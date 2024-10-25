@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // Copyright (C) 2024, untodesu
-#include <common/config.hh>
 #include <common/image.hh>
 #include <game/client/event/glfw_framebuffer_size.hh>
 #include <game/client/crosshair.hh>
 #include <game/client/globals.hh>
-#include <game/client/settings.hh>
 #include <game/client/varied_program.hh>
 #include <mathlib/mat4x4f.hh>
 #include <mathlib/vec2f.hh>
@@ -20,14 +18,8 @@ static int texture_width = {};
 static int texture_height = {};
 static GLuint texture = {};
 
-static bool invert_behind = true;
-
 void crosshair::init(void)
 {
-    Config::add(globals::client_config, "crosshair.invert_behind", invert_behind);
-
-    settings::add_checkbox(1, settings::VIDEO_GUI, "crosshair.invert_behind", invert_behind, true);
-
     if(!VariedProgram::setup(program, "shaders/crosshair.vert", "shaders/crosshair.frag")) {
         spdlog::critical("crosshair: program setup failed");
         std::terminate();
@@ -89,8 +81,8 @@ void crosshair::render(void)
 
     const int center_x = globals::width / 2;
     const int center_y = globals::height / 2;
-    const int scaled_width = globals::gui_scale * texture_width / 2;
-    const int scaled_height = globals::gui_scale * texture_height / 2;
+    const int scaled_width = cxpr::max<int>(texture_width, globals::gui_scale * texture_width / 2);
+    const int scaled_height = cxpr::max<int>(texture_height, globals::gui_scale * texture_height / 2);
 
     const int offset_x = center_x - scaled_width / 2;
     const int offset_y = center_y - scaled_height / 2;
@@ -102,10 +94,7 @@ void crosshair::render(void)
 
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
-
-    if(invert_behind)
-        glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
-    else glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
