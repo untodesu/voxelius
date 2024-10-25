@@ -99,27 +99,4 @@ void player_list::layout(void)
 
     ImGui::PopFont();
     ImGui::End();
-
-/*
-
-    // Figure out the maximum username size;
-    for(const std::string &username : usernames) {
-        const float username_size = ImGui::CalcTextSize(username.c_str(), username.c_str() + username.size()).x;
-        
-        if(username_size <= max_username_size)
-            continue;
-        max_username_size = username_size;
-    }
-
-
-    const ImVec2 rect_end = ImVec2(window_start.x + window_size.x, window_start.y + window_size.y);
-    draw_list->AddRectFilled(window_start, rect_end, rect_col);
-//IMGUI_API void  AddRectFilled(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding = 0.0f, ImDrawFlags flags = 0); 
-
-    for(const std::string &username : usernames) {
-        ImGui::Text(username.c_str());
-    }
-
-*/
-
 }
