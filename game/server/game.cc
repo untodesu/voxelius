@@ -66,7 +66,7 @@ void server_game::init_late(void)
 
     worldgen::init_late(UINT64_C(42));
 
-    constexpr int WSIZE = 16;
+    constexpr int WSIZE = 4;
     for(int x = -WSIZE; x < WSIZE; x += 1) {
         for(int z = -WSIZE; z < WSIZE; z += 1) {
             for(int y = -3; y < 4; y += 1) {
@@ -101,6 +101,7 @@ void server_game::update_late(void)
     while(enet_host_service(globals::server_host, &event, 0) > 0) {
         if(event.type == ENET_EVENT_TYPE_DISCONNECT) {
             sessions::destroy(sessions::find(event.peer));
+            sessions::refresh_player_list();
             continue;
         }
 

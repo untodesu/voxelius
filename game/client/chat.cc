@@ -137,50 +137,53 @@ void client_chat::layout(void)
 
     ImGui::PushFont(globals::font_chat);
 
-    if(ImGui::Begin("###chat", nullptr, WINDOW_FLAGS)) {
-        const ImVec2 &padding = ImGui::GetStyle().FramePadding;
-        const ImVec2 &spacing = ImGui::GetStyle().ItemSpacing;
-        const ImFont *font = ImGui::GetFont();
+    if(!ImGui::Begin("###chat", nullptr, WINDOW_FLAGS)) {
+        ImGui::End();
+        return;
+    }
 
-        ImDrawList *draw_list = ImGui::GetWindowDrawList();
+    const ImVec2 &padding = ImGui::GetStyle().FramePadding;
+    const ImVec2 &spacing = ImGui::GetStyle().ItemSpacing;
+    const ImFont *font = ImGui::GetFont();
 
-        // The text input widget occupies the bottom part
-        // of the chat window, we need to reserve some space for it
-        float ypos = window_size.y - font->FontSize - 2.0f * padding.y - 2.0f * spacing.y;
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
-        if(globals::gui_screen == GUI_CHAT) {
-            if(needs_focus) {
-                ImGui::SetKeyboardFocusHere();
-                needs_focus = false;
-            }
+    // The text input widget occupies the bottom part
+    // of the chat window, we need to reserve some space for it
+    float ypos = window_size.y - font->FontSize - 2.0f * padding.y - 2.0f * spacing.y;
 
-            ImGui::SetNextItemWidth(window_size.x + 32.0f * padding.x);
-            ImGui::SetCursorScreenPos(ImVec2(padding.x, ypos));
-            ImGui::InputText("###chat.input", &chat_input);
+    if(globals::gui_screen == GUI_CHAT) {
+        if(needs_focus) {
+            ImGui::SetKeyboardFocusHere();
+            needs_focus = false;
         }
 
-        if((globals::gui_screen == GUI_SCREEN_NONE) || (globals::gui_screen == GUI_CHAT) || (globals::gui_screen == GUI_DEBUG_WINDOW)) {
-            for(auto it = history.crbegin(); it < history.crend(); ++it) {
-                const ImVec2 text_size = ImGui::CalcTextSize(it->text.c_str(), it->text.c_str() + it->text.size(), false, window_size.x);
-                const ImVec2 rect_size = ImVec2(window_size.x, text_size.y + 2.0f * padding.y);
+        ImGui::SetNextItemWidth(window_size.x + 32.0f * padding.x);
+        ImGui::SetCursorScreenPos(ImVec2(padding.x, ypos));
+        ImGui::InputText("###chat.input", &chat_input);
+    }
 
-                const ImVec2 rect_pos = ImVec2(padding.x, ypos - text_size.y - 2.0f * padding.y);
-                const ImVec2 rect_end = ImVec2(rect_pos.x + rect_size.x, rect_pos.y + rect_size.y);
-                const ImVec2 text_pos = ImVec2(rect_pos.x + padding.x, rect_pos.y + padding.y);
-                
-                const float fadeout_seconds = 10.0f;
-                const float fadeout = std::exp(-1.0f * std::pow(1.0e-6 * static_cast<float>(globals::curtime - it->spawn) / fadeout_seconds, 10.0f));
-                const float rect_alpha = ((globals::gui_screen == GUI_CHAT) ? (0.75f) : (0.50f * fadeout));
-                const float text_alpha = ((globals::gui_screen == GUI_CHAT) ? (1.00f) : (1.00f * fadeout));
-                
-                const ImU32 rect_col = ImGui::GetColorU32(ImGuiCol_FrameBg, rect_alpha);
-                const ImU32 text_col = ImGui::GetColorU32(ImVec4(it->color.x, it->color.y, it->color.z, it->color.w * text_alpha));
+    if((globals::gui_screen == GUI_SCREEN_NONE) || (globals::gui_screen == GUI_CHAT) || (globals::gui_screen == GUI_DEBUG_WINDOW)) {
+        for(auto it = history.crbegin(); it < history.crend(); ++it) {
+            const ImVec2 text_size = ImGui::CalcTextSize(it->text.c_str(), it->text.c_str() + it->text.size(), false, window_size.x);
+            const ImVec2 rect_size = ImVec2(window_size.x, text_size.y + 2.0f * padding.y);
 
-                draw_list->AddRectFilled(rect_pos, rect_end, rect_col);
-                draw_list->AddText(font, font->FontSize, text_pos, text_col, it->text.c_str(), it->text.c_str() + it->text.size(), window_size.x);
+            const ImVec2 rect_pos = ImVec2(padding.x, ypos - text_size.y - 2.0f * padding.y);
+            const ImVec2 rect_end = ImVec2(rect_pos.x + rect_size.x, rect_pos.y + rect_size.y);
+            const ImVec2 text_pos = ImVec2(rect_pos.x + padding.x, rect_pos.y + padding.y);
 
-                ypos -= rect_size.y;
-            }
+            const float fadeout_seconds = 10.0f;
+            const float fadeout = std::exp(-1.0f * std::pow(1.0e-6 * static_cast<float>(globals::curtime - it->spawn) / fadeout_seconds, 10.0f));
+            const float rect_alpha = ((globals::gui_screen == GUI_CHAT) ? (0.75f) : (0.50f * fadeout));
+            const float text_alpha = ((globals::gui_screen == GUI_CHAT) ? (1.00f) : (1.00f * fadeout));
+
+            const ImU32 rect_col = ImGui::GetColorU32(ImGuiCol_FrameBg, rect_alpha);
+            const ImU32 text_col = ImGui::GetColorU32(ImVec4(it->color.x, it->color.y, it->color.z, it->color.w * text_alpha));
+
+            draw_list->AddRectFilled(rect_pos, rect_end, rect_col);
+            draw_list->AddText(font, font->FontSize, text_pos, text_col, it->text.c_str(), it->text.c_str() + it->text.size(), window_size.x);
+
+            ypos -= rect_size.y;
         }
     }
 

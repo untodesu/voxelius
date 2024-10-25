@@ -26,6 +26,7 @@
 #include <game/client/mouse.hh>
 #include <game/client/outline.hh>
 #include <game/client/play_menu.hh>
+#include <game/client/player_list.hh>
 #include <game/client/player_target.hh>
 #include <game/client/progress.hh>
 #include <game/client/receive.hh>
@@ -291,6 +292,7 @@ void client_game::init(void)
 
     background::init();
 
+    player_list::init();
     client_chat::init();
 
     main_menu::init();
@@ -516,6 +518,7 @@ void client_game::layout(void)
 
     if(globals::registry.valid(globals::player)) {
         client_chat::layout();
+        player_list::layout();
     }
 
     if(globals::gui_screen) {

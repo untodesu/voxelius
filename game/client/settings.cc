@@ -199,7 +199,7 @@ void SettingValue_LanguageSelect::layout(const SettingValue_LanguageSelect *valu
 {
     const LangIterator current = language::current();
 
-    if(ImGui::BeginCombo(value->wid.c_str(), current->display.c_str())) {
+    if(ImGui::BeginCombo(value->wid.c_str(), current->endonym.c_str())) {
         for(LangIterator it = language::cbegin(); it != language::cend(); ++it) {
             if(ImGui::Selectable(it->display.c_str(), it == current)) {
                 language::set(it);
@@ -256,8 +256,15 @@ void SettingValue_KeyBind::layout(const SettingValue_KeyBind *value)
 {
     const bool is_active = (globals::gui_keybind_ptr == value->value_ptr);
     const std::string &wid = is_active ? value->wid[0] : value->wid[1];
-    if(ImGui::Button(wid.c_str(), ImVec2(ImGui::CalcItemWidth() * 0.75f, 0.0f)))
+
+    if(ImGui::Button(wid.c_str(), ImVec2(ImGui::CalcItemWidth() * 0.75f, 0.0f))) {
+        ImGuiIO &io = ImGui::GetIO();
+        io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
+        io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+
         globals::gui_keybind_ptr = value->value_ptr;
+    }
+
     SettingValue::layout_label(value);
     SettingValue::layout_tooltip(value);
 }
@@ -283,10 +290,18 @@ static void on_glfw_key(const GlfwKeyEvent &event)
     if(event.action == GLFW_PRESS) {
         if(globals::gui_keybind_ptr) {
             if(event.key == GLFW_KEY_ESCAPE) {
+                ImGuiIO &io = ImGui::GetIO();
+                io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+                io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
                 globals::gui_keybind_ptr = nullptr;
                 return;
             }
-            
+
+            ImGuiIO &io = ImGui::GetIO();
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
             globals::gui_keybind_ptr[0] = event.key;
             globals::gui_keybind_ptr = nullptr;
 
@@ -328,7 +343,7 @@ static void on_language_set(const LanguageSetEvent &event)
 
 static void layout_values(std::size_t location)
 {
-    ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.80f);
+    ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.70f);
 
     for(const SettingValue *value : values[location]) {
         switch(value->value_type) {

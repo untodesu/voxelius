@@ -34,16 +34,12 @@ static void on_glfw_error(int code, const char *message)
 
 static void on_glfw_char(GLFWwindow *window, unsigned int codepoint)
 {
-    if(globals::gui_screen) {
-        ImGui_ImplGlfw_CharCallback(window, codepoint);
-    }
+    ImGui_ImplGlfw_CharCallback(window, codepoint);
 }
 
 static void on_glfw_cursor_enter(GLFWwindow *window, int entered)
 {
-    if(globals::gui_screen) {
-        ImGui_ImplGlfw_CursorEnterCallback(window, entered);
-    }
+    ImGui_ImplGlfw_CursorEnterCallback(window, entered);
 }
 
 static void on_glfw_cursor_pos(GLFWwindow *window, double xpos, double ypos)
@@ -53,9 +49,7 @@ static void on_glfw_cursor_pos(GLFWwindow *window, double xpos, double ypos)
     event.ypos = static_cast<float>(ypos);
     globals::dispatcher.trigger(event);
 
-    if(globals::gui_screen) {
-        ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
-    }
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 }
 
 static void on_glfw_framebuffer_size(GLFWwindow *window, int width, int height)
@@ -87,9 +81,7 @@ static void on_glfw_key(GLFWwindow *window, int key, int scancode, int action, i
     event.mods = mods;
     globals::dispatcher.trigger(event);
 
-    if(globals::gui_screen) {
-        ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-    }
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 }
 
 static void on_glfw_monitor_event(GLFWmonitor *monitor, int event)
@@ -105,9 +97,7 @@ static void on_glfw_mouse_button(GLFWwindow *window, int button, int action, int
     event.mods = mods;
     globals::dispatcher.trigger(event);
 
-    if(globals::gui_screen) {
-        ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-    }
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 }
 
 static void on_glfw_scroll(GLFWwindow *window, double dx, double dy)
@@ -117,9 +107,7 @@ static void on_glfw_scroll(GLFWwindow *window, double dx, double dy)
     event.dy = static_cast<float>(dy);
     globals::dispatcher.trigger(event);
 
-    if(globals::gui_screen) {
-        ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
-    }
+    ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
 }
 
 static void on_glfw_window_focus(GLFWwindow *window, int focused)

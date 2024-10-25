@@ -12,7 +12,7 @@ namespace protocol
 constexpr static std::size_t MAX_CHAT = 16384;
 constexpr static std::size_t MAX_USERNAME = 64;
 constexpr static std::uint16_t PORT = 43103;
-constexpr static std::uint32_t VERSION = 3;
+constexpr static std::uint32_t VERSION = 4;
 } // namespace protocol
 
 namespace protocol
@@ -41,6 +41,7 @@ struct ChatMessage;
 struct SetVoxel;
 struct RemoveEntity;
 struct EntityPlayer;
+struct PlayerListUpdate;
 } // namespace protocol
 
 namespace protocol
@@ -59,6 +60,7 @@ void send(ENetPeer *peer, ENetHost *host, const ChatMessage &packet);
 void send(ENetPeer *peer, ENetHost *host, const SetVoxel &packet);
 void send(ENetPeer *peer, ENetHost *host, const RemoveEntity &packet);
 void send(ENetPeer *peer, ENetHost *host, const EntityPlayer &packet);
+void send(ENetPeer *peer, ENetHost *host, const PlayerListUpdate &packet);
 } // namespace protocol
 
 namespace protocol
@@ -165,4 +167,8 @@ struct protocol::RemoveEntity final : public protocol::Base<0x000C> {
 
 struct protocol::EntityPlayer final : public protocol::Base<0x000D> {
     entt::entity entity {};
+};
+
+struct protocol::PlayerListUpdate final : public protocol::Base<0x000E> {
+    std::vector<std::string> names {};
 };

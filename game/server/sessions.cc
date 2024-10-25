@@ -94,6 +94,8 @@ static void on_login_request_packet(const protocol::LoginRequest &packet)
         message.message = std::string();
         protocol::send(nullptr, globals::server_host, message);
 
+        sessions::refresh_player_list();
+
         return;
     }
 
@@ -112,6 +114,7 @@ static void on_disconnect_packet(const protocol::Disconnect &packet)
         spdlog::info("{} disconnected ({})", session->username, packet.reason);
 
         sessions::destroy(session);
+        sessions::refresh_player_list();
     }
 }
 
@@ -251,4 +254,17 @@ void sessions::destroy(Session *session)
 
         sessions::num_players -= 1U;
     }
+}
+
+void sessions::refresh_player_list(void)
+{
+    protocol::PlayerListUpdate packet = {};
+
+    for(std::size_t i = 0; i < sessions::max_players; ++i) {
+        if(!sessions_vector[i].peer)
+            continue;
+        packet.names.push_back(sessions_vector[i].username);
+    }
+
+    protocol::send(nullptr, globals::server_host, packet);
 }

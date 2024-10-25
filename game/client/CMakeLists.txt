@@ -19,6 +19,7 @@ add_library(client STATIC
     "${CMAKE_CURRENT_LIST_DIR}/mouse.cc"
     "${CMAKE_CURRENT_LIST_DIR}/outline.cc"
     "${CMAKE_CURRENT_LIST_DIR}/play_menu.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/player_list.cc"
     "${CMAKE_CURRENT_LIST_DIR}/player_target.cc"
     "${CMAKE_CURRENT_LIST_DIR}/progress.cc"
     "${CMAKE_CURRENT_LIST_DIR}/receive.cc"

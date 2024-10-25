@@ -224,6 +224,16 @@ void protocol::send(ENetPeer *peer, ENetHost *host, const protocol::EntityPlayer
     basic_send(peer, host, enet_packet_create(write_buffer.vector.data(), write_buffer.vector.size(), ENET_PACKET_FLAG_RELIABLE));
 }
 
+void protocol::send(ENetPeer *peer, ENetHost *host, const protocol::PlayerListUpdate &packet)
+{
+    PacketBuffer::setup(write_buffer);
+    PacketBuffer::write_UI16(write_buffer, protocol::PlayerListUpdate::ID);
+    PacketBuffer::write_UI16(write_buffer, static_cast<std::uint16_t>(packet.names.size()));
+    for(const std::string &username : packet.names)
+        PacketBuffer::write_string(write_buffer, username.substr(0, protocol::MAX_USERNAME));
+    basic_send(peer, host, enet_packet_create(write_buffer.vector.data(), write_buffer.vector.size(), ENET_PACKET_FLAG_RELIABLE));
+}
+
 void protocol::receive(const ENetPacket *packet, ENetPeer *peer)
 {
     PacketBuffer::setup(read_buffer, packet->data, packet->dataLength);
@@ -242,6 +252,7 @@ void protocol::receive(const ENetPacket *packet, ENetPeer *peer)
     protocol::SetVoxel set_voxel = {};
     protocol::RemoveEntity remove_entity = {};
     protocol::EntityPlayer entity_player = {};
+    protocol::PlayerListUpdate player_list_update = {};
     
     switch(PacketBuffer::read_UI16(read_buffer)) {
         case protocol::StatusRequest::ID:
@@ -348,6 +359,12 @@ void protocol::receive(const ENetPacket *packet, ENetPeer *peer)
         case protocol::EntityPlayer::ID:
             entity_player.entity = static_cast<entt::entity>(PacketBuffer::read_UI64(read_buffer));
             globals::dispatcher.trigger(entity_player);
+            break;
+        case protocol::PlayerListUpdate::ID:
+            player_list_update.names.resize(PacketBuffer::read_UI16(read_buffer));
+            for(std::size_t i = 0; i < player_list_update.names.size(); ++i)
+                player_list_update.names[i] = PacketBuffer::read_string(read_buffer);
+            globals::dispatcher.trigger(player_list_update);
             break;
     }
 }

@@ -48,6 +48,7 @@
   "settings.value.key.forward": "Двигаться вперед",
   "settings.value.key.left": "Двигаться влево",
   "settings.value.key.right": "Двигаться вправо",
+  "settings.value.key.player_list": "Список игроков",
   "settings.value.key.screenshot": "Снимок экрана",
   "settings.value.key.up": "Двигаться вверх",
   "settings.value.language": "Язык",

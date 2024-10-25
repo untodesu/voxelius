@@ -48,6 +48,7 @@
   "settings.value.key.forward": "Move forward",
   "settings.value.key.left": "Move left",
   "settings.value.key.right": "Move right",
+  "settings.value.key.player_list": "Player list",
   "settings.value.key.screenshot": "Take a screenshot",
   "settings.value.key.up": "Move up",
   "settings.value.language": "Language",

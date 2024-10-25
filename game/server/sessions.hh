@@ -35,3 +35,8 @@ Session *find(std::uint64_t player_uid);
 Session *find(ENetPeer *peer);
 void destroy(Session *session);
 } // namespace sessions
+
+namespace sessions
+{
+void refresh_player_list(void);
+} // namespace sessions
