@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Zlib
+// SPDX-License-Identifier: GPL-2.0-only
 // Copyright (C) 2024, Voxelius Contributors
 #include <entt/signal/dispatcher.hpp>
 #include <game/client/event/glfw_key.hh>

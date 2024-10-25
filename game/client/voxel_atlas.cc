@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Zlib
+// SPDX-License-Identifier: GPL-2.0-only
 // Copyright (C) 2024, Voxelius Contributors
 #include <common/crc64.hh>
 #include <common/fstools.hh>

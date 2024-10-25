@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Zlib
+// SPDX-License-Identifier: GPL-2.0-only
 // Copyright (C) 2024, Voxelius Contributors
 #include <entt/entity/registry.hpp>
 #include <game/client/entity/player_look.hh>

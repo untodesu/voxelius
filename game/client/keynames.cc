@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Zlib
+// SPDX-License-Identifier: GPL-2.0-only
 // Copyright (C) 2024, Voxelius Contributors
 #include <game/client/keynames.hh>
 #include <GLFW/glfw3.h>
