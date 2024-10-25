@@ -20,7 +20,7 @@ static int texture_width = {};
 static int texture_height = {};
 static GLuint texture = {};
 
-static bool invert_behind = false;
+static bool invert_behind = true;
 
 void crosshair::init(void)
 {
@@ -94,6 +94,8 @@ void crosshair::render(void)
 
     const int offset_x = center_x - scaled_width / 2;
     const int offset_y = center_y - scaled_height / 2;
+
+    glDisable(GL_DEPTH_TEST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(offset_x, offset_y, scaled_width, scaled_height);
