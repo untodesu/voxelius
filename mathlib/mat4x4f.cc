@@ -4,8 +4,8 @@
 
 Mat4x4f Mat4x4f::model_rotate(const Mat4x4f &model, const float angle, const Vec3f &axis)
 {
-    const float cv = std::cosf(angle);
-    const float sv = std::sinf(angle);
+    const float cv = std::cos(angle);
+    const float sv = std::sin(angle);
     
     const Vec3f ax = Vec3f::normalized(axis);
     const Vec3f tm = Vec3f(ax * (1.0f - cv));
