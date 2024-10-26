@@ -190,7 +190,7 @@ void background::render(void)
         mdmatrix = Mat4x4f::model_rotate(mdmatrix, +0.25f * angle, Vec3f(0.0f, 0.0f, 1.0f));
 
         const Mat4x4f proj_1 = Mat4x4f::proj_ortho(-6.0f * globals::aspect, 0.5f * globals::aspect, -0.5f, 6.0f, -8.0f, 8.0f);
-        const Mat4x4f proj_2 = Mat4x4f::proj_ortho(-0.5f * globals::aspect, 6.0f * globals::aspect, -6.0f, 0.5f, -8.0f, 8.0f);
+        const Mat4x4f proj_2 = Mat4x4f::proj_ortho(-0.5f * globals::aspect, 7.0f * globals::aspect, -7.0f, 0.5f, -8.0f, 8.0f);
 
         glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vec3f), nullptr);

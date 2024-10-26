@@ -67,6 +67,8 @@ void server_game::init_late(void)
     worldgen::init_late(UINT64_C(42));
 
     constexpr int WSIZE = 16;
+
+#if 1
     for(int x = -WSIZE; x < WSIZE; x += 1) {
         for(int z = -WSIZE; z < WSIZE; z += 1) {
             for(int y = -3; y < 4; y += 1) {
@@ -74,6 +76,15 @@ void server_game::init_late(void)
             }
         }
     }
+#else
+    for(int x = -WSIZE; x < WSIZE; x += 1)
+    for(int z = -WSIZE; z < WSIZE; z += 1) {
+        Chunk *chunk = Chunk::create(ChunkType::Generic, globals::registry.create());
+        chunk->voxels.fill(game_voxels::vtest);
+        world::emplace_or_replace(ChunkCoord(x, -2, z), chunk);
+        world::emplace_or_replace(ChunkCoord(x, -1, z), Chunk::create(ChunkType::Generic, globals::registry.create()));
+    }
+#endif
 }
 
 void server_game::deinit(void)

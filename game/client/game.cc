@@ -130,11 +130,6 @@ static void on_glfw_framebuffer_size(const GlfwFramebufferSizeEvent &event)
         ImGui::GetIO().FontDefault = io.Fonts->AddFontFromMemoryTTF(fontbin.data(), fontbin.size(), 16.0f * scale, &font_config, ranges.Data);
         globals::font_chat = io.Fonts->AddFontFromMemoryTTF(fontbin.data(), fontbin.size(), 8.0f * scale, &font_config, ranges.Data);
 
-        // UNDONE: design a logo and draw it as a TEXTURE/SPRITE
-        if(!fstools::read_bytes("fonts/din1451alt.ttf", fontbin))
-            std::terminate();
-        globals::font_title = io.Fonts->AddFontFromMemoryTTF(fontbin.data(), fontbin.size(), 64.0f * scale, &font_config);
-
         if(!fstools::read_bytes("fonts/unscii-8.ttf", fontbin))
             std::terminate();
         globals::font_debug = io.Fonts->AddFontFromMemoryTTF(fontbin.data(), fontbin.size(), 4.0f * scale, &font_config);
@@ -363,6 +358,8 @@ void client_game::deinit(void)
     }
 
     staging::deinit();
+
+    main_menu::deinit();
 
     play_menu::deinit();
 

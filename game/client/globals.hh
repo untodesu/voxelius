@@ -42,7 +42,6 @@ extern GLuint world_fbo_color;
 extern GLuint world_fbo_depth;
 
 extern ImFont *font_chat;
-extern ImFont *font_title;
 extern ImFont *font_debug;
 
 extern int *gui_keybind_ptr;
