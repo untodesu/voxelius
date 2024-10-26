@@ -41,10 +41,28 @@ void screenshot::init(void)
 
 void screenshot::take(void)
 {
-    std::uint8_t *pixels = new std::uint8_t[globals::width * globals::height * 3];
-    
+    const std::size_t stride = 3 * globals::width;
+    const std::size_t length = 3 * globals::width * globals::height;
+    std::uint8_t *pixels = new std::uint8_t[length];
+
+    // We'll read pixel data from the window's main
+    // framebuffer; we want everything including GUI
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    GLint old_pack_alignment;
+    glGetIntegerv(GL_PACK_ALIGNMENT, &old_pack_alignment);
+
+    // The window can be of any size, including irregular
+    // values such as, say 641x480, while there is a default
+    // alignment value of sorts that might result in a corrupted
+    // image (https://github.com/voxelius/voxelius/issues/29#issuecomment-2438432281)
+    // We set GL_PACK_ALIGNMENT to 1, enabling byte-alignment
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
     glReadPixels(0, 0, globals::width, globals::height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+    // Restore the old pack alignment value
+    glPixelStorei(GL_PACK_ALIGNMENT, old_pack_alignment);
 
     const std::string dirname = std::string("screenshots");
     const std::string path = fmt::format("{}/{}.png", dirname, epoch::microseconds());
@@ -56,4 +74,6 @@ void screenshot::take(void)
         stbi_write_png_to_func(&png_write, file, globals::width, globals::height, 3, pixels, 3 * globals::width);
         PHYSFS_close(file);
     }
+
+    delete[] pixels;
 }
