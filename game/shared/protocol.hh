@@ -12,7 +12,7 @@ namespace protocol
 constexpr static std::size_t MAX_CHAT = 16384;
 constexpr static std::size_t MAX_USERNAME = 64;
 constexpr static std::uint16_t PORT = 43103;
-constexpr static std::uint32_t VERSION = 4;
+constexpr static std::uint32_t VERSION = 5;
 } // namespace protocol
 
 namespace protocol
