@@ -153,6 +153,7 @@ Voxel VDefBuilder::build(void) const
         VoxelInfo info = {};
         info.animated = json_object_get_boolean(state, "animated");
         info.blending = json_object_get_boolean(state, "blending");
+        info.state = state_name;
         info.name = name;
         info.type = type;
         info.base = base;

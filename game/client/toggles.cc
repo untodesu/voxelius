@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // Copyright (C) 2024, Voxelius Contributors
+#include <entt/entity/registry.hpp>
 #include <entt/signal/dispatcher.hpp>
 #include <game/client/event/glfw_key.hh>
 #include <game/client/globals.hh>
 #include <game/client/language.hh>
 #include <game/client/toggles.hh>
+#include <game/shared/entity/head.hh>
 #include <spdlog/spdlog.h>
 
 bool toggles::is_sequence_await = false;

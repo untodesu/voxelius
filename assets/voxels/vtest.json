@@ -10,5 +10,12 @@
         "textures/voxels/vtest_F4.png"
       ]
     }
+  },
+  "chromakey": {
+    "animated": false,
+    "blending": false,
+    "textures": {
+      "default": ["textures/voxels/chromakey.png"]
+    }
   }
 }

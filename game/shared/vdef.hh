@@ -71,6 +71,7 @@ struct VoxelTexture final {
 
 struct VoxelInfo final {
     std::vector<VoxelTexture> textures {};
+    std::string state {};
     std::string name {};
     VoxelType type {};
     bool animated {};

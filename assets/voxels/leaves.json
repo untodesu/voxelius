@@ -1,5 +1,5 @@
 {
-  "default": {
+  "oak": {
     "animated": false,
     "blending": false,
     "textures": {

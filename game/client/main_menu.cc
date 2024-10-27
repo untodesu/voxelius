@@ -85,7 +85,7 @@ void main_menu::deinit(void)
 void main_menu::layout(void)
 {
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    const ImVec2 window_start = ImVec2(0.0f, viewport->Size.y * 0.10f);
+    const ImVec2 window_start = ImVec2(0.0f, viewport->Size.y * 0.15f);
     const ImVec2 window_size = ImVec2(viewport->Size.x, viewport->Size.y);
 
     ImGui::SetNextWindowPos(window_start);
@@ -102,7 +102,7 @@ void main_menu::layout(void)
             ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<std::uintptr_t>(title)), ImVec2(image_width, image_height));
         }
         else {
-            ImGui::Dummy(ImVec2(0.0f, 48.0f * globals::gui_scale));
+            ImGui::Dummy(ImVec2(0.0f, 32.0f * globals::gui_scale));
         }
 
         ImGui::Dummy(ImVec2(0.0f, 24.0f * globals::gui_scale));

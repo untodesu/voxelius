@@ -3,10 +3,10 @@
 #include <emhash/hash_table8.hpp>
 #include <FastNoiseLite.h>
 #include <game/shared/chunk_coord_2d.hh>
-#include <game/shared/game_voxels.hh>
 #include <game/shared/local_coord.hh>
 #include <game/shared/overworld.hh>
 #include <game/shared/voxel_coord.hh>
+#include <game/shared/voxels.hh>
 #include <random>
 
 struct Metadata final {
@@ -85,14 +85,14 @@ void overworld::generate_terrain(const ChunkCoord &cpos, VoxelStorage &voxels)
             if(vpos[1] < INT64_C(0)) {
                 if(vpos[1] > metadata.heightmap[hdx])
                     metadata.heightmap[hdx] = vpos[1];
-                voxels[index] = game_voxels::stone;
+                voxels[index] = voxels::stone;
             }
         }
 
         if(get_noise(vpos, OW_VARIATION) > 0.0f) {
             if(vpos[1] > metadata.heightmap[hdx])
                 metadata.heightmap[hdx] = vpos[1];
-            voxels[index] = game_voxels::stone;
+            voxels[index] = voxels::stone;
         }
     }
 }
@@ -139,8 +139,8 @@ void overworld::generate_surface(const ChunkCoord &cpos, VoxelStorage &voxels)
 
         if(depth < 5) {
             if(depth == 0)
-                voxels[index] = game_voxels::grass;
-            else voxels[index] = game_voxels::dirt;
+                voxels[index] = voxels::grass;
+            else voxels[index] = voxels::dirt;
         }
     }
 }
@@ -176,19 +176,6 @@ void overworld::generate_features(const ChunkCoord &cpos, VoxelStorage &voxels)
 {
     Metadata &metadata = get_metadata(ChunkCoord2D(cpos[0], cpos[2]));
 
-    // Replace all stone with slate below -64
-    for(std::size_t index = 0; index < CHUNK_VOLUME; index += 1) {
-        const LocalCoord lpos = LocalCoord::from_index(index);
-        const VoxelCoord vpos = ChunkCoord::to_voxel(cpos, lpos);
-
-        if(voxels[index] == game_voxels::stone) {
-            if(vpos[1] <= ((static_cast<std::int64_t>(twister()) % 8) - 64)) {
-                voxels[index] = game_voxels::slate;
-                continue;
-            }
-        }
-    }
-
 #if 1
     constexpr static std::size_t COUNT = 5;
     std::array<std::int16_t, COUNT> lxa = {};
@@ -209,7 +196,7 @@ void overworld::generate_features(const ChunkCoord &cpos, VoxelStorage &voxels)
         for(std::size_t tc = 0; tc < COUNT; tc += 1) {
             if((lpos[0] == lxa[tc]) && (lpos[2] == lza[tc])) {
                 if(cxpr::range<std::int64_t>(vpos[1] - metadata.heightmap[hdx], 1, heights[tc]))
-                    voxels[index] = game_voxels::vtest;
+                    voxels[index] = voxels::cobble;
                 break;
             }
         }
@@ -221,7 +208,7 @@ void overworld::generate_features(const ChunkCoord &cpos, VoxelStorage &voxels)
         const std::size_t hdx = lpos[0] + lpos[2] * CHUNK_SIZE;
 
         if(vpos[1] == (metadata.heightmap[hdx] + 1)) {
-            voxels[index] = game_voxels::vtest;
+            voxels[index] = voxels::vtest;
             continue;
         }
     }

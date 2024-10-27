@@ -3,22 +3,20 @@
 #pragma once
 #include <game/shared/voxel.hh>
 
-namespace game_voxels
+namespace voxels
 {
+extern Voxel cobble;
 extern Voxel dirt;
 extern Voxel grass;
-extern Voxel slate;
 extern Voxel stone;
 extern Voxel vtest;
-} // namespace game_voxels
-
-namespace game_voxels
-{
+extern Voxel vtest_ck;
 extern Voxel oak_leaves;
-extern Voxel oak_log;
-} // namespace game_voxels
+extern Voxel oak_planks;
+extern Voxel oak_wood;
+} // namespace voxels
 
-namespace game_voxels
+namespace voxels
 {
 void populate(void);
-} // namespace game_voxels
+} // namespace voxels
