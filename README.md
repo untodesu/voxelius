@@ -1,4 +1,5 @@
-# Voxelius
+![](assets/textures/gui/title.png)
+
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/w/voxelius/voxelius)](https://github.com/voxelius/voxelius/commits/master/)
 [![GitHub Release](https://img.shields.io/github/v/release/voxelius/voxelius?include_prereleases)](https://github.com/voxelius/voxelius/releases)
 [![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/voxelius/voxelius)](https://github.com/voxelius/voxelius/issues)
