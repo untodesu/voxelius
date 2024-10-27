@@ -3,10 +3,10 @@
 #include <emhash/hash_table8.hpp>
 #include <FastNoiseLite.h>
 #include <game/shared/chunk_coord_2d.hh>
+#include <game/shared/game_voxels.hh>
 #include <game/shared/local_coord.hh>
 #include <game/shared/overworld.hh>
 #include <game/shared/voxel_coord.hh>
-#include <game/shared/voxels.hh>
 #include <random>
 
 struct Metadata final {
@@ -85,14 +85,14 @@ void overworld::generate_terrain(const ChunkCoord &cpos, VoxelStorage &voxels)
             if(vpos[1] < INT64_C(0)) {
                 if(vpos[1] > metadata.heightmap[hdx])
                     metadata.heightmap[hdx] = vpos[1];
-                voxels[index] = voxels::stone;
+                voxels[index] = game_voxels::stone;
             }
         }
 
         if(get_noise(vpos, OW_VARIATION) > 0.0f) {
             if(vpos[1] > metadata.heightmap[hdx])
                 metadata.heightmap[hdx] = vpos[1];
-            voxels[index] = voxels::stone;
+            voxels[index] = game_voxels::stone;
         }
     }
 }
@@ -139,8 +139,8 @@ void overworld::generate_surface(const ChunkCoord &cpos, VoxelStorage &voxels)
 
         if(depth < 5) {
             if(depth == 0)
-                voxels[index] = voxels::grass;
-            else voxels[index] = voxels::dirt;
+                voxels[index] = game_voxels::grass;
+            else voxels[index] = game_voxels::dirt;
         }
     }
 }
@@ -196,7 +196,7 @@ void overworld::generate_features(const ChunkCoord &cpos, VoxelStorage &voxels)
         for(std::size_t tc = 0; tc < COUNT; tc += 1) {
             if((lpos[0] == lxa[tc]) && (lpos[2] == lza[tc])) {
                 if(cxpr::range<std::int64_t>(vpos[1] - metadata.heightmap[hdx], 1, heights[tc]))
-                    voxels[index] = voxels::cobble;
+                    voxels[index] = game_voxels::cobble;
                 break;
             }
         }
@@ -208,7 +208,7 @@ void overworld::generate_features(const ChunkCoord &cpos, VoxelStorage &voxels)
         const std::size_t hdx = lpos[0] + lpos[2] * CHUNK_SIZE;
 
         if(vpos[1] == (metadata.heightmap[hdx] + 1)) {
-            voxels[index] = voxels::vtest;
+            voxels[index] = game_voxels::vtest;
             continue;
         }
     }

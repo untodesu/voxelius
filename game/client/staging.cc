@@ -8,7 +8,7 @@
 #include <game/client/globals.hh>
 #include <game/client/player_target.hh>
 #include <game/client/staging.hh>
-#include <game/shared/voxels.hh>
+#include <game/shared/game_voxels.hh>
 #include <game/shared/world.hh>
 #include <spdlog/fmt/fmt.h>
 #include <vector>
@@ -55,14 +55,14 @@ void staging::init(void)
 
 void staging::init_late(void)
 {
-    place_voxels.push_back(voxels::cobble);
-    place_voxels.push_back(voxels::dirt);
-    place_voxels.push_back(voxels::grass);
-    place_voxels.push_back(voxels::stone);
-    place_voxels.push_back(voxels::vtest);
-    place_voxels.push_back(voxels::oak_leaves);
-    place_voxels.push_back(voxels::oak_planks);
-    place_voxels.push_back(voxels::oak_wood);
+    place_voxels.push_back(game_voxels::cobble);
+    place_voxels.push_back(game_voxels::dirt);
+    place_voxels.push_back(game_voxels::grass);
+    place_voxels.push_back(game_voxels::stone);
+    place_voxels.push_back(game_voxels::vtest);
+    place_voxels.push_back(game_voxels::oak_leaves);
+    place_voxels.push_back(game_voxels::oak_planks);
+    place_voxels.push_back(game_voxels::oak_wood);
 }
 
 void staging::deinit(void)

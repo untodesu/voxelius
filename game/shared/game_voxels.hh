@@ -3,7 +3,7 @@
 #pragma once
 #include <game/shared/voxel.hh>
 
-namespace voxels
+namespace game_voxels
 {
 extern Voxel cobble;
 extern Voxel dirt;
@@ -14,9 +14,9 @@ extern Voxel vtest_ck;
 extern Voxel oak_leaves;
 extern Voxel oak_planks;
 extern Voxel oak_wood;
-} // namespace voxels
+} // namespace game_voxels
 
-namespace voxels
+namespace game_voxels
 {
 void populate(void);
-} // namespace voxels
+} // namespace game_voxels

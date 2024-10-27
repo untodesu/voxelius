@@ -42,9 +42,9 @@
 #include <game/shared/entity/head.hh>
 #include <game/shared/entity/transform.hh>
 #include <game/shared/entity/velocity.hh>
+#include <game/shared/game_voxels.hh>
 #include <game/shared/protocol.hh>
 #include <game/shared/ray_dda.hh>
-#include <game/shared/voxels.hh>
 #include <game/shared/world.hh>
 #include <GLFW/glfw3.h>
 #include <imgui_impl_opengl3.h>
@@ -313,7 +313,7 @@ void client_game::init_late(void)
 
     client_chat::init_late();
 
-    voxels::populate();
+    game_voxels::populate();
 
     staging::init_late();
 

@@ -4,11 +4,11 @@
 #include <emhash/hash_table8.hpp>
 #include <entt/entity/registry.hpp>
 #include <FastNoiseLite.h>
+#include <game/shared/game_voxels.hh>
 #include <game/shared/globals.hh>
 #include <game/shared/local_coord.hh>
 #include <game/shared/overworld.hh>
 #include <game/shared/voxel_coord.hh>
-#include <game/shared/voxels.hh>
 #include <game/shared/world.hh>
 #include <game/shared/worldgen.hh>
 #include <mathlib/vec2base.hh>

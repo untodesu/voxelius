@@ -13,9 +13,9 @@
 #include <game/shared/entity/player.hh>
 #include <game/shared/entity/transform.hh>
 #include <game/shared/entity/velocity.hh>
+#include <game/shared/game_voxels.hh>
 #include <game/shared/protocol.hh>
 #include <game/shared/splash.hh>
-#include <game/shared/voxels.hh>
 #include <game/shared/world.hh>
 #include <game/shared/worldgen.hh>
 #include <mathlib/constexpr.hh>
@@ -62,7 +62,7 @@ void server_game::init_late(void)
     spdlog::info("game: host: {} player + {} status peers", sessions::max_players, status_peers);
     spdlog::info("game: host: listening on UDP port {}", address.port);
 
-    voxels::populate();
+    game_voxels::populate();
 
     worldgen::init_late(UINT64_C(42));
 
@@ -80,7 +80,7 @@ void server_game::init_late(void)
     for(int x = -WSIZE; x < WSIZE; x += 1)
     for(int z = -WSIZE; z < WSIZE; z += 1) {
         Chunk *chunk = Chunk::create(ChunkType::Generic, globals::registry.create());
-        chunk->voxels.fill(voxels::vtest_ck);
+        chunk->voxels.fill(game_voxels::vtest_ck);
         world::emplace_or_replace(ChunkCoord(x, -2, z), chunk);
         world::emplace_or_replace(ChunkCoord(x, -1, z), Chunk::create(ChunkType::Generic, globals::registry.create()));
     }
