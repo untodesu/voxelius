@@ -83,7 +83,7 @@ if(WIN32)
     # same directory as the client and server executables since
     # launch.cc, as a last resort, pulls data from current_directory()
     install(TARGETS vgame RUNTIME DESTINATION ".")
-    install(TARGETS vds RUNTIME DESTINATION ".")
+    install(TARGETS vgame-server RUNTIME DESTINATION ".")
     install(DIRECTORY assets/ DESTINATION ".")
 
     # Configure NSIS
@@ -91,14 +91,15 @@ if(WIN32)
     # create a dedicated server executable in the start menu
     set(CPACK_GENERATOR NSIS)
     set(CPACK_NSIS_INSTALLED_ICON_NAME "vgame.exe")
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/launch/game_icon_1024x1024.ico")
-    set(CPACK_NSIS_MENU_LINKS "vgame.exe" "${CPACK_PACKAGE_NAME}")
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/launch/server_icon_1024x1024.ico")
+    list(APPEND CPACK_NSIS_MENU_LINKS "vgame-server.exe" "${CPACK_PACKAGE_NAMAE} Server")
+    list(APPEND CPACK_NSIS_MENU_LINKS "vgame.exe" "${CPACK_PACKAGE_NAME}")
 elseif(UNIX AND NOT APPLE)
     # For Linux packages, assets should be placed in the FHS-compliant
     # directory /usr/share/voxelius; again, when launch.cc is compiled
     # for Linux, it will look for assets in that specific directory
     install(TARGETS vgame RUNTIME DESTINATION share/bin)
-    install(TARGETS vds RUNTIME DESTINATION share/bin)
+    install(TARGETS vgame-server RUNTIME DESTINATION share/bin)
     install(DIRECTORY assets/ DESTINATION share/voxelius)
 
     if(glfw3_FOUND AND NOT GLFW_FORCE_FETCHCONTENT)
