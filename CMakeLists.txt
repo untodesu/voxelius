@@ -82,8 +82,8 @@ if(WIN32)
     # For Windows packages, assets should be placed in the
     # same directory as the client and server executables since
     # launch.cc, as a last resort, pulls data from current_directory()
-    install(TARGETS vgame RUNTIME COMPONENT Client DESTINATION ".")
-    install(TARGETS vds RUNTIME COMPONENT Server DESTINATION ".")
+    install(TARGETS vgame RUNTIME DESTINATION ".")
+    install(TARGETS vds RUNTIME DESTINATION ".")
     install(DIRECTORY assets/ DESTINATION ".")
 
     # Configure NSIS
@@ -97,8 +97,8 @@ elseif(UNIX AND NOT APPLE)
     # For Linux packages, assets should be placed in the FHS-compliant
     # directory /usr/share/voxelius; again, when launch.cc is compiled
     # for Linux, it will look for assets in that specific directory
-    install(TARGETS vgame RUNTIME COMPONENT client DESTINATION share/bin)
-    install(TARGETS vds RUNTIME COMPONENT server DESTINATION share/bin)
+    install(TARGETS vgame RUNTIME DESTINATION share/bin)
+    install(TARGETS vds RUNTIME DESTINATION share/bin)
     install(DIRECTORY assets/ DESTINATION share/voxelius)
 
     if(glfw3_FOUND AND NOT GLFW_FORCE_FETCHCONTENT)
