@@ -3,6 +3,11 @@ if(BUILD_CLIENT)
     target_compile_definitions(vgame PUBLIC VGAME_CLIENT)
     target_include_directories(vgame PUBLIC ${CMAKE_SOURCE_DIR})
     target_link_libraries(vgame PUBLIC client shared)
+
+    if(WIN32)
+        enable_language(RC)
+        target_sources(vgame PRIVATE "${CMAKE_CURRENT_LIST_DIR}/vgame.rc")
+    endif()
 endif()
 
 if(BUILD_SERVER)

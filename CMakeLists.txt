@@ -63,3 +63,53 @@ endif()
 add_subdirectory(game/server)
 add_subdirectory(game/shared)
 add_subdirectory(launch)
+
+set(CPACK_PACKAGE_NAME "Voxelius")
+set(CPACK_PACKAGE_VENDOR "Voxelius Contributors")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Block game on steroids")
+
+set(CPACK_PACKAGE_VERSION "${VOXELIUS_VERSION}-${VOXELIUS_VERSION_META}")
+set(CPACK_PACKAGE_VERSION_MAJOR "${VOXELIUS_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${VOXELIUS_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${VOXELIUS_VERSION_PATCH}")
+
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+
+if(WIN32)
+    # For Windows packages, assets should be placed in the
+    # same directory as the client and server executables since
+    # launch.cc, as a last resort, pulls data from current_directory()
+    install(TARGETS vgame vds RUNTIME DESTINATION ".")
+    install(DIRECTORY assets/ DESTINATION ".")
+
+    # Configure NSIS
+    # UNDONE: make a dedicated server icon and actually
+    # create a dedicated server executable in the start menu
+    set(CPACK_GENERATOR NSIS)
+    set(CPACK_NSIS_INSTALLED_ICON_NAME "vgame.exe")
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/launch/game_icon_1024x1024.ico")
+    set(CPACK_NSIS_MENU_LINKS "vgame.exe" "${CPACK_PACKAGE_NAME}")
+elseif(UNIX AND NOT APPLE)
+    # For Linux packages, assets should be placed in the FHS-compliant
+    # directory /usr/share/voxelius; again, when launch.cc is compiled
+    # for Linux, it will look for assets in that specific directory
+    install(TARGETS vgame vds RUNTIME DESTINATION share/bin)
+    install(DIRECTORY assets/ DESTINATION share/voxelius)
+
+    if(glfw3_FOUND AND NOT GLFW_FORCE_FETCHCONTENT)
+        # We're building using system GLFW distribution
+        # so we must include it as a dependency; this is really
+        # the only external library we might link to dynamically
+        set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglfw3")
+    else()
+        set(CPACK_DEBIAN_PACKAGE_DEPENDS "")
+    endif()
+
+    # Configure DEB
+    # FIXME: <tumbleweed sounds>
+    set(CPACK_GENERATOR DEB)
+endif()
+
+include(CPack)
