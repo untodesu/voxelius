@@ -71,7 +71,7 @@ void screenshot::take(void)
 
     if(PHYSFS_File *file = PHYSFS_openWrite(path.c_str())) {
         stbi_flip_vertically_on_write(true);
-        stbi_write_png_to_func(&png_write, file, globals::width, globals::height, 3, pixels, 3 * globals::width);
+        stbi_write_png_to_func(&png_write, file, globals::width, globals::height, 3, pixels, stride);
         PHYSFS_close(file);
     }
 
