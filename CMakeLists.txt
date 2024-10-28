@@ -91,7 +91,7 @@ if(WIN32)
     # create a dedicated server executable in the start menu
     set(CPACK_GENERATOR NSIS)
     set(CPACK_NSIS_INSTALLED_ICON_NAME "vgame.exe")
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/launch/server_icon_1024x1024.ico")
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/launch/resource/server_icon_1024x1024.ico")
     list(APPEND CPACK_NSIS_MENU_LINKS "vgame-server.exe" "${CPACK_PACKAGE_NAMAE} Server")
     list(APPEND CPACK_NSIS_MENU_LINKS "vgame.exe" "${CPACK_PACKAGE_NAME}")
 elseif(UNIX AND NOT APPLE)

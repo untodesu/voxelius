@@ -6,7 +6,7 @@ if(BUILD_CLIENT)
 
     if(WIN32)
         enable_language(RC)
-        target_sources(vgame PRIVATE "${CMAKE_CURRENT_LIST_DIR}/vgame.rc")
+        target_sources(vgame PRIVATE "${CMAKE_CURRENT_LIST_DIR}/resource/vgame.rc")
     endif()
 endif()
 
@@ -18,6 +18,6 @@ if(BUILD_SERVER)
 
     if(WIN32)
         enable_language(RC)
-        target_sources(vgame-server PRIVATE "${CMAKE_CURRENT_LIST_DIR}/vgame-server.rc")
+        target_sources(vgame-server PRIVATE "${CMAKE_CURRENT_LIST_DIR}/resource/vgame-server.rc")
     endif()
 endif()
