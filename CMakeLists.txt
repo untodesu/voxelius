@@ -4,6 +4,7 @@ set(VOXELIUS_VERSION_META "DEV.2024-10")
 
 set(BUILD_CLIENT ON CACHE BOOL "Build client executable")
 set(BUILD_SERVER ON CACHE BOOL "Build server executable")
+set(FORCE_FCGLFW OFF CACHE BOOL "Force use of FetchContent for GLFW")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -19,9 +20,12 @@ set(PHYSFS_ARCHIVE_ZIP ON CACHE BOOL "" FORCE)
 if(BUILD_CLIENT)
     add_subdirectory(external/glad)
     add_subdirectory(external/imgui)
-    find_package(glfw3 QUIET)
+    
+    if(NOT FORCE_FCGLFW)
+        find_package(glfw3 QUIET)
+    endif()
 
-    if(NOT glfw3_FOUND)
+    if(NOT glfw3_FOUND OR FORCE_FCGLFW)
         include(FetchContent)
         set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
         set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
