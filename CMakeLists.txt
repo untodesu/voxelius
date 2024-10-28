@@ -67,6 +67,7 @@ add_subdirectory(launch)
 set(CPACK_PACKAGE_NAME "Voxelius")
 set(CPACK_PACKAGE_VENDOR "Voxelius Contributors")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Block game on steroids")
+set(CPACK_PACKAGE_CONTACT "https://bsky.app/profile/at.untode.su")
 
 set(CPACK_PACKAGE_VERSION "${VOXELIUS_VERSION}-${VOXELIUS_VERSION_META}")
 set(CPACK_PACKAGE_VERSION_MAJOR "${VOXELIUS_VERSION_MAJOR}")
@@ -81,7 +82,8 @@ if(WIN32)
     # For Windows packages, assets should be placed in the
     # same directory as the client and server executables since
     # launch.cc, as a last resort, pulls data from current_directory()
-    install(TARGETS vgame vds RUNTIME DESTINATION ".")
+    install(TARGETS vgame RUNTIME COMPONENT Client DESTINATION ".")
+    install(TARGETS vds RUNTIME COMPONENT Server DESTINATION ".")
     install(DIRECTORY assets/ DESTINATION ".")
 
     # Configure NSIS
@@ -95,21 +97,20 @@ elseif(UNIX AND NOT APPLE)
     # For Linux packages, assets should be placed in the FHS-compliant
     # directory /usr/share/voxelius; again, when launch.cc is compiled
     # for Linux, it will look for assets in that specific directory
-    install(TARGETS vgame vds RUNTIME DESTINATION share/bin)
+    install(TARGETS vgame RUNTIME COMPONENT client DESTINATION share/bin)
+    install(TARGETS vds RUNTIME COMPONENT server DESTINATION share/bin)
     install(DIRECTORY assets/ DESTINATION share/voxelius)
 
     if(glfw3_FOUND AND NOT GLFW_FORCE_FETCHCONTENT)
         # We're building using system GLFW distribution
         # so we must include it as a dependency; this is really
         # the only external library we might link to dynamically
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglfw3")
-    else()
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "")
+        set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglfw3 (>= 3.3.8)")
     endif()
 
     # Configure DEB
-    # FIXME: <tumbleweed sounds>
     set(CPACK_GENERATOR DEB)
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_CONTACT}")
 endif()
 
 include(CPack)
