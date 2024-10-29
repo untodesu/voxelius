@@ -90,8 +90,9 @@ if(WIN32)
     # UNDONE: make a dedicated server icon and actually
     # create a dedicated server executable in the start menu
     set(CPACK_GENERATOR NSIS)
-    set(CPACK_NSIS_INSTALLED_ICON_NAME "vserver.exe")
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/media/vserver.ico")
+    set(CPACK_NSIS_INSTALLED_ICON_NAME "vclient.exe")
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/media/vclient.ico")
+    set(CPACK_NSIS_MUI_HEADERIMAGE "${CMAKE_CURRENT_SOURCE_DIR}\\\\media\\\\header.bmp")
     set(CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}\\\\media\\\\welcome.bmp")
     set(CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP "${CMAKE_SOURCE_DIR}\\\\media\\\\welcome.bmp")
     list(APPEND CPACK_NSIS_MENU_LINKS "vserver.exe" "${CPACK_PACKAGE_NAME} Server")
