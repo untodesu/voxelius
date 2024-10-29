@@ -82,24 +82,26 @@ if(WIN32)
     # For Windows packages, assets should be placed in the
     # same directory as the client and server executables since
     # launch.cc, as a last resort, pulls data from current_directory()
-    install(TARGETS vgame RUNTIME DESTINATION ".")
-    install(TARGETS vgame-server RUNTIME DESTINATION ".")
+    install(TARGETS vclient RUNTIME DESTINATION ".")
+    install(TARGETS vserver RUNTIME DESTINATION ".")
     install(DIRECTORY assets/ DESTINATION ".")
 
     # Configure NSIS
     # UNDONE: make a dedicated server icon and actually
     # create a dedicated server executable in the start menu
     set(CPACK_GENERATOR NSIS)
-    set(CPACK_NSIS_INSTALLED_ICON_NAME "vgame.exe")
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/launch/resource/server_icon_1024x1024.ico")
-    list(APPEND CPACK_NSIS_MENU_LINKS "vgame-server.exe" "${CPACK_PACKAGE_NAME} Server")
-    list(APPEND CPACK_NSIS_MENU_LINKS "vgame.exe" "${CPACK_PACKAGE_NAME}")
+    set(CPACK_NSIS_INSTALLED_ICON_NAME "vclient.exe")
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/media/vserver.ico")
+    set(CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}/media/welcome.bmp")
+    set(CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}/media/welcome.bmp")
+    list(APPEND CPACK_NSIS_MENU_LINKS "vserver.exe" "${CPACK_PACKAGE_NAME} Server")
+    list(APPEND CPACK_NSIS_MENU_LINKS "vclient.exe" "${CPACK_PACKAGE_NAME}")
 elseif(UNIX AND NOT APPLE)
     # For Linux packages, assets should be placed in the FHS-compliant
     # directory /usr/share/voxelius; again, when launch.cc is compiled
     # for Linux, it will look for assets in that specific directory
-    install(TARGETS vgame RUNTIME DESTINATION share/bin)
-    install(TARGETS vgame-server RUNTIME DESTINATION share/bin)
+    install(TARGETS vclient RUNTIME DESTINATION share/bin)
+    install(TARGETS vserver RUNTIME DESTINATION share/bin)
     install(DIRECTORY assets/ DESTINATION share/voxelius)
 
     if(glfw3_FOUND AND NOT GLFW_FORCE_FETCHCONTENT)

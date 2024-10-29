@@ -1,8 +1,5 @@
-# Since circa 2022, the source code tree
-# tracks dependencies as just directories
-# instead of separate repositories. This makes
-# GitHub's language tracker to go nuts!
-deps/* linguist-vendored
-*.png filter=lfs diff=lfs merge=lfs -text
-*.jpg filter=lfs diff=lfs merge=lfs -text
+external/* linguist-vendored
+*.bmp filter=lfs diff=lfs merge=lfs -text
 *.ico filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
