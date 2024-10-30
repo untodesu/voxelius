@@ -92,6 +92,7 @@ set(CPACK_PACKAGE_VERSION_MAJOR "${VOXELIUS_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${VOXELIUS_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${VOXELIUS_VERSION_PATCH}")
 
+set(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
@@ -104,18 +105,19 @@ if(WIN32)
     install(TARGETS vserver RUNTIME DESTINATION ".")
     install(DIRECTORY assets/ DESTINATION ".")
 
-    # Configure NSIS
-    # UNDONE: make a dedicated server icon and actually
-    # create a dedicated server executable in the start menu
     set(CPACK_GENERATOR NSIS)
-    set(CPACK_NSIS_INSTALLED_ICON_NAME "vclient.exe")
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/media/vclient.ico")
+
+    # Assign installer interface images
     set(CPACK_NSIS_MUI_HEADERIMAGE "${CMAKE_SOURCE_DIR}\\\\media\\\\header.bmp")
     set(CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "${CMAKE_SOURCE_DIR}\\\\media\\\\welcome.bmp")
     set(CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP "${CMAKE_SOURCE_DIR}\\\\media\\\\welcome.bmp")
+
+    # Assign start menu shortcuts
     list(APPEND CPACK_NSIS_MENU_LINKS "vserver.exe" "${CPACK_PACKAGE_NAME} Server")
     list(APPEND CPACK_NSIS_MENU_LINKS "vclient.exe" "${CPACK_PACKAGE_NAME}")
-elseif(UNIX AND NOT APPLE)
+endif()
+
+if(UNIX AND NOT APPLE)
     # For Linux packages, assets should be placed in the FHS-compliant
     # directory /usr/share/voxelius; again, when launch.cc is compiled
     # for Linux, it will look for assets in that specific directory
@@ -130,7 +132,6 @@ elseif(UNIX AND NOT APPLE)
         set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglfw3 (>= 3.3.8)")
     endif()
 
-    # Configure DEB
     set(CPACK_GENERATOR DEB)
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_CONTACT}")
 endif()
