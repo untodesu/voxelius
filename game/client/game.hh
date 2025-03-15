@@ -18,6 +18,11 @@ extern ConfigString username;
 
 namespace client_game
 {
+extern bool hide_hud;
+} // namespace client_game
+
+namespace client_game
+{
 void init(void);
 void init_late(void);
 void deinit(void);

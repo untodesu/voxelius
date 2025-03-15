@@ -205,8 +205,19 @@ void client_chat::layout(void)
 
             auto fadeout_seconds = 10.0f;
             auto fadeout = std::exp(-1.0f * std::pow(1.0e-6 * static_cast<float>(globals::curtime - it->spawn) / fadeout_seconds, 10.0f));
-            auto rect_alpha = ((globals::gui_screen == GUI_CHAT) ? (0.75f) : (0.50f * fadeout));
-            auto text_alpha = ((globals::gui_screen == GUI_CHAT) ? (1.00f) : (1.00f * fadeout));
+
+            float rect_alpha;
+            float text_alpha;
+
+            if(globals::gui_screen == GUI_CHAT) {
+                rect_alpha = 0.75f;
+                text_alpha = 1.00f;
+            }
+            else if(!client_game::hide_hud) {
+                rect_alpha = 0.50f * fadeout;
+                text_alpha = 1.00f * fadeout;
+            }
+            else break;
 
             auto rect_col = ImGui::GetColorU32(ImGuiCol_FrameBg, rect_alpha);
             auto text_col = ImGui::GetColorU32(ImVec4(it->color.x, it->color.y, it->color.z, it->color.w * text_alpha));

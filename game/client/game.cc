@@ -41,6 +41,7 @@
 #include "client/gui_screen.hh"
 #include "client/hotbar.hh"
 #include "client/interpolation.hh"
+#include "client/keybind.hh"
 #include "client/language.hh"
 #include "client/listener.hh"
 #include "client/main_menu.hh"
@@ -75,6 +76,10 @@ ConfigBoolean client_game::world_curvature(true);
 ConfigUnsigned client_game::pixel_size(2U, 1U, 4U);
 ConfigUnsigned client_game::fog_mode(1U, 0U, 2U);
 ConfigString client_game::username("player");
+
+bool client_game::hide_hud = false;
+
+static ConfigKeyBind hide_hud_toggle(GLFW_KEY_F1);
 
 static resource_ptr<BinFile> bin_unscii16;
 static resource_ptr<BinFile> bin_unscii8;
@@ -160,6 +165,13 @@ static void on_glfw_framebuffer_size(const GlfwFramebufferSizeEvent &event)
     }
 }
 
+static void on_glfw_key(const GlfwKeyEvent &event)
+{
+    if(!globals::gui_keybind_ptr && hide_hud_toggle.equals(event.key) && (event.action == GLFW_PRESS)) {
+        client_game::hide_hud = !client_game::hide_hud;
+    }
+}
+
 void client_game::init(void)
 {
     bin_unscii16 = resource::load<BinFile>("fonts/unscii-16.ttf");
@@ -179,7 +191,8 @@ void client_game::init(void)
     globals::client_config.add_value("game.pixel_size", client_game::pixel_size);
     globals::client_config.add_value("game.fog_mode", client_game::fog_mode);
     globals::client_config.add_value("game.username", client_game::username);
-    
+    globals::client_config.add_value("game.key.toggle_hide_hud", hide_hud_toggle);
+
     settings::init();
 
     settings::add_checkbox(0, client_game::streamer_mode, settings_location::VIDEO_GUI, "game.streamer_mode", true);
@@ -188,6 +201,7 @@ void client_game::init(void)
     settings::add_slider(1, client_game::pixel_size, settings_location::VIDEO, "game.pixel_size", true);
     settings::add_stepper(3, client_game::fog_mode, settings_location::VIDEO, "game.fog_mode", false);
     settings::add_input(1, client_game::username, settings_location::GENERAL, "game.username", true, false);
+    settings::add_keybind(4, hide_hud_toggle, settings_location::KEYBOARD_MISC, "game.key.toggle_hide_hud");
 
     globals::client_host = enet_host_create(nullptr, 1, 1, 0, 0);
     globals::client_host->checksum = &enet_crc32;
@@ -334,6 +348,7 @@ void client_game::init(void)
     experiments::init();
 
     globals::dispatcher.sink<GlfwFramebufferSizeEvent>().connect<&on_glfw_framebuffer_size>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
 }
 
 void client_game::init_late(void)
@@ -555,19 +570,12 @@ void client_game::render(void)
 
     glEnable(GL_DEPTH_TEST);
 
-    if(player_target::voxel != NULL_VOXEL_ID) {
-        auto cpos = coord::to_chunk(player_target::coord);
-        auto fpos = coord::to_local(player_target::coord);
-
-        outline::prepare();
-        outline::cube(cpos, glm::fvec3(fpos), glm::fvec3(1.0f), 2.0f, glm::fvec4(0.0f, 0.0f, 0.0f, 1.0f));
-    }
+    player_target::render();
 
     if(globals::dimension) {
         auto group = globals::dimension->entities.group(entt::get<PlayerComponent, CollisionComponent, HeadComponentIntr, TransformComponentIntr>);
 
         outline::prepare();
-
 
         for(const auto [entity, collision, head, transform] : group.each()) {
             if(entity == globals::player) {
@@ -607,7 +615,7 @@ void client_game::layout(void)
     }
 
     if(!globals::gui_screen || (globals::gui_screen == GUI_CHAT) || (globals::gui_screen == GUI_DEBUG_WINDOW)) {
-        if(toggles::draw_metrics) {
+        if(toggles::draw_metrics && !client_game::hide_hud) {
             // This contains Minecraft-esque debug information
             // about the hardware, world state and other
             // things that might be uesful
@@ -619,7 +627,7 @@ void client_game::layout(void)
         client_chat::layout();
         scoreboard::layout();
 
-        if(!globals::gui_screen) {
+        if(!globals::gui_screen && !client_game::hide_hud) {
             hotbar::layout();
             status_lines::layout();
             crosshair::layout();

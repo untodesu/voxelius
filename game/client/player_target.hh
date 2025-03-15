@@ -16,6 +16,7 @@ namespace player_target
 {
 void init(void);
 void update(void);
+void render(void);
 } // namespace player_target
 
 #endif /* CLIENT_PLAYER_TARGET_HH  */
