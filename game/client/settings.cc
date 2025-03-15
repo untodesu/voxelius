@@ -223,6 +223,8 @@ static std::string str_gamepad_checkbox_tooltip;
 
 static std::string str_video_gui;
 
+static std::string str_sound_levels;
+
 static std::vector<SettingValue *> values_all;
 static std::vector<SettingValue *> values[NUM_LOCATIONS];
 
@@ -619,6 +621,8 @@ static void on_language_set(const LanguageSetEvent &event)
 
     str_video_gui = language::resolve("settings.video.gui");
 
+    str_sound_levels = language::resolve("settings.sound.levels");
+
     for(SettingValue *value : values_all) {
         if(value->type == setting_type::CHECKBOX) {
             auto checkbox = static_cast<SettingValue_CheckBox *>(value);
@@ -734,8 +738,12 @@ static void layout_video(void)
 
 static void layout_sound(void)
 {
-    if(ImGui::BeginChild("###settings.sound.child"))
+    if(ImGui::BeginChild("###settings.sound.child")) {
         layout_values(settings_location::SOUND);
+        ImGui::SeparatorText(str_sound_levels.c_str());
+        layout_values(settings_location::SOUND_LEVELS);
+    }
+
     ImGui::EndChild();
 }
 

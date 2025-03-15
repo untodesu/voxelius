@@ -38,9 +38,10 @@ void sound::init(void)
     globals::client_config.add_value("sound.volume_ui", sound::volume_ui);
 
     settings::add_slider(1, sound::volume_master, settings_location::SOUND, "sound.volume_master", false, "%.0f%%");
-    settings::add_slider(2, sound::volume_effects, settings_location::SOUND, "sound.volume_effects", false, "%.0f%%");
-    settings::add_slider(3, sound::volume_music, settings_location::SOUND, "sound.volume_music", false, "%.0f%%");
-    settings::add_slider(4, sound::volume_ui, settings_location::SOUND, "sound.volume_ui", false, "%.0f%%");
+
+    settings::add_slider(0, sound::volume_effects, settings_location::SOUND_LEVELS, "sound.volume_effects", false, "%.0f%%");
+    settings::add_slider(1, sound::volume_music, settings_location::SOUND_LEVELS, "sound.volume_music", false, "%.0f%%");
+    settings::add_slider(2, sound::volume_ui, settings_location::SOUND_LEVELS, "sound.volume_ui", false, "%.0f%%");
 
     alGenSources(1, &generic_source);
     alSourcei(generic_source, AL_SOURCE_RELATIVE, AL_TRUE);

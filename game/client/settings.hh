@@ -26,7 +26,8 @@ enum class settings_location : unsigned int {
     VIDEO               = 0x0009U,
     VIDEO_GUI           = 0x000AU,
     SOUND               = 0x000BU,
-    COUNT               = 0x000CU,
+    SOUND_LEVELS        = 0x000CU,
+    COUNT               = 0x000DU,
 };
 
 namespace settings

@@ -44,6 +44,8 @@
 
   "settings.video.gui": "GUI",
 
+  "settings.sound.levels": "Levels",
+
   "settings.value.camera.roll_angle": "Roll angle",
   "settings.value.camera.vertical_fov": "FOV",
   "settings.value.camera.view_distance": "View distance",
@@ -96,6 +98,7 @@
   "settings.value.sound.volume_effects": "Effects volume",
   "settings.value.sound.volume_master": "Master volume",
   "settings.value.sound.volume_music": "Music volume",
+  "settings.value.sound.volume_ui": "UI volume",
 
   "settings.tooltip.camera.roll_angle": "Quake-styled view roll applied with sideways moves",
   "settings.tooltip.camera.vertical_fov": "Field Of View",
