@@ -44,7 +44,7 @@ static void append_text_message(const std::string &sender, const std::string &te
     message.color = ImGui::GetStyleColorVec4(ImGuiCol_Text);
     history.push_back(message);
 
-    if(sfx_chat_message) {
+    if(sfx_chat_message && session::is_ingame()) {
         sound::play_ui(sfx_chat_message, false, 1.0f);
     }
 }
@@ -57,7 +57,7 @@ static void append_player_join(const std::string &sender)
     message.color = ImGui::GetStyleColorVec4(ImGuiCol_DragDropTarget);
     history.push_back(message);
 
-    if(sfx_chat_message) {
+    if(sfx_chat_message && session::is_ingame()) {
         sound::play_ui(sfx_chat_message, false, 1.0f);
     }
 }
@@ -70,7 +70,7 @@ static void append_player_leave(const std::string &sender, const std::string &re
     message.color = ImGui::GetStyleColorVec4(ImGuiCol_DragDropTarget);
     history.push_back(message);
 
-    if(sfx_chat_message) {
+    if(sfx_chat_message && session::is_ingame()) {
         sound::play_ui(sfx_chat_message, false, 1.0f);
     }
 }
@@ -194,7 +194,7 @@ void client_chat::layout(void)
         ImGui::InputText("###chat.input", &chat_input);
     }
 
-    if((globals::gui_screen == GUI_SCREEN_NONE) || (globals::gui_screen == GUI_CHAT) || (globals::gui_screen == GUI_DEBUG_WINDOW)) {
+    if((globals::gui_screen == GUI_SCREEN_NONE) || (globals::gui_screen == GUI_CHAT)) {
         for(auto it = history.crbegin(); it < history.crend(); ++it) {
             auto text_size = ImGui::CalcTextSize(it->text.c_str(), it->text.c_str() + it->text.size(), false, window_size.x);
             auto rect_size = ImVec2(window_size.x, text_size.y + 2.0f * padding.y);
@@ -255,7 +255,7 @@ void client_chat::print(const std::string &text)
     message.color = ImGui::GetStyleColorVec4(ImGuiCol_Text);
     history.push_back(message);
 
-    if(sfx_chat_message) {
+    if(sfx_chat_message && session::is_ingame()) {
         sound::play_ui(sfx_chat_message, false, 1.0f);
     }
 }

@@ -18,6 +18,8 @@ add_executable(vclient
     "${CMAKE_CURRENT_LIST_DIR}/const.hh"
     "${CMAKE_CURRENT_LIST_DIR}/crosshair.cc"
     "${CMAKE_CURRENT_LIST_DIR}/crosshair.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/direct_connection.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/direct_connection.hh"
     "${CMAKE_CURRENT_LIST_DIR}/experiments.cc"
     "${CMAKE_CURRENT_LIST_DIR}/experiments.hh"
     "${CMAKE_CURRENT_LIST_DIR}/factory.cc"

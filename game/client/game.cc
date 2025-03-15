@@ -34,6 +34,7 @@
 #include "client/chunk_visibility.hh"
 #include "client/const.hh"
 #include "client/crosshair.hh"
+#include "client/direct_connection.hh"
 #include "client/experiments.hh"
 #include "client/gamepad.hh"
 #include "client/glfw.hh"
@@ -329,6 +330,7 @@ void client_game::init(void)
     play_menu::init();
     progress_bar::init();
     message_box::init();
+    direct_connection::init();
 
     crosshair::init();
     hotbar::init();
@@ -614,7 +616,7 @@ void client_game::layout(void)
         background::layout();
     }
 
-    if(!globals::gui_screen || (globals::gui_screen == GUI_CHAT) || (globals::gui_screen == GUI_DEBUG_WINDOW)) {
+    if(!globals::gui_screen || (globals::gui_screen == GUI_CHAT)) {
         if(toggles::draw_metrics && !client_game::hide_hud) {
             // This contains Minecraft-esque debug information
             // about the hardware, world state and other
@@ -635,7 +637,7 @@ void client_game::layout(void)
     }
 
     if(globals::gui_screen) {
-        if(session::is_ingame() && (globals::gui_screen != GUI_CHAT) && (globals::gui_screen != GUI_DEBUG_WINDOW)) {
+        if(session::is_ingame() && (globals::gui_screen != GUI_CHAT)) {
             const float width_f = static_cast<float>(globals::width);
             const float height_f = static_cast<float>(globals::height);
             const ImU32 darken = ImGui::GetColorU32(ImVec4(0.00f, 0.00f, 0.00f, 0.75f));
@@ -652,11 +654,14 @@ void client_game::layout(void)
             case GUI_SETTINGS:
                 settings::layout();
                 break;
-            case GUI_PROGRESS:
+            case GUI_PROGRESS_BAR:
                 progress_bar::layout();
                 break;
             case GUI_MESSAGE_BOX:
                 message_box::layout();
+                break;
+            case GUI_DIRECT_CONNECTION:
+                direct_connection::layout();
                 break;
         }
     }

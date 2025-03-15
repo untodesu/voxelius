@@ -20,6 +20,13 @@
   "play_menu.status.init": "Unknown",
   "play_menu.status.ping": "Pinging",
 
+  "direct_connection.title": "Direct connection",
+  "direct_connection.connect": "Connect",
+  "direct_connection.cancel": "Cancel",
+
+  "direct_connection.hostname": "Hostname",
+  "direct_connection.password": "Password",
+
   "settings.checkbox.false": "OFF",
   "settings.checkbox.true": "ON",
 

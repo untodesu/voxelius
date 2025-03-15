@@ -72,14 +72,14 @@ static bool needs_focus;
 
 static void parse_hostname(ServerStatusItem *item, const std::string &hostname)
 {
-    const std::vector<std::string> parts = strtools::split(hostname, ":");
+    auto parts = strtools::split(hostname, ":");
 
     if(!parts[0].empty())
         item->hostname = parts[0];
     else item->hostname = std::string("localhost");
 
     if(parts.size() >= 2)
-        item->port = cxpr::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 0x0000, UINT16_MAX);
+        item->port = cxpr::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 1024, UINT16_MAX);
     else item->port = protocol::PORT;
 }
 
@@ -329,7 +329,7 @@ static void layout_servers(void)
 
 static void layout_servers_buttons(void)
 {
-    const float avail_width = ImGui::GetContentRegionAvail().x;
+    auto avail_width = ImGui::GetContentRegionAvail().x;
 
     // Can only join when selected and not editing
     ImGui::BeginDisabled(!selected_server || editing_server);
@@ -337,13 +337,13 @@ static void layout_servers_buttons(void)
         join_selected_server();
     ImGui::EndDisabled();
     ImGui::SameLine();
-    
+
     // Can only connect directly when not editing anything
     ImGui::BeginDisabled(editing_server);
     if(ImGui::Button(str_connect.c_str(), ImVec2(-1.00f, 0.0f)))
-        spdlog::debug("UNDONE: direct connect is not implemented!");
+        globals::gui_screen = GUI_DIRECT_CONNECTION;
     ImGui::EndDisabled();
-    
+
     // Can only add when not editing anything
     ImGui::BeginDisabled(editing_server);
     if(ImGui::Button(str_add.c_str(), ImVec2(-0.75f * avail_width, 0.0f)))

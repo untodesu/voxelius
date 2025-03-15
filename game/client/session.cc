@@ -244,7 +244,7 @@ void session::connect(const char *host, std::uint16_t port, const char *password
         globals::gui_screen = GUI_PLAY_MENU;
     });
 
-    globals::gui_screen = GUI_PROGRESS;
+    globals::gui_screen = GUI_PROGRESS_BAR;
 }
 
 void session::disconnect(const char *reason)
@@ -292,7 +292,7 @@ void session::send_login_request(void)
     server_password_hash = UINT64_MAX;
 
     progress_bar::set_title("connecting.logging_in");
-    globals::gui_screen = GUI_PROGRESS;
+    globals::gui_screen = GUI_PROGRESS_BAR;
 }
 
 bool session::is_ingame(void)
