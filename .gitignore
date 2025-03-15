@@ -1,7 +1,7 @@
 /.vscode/*
 !/.vscode/c_cpp_properties.json
-/src/core/feature.hh
-/src/core/version.hh
+/core/feature.hh
+/core/version.hh
 /build32/
 /build64/
 /build/
