@@ -4,6 +4,11 @@
 
 #include "shared/const.hh"
 
+// This key is then going to be reserved for only
+// the debug toggles and users won't be able to
+// use this key for conventional gameplay things
+constexpr static int DEBUG_KEY = GLFW_KEY_F3;
+
 constexpr static int BASE_WIDTH = 320;
 constexpr static int BASE_HEIGHT = 240;
 

@@ -4,6 +4,7 @@
 #include "core/config.hh"
 
 #include "client/chat.hh"
+#include "client/const.hh"
 #include "client/gamepad.hh"
 #include "client/glfw.hh"
 #include "client/globals.hh"
@@ -51,7 +52,7 @@ static void on_glfw_key(const GlfwKeyEvent &event)
         return;
     }
 
-    if(event.key == GLFW_KEY_F3) {
+    if(event.key == DEBUG_KEY) {
         if(event.action == GLFW_PRESS) {
             toggles::is_sequence_await = true;
             return;

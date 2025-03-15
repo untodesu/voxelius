@@ -4,6 +4,7 @@
 #include "core/config.hh"
 #include "core/constexpr.hh"
 
+#include "client/const.hh"
 #include "client/gamepad_axis.hh"
 #include "client/gamepad_button.hh"
 #include "client/gamepad.hh"
@@ -529,7 +530,7 @@ static void refresh_input_wids(void)
 
 static void on_glfw_key(const GlfwKeyEvent &event)
 {
-    if(event.action == GLFW_PRESS) {
+    if((event.action == GLFW_PRESS) && (event.key != DEBUG_KEY)) {
         if(globals::gui_keybind_ptr || globals::gui_gamepad_axis_ptr || globals::gui_gamepad_button_ptr) {
             if(event.key == GLFW_KEY_ESCAPE) {
                 ImGuiIO &io = ImGui::GetIO();

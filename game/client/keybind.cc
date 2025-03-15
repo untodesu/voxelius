@@ -3,6 +3,8 @@
 
 #include "core/constexpr.hh"
 
+#include "client/const.hh"
+
 constexpr static const char *UNKNOWN_KEY_NAME = "UNKNOWN";
 
 static const std::pair<int, const char *> key_names[] = {
@@ -147,14 +149,20 @@ ConfigKeyBind::ConfigKeyBind(void)
 
 ConfigKeyBind::ConfigKeyBind(int default_value)
 {
-    m_glfw_keycode = default_value;
-    m_name = get_key_name(default_value);
+    if(default_value == DEBUG_KEY) {
+        m_glfw_keycode = GLFW_KEY_UNKNOWN;
+        m_name = UNKNOWN_KEY_NAME;
+    }
+    else {
+        m_glfw_keycode = default_value;
+        m_name = get_key_name(default_value);
+    }
 }
 
 void ConfigKeyBind::set(const char *value)
 {
     for(const auto &it : key_names) {
-        if(!std::strcmp(it.second, value)) {
+        if((it.first != DEBUG_KEY) && !std::strcmp(it.second, value)) {
             m_glfw_keycode = it.first;
             m_name = it.second;
             return;
@@ -172,8 +180,14 @@ const char *ConfigKeyBind::get(void) const
 
 void ConfigKeyBind::set_key(int keycode)
 {
-    m_glfw_keycode = keycode;
-    m_name = get_key_name(keycode);
+    if(keycode == DEBUG_KEY) {
+        m_glfw_keycode = GLFW_KEY_UNKNOWN;
+        m_name = UNKNOWN_KEY_NAME;
+    }
+    else {
+        m_glfw_keycode = keycode;
+        m_name = get_key_name(keycode);
+    }
 }
 
 int ConfigKeyBind::get_key(void) const
