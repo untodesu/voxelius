@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 
     shared_game::init(argc, argv);
 
-    spdlog::info("Voxelius {}", PROJECT_VERSION_STRING);
+    spdlog::info("Voxelius Client {}", PROJECT_VERSION_STRING);
 
     glfwSetErrorCallback(&on_glfw_error);
 
@@ -164,8 +164,6 @@ int main(int argc, char **argv)
         spdlog::critical("glfw: init failed");
         std::terminate();
     }
-
-    spdlog::info("GLFW {}", glfwGetVersionString());
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

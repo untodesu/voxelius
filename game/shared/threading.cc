@@ -4,6 +4,8 @@
 #include "core/cmdline.hh"
 #include "core/constexpr.hh"
 
+constexpr static const char *DEFAULT_POOL_SIZE_ARG = "4";
+
 static BS::light_thread_pool *thread_pool;
 static std::deque<Task *> task_deque;
 
@@ -31,9 +33,25 @@ void Task::set_status(task_status status)
 
 void threading::init(void)
 {
-    auto threads_arg = cmdline::get("threads", "4");
-    auto threads_num = cxpr::clamp<unsigned long>(std::strtoul(threads_arg, nullptr, 10), 2U, 4U);
-    thread_pool = new BS::light_thread_pool(threads_num);
+    auto argument = cmdline::get("threads", DEFAULT_POOL_SIZE_ARG);
+    auto num_concurrent_threads = std::thread::hardware_concurrency();
+    unsigned int thread_pool_size;
+
+    if(num_concurrent_threads && !std::strcmp(argument, "max")) {
+        // Use the maximum available number of concurrent
+        // hardware threads provided by the implementation
+        thread_pool_size = num_concurrent_threads;
+    }
+    else {
+        if(num_concurrent_threads)
+            thread_pool_size = cxpr::clamp<unsigned int>(std::strtoul(argument, nullptr, 10), 1U, num_concurrent_threads);
+        else thread_pool_size = cxpr::max<unsigned int>(std::strtoul(argument, nullptr, 10), 1U);
+    }
+
+    spdlog::info("threading: using {} threads for pooling tasks", thread_pool_size);
+
+    thread_pool = new BS::light_thread_pool(thread_pool_size);
+
     task_deque.clear();
 }
 
