@@ -85,41 +85,27 @@ static void on_set_voxel_packet(const protocol::SetVoxel &packet)
             auto index = coord::to_index(lpos);
 
             if(worldgen::is_generating(session->dimension, cpos)) {
-                // The chunk is currently being
-                // generated, so we must ignore any
-                // requests from players to build there
+                // The chunk is currently being generated;
+                // ignore all requests from players to build there
                 return;
             }
 
             auto chunk = session->dimension->find_chunk(cpos);
-            auto created = false;
 
             if(chunk == nullptr) {
-                chunk = universe::load_chunk(session->dimension, cpos);
-                created = true;
+                // The chunk is not loaded, so we must
+                // ignore any requests from players to build there
+                return;
             }
 
-            if(chunk == nullptr) {
-                chunk = session->dimension->create_chunk(cpos);
-                created = true;
-            }
-    
             chunk->set_voxel(packet.voxel, index);
 
-            if(created) {
-                session->dimension->chunks.emplace_or_replace<InhabitedComponent>(chunk->get_entity());
+            session->dimension->chunks.emplace_or_replace<InhabitedComponent>(chunk->get_entity());
 
-                protocol::ChunkVoxels response;
-                response.voxels = chunk->get_voxels();
-                response.chunk = cpos;
-                sessions::broadcast(session->dimension, protocol::encode(response));
-            }
-            else {
-                protocol::SetVoxel response;
-                response.vpos = packet.vpos;
-                response.voxel = packet.voxel;
-                sessions::broadcast(session->dimension, protocol::encode(response), session->peer);
-            }
+            protocol::SetVoxel response;
+            response.vpos = packet.vpos;
+            response.voxel = packet.voxel;
+            sessions::broadcast(session->dimension, protocol::encode(response), session->peer);
 
             return;
         }
