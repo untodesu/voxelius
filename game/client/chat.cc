@@ -194,7 +194,7 @@ void client_chat::layout(void)
         ImGui::InputText("###chat.input", &chat_input);
     }
 
-    if((globals::gui_screen == GUI_SCREEN_NONE) || (globals::gui_screen == GUI_CHAT)) {
+    if(!client_game::hide_hud && ((globals::gui_screen == GUI_SCREEN_NONE) || (globals::gui_screen == GUI_CHAT))) {
         for(auto it = history.crbegin(); it < history.crend(); ++it) {
             auto text_size = ImGui::CalcTextSize(it->text.c_str(), it->text.c_str() + it->text.size(), false, window_size.x);
             auto rect_size = ImVec2(window_size.x, text_size.y + 2.0f * padding.y);
@@ -213,11 +213,10 @@ void client_chat::layout(void)
                 rect_alpha = 0.75f;
                 text_alpha = 1.00f;
             }
-            else if(!client_game::hide_hud) {
+            else {
                 rect_alpha = 0.50f * fadeout;
                 text_alpha = 1.00f * fadeout;
             }
-            else break;
 
             auto rect_col = ImGui::GetColorU32(ImGuiCol_FrameBg, rect_alpha);
             auto text_col = ImGui::GetColorU32(ImVec4(it->color.x, it->color.y, it->color.z, it->color.w * text_alpha));
