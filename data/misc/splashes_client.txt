@@ -1,5 +1,6 @@
 ((void *)(0))
 [deleted]
+[REDACTED]
 #define FALSE 1
 #define NULL ((void *)(0))
 #define NULL ((void *)(1))
@@ -26,7 +27,7 @@ Format your hard drive today!
 From Urals with Love
 Happiness only real when shared
 Hell is empty and all the devils are here.
-I am confiscating that MOTD
+I am confiscating that splash
 I am inside your walls
 It's all connected!
 It's downward from here
@@ -46,7 +47,6 @@ Send dudes, we need more men!
 Sometimes I dream about cheese
 Stay hydrated. This is a threat.
 STOP POSTING ABOUT AMONG US
-Stop reading this and join
 Trust me, I'm a doctor.
 What is a MOTD?
 YES NO YES NO YES NO YES NO YES NO YES NO

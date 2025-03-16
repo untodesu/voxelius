@@ -195,7 +195,7 @@ static void on_bother_response(const BotherResponseEvent &event)
                 item->num_players = event.num_players;
                 item->max_players = event.max_players;
                 item->motd = event.motd;
-                item->status = item_status::FAILURE;
+                item->status = item_status::REACHED;
             }
 
             break;
@@ -480,7 +480,6 @@ void play_menu::update_late(void)
 {
     for(auto item : servers_deque) {
         if(item->status == item_status::UNKNOWN) {
-            spdlog::info("bothering {}", item->name);
             bother::ping(item->identity, item->hostname.c_str(), item->port);
             item->status = item_status::PINGING;
             continue;

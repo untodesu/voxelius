@@ -266,7 +266,7 @@ int main(int argc, char **argv)
 
     alcMakeContextCurrent(globals::sound_ctx);
 
-    splash::init();
+    splash::init_client();
 
     window_title::update();
 

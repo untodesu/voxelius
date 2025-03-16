@@ -4,7 +4,8 @@
 
 namespace splash
 {
-void init(void);
+void init_client(void);
+void init_server(void);
 const char* get(void);
 } // namespace splash
 

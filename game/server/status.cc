@@ -11,7 +11,6 @@
 
 static void on_status_request_packet(const protocol::StatusRequest &packet)
 {
-    spdlog::info("STATUS REQUEST");
     protocol::StatusResponse response;
     response.version = protocol::VERSION;
     response.max_players = sessions::max_players.get_value();

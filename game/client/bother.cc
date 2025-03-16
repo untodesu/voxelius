@@ -75,6 +75,7 @@ void bother::update_late(void)
         if(auto peer = enet_host_connect(bother_host, &address, 1, 0)) {
             peer->data = reinterpret_cast<void *>(static_cast<std::uintptr_t>(item.identity));
             bother_set.insert(item.identity);
+            enet_host_flush(bother_host);
         }
 
         bother_queue.pop_front();

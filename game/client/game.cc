@@ -205,7 +205,6 @@ void client_game::init(void)
     settings::add_keybind(4, hide_hud_toggle, settings_location::KEYBOARD_MISC, "game.key.toggle_hide_hud");
 
     globals::client_host = enet_host_create(nullptr, 1, 1, 0, 0);
-    globals::client_host->checksum = &enet_crc32;
 
     if(!globals::client_host) {
         spdlog::critical("game: unable to setup an ENet host");

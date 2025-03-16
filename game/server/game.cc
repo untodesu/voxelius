@@ -48,7 +48,7 @@ void server_game::init(void)
 
     whitelist::init();
 
-    splash::init();
+    splash::init_server();
 
     status::init();
 
@@ -72,8 +72,7 @@ void server_game::init_late(void)
     address.port = listen_port.get_value();
 
     globals::server_host = enet_host_create(&address, sessions::max_players.get_value() + status_peers.get_value(), 1, 0, 0);
-    globals::server_host->checksum = &enet_crc32;
-
+    
     if(!globals::server_host) {
         spdlog::critical("game: unable to setup an ENet host");
         std::terminate();
