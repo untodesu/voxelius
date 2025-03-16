@@ -6,10 +6,12 @@
 
 #include "shared/const.hh"
 #include "shared/dimension.hh"
+#include "shared/feature.hh"
 
-struct Metadata_2501 final {
-    std::array<std::uint64_t, CHUNK_AREA> entropy;
-    std::array<voxel_pos::value_type, CHUNK_AREA> heightmap;
+struct Overworld_Metadata final {
+    dimension_entropy_map entropy;
+    dimension_height_map heightmap;
+    std::vector<local_pos_xz> trees;
 };
 
 class Overworld final : public Dimension {
@@ -23,26 +25,32 @@ public:
     virtual bool generate(const chunk_pos &cpos, VoxelStorage &voxels) override;
 
 private:
-    float get_noise(const voxel_pos &vpos, std::int64_t variation);
-    Metadata_2501 &get_metadata(const worldgen_chunk_pos &cpos);
+    bool is_inside_cave(const voxel_pos &vpos);
+    bool is_inside_terrain(const voxel_pos &vpos);
+
+private:
+    const Overworld_Metadata &get_or_create_metadata(const chunk_pos_xz &cpos);
+
+private:
     void generate_terrain(const chunk_pos &cpos, VoxelStorage &voxels);
     void generate_surface(const chunk_pos &cpos, VoxelStorage &voxels);
-    void generate_carvers(const chunk_pos &cpos, VoxelStorage &voxels);
+    void generate_caves(const chunk_pos &cpos, VoxelStorage &voxels);
     void generate_features(const chunk_pos &cpos, VoxelStorage &voxels);
 
 private:
     ConfigInt m_terrain_variation;
     ConfigInt m_bottommost_chunk;
-    ConfigBoolean m_enable_surface;
-    ConfigBoolean m_enable_carvers;
-    ConfigBoolean m_enable_features;
 
 private:
-    emhash8::HashMap<worldgen_chunk_pos, Metadata_2501> m_metadata;
-    std::mt19937_64 m_twister;
+    emhash8::HashMap<chunk_pos_xz, Overworld_Metadata> m_metamap;
+
+private:
     fnl_state m_fnl_terrain;
     fnl_state m_fnl_caves_a;
     fnl_state m_fnl_caves_b;
+
+private:
+    Feature m_feat_tree;
 
 private:
     std::mutex m_mutex;

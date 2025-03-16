@@ -5,57 +5,107 @@
 #include "shared/game_voxels.hh"
 #include "shared/voxel_storage.hh"
 
+// FIXME: load these from a file
+static void compute_tree_feature(unsigned int height, Feature &feature, voxel_id log_voxel, voxel_id leaves_voxel)
+{
+    // Ensure the tree height is too small
+    height = cxpr::max<unsigned int>(height, 4U);
+
+    // Generate tree stem
+    for(unsigned int i = 0; i < height; ++i) {
+        feature.push_back({ voxel_pos(0, i, 0), log_voxel });
+    }
+
+    auto leaves_start = height - 3U;
+    auto leaves_thick_end = height - 2U;
+    auto leaves_thin_end = height - 1U;
+
+    // Generate the thin 3x3 layer of leaves that
+    // starts from leaves_start and ends at leaves_thin_end
+    for(unsigned int i = leaves_start; i <= leaves_thin_end; ++i) {
+        feature.push_back({ local_pos(-1, i, -1), leaves_voxel });
+        feature.push_back({ local_pos(-1, i, +0), leaves_voxel });
+        feature.push_back({ local_pos(-1, i, +1), leaves_voxel });
+        feature.push_back({ local_pos(+0, i, -1), leaves_voxel });
+        feature.push_back({ local_pos(+0, i, +1), leaves_voxel });
+        feature.push_back({ local_pos(+1, i, -1), leaves_voxel });
+        feature.push_back({ local_pos(+1, i, +0), leaves_voxel });
+        feature.push_back({ local_pos(+1, i, +1), leaves_voxel });
+    }
+
+    // Generate the tree cap; a 3x3 patch of leaves
+    // that is slapped right on top of the thin 3x3 layer
+    feature.push_back({ local_pos(-1, height, +0), leaves_voxel });
+    feature.push_back({ local_pos(+0, height, -1), leaves_voxel });
+    feature.push_back({ local_pos(+0, height, +0), leaves_voxel });
+    feature.push_back({ local_pos(+0, height, +1), leaves_voxel });
+    feature.push_back({ local_pos(+1, height, +0), leaves_voxel });
+
+    // Generate the thin 5x5 layer of leaves that
+    // starts from leaves_start and ends at leaves_thin_end
+    for(unsigned int i = leaves_start; i <= leaves_thick_end; ++i) {
+        feature.push_back({ local_pos(-1, i, -2), leaves_voxel });
+        feature.push_back({ local_pos(-1, i, +2), leaves_voxel });
+        feature.push_back({ local_pos(-2, i, -1), leaves_voxel });
+        feature.push_back({ local_pos(-2, i, -2), leaves_voxel });
+        feature.push_back({ local_pos(-2, i, +0), leaves_voxel });
+        feature.push_back({ local_pos(-2, i, +1), leaves_voxel });
+        feature.push_back({ local_pos(-2, i, +2), leaves_voxel });
+        feature.push_back({ local_pos(+0, i, -2), leaves_voxel });
+        feature.push_back({ local_pos(+0, i, +2), leaves_voxel });
+        feature.push_back({ local_pos(+1, i, -2), leaves_voxel });
+        feature.push_back({ local_pos(+1, i, +2), leaves_voxel });
+        feature.push_back({ local_pos(+2, i, -1), leaves_voxel });
+        feature.push_back({ local_pos(+2, i, -2), leaves_voxel });
+        feature.push_back({ local_pos(+2, i, +0), leaves_voxel });
+        feature.push_back({ local_pos(+2, i, +1), leaves_voxel });
+        feature.push_back({ local_pos(+2, i, +2), leaves_voxel });
+    }
+}
+
 Overworld::Overworld(const char *name) : Dimension(name, -30.0f)
 {
-
+    m_bottommost_chunk.set_limits(-64, -4);
+    m_terrain_variation.set_limits(16, 256);
+    compute_tree_feature(5U, m_feat_tree, game_voxels::oak_log, game_voxels::oak_leaves);
 }
 
 void Overworld::init(Config &config)
 {
     m_terrain_variation.set_value(64);
     m_bottommost_chunk.set_value(-4);
-    m_enable_surface.set_value(true);
-    m_enable_carvers.set_value(true);
-    m_enable_features.set_value(true);
 
     config.add_value("overworld.terrain_variation", m_terrain_variation);
     config.add_value("overworld.bottommost_chunk", m_bottommost_chunk);
-    config.add_value("overworld.enable_surface", m_enable_surface);
-    config.add_value("overworld.enable_carvers", m_enable_carvers);
-    config.add_value("overworld.enable_features", m_enable_features);
 }
 
 void Overworld::init_late(std::uint64_t global_seed)
 {
-    m_twister.seed(global_seed);
+    std::mt19937 twister(global_seed);
 
     m_fnl_terrain = fnlCreateState();
-    m_fnl_terrain.seed = static_cast<int>(m_twister());
+    m_fnl_terrain.seed = static_cast<int>(twister());
     m_fnl_terrain.noise_type = FNL_NOISE_OPENSIMPLEX2S;
     m_fnl_terrain.fractal_type = FNL_FRACTAL_FBM;
     m_fnl_terrain.frequency = 0.005f;
     m_fnl_terrain.octaves = 4;
 
     m_fnl_caves_a = fnlCreateState();
-    m_fnl_caves_a.seed = static_cast<int>(m_twister());
+    m_fnl_caves_a.seed = static_cast<int>(twister());
     m_fnl_caves_a.noise_type = FNL_NOISE_PERLIN;
     m_fnl_caves_a.frequency = 0.0075f;
 
     m_fnl_caves_b = fnlCreateState();
-    m_fnl_caves_b.seed = static_cast<int>(m_twister());
+    m_fnl_caves_b.seed = static_cast<int>(twister());
     m_fnl_caves_b.noise_type = FNL_NOISE_PERLIN;
     m_fnl_caves_b.frequency = 0.0075f;
 
-    // This ensures the metadata is cleaned
-    // between different world loads that happen
-    // on singleplayer; this should fix retained
-    // entropy bug we've just found out this morning
-    m_metadata.clear();
+    m_metamap.clear();
 }
 
 bool Overworld::generate(const chunk_pos &cpos, VoxelStorage &voxels)
 {
-    if(cpos.y < m_bottommost_chunk.get_value()) {
+    if(cpos.y <= m_bottommost_chunk.get_value()) {
         // If the player asks the generator
         // to generate a lot of stuff below
         // the surface, it will happily chew
@@ -69,77 +119,120 @@ bool Overworld::generate(const chunk_pos &cpos, VoxelStorage &voxels)
     generate_terrain(cpos, voxels);
     m_mutex.unlock();
 
-    if(m_enable_surface.get_value()) {
-        m_mutex.lock();
-        generate_surface(cpos, voxels);
-        m_mutex.unlock();
-    }
+    m_mutex.lock();
+    generate_surface(cpos, voxels);
+    m_mutex.unlock();
 
-    if(m_enable_carvers.get_value()) {
-        m_mutex.lock();
-        generate_carvers(cpos, voxels);
-        m_mutex.unlock();
-    }
+    m_mutex.lock();
+    generate_caves(cpos, voxels);
+    m_mutex.unlock();
 
-    if(m_enable_features.get_value()) {
-        m_mutex.lock();
-        generate_features(cpos, voxels);
-        m_mutex.unlock();
-    }
+    m_mutex.lock();
+    generate_features(cpos, voxels);
+    m_mutex.unlock();
 
     return true;
 }
 
-float Overworld::get_noise(const voxel_pos &vpos, std::int64_t variation)
+bool Overworld::is_inside_cave(const voxel_pos &vpos)
 {
-    // Terrain noise is also sampled when we're placing
-    // surface voxels; this is needed becuase chunks don't
-    // know if they have generated neighbours or not.
-    return variation * fnlGetNoise3D(&m_fnl_terrain, vpos.x, vpos.y, vpos.z) - vpos.y;
+    auto noise_a = fnlGetNoise3D(&m_fnl_caves_a, vpos.x, 1.5f * vpos.y, vpos.z);
+    auto noise_b = fnlGetNoise3D(&m_fnl_caves_b, vpos.x, 1.5f * vpos.y, vpos.z);
+    auto noise_combined = noise_a * noise_a + noise_b * noise_b;
+    return noise_combined < (1.0f / 1024.0f);
 }
 
-Metadata_2501 &Overworld::get_metadata(const worldgen_chunk_pos &cpos)
+bool Overworld::is_inside_terrain(const voxel_pos &vpos)
 {
-    const auto it = m_metadata.find(cpos);
+    auto variation = m_terrain_variation.get_value();
+    auto noise = variation * fnlGetNoise3D(&m_fnl_terrain, vpos.x, vpos.y, vpos.z) - vpos.y;
+    return noise > 0.0f;
+}
 
-    if(it == m_metadata.cend()) {
+const Overworld_Metadata &Overworld::get_or_create_metadata(const chunk_pos_xz &cpos)
+{
+    auto it = m_metamap.find(cpos);
 
-        auto &metadata = m_metadata.insert_or_assign(cpos, Metadata_2501()).first->second;
-        for(std::size_t i = 0; i < CHUNK_AREA; metadata.entropy[i++] = m_twister());
-        metadata.heightmap.fill(INT64_MIN);
-
-        return metadata;
+    if(it != m_metamap.cend()) {
+        // Metadata is present
+        return it->second;
     }
 
-    return it->second;
+    auto &metadata = m_metamap.insert_or_assign(cpos, Overworld_Metadata()).first->second;
+    metadata.entropy.fill(std::numeric_limits<std::uint64_t>::max());
+    metadata.heightmap.fill(std::numeric_limits<voxel_pos::value_type>::min());
+
+    auto twister = std::mt19937_64(std::hash<chunk_pos_xz>()(cpos));
+    auto variation = m_terrain_variation.get_value();
+
+    // Generator might need some randomness
+    // that depends on 2D coordinates, so we
+    // generate this entropy ahead of time
+    for(int i = 0; i < CHUNK_AREA; ++i) {
+        metadata.entropy[i] = twister();
+    }
+
+    // Generate speculative heightmap;
+    // Cave generation might have issues with placing
+    // surface features such as trees but I genuinely don't give a shit
+    for(int lx = 0; lx < CHUNK_SIZE; lx += 1) {
+        for(int lz = 0; lz < CHUNK_SIZE; lz += 1) {
+            auto hdx = static_cast<std::size_t>(lx + lz * CHUNK_SIZE);
+            auto vpos = coord::to_voxel(chunk_pos(cpos.x, 0, cpos.y), local_pos(lx, 0, lz));
+
+            for(vpos.y = variation; vpos.y >= -variation; vpos.y -= 1) {
+                if(is_inside_terrain(vpos)) {
+                    metadata.heightmap[hdx] = vpos.y;
+                    break;
+                }
+            }
+        }
+    }
+
+    // FIXME: make this into a configuration value
+    constexpr static unsigned int TREE_DENSITY = 4U;
+
+    // Generate tree locations for this chunk
+    while(metadata.trees.size() < TREE_DENSITY) {
+        auto lpos = local_pos_xz((twister() % CHUNK_SIZE), (twister() % CHUNK_SIZE));
+        auto is_unique = true;
+
+        for(const auto &check_lpos : metadata.trees) {
+            if(check_lpos == lpos) {
+                is_unique = false;
+                break;
+            }
+        }
+
+        if(is_unique) {
+            metadata.trees.push_back(lpos);
+        }
+    }
+
+    return metadata;
 }
 
 void Overworld::generate_terrain(const chunk_pos &cpos, VoxelStorage &voxels)
 {
-    auto &metadata = get_metadata(worldgen_chunk_pos(cpos.x, cpos.z));
+    auto &metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
+    auto variation = m_terrain_variation.get_value();
 
-    for(std::size_t index = 0; index < CHUNK_VOLUME; index += 1) {
-        auto lpos = coord::to_local(index);
+    for(unsigned long i = 0; i < CHUNK_VOLUME; ++i) {
+        auto lpos = coord::to_local(i);
         auto vpos = coord::to_voxel(cpos, lpos);
-        auto hdx = static_cast<std::size_t>(lpos.x + lpos.z * CHUNK_SIZE);
 
-        // Sampling 3D noise like that is expensive; to
-        // avoid unnecessary noise sampling we can speculate
-        // where the terrain would be guaranteed to be solid or air
-        if(cxpr::abs(vpos.y) >= (m_terrain_variation.get_value() + 1)) {
-            if(vpos.y < INT64_C(0)) {
-                if(vpos.y > metadata.heightmap[hdx])
-                    metadata.heightmap[hdx] = vpos.y;
-                voxels[index] = game_voxels::stone;
-            }
-
+        if(vpos.y > variation) {
+            voxels[i] = NULL_VOXEL_ID;
             continue;
         }
 
-        if(get_noise(vpos, m_terrain_variation.get_value()) > 0.0f) {
-            if(vpos.y > metadata.heightmap[hdx])
-                metadata.heightmap[hdx] = vpos.y;
-            voxels[index] = game_voxels::stone;
+        if(vpos.y < -variation) {
+            voxels[i] = game_voxels::stone;
+            continue;
+        }
+
+        if(is_inside_terrain(vpos)) {
+            voxels[i] = game_voxels::stone;
             continue;
         }
     }
@@ -147,76 +240,70 @@ void Overworld::generate_terrain(const chunk_pos &cpos, VoxelStorage &voxels)
 
 void Overworld::generate_surface(const chunk_pos &cpos, VoxelStorage &voxels)
 {
-    auto &metadata = get_metadata(worldgen_chunk_pos(cpos.x, cpos.z));
+    auto &metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
+    auto variation = m_terrain_variation.get_value();
 
-    for(std::size_t index = 0; index < CHUNK_VOLUME; index += 1) {
-        auto lpos = coord::to_local(index);
-        auto vpos = coord::to_voxel(cpos, lpos);
-
-        // Same speculation check applies here albeit
-        // a little differently - there's no surface to
-        // place voxels on above variation range
-        if(cxpr::abs(vpos.y) >= (m_terrain_variation.get_value() + 1)) {
-            continue;
-        }
-
-        // Surface voxel checks only apply for solid voxels;
-        // it's kind of obvious you can't replace air with grass
-        if(voxels[index] == NULL_VOXEL_ID) {
-            continue;
-        }
-
-        std::size_t depth = 0;
-
-        for(local_pos::value_type dy = 0; dy < 5; dy += 1) {
-            auto dlpos = local_pos(lpos.x, lpos.y + dy + 1, lpos.z);
-            auto dvpos = coord::to_voxel(cpos, dlpos);
-            auto didx = coord::to_index(dlpos);
-
-            if(dlpos.y >= CHUNK_SIZE) {
-                if(get_noise(dvpos, m_terrain_variation.get_value()) <= 0.0f)
-                    break;
-                depth += 1;
-            }
-            else {
-                if(voxels[didx] == NULL_VOXEL_ID)
-                    break;
-                depth += 1;
-            }
-        }
-
-        if(depth < 5) {
-            if(depth == 0)
-                voxels[index] = game_voxels::grass;
-            else voxels[index] = game_voxels::dirt;
-        }
-    }
-}
-
-void Overworld::generate_carvers(const chunk_pos &cpos, VoxelStorage &voxels)
-{
-    auto &metadata = get_metadata(worldgen_chunk_pos(cpos.x, cpos.z));
-
-    for(std::size_t index = 0; index < CHUNK_VOLUME; index += 1) {
-        auto lpos = coord::to_local(index);
+    for(unsigned long i = 0; i < CHUNK_VOLUME; ++i) {
+        auto lpos = coord::to_local(i);
         auto vpos = coord::to_voxel(cpos, lpos);
         auto hdx = static_cast<std::size_t>(lpos.x + lpos.z * CHUNK_SIZE);
 
-        // Speculative optimization - there's no solid
-        // terrain above variation to carve caves out from
-        if(vpos[1] > (m_terrain_variation.get_value() + 1)) {
+        if((vpos.y > variation) || (vpos.y < -variation)) {
+            // Speculative optimization
             continue;
         }
 
-        const float na = fnlGetNoise3D(&m_fnl_caves_a, vpos.x, 1.5f * vpos.y, vpos.z);
-        const float nb = fnlGetNoise3D(&m_fnl_caves_b, vpos.x, 1.5f * vpos.y, vpos.z);
+        if(voxels[i] == NULL_VOXEL_ID) {
+            // Surface voxel checks only apply for solid voxels;
+            // it's kind of obvious you can't replace air with grass
+            continue;
+        }
 
-        if((na * na + nb * nb) <= (1.0f / 1024.0f)) {
-            if(vpos[1] == metadata.heightmap[hdx]) {
-                metadata.heightmap[hdx] = INT64_MIN;
+        unsigned int depth = 0U;
+
+        for(unsigned int dy = 0U; dy < 5U; dy += 1U) {
+            auto d_lpos = local_pos(lpos.x, lpos.y + dy + 1, lpos.z);
+            auto d_vpos = coord::to_voxel(cpos, d_lpos);
+            auto d_index = coord::to_index(d_lpos);
+
+            if(d_lpos.y >= CHUNK_SIZE) {
+                if(!is_inside_terrain(d_vpos))
+                    break;
+                depth += 1U;
             }
+            else {
+                if(voxels[d_index] == NULL_VOXEL_ID)
+                    break;
+                depth += 1U;
+            }
+        }
 
-            voxels[index] = NULL_VOXEL_ID;
+        if(depth < (2U + (metadata.entropy[hdx] % 5U))) {
+            if(depth == 0U)
+                voxels[i] = game_voxels::grass;
+            else voxels[i] = game_voxels::dirt;
+        }
+    }
+
+}
+
+void Overworld::generate_caves(const chunk_pos &cpos, VoxelStorage &voxels)
+{
+    auto &metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
+    auto variation = m_terrain_variation.get_value();
+    
+    for(unsigned long i = 0U; i < CHUNK_VOLUME; ++i) {
+        auto lpos = coord::to_local(i);
+        auto vpos = coord::to_voxel(cpos, lpos);
+
+        if(vpos.y > variation) {
+            // Speculative optimization - there's no solid
+            // terrain above variation to carve caves out from
+            continue;
+        }
+
+        if(is_inside_cave(vpos)) {
+            voxels[i] = NULL_VOXEL_ID;
             continue;
         }
     }
@@ -224,43 +311,43 @@ void Overworld::generate_carvers(const chunk_pos &cpos, VoxelStorage &voxels)
 
 void Overworld::generate_features(const chunk_pos &cpos, VoxelStorage &voxels)
 {
-    auto &metadata = get_metadata(worldgen_chunk_pos(cpos.x, cpos.z));
+    const chunk_pos_xz tree_chunks[] = {
+        chunk_pos_xz(cpos.x - 0, cpos.z - 1),
+        chunk_pos_xz(cpos.x - 1, cpos.z - 1),
+        chunk_pos_xz(cpos.x - 1, cpos.z + 0),
+        chunk_pos_xz(cpos.x - 1, cpos.z + 1),
+        chunk_pos_xz(cpos.x + 0, cpos.z + 0),
+        chunk_pos_xz(cpos.x + 0, cpos.z + 1),
+        chunk_pos_xz(cpos.x + 1, cpos.z - 1),
+        chunk_pos_xz(cpos.x + 1, cpos.z + 0),
+        chunk_pos_xz(cpos.x + 1, cpos.z + 1),
+    };
 
-#if 1
-    constexpr static std::size_t COUNT = 5;
-    std::array<std::int16_t, COUNT> lxa = {};
-    std::array<std::int16_t, COUNT> lza = {};
-    std::array<std::int64_t, COUNT> heights = {};
+    for(unsigned int i = 0U; i < cxpr::array_size(tree_chunks); ++i) {
+        const auto &cpos_xz = tree_chunks[i];
+        const auto &metadata = get_or_create_metadata(cpos_xz);
 
-    for(std::size_t tc = 0; tc < COUNT; tc += 1) {
-        lxa[tc] = static_cast<std::int16_t>(metadata.entropy[tc * 3 + 0] % CHUNK_SIZE);
-        lza[tc] = static_cast<std::int16_t>(metadata.entropy[tc * 3 + 1] % CHUNK_SIZE);
-        heights[tc] = 3 + static_cast<std::int64_t>(metadata.entropy[tc * 3 + 2] % 4);
-    }
+        for(const auto &lpos_xz : metadata.trees) {
+            auto hdx = static_cast<std::size_t>(lpos_xz.x + lpos_xz.y * CHUNK_SIZE);
+            auto height = metadata.heightmap[hdx];
 
-    for(std::size_t index = 0; index < CHUNK_VOLUME; index += 1) {
-        auto lpos = coord::to_local(index);
-        auto vpos = coord::to_voxel(cpos, lpos);
-        auto hdx = static_cast<std::size_t>(lpos.x + lpos.z * CHUNK_SIZE);
-
-        for(std::size_t tc = 0; tc < COUNT; tc += 1) {
-            if((lpos.x == lxa[tc]) && (lpos.z == lza[tc])) {
-                if(cxpr::range<std::int64_t>(vpos.y - metadata.heightmap[hdx], 1, heights[tc]))
-                    voxels[index] = game_voxels::cobblestone;
-                break;
+            if(height == std::numeric_limits<voxel_pos::value_type>::min()) {
+                // What happened? Cave happened
+                continue;
             }
-        }
-    }
-#else
-    for(std::size_t index = 0; index < CHUNK_VOLUME; index += 1) {
-        auto lpos = coord::to_local(index);
-        auto vpos = coord::to_voxel(cpos, lpos);
-        auto hdx = static_cast<std::size_t>(lpos.x + lpos.z * CHUNK_SIZE);
 
-        if(vpos.y == (metadata.heightmap[hdx] + 1)) {
-            voxels[index] = game_voxels::vtest;
-            continue;
+            auto cpos_xyz = chunk_pos(cpos_xz.x, 0, cpos_xz.y);
+            auto lpos_xyz = local_pos(lpos_xz.x, 0, lpos_xz.y);
+            auto vpos = coord::to_voxel(cpos_xyz, lpos_xyz);
+
+            if(is_inside_cave(vpos)) {
+                // Cave is in the way
+                continue;
+            }
+
+            m_feat_tree.place(vpos + DIR_UP<voxel_pos::value_type>, cpos, voxels);
         }
+
     }
-#endif
+
 }

@@ -13,7 +13,7 @@ Dimension::Dimension(const char *name, float gravity)
 
 Dimension::~Dimension(void)
 {
-    for(const auto it : m_hashmap)
+    for(const auto it : m_chunkmap)
         delete it.second;
     entities.clear();
     chunks.clear();
@@ -31,9 +31,9 @@ float Dimension::get_gravity(void) const
 
 Chunk *Dimension::create_chunk(const chunk_pos &cpos)
 {
-    auto it = m_hashmap.find(cpos);
+    auto it = m_chunkmap.find(cpos);
 
-    if(it != m_hashmap.cend()) {
+    if(it != m_chunkmap.cend()) {
         // Chunk already exists
         return it->second;
     }
@@ -52,7 +52,7 @@ Chunk *Dimension::create_chunk(const chunk_pos &cpos)
 
     globals::dispatcher.trigger(event);
 
-    return m_hashmap.insert_or_assign(cpos, std::move(chunk)).first->second;
+    return m_chunkmap.insert_or_assign(cpos, std::move(chunk)).first->second;
 }
 
 Chunk *Dimension::find_chunk(entt::entity entity) const
@@ -64,8 +64,8 @@ Chunk *Dimension::find_chunk(entt::entity entity) const
 
 Chunk *Dimension::find_chunk(const chunk_pos &cpos) const
 {
-    auto it = m_hashmap.find(cpos);
-    if(it != m_hashmap.cend())
+    auto it = m_chunkmap.find(cpos);
+    if(it != m_chunkmap.cend())
         return it->second;
     return nullptr;
 }
@@ -74,18 +74,18 @@ void Dimension::remove_chunk(entt::entity entity)
 {
     if(chunks.valid(entity)) {
         auto &component = chunks.get<ChunkComponent>(entity);
-        m_hashmap.erase(component.cpos);
+        m_chunkmap.erase(component.cpos);
         chunks.destroy(entity);
     }
 }
 
 void Dimension::remove_chunk(const chunk_pos &cpos)
 {
-    auto it = m_hashmap.find(cpos);
+    auto it = m_chunkmap.find(cpos);
 
-    if(it != m_hashmap.cend()) {
+    if(it != m_chunkmap.cend()) {
         chunks.destroy(it->second->get_entity());
-        m_hashmap.erase(it);
+        m_chunkmap.erase(it);
     }
 }
 
@@ -93,7 +93,7 @@ void Dimension::remove_chunk(Chunk *chunk)
 {
     if(chunk) {
         const auto &component = chunks.get<ChunkComponent>(chunk->get_entity());
-        m_hashmap.erase(component.cpos);
+        m_chunkmap.erase(component.cpos);
         chunks.destroy(chunk->get_entity());
     }
 }

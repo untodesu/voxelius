@@ -8,6 +8,7 @@ Chunk::Chunk(entt::entity entity, Dimension *dimension)
     m_entity = entity;
     m_dimension = dimension;
     m_voxels.fill(NULL_VOXEL_ID);
+    m_biome = BIOME_VOID;
 }
 
 voxel_id Chunk::get_voxel(const local_pos &lpos) const
@@ -42,6 +43,16 @@ const VoxelStorage &Chunk::get_voxels(void) const
 void Chunk::set_voxels(const VoxelStorage &voxels)
 {
     m_voxels = voxels;
+}
+
+unsigned int Chunk::get_biome(void) const
+{
+    return m_biome;
+}
+
+void Chunk::set_biome(unsigned int biome)
+{
+    m_biome = biome;
 }
 
 entt::entity Chunk::get_entity(void) const

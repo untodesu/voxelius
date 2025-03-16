@@ -2,11 +2,15 @@
 #define SHARED_DIMENSION_HH 1
 #pragma once
 
+#include "shared/const.hh"
 #include "shared/types.hh"
 
 class Chunk;
 class Config;
 class VoxelStorage;
+
+using dimension_entropy_map = std::array<std::uint64_t, CHUNK_AREA>;
+using dimension_height_map = std::array<voxel_pos::value_type, CHUNK_AREA>;
 
 class Dimension {
 public:
@@ -43,7 +47,7 @@ public:
 
 private:
     std::string m_name;
-    emhash8::HashMap<chunk_pos, Chunk *> m_hashmap;
+    emhash8::HashMap<chunk_pos, Chunk *> m_chunkmap;
     float m_gravity;
 };
 

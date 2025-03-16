@@ -12,6 +12,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/dimension.hh"
     "${CMAKE_CURRENT_LIST_DIR}/factory.cc"
     "${CMAKE_CURRENT_LIST_DIR}/factory.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/feature.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/feature.hh"
     "${CMAKE_CURRENT_LIST_DIR}/game_items.cc"
     "${CMAKE_CURRENT_LIST_DIR}/game_items.hh"
     "${CMAKE_CURRENT_LIST_DIR}/game_voxels.cc"

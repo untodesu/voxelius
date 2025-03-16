@@ -14,9 +14,9 @@ using chunk_pos = glm::vec<3, std::int32_t>;
 using local_pos = glm::vec<3, std::int16_t>;
 using voxel_pos = glm::vec<3, std::int64_t>;
 
-// A special 2D chunk coordinate used by world generation code
-// to cache things like 2D noise and terrain heightmap for performance reasons
-using worldgen_chunk_pos = glm::vec<2, chunk_pos::value_type>;
+using chunk_pos_xz = glm::vec<2, chunk_pos::value_type>;
+using local_pos_xz = glm::vec<2, local_pos::value_type>;
+using voxel_pos_xz = glm::vec<2, local_pos::value_type>;
 
 template<>
 struct std::hash<chunk_pos> final {
@@ -31,8 +31,8 @@ struct std::hash<chunk_pos> final {
 };
 
 template<>
-struct std::hash<worldgen_chunk_pos> final {
-    constexpr inline std::size_t operator()(const worldgen_chunk_pos &cwpos) const
+struct std::hash<chunk_pos_xz> final {
+    constexpr inline std::size_t operator()(const chunk_pos_xz &cwpos) const
     {
         std::size_t value = 0;
         value ^= cwpos.x * 73856093;
