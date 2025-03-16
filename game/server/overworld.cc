@@ -338,7 +338,9 @@ void Overworld::generate_features(const chunk_pos &cpos, VoxelStorage &voxels)
 
             auto cpos_xyz = chunk_pos(cpos_xz.x, 0, cpos_xz.y);
             auto lpos_xyz = local_pos(lpos_xz.x, 0, lpos_xz.y);
+
             auto vpos = coord::to_voxel(cpos_xyz, lpos_xyz);
+            vpos.y = height;
 
             if(is_inside_cave(vpos)) {
                 // Cave is in the way
