@@ -278,7 +278,7 @@ void Overworld::generate_surface(const chunk_pos &cpos, VoxelStorage &voxels)
             }
         }
 
-        if(depth < (2U + (metadata.entropy[hdx] % 5U))) {
+        if(depth < 5U) {
             if(depth == 0U)
                 voxels[i] = game_voxels::grass;
             else voxels[i] = game_voxels::dirt;
@@ -349,7 +349,5 @@ void Overworld::generate_features(const chunk_pos &cpos, VoxelStorage &voxels)
 
             m_feat_tree.place(vpos + DIR_UP<voxel_pos::value_type>, cpos, voxels);
         }
-
     }
-
 }
