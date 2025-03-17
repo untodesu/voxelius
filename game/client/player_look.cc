@@ -136,7 +136,7 @@ void player_look::update_late(void)
         add_angles(pitch_value, yaw_value);
     }
 
-    if(!globals::gui_screen && session::is_ingame) {
+    if(!globals::gui_screen && session::is_ingame()) {
         glfwSetInputMode(globals::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glfwSetInputMode(globals::window, GLFW_RAW_MOUSE_MOTION, mouse_raw_input.get_value());
     }
