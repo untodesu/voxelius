@@ -11,6 +11,8 @@ class Feature final : public std::vector<std::pair<voxel_pos, voxel_id>> {
 public:
     explicit Feature(void) = default;
     virtual ~Feature(void) = default;
+
+public:
     void place(const voxel_pos &vpos, Dimension *dimension, bool overwrite = false) const;
     void place(const voxel_pos &vpos, const chunk_pos &cpos, VoxelStorage &voxels, bool overwrite = false) const;
 };
