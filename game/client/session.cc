@@ -72,8 +72,6 @@ static void on_disconnect_packet(const protocol::Disconnect &packet)
     globals::player = entt::null;
     globals::dimension = nullptr;
 
-    chunk_visibility::cleanup();
-
     message_box::reset();
     message_box::set_title("disconnected.disconnected");
     message_box::set_subtitle(packet.reason.c_str());
@@ -184,8 +182,6 @@ void session::invalidate(void)
     delete globals::dimension;
     globals::player = entt::null;
     globals::dimension = nullptr;
-
-    chunk_visibility::cleanup();
 }
 
 void session::connect(const char *host, std::uint16_t port, const char *password)
@@ -238,8 +234,6 @@ void session::connect(const char *host, std::uint16_t port, const char *password
         delete globals::dimension;
         globals::player = entt::null;
         globals::dimension = nullptr;
-    
-        chunk_visibility::cleanup();
 
         globals::gui_screen = GUI_PLAY_MENU;
     });
@@ -272,8 +266,6 @@ void session::disconnect(const char *reason)
         delete globals::dimension;
         globals::player = entt::null;
         globals::dimension = nullptr;
-    
-        chunk_visibility::cleanup();
         
         client_chat::clear();
     }

@@ -10,7 +10,6 @@
 #include "shared/voxel_registry.hh"
 
 #include "client/chunk_quad.hh"
-#include "client/chunk_visibility.hh"
 #include "client/globals.hh"
 #include "client/session.hh"
 #include "client/voxel_atlas.hh"
@@ -222,9 +221,9 @@ void GL_MeshingTask::finalize(void)
         }        
     }
 
-    if(has_no_submeshes_b && has_no_submeshes_nb)
+    if(has_no_submeshes_b && has_no_submeshes_nb) {
         globals::dimension->chunks.remove<ChunkMeshComponent>(m_entity);
-    else chunk_visibility::update_chunk(m_entity);
+    }
 }
 
 bool GL_MeshingTask::vis_test(voxel_id voxel, const VoxelInfo *info, const local_pos &lpos) const

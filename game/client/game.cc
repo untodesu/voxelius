@@ -513,8 +513,6 @@ void client_game::update(void)
 
     chunk_mesher::update();
 
-    chunk_visibility::update();
-    
     client_chat::update();
 
     experiments::update();
@@ -550,6 +548,8 @@ void client_game::update_late(void)
 
     gamepad::update_late();
 
+    chunk_visibility::update_late();
+    
     if(client_game::vertical_sync.get_value())
         glfwSwapInterval(1);
     else glfwSwapInterval(0);

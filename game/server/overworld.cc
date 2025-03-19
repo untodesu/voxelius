@@ -67,7 +67,7 @@ Overworld::Overworld(const char *name) : Dimension(name, -30.0f)
 {
     m_bottommost_chunk.set_limits(-64, -4);
     m_terrain_variation.set_limits(16, 256);
-    compute_tree_feature(5U, m_feat_tree, game_voxels::oak_log, game_voxels::oak_leaves);
+    compute_tree_feature(32U, m_feat_tree, game_voxels::oak_log, game_voxels::oak_leaves);
 }
 
 void Overworld::init(Config &config)
@@ -83,6 +83,11 @@ void Overworld::init_late(std::uint64_t global_seed)
 {
     std::mt19937 twister(global_seed);
 
+    m_fnl_variation = fnlCreateState();
+    m_fnl_variation.seed = static_cast<int>(twister());
+    m_fnl_variation.noise_type = FNL_NOISE_PERLIN;
+    m_fnl_variation.frequency = 0.001f;
+
     m_fnl_terrain = fnlCreateState();
     m_fnl_terrain.seed = static_cast<int>(twister());
     m_fnl_terrain.noise_type = FNL_NOISE_OPENSIMPLEX2S;
@@ -93,12 +98,21 @@ void Overworld::init_late(std::uint64_t global_seed)
     m_fnl_caves_a = fnlCreateState();
     m_fnl_caves_a.seed = static_cast<int>(twister());
     m_fnl_caves_a.noise_type = FNL_NOISE_PERLIN;
-    m_fnl_caves_a.frequency = 0.0075f;
+    m_fnl_caves_a.fractal_type = FNL_FRACTAL_RIDGED;
+    m_fnl_caves_a.frequency = 0.0125f;
+    m_fnl_caves_a.octaves = 1;
 
     m_fnl_caves_b = fnlCreateState();
     m_fnl_caves_b.seed = static_cast<int>(twister());
-    m_fnl_caves_b.noise_type = FNL_NOISE_PERLIN;
-    m_fnl_caves_b.frequency = 0.0075f;
+    m_fnl_caves_b.noise_type = FNL_NOISE_OPENSIMPLEX2S;
+    m_fnl_caves_b.fractal_type = FNL_FRACTAL_RIDGED;
+    m_fnl_caves_b.frequency = 0.0125f;
+    m_fnl_caves_b.octaves = 1;
+
+    m_fnl_nvdi = fnlCreateState();
+    m_fnl_nvdi.seed = static_cast<int>(twister());
+    m_fnl_nvdi.noise_type = FNL_NOISE_OPENSIMPLEX2S;
+    m_fnl_nvdi.frequency = 1.0f;
 
     m_metamap.clear();
 }
@@ -136,15 +150,15 @@ bool Overworld::generate(const chunk_pos &cpos, VoxelStorage &voxels)
 
 bool Overworld::is_inside_cave(const voxel_pos &vpos)
 {
-    auto noise_a = fnlGetNoise3D(&m_fnl_caves_a, vpos.x, 1.5f * vpos.y, vpos.z);
-    auto noise_b = fnlGetNoise3D(&m_fnl_caves_b, vpos.x, 1.5f * vpos.y, vpos.z);
-    auto noise_combined = noise_a * noise_a + noise_b * noise_b;
-    return noise_combined < (1.0f / 1024.0f);
+    auto noise_a = fnlGetNoise3D(&m_fnl_caves_a, vpos.x, vpos.y * 2.0f, vpos.z);
+    auto noise_b = fnlGetNoise3D(&m_fnl_caves_b, vpos.x, vpos.y * 2.0f, vpos.z);
+    return (noise_a > 0.95f) && (noise_b > 0.85f);
 }
 
 bool Overworld::is_inside_terrain(const voxel_pos &vpos)
 {
-    auto variation = m_terrain_variation.get_value();
+    auto variation_noise = fnlGetNoise3D(&m_fnl_terrain, vpos.x, vpos.y, vpos.z);
+    auto variation = m_terrain_variation.get_value() * (1.0f - (variation_noise * variation_noise));
     auto noise = variation * fnlGetNoise3D(&m_fnl_terrain, vpos.x, vpos.y, vpos.z) - vpos.y;
     return noise > 0.0f;
 }
@@ -189,11 +203,10 @@ const Overworld_Metadata &Overworld::get_or_create_metadata(const chunk_pos_xz &
         }
     }
 
-    // FIXME: make this into a configuration value
-    constexpr static unsigned int TREE_DENSITY = 4U;
+    auto tree_density = static_cast<unsigned int>(fnlGetNoise2D(&m_fnl_nvdi, cpos.x, cpos.y) * 2.0 + 2.0f);
 
     // Generate tree locations for this chunk
-    while(metadata.trees.size() < TREE_DENSITY) {
+    while(metadata.trees.size() < tree_density) {
         auto lpos = local_pos_xz((twister() % CHUNK_SIZE), (twister() % CHUNK_SIZE));
         auto is_unique = true;
 

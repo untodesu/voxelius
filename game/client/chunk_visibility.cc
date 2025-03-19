@@ -2,7 +2,9 @@
 #include "client/chunk_visibility.hh"
 
 #include "core/config.hh"
+#include "core/vectors.hh"
 
+#include "shared/chunk_aabb.hh"
 #include "shared/chunk.hh"
 #include "shared/dimension.hh"
 #include "shared/protocol.hh"
@@ -11,124 +13,74 @@
 #include "client/globals.hh"
 #include "client/session.hh"
 
-static chunk_pos cached_cpos;
-static unsigned int cached_dist;
+// Sending a somewhat large amount of network packets
+// can easily overwhelm both client, server and the network
+// channel created between the two. To prevent this from happening
+// we throttle the client's ever increasing itch for new chunks
+constexpr static unsigned int MAX_CHUNKS_REQUESTS_PER_FRAME = 16U;
+
+static ChunkAABB current_view_box;
+static ChunkAABB previous_view_box;
 static std::vector<chunk_pos> requests;
 
-static void request_chunk(const chunk_pos &cpos)
+static void update_requests(void)
 {
-    protocol::RequestChunk packet;
-    packet.cpos = cpos;
-    protocol::send(session::peer, protocol::encode(packet));
-}
-
-// Go through the list of chunk positions that should
-// be visible client-side but seem to not exist yet
-static void request_new_chunks(void)
-{
-    auto cmin = cached_cpos - static_cast<chunk_pos::value_type>(cached_dist);
-    auto cmax = cached_cpos + static_cast<chunk_pos::value_type>(cached_dist);
-
     requests.clear();
 
-    for(auto cx = cmin.x; cx <= cmax.x; ++cx)
-    for(auto cy = cmin.y; cy <= cmax.y; ++cy)
-    for(auto cz = cmin.z; cz <= cmax.z; ++cz) {
-        if(globals::dimension->find_chunk({cx, cy, cz})) {
-            // The chunk already exists, we don't need
-            // to request it from the server anymore
-            continue;
-        }
+    for(auto cx = current_view_box.min.x; cx != current_view_box.max.x; cx += 1)
+    for(auto cy = current_view_box.min.y; cy != current_view_box.max.y; cy += 1)
+    for(auto cz = current_view_box.min.z; cz != current_view_box.max.z; cz += 1) {
+        auto cpos = chunk_pos(cx, cy, cz);
 
-        requests.push_back(chunk_pos(cx, cy, cz));
+        if(globals::dimension->find_chunk(cpos))
+            continue;
+        requests.push_back(cpos);
     }
 
-    std::sort(requests.begin(), requests.end(), [](const chunk_pos &ca, const chunk_pos &cb) {
-        auto dir_a = ca - cached_cpos;
-        auto dir_b = cb - cached_cpos;
-
-        const auto da = dir_a[0] * dir_a[0] + dir_a[1] * dir_a[1] + dir_a[2] * dir_a[2];
-        const auto db = dir_b[0] * dir_b[0] + dir_b[1] * dir_b[1] + dir_b[2] * dir_b[2];
-
+    std::sort(requests.begin(), requests.end(), [](const chunk_pos &cpos_a, const chunk_pos &cpos_b) {
+        auto da = cxvectors::distance2(cpos_a, camera::position_chunk);
+        auto db = cxvectors::distance2(cpos_b, camera::position_chunk);
         return da > db;
     });
 }
 
-static bool is_chunk_visible(const chunk_pos &cpos)
+void chunk_visibility::update_late(void)
 {
-    const auto dx = cxpr::abs(cpos.x - cached_cpos.x);
-    const auto dy = cxpr::abs(cpos.z - cached_cpos.z);
+    current_view_box.min = camera::position_chunk - static_cast<chunk_pos::value_type>(camera::view_distance.get_value());
+    current_view_box.max = camera::position_chunk + static_cast<chunk_pos::value_type>(camera::view_distance.get_value());
 
-    if((dx <= cached_dist) && (dy <= cached_dist))
-        return true;
-    return false;
-}
-
-void chunk_visibility::update_chunk(entt::entity entity)
-{
-    if(auto component = globals::dimension->chunks.try_get<ChunkComponent>(entity)) {
-        if(is_chunk_visible(component->cpos))
-            globals::dimension->chunks.emplace_or_replace<ChunkVisibleComponent>(entity);
-        else globals::dimension->chunks.remove<ChunkVisibleComponent>(entity);
-    }
-}
-
-void chunk_visibility::update_chunk(const chunk_pos &cpos)
-{
-    if(auto chunk = globals::dimension->find_chunk(cpos)) {
-        const auto &component = globals::dimension->chunks.get<ChunkComponent>(chunk->get_entity());
-        if(is_chunk_visible(component.cpos))
-            globals::dimension->chunks.emplace_or_replace<ChunkVisibleComponent>(chunk->get_entity());
-        else globals::dimension->chunks.remove<ChunkVisibleComponent>(chunk->get_entity());
-    }
-}
-
-void chunk_visibility::update_chunks(void)
-{
-    const auto view = globals::dimension->chunks.view<ChunkComponent>();
-    
-    for(const auto [entity, chunk] : view.each()) {
-        if(is_chunk_visible(chunk.cpos))
-            globals::dimension->chunks.emplace_or_replace<ChunkVisibleComponent>(entity);
-        else globals::dimension->chunks.remove<ChunkVisibleComponent>(entity);
-    }
-
-    request_new_chunks();
-}
-
-void chunk_visibility::cleanup(void)
-{
-    cached_cpos = camera::position_chunk + 1;
-    cached_dist = camera::view_distance.get_value() + 1;
-    requests.clear();
-}
-
-void chunk_visibility::update(void)
-{
-    if(session::is_ingame()) {
-        if((cached_cpos != camera::position_chunk) || (cached_dist != camera::view_distance.get_value())) {
-            cached_cpos = camera::position_chunk;
-            cached_dist = camera::view_distance.get_value();
-            chunk_visibility::update_chunks();
-            return;
-        }
-
-        for(int i = 0; i < 16; ++i) {
-            if(requests.empty()) {
-                // Done sending requests
-                break;
-            }
-
-            request_chunk(requests.back());
-
-            requests.pop_back();
-        }
-        
-        cached_cpos = camera::position_chunk;
-        cached_dist = camera::view_distance.get_value();
+    if(!session::is_ingame()) {
+        // This makes sure the previous view box
+        // is always different from the current one
+        previous_view_box.min = chunk_pos(INT32_MIN, INT32_MIN, INT32_MIN);
+        previous_view_box.max = chunk_pos(INT32_MAX, INT32_MAX, INT32_MAX);
         return;
     }
-    
-    cached_cpos = camera::position_chunk + 1;
-    cached_dist = camera::view_distance.get_value() + 1;
+
+    if((current_view_box.min != previous_view_box.min) || (current_view_box.max != previous_view_box.max)) {
+        update_requests();
+    }
+
+    for(unsigned int i = 0U; i < MAX_CHUNKS_REQUESTS_PER_FRAME; ++i) {
+        if(requests.empty()) {
+            // Done sending requests
+            break;
+        }
+
+        protocol::RequestChunk packet;
+        packet.cpos = requests.back();
+        protocol::send(session::peer, protocol::encode(packet));
+
+        requests.pop_back();
+    }
+
+    auto view = globals::dimension->chunks.view<ChunkComponent>();
+
+    for(const auto [entity, chunk] : view.each()) {
+        if(current_view_box.contains(chunk.cpos))
+            continue;
+        globals::dimension->remove_chunk(entity);
+    }
+
+    previous_view_box = current_view_box;
 }

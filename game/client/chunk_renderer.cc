@@ -10,7 +10,6 @@
 #include "client/camera.hh"
 #include "client/chunk_mesher.hh"
 #include "client/chunk_quad.hh"
-#include "client/chunk_visibility.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
 #include "client/outline.hh"
@@ -107,7 +106,7 @@ void chunk_renderer::render(void)
     timings[1] = globals::window_frametime_avg;
     timings[2] = voxel_anims::frame;
 
-    const auto group = globals::dimension->chunks.group<ChunkComponent>(entt::get<ChunkMeshComponent, ChunkVisibleComponent>);
+    const auto group = globals::dimension->chunks.group<ChunkComponent>(entt::get<ChunkMeshComponent>);
 
     if(depth_sort_chunks.get_value()) {
         // FIXME: speed! sorting every frame doesn't look

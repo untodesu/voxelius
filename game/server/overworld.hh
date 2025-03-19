@@ -45,9 +45,11 @@ private:
     emhash8::HashMap<chunk_pos_xz, Overworld_Metadata> m_metamap;
 
 private:
+    fnl_state m_fnl_variation;
     fnl_state m_fnl_terrain;
     fnl_state m_fnl_caves_a;
     fnl_state m_fnl_caves_b;
+    fnl_state m_fnl_nvdi;
 
 private:
     Feature m_feat_tree;
