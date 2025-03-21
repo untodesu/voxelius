@@ -354,6 +354,8 @@ void client_game::init(void)
 
 void client_game::init_late(void)
 {
+    toggles::init_late();
+
     sound::init_late();
 
     language::init_late();
@@ -498,7 +500,14 @@ void client_game::fixed_update_late(void)
 
 void client_game::update(void)
 {
+    if(session::is_ingame()) {
+        if(toggles::get(TOGGLE_PM_FLIGHT))
+            globals::dimension->entities.remove<GravityComponent>(globals::player);
+        else globals::dimension->entities.emplace_or_replace<GravityComponent>(globals::player);
+    }
+
     sound::update();
+
     listener::update();
 
     interpolation::update();
@@ -616,7 +625,7 @@ void client_game::layout(void)
     }
 
     if(!globals::gui_screen || (globals::gui_screen == GUI_CHAT)) {
-        if(toggles::draw_metrics && !client_game::hide_hud) {
+        if(toggles::get(TOGGLE_METRICS_UI) && !client_game::hide_hud) {
             // This contains Minecraft-esque debug information
             // about the hardware, world state and other
             // things that might be uesful

@@ -22,6 +22,7 @@
 #include "client/settings.hh"
 #include "client/sound.hh"
 #include "client/status_lines.hh"
+#include "client/toggles.hh"
 #include "client/voxel_sounds.hh"
 
 constexpr static std::uint64_t PMOVE_JUMP_COOLDOWN = 500000; // 0.5 seconds
@@ -47,17 +48,17 @@ static ConfigGamepadButton button_move_up(GLFW_GAMEPAD_BUTTON_DPAD_UP);
 // General movement options
 static ConfigBoolean enable_speedometer(true);
 
-static std::uint64_t next_jump;
-static float speedometer_value;
-static float footsteps_distance;
 static glm::fvec3 movement_direction;
 
-// Pitch randomizer
+static std::uint64_t next_jump_us;
+static float speedometer_value;
+static float footsteps_distance;
+
 static std::mt19937_64 pitch_random;
 static std::uniform_real_distribution<float> pitch_distrib;
 
-// Quake III's PM_Accelerate clean-roomed
-// into my physics and mathematics universe
+// Quake III's PM_Accelerate-ish function used for
+// conventional (gravity-affected non-flight) movement
 static glm::fvec3 pm_accelerate(const glm::fvec3 &wishdir, const glm::fvec3 &velocity, float wishspeed, float accel)
 {
     auto current_speed = glm::dot(velocity, wishdir);
@@ -76,15 +77,14 @@ static glm::fvec3 pm_accelerate(const glm::fvec3 &wishdir, const glm::fvec3 &vel
     return result;
 }
 
-// Returns new player velocity when moving in air
-// FIXME: this feels like we have too much air control
-static glm::fvec3 pm_airmove(const glm::fvec3 &wishdir, const glm::fvec3 &velocity)
+// Conventional movement - velocity update when not on the ground
+static glm::fvec3 pm_air_move(const glm::fvec3 &wishdir, const glm::fvec3 &velocity)
 {
     return pm_accelerate(wishdir, velocity, PMOVE_ACCELERATION_AIR, PMOVE_MAX_SPEED_AIR);
 }
 
-// Returns new player velocity when moving on the ground
-static glm::fvec3 pm_groundmove(const glm::fvec3 &wishdir, const glm::fvec3 &velocity)
+// Conventional movement - velocity uodate when on the ground
+static glm::fvec3 pm_ground_move(const glm::fvec3 &wishdir, const glm::fvec3 &velocity)
 {
     if(auto speed = glm::length(velocity)) {
         auto speed_drop = speed * PMOVE_FRICTION_GROUND * globals::fixed_frametime;
@@ -95,13 +95,23 @@ static glm::fvec3 pm_groundmove(const glm::fvec3 &wishdir, const glm::fvec3 &vel
     return pm_accelerate(wishdir, velocity, PMOVE_ACCELERATION_GROUND, PMOVE_MAX_SPEED_GROUND);
 }
 
+// A simpler minecraft-like acceleration model
+// used whenever the TOGGLE_PM_FLIGHT is enabled
+static glm::fvec3 pm_flight_move(const glm::fvec3 &wishdir)
+{
+    // FIXME: make it smoother
+    return wishdir * PMOVE_MAX_SPEED_AIR;
+}
+
 void player_move::init(void)
 {
-    next_jump = UINT64_C(0);
-    speedometer_value = 0.0f;
-    footsteps_distance = 0.0f;
     movement_direction = ZERO_VEC3<float>;
 
+    next_jump_us = 0x0000000000000000U;
+    speedometer_value = 0.0f;
+    footsteps_distance = 0.0f;
+
+    // UNDONE: make this a separate subsystem
     pitch_random.seed(std::random_device()());
     pitch_distrib = std::uniform_real_distribution<float>(0.9f, 1.1f);
 
@@ -149,11 +159,16 @@ void player_move::fixed_update(void)
     wishdir.x = glm::dot(movevars, right);
     wishdir.z = glm::dot(movevars, forward);
 
+    if(toggles::get(TOGGLE_PM_FLIGHT)) {
+        velocity.value = pm_flight_move(glm::fvec3(wishdir.x, movement_direction.y, wishdir.z));
+        return;
+    }
+
     auto grounded = globals::dimension->entities.try_get<GroundedComponent>(globals::player);
     auto velocity_horizontal = glm::fvec3(velocity.value.x, 0.0f, velocity.value.z);
 
     if(grounded) {
-        auto new_velocity = pm_groundmove(wishdir, velocity_horizontal);
+        auto new_velocity = pm_ground_move(wishdir, velocity_horizontal);
         velocity.value.x = new_velocity.x;
         velocity.value.z = new_velocity.z;
 
@@ -170,7 +185,7 @@ void player_move::fixed_update(void)
         }
     }
     else {
-        auto new_velocity = pm_airmove(wishdir, velocity_horizontal);
+        auto new_velocity = pm_air_move(wishdir, velocity_horizontal);
         velocity.value.x = new_velocity.x;
         velocity.value.z = new_velocity.z;
     }
@@ -178,11 +193,11 @@ void player_move::fixed_update(void)
     if(movement_direction.y == 0.0f) {
         // Allow players to queue bunny-jumps by quickly
         // releasing and pressing the jump key again without a cooldown
-        next_jump = UINT64_C(0);
+        next_jump_us = 0x0000000000000000U;
         return;
     }
 
-    if(grounded && (movement_direction.y > 0.0f) && (globals::curtime >= next_jump)) {
+    if(grounded && (movement_direction.y > 0.0f) && (globals::curtime >= next_jump_us)) {
         velocity.value.y = -PMOVE_JUMP_FORCE * globals::dimension->get_gravity();
 
         auto new_speed = glm::length(glm::fvec2(velocity.value.x, velocity.value.z));
@@ -191,7 +206,7 @@ void player_move::fixed_update(void)
 
         speedometer_value = new_speed;
 
-        next_jump = globals::curtime + PMOVE_JUMP_COOLDOWN;
+        next_jump_us = globals::curtime + PMOVE_JUMP_COOLDOWN;
 
         if(enable_speedometer.get_value()) {
             if(cxpr::abs(speed_change) < 0.01f) {

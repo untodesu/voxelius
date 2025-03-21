@@ -6,6 +6,7 @@
 #include "shared/coord.hh"
 #include "shared/dimension.hh"
 #include "shared/globals.hh"
+#include "shared/gravity.hh"
 #include "shared/grounded.hh"
 #include "shared/transform.hh"
 #include "shared/velocity.hh"
@@ -146,11 +147,15 @@ void CollisionComponent::fixed_update(Dimension *dimension)
         auto surface = voxel_surface::UNKNOWN;
         auto vertical_move = vgrid_collide(dimension, 1, collision, transform, velocity, surface);
 
-        if(vertical_move == cxpr::sign<int>(dimension->get_gravity())) {
-            auto &component = dimension->entities.get_or_emplace<GroundedComponent>(entity);
-            component.surface = surface;
+        if(dimension->entities.any_of<GravityComponent>(entity)) {
+            if(vertical_move == cxpr::sign<int>(dimension->get_gravity()))
+                dimension->entities.emplace_or_replace<GroundedComponent>(entity, GroundedComponent{surface});
+            else dimension->entities.remove<GroundedComponent>(entity);
         }
         else {
+            // The entity cannot be grounded because the component
+            // setup of said entity should not let it comprehend the
+            // concept of resting on the ground (it flies around)
             dimension->entities.remove<GroundedComponent>(entity);
         }
 

@@ -8,6 +8,7 @@
 #include "client/glfw.hh"
 #include "client/globals.hh"
 #include "client/settings.hh"
+#include "client/toggles.hh"
 
 constexpr static int INVALID_GAMEPAD_ID = INT_MAX;
 constexpr static std::size_t NUM_AXES = static_cast<std::size_t>(GLFW_GAMEPAD_AXIS_LAST + 1);
@@ -21,6 +22,24 @@ ConfigFloat gamepad::deadzone(0.00f, 0.00f, 0.66f);
 ConfigBoolean gamepad::active(false);
 GLFWgamepadstate gamepad::state;
 GLFWgamepadstate gamepad::last_state;
+
+static void on_toggle_enable(const ToggleEnabledEvent &event)
+{
+    if(event.type == TOGGLE_USE_GAMEPAD) {
+        spdlog::info("KHUETA ENABLED");
+        gamepad::active.set_value(true);
+        return;
+    }
+}
+
+static void on_toggle_disable(const ToggleDisabledEvent &event)
+{
+    if(event.type == TOGGLE_USE_GAMEPAD) {
+        spdlog::info("KHUETA DISABLED");
+        gamepad::active.set_value(false);
+        return;
+    }
+}
 
 static void on_glfw_joystick_event(const GlfwJoystickEvent &event)
 {
@@ -92,6 +111,8 @@ void gamepad::init(void)
     for(int i = 0; i < NUM_AXES; gamepad::state.axes[i++] = 0.0f);
     for(int i = 0; i < NUM_BUTTONS; gamepad::state.buttons[i++] = GLFW_RELEASE);
 
+    globals::dispatcher.sink<ToggleEnabledEvent>().connect<&on_toggle_enable>();
+    globals::dispatcher.sink<ToggleDisabledEvent>().connect<&on_toggle_disable>();
     globals::dispatcher.sink<GlfwJoystickEvent>().connect<&on_glfw_joystick_event>();
 }
 

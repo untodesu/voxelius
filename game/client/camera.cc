@@ -14,6 +14,7 @@
 #include "client/player_move.hh"
 #include "client/session.hh"
 #include "client/settings.hh"
+#include "client/toggles.hh"
 
 ConfigFloat camera::roll_angle(2.0f, 0.0f, 4.0f);
 ConfigFloat camera::vertical_fov(90.0f, 45.0f, 110.0f);
@@ -88,10 +89,12 @@ void camera::update(void)
     glm::fvec3 right_vector, up_vector;
     cxangles::vectors(camera::angles, &camera::direction, &right_vector, &up_vector);
 
-    // Apply view roll angle
-    // FIXME: check if grounded
     auto client_angles = camera::angles;
-    client_angles[2] = cxpr::radians(-camera::roll_angle.get_value() * glm::dot(velocity.value / PMOVE_MAX_SPEED_GROUND, right_vector));
+
+    if(!toggles::get(TOGGLE_PM_FLIGHT)) {
+        // Apply the quake-like view rolling
+        client_angles[2] = cxpr::radians(-camera::roll_angle.get_value() * glm::dot(velocity.value / PMOVE_MAX_SPEED_GROUND, right_vector));
+    }
 
     const auto z_near = 0.01f;
     const auto z_far = 1.25f * static_cast<float>(CHUNK_SIZE * camera::view_distance.get_value());

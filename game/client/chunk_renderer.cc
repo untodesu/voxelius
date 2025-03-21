@@ -87,7 +87,7 @@ void chunk_renderer::render(void)
     glDepthFunc(GL_LEQUAL);
     glLineWidth(1.0f);
 
-    if(toggles::render_wireframe)
+    if(toggles::get(TOGGLE_WIREFRAME))
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -192,7 +192,7 @@ void chunk_renderer::render(void)
         }
     }
 
-    if(toggles::draw_chunk_borders) {
+    if(toggles::get(TOGGLE_CHUNK_AABB)) {
         outline::prepare();
 
         for(const auto [entity, chunk, mesh] : group.each()) {

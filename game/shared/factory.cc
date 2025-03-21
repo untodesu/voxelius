@@ -18,8 +18,6 @@ void shared_factory::create_player(Dimension *dimension, entt::entity entity)
     collision.aabb.min = glm::fvec3(-0.4f, -1.6f, -0.4f);
     collision.aabb.max = glm::fvec3(+0.4f, +0.2f, +0.4f);
 
-    dimension->entities.emplace_or_replace<GravityComponent>(entity);
-
     auto &head = dimension->entities.emplace_or_replace<HeadComponent>(entity);
     head.angles = glm::fvec3(0.0f, 0.0f, 0.0f);
     head.offset = glm::fvec3(0.0f, 0.0f, 0.0f);
