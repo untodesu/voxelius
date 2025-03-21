@@ -26,7 +26,6 @@ GLFWgamepadstate gamepad::last_state;
 static void on_toggle_enable(const ToggleEnabledEvent &event)
 {
     if(event.type == TOGGLE_USE_GAMEPAD) {
-        spdlog::info("KHUETA ENABLED");
         gamepad::active.set_value(true);
         return;
     }
@@ -35,7 +34,6 @@ static void on_toggle_enable(const ToggleEnabledEvent &event)
 static void on_toggle_disable(const ToggleDisabledEvent &event)
 {
     if(event.type == TOGGLE_USE_GAMEPAD) {
-        spdlog::info("KHUETA DISABLED");
         gamepad::active.set_value(false);
         return;
     }
