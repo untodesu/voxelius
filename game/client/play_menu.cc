@@ -20,6 +20,8 @@ constexpr static const char *DEFAULT_SERVER_NAME = "Voxelius Server";
 constexpr static const char *SERVERS_TXT = "servers.txt";
 constexpr static const char *WARNING_TOAST = "[!]";
 
+constexpr static std::size_t MAX_SERVER_ITEM_NAME = 24;
+
 enum class item_status : unsigned int {
     UNKNOWN = 0x0000U,
     PINGING = 0x0001U,
@@ -253,7 +255,7 @@ static void layout_server_item(ServerStatusItem *item)
             auto warning_end = ImVec2(warning_pos.x + warning_size.x, warning_pos.y + warning_size.y);
             draw_list->AddText(warning_pos, ImGui::GetColorU32(ImGuiCol_DragDropTarget), WARNING_TOAST);
 
-            if(ImGui::IsItemHovered()) {
+            if(ImGui::IsMouseHoveringRect(warning_pos, warning_end)) {
                 ImGui::BeginTooltip();
                 if(item->protocol_version < protocol::VERSION)
                     ImGui::TextUnformatted(str_outdated_server.c_str(), str_outdated_server.c_str() + str_outdated_server.size());
@@ -307,7 +309,7 @@ static void layout_server_edit(ServerStatusItem *item)
     if(ImGui::Button("OK###play_menu.servers.submit_input", ImVec2(-1.0f, 0.0f)) || (!ignore_input && ImGui::IsKeyPressed(ImGuiKey_Enter))) {
         parse_hostname(item, input_hostname);
         item->password = input_password;
-        item->name = input_itemname;
+        item->name = input_itemname.substr(0, MAX_SERVER_ITEM_NAME);
         item->status = item_status::UNKNOWN;
         editing_server = false;
         adding_server = false;
@@ -429,7 +431,7 @@ void play_menu::init(void)
             else item->password = std::string();
 
             if(parts.size() >= 3)
-                item->name = parts[2];
+                item->name = parts[2].substr(0, MAX_SERVER_ITEM_NAME);
             else item->name = DEFAULT_SERVER_NAME;
 
             servers_deque.push_back(item);
