@@ -20,6 +20,9 @@
   "play_menu.status.init": "Unknown",
   "play_menu.status.ping": "Pinging",
 
+  "play_menu.outdated_client": "Outdated client",
+  "play_menu.outdated_server": "Outdated server",
+
   "direct_connection.title": "Direct connection",
   "direct_connection.connect": "Connect",
   "direct_connection.cancel": "Cancel",

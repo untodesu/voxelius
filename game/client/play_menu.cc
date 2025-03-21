@@ -18,6 +18,7 @@
 constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration;
 constexpr static const char *DEFAULT_SERVER_NAME = "Voxelius Server";
 constexpr static const char *SERVERS_TXT = "servers.txt";
+constexpr static const char *WARNING_TOAST = "[!]";
 
 enum class item_status : unsigned int {
     UNKNOWN = 0x0000U,
@@ -58,6 +59,9 @@ static std::string str_refresh;
 static std::string str_status_init;
 static std::string str_status_ping;
 static std::string str_status_fail;
+
+static std::string str_outdated_client;
+static std::string str_outdated_server;
 
 static std::string input_itemname;
 static std::string input_hostname;
@@ -177,6 +181,9 @@ static void on_language_set(const LanguageSetEvent &event)
     str_status_init = language::resolve("play_menu.status.init");
     str_status_ping = language::resolve("play_menu.status.ping");
     str_status_fail = language::resolve("play_menu.status.fail");
+
+    str_outdated_client = language::resolve("play_menu.outdated_client");
+    str_outdated_server = language::resolve("play_menu.outdated_server");
 }
 
 static void on_bother_response(const BotherResponseEvent &event)
@@ -235,10 +242,25 @@ static void layout_server_item(ServerStatusItem *item)
     draw_list->AddText(name_pos, ImGui::GetColorU32(ImGuiCol_Text), item->name.c_str(), item->name.c_str() + item->name.size());
 
     if(item->status == item_status::REACHED) {
-        const std::string stats = fmt::format("{}/{}", item->num_players, item->max_players);
-        const float stats_width = ImGui::CalcTextSize(stats.c_str(), stats.c_str() + stats.size()).x;
-        const ImVec2 stats_pos = ImVec2(cursor.x + item_width - stats_width - padding.x, cursor.y + padding.y);
+        auto stats = fmt::format("{}/{}", item->num_players, item->max_players);
+        auto stats_width = ImGui::CalcTextSize(stats.c_str(), stats.c_str() + stats.size()).x;
+        auto stats_pos = ImVec2(cursor.x + item_width - stats_width - padding.x, cursor.y + padding.y);
         draw_list->AddText(stats_pos, ImGui::GetColorU32(ImGuiCol_TextDisabled), stats.c_str(), stats.c_str() + stats.size());
+
+        if(item->protocol_version != protocol::VERSION) {
+            auto warning_size = ImGui::CalcTextSize(WARNING_TOAST);
+            auto warning_pos = ImVec2(stats_pos.x - warning_size.x - padding.x - 4.0f * globals::gui_scale, cursor.y + padding.y);
+            auto warning_end = ImVec2(warning_pos.x + warning_size.x, warning_pos.y + warning_size.y);
+            draw_list->AddText(warning_pos, ImGui::GetColorU32(ImGuiCol_DragDropTarget), WARNING_TOAST);
+
+            if(ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                if(item->protocol_version < protocol::VERSION)
+                    ImGui::TextUnformatted(str_outdated_server.c_str(), str_outdated_server.c_str() + str_outdated_server.size());
+                else ImGui::TextUnformatted(str_outdated_client.c_str(), str_outdated_client.c_str() + str_outdated_client.size());
+                ImGui::EndTooltip();
+            }
+        }
     }
 
     ImU32 motd_color = {};
