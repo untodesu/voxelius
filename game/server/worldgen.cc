@@ -1,7 +1,7 @@
 #include "server/pch.hh"
 #include "server/worldgen.hh"
 
-#include "core/config.hh"
+#include "core/cmdline.hh"
 
 #include "shared/chunk.hh"
 #include "shared/dimension.hh"
@@ -12,7 +12,7 @@
 #include "server/inhabited.hh"
 #include "server/sessions.hh"
 
-static ConfigBoolean aggressive_caching(false);
+static bool aggressive_caching;
 
 static emhash8::HashMap<Dimension *, emhash8::HashMap<chunk_pos, std::unordered_set<Session *>>> active_tasks;
 
@@ -66,7 +66,7 @@ void WorldgenTask::finalize(void)
     auto chunk = m_dimension->create_chunk(m_cpos);
     chunk->set_voxels(m_voxels);
 
-    if(aggressive_caching.get_value()) {
+    if(aggressive_caching) {
         // Marking the chunk with InhabitedComponent makes
         // it so that it is saved regardles of whether it was
         // modified by players or not. This isn't particularly
@@ -100,7 +100,7 @@ void WorldgenTask::finalize(void)
 
 void worldgen::init(void)
 {
-    globals::server_config.add_value("worldgen.aggressive_caching", aggressive_caching);
+    aggressive_caching = cmdline::contains("aggressive-caching");
 }
 
 bool worldgen::is_generating(Dimension *dimension, const chunk_pos &cpos)
