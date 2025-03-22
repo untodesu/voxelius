@@ -67,7 +67,11 @@ Overworld::Overworld(const char *name) : Dimension(name, -30.0f)
 {
     m_bottommost_chunk.set_limits(-64, -4);
     m_terrain_variation.set_limits(16, 256);
-    compute_tree_feature(32U, m_feat_tree, game_voxels::oak_log, game_voxels::oak_leaves);
+
+    compute_tree_feature(4U, m_feat_tree[0], game_voxels::oak_log, game_voxels::oak_leaves);
+    compute_tree_feature(5U, m_feat_tree[1], game_voxels::oak_log, game_voxels::oak_leaves);
+    compute_tree_feature(6U, m_feat_tree[2], game_voxels::oak_log, game_voxels::oak_leaves);
+    compute_tree_feature(8U, m_feat_tree[3], game_voxels::oak_log, game_voxels::oak_leaves);
 }
 
 void Overworld::init(Config &config)
@@ -203,11 +207,12 @@ const Overworld_Metadata &Overworld::get_or_create_metadata(const chunk_pos_xz &
         }
     }
 
-    auto tree_density = static_cast<unsigned int>(fnlGetNoise2D(&m_fnl_nvdi, cpos.x, cpos.y) * 2.0 + 2.0f);
+    auto nvdi_value = fnlGetNoise2D(&m_fnl_nvdi, cpos.x, cpos.y);
+    auto tree_density = (nvdi_value > 0.0f) ? 4U : 0U;
 
     // Generate tree locations for this chunk
     while(metadata.trees.size() < tree_density) {
-        auto lpos = local_pos_xz((twister() % CHUNK_SIZE), (twister() % CHUNK_SIZE));
+        auto lpos = local_pos((twister() % CHUNK_SIZE), (twister() % OW_NUM_TREES), (twister() % CHUNK_SIZE));
         auto is_unique = true;
 
         for(const auto &check_lpos : metadata.trees) {
@@ -340,8 +345,8 @@ void Overworld::generate_features(const chunk_pos &cpos, VoxelStorage &voxels)
         const auto &cpos_xz = tree_chunks[i];
         const auto &metadata = get_or_create_metadata(cpos_xz);
 
-        for(const auto &lpos_xz : metadata.trees) {
-            auto hdx = static_cast<std::size_t>(lpos_xz.x + lpos_xz.y * CHUNK_SIZE);
+        for(const auto &tree_info : metadata.trees) {
+            auto hdx = static_cast<std::size_t>(tree_info.x + tree_info.z * CHUNK_SIZE);
             auto height = metadata.heightmap[hdx];
 
             if(height == std::numeric_limits<voxel_pos::value_type>::min()) {
@@ -350,7 +355,7 @@ void Overworld::generate_features(const chunk_pos &cpos, VoxelStorage &voxels)
             }
 
             auto cpos_xyz = chunk_pos(cpos_xz.x, 0, cpos_xz.y);
-            auto lpos_xyz = local_pos(lpos_xz.x, 0, lpos_xz.y);
+            auto lpos_xyz = local_pos(tree_info.x, 0, tree_info.z);
 
             auto vpos = coord::to_voxel(cpos_xyz, lpos_xyz);
             vpos.y = height;
@@ -360,7 +365,7 @@ void Overworld::generate_features(const chunk_pos &cpos, VoxelStorage &voxels)
                 continue;
             }
 
-            m_feat_tree.place(vpos + DIR_UP<voxel_pos::value_type>, cpos, voxels);
+            m_feat_tree[tree_info.y].place(vpos + DIR_UP<voxel_pos::value_type>, cpos, voxels);
         }
     }
 }

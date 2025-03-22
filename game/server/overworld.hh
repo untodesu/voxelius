@@ -8,10 +8,12 @@
 #include "shared/dimension.hh"
 #include "shared/feature.hh"
 
+constexpr static unsigned int OW_NUM_TREES = 4U;
+
 struct Overworld_Metadata final {
     dimension_entropy_map entropy;
     dimension_height_map heightmap;
-    std::vector<local_pos_xz> trees;
+    std::vector<local_pos> trees;
 };
 
 class Overworld final : public Dimension {
@@ -52,7 +54,7 @@ private:
     fnl_state m_fnl_nvdi;
 
 private:
-    Feature m_feat_tree;
+    Feature m_feat_tree[OW_NUM_TREES];
 
 private:
     std::mutex m_mutex;
