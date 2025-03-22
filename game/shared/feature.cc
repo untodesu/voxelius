@@ -6,10 +6,10 @@
 #include "shared/dimension.hh"
 #include "shared/voxel_storage.hh"
 
-void Feature::place(const voxel_pos &vpos, Dimension *dimension, bool overwrite) const
+void Feature::place(const voxel_pos &vpos, Dimension *dimension) const
 {
-    for(const auto &it : (*this)) {
-        auto it_vpos = vpos + it.first;
+    for(const auto [rpos, voxel, overwrite] : (*this)) {
+        auto it_vpos = vpos + rpos;
         auto it_cpos = coord::to_chunk(it_vpos);
 
         if(auto chunk = dimension->create_chunk(it_cpos)) {
@@ -23,15 +23,15 @@ void Feature::place(const voxel_pos &vpos, Dimension *dimension, bool overwrite)
                 continue;
             }
 
-            chunk->set_voxel(it.second, it_index);
+            chunk->set_voxel(voxel, it_index);
         }
     }
 }
 
-void Feature::place(const voxel_pos &vpos, const chunk_pos &cpos, VoxelStorage &voxels, bool overwrite) const
+void Feature::place(const voxel_pos &vpos, const chunk_pos &cpos, VoxelStorage &voxels) const
 {
-    for(const auto &it : (*this)) {
-        auto it_vpos = vpos + it.first;
+    for(const auto [rpos, voxel, overwrite] : (*this)) {
+        auto it_vpos = vpos + rpos;
         auto it_cpos = coord::to_chunk(it_vpos);
 
         if(it_cpos == cpos) {
@@ -45,7 +45,7 @@ void Feature::place(const voxel_pos &vpos, const chunk_pos &cpos, VoxelStorage &
                 continue;
             }
 
-            voxels[it_index] = it.second;
+            voxels[it_index] = voxel;
         }
     }
 }

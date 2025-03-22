@@ -1,6 +1,8 @@
 #include "shared/pch.hh"
 #include "shared/item_registry.hh"
 
+#include "core/crc64.hh"
+
 #include "shared/voxel_registry.hh"
 
 std::unordered_map<std::string, ItemInfoBuilder> item_registry::builders = {};
@@ -77,4 +79,16 @@ void item_registry::purge(void)
     item_registry::builders.clear();
     item_registry::names.clear();
     item_registry::items.clear();
+}
+
+std::uint64_t item_registry::calcualte_checksum(void)
+{
+    std::uint64_t result = 0;
+
+    for(const auto &info : item_registry::items) {
+        result = crc64::get(info->name, result);
+        result += static_cast<std::uint64_t>(info->place_voxel);
+    }
+
+    return result;
 }

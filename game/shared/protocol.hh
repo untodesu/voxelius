@@ -118,8 +118,8 @@ struct protocol::StatusResponse final : public protocol::Base<0x0001> {
 
 struct protocol::LoginRequest final : public protocol::Base<0x0002> {
     std::uint32_t version;
-    std::uint64_t voxel_def_checksum;
-    std::uint64_t item_def_checksum;
+    std::uint64_t voxel_registry_checksum;
+    std::uint64_t item_registry_checksum;
     std::uint64_t password_hash;
     std::string username;
 };

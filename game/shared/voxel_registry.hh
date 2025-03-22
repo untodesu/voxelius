@@ -138,7 +138,7 @@ void purge(void);
 
 namespace voxel_registry
 {
-std::uint64_t checksum(void);
+std::uint64_t calcualte_checksum(void);
 } // namespace voxel_registry
 
 #endif /* SHARED_VOXEL_REGISTRY_HH */

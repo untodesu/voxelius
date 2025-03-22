@@ -12,6 +12,7 @@
 #include "client/factory.hh"
 #include "client/globals.hh"
 #include "client/gui_screen.hh"
+#include "client/message_box.hh"
 #include "client/session.hh"
 #include "client/sound.hh"
 #include "client/window_title.hh"
@@ -33,6 +34,17 @@ static bool synchronize_entity_id(Dimension *dimension, entt::entity entity)
     session::disconnect("protocol.entity_id_desync");
     spdlog::critical("receive: entity desync: network {} resolved as client {}",
         static_cast<std::uint64_t>(entity), static_cast<std::uint64_t>(created));
+
+    message_box::reset();
+    message_box::set_title("disconnected.disconnected");
+    message_box::set_subtitle("protocol.entity_id_desync");
+    message_box::add_button("disconnected.back", [](void) {
+        globals::gui_screen = GUI_PLAY_MENU;
+        window_title::update();
+    });
+
+    globals::gui_screen = GUI_MESSAGE_BOX;
+
     return false;
 }
 

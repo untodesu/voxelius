@@ -141,11 +141,13 @@
   "protocol.client_disconnect": "Client disconnect",
   "protocol.client_shutdown": "Client shutdown",
   "protocol.entity_id_desync": "Entity ID desync",
+  "protocol.item_registry_checksum": "Item registry checksum mismatch",
   "protocol.not_whitelisted": "Not whitelisted",
   "protocol.outdated_client": "Outdated client",
   "protocol.outdated_server": "Outdated server",
   "protocol.password_incorrect": "Incorrect password",
   "protocol.server_full": "Server is full",
+  "protocol.server_shutdown": "Server stopped",
   "protocol.username_taken": "Username is taken",
   "protocol.voxel_registry_checksum": "Voxel registry checksum mismatch"
 }

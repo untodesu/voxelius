@@ -169,7 +169,7 @@ void voxel_registry::purge(void)
     voxel_registry::voxels.clear();
 }
 
-std::uint64_t voxel_registry::checksum(void)
+std::uint64_t voxel_registry::calcualte_checksum(void)
 {
     std::uint64_t result = 0;
 

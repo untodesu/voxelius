@@ -1,6 +1,8 @@
 #include "server/pch.hh"
 #include "server/overworld.hh"
 
+#include "core/vectors.hh"
+
 #include "shared/coord.hh"
 #include "shared/game_voxels.hh"
 #include "shared/voxel_storage.hh"
@@ -11,9 +13,12 @@ static void compute_tree_feature(unsigned int height, Feature &feature, voxel_id
     // Ensure the tree height is too small
     height = cxpr::max<unsigned int>(height, 4U);
 
+    // Put down a single piece of dirt
+    feature.push_back({ voxel_pos(0, -1, 0), game_voxels::dirt, true });
+
     // Generate tree stem
     for(unsigned int i = 0; i < height; ++i) {
-        feature.push_back({ voxel_pos(0, i, 0), log_voxel });
+        feature.push_back({ voxel_pos(0, i, 0), log_voxel, true });
     }
 
     auto leaves_start = height - 3U;
@@ -23,43 +28,43 @@ static void compute_tree_feature(unsigned int height, Feature &feature, voxel_id
     // Generate the thin 3x3 layer of leaves that
     // starts from leaves_start and ends at leaves_thin_end
     for(unsigned int i = leaves_start; i <= leaves_thin_end; ++i) {
-        feature.push_back({ local_pos(-1, i, -1), leaves_voxel });
-        feature.push_back({ local_pos(-1, i, +0), leaves_voxel });
-        feature.push_back({ local_pos(-1, i, +1), leaves_voxel });
-        feature.push_back({ local_pos(+0, i, -1), leaves_voxel });
-        feature.push_back({ local_pos(+0, i, +1), leaves_voxel });
-        feature.push_back({ local_pos(+1, i, -1), leaves_voxel });
-        feature.push_back({ local_pos(+1, i, +0), leaves_voxel });
-        feature.push_back({ local_pos(+1, i, +1), leaves_voxel });
+        feature.push_back({ local_pos(-1, i, -1), leaves_voxel, false });
+        feature.push_back({ local_pos(-1, i, +0), leaves_voxel, false });
+        feature.push_back({ local_pos(-1, i, +1), leaves_voxel, false });
+        feature.push_back({ local_pos(+0, i, -1), leaves_voxel, false });
+        feature.push_back({ local_pos(+0, i, +1), leaves_voxel, false });
+        feature.push_back({ local_pos(+1, i, -1), leaves_voxel, false });
+        feature.push_back({ local_pos(+1, i, +0), leaves_voxel, false });
+        feature.push_back({ local_pos(+1, i, +1), leaves_voxel, false });
     }
 
     // Generate the tree cap; a 3x3 patch of leaves
     // that is slapped right on top of the thin 3x3 layer
-    feature.push_back({ local_pos(-1, height, +0), leaves_voxel });
-    feature.push_back({ local_pos(+0, height, -1), leaves_voxel });
-    feature.push_back({ local_pos(+0, height, +0), leaves_voxel });
-    feature.push_back({ local_pos(+0, height, +1), leaves_voxel });
-    feature.push_back({ local_pos(+1, height, +0), leaves_voxel });
+    feature.push_back({ local_pos(-1, height, +0), leaves_voxel, false });
+    feature.push_back({ local_pos(+0, height, -1), leaves_voxel, false });
+    feature.push_back({ local_pos(+0, height, +0), leaves_voxel, false });
+    feature.push_back({ local_pos(+0, height, +1), leaves_voxel, false });
+    feature.push_back({ local_pos(+1, height, +0), leaves_voxel, false });
 
     // Generate the thin 5x5 layer of leaves that
     // starts from leaves_start and ends at leaves_thin_end
     for(unsigned int i = leaves_start; i <= leaves_thick_end; ++i) {
-        feature.push_back({ local_pos(-1, i, -2), leaves_voxel });
-        feature.push_back({ local_pos(-1, i, +2), leaves_voxel });
-        feature.push_back({ local_pos(-2, i, -1), leaves_voxel });
-        feature.push_back({ local_pos(-2, i, -2), leaves_voxel });
-        feature.push_back({ local_pos(-2, i, +0), leaves_voxel });
-        feature.push_back({ local_pos(-2, i, +1), leaves_voxel });
-        feature.push_back({ local_pos(-2, i, +2), leaves_voxel });
-        feature.push_back({ local_pos(+0, i, -2), leaves_voxel });
-        feature.push_back({ local_pos(+0, i, +2), leaves_voxel });
-        feature.push_back({ local_pos(+1, i, -2), leaves_voxel });
-        feature.push_back({ local_pos(+1, i, +2), leaves_voxel });
-        feature.push_back({ local_pos(+2, i, -1), leaves_voxel });
-        feature.push_back({ local_pos(+2, i, -2), leaves_voxel });
-        feature.push_back({ local_pos(+2, i, +0), leaves_voxel });
-        feature.push_back({ local_pos(+2, i, +1), leaves_voxel });
-        feature.push_back({ local_pos(+2, i, +2), leaves_voxel });
+        feature.push_back({ local_pos(-1, i, -2), leaves_voxel, false });
+        feature.push_back({ local_pos(-1, i, +2), leaves_voxel, false });
+        feature.push_back({ local_pos(-2, i, -1), leaves_voxel, false });
+        feature.push_back({ local_pos(-2, i, -2), leaves_voxel, false });
+        feature.push_back({ local_pos(-2, i, +0), leaves_voxel, false });
+        feature.push_back({ local_pos(-2, i, +1), leaves_voxel, false });
+        feature.push_back({ local_pos(-2, i, +2), leaves_voxel, false });
+        feature.push_back({ local_pos(+0, i, -2), leaves_voxel, false });
+        feature.push_back({ local_pos(+0, i, +2), leaves_voxel, false });
+        feature.push_back({ local_pos(+1, i, -2), leaves_voxel, false });
+        feature.push_back({ local_pos(+1, i, +2), leaves_voxel, false });
+        feature.push_back({ local_pos(+2, i, -1), leaves_voxel, false });
+        feature.push_back({ local_pos(+2, i, -2), leaves_voxel, false });
+        feature.push_back({ local_pos(+2, i, +0), leaves_voxel, false });
+        feature.push_back({ local_pos(+2, i, +1), leaves_voxel, false });
+        feature.push_back({ local_pos(+2, i, +2), leaves_voxel, false });
     }
 }
 
@@ -216,7 +221,7 @@ const Overworld_Metadata &Overworld::get_or_create_metadata(const chunk_pos_xz &
         auto is_unique = true;
 
         for(const auto &check_lpos : metadata.trees) {
-            if(check_lpos == lpos) {
+            if(cxvectors::distance2(check_lpos, lpos) <= 9) {
                 is_unique = false;
                 break;
             }

@@ -7,6 +7,7 @@
 #include "shared/coord.hh"
 #include "shared/dimension.hh"
 #include "shared/head.hh"
+#include "shared/item_registry.hh"
 #include "shared/player.hh"
 #include "shared/protocol.hh"
 #include "shared/transform.hh"
@@ -275,7 +276,8 @@ void session::send_login_request(void)
 {
     protocol::LoginRequest packet;
     packet.version = protocol::VERSION;
-    packet.voxel_def_checksum = voxel_registry::checksum();
+    packet.voxel_registry_checksum = voxel_registry::calcualte_checksum();
+    packet.item_registry_checksum = item_registry::calcualte_checksum();
     packet.password_hash = server_password_hash;
     packet.username = client_game::username.get();
 

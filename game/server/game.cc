@@ -28,6 +28,7 @@
 #include "server/universe.hh"
 #include "server/unloader.hh"
 #include "server/whitelist.hh"
+#include "server/worldgen.hh"
 
 ConfigUnsigned server_game::view_distance(4U, 4U, 32U);
 
@@ -54,6 +55,8 @@ void server_game::init(void)
 
     server_chat::init();
     server_recieve::init();
+
+    worldgen::init();
 
     unloader::init();
     universe::init();

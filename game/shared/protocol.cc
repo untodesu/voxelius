@@ -39,8 +39,8 @@ ENetPacket *protocol::encode(const protocol::LoginRequest &packet, enet_uint32 f
     write_buffer.reset();
     write_buffer.write_UI16(protocol::LoginRequest::ID);
     write_buffer.write_UI32(packet.version);
-    write_buffer.write_UI64(packet.voxel_def_checksum);
-    write_buffer.write_UI64(packet.item_def_checksum);
+    write_buffer.write_UI64(packet.voxel_registry_checksum);
+    write_buffer.write_UI64(packet.item_registry_checksum);
     write_buffer.write_UI64(packet.password_hash);
     write_buffer.write_string(packet.username.substr(0, protocol::MAX_USERNAME));
     return write_buffer.to_packet(flags);
@@ -280,8 +280,8 @@ void protocol::decode(entt::dispatcher &dispatcher, const ENetPacket *packet, EN
         case protocol::LoginRequest::ID:
             login_request.peer = peer;
             login_request.version = read_buffer.read_UI32();
-            login_request.voxel_def_checksum = read_buffer.read_UI64();
-            login_request.item_def_checksum = read_buffer.read_UI64();
+            login_request.voxel_registry_checksum = read_buffer.read_UI64();
+            login_request.item_registry_checksum = read_buffer.read_UI64();
             login_request.password_hash = read_buffer.read_UI64();
             login_request.username = read_buffer.read_string();
             dispatcher.trigger(login_request);

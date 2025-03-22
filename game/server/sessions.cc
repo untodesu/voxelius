@@ -11,6 +11,7 @@
 #include "shared/dimension.hh"
 #include "shared/factory.hh"
 #include "shared/head.hh"
+#include "shared/item_registry.hh"
 #include "shared/player.hh"
 #include "shared/protocol.hh"
 #include "shared/transform.hh"
@@ -56,9 +57,16 @@ static void on_login_request_packet(const protocol::LoginRequest &packet)
 
     // FIXME: calculate voxel registry checksum ahead of time
     // instead of figuring it out every time a new player connects
-    if(packet.voxel_def_checksum != voxel_registry::checksum()) {
+    if(packet.voxel_registry_checksum != voxel_registry::calcualte_checksum()) {
         protocol::Disconnect response;
         response.reason = "protocol.voxel_registry_checksum";
+        protocol::send(packet.peer, protocol::encode(response));
+        return;
+    }
+
+    if(packet.item_registry_checksum != item_registry::calcualte_checksum()) {
+        protocol::Disconnect response;
+        response.reason = "protocol.item_registry_checksum";
         protocol::send(packet.peer, protocol::encode(response));
         return;
     }
