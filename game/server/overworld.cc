@@ -212,11 +212,10 @@ const Overworld_Metadata &Overworld::get_or_create_metadata(const chunk_pos_xz &
         }
     }
 
-    auto nvdi_value = fnlGetNoise2D(&m_fnl_nvdi, cpos.x, cpos.y);
-    auto tree_density = (nvdi_value > 0.0f) ? 4U : 0U;
+    auto nvdi_value = 0.5f + 0.5f * fnlGetNoise2D(&m_fnl_nvdi, cpos.x, cpos.y);
+    auto tree_density = (nvdi_value >= 0.33f) ? cxpr::floor<unsigned int>(nvdi_value * 4.0f) : 0U;
 
-    // Generate tree locations for this chunk
-    while(metadata.trees.size() < tree_density) {
+    for(unsigned int i = 0U; i < tree_density; ++i) {
         auto lpos = local_pos((twister() % CHUNK_SIZE), (twister() % OW_NUM_TREES), (twister() % CHUNK_SIZE));
         auto is_unique = true;
 
