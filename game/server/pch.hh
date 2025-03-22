@@ -4,6 +4,4 @@
 
 #include <shared/pch.hh>
 
-#include <csignal>
-
 #endif /* SERVER_PCH_HH  */

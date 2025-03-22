@@ -127,6 +127,12 @@ static void GLAD_API_PTR on_opengl_message(GLenum source, GLenum type, GLuint id
     spdlog::info("opengl: {}", reinterpret_cast<const char *>(message));
 }
 
+static void on_termination_signal(int)
+{
+    spdlog::warn("client: received termination signal");
+    glfwSetWindowShouldClose(globals::window, true);
+}
+
 int main(int argc, char **argv)
 {
     cmdline::create(argc, argv);
@@ -177,6 +183,9 @@ int main(int argc, char **argv)
         spdlog::critical("glfw: failed to open a window");
         std::terminate();
     }
+
+    std::signal(SIGINT, &on_termination_signal);
+    std::signal(SIGTERM, &on_termination_signal);
 
     glfwMakeContextCurrent(globals::window);
     glfwSwapInterval(1);

@@ -4,6 +4,8 @@
 
 #include <core/pch.hh>
 
+#include <csignal>
+
 #include <BS_thread_pool.hpp>
 
 #include <enet/enet.h>
