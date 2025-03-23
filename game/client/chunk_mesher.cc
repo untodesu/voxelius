@@ -161,13 +161,6 @@ void GL_MeshingTask::finalize(void)
         return;
     }
 
-    if(m_status == task_status::CANCELLED) {
-        // The task has been cancelled, the result
-        // should be invalidated, if the code even got
-        // to this point (it normally should not)
-        return;
-    }
-
     auto &component = globals::dimension->chunks.emplace_or_replace<ChunkMeshComponent>(m_entity);
 
     const std::size_t plane_count_nb = m_quads_s.size();

@@ -99,7 +99,7 @@ void threading::update(void)
     }
 }
 
-void threading::submit(Task *task)
+void threading::detail::submit_new(Task *task)
 {
     task->set_status(task_status::ENQUEUED);
 

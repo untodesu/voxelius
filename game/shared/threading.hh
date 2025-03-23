@@ -28,8 +28,12 @@ namespace threading
 void init(void);
 void deinit(void);
 void update(void);
-void submit(Task *task);
 } // namespace threading
+
+namespace threading::detail
+{
+void submit_new(Task *task);
+} // namespace threading::detail
 
 namespace threading
 {
@@ -40,7 +44,7 @@ void submit(AT &&... args);
 template<typename T, typename... AT>
 inline void threading::submit(AT &&... args)
 {
-    threading::submit(new T(args...));
+    threading::detail::submit_new(new T(args...));
 }
 
 #endif /* SHARED_THREADING_HH  */
