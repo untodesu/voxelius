@@ -252,28 +252,40 @@ int main(int argc, char **argv)
         glfwSetWindowIcon(globals::window, 1, &icon_image);
     }
 
-    if(!saladLoadALdefault()) {
-        spdlog::critical("salad: failed to load function pointers");
-        std::terminate();
+    if(cmdline::contains("nosound")) {
+        spdlog::warn("client: sound disabled [per command line]");
+        globals::sound_dev = nullptr;
+        globals::sound_ctx = nullptr;
     }
+    else {
+        if(!saladLoadALdefault()) {
+            spdlog::warn("client: sound disabled [openal loading failed]");
+            globals::sound_dev = nullptr;
+            globals::sound_ctx = nullptr;
+        }
+        else {
+            globals::sound_dev = alcOpenDevice(nullptr);
 
-    globals::sound_dev = alcOpenDevice(nullptr);
+            if(globals::sound_dev == nullptr) {
+                spdlog::warn("client: sound disabled [no device]");
+                globals::sound_ctx = nullptr;
+            }
+            else {
+                spdlog::info("sound: {}", reinterpret_cast<const char *>(alcGetString(globals::sound_dev, ALC_DEVICE_SPECIFIER)));
 
-    if(globals::sound_dev == nullptr) {
-        spdlog::critical("openal: alcOpenDevice failed");
-        std::terminate();
+                globals::sound_ctx = alcCreateContext(globals::sound_dev, nullptr);
+
+                if(globals::sound_ctx == nullptr) {
+                    spdlog::warn("client: sound disabled [context creation failed]");
+                    alcCloseDevice(globals::sound_dev);
+                    globals::sound_dev = nullptr;
+                }
+                else {
+                    alcMakeContextCurrent(globals::sound_ctx);
+                }
+            }
+        }
     }
-
-    spdlog::info("sound: {}", reinterpret_cast<const char *>(alcGetString(globals::sound_dev, ALC_DEVICE_SPECIFIER)));
-
-    globals::sound_ctx = alcCreateContext(globals::sound_dev, nullptr);
-
-    if(globals::sound_ctx == nullptr) {
-        spdlog::critical("openal: alcCreateContext failed");
-        std::terminate();
-    }
-
-    alcMakeContextCurrent(globals::sound_ctx);
 
     splash::init_client();
 
@@ -417,9 +429,11 @@ int main(int argc, char **argv)
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    alcMakeContextCurrent(nullptr);
-    alcDestroyContext(globals::sound_ctx);
-    alcCloseDevice(globals::sound_dev);
+    if(globals::sound_ctx){
+        alcMakeContextCurrent(nullptr);
+        alcDestroyContext(globals::sound_ctx);
+        alcCloseDevice(globals::sound_dev);
+    }
 
     glfwDestroyWindow(globals::window);
     glfwTerminate();

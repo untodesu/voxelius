@@ -3,6 +3,8 @@
 
 #include "core/resource.hh"
 
+#include "client/globals.hh"
+
 static emhash8::HashMap<std::string, resource_ptr<SoundEffect>> resource_map;
 
 static std::size_t drwav_read_physfs(void *file, void *output, std::size_t count)
@@ -25,6 +27,11 @@ resource_ptr<SoundEffect> resource::load<SoundEffect>(const char *name, unsigned
     if(it != resource_map.cend()) {
         // Return an existing resource
         return it->second;
+    }
+
+    if(globals::sound_ctx == nullptr) {
+        // Sound is disabled
+        return nullptr;
     }
 
     auto file = PHYSFS_openRead(name);

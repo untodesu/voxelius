@@ -342,7 +342,9 @@ void client_game::init(void)
     globals::gui_scale = 0U;
     globals::gui_screen = GUI_MAIN_MENU;
 
-    sound::init();
+    if(globals::sound_ctx) {
+        sound::init();
+    }
 
     client_receive::init();
 
@@ -356,7 +358,9 @@ void client_game::init_late(void)
 {
     toggles::init_late();
 
-    sound::init_late();
+    if(globals::sound_ctx) {
+        sound::init_late();
+    }
 
     language::init_late();
 
@@ -418,7 +422,9 @@ void client_game::deinit(void)
 
     session::deinit();
 
-    sound::deinit();
+    if(globals::sound_ctx) {
+        sound::deinit();
+    }
 
     hotbar::deinit();
     main_menu::deinit();
@@ -506,17 +512,19 @@ void client_game::update(void)
         else globals::dimension->entities.emplace_or_replace<GravityComponent>(globals::player);
     }
 
-    sound::update();
+    if(globals::sound_ctx) {
+        sound::update();
 
-    listener::update();
+        listener::update();
+
+        SoundEmitterComponent::update();
+    }
 
     interpolation::update();
 
     player_target::update();
 
     camera::update();
-
-    SoundEmitterComponent::update();
 
     voxel_anims::update();
 

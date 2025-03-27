@@ -49,7 +49,7 @@ static void on_glfw_joystick_event(const GlfwJoystickEvent &event)
         for(int i = 0; i < NUM_AXES; gamepad::last_state.axes[i++] = 0.0f);
         for(int i = 0; i < NUM_BUTTONS; gamepad::last_state.buttons[i++] = GLFW_RELEASE);
 
-        spdlog::warn("gamepad: detected gamepad: {}", glfwGetGamepadName(event.joystick_id));
+        spdlog::info("gamepad: detected gamepad: {}", glfwGetGamepadName(event.joystick_id));
 
         return;
     }
@@ -100,7 +100,7 @@ void gamepad::init(void)
             for(int i = 0; i < NUM_AXES; gamepad::last_state.axes[i++] = 0.0f);
             for(int i = 0; i < NUM_BUTTONS; gamepad::last_state.buttons[i++] = GLFW_RELEASE);
 
-            spdlog::warn("gamepad: detected gamepad: {}", glfwGetGamepadName(joystick));
+            spdlog::info("gamepad: detected gamepad: {}", glfwGetGamepadName(joystick));
 
             break;
         }

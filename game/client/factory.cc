@@ -6,6 +6,7 @@
 #include "shared/head.hh"
 #include "shared/transform.hh"
 
+#include "client/globals.hh"
 #include "client/sound_emitter.hh"
 
 void client_factory::create_player(Dimension *dimension, entt::entity entity)
@@ -20,5 +21,7 @@ void client_factory::create_player(Dimension *dimension, entt::entity entity)
     dimension->entities.emplace_or_replace<TransformComponentIntr>(entity, transform);
     dimension->entities.emplace_or_replace<TransformComponentPrev>(entity, transform);
 
-    dimension->entities.emplace_or_replace<SoundEmitterComponent>(entity);
+    if(globals::sound_ctx) {
+        dimension->entities.emplace_or_replace<SoundEmitterComponent>(entity);
+    }
 }
