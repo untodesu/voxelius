@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: CC-BY-SA-4.0 */
+// SPDX-License-Identifier: CC-BY-SA-4.0
 #version 330 core
 #pragma variant[0] WORLD_CURVATURE
 #pragma variant[1] WORLD_FOG
