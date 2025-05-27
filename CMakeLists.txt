@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-project(Voxelius LANGUAGES C CXX VERSION 0.0.1.2512)
+project(Voxelius LANGUAGES C CXX VERSION 0.0.1.2513)
 
 ## Declare build options
 option(BUILD_VCLIENT "Build Voxelius client" ON)
