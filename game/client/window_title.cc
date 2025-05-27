@@ -10,7 +10,11 @@
 
 void window_title::update(void)
 {
-    auto string = fmt::format("Voxelius {}: {}", PROJECT_VERSION_STRING, splash::get());
+    std::string title;
 
-    glfwSetWindowTitle(globals::window, string.c_str());
+    if(globals::sound_ctx && globals::sound_dev)
+        title = fmt::format("Voxelius {}: {}", PROJECT_VERSION_STRING, splash::get());
+    else title = fmt::format("Voxelius {}: {} [NOSOUND]", PROJECT_VERSION_STRING, splash::get());
+
+    glfwSetWindowTitle(globals::window, title.c_str());
 }
