@@ -342,6 +342,8 @@ void client_game::init(void)
     globals::gui_scale = 0U;
     globals::gui_screen = GUI_MAIN_MENU;
 
+    sound::init_config();
+
     if(globals::sound_ctx) {
         sound::init();
     }

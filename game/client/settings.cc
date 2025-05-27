@@ -18,20 +18,20 @@ constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground |
 constexpr static unsigned int NUM_LOCATIONS = static_cast<unsigned int>(settings_location::COUNT);
 
 enum class setting_type : unsigned int {
-    CHECKBOX        = 0x0000U, // ConfigBoolean
-    INPUT_INT       = 0x0001U, // ConfigNumber<int>
-    INPUT_FLOAT     = 0x0002U, // ConfigNumber<float>
-    INPUT_UINT      = 0x0003U, // ConfigNumber<unsigned int>
-    INPUT_STRING    = 0x0004U, // ConfigString
-    SLIDER_INT      = 0x0005U, // ConfigNumber<int>
-    SLIDER_FLOAT    = 0x0006U, // ConfigNumber<float>
-    SLIDER_UINT     = 0x0007U, // ConfigNumber<unsigned int>
-    STEPPER_INT     = 0x0008U, // ConfigNumber<int>
-    STEPPER_UINT    = 0x0009U, // ConfigNumber<unsigned int>
-    KEYBIND         = 0x000AU, // ConfigKeyBind
-    GAMEPAD_AXIS    = 0x000BU, // ConfigGamepadAxis
-    GAMEPAD_BUTTON  = 0x000CU, // ConfigGamepadButton
-    LANGUAGE_SELECT = 0x000DU, // ConfigString internally
+    CHECKBOX        = 0x0000U, ///< ConfigBoolean
+    INPUT_INT       = 0x0001U, ///< ConfigNumber<int>
+    INPUT_FLOAT     = 0x0002U, ///< ConfigNumber<float>
+    INPUT_UINT      = 0x0003U, ///< ConfigNumber<unsigned int>
+    INPUT_STRING    = 0x0004U, ///< ConfigString
+    SLIDER_INT      = 0x0005U, ///< ConfigNumber<int>
+    SLIDER_FLOAT    = 0x0006U, ///< ConfigNumber<float>
+    SLIDER_UINT     = 0x0007U, ///< ConfigNumber<unsigned int>
+    STEPPER_INT     = 0x0008U, ///< ConfigNumber<int>
+    STEPPER_UINT    = 0x0009U, ///< ConfigNumber<unsigned int>
+    KEYBIND         = 0x000AU, ///< ConfigKeyBind
+    GAMEPAD_AXIS    = 0x000BU, ///< ConfigGamepadAxis
+    GAMEPAD_BUTTON  = 0x000CU, ///< ConfigGamepadButton
+    LANGUAGE_SELECT = 0x000DU, ///< ConfigString internally
 };
 
 class SettingValue {
@@ -709,10 +709,12 @@ static void layout_input(void)
             ImGui::EndTabItem();
         }
 
-        if(ImGui::BeginTabItem(str_input_gamepad.c_str())) {
-            globals::gui_keybind_ptr = nullptr;
-            layout_input_gamepad();
-            ImGui::EndTabItem();
+        if(gamepad::available) {
+            if(ImGui::BeginTabItem(str_input_gamepad.c_str())) {
+                globals::gui_keybind_ptr = nullptr;
+                layout_input_gamepad();
+                ImGui::EndTabItem();
+            }
         }
 
         if(ImGui::BeginTabItem(str_input_mouse.c_str())) {
@@ -812,10 +814,12 @@ void settings::layout(void)
                 ImGui::EndTabItem();
             }
 
-            if(ImGui::BeginTabItem(str_tab_sound.c_str())) {
-                globals::gui_keybind_ptr = nullptr;
-                layout_sound();
-                ImGui::EndTabItem();
+            if(globals::sound_ctx && globals::sound_dev) {
+                if(ImGui::BeginTabItem(str_tab_sound.c_str())) {
+                    globals::gui_keybind_ptr = nullptr;
+                    layout_sound();
+                    ImGui::EndTabItem();
+                }
             }
 
             ImGui::EndTabBar();

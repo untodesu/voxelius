@@ -153,7 +153,7 @@ void client_splash::render(void)
         const ImVec4 tint = ImVec4(1.0f, 1.0f, 1.0f, texture_alpha);
 
         ImGui::SetCursorPos(image_pos);
-        ImGui::Image(texture->handle, image_size, uv_a, uv_b, tint);
+        ImGui::ImageWithBg(texture->handle, image_size, uv_a, uv_b, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tint);
     }
 
     ImGui::End();

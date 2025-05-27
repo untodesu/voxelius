@@ -17,6 +17,7 @@ extern ConfigFloat volume_ui;
 
 namespace sound
 {
+void init_config(void);
 void init(void);
 void init_late(void);
 void deinit(void);

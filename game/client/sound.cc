@@ -30,7 +30,7 @@ static resource_ptr<SoundEffect> sfx_generic;
 static resource_ptr<SoundEffect> sfx_player;
 static resource_ptr<SoundEffect> sfx_ui;
 
-void sound::init(void)
+void sound::init_config(void)
 {
     globals::client_config.add_value("sound.volume_master", sound::volume_master);
     globals::client_config.add_value("sound.volume_effects", sound::volume_effects);
@@ -42,7 +42,10 @@ void sound::init(void)
     settings::add_slider(0, sound::volume_effects, settings_location::SOUND_LEVELS, "sound.volume_effects", false, "%.0f%%");
     settings::add_slider(1, sound::volume_music, settings_location::SOUND_LEVELS, "sound.volume_music", false, "%.0f%%");
     settings::add_slider(2, sound::volume_ui, settings_location::SOUND_LEVELS, "sound.volume_ui", false, "%.0f%%");
+}
 
+void sound::init(void)
+{
     alGenSources(1, &generic_source);
     alSourcei(generic_source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSource3f(generic_source, AL_POSITION, 0.0f, 0.0f, 0.0f);
