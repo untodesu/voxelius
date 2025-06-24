@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/toggles.hh"
 
 #include "core/config.hh"
@@ -11,7 +12,7 @@
 #include "client/language.hh"
 
 struct ToggleInfo final {
-    const char *description;
+    const char* description;
     int glfw_keycode;
     bool is_enabled;
 };
@@ -20,30 +21,31 @@ bool toggles::is_sequence_await = false;
 
 static ToggleInfo toggle_infos[TOGGLE_COUNT];
 
-static void print_toggle_state(const ToggleInfo &info)
+static void print_toggle_state(const ToggleInfo& info)
 {
     if(info.description) {
-        if(info.is_enabled)
+        if(info.is_enabled) {
             client_chat::print(fmt::format("[toggles] {} ON", info.description));
-        else client_chat::print(fmt::format("[toggles] {} OFF", info.description));
+        } else {
+            client_chat::print(fmt::format("[toggles] {} OFF", info.description));
+        }
     }
 }
 
-static void toggle_value(ToggleInfo &info, toggle_type type)
+static void toggle_value(ToggleInfo& info, toggle_type type)
 {
     if(info.is_enabled) {
         info.is_enabled = false;
-        globals::dispatcher.trigger(ToggleDisabledEvent {type});
-    }
-    else {
+        globals::dispatcher.trigger(ToggleDisabledEvent { type });
+    } else {
         info.is_enabled = true;
-        globals::dispatcher.trigger(ToggleEnabledEvent {type});
+        globals::dispatcher.trigger(ToggleEnabledEvent { type });
     }
 
     print_toggle_state(info);
 }
 
-static void on_glfw_key(const GlfwKeyEvent &event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if(globals::gui_keybind_ptr) {
         // The UI keybind subsystem has the authority
@@ -119,17 +121,21 @@ void toggles::init(void)
 void toggles::init_late(void)
 {
     for(toggle_type i = 0; i < TOGGLE_COUNT; ++i) {
-        if(toggle_infos[i].is_enabled)
-            globals::dispatcher.trigger(ToggleEnabledEvent {i});
-        else globals::dispatcher.trigger(ToggleDisabledEvent {i});
+        if(toggle_infos[i].is_enabled) {
+            globals::dispatcher.trigger(ToggleEnabledEvent { i });
+        } else {
+            globals::dispatcher.trigger(ToggleDisabledEvent { i });
+        }
     }
 }
 
 bool toggles::get(toggle_type type)
 {
-    if(type < TOGGLE_COUNT)
+    if(type < TOGGLE_COUNT) {
         return toggle_infos[type].is_enabled;
-    return false;
+    } else {
+        return false;
+    }
 }
 
 void toggles::set(toggle_type type, bool value)
@@ -137,11 +143,10 @@ void toggles::set(toggle_type type, bool value)
     if(type < TOGGLE_COUNT) {
         if(value) {
             toggle_infos[type].is_enabled = true;
-            globals::dispatcher.trigger(ToggleEnabledEvent {type});
-        }
-        else {
+            globals::dispatcher.trigger(ToggleEnabledEvent { type });
+        } else {
             toggle_infos[type].is_enabled = false;
-            globals::dispatcher.trigger(ToggleDisabledEvent {type});
+            globals::dispatcher.trigger(ToggleDisabledEvent { type });
         }
 
         print_toggle_state(toggle_infos[type]);

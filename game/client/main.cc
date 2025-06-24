@@ -26,22 +26,22 @@ extern "C" __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 extern "C" __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 #endif
 
-static void on_glfw_error(int code, const char *message)
+static void on_glfw_error(int code, const char* message)
 {
     spdlog::error("glfw: {}", message);
 }
 
-static void on_glfw_char(GLFWwindow *window, unsigned int codepoint)
+static void on_glfw_char(GLFWwindow* window, unsigned int codepoint)
 {
     ImGui_ImplGlfw_CharCallback(window, codepoint);
 }
 
-static void on_glfw_cursor_enter(GLFWwindow *window, int entered)
+static void on_glfw_cursor_enter(GLFWwindow* window, int entered)
 {
     ImGui_ImplGlfw_CursorEnterCallback(window, entered);
 }
 
-static void on_glfw_cursor_pos(GLFWwindow *window, double xpos, double ypos)
+static void on_glfw_cursor_pos(GLFWwindow* window, double xpos, double ypos)
 {
     GlfwCursorPosEvent event;
     event.pos.x = static_cast<float>(xpos);
@@ -51,7 +51,7 @@ static void on_glfw_cursor_pos(GLFWwindow *window, double xpos, double ypos)
     ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 }
 
-static void on_glfw_framebuffer_size(GLFWwindow *window, int width, int height)
+static void on_glfw_framebuffer_size(GLFWwindow* window, int width, int height)
 {
     if(glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
         // Don't do anything if the window was just
@@ -59,7 +59,7 @@ static void on_glfw_framebuffer_size(GLFWwindow *window, int width, int height)
         // windows on WIN32 seem to be forced into 0x0
         return;
     }
-    
+
     globals::width = width;
     globals::height = height;
     globals::aspect = static_cast<float>(width) / static_cast<float>(height);
@@ -71,7 +71,7 @@ static void on_glfw_framebuffer_size(GLFWwindow *window, int width, int height)
     globals::dispatcher.trigger(fb_event);
 }
 
-static void on_glfw_key(GLFWwindow *window, int key, int scancode, int action, int mods)
+static void on_glfw_key(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     GlfwKeyEvent event;
     event.key = key;
@@ -91,12 +91,12 @@ static void on_glfw_joystick(int joystick_id, int event_type)
     globals::dispatcher.trigger(event);
 }
 
-static void on_glfw_monitor_event(GLFWmonitor *monitor, int event)
+static void on_glfw_monitor_event(GLFWmonitor* monitor, int event)
 {
     ImGui_ImplGlfw_MonitorCallback(monitor, event);
 }
 
-static void on_glfw_mouse_button(GLFWwindow *window, int button, int action, int mods)
+static void on_glfw_mouse_button(GLFWwindow* window, int button, int action, int mods)
 {
     GlfwMouseButtonEvent event;
     event.button = button;
@@ -107,7 +107,7 @@ static void on_glfw_mouse_button(GLFWwindow *window, int button, int action, int
     ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 }
 
-static void on_glfw_scroll(GLFWwindow *window, double dx, double dy)
+static void on_glfw_scroll(GLFWwindow* window, double dx, double dy)
 {
     GlfwScrollEvent event;
     event.dx = static_cast<float>(dx);
@@ -117,14 +117,14 @@ static void on_glfw_scroll(GLFWwindow *window, double dx, double dy)
     ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
 }
 
-static void on_glfw_window_focus(GLFWwindow *window, int focused)
+static void on_glfw_window_focus(GLFWwindow* window, int focused)
 {
     ImGui_ImplGlfw_WindowFocusCallback(window, focused);
 }
 
-static void GLAD_API_PTR on_opengl_message(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *param)
+static void GLAD_API_PTR on_opengl_message(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* param)
 {
-    spdlog::info("opengl: {}", reinterpret_cast<const char *>(message));
+    spdlog::info("opengl: {}", reinterpret_cast<const char*>(message));
 }
 
 static void on_termination_signal(int)
@@ -133,7 +133,7 @@ static void on_termination_signal(int)
     glfwSetWindowShouldClose(globals::window, true);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     cmdline::create(argc, argv);
 
@@ -205,19 +205,17 @@ int main(int argc, char **argv)
             // information about buffer usage into the debug callback
             static const std::uint32_t ignore_nvidia_131185 = 131185;
             glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 1, &ignore_nvidia_131185, GL_FALSE);
-        }
-        else {
+        } else {
             spdlog::warn("glad: nodebug command line parameter found");
             spdlog::warn("glad: OpenGL errors will not be logged");
         }
-    }
-    else {
+    } else {
         spdlog::warn("glad: KHR_debug extension not supported");
         spdlog::warn("glad: OpenGL errors will not be logged");
     }
 
-    spdlog::info("opengl: version: {}", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
-    spdlog::info("opengl: renderer: {}", reinterpret_cast<const char *>(glGetString(GL_RENDERER)));
+    spdlog::info("opengl: version: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+    spdlog::info("opengl: renderer: {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 
     glDisable(GL_MULTISAMPLE);
 
@@ -231,7 +229,7 @@ int main(int argc, char **argv)
     // constants. However, UI scale of 1 doesn't look that good, so the window size is
     // limited to a resolution that allows at least UI scale of 2 and is defined by MIN_WIDTH and MIN_HEIGHT.
     glfwSetWindowSizeLimits(globals::window, MIN_WIDTH, MIN_HEIGHT, GLFW_DONT_CARE, GLFW_DONT_CARE);
-    
+
     glfwSetCharCallback(globals::window, &on_glfw_char);
     glfwSetCursorEnterCallback(globals::window, &on_glfw_cursor_enter);
     glfwSetCursorPosCallback(globals::window, &on_glfw_cursor_pos);
@@ -248,7 +246,7 @@ int main(int argc, char **argv)
         GLFWimage icon_image;
         icon_image.width = image->size.x;
         icon_image.height = image->size.y;
-        icon_image.pixels = reinterpret_cast<unsigned char *>(image->pixels);
+        icon_image.pixels = reinterpret_cast<unsigned char*>(image->pixels);
         glfwSetWindowIcon(globals::window, 1, &icon_image);
     }
 
@@ -256,22 +254,19 @@ int main(int argc, char **argv)
         spdlog::warn("client: sound disabled [per command line]");
         globals::sound_dev = nullptr;
         globals::sound_ctx = nullptr;
-    }
-    else {
+    } else {
         if(!saladLoadALdefault()) {
             spdlog::warn("client: sound disabled [openal loading failed]");
             globals::sound_dev = nullptr;
             globals::sound_ctx = nullptr;
-        }
-        else {
+        } else {
             globals::sound_dev = alcOpenDevice(nullptr);
 
             if(globals::sound_dev == nullptr) {
                 spdlog::warn("client: sound disabled [no device]");
                 globals::sound_ctx = nullptr;
-            }
-            else {
-                spdlog::info("sound: {}", reinterpret_cast<const char *>(alcGetString(globals::sound_dev, ALC_DEVICE_SPECIFIER)));
+            } else {
+                spdlog::info("sound: {}", reinterpret_cast<const char*>(alcGetString(globals::sound_dev, ALC_DEVICE_SPECIFIER)));
 
                 globals::sound_ctx = alcCreateContext(globals::sound_dev, nullptr);
 
@@ -279,8 +274,7 @@ int main(int argc, char **argv)
                     spdlog::warn("client: sound disabled [context creation failed]");
                     alcCloseDevice(globals::sound_dev);
                     globals::sound_dev = nullptr;
-                }
-                else {
+                } else {
                     alcMakeContextCurrent(globals::sound_ctx);
                 }
             }
@@ -291,7 +285,7 @@ int main(int argc, char **argv)
 
     window_title::update();
 
-    ImGuiIO &io = ImGui::GetIO();
+    ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
@@ -344,13 +338,12 @@ int main(int argc, char **argv)
         if(globals::fixed_frametime_us == UINT64_MAX) {
             globals::fixed_framecount = 0;
             globals::fixed_accumulator = 0;
-        }
-        else {
+        } else {
             globals::fixed_accumulator += globals::window_frametime_us;
             globals::fixed_framecount = globals::fixed_accumulator / globals::fixed_frametime_us;
             globals::fixed_accumulator %= globals::fixed_frametime_us;
         }
-    
+
         globals::num_drawcalls = 0;
         globals::num_triangles = 0;
 
@@ -363,16 +356,16 @@ int main(int argc, char **argv)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-    
+
         glDisable(GL_BLEND);
-    
+
         glDisable(GL_DEPTH_TEST);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, globals::width, globals::height);
-    
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-    
+
         // Make sure there is no stray program object
         // being bound to the context. Usually third-party
         // overlay software (such as RivaTuner) injects itself
@@ -406,7 +399,7 @@ int main(int argc, char **argv)
 
         resource::soft_cleanup<BinFile>();
         resource::soft_cleanup<Image>();
-        
+
         resource::soft_cleanup<SoundEffect>();
         resource::soft_cleanup<TextureGUI>();
 
@@ -414,13 +407,13 @@ int main(int argc, char **argv)
     }
 
     client_game::deinit();
-    
+
     resource::hard_cleanup<BinFile>();
     resource::hard_cleanup<Image>();
 
     resource::hard_cleanup<SoundEffect>();
     resource::hard_cleanup<TextureGUI>();
-    
+
     spdlog::info("client: shutdown after {} frames", globals::window_framecount);
     spdlog::info("client: average framerate: {:.03f} FPS", 1.0f / globals::window_frametime_avg);
     spdlog::info("client: average frametime: {:.03f} ms", 1000.0f * globals::window_frametime_avg);
@@ -429,7 +422,7 @@ int main(int argc, char **argv)
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    if(globals::sound_ctx){
+    if(globals::sound_ctx) {
         alcMakeContextCurrent(nullptr);
         alcDestroyContext(globals::sound_ctx);
         alcCloseDevice(globals::sound_dev);

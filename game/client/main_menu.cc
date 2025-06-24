@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/main_menu.hh"
 
 #include "core/constexpr.hh"
@@ -24,7 +25,7 @@ static std::string str_quit;
 static resource_ptr<TextureGUI> title;
 static float title_aspect;
 
-static void on_glfw_key(const GlfwKeyEvent &event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if(session::is_ingame() && (event.key == GLFW_KEY_ESCAPE) && (event.action == GLFW_PRESS)) {
         if(globals::gui_screen == GUI_SCREEN_NONE) {
@@ -39,7 +40,7 @@ static void on_glfw_key(const GlfwKeyEvent &event)
     }
 }
 
-static void on_language_set(const LanguageSetEvent &event)
+static void on_language_set(const LanguageSetEvent& event)
 {
     str_play = language::resolve_gui("main_menu.play");
     str_resume = language::resolve_gui("main_menu.resume");
@@ -57,9 +58,11 @@ void main_menu::init(void)
         std::terminate();
     }
 
-    if(title->size.x > title->size.y)
+    if(title->size.x > title->size.y) {
         title_aspect = static_cast<float>(title->size.x) / static_cast<float>(title->size.y);
-    else title_aspect = static_cast<float>(title->size.y) / static_cast<float>(title->size.x);
+    } else {
+        title_aspect = static_cast<float>(title->size.y) / static_cast<float>(title->size.x);
+    }
 
     globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
     globals::dispatcher.sink<LanguageSetEvent>().connect<&on_language_set>();
@@ -84,8 +87,7 @@ void main_menu::layout(void)
 
         if(session::is_ingame()) {
             ImGui::Dummy(ImVec2(0.0f, 32.0f * globals::gui_scale));
-        }
-        else {
+        } else {
             auto reference_height = 0.225f * window_size.y;
             auto image_width = cxpr::min(window_size.x, reference_height * title_aspect);
             auto image_height = image_width / title_aspect;
@@ -100,20 +102,28 @@ void main_menu::layout(void)
 
         if(session::is_ingame()) {
             ImGui::SetCursorPosX(button_xpos);
-            if(ImGui::Button(str_resume.c_str(), ImVec2(button_width, 0.0f)))
+
+            if(ImGui::Button(str_resume.c_str(), ImVec2(button_width, 0.0f))) {
                 globals::gui_screen = GUI_SCREEN_NONE;
+            }
+
             ImGui::Spacing();
-        }
-        else {
+        } else {
             ImGui::SetCursorPosX(button_xpos);
-            if(ImGui::Button(str_play.c_str(), ImVec2(button_width, 0.0f)))
+
+            if(ImGui::Button(str_play.c_str(), ImVec2(button_width, 0.0f))) {
                 globals::gui_screen = GUI_PLAY_MENU;
+            }
+
             ImGui::Spacing();
         }
 
         ImGui::SetCursorPosX(button_xpos);
-        if(ImGui::Button(str_settings.c_str(), ImVec2(button_width, 0.0f)))
+
+        if(ImGui::Button(str_settings.c_str(), ImVec2(button_width, 0.0f))) {
             globals::gui_screen = GUI_SETTINGS;
+        }
+
         ImGui::Spacing();
 
         if(session::is_ingame()) {
@@ -126,17 +136,19 @@ void main_menu::layout(void)
             }
 
             ImGui::Spacing();
-        }
-        else {
+        } else {
             ImGui::SetCursorPosX(button_xpos);
-            if(ImGui::Button(str_quit.c_str(), ImVec2(button_width, 0.0f)))
+
+            if(ImGui::Button(str_quit.c_str(), ImVec2(button_width, 0.0f))) {
                 glfwSetWindowShouldClose(globals::window, true);
-            ImGui::Spacing(); 
+            }
+
+            ImGui::Spacing();
         }
 
         if(!session::is_ingame()) {
-            const auto &padding = ImGui::GetStyle().FramePadding;
-            const auto &spacing = ImGui::GetStyle().ItemSpacing;
+            const auto& padding = ImGui::GetStyle().FramePadding;
+            const auto& spacing = ImGui::GetStyle().ItemSpacing;
 
             ImGui::PushFont(globals::font_debug);
             ImGui::SetCursorScreenPos(ImVec2(padding.x + spacing.x, window_size.y - globals::font_debug->FontSize - padding.y - spacing.y));

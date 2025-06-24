@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/camera.hh"
 
 #include "core/angles.hh"
@@ -37,7 +38,7 @@ static void reset_camera(void)
 
 // Gracefully contributed by PQCraft himself in 2024
 // making PlatinumSrc and Voxelius kind of related to each other
-static glm::fmat4x4 platinumsrc_viewmatrix(const glm::fvec3 &position, const glm::fvec3 &angles)
+static glm::fmat4x4 platinumsrc_viewmatrix(const glm::fvec3& position, const glm::fvec3& angles)
 {
     glm::fvec3 forward, up;
     cxangles::vectors(angles, &forward, nullptr, &up);
@@ -78,9 +79,9 @@ void camera::update(void)
         return;
     }
 
-    const auto &head = globals::dimension->entities.get<HeadComponentIntr>(globals::player);
-    const auto &transform = globals::dimension->entities.get<TransformComponentIntr>(globals::player);
-    const auto &velocity = globals::dimension->entities.get<VelocityComponent>(globals::player);
+    const auto& head = globals::dimension->entities.get<HeadComponentIntr>(globals::player);
+    const auto& transform = globals::dimension->entities.get<TransformComponentIntr>(globals::player);
+    const auto& velocity = globals::dimension->entities.get<VelocityComponent>(globals::player);
 
     camera::angles = transform.angles + head.angles;
     camera::position_chunk = transform.chunk;

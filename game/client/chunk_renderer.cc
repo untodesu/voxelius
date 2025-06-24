@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/chunk_renderer.hh"
 
 #include "core/config.hh"
@@ -87,9 +88,11 @@ void chunk_renderer::render(void)
     glDepthFunc(GL_LEQUAL);
     glLineWidth(1.0f);
 
-    if(toggles::get(TOGGLE_WIREFRAME))
+    if(toggles::get(TOGGLE_WIREFRAME)) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    } else {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 
     quad_program.set_variant_vert(WORLD_CURVATURE, client_game::world_curvature.get_value());
     quad_program.set_variant_vert(WORLD_FOG, client_game::fog_mode.get_value());
@@ -115,10 +118,10 @@ void chunk_renderer::render(void)
         group.sort([](entt::entity ea, entt::entity eb) {
             const auto dir_a = globals::dimension->chunks.get<ChunkComponent>(ea).cpos - camera::position_chunk;
             const auto dir_b = globals::dimension->chunks.get<ChunkComponent>(eb).cpos - camera::position_chunk;
-            
+
             const auto da = dir_a[0] * dir_a[0] + dir_a[1] * dir_a[1] + dir_a[2] * dir_a[2];
             const auto db = dir_b[0] * dir_b[0] + dir_b[1] * dir_b[1] + dir_b[2] * dir_b[2];
-            
+
             return da > db;
         });
     }
@@ -143,52 +146,42 @@ void chunk_renderer::render(void)
         glFrontFace(GL_CCW);
 
         for(const auto [entity, chunk, mesh] : group.each()) {
-            if(plane_id >= mesh.quad_nb.size())
-                continue;
-            if(!mesh.quad_nb[plane_id].handle)
-                continue;
-            if(!mesh.quad_nb[plane_id].size)
-                continue;
-            
-            const auto wpos = coord::to_fvec3(chunk.cpos - camera::position_chunk);
-            glUniform3fv(quad_program.uniforms[u_quad_world_position].location, 1, glm::value_ptr(wpos));
+            if(plane_id < mesh.quad_nb.size() && mesh.quad_nb[plane_id].handle && mesh.quad_nb[plane_id].size) {
+                const auto wpos = coord::to_fvec3(chunk.cpos - camera::position_chunk);
+                glUniform3fv(quad_program.uniforms[u_quad_world_position].location, 1, glm::value_ptr(wpos));
 
-            glBindBuffer(GL_ARRAY_BUFFER, mesh.quad_nb[plane_id].handle);
+                glBindBuffer(GL_ARRAY_BUFFER, mesh.quad_nb[plane_id].handle);
 
-            glEnableVertexAttribArray(1);
-            glVertexAttribDivisor(1, 1);
-            glVertexAttribIPointer(1, 2, GL_UNSIGNED_INT, sizeof(ChunkQuad), nullptr);
-            
-            glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mesh.quad_nb[plane_id].size);
-            
-            globals::num_drawcalls += 1;
-            globals::num_triangles += 2 * mesh.quad_nb[plane_id].size;
+                glEnableVertexAttribArray(1);
+                glVertexAttribDivisor(1, 1);
+                glVertexAttribIPointer(1, 2, GL_UNSIGNED_INT, sizeof(ChunkQuad), nullptr);
+
+                glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mesh.quad_nb[plane_id].size);
+
+                globals::num_drawcalls += 1;
+                globals::num_triangles += 2 * mesh.quad_nb[plane_id].size;
+            }
         }
 
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         for(const auto [entity, chunk, mesh] : group.each()) {
-            if(plane_id >= mesh.quad_b.size())
-                continue;
-            if(!mesh.quad_b[plane_id].handle)
-                continue;
-            if(!mesh.quad_b[plane_id].size)
-                continue;
-            
-            const auto wpos = coord::to_fvec3(chunk.cpos - camera::position_chunk);
-            glUniform3fv(quad_program.uniforms[u_quad_world_position].location, 1, glm::value_ptr(wpos));
+            if(plane_id < mesh.quad_b.size() && mesh.quad_b[plane_id].handle && mesh.quad_b[plane_id].size) {
+                const auto wpos = coord::to_fvec3(chunk.cpos - camera::position_chunk);
+                glUniform3fv(quad_program.uniforms[u_quad_world_position].location, 1, glm::value_ptr(wpos));
 
-            glBindBuffer(GL_ARRAY_BUFFER, mesh.quad_b[plane_id].handle);
+                glBindBuffer(GL_ARRAY_BUFFER, mesh.quad_b[plane_id].handle);
 
-            glEnableVertexAttribArray(1);
-            glVertexAttribDivisor(1, 1);
-            glVertexAttribIPointer(1, 2, GL_UNSIGNED_INT, sizeof(ChunkQuad), nullptr);
-            
-            glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mesh.quad_b[plane_id].size);
-            
-            globals::num_drawcalls += 1;
-            globals::num_triangles += 2 * mesh.quad_b[plane_id].size;
+                glEnableVertexAttribArray(1);
+                glVertexAttribDivisor(1, 1);
+                glVertexAttribIPointer(1, 2, GL_UNSIGNED_INT, sizeof(ChunkQuad), nullptr);
+
+                glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mesh.quad_b[plane_id].size);
+
+                globals::num_drawcalls += 1;
+                globals::num_triangles += 2 * mesh.quad_b[plane_id].size;
+            }
         }
     }
 

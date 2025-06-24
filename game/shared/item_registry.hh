@@ -21,12 +21,12 @@ struct ItemInfo final {
 
 class ItemInfoBuilder final {
 public:
-    explicit ItemInfoBuilder(const char *name);
+    explicit ItemInfoBuilder(const char* name);
     virtual ~ItemInfoBuilder(void) = default;
 
 public:
-    ItemInfoBuilder &set_texture(const char *texture);
-    ItemInfoBuilder &set_place_voxel(voxel_id place_voxel);
+    ItemInfoBuilder& set_texture(const char* texture);
+    ItemInfoBuilder& set_place_voxel(voxel_id place_voxel);
 
 public:
     item_id build(void) const;
@@ -44,9 +44,9 @@ extern std::vector<std::shared_ptr<ItemInfo>> items;
 
 namespace item_registry
 {
-ItemInfoBuilder &construct(const char *name);
-ItemInfo *find(const char *name);
-ItemInfo *find(const item_id item);
+ItemInfoBuilder& construct(const char* name);
+ItemInfo* find(const char* name);
+ItemInfo* find(const item_id item);
 } // namespace item_registry
 
 namespace item_registry

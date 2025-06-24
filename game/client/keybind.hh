@@ -10,8 +10,8 @@ public:
     explicit ConfigKeyBind(int default_value);
     virtual ~ConfigKeyBind(void) = default;
 
-    virtual void set(const char *value) override;
-    virtual const char *get(void) const override;
+    virtual void set(const char* value) override;
+    virtual const char* get(void) const override;
 
     void set_key(int keycode);
     int get_key(void) const;
@@ -19,7 +19,7 @@ public:
     bool equals(int keycode) const;
 
 private:
-    const char *m_name;
+    const char* m_name;
     int m_glfw_keycode;
 };
 

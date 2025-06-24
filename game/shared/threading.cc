@@ -1,15 +1,16 @@
 #include "shared/pch.hh"
+
 #include "shared/threading.hh"
 
 #include "core/cmdline.hh"
 #include "core/constexpr.hh"
 
-constexpr static const char *DEFAULT_POOL_SIZE_ARG = "4";
+constexpr static const char* DEFAULT_POOL_SIZE_ARG = "4";
 
-static BS::light_thread_pool *thread_pool;
-static std::deque<Task *> task_deque;
+static BS::light_thread_pool* thread_pool;
+static std::deque<Task*> task_deque;
 
-static void task_process(Task *task)
+static void task_process(Task* task)
 {
     task->set_status(task_status::PROCESSING);
     task->process();
@@ -41,11 +42,12 @@ void threading::init(void)
         // Use the maximum available number of concurrent
         // hardware threads provided by the implementation
         thread_pool_size = num_concurrent_threads;
-    }
-    else {
-        if(num_concurrent_threads)
+    } else {
+        if(num_concurrent_threads) {
             thread_pool_size = cxpr::clamp<unsigned int>(std::strtoul(argument, nullptr, 10), 1U, num_concurrent_threads);
-        else thread_pool_size = cxpr::max<unsigned int>(std::strtoul(argument, nullptr, 10), 1U);
+        } else {
+            thread_pool_size = cxpr::max<unsigned int>(std::strtoul(argument, nullptr, 10), 1U);
+        }
     }
 
     spdlog::info("threading: using {} threads for pooling tasks", thread_pool_size);
@@ -99,7 +101,7 @@ void threading::update(void)
     }
 }
 
-void threading::detail::submit_new(Task *task)
+void threading::detail::submit_new(Task* task)
 {
     task->set_status(task_status::ENQUEUED);
 

@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/skybox.hh"
 
 glm::fvec3 skybox::fog_color;

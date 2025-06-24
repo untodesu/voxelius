@@ -1,4 +1,5 @@
 #include "shared/pch.hh"
+
 #include "shared/game.hh"
 
 #include "core/cmdline.hh"
@@ -47,10 +48,10 @@ static std::filesystem::path get_userpath(void)
     return std::filesystem::current_path();
 }
 
-void shared_game::init(int argc, char **argv)
+void shared_game::init(int argc, char** argv)
 {
     auto logger = spdlog::default_logger();
-    auto &logger_sinks = logger->sinks();
+    auto& logger_sinks = logger->sinks();
 
     logger_sinks.clear();
     logger_sinks.push_back(std::make_shared<spdlog::sinks::stderr_color_sink_mt>());
@@ -62,11 +63,13 @@ void shared_game::init(int argc, char **argv)
     constexpr auto default_loglevel = spdlog::level::trace;
 #endif
 
-    if(cmdline::contains("quiet"))
+    if(cmdline::contains("quiet")) {
         logger->set_level(spdlog::level::warn);
-    else if(cmdline::contains("verbose"))
+    } else if(cmdline::contains("verbose")) {
         logger->set_level(spdlog::level::trace);
-    else logger->set_level(default_loglevel);
+    } else {
+        logger->set_level(default_loglevel);
+    }
 
     logger->set_pattern("%H:%M:%S.%e %^[%L]%$ %v");
     logger->flush();

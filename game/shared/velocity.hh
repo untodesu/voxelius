@@ -11,7 +11,7 @@ public:
     // Updates entities TransformComponent values
     // according to velocities multiplied by fixed_frametime.
     // NOTE: This system was previously called inertial
-    static void fixed_update(Dimension *dimension);
+    static void fixed_update(Dimension* dimension);
 };
 
 #endif /* SHARED_VELOCITY_HH */

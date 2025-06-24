@@ -1,28 +1,29 @@
 #include "core/pch.hh"
+
 #include "core/image.hh"
 
 #include "core/resource.hh"
 
 static emhash8::HashMap<std::string, resource_ptr<Image>> resource_map;
 
-static int stbi_physfs_read(void *context, char *data, int size)
+static int stbi_physfs_read(void* context, char* data, int size)
 {
-    return PHYSFS_readBytes(reinterpret_cast<PHYSFS_File *>(context), data, size);
+    return PHYSFS_readBytes(reinterpret_cast<PHYSFS_File*>(context), data, size);
 }
 
-static void stbi_physfs_skip(void *context, int count)
+static void stbi_physfs_skip(void* context, int count)
 {
-    auto file = reinterpret_cast<PHYSFS_File *>(context);
+    auto file = reinterpret_cast<PHYSFS_File*>(context);
     PHYSFS_seek(file, PHYSFS_tell(file) + count);
 }
 
-static int stbi_physfs_eof(void *context)
+static int stbi_physfs_eof(void* context)
 {
-    return PHYSFS_eof(reinterpret_cast<PHYSFS_File *>(context));
+    return PHYSFS_eof(reinterpret_cast<PHYSFS_File*>(context));
 }
 
 template<>
-resource_ptr<Image> resource::load<Image>(const char *name, unsigned int flags)
+resource_ptr<Image> resource::load<Image>(const char* name, unsigned int flags)
 {
     auto it = resource_map.find(name);
 
@@ -38,10 +39,12 @@ resource_ptr<Image> resource::load<Image>(const char *name, unsigned int flags)
         return nullptr;
     }
 
-    if(flags & IMAGE_LOAD_FLIP)
+    if(flags & IMAGE_LOAD_FLIP) {
         stbi_set_flip_vertically_on_load(true);
-    else stbi_set_flip_vertically_on_load(false);
-    
+    } else {
+        stbi_set_flip_vertically_on_load(false);
+    }
+
     stbi_io_callbacks callbacks;
     callbacks.read = &stbi_physfs_read;
     callbacks.skip = &stbi_physfs_skip;
@@ -49,9 +52,11 @@ resource_ptr<Image> resource::load<Image>(const char *name, unsigned int flags)
 
     auto new_resource = std::make_shared<Image>();
 
-    if(flags & IMAGE_LOAD_GRAY)
+    if(flags & IMAGE_LOAD_GRAY) {
         new_resource->pixels = stbi_load_from_callbacks(&callbacks, file, &new_resource->size.x, &new_resource->size.y, nullptr, STBI_grey);
-    else new_resource->pixels = stbi_load_from_callbacks(&callbacks, file, &new_resource->size.x, &new_resource->size.y, nullptr, STBI_rgb_alpha);
+    } else {
+        new_resource->pixels = stbi_load_from_callbacks(&callbacks, file, &new_resource->size.x, &new_resource->size.y, nullptr, STBI_rgb_alpha);
+    }
 
     PHYSFS_close(file);
 
@@ -72,10 +77,12 @@ resource_ptr<Image> resource::load<Image>(const char *name, unsigned int flags)
 template<>
 void resource::hard_cleanup<Image>(void)
 {
-    for(const auto &it : resource_map) {
-        if(it.second.use_count() > 1L)
+    for(const auto& it : resource_map) {
+        if(it.second.use_count() > 1L) {
             spdlog::warn("resource: zombie resource [Image] {} [use_count={}]", it.first, it.second.use_count());
-        else spdlog::debug("resource: releasing [Image] {}", it.first);
+        } else {
+            spdlog::debug("resource: releasing [Image] {}", it.first);
+        }
 
         stbi_image_free(it.second->pixels);
     }

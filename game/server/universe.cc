@@ -1,9 +1,10 @@
 #include "server/pch.hh"
+
 #include "server/universe.hh"
 
+#include "core/buffer.hh"
 #include "core/config.hh"
 #include "core/epoch.hh"
-#include "core/buffer.hh"
 
 #include "shared/chunk.hh"
 #include "shared/dimension.hh"
@@ -25,9 +26,9 @@ static ConfigUnsigned64 universe_config_seed;
 static ConfigString universe_spawn_dimension("world");
 
 static std::string universe_config_path;
-static std::unordered_map<Dimension *, DimensionMetadata *> metadata_map;
+static std::unordered_map<Dimension*, DimensionMetadata*> metadata_map;
 
-static std::string make_chunk_filename(const DimensionMetadata *metadata, const chunk_pos &cpos)
+static std::string make_chunk_filename(const DimensionMetadata* metadata, const chunk_pos& cpos)
 {
     const auto unsigned_x = static_cast<std::uint32_t>(cpos.x);
     const auto unsigned_y = static_cast<std::uint32_t>(cpos.y);
@@ -35,7 +36,7 @@ static std::string make_chunk_filename(const DimensionMetadata *metadata, const 
     return fmt::format("{}/{:08X}-{:08X}-{:08X}.zvox", metadata->zvox_dir, unsigned_x, unsigned_y, unsigned_z);
 }
 
-static void add_new_dimension(Dimension *dimension)
+static void add_new_dimension(Dimension* dimension)
 {
     if(globals::dimensions.count(dimension->get_name())) {
         spdlog::critical("universe: dimension named {} already exists", dimension->get_name());
@@ -57,10 +58,10 @@ static void add_new_dimension(Dimension *dimension)
         spdlog::critical("universe: {}: {}", metadata->zvox_dir, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
         std::terminate();
     }
-    
+
     globals::dimensions.insert_or_assign(dimension->get_name(), dimension);
-    
-    auto &mapped_metadata = metadata_map.insert_or_assign(dimension, metadata).first->second;
+
+    auto& mapped_metadata = metadata_map.insert_or_assign(dimension, metadata).first->second;
 
     dimension->init(mapped_metadata->config);
 
@@ -69,7 +70,7 @@ static void add_new_dimension(Dimension *dimension)
     dimension->init_late(universe_config_seed.get_value());
 }
 
-static void internal_save_chunk(const DimensionMetadata *metadata, const Dimension *dimension, const chunk_pos &cpos, const Chunk *chunk)
+static void internal_save_chunk(const DimensionMetadata* metadata, const Dimension* dimension, const chunk_pos& cpos, const Chunk* chunk)
 {
     auto path = make_chunk_filename(metadata, cpos);
 
@@ -140,14 +141,14 @@ void universe::deinit(void)
         universe::save_all_chunks(dimension.second);
         delete dimension.second;
     }
- 
+
     globals::dimensions.clear();
     globals::spawn_dimension = nullptr;
 
     universe_config.save_file(universe_config_path.c_str());
 }
 
-Chunk *universe::load_chunk(Dimension *dimension, const chunk_pos &cpos)
+Chunk* universe::load_chunk(Dimension* dimension, const chunk_pos& cpos)
 {
     if(auto chunk = dimension->find_chunk(cpos)) {
         // Just return the existing chunk which is
@@ -182,7 +183,7 @@ Chunk *universe::load_chunk(Dimension *dimension, const chunk_pos &cpos)
     return nullptr;
 }
 
-void universe::save_chunk(Dimension *dimension, const chunk_pos &cpos)
+void universe::save_chunk(Dimension* dimension, const chunk_pos& cpos)
 {
     auto metadata = metadata_map.find(dimension);
 
@@ -197,7 +198,7 @@ void universe::save_chunk(Dimension *dimension, const chunk_pos &cpos)
     }
 }
 
-void universe::save_all_chunks(Dimension *dimension)
+void universe::save_all_chunks(Dimension* dimension)
 {
     auto group = dimension->chunks.group(entt::get<ChunkComponent, InhabitedComponent>);
     auto metadata = metadata_map.find(dimension);

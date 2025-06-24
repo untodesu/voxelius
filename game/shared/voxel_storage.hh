@@ -11,8 +11,8 @@ class WriteBuffer;
 class VoxelStorage final : public std::array<voxel_id, CHUNK_VOLUME> {
 public:
     using std::array<voxel_id, CHUNK_VOLUME>::array;
-    void serialize(WriteBuffer &buffer) const;
-    void deserialize(ReadBuffer &buffer);
+    void serialize(WriteBuffer& buffer) const;
+    void deserialize(ReadBuffer& buffer);
 };
 
 #endif /* SHARED_VOXEL_STORAGE_HH */

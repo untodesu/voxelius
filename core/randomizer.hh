@@ -8,8 +8,8 @@ public:
     explicit Randomizer(void);
     explicit Randomizer(std::uint64_t seed);
     virtual ~Randomizer(void) = default;
-    void add(const T &value);
-    const T &get(void);
+    void add(const T& value);
+    const T& get(void);
     void clear(void);
 
 private:
@@ -35,14 +35,14 @@ inline Randomizer<T>::Randomizer(std::uint64_t seed)
 }
 
 template<typename T>
-inline void Randomizer<T>::add(const T &value)
+inline void Randomizer<T>::add(const T& value)
 {
     m_vector.push_back(value);
     m_dist = std::uniform_int_distribution<std::size_t>(0, m_vector.size() - 1);
 }
 
 template<typename T>
-inline const T &Randomizer<T>::get(void)
+inline const T& Randomizer<T>::get(void)
 {
     return m_vector.at(m_dist(m_twister));
 }

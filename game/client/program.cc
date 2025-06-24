@@ -1,41 +1,43 @@
 #include "client/pch.hh"
+
 #include "client/program.hh"
 
 #include "core/strtools.hh"
 
 // This fills up the array of source lines and figures out
 // which lines are to be dynamically resolved as variant macros
-static void parse_source(const char *source, std::vector<std::string> &out_lines, std::vector<GL_VariedMacro> &out_variants)
+static void parse_source(const char* source, std::vector<std::string>& out_lines, std::vector<GL_VariedMacro>& out_variants)
 {
     std::string line;
     std::istringstream stream = std::istringstream(source);
     unsigned long line_number = 0UL;
-    
+
     out_lines.clear();
     out_variants.clear();
-    
+
     while(std::getline(stream, line)) {
         unsigned int macro_index = {};
         char macro_name[128] = {};
-        
+
         if(std::sscanf(line.c_str(), " # pragma variant [ %u ] %127[^, \"\t\r\n]", &macro_index, &macro_name) == 2) {
-            if(out_variants.size() <= macro_index)
+            if(out_variants.size() <= macro_index) {
                 out_variants.resize(macro_index + 1U);
+            }
+
             out_variants[macro_index].name = macro_name;
             out_variants[macro_index].line = line_number;
             out_variants[macro_index].value = std::numeric_limits<unsigned int>::max();
 
             out_lines.push_back(std::string());
             line_number += 1UL;
-        }
-        else {
+        } else {
             out_lines.push_back(line);
             line_number += 1UL;
         }
     }
 }
 
-static GLuint compile_shader(const char *path, const char *source, GLenum shader_stage)
+static GLuint compile_shader(const char* path, const char* source, GLenum shader_stage)
 {
     GLuint shader = glCreateShader(shader_stage);
     glShaderSource(shader, 1, &source, nullptr);
@@ -63,7 +65,7 @@ static GLuint compile_shader(const char *path, const char *source, GLenum shader
     return shader;
 }
 
-bool GL_Program::setup(const char *vpath, const char *fpath)
+bool GL_Program::setup(const char* vpath, const char* fpath)
 {
     destroy();
 
@@ -109,9 +111,9 @@ bool GL_Program::update(void)
         return true;
     }
 
-    for(const auto &macro : vert_variants)
+    for(const auto& macro : vert_variants)
         vert_source[macro.line] = fmt::format("#define {} {}", macro.name, macro.value);
-    for(const auto &macro : frag_variants)
+    for(const auto& macro : frag_variants)
         frag_source[macro.line] = fmt::format("#define {} {}", macro.name, macro.value);
 
     const std::string vsource = strtools::join(vert_source, "\r\n");
@@ -121,7 +123,7 @@ bool GL_Program::update(void)
     GLuint frag = compile_shader(frag_path.c_str(), fsource.c_str(), GL_FRAGMENT_SHADER);
 
     if(!vert || !frag) {
-        //needs_update = false;
+        // needs_update = false;
         glDeleteShader(frag);
         glDeleteShader(vert);
         return false;
@@ -150,12 +152,12 @@ bool GL_Program::update(void)
     glGetProgramiv(handle, GL_LINK_STATUS, &link_status);
 
     if(!link_status) {
-        //needs_update = false;
+        // needs_update = false;
         glDeleteProgram(handle);
         return false;
     }
 
-    for(auto &uniform : uniforms) {
+    for(auto& uniform : uniforms) {
         // NOTE: GL seems to silently ignore invalid uniform
         // locations (-1); should we write something into logs about this?
         uniform.location = glGetUniformLocation(handle, uniform.name.c_str());
@@ -167,9 +169,10 @@ bool GL_Program::update(void)
 
 void GL_Program::destroy(void)
 {
-    if(handle)
+    if(handle) {
         glDeleteProgram(handle);
-    handle = 0;
+        handle = 0;
+    }
 
     uniforms.clear();
 
@@ -184,14 +187,14 @@ void GL_Program::destroy(void)
     needs_update = false;
 }
 
-std::size_t GL_Program::add_uniform(const char *name)
+std::size_t GL_Program::add_uniform(const char* name)
 {
     for(std::size_t i = 0; i < uniforms.size(); ++i) {
-        if(uniforms[i].name.compare(name))
-            continue;
-        return i;
+        if(!uniforms[i].name.compare(name)) {
+            return i;
+        }
     }
-    
+
     const std::size_t index = uniforms.size();
     uniforms.push_back(GL_Uniform());
     uniforms[index].location = -1;

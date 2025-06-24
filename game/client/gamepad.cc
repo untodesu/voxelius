@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/gamepad.hh"
 
 #include "core/cmdline.hh"
@@ -23,7 +24,7 @@ ConfigBoolean gamepad::active(false);
 GLFWgamepadstate gamepad::state;
 GLFWgamepadstate gamepad::last_state;
 
-static void on_toggle_enable(const ToggleEnabledEvent &event)
+static void on_toggle_enable(const ToggleEnabledEvent& event)
 {
     if(event.type == TOGGLE_USE_GAMEPAD) {
         gamepad::active.set_value(true);
@@ -31,7 +32,7 @@ static void on_toggle_enable(const ToggleEnabledEvent &event)
     }
 }
 
-static void on_toggle_disable(const ToggleDisabledEvent &event)
+static void on_toggle_disable(const ToggleDisabledEvent& event)
 {
     if(event.type == TOGGLE_USE_GAMEPAD) {
         gamepad::active.set_value(false);
@@ -39,15 +40,17 @@ static void on_toggle_disable(const ToggleDisabledEvent &event)
     }
 }
 
-static void on_glfw_joystick_event(const GlfwJoystickEvent &event)
+static void on_glfw_joystick_event(const GlfwJoystickEvent& event)
 {
     if((event.event_type == GLFW_CONNECTED) && glfwJoystickIsGamepad(event.joystick_id) && (active_gamepad_id == INVALID_GAMEPAD_ID)) {
         gamepad::available = true;
 
         active_gamepad_id = event.joystick_id;
 
-        for(int i = 0; i < NUM_AXES; gamepad::last_state.axes[i++] = 0.0f);
-        for(int i = 0; i < NUM_BUTTONS; gamepad::last_state.buttons[i++] = GLFW_RELEASE);
+        for(int i = 0; i < NUM_AXES; gamepad::last_state.axes[i++] = 0.0f)
+            ;
+        for(int i = 0; i < NUM_BUTTONS; gamepad::last_state.buttons[i++] = GLFW_RELEASE)
+            ;
 
         spdlog::info("gamepad: detected gamepad: {}", glfwGetGamepadName(event.joystick_id));
 
@@ -59,8 +62,10 @@ static void on_glfw_joystick_event(const GlfwJoystickEvent &event)
 
         active_gamepad_id = INVALID_GAMEPAD_ID;
 
-        for(int i = 0; i < NUM_AXES; gamepad::last_state.axes[i++] = 0.0f);
-        for(int i = 0; i < NUM_BUTTONS; gamepad::last_state.buttons[i++] = GLFW_RELEASE);
+        for(int i = 0; i < NUM_AXES; gamepad::last_state.axes[i++] = 0.0f)
+            ;
+        for(int i = 0; i < NUM_BUTTONS; gamepad::last_state.buttons[i++] = GLFW_RELEASE)
+            ;
 
         spdlog::warn("gamepad: disconnected");
 
@@ -97,8 +102,10 @@ void gamepad::init(void)
 
             active_gamepad_id = joystick;
 
-            for(int i = 0; i < NUM_AXES; gamepad::last_state.axes[i++] = 0.0f);
-            for(int i = 0; i < NUM_BUTTONS; gamepad::last_state.buttons[i++] = GLFW_RELEASE);
+            for(int i = 0; i < NUM_AXES; gamepad::last_state.axes[i++] = 0.0f)
+                ;
+            for(int i = 0; i < NUM_BUTTONS; gamepad::last_state.buttons[i++] = GLFW_RELEASE)
+                ;
 
             spdlog::info("gamepad: detected gamepad: {}", glfwGetGamepadName(joystick));
 
@@ -106,8 +113,10 @@ void gamepad::init(void)
         }
     }
 
-    for(int i = 0; i < NUM_AXES; gamepad::state.axes[i++] = 0.0f);
-    for(int i = 0; i < NUM_BUTTONS; gamepad::state.buttons[i++] = GLFW_RELEASE);
+    for(int i = 0; i < NUM_AXES; gamepad::state.axes[i++] = 0.0f)
+        ;
+    for(int i = 0; i < NUM_BUTTONS; gamepad::state.buttons[i++] = GLFW_RELEASE)
+        ;
 
     globals::dispatcher.sink<ToggleEnabledEvent>().connect<&on_toggle_enable>();
     globals::dispatcher.sink<ToggleDisabledEvent>().connect<&on_toggle_disable>();

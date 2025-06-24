@@ -1,10 +1,11 @@
 #include "client/pch.hh"
+
 #include "client/splash.hh"
 
 #include "core/cmdline.hh"
 #include "core/constexpr.hh"
-#include "core/feature.hh"
 #include "core/epoch.hh"
+#include "core/feature.hh"
 #include "core/resource.hh"
 
 #include "client/glfw.hh"
@@ -17,7 +18,7 @@ constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground |
 
 constexpr static int SPLASH_COUNT = 4;
 constexpr static std::size_t DELAY_MICROSECONDS = 2000000;
-constexpr static const char *SPLASH_PATH = "textures/gui/client_splash.png";
+constexpr static const char* SPLASH_PATH = "textures/gui/client_splash.png";
 
 static resource_ptr<TextureGUI> texture;
 static float texture_aspect;
@@ -26,17 +27,17 @@ static float texture_alpha;
 static std::uint64_t end_time;
 static std::string current_text;
 
-static void on_glfw_key(const GlfwKeyEvent &event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     end_time = UINT64_C(0);
 }
 
-static void on_glfw_mouse_button(const GlfwMouseButtonEvent &event)
+static void on_glfw_mouse_button(const GlfwMouseButtonEvent& event)
 {
     end_time = UINT64_C(0);
 }
 
-static void on_glfw_scroll(const GlfwScrollEvent &event)
+static void on_glfw_scroll(const GlfwScrollEvent& event)
 {
     end_time = UINT64_C(0);
 }
@@ -58,9 +59,12 @@ void client_splash::init(void)
     texture_alpha = 0.0f;
 
     if(texture) {
-        if(texture->size.x > texture->size.y)
+        if(texture->size.x > texture->size.y) {
             texture_aspect = static_cast<float>(texture->size.x) / static_cast<float>(texture->size.y);
-        else texture_aspect = static_cast<float>(texture->size.y) / static_cast<float>(texture->size.x);
+        } else {
+            texture_aspect = static_cast<float>(texture->size.y) / static_cast<float>(texture->size.x);
+        }
+
         texture_alpha = 1.0f;
     }
 }
@@ -85,8 +89,9 @@ void client_splash::init_late(void)
         const std::uint64_t curtime = epoch::microseconds();
         const std::uint64_t remains = end_time - curtime;
 
-        if(curtime >= end_time)
+        if(curtime >= end_time) {
             break;
+        }
 
         texture_alpha = cxpr::smoothstep(0.25f, 0.6f, static_cast<float>(remains) / static_cast<float>(DELAY_MICROSECONDS));
 
@@ -117,7 +122,7 @@ void client_splash::render(void)
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    
+
     glDisable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, globals::width, globals::height);

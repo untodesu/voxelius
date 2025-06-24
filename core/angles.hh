@@ -15,22 +15,24 @@ float wrap_360(float angle);
 
 namespace cxangles
 {
-glm::fvec3 wrap_180(const glm::fvec3 &angles);
-glm::fvec3 wrap_360(const glm::fvec3 &angles);
+glm::fvec3 wrap_180(const glm::fvec3& angles);
+glm::fvec3 wrap_360(const glm::fvec3& angles);
 } // namespace cxangles
 
 namespace cxangles
 {
-void vectors(const glm::fvec3 &angles, glm::fvec3 &forward);
-void vectors(const glm::fvec3 &angles, glm::fvec3 *forward, glm::fvec3 *right, glm::fvec3 *up);
+void vectors(const glm::fvec3& angles, glm::fvec3& forward);
+void vectors(const glm::fvec3& angles, glm::fvec3* forward, glm::fvec3* right, glm::fvec3* up);
 } // namespace cxangles
 
 inline float cxangles::wrap_180(float angle)
 {
     const auto result = std::fmod(angle + A180, A360);
 
-    if(result < 0.0f)
+    if(result < 0.0f) {
         return result + A180;
+    }
+
     return result - A180;
 }
 
@@ -39,7 +41,7 @@ inline float cxangles::wrap_360(float angle)
     return std::fmod(std::fmod(angle, A360) + A360, A360);
 }
 
-inline glm::fvec3 cxangles::wrap_180(const glm::fvec3 &angles)
+inline glm::fvec3 cxangles::wrap_180(const glm::fvec3& angles)
 {
     return glm::fvec3 {
         cxangles::wrap_180(angles.x),
@@ -48,7 +50,7 @@ inline glm::fvec3 cxangles::wrap_180(const glm::fvec3 &angles)
     };
 }
 
-inline glm::fvec3 cxangles::wrap_360(const glm::fvec3 &angles)
+inline glm::fvec3 cxangles::wrap_360(const glm::fvec3& angles)
 {
     return glm::fvec3 {
         cxangles::wrap_360(angles.x),
@@ -57,7 +59,7 @@ inline glm::fvec3 cxangles::wrap_360(const glm::fvec3 &angles)
     };
 }
 
-inline void cxangles::vectors(const glm::fvec3 &angles, glm::fvec3 &forward)
+inline void cxangles::vectors(const glm::fvec3& angles, glm::fvec3& forward)
 {
     const float cosp = std::cos(angles.x);
     const float cosy = std::cos(angles.y);
@@ -69,7 +71,7 @@ inline void cxangles::vectors(const glm::fvec3 &angles, glm::fvec3 &forward)
     forward.z = cosp * cosy * (-1.0f);
 }
 
-inline void cxangles::vectors(const glm::fvec3 &angles, glm::fvec3 *forward, glm::fvec3 *right, glm::fvec3 *up)
+inline void cxangles::vectors(const glm::fvec3& angles, glm::fvec3* forward, glm::fvec3* right, glm::fvec3* up)
 {
     if(!forward && !right && !up) {
         // There's no point in figuring out

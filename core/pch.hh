@@ -40,8 +40,8 @@
 
 #include <physfs.h>
 
-#include <spdlog/spdlog.h>
 #include <spdlog/fmt/fmt.h>
+#include <spdlog/spdlog.h>
 
 #include <stb_image.h>
 #include <stb_image_write.h>

@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/direct_connection.hh"
 
 #include "core/config.hh"
@@ -25,7 +26,7 @@ static std::string str_password;
 static std::string direct_hostname;
 static std::string direct_password;
 
-static void on_glfw_key(const GlfwKeyEvent &event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if((event.key == GLFW_KEY_ESCAPE) && (event.action == GLFW_PRESS)) {
         if(globals::gui_screen == GUI_DIRECT_CONNECTION) {
@@ -35,7 +36,7 @@ static void on_glfw_key(const GlfwKeyEvent &event)
     }
 }
 
-static void on_language_set(const LanguageSetEvent &event)
+static void on_language_set(const LanguageSetEvent& event)
 {
     str_title = language::resolve("direct_connection.title");
     str_connect = language::resolve_gui("direct_connection.connect");
@@ -51,13 +52,17 @@ static void connect_to_server(void)
     std::string parsed_hostname;
     std::uint16_t parsed_port;
 
-    if(!parts[0].empty())
+    if(!parts[0].empty()) {
         parsed_hostname = parts[0];
-    else parsed_hostname = std::string("localhost");
+    } else {
+        parsed_hostname = std::string("localhost");
+    }
 
-    if(parts.size() >= 2)
+    if(parts.size() >= 2) {
         parsed_port = cxpr::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 1024, UINT16_MAX);
-    else parsed_port = protocol::PORT;
+    } else {
+        parsed_port = protocol::PORT;
+    }
 
     session::connect(parsed_hostname.c_str(), parsed_port, direct_password.c_str());
 }
@@ -119,8 +124,11 @@ void direct_connection::layout(void)
         ImGui::Dummy(ImVec2(0.0f, 4.0f * globals::gui_scale));
 
         ImGui::BeginDisabled(strtools::is_whitespace(direct_hostname));
-        if(ImGui::Button(str_connect.c_str(), ImVec2(avail_width, 0.0f)))
+
+        if(ImGui::Button(str_connect.c_str(), ImVec2(avail_width, 0.0f))) {
             connect_to_server();
+        }
+
         ImGui::EndDisabled();
 
         if(ImGui::Button(str_cancel.c_str(), ImVec2(avail_width, 0.0f))) {

@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/player_move.hh"
 
 #include "core/angles.hh"
@@ -12,9 +13,9 @@
 #include "shared/velocity.hh"
 
 #include "client/const.hh"
+#include "client/gamepad.hh"
 #include "client/gamepad_axis.hh"
 #include "client/gamepad_button.hh"
-#include "client/gamepad.hh"
 #include "client/globals.hh"
 #include "client/gui_screen.hh"
 #include "client/keybind.hh"
@@ -59,7 +60,7 @@ static std::uniform_real_distribution<float> pitch_distrib;
 
 // Quake III's PM_Accelerate-ish function used for
 // conventional (gravity-affected non-flight) movement
-static glm::fvec3 pm_accelerate(const glm::fvec3 &wishdir, const glm::fvec3 &velocity, float wishspeed, float accel)
+static glm::fvec3 pm_accelerate(const glm::fvec3& wishdir, const glm::fvec3& velocity, float wishspeed, float accel)
 {
     auto current_speed = glm::dot(velocity, wishdir);
     auto add_speed = wishspeed - current_speed;
@@ -78,13 +79,13 @@ static glm::fvec3 pm_accelerate(const glm::fvec3 &wishdir, const glm::fvec3 &vel
 }
 
 // Conventional movement - velocity update when not on the ground
-static glm::fvec3 pm_air_move(const glm::fvec3 &wishdir, const glm::fvec3 &velocity)
+static glm::fvec3 pm_air_move(const glm::fvec3& wishdir, const glm::fvec3& velocity)
 {
     return pm_accelerate(wishdir, velocity, PMOVE_ACCELERATION_AIR, PMOVE_MAX_SPEED_AIR);
 }
 
 // Conventional movement - velocity uodate when on the ground
-static glm::fvec3 pm_ground_move(const glm::fvec3 &wishdir, const glm::fvec3 &velocity)
+static glm::fvec3 pm_ground_move(const glm::fvec3& wishdir, const glm::fvec3& velocity)
 {
     if(auto speed = glm::length(velocity)) {
         auto speed_drop = speed * PMOVE_FRICTION_GROUND * globals::fixed_frametime;
@@ -97,7 +98,7 @@ static glm::fvec3 pm_ground_move(const glm::fvec3 &wishdir, const glm::fvec3 &ve
 
 // A simpler minecraft-like acceleration model
 // used whenever the TOGGLE_PM_FLIGHT is enabled
-static glm::fvec3 pm_flight_move(const glm::fvec3 &wishdir)
+static glm::fvec3 pm_flight_move(const glm::fvec3& wishdir)
 {
     // FIXME: make it smoother
     return wishdir * PMOVE_MAX_SPEED_AIR;
@@ -144,9 +145,9 @@ void player_move::init(void)
 
 void player_move::fixed_update(void)
 {
-    const auto &head = globals::dimension->entities.get<HeadComponent>(globals::player);
-    auto &transform = globals::dimension->entities.get<TransformComponent>(globals::player);
-    auto &velocity = globals::dimension->entities.get<VelocityComponent>(globals::player);
+    const auto& head = globals::dimension->entities.get<HeadComponent>(globals::player);
+    auto& transform = globals::dimension->entities.get<TransformComponent>(globals::player);
+    auto& velocity = globals::dimension->entities.get<VelocityComponent>(globals::player);
 
     // Interpolation - preserve current component states
     globals::dimension->entities.emplace_or_replace<TransformComponentPrev>(globals::player, transform);
@@ -174,17 +175,20 @@ void player_move::fixed_update(void)
 
         auto new_speed = glm::length(new_velocity);
 
-        if(new_speed > 0.01f)
+        if(new_speed > 0.01f) {
             footsteps_distance += globals::fixed_frametime * new_speed;
-        else footsteps_distance = 0.0f;
-
-        if(footsteps_distance >= PMOVE_FOOTSTEP_SIZE) {
-            if(auto effect = voxel_sounds::get_footsteps(grounded->surface))
-                sound::play_player(effect, false, pitch_distrib(pitch_random));
+        } else {
             footsteps_distance = 0.0f;
         }
-    }
-    else {
+
+        if(footsteps_distance >= PMOVE_FOOTSTEP_SIZE) {
+            if(auto effect = voxel_sounds::get_footsteps(grounded->surface)) {
+                sound::play_player(effect, false, pitch_distrib(pitch_random));
+            }
+
+            footsteps_distance = 0.0f;
+        }
+    } else {
         auto new_velocity = pm_air_move(wishdir, velocity_horizontal);
         velocity.value.x = new_velocity.x;
         velocity.value.z = new_velocity.z;
@@ -213,13 +217,11 @@ void player_move::fixed_update(void)
                 // No considerable speed increase within
                 // the precision we use to draw the speedometer
                 status_lines::set(STATUS_DEBUG, new_speed_text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f), 1.0f);
-            }
-            else if(speed_change < 0.0f) {
+            } else if(speed_change < 0.0f) {
                 // Speed change is negative, we are actively
                 // slowing down; use the red color for the status line
                 status_lines::set(STATUS_DEBUG, new_speed_text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 1.0f);
-            }
-            else {
+            } else {
                 // Speed change is positive, we are actively
                 // speeding up; use the green color for the status line
                 status_lines::set(STATUS_DEBUG, new_speed_text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f), 1.0f);
@@ -243,25 +245,39 @@ void player_move::update_late(void)
     }
 
     if(gamepad::available && gamepad::active.get_value()) {
-        if(button_move_down.is_pressed(gamepad::state))
+        if(button_move_down.is_pressed(gamepad::state)) {
             movement_direction += DIR_DOWN<float>;
-        if(button_move_up.is_pressed(gamepad::state))
+        }
+
+        if(button_move_up.is_pressed(gamepad::state)) {
             movement_direction += DIR_UP<float>;
+        }
+
         movement_direction.x += axis_move_sideways.get_value(gamepad::state, gamepad::deadzone.get_value());
         movement_direction.z -= axis_move_forward.get_value(gamepad::state, gamepad::deadzone.get_value());
-    }
-    else {
-        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_forward.get_key()))
+    } else {
+        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_forward.get_key())) {
             movement_direction += DIR_FORWARD<float>;
-        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_back.get_key()))
+        }
+
+        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_back.get_key())) {
             movement_direction += DIR_BACK<float>;
-        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_left.get_key()))
+        }
+
+        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_left.get_key())) {
             movement_direction += DIR_LEFT<float>;
-        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_right.get_key()))
+        }
+
+        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_right.get_key())) {
             movement_direction += DIR_RIGHT<float>;
-        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_down.get_key()))
+        }
+
+        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_down.get_key())) {
             movement_direction += DIR_DOWN<float>;
-        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_up.get_key()))
+        }
+
+        if(GLFW_PRESS == glfwGetKey(globals::window, key_move_up.get_key())) {
             movement_direction += DIR_UP<float>;
+        }
     }
 }

@@ -1,4 +1,5 @@
 #include "shared/pch.hh"
+
 #include "shared/collision.hh"
 
 #include "core/constexpr.hh"
@@ -12,12 +13,12 @@
 #include "shared/velocity.hh"
 #include "shared/voxel_registry.hh"
 
-static int vgrid_collide(const Dimension *dimension, int d, CollisionComponent &collision, TransformComponent &transform, VelocityComponent &velocity, voxel_surface &touch_surface)
+static int vgrid_collide(const Dimension* dimension, int d, CollisionComponent& collision, TransformComponent& transform, VelocityComponent& velocity, voxel_surface& touch_surface)
 {
     const auto move = globals::fixed_frametime * velocity.value[d];
     const auto move_sign = cxpr::sign<int>(move);
 
-    const auto &ref_aabb = collision.aabb;
+    const auto& ref_aabb = collision.aabb;
     const auto current_aabb = ref_aabb.push(transform.local);
 
     auto next_aabb = AABB(current_aabb);
@@ -46,8 +47,7 @@ static int vgrid_collide(const Dimension *dimension, int d, CollisionComponent &
         ddir = local_pos::value_type(+1);
         dmin = lpos_min[d];
         dmax = lpos_max[d];
-    }
-    else {
+    } else {
         ddir = local_pos::value_type(-1);
         dmin = lpos_max[d];
         dmax = lpos_min[d];
@@ -60,50 +60,50 @@ static int vgrid_collide(const Dimension *dimension, int d, CollisionComponent &
 
     for(auto i = dmin; i != dmax; i += ddir) {
         for(auto j = lpos_min[u]; j < lpos_max[u]; ++j)
-        for(auto k = lpos_min[v]; k < lpos_max[v]; ++k) {
-            local_pos lpos;
-            lpos[d] = i;
-            lpos[u] = j;
-            lpos[v] = k;
+            for(auto k = lpos_min[v]; k < lpos_max[v]; ++k) {
+                local_pos lpos;
+                lpos[d] = i;
+                lpos[u] = j;
+                lpos[v] = k;
 
-            const auto vpos = coord::to_voxel(transform.chunk, lpos);
-            const auto info = voxel_registry::find(dimension->get_voxel(vpos));
+                const auto vpos = coord::to_voxel(transform.chunk, lpos);
+                const auto info = voxel_registry::find(dimension->get_voxel(vpos));
 
-            if(info == nullptr) {
-                // Don't collide with something
-                // that we assume to be nothing
-                continue;
+                if(info == nullptr) {
+                    // Don't collide with something
+                    // that we assume to be nothing
+                    continue;
+                }
+
+                AABB vbox;
+                vbox.min = glm::fvec3(lpos);
+                vbox.max = glm::fvec3(lpos) + 1.0f;
+
+                if(!next_aabb.intersect(vbox)) {
+                    // No intersection between the voxel
+                    // and the entity's collision hull
+                    continue;
+                }
+
+                if(info->touch_type == voxel_touch::SOLID) {
+                    // Solid touch type makes a collision
+                    // response whenever it is encountered
+                    velocity.value[d] = 0.0f;
+                    touch_surface = info->surface;
+                    return move_sign;
+                }
+
+                // In case of other touch types, they
+                // are latched and the last ever touch
+                // type is then responded to
+                if(info->touch_type != voxel_touch::NOTHING) {
+                    latch_touch = info->touch_type;
+                    latch_values = info->touch_values;
+                    latch_surface = info->surface;
+                    latch_vbox = vbox;
+                    continue;
+                }
             }
-
-            AABB vbox;
-            vbox.min = glm::fvec3(lpos);
-            vbox.max = glm::fvec3(lpos) + 1.0f;
-
-            if(!next_aabb.intersect(vbox)) {
-                // No intersection between the voxel
-                // and the entity's collision hull
-                continue;
-            }
-
-            if(info->touch_type == voxel_touch::SOLID) {
-                // Solid touch type makes a collision
-                // response whenever it is encountered
-                velocity.value[d] = 0.0f;
-                touch_surface = info->surface;
-                return move_sign;
-            }
-
-            // In case of other touch types, they
-            // are latched and the last ever touch
-            // type is then responded to
-            if(info->touch_type != voxel_touch::NOTHING) {
-                latch_touch = info->touch_type;
-                latch_values = info->touch_values;
-                latch_surface = info->surface;
-                latch_vbox = vbox;
-                continue;
-            }
-        }
     }
 
     if(latch_touch != voxel_touch::NOTHING) {
@@ -111,10 +111,12 @@ static int vgrid_collide(const Dimension *dimension, int d, CollisionComponent &
             const auto move_distance = cxpr::abs(current_aabb.min[d] - next_aabb.min[d]);
             const auto threshold = 2.0f * globals::fixed_frametime;
 
-            if(move_distance > threshold)
+            if(move_distance > threshold) {
                 velocity.value[d] *= -latch_values[d];
-            else velocity.value[d] = 0.0f;
-    
+            } else {
+                velocity.value[d] = 0.0f;
+            }
+
             touch_surface = latch_surface;
 
             return move_sign;
@@ -130,7 +132,7 @@ static int vgrid_collide(const Dimension *dimension, int d, CollisionComponent &
     return 0;
 }
 
-void CollisionComponent::fixed_update(Dimension *dimension)
+void CollisionComponent::fixed_update(Dimension* dimension)
 {
     // FIXME: this isn't particularly accurate considering
     // some voxels might be passable and some other voxels
@@ -148,11 +150,12 @@ void CollisionComponent::fixed_update(Dimension *dimension)
         auto vertical_move = vgrid_collide(dimension, 1, collision, transform, velocity, surface);
 
         if(dimension->entities.any_of<GravityComponent>(entity)) {
-            if(vertical_move == cxpr::sign<int>(dimension->get_gravity()))
-                dimension->entities.emplace_or_replace<GroundedComponent>(entity, GroundedComponent{surface});
-            else dimension->entities.remove<GroundedComponent>(entity);
-        }
-        else {
+            if(vertical_move == cxpr::sign<int>(dimension->get_gravity())) {
+                dimension->entities.emplace_or_replace<GroundedComponent>(entity, GroundedComponent { surface });
+            } else {
+                dimension->entities.remove<GroundedComponent>(entity);
+            }
+        } else {
             // The entity cannot be grounded because the component
             // setup of said entity should not let it comprehend the
             // concept of resting on the ground (it flies around)

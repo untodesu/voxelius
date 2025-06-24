@@ -7,7 +7,7 @@ namespace cxpr
 template<typename T>
 constexpr static inline const T abs(const T x);
 template<typename T, std::size_t L>
-constexpr static inline const std::size_t array_size(const T(&)[L]);
+constexpr static inline const std::size_t array_size(const T (&)[L]);
 template<typename T, typename F>
 constexpr static inline const T ceil(const F x);
 template<typename T>
@@ -41,13 +41,15 @@ constexpr static inline const T smoothstep(const T x, const T y, const F a);
 template<typename T>
 constexpr static inline const T cxpr::abs(const T x)
 {
-    if(x < static_cast<T>(0))
+    if(x < static_cast<T>(0)) {
         return -x;
-    return x;
+    } else {
+        return x;
+    }
 }
 
 template<typename T, std::size_t L>
-constexpr static inline const std::size_t cxpr::array_size(const T(&)[L])
+constexpr static inline const std::size_t cxpr::array_size(const T (&)[L])
 {
     return L;
 }
@@ -59,9 +61,12 @@ constexpr static inline const T cxpr::ceil(const F x)
     static_assert(std::is_floating_point_v<F>);
 
     const T ival = static_cast<T>(x);
-    if(ival < x)
+
+    if(ival < x) {
         return ival + static_cast<T>(1);
-    return ival;
+    } else {
+        return ival;
+    }
 }
 
 template<typename T>
@@ -77,19 +82,24 @@ constexpr static inline const T cxpr::floor(const F x)
     static_assert(std::is_floating_point_v<F>);
 
     const T ival = static_cast<T>(x);
-    if(ival > x)
+
+    if(ival > x) {
         return ival - static_cast<T>(1);
-    return ival;
+    } else {
+        return ival;
+    }
 }
 
 template<typename T>
 constexpr static inline const T cxpr::clamp(const T x, const T min, const T max)
 {
-    if(x < min)
+    if(x < min) {
         return min;
-    if(x > max)
+    } else if(x > max) {
         return max;
-    return x;
+    } else {
+        return x;
+    }
 }
 
 template<typename T, typename F>
@@ -103,25 +113,31 @@ constexpr static inline const T cxpr::lerp(const T x, const T y, const F a)
 template<typename T>
 constexpr static inline const T cxpr::log2(const T x)
 {
-    if(x < 2)
+    if(x < 2) {
         return 0;
-    return cxpr::log2<T>((x + 1) >> 1) + 1;
+    } else {
+        return cxpr::log2<T>((x + 1) >> 1) + 1;
+    }
 }
 
 template<typename T>
 constexpr static inline const T cxpr::max(const T x, const T y)
 {
-    if(x < y)
+    if(x < y) {
         return y;
-    return x;
+    } else {
+        return x;
+    }
 }
 
 template<typename T>
 constexpr static inline const T cxpr::min(const T x, const T y)
 {
-    if(x > y)
+    if(x > y) {
         return y;
-    return x;
+    } else {
+        return x;
+    }
 }
 
 template<typename T>
@@ -129,10 +145,13 @@ constexpr static inline const T cxpr::mod_signed(const T x, const T m)
 {
     static_assert(std::is_signed_v<T>);
     static_assert(std::is_integral_v<T>);
-    const T result = static_cast<T>(x % m);
-    if(result < T(0))
+    auto result = static_cast<T>(x % m);
+
+    if(result < T(0)) {
         return result + m;
-    return result;
+    } else {
+        return result;
+    }
 }
 
 template<typename T>
@@ -159,11 +178,13 @@ constexpr static inline const bool cxpr::range(const T x, const T min, const T m
 template<typename T, typename F>
 constexpr static inline const T cxpr::sign(const F x)
 {
-    if(x < F(0))
+    if(x < F(0)) {
         return T(-1);
-    if(x > F(0))
+    } else if(x > F(0)) {
         return T(+1);
-    return T(0);
+    } else {
+        return T(0);
+    }
 }
 
 template<typename T, typename F>

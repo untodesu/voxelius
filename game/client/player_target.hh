@@ -9,7 +9,7 @@ namespace player_target
 extern voxel_id voxel;
 extern voxel_pos coord;
 extern voxel_pos normal;
-extern const VoxelInfo *info;
+extern const VoxelInfo* info;
 } // namespace player_target
 
 namespace player_target

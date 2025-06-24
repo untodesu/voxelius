@@ -15,7 +15,7 @@ namespace client_chat
 {
 void clear(void);
 void refresh_timings(void);
-void print(const std::string &string);
+void print(const std::string& string);
 } // namespace client_chat
 
 #endif /* CLIENT_CHAT_HH  */

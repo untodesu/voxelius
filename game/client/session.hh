@@ -4,7 +4,7 @@
 
 namespace session
 {
-extern ENetPeer *peer;
+extern ENetPeer* peer;
 extern std::uint16_t client_index;
 extern std::uint64_t client_identity;
 } // namespace session
@@ -18,8 +18,8 @@ void invalidate(void);
 
 namespace session
 {
-void connect(const char *hostname, std::uint16_t port, const char *password);
-void disconnect(const char *reason);
+void connect(const char* hostname, std::uint16_t port, const char* password);
+void disconnect(const char* reason);
 void send_login_request(void);
 } // namespace session
 

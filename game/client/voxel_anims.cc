@@ -1,8 +1,9 @@
 #include "client/pch.hh"
+
 #include "client/voxel_anims.hh"
 
-#include "core/constexpr.hh"
 #include "core/config.hh"
+#include "core/constexpr.hh"
 
 #include "client/globals.hh"
 

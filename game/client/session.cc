@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/session.hh"
 
 #include "core/config.hh"
@@ -24,7 +25,7 @@
 #include "client/progress_bar.hh"
 #include "client/window_title.hh"
 
-ENetPeer *session::peer = nullptr;
+ENetPeer* session::peer = nullptr;
 std::uint16_t session::client_index = UINT16_MAX;
 std::uint64_t session::client_identity = UINT64_MAX;
 
@@ -37,7 +38,7 @@ static void set_fixed_tickrate(std::uint16_t tickrate)
     globals::fixed_accumulator = 0;
 }
 
-static void on_login_response_packet(const protocol::LoginResponse &packet)
+static void on_login_response_packet(const protocol::LoginResponse& packet)
 {
     spdlog::info("session: assigned client_index={}", packet.client_index);
     spdlog::info("session: assigned client_identity={}", packet.client_identity);
@@ -51,7 +52,7 @@ static void on_login_response_packet(const protocol::LoginResponse &packet)
     progress_bar::set_title("connecting.loading_world");
 }
 
-static void on_disconnect_packet(const protocol::Disconnect &packet)
+static void on_disconnect_packet(const protocol::Disconnect& packet)
 {
     enet_peer_disconnect(session::peer, 0);
 
@@ -84,7 +85,7 @@ static void on_disconnect_packet(const protocol::Disconnect &packet)
     globals::gui_screen = GUI_MESSAGE_BOX;
 }
 
-static void on_set_voxel_packet(const protocol::SetVoxel &packet)
+static void on_set_voxel_packet(const protocol::SetVoxel& packet)
 {
     auto cpos = coord::to_chunk(packet.vpos);
     auto lpos = coord::to_local(packet.vpos);
@@ -98,7 +99,7 @@ static void on_set_voxel_packet(const protocol::SetVoxel &packet)
             event.dimension = globals::dimension;
             event.chunk = chunk;
             event.cpos = cpos;
-            
+
             // Send a generic ChunkUpdate event to shake
             // up the mesher; directly calling world::set_voxel
             // here would result in a networked feedback loop
@@ -111,7 +112,7 @@ static void on_set_voxel_packet(const protocol::SetVoxel &packet)
 // NOTE: [session] is a good place for this since [receive]
 // handles entity data sent by the server and [session] handles
 // everything else network related that is not player movement
-static void on_voxel_set(const VoxelSetEvent &event)
+static void on_voxel_set(const VoxelSetEvent& event)
 {
     if(session::peer) {
         // Propagate changes to the server
@@ -135,7 +136,7 @@ void session::init(void)
     globals::fixed_accumulator = 0;
 
     server_password_hash = UINT64_MAX;
-    
+
     globals::dispatcher.sink<protocol::LoginResponse>().connect<&on_login_response_packet>();
     globals::dispatcher.sink<protocol::Disconnect>().connect<&on_disconnect_packet>();
     globals::dispatcher.sink<protocol::SetVoxel>().connect<&on_set_voxel_packet>();
@@ -156,7 +157,7 @@ void session::invalidate(void)
 {
     if(session::peer) {
         enet_peer_reset(session::peer);
-        
+
         message_box::reset();
         message_box::set_title("disconnected.disconnected");
         message_box::set_subtitle("enet.peer_connection_timeout");
@@ -185,12 +186,12 @@ void session::invalidate(void)
     globals::dimension = nullptr;
 }
 
-void session::connect(const char *host, std::uint16_t port, const char *password)
+void session::connect(const char* host, std::uint16_t port, const char* password)
 {
     ENetAddress address;
     enet_address_set_host(&address, host);
     address.port = port;
-    
+
     session::peer = enet_host_connect(globals::client_host, &address, 1, 0);
     session::client_index = UINT16_MAX;
     session::client_identity = UINT64_MAX;
@@ -242,7 +243,7 @@ void session::connect(const char *host, std::uint16_t port, const char *password
     globals::gui_screen = GUI_PROGRESS_BAR;
 }
 
-void session::disconnect(const char *reason)
+void session::disconnect(const char* reason)
 {
     if(session::peer) {
         protocol::Disconnect packet;
@@ -267,7 +268,7 @@ void session::disconnect(const char *reason)
         delete globals::dimension;
         globals::player = entt::null;
         globals::dimension = nullptr;
-        
+
         client_chat::clear();
     }
 }
@@ -282,7 +283,7 @@ void session::send_login_request(void)
     packet.username = client_game::username.get();
 
     protocol::send(session::peer, protocol::encode(packet));
-    
+
     server_password_hash = UINT64_MAX;
 
     progress_bar::set_title("connecting.logging_in");
@@ -291,7 +292,9 @@ void session::send_login_request(void)
 
 bool session::is_ingame(void)
 {
-    if(globals::dimension)
+    if(globals::dimension) {
         return globals::dimension->entities.valid(globals::player);
-    return false;
+    } else {
+        return false;
+    }
 }

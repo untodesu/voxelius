@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/sound_effect.hh"
 
 #include "core/resource.hh"
@@ -7,20 +8,22 @@
 
 static emhash8::HashMap<std::string, resource_ptr<SoundEffect>> resource_map;
 
-static std::size_t drwav_read_physfs(void *file, void *output, std::size_t count)
+static std::size_t drwav_read_physfs(void* file, void* output, std::size_t count)
 {
-    return static_cast<std::size_t>(PHYSFS_readBytes(reinterpret_cast<PHYSFS_File *>(file), output, count));
+    return static_cast<std::size_t>(PHYSFS_readBytes(reinterpret_cast<PHYSFS_File*>(file), output, count));
 }
 
-static drwav_bool32 drwav_seek_physfs(void *file, int offset, drwav_seek_origin origin)
+static drwav_bool32 drwav_seek_physfs(void* file, int offset, drwav_seek_origin origin)
 {
-    if(origin == drwav_seek_origin_current)
-        return PHYSFS_seek(reinterpret_cast<PHYSFS_File *>(file), PHYSFS_tell(reinterpret_cast<PHYSFS_File *>(file)) + offset);
-    return PHYSFS_seek(reinterpret_cast<PHYSFS_File *>(file), offset);
+    if(origin == drwav_seek_origin_current) {
+        return PHYSFS_seek(reinterpret_cast<PHYSFS_File*>(file), PHYSFS_tell(reinterpret_cast<PHYSFS_File*>(file)) + offset);
+    } else {
+        return PHYSFS_seek(reinterpret_cast<PHYSFS_File*>(file), offset);
+    }
 }
 
 template<>
-resource_ptr<SoundEffect> resource::load<SoundEffect>(const char *name, unsigned int flags)
+resource_ptr<SoundEffect> resource::load<SoundEffect>(const char* name, unsigned int flags)
 {
     auto it = resource_map.find(name);
 
@@ -41,7 +44,6 @@ resource_ptr<SoundEffect> resource::load<SoundEffect>(const char *name, unsigned
         return nullptr;
     }
 
-
     drwav wav_info;
 
     if(!drwav_init(&wav_info, &drwav_read_physfs, &drwav_seek_physfs, file, nullptr)) {
@@ -58,7 +60,7 @@ resource_ptr<SoundEffect> resource::load<SoundEffect>(const char *name, unsigned
     }
 
     auto samples = new ALshort[wav_info.totalPCMFrameCount];
-    auto count = drwav_read_pcm_frames_s16(&wav_info, wav_info.totalPCMFrameCount, reinterpret_cast<drwav_int16 *>(samples));
+    auto count = drwav_read_pcm_frames_s16(&wav_info, wav_info.totalPCMFrameCount, reinterpret_cast<drwav_int16*>(samples));
     auto sample_rate = static_cast<ALsizei>(wav_info.sampleRate);
     auto length = static_cast<ALsizei>(count * sizeof(ALshort));
 
@@ -79,10 +81,12 @@ resource_ptr<SoundEffect> resource::load<SoundEffect>(const char *name, unsigned
 template<>
 void resource::hard_cleanup<SoundEffect>(void)
 {
-    for(const auto &it : resource_map) {
-        if(it.second.use_count() > 1L)
+    for(const auto& it : resource_map) {
+        if(it.second.use_count() > 1L) {
             spdlog::warn("resource: zombie resource [SoundEffect] {} [use_count={}]", it.first, it.second.use_count());
-        else spdlog::debug("resource: releasing [SoundEffect] {}", it.first);
+        } else {
+            spdlog::debug("resource: releasing [SoundEffect] {}", it.first);
+        }
 
         alDeleteBuffers(1, &it.second->buffer);
     }

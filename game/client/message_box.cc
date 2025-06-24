@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/message_box.hh"
 
 #include "client/globals.hh"
@@ -34,7 +35,7 @@ void message_box::layout(void)
 
     if(ImGui::Begin("###UIProgress", nullptr, WINDOW_FLAGS)) {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 1.0f * globals::gui_scale));
-        
+
         const float title_width = ImGui::CalcTextSize(str_title.c_str()).x;
         ImGui::SetCursorPosX(0.5f * (window_size.x - title_width));
         ImGui::TextUnformatted(str_title.c_str());
@@ -49,14 +50,14 @@ void message_box::layout(void)
 
         ImGui::Dummy(ImVec2(0.0f, 32.0f * globals::gui_scale));
 
-        for(const auto &button : buttons) {
+        for(const auto& button : buttons) {
             const float button_width = 0.8f * ImGui::CalcItemWidth();
             ImGui::SetCursorPosX(0.5f * (window_size.x - button_width));
 
             if(ImGui::Button(button.str_title.c_str(), ImVec2(button_width, 0.0f))) {
-                if(!button.action)
-                    continue;
-                button.action();
+                if(button.action) {
+                    button.action();
+                }
             }
         }
 
@@ -73,17 +74,17 @@ void message_box::reset(void)
     buttons.clear();
 }
 
-void message_box::set_title(const char *title)
+void message_box::set_title(const char* title)
 {
     str_title = language::resolve(title);
 }
 
-void message_box::set_subtitle(const char *subtitle)
+void message_box::set_subtitle(const char* subtitle)
 {
     str_subtitle = language::resolve(subtitle);
 }
 
-void message_box::add_button(const char *text, const message_box_action &action)
+void message_box::add_button(const char* text, const message_box_action& action)
 {
     Button button = {};
     button.str_title = fmt::format("{}###MessageBox_Button{}", language::resolve(text), buttons.size());

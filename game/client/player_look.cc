@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/player_look.hh"
 
 #include "core/angles.hh"
@@ -8,9 +9,9 @@
 #include "shared/head.hh"
 
 #include "client/const.hh"
+#include "client/gamepad.hh"
 #include "client/gamepad_axis.hh"
 #include "client/gamepad_button.hh"
-#include "client/gamepad.hh"
 #include "client/glfw.hh"
 #include "client/globals.hh"
 #include "client/keybind.hh"
@@ -42,7 +43,7 @@ static glm::fvec2 last_cursor;
 static void add_angles(float pitch, float yaw)
 {
     if(session::is_ingame()) {
-        auto &head = globals::dimension->entities.get<HeadComponent>(globals::player);
+        auto& head = globals::dimension->entities.get<HeadComponent>(globals::player);
 
         head.angles[0] += pitch;
         head.angles[1] += yaw;
@@ -57,7 +58,7 @@ static void add_angles(float pitch, float yaw)
     }
 }
 
-static void on_glfw_cursor_pos(const GlfwCursorPosEvent &event)
+static void on_glfw_cursor_pos(const GlfwCursorPosEvent& event)
 {
     if(gamepad::available && gamepad::active.get_value()) {
         // The player is assumed to be using
@@ -65,7 +66,7 @@ static void on_glfw_cursor_pos(const GlfwCursorPosEvent &event)
         last_cursor = event.pos;
         return;
     }
-    
+
     if(globals::gui_screen || !session::is_ingame()) {
         // UI is visible or we're not in-game
         last_cursor = event.pos;
@@ -79,12 +80,10 @@ static void on_glfw_cursor_pos(const GlfwCursorPosEvent &event)
     last_cursor = event.pos;
 }
 
-static void on_gamepad_button(const GamepadButtonEvent &event)
+static void on_gamepad_button(const GamepadButtonEvent& event)
 {
     if(button_fastlook.equals(event.button)) {
-        if(event.action == GLFW_PRESS)
-            fastlook_enabled = true;
-        else fastlook_enabled = false;
+        fastlook_enabled = event.action == GLFW_PRESS;
     }
 }
 
@@ -139,8 +138,7 @@ void player_look::update_late(void)
     if(!globals::gui_screen && session::is_ingame()) {
         glfwSetInputMode(globals::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glfwSetInputMode(globals::window, GLFW_RAW_MOUSE_MOTION, mouse_raw_input.get_value());
-    }
-    else {
+    } else {
         glfwSetInputMode(globals::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwSetInputMode(globals::window, GLFW_RAW_MOUSE_MOTION, false);
     }

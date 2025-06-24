@@ -8,7 +8,7 @@ class Dimension;
 // out of bounds in a specific dimension
 struct StasisComponent final {
 public:
-    static void fixed_update(Dimension *dimension);
+    static void fixed_update(Dimension* dimension);
 };
 
 #endif /* SHARED_STASIS_HH */

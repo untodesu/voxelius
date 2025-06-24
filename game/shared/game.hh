@@ -4,7 +4,7 @@
 
 namespace shared_game
 {
-void init(int argc, char **argv);
+void init(int argc, char** argv);
 void deinit(void);
 } // namespace shared_game
 

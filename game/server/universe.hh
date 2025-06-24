@@ -17,9 +17,9 @@ void deinit(void);
 
 namespace universe
 {
-Chunk *load_chunk(Dimension *dimension, const chunk_pos &cpos);
-void save_chunk(Dimension *dimension, const chunk_pos &cpos);
-void save_all_chunks(Dimension *dimension);
+Chunk* load_chunk(Dimension* dimension, const chunk_pos& cpos);
+void save_chunk(Dimension* dimension, const chunk_pos& cpos);
+void save_all_chunks(Dimension* dimension);
 } // namespace universe
 
 #endif /* SERVER_UNIVERSE_HH  */

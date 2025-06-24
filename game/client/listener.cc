@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/listener.hh"
 
 #include "core/config.hh"
@@ -16,8 +17,8 @@
 void listener::update(void)
 {
     if(session::is_ingame()) {
-        const auto &velocity = globals::dimension->entities.get<VelocityComponent>(globals::player).value;
-        const auto &position = camera::position_local;
+        const auto& velocity = globals::dimension->entities.get<VelocityComponent>(globals::player).value;
+        const auto& position = camera::position_local;
 
         alListener3f(AL_POSITION, position.x, position.y, position.z);
         alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);

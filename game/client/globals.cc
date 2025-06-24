@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/globals.hh"
 
 #include "core/config.hh"
@@ -7,7 +8,7 @@
 
 Config globals::client_config;
 
-GLFWwindow *globals::window;
+GLFWwindow* globals::window;
 
 float globals::window_frametime;
 float globals::window_frametime_avg;
@@ -27,21 +28,21 @@ GLuint globals::world_fbo_depth;
 std::size_t globals::num_drawcalls;
 std::size_t globals::num_triangles;
 
-ENetHost *globals::client_host;
+ENetHost* globals::client_host;
 
-Dimension *globals::dimension = nullptr;
+Dimension* globals::dimension = nullptr;
 entt::entity globals::player;
 
-ImFont *globals::font_debug;
-ImFont *globals::font_default;
-ImFont *globals::font_chat;
+ImFont* globals::font_debug;
+ImFont* globals::font_default;
+ImFont* globals::font_chat;
 
-ConfigKeyBind *globals::gui_keybind_ptr = nullptr;
-ConfigGamepadAxis *globals::gui_gamepad_axis_ptr = nullptr;
-ConfigGamepadButton *globals::gui_gamepad_button_ptr = nullptr;
+ConfigKeyBind* globals::gui_keybind_ptr = nullptr;
+ConfigGamepadAxis* globals::gui_gamepad_axis_ptr = nullptr;
+ConfigGamepadButton* globals::gui_gamepad_button_ptr = nullptr;
 
 unsigned int globals::gui_scale = 0U;
 unsigned int globals::gui_screen = GUI_SCREEN_NONE;
 
-ALCdevice *globals::sound_dev;
-ALCcontext *globals::sound_ctx;
+ALCdevice* globals::sound_dev;
+ALCcontext* globals::sound_ctx;

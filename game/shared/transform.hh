@@ -15,7 +15,7 @@ public:
     // Updates TransformComponent values so that
     // the local translation field is always within
     // local coodrinates; [floating-point precision]
-    static void fixed_update(Dimension *dimension);
+    static void fixed_update(Dimension* dimension);
 };
 
 // Client-side only - interpolated and previous transform

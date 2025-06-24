@@ -1,9 +1,10 @@
 #include "shared/pch.hh"
+
 #include "shared/voxel_storage.hh"
 
 #include "core/buffer.hh"
 
-void VoxelStorage::serialize(WriteBuffer &buffer) const
+void VoxelStorage::serialize(WriteBuffer& buffer) const
 {
     auto bound = mz_compressBound(sizeof(VoxelStorage));
     auto zdata = std::vector<unsigned char>(bound);
@@ -22,17 +23,19 @@ void VoxelStorage::serialize(WriteBuffer &buffer) const
     buffer.write_UI64(bound);
 
     // Write all the compressed data into the buffer
-    for(std::size_t i = 0; i < bound; buffer.write_UI8(zdata[i++]));
+    for(std::size_t i = 0; i < bound; buffer.write_UI8(zdata[i++]))
+        ;
 }
 
-void VoxelStorage::deserialize(ReadBuffer &buffer)
+void VoxelStorage::deserialize(ReadBuffer& buffer)
 {
     auto size = static_cast<mz_ulong>(sizeof(VoxelStorage));
     auto bound = static_cast<mz_ulong>(buffer.read_UI64());
     auto zdata = std::vector<unsigned char>(bound);
 
     // Read all the compressed data from the buffer
-    for(std::size_t i = 0; i < bound; zdata[i++] = buffer.read_UI8());
+    for(std::size_t i = 0; i < bound; zdata[i++] = buffer.read_UI8())
+        ;
 
     mz_uncompress(reinterpret_cast<unsigned char*>(data()), &size, zdata.data(), bound);
 

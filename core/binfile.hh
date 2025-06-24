@@ -3,7 +3,7 @@
 #pragma once
 
 struct BinFile final {
-    std::byte *buffer;
+    std::byte* buffer;
     std::size_t size;
 };
 

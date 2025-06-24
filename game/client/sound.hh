@@ -26,10 +26,10 @@ void update(void);
 
 namespace sound
 {
-void play_generic(const char *sound, bool looping, float pitch);
-void play_entity(entt::entity entity, const char *sound, bool looping, float pitch);
-void play_player(const char *sound, bool looping, float pitch);
-void play_ui(const char *sound, bool looping, float pitch);
+void play_generic(const char* sound, bool looping, float pitch);
+void play_entity(entt::entity entity, const char* sound, bool looping, float pitch);
+void play_player(const char* sound, bool looping, float pitch);
+void play_ui(const char* sound, bool looping, float pitch);
 } // namespace sound
 
 namespace sound

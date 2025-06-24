@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/sound_emitter.hh"
 
 #include "core/config.hh"
@@ -30,7 +31,7 @@ void SoundEmitterComponent::update(void)
     if(globals::dimension) {
         const auto view = globals::dimension->entities.view<SoundEmitterComponent>();
 
-        const auto &pivot = camera::position_chunk;
+        const auto& pivot = camera::position_chunk;
         const auto gain = cxpr::clamp(sound::volume_effects.get_value() * 0.01f, 0.0f, 1.0f);
 
         for(const auto [entity, emitter] : view.each()) {

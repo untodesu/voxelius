@@ -1,4 +1,5 @@
 #include "server/pch.hh"
+
 #include "server/status.hh"
 
 #include "core/config.hh"
@@ -9,7 +10,7 @@
 #include "server/globals.hh"
 #include "server/sessions.hh"
 
-static void on_status_request_packet(const protocol::StatusRequest &packet)
+static void on_status_request_packet(const protocol::StatusRequest& packet)
 {
     protocol::StatusResponse response;
     response.version = protocol::VERSION;

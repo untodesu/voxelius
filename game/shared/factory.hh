@@ -6,7 +6,7 @@ class Dimension;
 
 namespace shared_factory
 {
-void create_player(Dimension *dimension, entt::entity entity);
+void create_player(Dimension* dimension, entt::entity entity);
 } // namespace shared_factory
 
 #endif /* SHARED_FACTORY */

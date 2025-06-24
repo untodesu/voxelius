@@ -1,4 +1,5 @@
 #include "server/pch.hh"
+
 #include "server/sessions.hh"
 
 #include "core/config.hh"
@@ -24,22 +25,22 @@
 
 class DimensionListener final {
 public:
-    explicit DimensionListener(Dimension *dimension);
-    void on_destroy_entity(const entt::registry &registry, entt::entity entity);
+    explicit DimensionListener(Dimension* dimension);
+    void on_destroy_entity(const entt::registry& registry, entt::entity entity);
 
 private:
-    Dimension *dimension;
+    Dimension* dimension;
 };
 
 ConfigUnsigned sessions::max_players(8U, 1U, 128U);
 unsigned int sessions::num_players = 0U;
 
-static emhash8::HashMap<std::string, Session *> username_map;
-static emhash8::HashMap<std::uint64_t, Session *> identity_map;
+static emhash8::HashMap<std::string, Session*> username_map;
+static emhash8::HashMap<std::uint64_t, Session*> identity_map;
 static std::vector<DimensionListener> dimension_listeners;
 static std::vector<Session> sessions_vector;
 
-static void on_login_request_packet(const protocol::LoginRequest &packet)
+static void on_login_request_packet(const protocol::LoginRequest& packet)
 {
     if(packet.version > protocol::VERSION) {
         protocol::Disconnect response;
@@ -95,15 +96,14 @@ static void on_login_request_packet(const protocol::LoginRequest &packet)
             protocol::send(packet.peer, protocol::encode(response));
             return;
         }
-    }
-    else if(packet.password_hash != server_game::password_hash) {
+    } else if(packet.password_hash != server_game::password_hash) {
         protocol::Disconnect response;
         response.reason = "protocol.password_incorrect";
         protocol::send(packet.peer, protocol::encode(response));
         return;
     }
 
-    if(Session *session = sessions::create(packet.peer, packet.username.c_str())) {
+    if(Session* session = sessions::create(packet.peer, packet.username.c_str())) {
         protocol::LoginResponse response;
         response.client_index = session->client_index;
         response.client_identity = session->client_identity;
@@ -114,9 +114,12 @@ static void on_login_request_packet(const protocol::LoginRequest &packet)
         dim_info.name = globals::spawn_dimension->get_name();
         dim_info.gravity = globals::spawn_dimension->get_gravity();
         protocol::send(packet.peer, protocol::encode(dim_info));
-        
-        spdlog::info("sessions: {} [{}] logged in with client_index={} in {}", session->client_username,
-            session->client_identity, session->client_index, globals::spawn_dimension->get_name());
+
+        spdlog::info("sessions: {} [{}] logged in with client_index={} in {}",
+            session->client_username,
+            session->client_identity,
+            session->client_index,
+            globals::spawn_dimension->get_name());
 
         // FIXME: only send entities that are present within the current
         // player's view bounding box; this also would mean we're not sending
@@ -157,9 +160,9 @@ static void on_login_request_packet(const protocol::LoginRequest &packet)
         session->player_entity = globals::spawn_dimension->entities.create();
         shared_factory::create_player(globals::spawn_dimension, session->player_entity);
 
-        const auto &head = globals::spawn_dimension->entities.get<HeadComponent>(session->player_entity);
-        const auto &transform = globals::spawn_dimension->entities.get<TransformComponent>(session->player_entity);
-        const auto &velocity = globals::spawn_dimension->entities.get<VelocityComponent>(session->player_entity);
+        const auto& head = globals::spawn_dimension->entities.get<HeadComponent>(session->player_entity);
+        const auto& transform = globals::spawn_dimension->entities.get<TransformComponent>(session->player_entity);
+        const auto& velocity = globals::spawn_dimension->entities.get<VelocityComponent>(session->player_entity);
 
         protocol::EntityHead head_packet;
         head_packet.entity = session->player_entity;
@@ -209,14 +212,14 @@ static void on_login_request_packet(const protocol::LoginRequest &packet)
     protocol::send(packet.peer, protocol::encode(response));
 }
 
-static void on_disconnect_packet(const protocol::Disconnect &packet)
+static void on_disconnect_packet(const protocol::Disconnect& packet)
 {
-    if(Session *session = sessions::find(packet.peer)) {
+    if(Session* session = sessions::find(packet.peer)) {
         protocol::ChatMessage message;
         message.type = protocol::ChatMessage::PLAYER_LEAVE;
         message.sender = session->client_username;
         message.message = packet.reason;
-    
+
         protocol::broadcast(globals::server_host, protocol::encode(message), session->peer);
 
         spdlog::info("{} disconnected ({})", session->client_username, packet.reason);
@@ -229,7 +232,7 @@ static void on_disconnect_packet(const protocol::Disconnect &packet)
 // NOTE: [sessions] is a good place for this since [receive]
 // handles entity data sent by players and [sessions] handles
 // everything else network related that is not player movement
-static void on_voxel_set(const VoxelSetEvent &event)
+static void on_voxel_set(const VoxelSetEvent& event)
 {
     protocol::SetVoxel packet;
     packet.vpos = coord::to_voxel(event.cpos, event.lpos);
@@ -238,12 +241,12 @@ static void on_voxel_set(const VoxelSetEvent &event)
     protocol::broadcast(globals::server_host, protocol::encode(packet));
 }
 
-DimensionListener::DimensionListener(Dimension *dimension)
+DimensionListener::DimensionListener(Dimension* dimension)
 {
     this->dimension = dimension;
 }
 
-void DimensionListener::on_destroy_entity(const entt::registry &registry, entt::entity entity)
+void DimensionListener::on_destroy_entity(const entt::registry& registry, entt::entity entity)
 {
     protocol::RemoveEntity packet;
     packet.entity = entity;
@@ -279,7 +282,7 @@ void sessions::init_late(void)
 
 void sessions::init_post_universe(void)
 {
-    for(auto &dimension : globals::dimensions) {
+    for(auto& dimension : globals::dimensions) {
         dimension_listeners.push_back(DimensionListener(dimension.second));
         dimension.second->entities.on_destroy<entt::entity>().connect<&DimensionListener::on_destroy_entity>(dimension_listeners.back());
     }
@@ -293,7 +296,7 @@ void sessions::deinit(void)
     dimension_listeners.clear();
 }
 
-Session *sessions::create(ENetPeer *peer, const char *client_username)
+Session* sessions::create(ENetPeer* peer, const char* client_username)
 {
     for(unsigned int i = 0U; i < sessions::max_players.get_value(); ++i) {
         if(!sessions_vector[i].peer) {
@@ -303,7 +306,7 @@ Session *sessions::create(ENetPeer *peer, const char *client_username)
             sessions_vector[i].client_identity = client_identity;
             sessions_vector[i].client_username = client_username;
             sessions_vector[i].player_entity = entt::null;
-            sessions_vector[i].peer = peer;        
+            sessions_vector[i].peer = peer;
 
             username_map[client_username] = &sessions_vector[i];
             identity_map[client_identity] = &sessions_vector[i];
@@ -319,48 +322,57 @@ Session *sessions::create(ENetPeer *peer, const char *client_username)
     return nullptr;
 }
 
-Session *sessions::find(const char *client_username)
+Session* sessions::find(const char* client_username)
 {
     const auto it = username_map.find(client_username);
-    if(it != username_map.cend())
+    if(it != username_map.cend()) {
         return it->second;
-    return nullptr;
+    } else {
+        return nullptr;
+    }
 }
 
-Session *sessions::find(std::uint16_t client_index)
+Session* sessions::find(std::uint16_t client_index)
 {
     if(client_index < sessions_vector.size()) {
-        if(!sessions_vector[client_index].peer)
+        if(!sessions_vector[client_index].peer) {
             return nullptr;
-        return &sessions_vector[client_index];
+        } else {
+            return &sessions_vector[client_index];
+        }
     }
 
     return nullptr;
 }
 
-Session *sessions::find(std::uint64_t client_identity)
+Session* sessions::find(std::uint64_t client_identity)
 {
     const auto it = identity_map.find(client_identity);
-    if(it != identity_map.cend())
+
+    if(it != identity_map.cend()) {
         return it->second;
-    return nullptr;
+    } else {
+        return nullptr;
+    }
 }
 
-Session *sessions::find(ENetPeer *peer)
+Session* sessions::find(ENetPeer* peer)
 {
-    if(peer != nullptr)
-        return reinterpret_cast<Session *>(peer->data);
-    return nullptr;
+    if(peer != nullptr) {
+        return reinterpret_cast<Session*>(peer->data);
+    } else {
+        return nullptr;
+    }
 }
 
-void sessions::destroy(Session *session)
+void sessions::destroy(Session* session)
 {
     if(session) {
         if(session->peer) {
             // Make sure we don't leave a mark
             session->peer->data = nullptr;
         }
-        
+
         if(session->dimension) {
             session->dimension->entities.destroy(session->player_entity);
         }
@@ -378,18 +390,18 @@ void sessions::destroy(Session *session)
     }
 }
 
-void sessions::broadcast(const Dimension *dimension, ENetPacket *packet)
+void sessions::broadcast(const Dimension* dimension, ENetPacket* packet)
 {
-    for(const auto &session : sessions_vector) {
+    for(const auto& session : sessions_vector) {
         if(session.peer && (session.dimension == dimension)) {
             enet_peer_send(session.peer, protocol::CHANNEL, packet);
         }
     }
 }
 
-void sessions::broadcast(const Dimension *dimension, ENetPacket *packet, ENetPeer *except)
+void sessions::broadcast(const Dimension* dimension, ENetPacket* packet, ENetPeer* except)
 {
-    for(const auto &session : sessions_vector) {
+    for(const auto& session : sessions_vector) {
         if(session.peer && (session.peer != except)) {
             enet_peer_send(session.peer, protocol::CHANNEL, packet);
         }
@@ -401,9 +413,9 @@ void sessions::refresh_scoreboard(void)
     protocol::ScoreboardUpdate packet;
 
     for(std::size_t i = 0; i < sessions::max_players.get_value(); ++i) {
-        if(!sessions_vector[i].peer)
-            continue;
-        packet.names.push_back(sessions_vector[i].client_username);
+        if(sessions_vector[i].peer) {
+            packet.names.push_back(sessions_vector[i].client_username);
+        }
     }
 
     protocol::broadcast(globals::server_host, protocol::encode(packet));

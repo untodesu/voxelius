@@ -10,7 +10,7 @@
 // [1] FFFFTTTTTTTTTTTAAAAA------------
 using ChunkQuad = std::array<std::uint32_t, 2>;
 
-constexpr inline static ChunkQuad make_chunk_quad(const glm::fvec3 &position, const glm::fvec2 &size, voxel_facing facing, std::size_t texture, std::size_t frames)
+constexpr inline static ChunkQuad make_chunk_quad(const glm::fvec3& position, const glm::fvec2& size, voxel_facing facing, std::size_t texture, std::size_t frames)
 {
     ChunkQuad result = {};
     result[0] = 0x00000000;

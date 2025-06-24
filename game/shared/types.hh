@@ -20,7 +20,7 @@ using voxel_pos_xz = glm::vec<2, local_pos::value_type>;
 
 template<>
 struct std::hash<chunk_pos> final {
-    constexpr inline std::size_t operator()(const chunk_pos &cpos) const
+    constexpr inline std::size_t operator()(const chunk_pos& cpos) const
     {
         std::size_t value = 0;
         value ^= cpos.x * 73856093;
@@ -32,7 +32,7 @@ struct std::hash<chunk_pos> final {
 
 template<>
 struct std::hash<chunk_pos_xz> final {
-    constexpr inline std::size_t operator()(const chunk_pos_xz &cwpos) const
+    constexpr inline std::size_t operator()(const chunk_pos_xz& cwpos) const
     {
         std::size_t value = 0;
         value ^= cwpos.x * 73856093;

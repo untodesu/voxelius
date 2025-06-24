@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: BSD-2-Clause
 #include "client/pch.hh"
+
 #include "client/voxel_atlas.hh"
 
 #include "core/constexpr.hh"
@@ -25,15 +25,15 @@ static std::vector<AtlasPlane> planes;
 // textures (see the "default" texture part in VoxelInfoBuilder::build)
 // so there could either be six UNIQUE atlas strips or only one
 // https://crypto.stackexchange.com/questions/55162/best-way-to-hash-two-values-into-one
-static std::size_t vector_hash(const std::vector<std::string> &strings)
+static std::size_t vector_hash(const std::vector<std::string>& strings)
 {
     std::size_t source = 0;
-    for(const std::string &str : strings)
+    for(const std::string& str : strings)
         source += crc64::get(str);
     return crc64::get(&source, sizeof(source));
 }
 
-static void plane_setup(AtlasPlane &plane)
+static void plane_setup(AtlasPlane& plane)
 {
     glGenTextures(1, &plane.gl_texture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, plane.gl_texture);
@@ -44,22 +44,25 @@ static void plane_setup(AtlasPlane &plane)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
-static AtlasStrip *plane_lookup(AtlasPlane &plane, std::size_t hash_value)
+static AtlasStrip* plane_lookup(AtlasPlane& plane, std::size_t hash_value)
 {
     const auto it = plane.lookup.find(hash_value);
-    if(it != plane.lookup.cend())
+
+    if(it != plane.lookup.cend()) {
         return &plane.strips[it->second];
+    }
+
     return nullptr;
 }
 
-static AtlasStrip *plane_new_strip(AtlasPlane &plane, const std::vector<std::string> &paths, std::size_t hash_value)
+static AtlasStrip* plane_new_strip(AtlasPlane& plane, const std::vector<std::string>& paths, std::size_t hash_value)
 {
     AtlasStrip strip = {};
     strip.offset = plane.layer_count;
     strip.plane = plane.plane_id;
-    
+
     glBindTexture(GL_TEXTURE_2D_ARRAY, plane.gl_texture);
-    
+
     for(std::size_t i = 0; i < paths.size(); ++i) {
         if(auto image = resource::load<Image>(paths[i].c_str(), IMAGE_LOAD_FLIP)) {
             if((image->size.x != atlas_width) || (image->size.y != atlas_height)) {
@@ -71,7 +74,7 @@ static AtlasStrip *plane_new_strip(AtlasPlane &plane, const std::vector<std::str
             glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, offset, image->size.x, image->size.y, 1, GL_RGBA, GL_UNSIGNED_BYTE, image->pixels);
         }
     }
-    
+
     plane.layer_count += paths.size();
 
     const std::size_t index = plane.strips.size();
@@ -111,7 +114,7 @@ void voxel_atlas::create(int width, int height, std::size_t count)
 
 void voxel_atlas::destroy(void)
 {
-    for(const AtlasPlane &plane : planes)
+    for(const AtlasPlane& plane : planes)
         glDeleteTextures(1, &plane.gl_texture);
     atlas_width = 0;
     atlas_height = 0;
@@ -125,45 +128,53 @@ std::size_t voxel_atlas::plane_count(void)
 
 GLuint voxel_atlas::plane_texture(std::size_t plane_id)
 {
-    if(plane_id < planes.size())
+    if(plane_id < planes.size()) {
         return planes[plane_id].gl_texture;
-    return 0;
+    } else {
+        return 0;
+    }
 }
 
 void voxel_atlas::generate_mipmaps(void)
 {
-    for(const AtlasPlane &plane : planes) {
+    for(const AtlasPlane& plane : planes) {
         glBindTexture(GL_TEXTURE_2D_ARRAY, plane.gl_texture);
         glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     }
 }
 
-AtlasStrip *voxel_atlas::find_or_load(const std::vector<std::string> &paths)
+AtlasStrip* voxel_atlas::find_or_load(const std::vector<std::string>& paths)
 {
     const std::size_t hash_value = vector_hash(paths);
 
-    for(AtlasPlane &plane : planes) {
-        if(AtlasStrip *strip = plane_lookup(plane, hash_value))
+    for(AtlasPlane& plane : planes) {
+        if(AtlasStrip* strip = plane_lookup(plane, hash_value)) {
             return strip;
+        }
+
         continue;
     }
 
-    for(AtlasPlane &plane : planes) {
-        if((plane.layer_count + paths.size()) <= plane.layer_count_max)
+    for(AtlasPlane& plane : planes) {
+        if((plane.layer_count + paths.size()) <= plane.layer_count_max) {
             return plane_new_strip(plane, paths, hash_value);
+        }
+
         continue;
     }
 
     return nullptr;
 }
 
-AtlasStrip *voxel_atlas::find(const std::vector<std::string> &paths)
+AtlasStrip* voxel_atlas::find(const std::vector<std::string>& paths)
 {
     const std::size_t hash_value = vector_hash(paths);
 
-    for(AtlasPlane &plane : planes) {
-        if(AtlasStrip *strip = plane_lookup(plane, hash_value))
+    for(AtlasPlane& plane : planes) {
+        if(AtlasStrip* strip = plane_lookup(plane, hash_value)) {
             return strip;
+        }
+
         continue;
     }
 

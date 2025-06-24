@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/language.hh"
 
 #include "core/config.hh"
@@ -6,13 +7,13 @@
 #include "client/globals.hh"
 #include "client/settings.hh"
 
-constexpr static const char *DEFAULT_LANGUAGE = "en_US";
+constexpr static const char* DEFAULT_LANGUAGE = "en_US";
 
 // Available languages are kept in a special manifest file which
 // is essentially a key-value map of semi-IETF-compliant language tags
 // and the language's endonym; after reading the manifest, the translation
 // system knows what language it can load and will act accordingly
-constexpr static const char *MANIFEST_PATH = "lang/manifest.json";
+constexpr static const char* MANIFEST_PATH = "lang/manifest.json";
 
 static LanguageManifest manifest;
 static LanguageIterator current_language;
@@ -130,7 +131,7 @@ void language::set(LanguageIterator new_language)
         }
 
         language_map.clear();
-        
+
         for(size_t i = 0; i < count; ++i) {
             const auto key = json_object_get_name(json, i);
             const auto value = json_object_get_value_at(json, i);
@@ -156,12 +157,14 @@ LanguageIterator language::get_current(void)
     return current_language;
 }
 
-LanguageIterator language::find(const char *ietf)
+LanguageIterator language::find(const char* ietf)
 {
     const auto it = ietf_map.find(ietf);
-    if(it != ietf_map.cend())
+    if(it != ietf_map.cend()) {
         return it->second;
-    return manifest.cend();
+    } else {
+        return manifest.cend();
+    }
 }
 
 LanguageIterator language::cbegin(void)
@@ -174,15 +177,17 @@ LanguageIterator language::cend(void)
     return manifest.cend();
 }
 
-const char *language::resolve(const char *key)
+const char* language::resolve(const char* key)
 {
     const auto it = language_map.find(key);
-    if(it != language_map.cend())
+    if(it != language_map.cend()) {
         return it->second.c_str();
-    return key;
+    } else {
+        return key;
+    }
 }
 
-std::string language::resolve_gui(const char *key)
+std::string language::resolve_gui(const char* key)
 {
     // We need window tags to retain their hierarchy when a language
     // dynamically changes; ImGui allows to provide hidden unique identifiers

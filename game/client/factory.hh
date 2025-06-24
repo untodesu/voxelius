@@ -6,7 +6,7 @@ class Dimension;
 
 namespace client_factory
 {
-void create_player(Dimension *dimension, entt::entity entity);
+void create_player(Dimension* dimension, entt::entity entity);
 } // namespace client_factory
 
 #endif /* CLIENT_FACTORY_HH */

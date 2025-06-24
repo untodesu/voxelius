@@ -1,4 +1,5 @@
 #include "shared/pch.hh"
+
 #include "shared/protocol.hh"
 
 #include "core/buffer.hh"
@@ -15,7 +16,7 @@
 static ReadBuffer read_buffer;
 static WriteBuffer write_buffer;
 
-ENetPacket *protocol::encode(const protocol::StatusRequest &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::StatusRequest& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::StatusRequest::ID);
@@ -23,7 +24,7 @@ ENetPacket *protocol::encode(const protocol::StatusRequest &packet, enet_uint32 
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::StatusResponse &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::StatusResponse& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::StatusResponse::ID);
@@ -34,7 +35,7 @@ ENetPacket *protocol::encode(const protocol::StatusResponse &packet, enet_uint32
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::LoginRequest &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::LoginRequest& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::LoginRequest::ID);
@@ -46,7 +47,7 @@ ENetPacket *protocol::encode(const protocol::LoginRequest &packet, enet_uint32 f
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::LoginResponse &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::LoginResponse& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::LoginResponse::ID);
@@ -56,7 +57,7 @@ ENetPacket *protocol::encode(const protocol::LoginResponse &packet, enet_uint32 
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::Disconnect &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::Disconnect& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::Disconnect::ID);
@@ -64,7 +65,7 @@ ENetPacket *protocol::encode(const protocol::Disconnect &packet, enet_uint32 fla
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::ChunkVoxels &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::ChunkVoxels& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::ChunkVoxels::ID);
@@ -75,7 +76,7 @@ ENetPacket *protocol::encode(const protocol::ChunkVoxels &packet, enet_uint32 fl
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::EntityTransform &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::EntityTransform& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::EntityTransform::ID);
@@ -92,7 +93,7 @@ ENetPacket *protocol::encode(const protocol::EntityTransform &packet, enet_uint3
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::EntityHead &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::EntityHead& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::EntityHead::ID);
@@ -103,7 +104,7 @@ ENetPacket *protocol::encode(const protocol::EntityHead &packet, enet_uint32 fla
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::EntityVelocity &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::EntityVelocity& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::EntityVelocity::ID);
@@ -114,15 +115,15 @@ ENetPacket *protocol::encode(const protocol::EntityVelocity &packet, enet_uint32
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::SpawnPlayer &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::SpawnPlayer& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::SpawnPlayer::ID);
-    write_buffer.write_UI64(static_cast<std::uint64_t>(packet.entity));  
+    write_buffer.write_UI64(static_cast<std::uint64_t>(packet.entity));
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::ChatMessage &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::ChatMessage& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::ChatMessage::ID);
@@ -132,7 +133,7 @@ ENetPacket *protocol::encode(const protocol::ChatMessage &packet, enet_uint32 fl
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::SetVoxel &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::SetVoxel& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::SetVoxel::ID);
@@ -144,7 +145,7 @@ ENetPacket *protocol::encode(const protocol::SetVoxel &packet, enet_uint32 flags
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::RemoveEntity &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::RemoveEntity& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::RemoveEntity::ID);
@@ -152,7 +153,7 @@ ENetPacket *protocol::encode(const protocol::RemoveEntity &packet, enet_uint32 f
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::EntityPlayer &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::EntityPlayer& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::EntityPlayer::ID);
@@ -160,17 +161,17 @@ ENetPacket *protocol::encode(const protocol::EntityPlayer &packet, enet_uint32 f
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::ScoreboardUpdate &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::ScoreboardUpdate& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::ScoreboardUpdate::ID);
     write_buffer.write_UI16(static_cast<std::uint16_t>(packet.names.size()));
-    for(const std::string &username : packet.names)
+    for(const std::string& username : packet.names)
         write_buffer.write_string(username.substr(0, protocol::MAX_USERNAME));
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::RequestChunk &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::RequestChunk& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::RequestChunk::ID);
@@ -180,7 +181,7 @@ ENetPacket *protocol::encode(const protocol::RequestChunk &packet, enet_uint32 f
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::GenericSound &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::GenericSound& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::GenericSound::ID);
@@ -190,7 +191,7 @@ ENetPacket *protocol::encode(const protocol::GenericSound &packet, enet_uint32 f
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::EntitySound &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::EntitySound& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::EntitySound::ID);
@@ -201,7 +202,7 @@ ENetPacket *protocol::encode(const protocol::EntitySound &packet, enet_uint32 fl
     return write_buffer.to_packet(flags);
 }
 
-ENetPacket *protocol::encode(const protocol::DimensionInfo &packet, enet_uint32 flags)
+ENetPacket* protocol::encode(const protocol::DimensionInfo& packet, enet_uint32 flags)
 {
     write_buffer.reset();
     write_buffer.write_UI16(protocol::DimensionInfo::ID);
@@ -210,34 +211,34 @@ ENetPacket *protocol::encode(const protocol::DimensionInfo &packet, enet_uint32 
     return write_buffer.to_packet(flags);
 }
 
-void protocol::broadcast(ENetHost *host, ENetPacket *packet)
+void protocol::broadcast(ENetHost* host, ENetPacket* packet)
 {
     if(packet) {
         enet_host_broadcast(host, protocol::CHANNEL, packet);
     }
 }
 
-void protocol::broadcast(ENetHost *host, ENetPacket *packet, ENetPeer *except)
+void protocol::broadcast(ENetHost* host, ENetPacket* packet, ENetPeer* except)
 {
     if(packet) {
         for(unsigned int i = 0U; i < host->peerCount; ++i) {
             if(host->peers[i].state == ENET_PEER_STATE_CONNECTED) {
-                if(&host->peers[i] == except)
-                    continue;
-                enet_peer_send(&host->peers[i], protocol::CHANNEL, packet);
+                if(&host->peers[i] != except) {
+                    enet_peer_send(&host->peers[i], protocol::CHANNEL, packet);
+                }
             }
         }
     }
 }
 
-void protocol::send(ENetPeer *peer, ENetPacket *packet)
+void protocol::send(ENetPeer* peer, ENetPacket* packet)
 {
     if(packet) {
         enet_peer_send(peer, protocol::CHANNEL, packet);
     }
 }
 
-void protocol::decode(entt::dispatcher &dispatcher, const ENetPacket *packet, ENetPeer *peer)
+void protocol::decode(entt::dispatcher& dispatcher, const ENetPacket* packet, ENetPeer* peer)
 {
     read_buffer.reset(packet);
 
@@ -260,9 +261,9 @@ void protocol::decode(entt::dispatcher &dispatcher, const ENetPacket *packet, EN
     protocol::GenericSound generic_sound;
     protocol::EntitySound entity_sound;
     protocol::DimensionInfo dimension_info;
-    
+
     auto id = read_buffer.read_UI16();
-    
+
     switch(id) {
         case protocol::StatusRequest::ID:
             status_request.peer = peer;
@@ -405,14 +406,14 @@ void protocol::decode(entt::dispatcher &dispatcher, const ENetPacket *packet, EN
     }
 }
 
-ENetPacket *protocol::utils::make_disconnect(const char *reason, enet_uint32 flags)
+ENetPacket* protocol::utils::make_disconnect(const char* reason, enet_uint32 flags)
 {
     protocol::Disconnect packet;
     packet.reason = std::string(reason);
     return protocol::encode(packet, flags);
 }
 
-ENetPacket *protocol::utils::make_chat_message(const char *message, enet_uint32 flags)
+ENetPacket* protocol::utils::make_chat_message(const char* message, enet_uint32 flags)
 {
     protocol::ChatMessage packet;
     packet.type = protocol::ChatMessage::TEXT_MESSAGE;
@@ -420,7 +421,7 @@ ENetPacket *protocol::utils::make_chat_message(const char *message, enet_uint32 
     return protocol::encode(packet, flags);
 }
 
-ENetPacket *protocol::utils::make_chunk_voxels(Dimension *dimension, entt::entity entity, enet_uint32 flags)
+ENetPacket* protocol::utils::make_chunk_voxels(Dimension* dimension, entt::entity entity, enet_uint32 flags)
 {
     if(auto component = dimension->chunks.try_get<ChunkComponent>(entity)) {
         protocol::ChunkVoxels packet;
@@ -432,7 +433,7 @@ ENetPacket *protocol::utils::make_chunk_voxels(Dimension *dimension, entt::entit
     return nullptr;
 }
 
-ENetPacket *protocol::utils::make_entity_head(Dimension *dimension, entt::entity entity, enet_uint32 flags)
+ENetPacket* protocol::utils::make_entity_head(Dimension* dimension, entt::entity entity, enet_uint32 flags)
 {
     if(auto component = dimension->entities.try_get<HeadComponent>(entity)) {
         protocol::EntityHead packet;
@@ -444,7 +445,7 @@ ENetPacket *protocol::utils::make_entity_head(Dimension *dimension, entt::entity
     return nullptr;
 }
 
-ENetPacket *protocol::utils::make_entity_transform(Dimension *dimension, entt::entity entity, enet_uint32 flags)
+ENetPacket* protocol::utils::make_entity_transform(Dimension* dimension, entt::entity entity, enet_uint32 flags)
 {
     if(auto component = dimension->entities.try_get<TransformComponent>(entity)) {
         protocol::EntityTransform packet;
@@ -458,7 +459,7 @@ ENetPacket *protocol::utils::make_entity_transform(Dimension *dimension, entt::e
     return nullptr;
 }
 
-ENetPacket *protocol::utils::make_entity_velocity(Dimension *dimension, entt::entity entity, enet_uint32 flags)
+ENetPacket* protocol::utils::make_entity_velocity(Dimension* dimension, entt::entity entity, enet_uint32 flags)
 {
     if(auto component = dimension->entities.try_get<VelocityComponent>(entity)) {
         protocol::EntityVelocity packet;
@@ -470,7 +471,7 @@ ENetPacket *protocol::utils::make_entity_velocity(Dimension *dimension, entt::en
     return nullptr;
 }
 
-ENetPacket *protocol::utils::make_entity_player(Dimension *dimension, entt::entity entity, enet_uint32 flags)
+ENetPacket* protocol::utils::make_entity_player(Dimension* dimension, entt::entity entity, enet_uint32 flags)
 {
     if(dimension->entities.any_of<PlayerComponent>(entity)) {
         protocol::EntityPlayer packet;
@@ -481,7 +482,7 @@ ENetPacket *protocol::utils::make_entity_player(Dimension *dimension, entt::enti
     return nullptr;
 }
 
-ENetPacket *protocol::utils::make_dimension_info(const Dimension *dimension)
+ENetPacket* protocol::utils::make_dimension_info(const Dimension* dimension)
 {
     protocol::DimensionInfo packet;
     packet.name = dimension->get_name();

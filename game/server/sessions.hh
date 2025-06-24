@@ -11,8 +11,8 @@ struct Session final {
     std::uint64_t client_identity;
     std::string client_username;
     entt::entity player_entity;
-    Dimension *dimension;
-    ENetPeer *peer;
+    Dimension* dimension;
+    ENetPeer* peer;
 };
 
 namespace sessions
@@ -31,18 +31,18 @@ void deinit(void);
 
 namespace sessions
 {
-Session *create(ENetPeer *peer, const char *client_username);
-Session *find(const char *client_username);
-Session *find(std::uint16_t client_index);
-Session *find(std::uint64_t client_identity);
-Session *find(ENetPeer *peer);
-void destroy(Session *session);
+Session* create(ENetPeer* peer, const char* client_username);
+Session* find(const char* client_username);
+Session* find(std::uint16_t client_index);
+Session* find(std::uint64_t client_identity);
+Session* find(ENetPeer* peer);
+void destroy(Session* session);
 } // namespace sessions
 
 namespace sessions
 {
-void broadcast(const Dimension *dimension, ENetPacket *packet);
-void broadcast(const Dimension *dimension, ENetPacket *packet, ENetPeer *except);
+void broadcast(const Dimension* dimension, ENetPacket* packet);
+void broadcast(const Dimension* dimension, ENetPacket* packet, ENetPeer* except);
 } // namespace sessions
 
 namespace sessions

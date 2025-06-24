@@ -3,10 +3,10 @@
 #pragma once
 
 enum class task_status : unsigned int {
-    ENQUEUED    = 0x0000U,
-    PROCESSING  = 0x0001U,
-    COMPLETED   = 0x0002U,
-    CANCELLED   = 0x0004U,
+    ENQUEUED = 0x0000U,
+    PROCESSING = 0x0001U,
+    COMPLETED = 0x0002U,
+    CANCELLED = 0x0004U,
 };
 
 class Task {
@@ -32,17 +32,17 @@ void update(void);
 
 namespace threading::detail
 {
-void submit_new(Task *task);
+void submit_new(Task* task);
 } // namespace threading::detail
 
 namespace threading
 {
 template<typename T, typename... AT>
-void submit(AT &&... args);
+void submit(AT&&... args);
 } // namespace threading
 
 template<typename T, typename... AT>
-inline void threading::submit(AT &&... args)
+inline void threading::submit(AT&&... args)
 {
     threading::detail::submit_new(new T(args...));
 }

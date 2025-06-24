@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/bother.hh"
 
 #include "shared/protocol.hh"
@@ -14,12 +15,12 @@ struct BotherQueueItem final {
     std::uint16_t port;
 };
 
-static ENetHost *bother_host;
+static ENetHost* bother_host;
 static entt::dispatcher bother_dispatcher;
 static std::unordered_set<unsigned int> bother_set;
 static std::deque<BotherQueueItem> bother_queue;
 
-static void on_status_response_packet(const protocol::StatusResponse &packet)
+static void on_status_response_packet(const protocol::StatusResponse& packet)
 {
     auto identity = static_cast<unsigned int>(reinterpret_cast<std::uintptr_t>(packet.peer->data));
 
@@ -60,20 +61,22 @@ void bother::update_late(void)
     // Figure out how much times we can call
     // enet_host_connect and reallistically succeed
     for(unsigned int i = 0U; i < bother_host->peerCount; ++i) {
-        if(bother_host->peers[i].state != ENET_PEER_STATE_DISCONNECTED)
+        if(bother_host->peers[i].state != ENET_PEER_STATE_DISCONNECTED) {
             continue;
+        }
+
         free_peers += 1U;
     }
 
     for(unsigned int i = 0U; (i < free_peers) && bother_queue.size(); ++i) {
-        const auto &item = bother_queue.front();
+        const auto& item = bother_queue.front();
 
         ENetAddress address;
         enet_address_set_host(&address, item.hostname.c_str());
         address.port = enet_uint16(item.port);
 
         if(auto peer = enet_host_connect(bother_host, &address, 1, 0)) {
-            peer->data = reinterpret_cast<void *>(static_cast<std::uintptr_t>(item.identity));
+            peer->data = reinterpret_cast<void*>(static_cast<std::uintptr_t>(item.identity));
             bother_set.insert(item.identity);
             enet_host_flush(bother_host);
         }
@@ -114,14 +117,14 @@ void bother::update_late(void)
     }
 }
 
-void bother::ping(unsigned int identity, const char *host, std::uint16_t port)
+void bother::ping(unsigned int identity, const char* host, std::uint16_t port)
 {
     if(bother_set.count(identity)) {
         // Already in the process
         return;
     }
 
-    for(const auto &item : bother_queue) {
+    for(const auto& item : bother_queue) {
         if(item.identity == identity) {
             // Already in the queue
             return;
@@ -152,7 +155,7 @@ void bother::cancel(unsigned int identity)
     }
 
     for(unsigned int i = 0U; i < bother_host->peerCount; ++i) {
-        if(bother_host->peers[i].data == reinterpret_cast<void *>(static_cast<std::uintptr_t>(identity))) {
+        if(bother_host->peers[i].data == reinterpret_cast<void*>(static_cast<std::uintptr_t>(identity))) {
             enet_peer_reset(&bother_host->peers[i]);
             break;
         }

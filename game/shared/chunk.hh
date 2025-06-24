@@ -11,27 +11,27 @@ class Dimension;
 
 class Chunk final {
 public:
-    explicit Chunk(entt::entity entity, Dimension *dimension);
+    explicit Chunk(entt::entity entity, Dimension* dimension);
     virtual ~Chunk(void) = default;
 
-    voxel_id get_voxel(const local_pos &lpos) const;
+    voxel_id get_voxel(const local_pos& lpos) const;
     voxel_id get_voxel(const std::size_t index) const;
 
-    void set_voxel(voxel_id voxel, const local_pos &lpos);
+    void set_voxel(voxel_id voxel, const local_pos& lpos);
     void set_voxel(voxel_id voxel, const std::size_t index);
 
-    const VoxelStorage &get_voxels(void) const;
-    void set_voxels(const VoxelStorage &voxels);
+    const VoxelStorage& get_voxels(void) const;
+    void set_voxels(const VoxelStorage& voxels);
 
     unsigned int get_biome(void) const;
     void set_biome(unsigned int biome);
 
     entt::entity get_entity(void) const;
-    Dimension *get_dimension(void) const;
+    Dimension* get_dimension(void) const;
 
 private:
     entt::entity m_entity;
-    Dimension *m_dimension;
+    Dimension* m_dimension;
     VoxelStorage m_voxels;
     unsigned int m_biome;
 };

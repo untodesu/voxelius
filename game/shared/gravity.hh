@@ -6,7 +6,7 @@ class Dimension;
 
 struct GravityComponent final {
 public:
-    static void fixed_update(Dimension *dimension);
+    static void fixed_update(Dimension* dimension);
 };
 
 #endif /* SHARED_GRAVITY_HH */

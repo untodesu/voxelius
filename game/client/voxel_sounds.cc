@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/voxel_sounds.hh"
 
 #include "client/sound_effect.hh"
@@ -8,7 +9,7 @@ constexpr static std::size_t NUM_SURFACES = static_cast<std::size_t>(voxel_surfa
 static std::vector<resource_ptr<SoundEffect>> footsteps_sounds[NUM_SURFACES];
 static std::mt19937_64 randomizer;
 
-static void add_footsteps_effect(voxel_surface surface, const char *name)
+static void add_footsteps_effect(voxel_surface surface, const char* name)
 {
     if(auto effect = resource::load<SoundEffect>(name)) {
         auto surface_index = static_cast<std::size_t>(surface);
@@ -25,7 +26,7 @@ static resource_ptr<SoundEffect> get_footsteps_effect(voxel_surface surface)
         return nullptr;
     }
 
-    const auto &sounds = footsteps_sounds[surface_index];
+    const auto& sounds = footsteps_sounds[surface_index];
 
     if(sounds.empty()) {
         // No sounds for this surface

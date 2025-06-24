@@ -1,4 +1,5 @@
 #include "server/pch.hh"
+
 #include "server/overworld.hh"
 
 #include "core/vectors.hh"
@@ -8,7 +9,7 @@
 #include "shared/voxel_storage.hh"
 
 // FIXME: load these from a file
-static void compute_tree_feature(unsigned int height, Feature &feature, voxel_id log_voxel, voxel_id leaves_voxel)
+static void compute_tree_feature(unsigned int height, Feature& feature, voxel_id log_voxel, voxel_id leaves_voxel)
 {
     // Ensure the tree height is too small
     height = cxpr::max<unsigned int>(height, 4U);
@@ -68,7 +69,7 @@ static void compute_tree_feature(unsigned int height, Feature &feature, voxel_id
     }
 }
 
-Overworld::Overworld(const char *name) : Dimension(name, -30.0f)
+Overworld::Overworld(const char* name) : Dimension(name, -30.0f)
 {
     m_bottommost_chunk.set_limits(-64, -4);
     m_terrain_variation.set_limits(16, 256);
@@ -79,7 +80,7 @@ Overworld::Overworld(const char *name) : Dimension(name, -30.0f)
     compute_tree_feature(8U, m_feat_tree[3], game_voxels::oak_log, game_voxels::oak_leaves);
 }
 
-void Overworld::init(Config &config)
+void Overworld::init(Config& config)
 {
     m_terrain_variation.set_value(64);
     m_bottommost_chunk.set_value(-4);
@@ -126,7 +127,7 @@ void Overworld::init_late(std::uint64_t global_seed)
     m_metamap.clear();
 }
 
-bool Overworld::generate(const chunk_pos &cpos, VoxelStorage &voxels)
+bool Overworld::generate(const chunk_pos& cpos, VoxelStorage& voxels)
 {
     if(cpos.y <= m_bottommost_chunk.get_value()) {
         // If the player asks the generator
@@ -157,14 +158,14 @@ bool Overworld::generate(const chunk_pos &cpos, VoxelStorage &voxels)
     return true;
 }
 
-bool Overworld::is_inside_cave(const voxel_pos &vpos)
+bool Overworld::is_inside_cave(const voxel_pos& vpos)
 {
     auto noise_a = fnlGetNoise3D(&m_fnl_caves_a, vpos.x, vpos.y * 2.0f, vpos.z);
     auto noise_b = fnlGetNoise3D(&m_fnl_caves_b, vpos.x, vpos.y * 2.0f, vpos.z);
     return (noise_a > 0.95f) && (noise_b > 0.85f);
 }
 
-bool Overworld::is_inside_terrain(const voxel_pos &vpos)
+bool Overworld::is_inside_terrain(const voxel_pos& vpos)
 {
     auto variation_noise = fnlGetNoise3D(&m_fnl_terrain, vpos.x, vpos.y, vpos.z);
     auto variation = m_terrain_variation.get_value() * (1.0f - (variation_noise * variation_noise));
@@ -172,7 +173,7 @@ bool Overworld::is_inside_terrain(const voxel_pos &vpos)
     return noise > 0.0f;
 }
 
-const Overworld_Metadata &Overworld::get_or_create_metadata(const chunk_pos_xz &cpos)
+const Overworld_Metadata& Overworld::get_or_create_metadata(const chunk_pos_xz& cpos)
 {
     auto it = m_metamap.find(cpos);
 
@@ -181,7 +182,7 @@ const Overworld_Metadata &Overworld::get_or_create_metadata(const chunk_pos_xz &
         return it->second;
     }
 
-    auto &metadata = m_metamap.insert_or_assign(cpos, Overworld_Metadata()).first->second;
+    auto& metadata = m_metamap.insert_or_assign(cpos, Overworld_Metadata()).first->second;
     metadata.entropy.fill(std::numeric_limits<std::uint64_t>::max());
     metadata.heightmap.fill(std::numeric_limits<voxel_pos::value_type>::min());
 
@@ -219,7 +220,7 @@ const Overworld_Metadata &Overworld::get_or_create_metadata(const chunk_pos_xz &
         auto lpos = local_pos((twister() % CHUNK_SIZE), (twister() % OW_NUM_TREES), (twister() % CHUNK_SIZE));
         auto is_unique = true;
 
-        for(const auto &check_lpos : metadata.trees) {
+        for(const auto& check_lpos : metadata.trees) {
             if(cxvectors::distance2(check_lpos, lpos) <= 9) {
                 is_unique = false;
                 break;
@@ -234,9 +235,9 @@ const Overworld_Metadata &Overworld::get_or_create_metadata(const chunk_pos_xz &
     return metadata;
 }
 
-void Overworld::generate_terrain(const chunk_pos &cpos, VoxelStorage &voxels)
+void Overworld::generate_terrain(const chunk_pos& cpos, VoxelStorage& voxels)
 {
-    auto &metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
+    auto& metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
     auto variation = m_terrain_variation.get_value();
 
     for(unsigned long i = 0; i < CHUNK_VOLUME; ++i) {
@@ -260,9 +261,9 @@ void Overworld::generate_terrain(const chunk_pos &cpos, VoxelStorage &voxels)
     }
 }
 
-void Overworld::generate_surface(const chunk_pos &cpos, VoxelStorage &voxels)
+void Overworld::generate_surface(const chunk_pos& cpos, VoxelStorage& voxels)
 {
-    auto &metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
+    auto& metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
     auto variation = m_terrain_variation.get_value();
 
     for(unsigned long i = 0; i < CHUNK_VOLUME; ++i) {
@@ -289,31 +290,35 @@ void Overworld::generate_surface(const chunk_pos &cpos, VoxelStorage &voxels)
             auto d_index = coord::to_index(d_lpos);
 
             if(d_lpos.y >= CHUNK_SIZE) {
-                if(!is_inside_terrain(d_vpos))
+                if(!is_inside_terrain(d_vpos)) {
                     break;
+                }
+
                 depth += 1U;
-            }
-            else {
-                if(voxels[d_index] == NULL_VOXEL_ID)
+            } else {
+                if(voxels[d_index] == NULL_VOXEL_ID) {
                     break;
+                }
+
                 depth += 1U;
             }
         }
 
         if(depth < 5U) {
-            if(depth == 0U)
+            if(depth == 0U) {
                 voxels[i] = game_voxels::grass;
-            else voxels[i] = game_voxels::dirt;
+            } else {
+                voxels[i] = game_voxels::dirt;
+            }
         }
     }
-
 }
 
-void Overworld::generate_caves(const chunk_pos &cpos, VoxelStorage &voxels)
+void Overworld::generate_caves(const chunk_pos& cpos, VoxelStorage& voxels)
 {
-    auto &metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
+    auto& metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
     auto variation = m_terrain_variation.get_value();
-    
+
     for(unsigned long i = 0U; i < CHUNK_VOLUME; ++i) {
         auto lpos = coord::to_local(i);
         auto vpos = coord::to_voxel(cpos, lpos);
@@ -331,7 +336,7 @@ void Overworld::generate_caves(const chunk_pos &cpos, VoxelStorage &voxels)
     }
 }
 
-void Overworld::generate_features(const chunk_pos &cpos, VoxelStorage &voxels)
+void Overworld::generate_features(const chunk_pos& cpos, VoxelStorage& voxels)
 {
     const chunk_pos_xz tree_chunks[] = {
         chunk_pos_xz(cpos.x - 0, cpos.z - 1),
@@ -346,10 +351,10 @@ void Overworld::generate_features(const chunk_pos &cpos, VoxelStorage &voxels)
     };
 
     for(unsigned int i = 0U; i < cxpr::array_size(tree_chunks); ++i) {
-        const auto &cpos_xz = tree_chunks[i];
-        const auto &metadata = get_or_create_metadata(cpos_xz);
+        const auto& cpos_xz = tree_chunks[i];
+        const auto& metadata = get_or_create_metadata(cpos_xz);
 
-        for(const auto &tree_info : metadata.trees) {
+        for(const auto& tree_info : metadata.trees) {
             auto hdx = static_cast<std::size_t>(tree_info.x + tree_info.z * CHUNK_SIZE);
             auto height = metadata.heightmap[hdx];
 

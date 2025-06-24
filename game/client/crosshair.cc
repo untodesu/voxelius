@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/crosshair.hh"
 
 #include "core/constexpr.hh"
@@ -26,7 +27,7 @@ void crosshair::deinit(void)
 }
 
 void crosshair::layout(void)
-{    
+{
     auto viewport = ImGui::GetMainViewport();
     auto draw_list = ImGui::GetForegroundDrawList();
 

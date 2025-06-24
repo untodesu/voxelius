@@ -1,4 +1,5 @@
 #include "server/pch.hh"
+
 #include "server/whitelist.hh"
 
 #include "core/config.hh"
@@ -8,7 +9,7 @@
 #include "server/game.hh"
 #include "server/globals.hh"
 
-constexpr static const char *DEFAULT_FILENAME = "whitelist.txt";
+constexpr static const char* DEFAULT_FILENAME = "whitelist.txt";
 constexpr static char SEPARATOR_CHAR = ':';
 
 ConfigBoolean whitelist::enabled(false);
@@ -38,7 +39,7 @@ void whitelist::init_late(void)
         whitelist::filename.set(DEFAULT_FILENAME);
     }
 
-    PHYSFS_File *file = PHYSFS_openRead(whitelist::filename.get());
+    PHYSFS_File* file = PHYSFS_openRead(whitelist::filename.get());
 
     if(file == nullptr) {
         spdlog::warn("whitelist: {}: {}", whitelist::filename.get(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -61,8 +62,7 @@ void whitelist::init_late(void)
             // to the global server password; this allows easier adding
             // of guest accounts which can later be edited to use a better password
             whitelist_map[line] = server_game::password_hash;
-        }
-        else {
+        } else {
             const auto username = line.substr(0, location);
             const auto password = line.substr(location + 1);
             whitelist_map[username] = crc64::get(password);
@@ -77,12 +77,12 @@ void whitelist::deinit(void)
     // UNDONE: implement saving
 }
 
-bool whitelist::contains(const char *username)
+bool whitelist::contains(const char* username)
 {
     return whitelist_map.contains(username);
 }
 
-bool whitelist::matches(const char *username, std::uint64_t password_hash)
+bool whitelist::matches(const char* username, std::uint64_t password_hash)
 {
     const auto it = whitelist_map.find(username);
 
@@ -91,7 +91,5 @@ bool whitelist::matches(const char *username, std::uint64_t password_hash)
         return false;
     }
 
-    if(it->second == password_hash)
-        return true;
-    return false;
+    return it->second == password_hash;
 }

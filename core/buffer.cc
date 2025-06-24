@@ -1,19 +1,20 @@
 #include "core/pch.hh"
+
 #include "core/buffer.hh"
 
 #include "core/constexpr.hh"
 
-ReadBuffer::ReadBuffer(const void *data, std::size_t size)
+ReadBuffer::ReadBuffer(const void* data, std::size_t size)
 {
     reset(data, size);
 }
 
-ReadBuffer::ReadBuffer(const ENetPacket *packet)
+ReadBuffer::ReadBuffer(const ENetPacket* packet)
 {
     reset(packet);
 }
 
-ReadBuffer::ReadBuffer(PHYSFS_File *file)
+ReadBuffer::ReadBuffer(PHYSFS_File* file)
 {
     reset(file);
 }
@@ -23,26 +24,26 @@ std::size_t ReadBuffer::size(void) const
     return m_vector.size();
 }
 
-const std::byte *ReadBuffer::data(void) const
+const std::byte* ReadBuffer::data(void) const
 {
     return m_vector.data();
 }
 
-void ReadBuffer::reset(const void *data, std::size_t size)
+void ReadBuffer::reset(const void* data, std::size_t size)
 {
-    auto bytes = reinterpret_cast<const std::byte *>(data);
+    auto bytes = reinterpret_cast<const std::byte*>(data);
     m_vector.assign(bytes, bytes + size);
     m_position = 0U;
 }
 
-void ReadBuffer::reset(const ENetPacket *packet)
+void ReadBuffer::reset(const ENetPacket* packet)
 {
-    auto bytes_ptr = reinterpret_cast<const std::byte *>(packet->data);
+    auto bytes_ptr = reinterpret_cast<const std::byte*>(packet->data);
     m_vector.assign(bytes_ptr, bytes_ptr + packet->dataLength);
     m_position = 0;
 }
 
-void ReadBuffer::reset(PHYSFS_File *file)
+void ReadBuffer::reset(PHYSFS_File* file)
 {
     m_vector.resize(PHYSFS_fileLength(file));
     m_position = 0;
@@ -124,8 +125,10 @@ std::string ReadBuffer::read_string(void)
     auto result = std::string();
 
     for(std::size_t i = 0; i < size; ++i) {
-        if(m_position < m_vector.size())
+        if(m_position < m_vector.size()) {
             result.push_back(static_cast<char>(m_vector[m_position]));
+        }
+
         m_position += 1U;
     }
 
@@ -137,7 +140,7 @@ std::size_t WriteBuffer::size(void) const
     return m_vector.size();
 }
 
-const std::byte *WriteBuffer::data(void) const
+const std::byte* WriteBuffer::data(void) const
 {
     return m_vector.data();
 }
@@ -178,16 +181,17 @@ void WriteBuffer::write_UI64(std::uint64_t value)
     m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x00000000000000FF)) >> 0U)));
 }
 
-void WriteBuffer::write_string(const std::string &value)
+void WriteBuffer::write_string(const std::string& value)
 {
     const std::size_t size = cxpr::min<std::size_t>(UINT16_MAX, value.size());
 
     write_UI16(static_cast<std::uint16_t>(size));
 
-    for(std::size_t i = 0; i < size; m_vector.push_back(static_cast<std::byte>(value[i++])));
+    for(std::size_t i = 0; i < size; m_vector.push_back(static_cast<std::byte>(value[i++])))
+        ;
 }
 
-PHYSFS_File *WriteBuffer::to_file(const char *path, bool append) const
+PHYSFS_File* WriteBuffer::to_file(const char* path, bool append) const
 {
     if(auto file = (append ? PHYSFS_openAppend(path) : PHYSFS_openWrite(path))) {
         PHYSFS_writeBytes(file, m_vector.data(), m_vector.size());
@@ -197,7 +201,7 @@ PHYSFS_File *WriteBuffer::to_file(const char *path, bool append) const
     return nullptr;
 }
 
-ENetPacket *WriteBuffer::to_packet(enet_uint32 flags) const
+ENetPacket* WriteBuffer::to_packet(enet_uint32 flags) const
 {
     return enet_packet_create(m_vector.data(), m_vector.size(), flags);
 }

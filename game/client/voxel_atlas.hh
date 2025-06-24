@@ -22,8 +22,8 @@ void generate_mipmaps(void);
 
 namespace voxel_atlas
 {
-AtlasStrip *find_or_load(const std::vector<std::string> &paths);
-AtlasStrip *find(const std::vector<std::string> &paths);
+AtlasStrip* find_or_load(const std::vector<std::string>& paths);
+AtlasStrip* find(const std::vector<std::string>& paths);
 } // namespace voxel_atlas
 
 #endif /* CLIENT_VOXEL_ATLAS_HH  */

@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/experiments.hh"
 
 #include "shared/dimension.hh"
@@ -14,7 +15,7 @@
 #include "client/session.hh"
 #include "client/status_lines.hh"
 
-static void on_glfw_mouse_button(const GlfwMouseButtonEvent &event)
+static void on_glfw_mouse_button(const GlfwMouseButtonEvent& event)
 {
     if(!globals::gui_screen && session::is_ingame()) {
         if((event.action == GLFW_PRESS) && (player_target::voxel != NULL_VOXEL_ID)) {
@@ -51,17 +52,14 @@ void experiments::init_late(void)
 
 void experiments::deinit(void)
 {
-
 }
 
 void experiments::update(void)
 {
-
 }
 
 void experiments::update_late(void)
 {
-
 }
 
 void experiments::attack(void)
@@ -72,8 +70,8 @@ void experiments::attack(void)
 void experiments::interact(void)
 {
     if(auto info = item_registry::find(hotbar::slots[hotbar::active_slot])) {
-        if(info->place_voxel != NULL_VOXEL_ID)
+        if(info->place_voxel != NULL_VOXEL_ID) {
             globals::dimension->set_voxel(info->place_voxel, player_target::coord + player_target::normal);
-        return;
+        }
     }
 }

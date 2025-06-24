@@ -1,4 +1,5 @@
 #include "core/pch.hh"
+
 #include "core/epoch.hh"
 
 std::uint64_t epoch::seconds(void)

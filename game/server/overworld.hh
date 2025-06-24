@@ -18,26 +18,26 @@ struct Overworld_Metadata final {
 
 class Overworld final : public Dimension {
 public:
-    explicit Overworld(const char *name);
+    explicit Overworld(const char* name);
     virtual ~Overworld(void) = default;
 
 public:
-    virtual void init(Config &config) override;
+    virtual void init(Config& config) override;
     virtual void init_late(std::uint64_t global_seed) override;
-    virtual bool generate(const chunk_pos &cpos, VoxelStorage &voxels) override;
+    virtual bool generate(const chunk_pos& cpos, VoxelStorage& voxels) override;
 
 private:
-    bool is_inside_cave(const voxel_pos &vpos);
-    bool is_inside_terrain(const voxel_pos &vpos);
+    bool is_inside_cave(const voxel_pos& vpos);
+    bool is_inside_terrain(const voxel_pos& vpos);
 
 private:
-    const Overworld_Metadata &get_or_create_metadata(const chunk_pos_xz &cpos);
+    const Overworld_Metadata& get_or_create_metadata(const chunk_pos_xz& cpos);
 
 private:
-    void generate_terrain(const chunk_pos &cpos, VoxelStorage &voxels);
-    void generate_surface(const chunk_pos &cpos, VoxelStorage &voxels);
-    void generate_caves(const chunk_pos &cpos, VoxelStorage &voxels);
-    void generate_features(const chunk_pos &cpos, VoxelStorage &voxels);
+    void generate_terrain(const chunk_pos& cpos, VoxelStorage& voxels);
+    void generate_surface(const chunk_pos& cpos, VoxelStorage& voxels);
+    void generate_caves(const chunk_pos& cpos, VoxelStorage& voxels);
+    void generate_features(const chunk_pos& cpos, VoxelStorage& voxels);
 
 private:
     ConfigInt m_terrain_variation;

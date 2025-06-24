@@ -1,10 +1,11 @@
 #include "shared/pch.hh"
+
 #include "shared/transform.hh"
 
 #include "shared/const.hh"
 #include "shared/dimension.hh"
 
-constexpr inline static void update_component(unsigned int dim, TransformComponent &component)
+constexpr inline static void update_component(unsigned int dim, TransformComponent& component)
 {
     if(component.local[dim] >= CHUNK_SIZE) {
         component.local[dim] -= CHUNK_SIZE;
@@ -19,7 +20,7 @@ constexpr inline static void update_component(unsigned int dim, TransformCompone
     }
 }
 
-void TransformComponent::fixed_update(Dimension *dimension)
+void TransformComponent::fixed_update(Dimension* dimension)
 {
     auto view = dimension->entities.view<TransformComponent>();
 

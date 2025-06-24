@@ -1,4 +1,5 @@
 #include "server/pch.hh"
+
 #include "server/game.hh"
 
 #include "core/cmdline.hh"
@@ -75,7 +76,7 @@ void server_game::init_late(void)
     address.port = listen_port.get_value();
 
     globals::server_host = enet_host_create(&address, sessions::max_players.get_value() + status_peers.get_value(), 1, 0, 0);
-    
+
     if(!globals::server_host) {
         spdlog::critical("game: unable to setup an ENet host");
         std::terminate();

@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/chat.hh"
 
 #include "core/config.hh"
@@ -15,8 +16,8 @@
 #include "client/language.hh"
 #include "client/session.hh"
 #include "client/settings.hh"
-#include "client/sound_effect.hh"
 #include "client/sound.hh"
+#include "client/sound_effect.hh"
 
 constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration;
 constexpr static unsigned int MAX_HISTORY_SIZE = 128U;
@@ -36,7 +37,7 @@ static bool needs_focus;
 
 static resource_ptr<SoundEffect> sfx_chat_message;
 
-static void append_text_message(const std::string &sender, const std::string &text)
+static void append_text_message(const std::string& sender, const std::string& text)
 {
     GuiChatMessage message;
     message.spawn = globals::curtime;
@@ -49,7 +50,7 @@ static void append_text_message(const std::string &sender, const std::string &te
     }
 }
 
-static void append_player_join(const std::string &sender)
+static void append_player_join(const std::string& sender)
 {
     GuiChatMessage message;
     message.spawn = globals::curtime;
@@ -62,7 +63,7 @@ static void append_player_join(const std::string &sender)
     }
 }
 
-static void append_player_leave(const std::string &sender, const std::string &reason)
+static void append_player_leave(const std::string& sender, const std::string& reason)
 {
     GuiChatMessage message;
     message.spawn = globals::curtime;
@@ -75,25 +76,25 @@ static void append_player_leave(const std::string &sender, const std::string &re
     }
 }
 
-static void on_chat_message_packet(const protocol::ChatMessage &packet)
+static void on_chat_message_packet(const protocol::ChatMessage& packet)
 {
     if(packet.type == protocol::ChatMessage::TEXT_MESSAGE) {
         append_text_message(packet.sender, packet.message);
         return;
     }
-    
+
     if(packet.type == protocol::ChatMessage::PLAYER_JOIN) {
         append_player_join(packet.sender);
         return;
     }
-    
+
     if(packet.type == protocol::ChatMessage::PLAYER_LEAVE) {
         append_player_leave(packet.sender, packet.message);
         return;
     }
 }
 
-static void on_glfw_key(const GlfwKeyEvent &event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if(event.action == GLFW_PRESS) {
         if((event.key == GLFW_KEY_ENTER) && (globals::gui_screen == GUI_CHAT)) {
@@ -112,12 +113,12 @@ static void on_glfw_key(const GlfwKeyEvent &event)
 
             return;
         }
-        
+
         if((event.key == GLFW_KEY_ESCAPE) && (globals::gui_screen == GUI_CHAT)) {
             globals::gui_screen = GUI_SCREEN_NONE;
             return;
         }
-        
+
         if(key_chat.equals(event.key) && !globals::gui_screen) {
             globals::gui_screen = GUI_CHAT;
             needs_focus = true;
@@ -142,7 +143,6 @@ void client_chat::init(void)
 
 void client_chat::init_late(void)
 {
-
 }
 
 void client_chat::deinit(void)
@@ -173,8 +173,8 @@ void client_chat::layout(void)
         return;
     }
 
-    auto &padding = ImGui::GetStyle().FramePadding;
-    auto &spacing = ImGui::GetStyle().ItemSpacing;
+    auto& padding = ImGui::GetStyle().FramePadding;
+    auto& spacing = ImGui::GetStyle().ItemSpacing;
     auto font = ImGui::GetFont();
 
     auto draw_list = ImGui::GetWindowDrawList();
@@ -212,8 +212,7 @@ void client_chat::layout(void)
             if(globals::gui_screen == GUI_CHAT) {
                 rect_alpha = 0.75f;
                 text_alpha = 1.00f;
-            }
-            else {
+            } else {
                 rect_alpha = 0.50f * fadeout;
                 text_alpha = 1.00f * fadeout;
             }
@@ -246,7 +245,7 @@ void client_chat::refresh_timings(void)
     }
 }
 
-void client_chat::print(const std::string &text)
+void client_chat::print(const std::string& text)
 {
     GuiChatMessage message = {};
     message.spawn = globals::curtime;

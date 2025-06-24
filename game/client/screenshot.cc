@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/screenshot.hh"
 
 #include "core/config.hh"
@@ -14,14 +15,14 @@
 
 static ConfigKeyBind screenshot_key(GLFW_KEY_F2);
 
-static void stbi_png_physfs_callback(void *context, void *data, int size)
+static void stbi_png_physfs_callback(void* context, void* data, int size)
 {
-    PHYSFS_writeBytes(reinterpret_cast<PHYSFS_File *>(context), data, size);
+    PHYSFS_writeBytes(reinterpret_cast<PHYSFS_File*>(context), data, size);
 }
 
-static void on_glfw_key(const GlfwKeyEvent &event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
-    if(!globals::gui_keybind_ptr && !toggles::is_sequence_await) {    
+    if(!globals::gui_keybind_ptr && !toggles::is_sequence_await) {
         if(screenshot_key.equals(event.key) && (event.action == GLFW_PRESS)) {
             screenshot::take();
             return;
@@ -54,7 +55,7 @@ void screenshot::take(void)
     // alignment value of sorts that might result in a corrupted
     // image; we set GL_PACK_ALIGNMENT to 1, enabling byte-alignment
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    
+
     glReadPixels(0, 0, globals::width, globals::height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 
     // Restore the old pack alignment value
@@ -71,7 +72,7 @@ void screenshot::take(void)
         stbi_write_png_to_func(&stbi_png_physfs_callback, file, globals::width, globals::height, 3, pixels, stride);
 
         spdlog::info("screenshot: wrote {}", filepath);
-    
+
         client_chat::print(fmt::format("{} {}", language::resolve("chat.screenshot_message"), filename));
 
         PHYSFS_close(file);

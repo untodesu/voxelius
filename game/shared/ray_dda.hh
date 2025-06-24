@@ -9,16 +9,16 @@ class Dimension;
 class RayDDA final {
 public:
     explicit RayDDA(void) = default;
-    explicit RayDDA(const Dimension *dimension, const chunk_pos &start_chunk, const glm::fvec3 &start_fpos, const glm::fvec3 &direction);
-    explicit RayDDA(const Dimension &dimension, const chunk_pos &start_chunk, const glm::fvec3 &start_fpos, const glm::fvec3 &direction);
+    explicit RayDDA(const Dimension* dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction);
+    explicit RayDDA(const Dimension& dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction);
 
-    void reset(const Dimension *dimension, const chunk_pos &start_chunk, const glm::fvec3 &start_fpos, const glm::fvec3 &direction);
-    void reset(const Dimension &dimension, const chunk_pos &start_chunk, const glm::fvec3 &start_fpos, const glm::fvec3 &direction);
+    void reset(const Dimension* dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction);
+    void reset(const Dimension& dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction);
 
     voxel_id step(void);
 
 public:
-    const Dimension *dimension;
+    const Dimension* dimension;
     chunk_pos start_chunk;
     glm::fvec3 start_fpos;
     glm::fvec3 direction;

@@ -1,11 +1,12 @@
 #include "client/pch.hh"
+
 #include "client/chunk_visibility.hh"
 
 #include "core/config.hh"
 #include "core/vectors.hh"
 
-#include "shared/chunk_aabb.hh"
 #include "shared/chunk.hh"
+#include "shared/chunk_aabb.hh"
 #include "shared/dimension.hh"
 #include "shared/protocol.hh"
 
@@ -28,16 +29,16 @@ static void update_requests(void)
     requests.clear();
 
     for(auto cx = current_view_box.min.x; cx != current_view_box.max.x; cx += 1)
-    for(auto cy = current_view_box.min.y; cy != current_view_box.max.y; cy += 1)
-    for(auto cz = current_view_box.min.z; cz != current_view_box.max.z; cz += 1) {
-        auto cpos = chunk_pos(cx, cy, cz);
+        for(auto cy = current_view_box.min.y; cy != current_view_box.max.y; cy += 1)
+            for(auto cz = current_view_box.min.z; cz != current_view_box.max.z; cz += 1) {
+                auto cpos = chunk_pos(cx, cy, cz);
 
-        if(globals::dimension->find_chunk(cpos))
-            continue;
-        requests.push_back(cpos);
-    }
+                if(!globals::dimension->find_chunk(cpos)) {
+                    requests.push_back(cpos);
+                }
+            }
 
-    std::sort(requests.begin(), requests.end(), [](const chunk_pos &cpos_a, const chunk_pos &cpos_b) {
+    std::sort(requests.begin(), requests.end(), [](const chunk_pos& cpos_a, const chunk_pos& cpos_b) {
         auto da = cxvectors::distance2(cpos_a, camera::position_chunk);
         auto db = cxvectors::distance2(cpos_b, camera::position_chunk);
         return da > db;
@@ -77,9 +78,9 @@ void chunk_visibility::update_late(void)
     auto view = globals::dimension->chunks.view<ChunkComponent>();
 
     for(const auto [entity, chunk] : view.each()) {
-        if(current_view_box.contains(chunk.cpos))
-            continue;
-        globals::dimension->remove_chunk(entity);
+        if(!current_view_box.contains(chunk.cpos)) {
+            globals::dimension->remove_chunk(entity);
+        }
     }
 
     previous_view_box = current_view_box;

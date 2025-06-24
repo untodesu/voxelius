@@ -5,8 +5,8 @@
 class IConfigValue {
 public:
     virtual ~IConfigValue(void) = default;
-    virtual void set(const char *value) = 0;
-    virtual const char *get(void) const = 0;
+    virtual void set(const char* value) = 0;
+    virtual const char* get(void) const = 0;
 };
 
 class ConfigBoolean final : public IConfigValue {
@@ -14,8 +14,8 @@ public:
     explicit ConfigBoolean(bool default_value = false);
     virtual ~ConfigBoolean(void) = default;
 
-    virtual void set(const char *value) override;
-    virtual const char *get(void) const override;
+    virtual void set(const char* value) override;
+    virtual const char* get(void) const override;
 
     bool get_value(void) const;
     void set_value(bool value);
@@ -25,8 +25,8 @@ private:
     std::string m_string;
 
 public:
-    static const char *to_string(bool value);
-    static bool from_string(const char *value);
+    static const char* to_string(bool value);
+    static bool from_string(const char* value);
 };
 
 template<typename T>
@@ -38,8 +38,8 @@ public:
     explicit ConfigNumber(T default_value, T min_value, T max_value);
     virtual ~ConfigNumber(void) = default;
 
-    virtual void set(const char *value) override;
-    virtual const char *get(void) const override;
+    virtual void set(const char* value) override;
+    virtual const char* get(void) const override;
 
     T get_value(void) const;
     void set_value(T value);
@@ -82,11 +82,11 @@ public:
 
 class ConfigString final : public IConfigValue {
 public:
-    explicit ConfigString(const char *default_value);
+    explicit ConfigString(const char* default_value);
     virtual ~ConfigString(void) = default;
 
-    virtual void set(const char *value) override;
-    virtual const char *get(void) const override;
+    virtual void set(const char* value) override;
+    virtual const char* get(void) const override;
 
 private:
     std::string m_value;
@@ -98,18 +98,18 @@ public:
     virtual ~Config(void) = default;
 
     void load_cmdline(void);
-    bool load_file(const char *path);
-    bool save_file(const char *path) const;
+    bool load_file(const char* path);
+    bool save_file(const char* path) const;
 
-    bool set_value(const char *name, const char *value);
-    const char *get_value(const char *name) const;
+    bool set_value(const char* name, const char* value);
+    const char* get_value(const char* name) const;
 
-    void add_value(const char *name, IConfigValue &vref);
+    void add_value(const char* name, IConfigValue& vref);
 
-    const IConfigValue *find(const char *name) const;
+    const IConfigValue* find(const char* name) const;
 
 private:
-    std::unordered_map<std::string, IConfigValue *> m_values;
+    std::unordered_map<std::string, IConfigValue*> m_values;
 };
 
 template<typename T>
@@ -131,7 +131,7 @@ inline ConfigNumber<T>::ConfigNumber(T default_value, T min_value, T max_value)
 }
 
 template<typename T>
-inline void ConfigNumber<T>::set(const char *value)
+inline void ConfigNumber<T>::set(const char* value)
 {
     std::istringstream(value) >> m_value;
     m_value = std::clamp(m_value, m_min_value, m_max_value);
@@ -139,7 +139,7 @@ inline void ConfigNumber<T>::set(const char *value)
 }
 
 template<typename T>
-inline const char *ConfigNumber<T>::get(void) const
+inline const char* ConfigNumber<T>::get(void) const
 {
     return m_string.c_str();
 }

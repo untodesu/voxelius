@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/outline.hh"
 
 #include "core/config.hh"
@@ -39,20 +40,32 @@ void outline::init(void)
     u_scale = program.add_uniform("u_Scale");
 
     const glm::fvec3 cube_vertices[24] = {
-        glm::fvec3(0.0f, 0.0f, 0.0f), glm::fvec3(0.0f, 1.0f, 0.0f),
-        glm::fvec3(0.0f, 1.0f, 0.0f), glm::fvec3(1.0f, 1.0f, 0.0f),
-        glm::fvec3(1.0f, 1.0f, 0.0f), glm::fvec3(1.0f, 0.0f, 0.0f),
-        glm::fvec3(1.0f, 0.0f, 0.0f), glm::fvec3(0.0f, 0.0f, 0.0f),
+        glm::fvec3(0.0f, 0.0f, 0.0f),
+        glm::fvec3(0.0f, 1.0f, 0.0f),
+        glm::fvec3(0.0f, 1.0f, 0.0f),
+        glm::fvec3(1.0f, 1.0f, 0.0f),
+        glm::fvec3(1.0f, 1.0f, 0.0f),
+        glm::fvec3(1.0f, 0.0f, 0.0f),
+        glm::fvec3(1.0f, 0.0f, 0.0f),
+        glm::fvec3(0.0f, 0.0f, 0.0f),
 
-        glm::fvec3(0.0f, 0.0f, 1.0f), glm::fvec3(0.0f, 1.0f, 1.0f),
-        glm::fvec3(0.0f, 1.0f, 1.0f), glm::fvec3(1.0f, 1.0f, 1.0f),
-        glm::fvec3(1.0f, 1.0f, 1.0f), glm::fvec3(1.0f, 0.0f, 1.0f),
-        glm::fvec3(1.0f, 0.0f, 1.0f), glm::fvec3(0.0f, 0.0f, 1.0f),
+        glm::fvec3(0.0f, 0.0f, 1.0f),
+        glm::fvec3(0.0f, 1.0f, 1.0f),
+        glm::fvec3(0.0f, 1.0f, 1.0f),
+        glm::fvec3(1.0f, 1.0f, 1.0f),
+        glm::fvec3(1.0f, 1.0f, 1.0f),
+        glm::fvec3(1.0f, 0.0f, 1.0f),
+        glm::fvec3(1.0f, 0.0f, 1.0f),
+        glm::fvec3(0.0f, 0.0f, 1.0f),
 
-        glm::fvec3(0.0f, 0.0f, 0.0f), glm::fvec3(0.0f, 0.0f, 1.0f),
-        glm::fvec3(0.0f, 1.0f, 0.0f), glm::fvec3(0.0f, 1.0f, 1.0f),
-        glm::fvec3(1.0f, 0.0f, 0.0f), glm::fvec3(1.0f, 0.0f, 1.0f),
-        glm::fvec3(1.0f, 1.0f, 0.0f), glm::fvec3(1.0f, 1.0f, 1.0f),
+        glm::fvec3(0.0f, 0.0f, 0.0f),
+        glm::fvec3(0.0f, 0.0f, 1.0f),
+        glm::fvec3(0.0f, 1.0f, 0.0f),
+        glm::fvec3(0.0f, 1.0f, 1.0f),
+        glm::fvec3(1.0f, 0.0f, 0.0f),
+        glm::fvec3(1.0f, 0.0f, 1.0f),
+        glm::fvec3(1.0f, 1.0f, 0.0f),
+        glm::fvec3(1.0f, 1.0f, 1.0f),
     };
 
     glGenBuffers(1, &cube_vbo);
@@ -104,7 +117,7 @@ void outline::prepare(void)
     glVertexAttribDivisor(0, 0);
 }
 
-void outline::cube(const chunk_pos &cpos, const glm::fvec3 &fpos, const glm::fvec3 &size, float thickness, const glm::fvec4 &color)
+void outline::cube(const chunk_pos& cpos, const glm::fvec3& fpos, const glm::fvec3& size, float thickness, const glm::fvec4& color)
 {
     auto patch_cpos = cpos - camera::position_chunk;
 
@@ -119,7 +132,7 @@ void outline::cube(const chunk_pos &cpos, const glm::fvec3 &fpos, const glm::fve
     glDrawArrays(GL_LINES, 0, 24);
 }
 
-void outline::line(const chunk_pos &cpos, const glm::fvec3 &fpos, const glm::fvec3 &size, float thickness, const glm::fvec4 &color)
+void outline::line(const chunk_pos& cpos, const glm::fvec3& fpos, const glm::fvec3& size, float thickness, const glm::fvec4& color)
 {
     auto patch_cpos = cpos - camera::position_chunk;
 

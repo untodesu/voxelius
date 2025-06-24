@@ -7,41 +7,41 @@
 
 namespace coord
 {
-constexpr chunk_pos to_chunk(const voxel_pos &vpos);
+constexpr chunk_pos to_chunk(const voxel_pos& vpos);
 } // namespace coord
 
 namespace coord
 {
-constexpr local_pos to_local(const voxel_pos &vpos);
-constexpr local_pos to_local(const glm::fvec3 &fvec);
+constexpr local_pos to_local(const voxel_pos& vpos);
+constexpr local_pos to_local(const glm::fvec3& fvec);
 constexpr local_pos to_local(std::size_t index);
 } // namespace coord
 
 namespace coord
 {
-constexpr voxel_pos to_voxel(const chunk_pos &cpos, const local_pos &lpos);
-constexpr voxel_pos to_voxel(const chunk_pos &cpos, const glm::fvec3 &fvec);
+constexpr voxel_pos to_voxel(const chunk_pos& cpos, const local_pos& lpos);
+constexpr voxel_pos to_voxel(const chunk_pos& cpos, const glm::fvec3& fvec);
 } // namespace coord
 
 namespace coord
 {
-constexpr std::size_t to_index(const local_pos &lpos);
+constexpr std::size_t to_index(const local_pos& lpos);
 } // namespace coord
 
 namespace coord
 {
-constexpr glm::fvec3 to_relative(const chunk_pos &pivot_cpos, const chunk_pos &cpos, const glm::fvec3 &fvec);
-constexpr glm::fvec3 to_relative(const chunk_pos &pivot_cpos, const glm::fvec3 &pivot_fvec, const chunk_pos &cpos);
-constexpr glm::fvec3 to_relative(const chunk_pos &pivot_cpos, const glm::fvec3 &pivot_fvec, const chunk_pos &cpos, const glm::fvec3 &fvec);
+constexpr glm::fvec3 to_relative(const chunk_pos& pivot_cpos, const chunk_pos& cpos, const glm::fvec3& fvec);
+constexpr glm::fvec3 to_relative(const chunk_pos& pivot_cpos, const glm::fvec3& pivot_fvec, const chunk_pos& cpos);
+constexpr glm::fvec3 to_relative(const chunk_pos& pivot_cpos, const glm::fvec3& pivot_fvec, const chunk_pos& cpos, const glm::fvec3& fvec);
 } // namespace coord
 
 namespace coord
 {
-constexpr glm::fvec3 to_fvec3(const chunk_pos &cpos);
-constexpr glm::fvec3 to_fvec3(const chunk_pos &cpos, const glm::fvec3 &fpos);
+constexpr glm::fvec3 to_fvec3(const chunk_pos& cpos);
+constexpr glm::fvec3 to_fvec3(const chunk_pos& cpos, const glm::fvec3& fpos);
 } // namespace coord
 
-inline constexpr chunk_pos coord::to_chunk(const voxel_pos &vpos)
+inline constexpr chunk_pos coord::to_chunk(const voxel_pos& vpos)
 {
     return chunk_pos {
         static_cast<chunk_pos::value_type>(vpos.x >> CHUNK_BITSHIFT),
@@ -50,7 +50,7 @@ inline constexpr chunk_pos coord::to_chunk(const voxel_pos &vpos)
     };
 }
 
-inline constexpr local_pos coord::to_local(const voxel_pos &vpos)
+inline constexpr local_pos coord::to_local(const voxel_pos& vpos)
 {
     return local_pos {
         static_cast<local_pos::value_type>(cxpr::mod_signed<voxel_pos::value_type>(vpos.x, CHUNK_SIZE)),
@@ -59,7 +59,7 @@ inline constexpr local_pos coord::to_local(const voxel_pos &vpos)
     };
 }
 
-inline constexpr local_pos coord::to_local(const glm::fvec3 &fvec)
+inline constexpr local_pos coord::to_local(const glm::fvec3& fvec)
 {
     return local_pos {
         static_cast<local_pos::value_type>(fvec.x),
@@ -77,7 +77,7 @@ inline constexpr local_pos coord::to_local(std::size_t index)
     };
 }
 
-inline constexpr voxel_pos coord::to_voxel(const chunk_pos &cpos, const local_pos &lpos)
+inline constexpr voxel_pos coord::to_voxel(const chunk_pos& cpos, const local_pos& lpos)
 {
     return voxel_pos {
         lpos.x + (static_cast<voxel_pos::value_type>(cpos.x) << CHUNK_BITSHIFT),
@@ -86,7 +86,7 @@ inline constexpr voxel_pos coord::to_voxel(const chunk_pos &cpos, const local_po
     };
 }
 
-inline constexpr voxel_pos coord::to_voxel(const chunk_pos &cpos, const glm::fvec3 &fvec)
+inline constexpr voxel_pos coord::to_voxel(const chunk_pos& cpos, const glm::fvec3& fvec)
 {
     return voxel_pos {
         static_cast<voxel_pos::value_type>(fvec.x) + (static_cast<voxel_pos::value_type>(cpos.x) << CHUNK_BITSHIFT),
@@ -95,12 +95,12 @@ inline constexpr voxel_pos coord::to_voxel(const chunk_pos &cpos, const glm::fve
     };
 }
 
-inline constexpr std::size_t coord::to_index(const local_pos &lpos)
+inline constexpr std::size_t coord::to_index(const local_pos& lpos)
 {
     return static_cast<std::size_t>((lpos.y * CHUNK_SIZE + lpos.z) * CHUNK_SIZE + lpos.x);
 }
 
-inline constexpr glm::fvec3 coord::to_relative(const chunk_pos &pivot_cpos, const chunk_pos &cpos, const glm::fvec3 &fvec)
+inline constexpr glm::fvec3 coord::to_relative(const chunk_pos& pivot_cpos, const chunk_pos& cpos, const glm::fvec3& fvec)
 {
     return glm::fvec3 {
         static_cast<float>((cpos.x - pivot_cpos.x) << CHUNK_BITSHIFT) + fvec.x,
@@ -109,7 +109,7 @@ inline constexpr glm::fvec3 coord::to_relative(const chunk_pos &pivot_cpos, cons
     };
 }
 
-inline constexpr glm::fvec3 coord::to_relative(const chunk_pos &pivot_cpos, const glm::fvec3 &pivot_fvec, const chunk_pos &cpos)
+inline constexpr glm::fvec3 coord::to_relative(const chunk_pos& pivot_cpos, const glm::fvec3& pivot_fvec, const chunk_pos& cpos)
 {
     return glm::fvec3 {
         static_cast<float>((cpos.x - pivot_cpos.x) << CHUNK_BITSHIFT) - pivot_fvec.x,
@@ -118,7 +118,7 @@ inline constexpr glm::fvec3 coord::to_relative(const chunk_pos &pivot_cpos, cons
     };
 }
 
-inline constexpr glm::fvec3 coord::to_relative(const chunk_pos &pivot_cpos, const glm::fvec3 &pivot_fvec, const chunk_pos &cpos, const glm::fvec3 &fvec)
+inline constexpr glm::fvec3 coord::to_relative(const chunk_pos& pivot_cpos, const glm::fvec3& pivot_fvec, const chunk_pos& cpos, const glm::fvec3& fvec)
 {
     return glm::fvec3 {
         static_cast<float>((cpos.x - pivot_cpos.x) << CHUNK_BITSHIFT) + (fvec.x - pivot_fvec.x),
@@ -127,7 +127,7 @@ inline constexpr glm::fvec3 coord::to_relative(const chunk_pos &pivot_cpos, cons
     };
 }
 
-inline constexpr glm::fvec3 coord::to_fvec3(const chunk_pos &cpos)
+inline constexpr glm::fvec3 coord::to_fvec3(const chunk_pos& cpos)
 {
     return glm::fvec3 {
         static_cast<float>(cpos.x << CHUNK_BITSHIFT),
@@ -136,7 +136,7 @@ inline constexpr glm::fvec3 coord::to_fvec3(const chunk_pos &cpos)
     };
 }
 
-inline constexpr glm::fvec3 coord::to_fvec3(const chunk_pos &cpos, const glm::fvec3 &fpos)
+inline constexpr glm::fvec3 coord::to_fvec3(const chunk_pos& cpos, const glm::fvec3& fpos)
 {
     return glm::fvec3 {
         fpos.x + static_cast<float>(cpos.x << CHUNK_BITSHIFT),

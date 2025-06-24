@@ -3,13 +3,13 @@
 #pragma once
 
 using toggle_type = unsigned int;
-constexpr static toggle_type TOGGLE_WIREFRAME   = 0x0000U; // Render things in wireframe mode
-constexpr static toggle_type TOGGLE_FULLBRIGHT  = 0x0001U; // Render things without lighting
-constexpr static toggle_type TOGGLE_CHUNK_AABB  = 0x0002U; // Render chunk bounding boxes
-constexpr static toggle_type TOGGLE_METRICS_UI  = 0x0003U; // Render debug metrics overlay
+constexpr static toggle_type TOGGLE_WIREFRAME = 0x0000U;   // Render things in wireframe mode
+constexpr static toggle_type TOGGLE_FULLBRIGHT = 0x0001U;  // Render things without lighting
+constexpr static toggle_type TOGGLE_CHUNK_AABB = 0x0002U;  // Render chunk bounding boxes
+constexpr static toggle_type TOGGLE_METRICS_UI = 0x0003U;  // Render debug metrics overlay
 constexpr static toggle_type TOGGLE_USE_GAMEPAD = 0x0004U; // Use gamepad for player movement
-constexpr static toggle_type TOGGLE_PM_FLIGHT   = 0x0005U; // Enable flight for player movement
-constexpr static std::size_t TOGGLE_COUNT       = 0x0006U;
+constexpr static toggle_type TOGGLE_PM_FLIGHT = 0x0005U;   // Enable flight for player movement
+constexpr static std::size_t TOGGLE_COUNT = 0x0006U;
 
 struct ToggleEnabledEvent final {
     toggle_type type;

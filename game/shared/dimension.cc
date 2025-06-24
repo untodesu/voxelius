@@ -1,11 +1,12 @@
 #include "shared/pch.hh"
+
 #include "shared/dimension.hh"
 
+#include "shared/chunk.hh"
 #include "shared/coord.hh"
 #include "shared/globals.hh"
-#include "shared/chunk.hh"
 
-Dimension::Dimension(const char *name, float gravity)
+Dimension::Dimension(const char* name, float gravity)
 {
     m_name = name;
     m_gravity = gravity;
@@ -19,7 +20,7 @@ Dimension::~Dimension(void)
     chunks.clear();
 }
 
-const char *Dimension::get_name(void) const
+const char* Dimension::get_name(void) const
 {
     return m_name.c_str();
 }
@@ -29,7 +30,7 @@ float Dimension::get_gravity(void) const
     return m_gravity;
 }
 
-Chunk *Dimension::create_chunk(const chunk_pos &cpos)
+Chunk* Dimension::create_chunk(const chunk_pos& cpos)
 {
     auto it = m_chunkmap.find(cpos);
 
@@ -41,7 +42,7 @@ Chunk *Dimension::create_chunk(const chunk_pos &cpos)
     auto entity = chunks.create();
     auto chunk = new Chunk(entity, this);
 
-    auto &component = chunks.emplace<ChunkComponent>(entity);
+    auto& component = chunks.emplace<ChunkComponent>(entity);
     component.chunk = chunk;
     component.cpos = cpos;
 
@@ -55,31 +56,36 @@ Chunk *Dimension::create_chunk(const chunk_pos &cpos)
     return m_chunkmap.insert_or_assign(cpos, std::move(chunk)).first->second;
 }
 
-Chunk *Dimension::find_chunk(entt::entity entity) const
+Chunk* Dimension::find_chunk(entt::entity entity) const
 {
-    if(chunks.valid(entity))
+    if(chunks.valid(entity)) {
         return chunks.get<ChunkComponent>(entity).chunk;
-    return nullptr;
+    } else {
+        return nullptr;
+    }
 }
 
-Chunk *Dimension::find_chunk(const chunk_pos &cpos) const
+Chunk* Dimension::find_chunk(const chunk_pos& cpos) const
 {
     auto it = m_chunkmap.find(cpos);
-    if(it != m_chunkmap.cend())
+
+    if(it != m_chunkmap.cend()) {
         return it->second;
-    return nullptr;
+    } else {
+        return nullptr;
+    }
 }
 
 void Dimension::remove_chunk(entt::entity entity)
 {
     if(chunks.valid(entity)) {
-        auto &component = chunks.get<ChunkComponent>(entity);
+        auto& component = chunks.get<ChunkComponent>(entity);
         m_chunkmap.erase(component.cpos);
         chunks.destroy(entity);
     }
 }
 
-void Dimension::remove_chunk(const chunk_pos &cpos)
+void Dimension::remove_chunk(const chunk_pos& cpos)
 {
     auto it = m_chunkmap.find(cpos);
 
@@ -89,26 +95,28 @@ void Dimension::remove_chunk(const chunk_pos &cpos)
     }
 }
 
-void Dimension::remove_chunk(Chunk *chunk)
+void Dimension::remove_chunk(Chunk* chunk)
 {
     if(chunk) {
-        const auto &component = chunks.get<ChunkComponent>(chunk->get_entity());
+        const auto& component = chunks.get<ChunkComponent>(chunk->get_entity());
         m_chunkmap.erase(component.cpos);
         chunks.destroy(chunk->get_entity());
     }
 }
 
-voxel_id Dimension::get_voxel(const voxel_pos &vpos) const
+voxel_id Dimension::get_voxel(const voxel_pos& vpos) const
 {
     auto cpos = coord::to_chunk(vpos);
     auto lpos = coord::to_local(vpos);
-    
-    if(auto chunk = find_chunk(cpos))
+
+    if(auto chunk = find_chunk(cpos)) {
         return chunk->get_voxel(lpos);
-    return NULL_VOXEL_ID;
+    } else {
+        return NULL_VOXEL_ID;
+    }
 }
 
-voxel_id Dimension::get_voxel(const chunk_pos &cpos, const local_pos &lpos) const
+voxel_id Dimension::get_voxel(const chunk_pos& cpos, const local_pos& lpos) const
 {
     // This allows accessing get_voxel with negative
     // local coordinates that usually would result in an
@@ -116,7 +124,7 @@ voxel_id Dimension::get_voxel(const chunk_pos &cpos, const local_pos &lpos) cons
     return get_voxel(coord::to_voxel(cpos, lpos));
 }
 
-bool Dimension::set_voxel(voxel_id voxel, const voxel_pos &vpos)
+bool Dimension::set_voxel(voxel_id voxel, const voxel_pos& vpos)
 {
     auto cpos = coord::to_chunk(vpos);
     auto lpos = coord::to_local(vpos);
@@ -139,7 +147,7 @@ bool Dimension::set_voxel(voxel_id voxel, const voxel_pos &vpos)
     return false;
 }
 
-bool Dimension::set_voxel(voxel_id voxel, const chunk_pos &cpos, const local_pos &lpos)
+bool Dimension::set_voxel(voxel_id voxel, const chunk_pos& cpos, const local_pos& lpos)
 {
     // This allows accessing set_voxel with negative
     // local coordinates that usually would result in an
@@ -147,17 +155,15 @@ bool Dimension::set_voxel(voxel_id voxel, const chunk_pos &cpos, const local_pos
     return set_voxel(voxel, coord::to_voxel(cpos, lpos));
 }
 
-void Dimension::init(Config &config)
+void Dimension::init(Config& config)
 {
-
 }
 
 void Dimension::init_late(std::uint64_t global_seed)
 {
-    
 }
 
-bool Dimension::generate(const chunk_pos &cpos, VoxelStorage &voxels)
+bool Dimension::generate(const chunk_pos& cpos, VoxelStorage& voxels)
 {
     return false;
 }

@@ -1,4 +1,5 @@
 #include "core/pch.hh"
+
 #include "core/binfile.hh"
 
 #include "core/resource.hh"
@@ -6,7 +7,7 @@
 static emhash8::HashMap<std::string, resource_ptr<BinFile>> resource_map;
 
 template<>
-resource_ptr<BinFile> resource::load<BinFile>(const char *name, unsigned int flags)
+resource_ptr<BinFile> resource::load<BinFile>(const char* name, unsigned int flags)
 {
     auto it = resource_map.find(name);
 
@@ -35,10 +36,12 @@ resource_ptr<BinFile> resource::load<BinFile>(const char *name, unsigned int fla
 template<>
 void resource::hard_cleanup<BinFile>(void)
 {
-    for(const auto &it : resource_map) {
-        if(it.second.use_count() > 1L)
+    for(const auto& it : resource_map) {
+        if(it.second.use_count() > 1L) {
             spdlog::warn("resource: zombie resource [BinFile] {} [use_count={}]", it.first, it.second.use_count());
-        else spdlog::debug("resource: releasing [BinFile] {}", it.first);
+        } else {
+            spdlog::debug("resource: releasing [BinFile] {}", it.first);
+        }
 
         delete[] it.second->buffer;
     }

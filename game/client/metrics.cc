@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/metrics.hh"
 
 #include "core/feature.hh"
@@ -64,18 +65,18 @@ void metrics::layout(void)
     position.y += y_step;
 
     // Draw OpenGL version string
-    auto r_version_line = fmt::format("GL_VERSION: {}", reinterpret_cast<const char *>(r_version.c_str()));
+    auto r_version_line = fmt::format("GL_VERSION: {}", reinterpret_cast<const char*>(r_version.c_str()));
     imdraw_ext::text_shadow(r_version_line, position, text_color, shadow_color, globals::font_debug, draw_list);
     position.y += y_step;
 
     // Draw OpenGL renderer string
-    auto r_renderer_line = fmt::format("GL_RENDERER: {}", reinterpret_cast<const char *>(r_renderer.c_str()));
+    auto r_renderer_line = fmt::format("GL_RENDERER: {}", reinterpret_cast<const char*>(r_renderer.c_str()));
     imdraw_ext::text_shadow(r_renderer_line, position, text_color, shadow_color, globals::font_debug, draw_list);
     position.y += 1.5f * y_step;
 
-    const auto &head = globals::dimension->entities.get<HeadComponent>(globals::player);
-    const auto &transform = globals::dimension->entities.get<TransformComponent>(globals::player);
-    const auto &velocity = globals::dimension->entities.get<VelocityComponent>(globals::player);
+    const auto& head = globals::dimension->entities.get<HeadComponent>(globals::player);
+    const auto& transform = globals::dimension->entities.get<TransformComponent>(globals::player);
+    const auto& velocity = globals::dimension->entities.get<VelocityComponent>(globals::player);
 
     // Draw player voxel position
     auto voxel_position = coord::to_voxel(transform.chunk, transform.local);
@@ -84,9 +85,8 @@ void metrics::layout(void)
     position.y += y_step;
 
     // Draw player world position
-    auto world_line = fmt::format("world: [{} {} {}] [{:.03f} {:.03f} {:.03f}]",
-        transform.chunk.x, transform.chunk.y, transform.chunk.z,
-        transform.local.x, transform.local.y, transform.local.z);
+    auto world_line = fmt::format(
+        "world: [{} {} {}] [{:.03f} {:.03f} {:.03f}]", transform.chunk.x, transform.chunk.y, transform.chunk.z, transform.local.x, transform.local.y, transform.local.z);
     imdraw_ext::text_shadow(world_line, position, text_color, shadow_color, globals::font_debug, draw_list);
     position.y += y_step;
 

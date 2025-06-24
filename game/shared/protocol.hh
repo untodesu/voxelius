@@ -23,7 +23,7 @@ template<std::uint16_t packet_id>
 struct Base {
     constexpr static std::uint16_t ID = packet_id;
     virtual ~Base(void) = default;
-    ENetPeer *peer {nullptr};
+    ENetPeer* peer { nullptr };
 };
 } // namespace protocol
 
@@ -52,57 +52,57 @@ struct DimensionInfo;
 
 namespace protocol
 {
-ENetPacket *encode(const StatusRequest &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const StatusResponse &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const LoginRequest &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const LoginResponse &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const Disconnect &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const ChunkVoxels &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const EntityTransform &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const EntityHead &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const EntityVelocity &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const SpawnPlayer &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const ChatMessage &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const SetVoxel &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const RemoveEntity &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const EntityPlayer &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const ScoreboardUpdate &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const RequestChunk &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const GenericSound &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const EntitySound &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *encode(const DimensionInfo &packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const StatusRequest& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const StatusResponse& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const LoginRequest& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const LoginResponse& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const Disconnect& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const ChunkVoxels& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const EntityTransform& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const EntityHead& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const EntityVelocity& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const SpawnPlayer& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const ChatMessage& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const SetVoxel& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const RemoveEntity& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const EntityPlayer& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const ScoreboardUpdate& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const RequestChunk& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const GenericSound& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const EntitySound& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* encode(const DimensionInfo& packet, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
 } // namespace protocol
 
 namespace protocol
 {
-void broadcast(ENetHost *host, ENetPacket *packet);
-void broadcast(ENetHost *host, ENetPacket *packet, ENetPeer *except);
-void send(ENetPeer *peer, ENetPacket *packet);
+void broadcast(ENetHost* host, ENetPacket* packet);
+void broadcast(ENetHost* host, ENetPacket* packet, ENetPeer* except);
+void send(ENetPeer* peer, ENetPacket* packet);
 } // namespace protocol
 
 namespace protocol
 {
-void decode(entt::dispatcher &dispatcher, const ENetPacket *packet, ENetPeer *peer);
+void decode(entt::dispatcher& dispatcher, const ENetPacket* packet, ENetPeer* peer);
 } // namespace protocol
 
 namespace protocol::utils
 {
-ENetPacket *make_disconnect(const char *reason, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *make_chat_message(const char *message, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_disconnect(const char* reason, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_chat_message(const char* message, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
 } // namespace protocol::utils
 
 namespace protocol::utils
 {
-ENetPacket *make_chunk_voxels(Dimension *dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_chunk_voxels(Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
 } // namespace protocol::utils
 
 namespace protocol::utils
 {
-ENetPacket *make_entity_head(Dimension *dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *make_entity_transform(Dimension *dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *make_entity_velocity(Dimension *dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *make_entity_player(Dimension *dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket *make_dimension_info(const Dimension *dimension);
+ENetPacket* make_entity_head(Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_entity_transform(Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_entity_velocity(Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_entity_player(Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_dimension_info(const Dimension* dimension);
 } // namespace protocol::utils
 
 struct protocol::StatusRequest final : public protocol::Base<0x0000> {
@@ -162,7 +162,7 @@ struct protocol::SpawnPlayer final : public protocol::Base<0x0009> {
 
 struct protocol::ChatMessage final : public protocol::Base<0x000A> {
     constexpr static std::uint16_t TEXT_MESSAGE = 0x0000;
-    constexpr static std::uint16_t PLAYER_JOIN  = 0x0001;
+    constexpr static std::uint16_t PLAYER_JOIN = 0x0001;
     constexpr static std::uint16_t PLAYER_LEAVE = 0x0002;
 
     std::uint16_t type;

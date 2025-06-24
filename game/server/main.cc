@@ -24,7 +24,7 @@ static void on_termination_signal(int)
     globals::is_running = false;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     cmdline::create(argc, argv);
 
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     server_game::init_late();
 
     std::uint64_t last_curtime = globals::curtime;
-    
+
     while(globals::is_running) {
         globals::curtime = epoch::microseconds();
 
@@ -68,12 +68,12 @@ int main(int argc, char **argv)
         globals::fixed_frametime_avg *= 0.5f;
 
         last_curtime = globals::curtime;
-        
+
         server_game::fixed_update();
         server_game::fixed_update_late();
 
         globals::dispatcher.update();
-        
+
         globals::fixed_framecount += 1;
 
         std::this_thread::sleep_for(std::chrono::microseconds(globals::tickrate_dt));
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
     }
 
     server_game::deinit();
-    
+
     resource::hard_cleanup<BinFile>();
     resource::hard_cleanup<Image>();
 

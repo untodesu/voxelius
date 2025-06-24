@@ -18,7 +18,7 @@ namespace globals
 {
 extern Config client_config;
 
-extern GLFWwindow *window;
+extern GLFWwindow* window;
 
 // Some gamesystems that aren't really
 // gameplay-oriented might still use client
@@ -43,24 +43,24 @@ extern GLuint world_fbo_depth;
 extern std::size_t num_drawcalls;
 extern std::size_t num_triangles;
 
-extern ENetHost *client_host;
+extern ENetHost* client_host;
 
-extern Dimension *dimension;
+extern Dimension* dimension;
 extern entt::entity player;
 
-extern ImFont *font_debug;
-extern ImFont *font_default;
-extern ImFont *font_chat;
+extern ImFont* font_debug;
+extern ImFont* font_default;
+extern ImFont* font_chat;
 
-extern ConfigKeyBind *gui_keybind_ptr;
-extern ConfigGamepadAxis *gui_gamepad_axis_ptr;
-extern ConfigGamepadButton *gui_gamepad_button_ptr;
+extern ConfigKeyBind* gui_keybind_ptr;
+extern ConfigGamepadAxis* gui_gamepad_axis_ptr;
+extern ConfigGamepadButton* gui_gamepad_button_ptr;
 
 extern unsigned int gui_scale;
 extern unsigned int gui_screen;
 
-extern ALCdevice *sound_dev;
-extern ALCcontext *sound_ctx;
+extern ALCdevice* sound_dev;
+extern ALCcontext* sound_ctx;
 } // namespace globals
 
 #endif /* CLIENTOBALS_HH */

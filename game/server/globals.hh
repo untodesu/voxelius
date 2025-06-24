@@ -12,14 +12,14 @@ namespace globals
 {
 extern Config server_config;
 
-extern ENetHost *server_host;
+extern ENetHost* server_host;
 
 extern bool is_running;
 extern unsigned int tickrate;
 extern std::uint64_t tickrate_dt;
 
-extern Dimension *spawn_dimension;
-extern std::unordered_map<std::string, Dimension *> dimensions;
+extern Dimension* spawn_dimension;
+extern std::unordered_map<std::string, Dimension*> dimensions;
 } // namespace globals
 
 #endif /* SERVER_GLOBALS_HH  */

@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/hotbar.hh"
 
 #include "core/config.hh"
@@ -28,7 +29,7 @@ static resource_ptr<TextureGUI> hotbar_selector;
 
 static ImU32 get_color_alpha(ImGuiCol style_color, float alpha)
 {
-    const auto &color = ImGui::GetStyleColorVec4(style_color);
+    const auto& color = ImGui::GetStyleColorVec4(style_color);
     return ImGui::GetColorU32(ImVec4(color.x, color.y, color.z, alpha));
 }
 
@@ -45,7 +46,7 @@ static void update_hotbar_item(void)
     }
 }
 
-static void on_glfw_key(const GlfwKeyEvent &event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if((event.action == GLFW_PRESS) && !globals::gui_screen) {
         for(unsigned int i = 0U; i < HOTBAR_SIZE; ++i) {
@@ -58,7 +59,7 @@ static void on_glfw_key(const GlfwKeyEvent &event)
     }
 }
 
-static void on_glfw_scroll(const GlfwScrollEvent &event)
+static void on_glfw_scroll(const GlfwScrollEvent& event)
 {
     if(!globals::gui_screen) {
         if(event.dy < 0.0) {
@@ -120,7 +121,7 @@ void hotbar::deinit(void)
 
 void hotbar::layout(void)
 {
-    auto &style = ImGui::GetStyle();
+    auto& style = ImGui::GetStyle();
 
     auto item_size = ITEM_SIZE * globals::gui_scale;
     auto hotbar_width = HOTBAR_SIZE * item_size;

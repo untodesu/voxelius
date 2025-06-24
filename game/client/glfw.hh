@@ -17,14 +17,14 @@ struct GlfwJoystickEvent final {
 };
 
 struct GlfwKeyEvent final {
-    int key {GLFW_KEY_UNKNOWN};
+    int key { GLFW_KEY_UNKNOWN };
     int scancode;
     int action;
     int mods;
 };
 
 struct GlfwMouseButtonEvent final {
-    int button {GLFW_KEY_UNKNOWN};
+    int button { GLFW_KEY_UNKNOWN };
     int action;
     int mods;
 };

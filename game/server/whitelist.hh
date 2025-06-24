@@ -20,8 +20,8 @@ void deinit(void);
 
 namespace whitelist
 {
-bool contains(const char *username);
-bool matches(const char *username, std::uint64_t password_hash);
+bool contains(const char* username);
+bool matches(const char* username, std::uint64_t password_hash);
 } // namespace whitelist
 
 #endif /* SERVER_WHITELIST_HH  */

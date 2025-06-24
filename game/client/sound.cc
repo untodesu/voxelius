@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/sound.hh"
 
 #include "core/config.hh"
@@ -68,7 +69,6 @@ void sound::init(void)
 
 void sound::init_late(void)
 {
-
 }
 
 void sound::deinit(void)
@@ -82,7 +82,6 @@ void sound::deinit(void)
     alDeleteSources(1, &player_source);
 }
 
-
 void sound::update(void)
 {
     auto effects_gain = cxpr::clamp(0.01f * sound::volume_effects.get_value(), 0.0f, 1.0f);
@@ -93,32 +92,40 @@ void sound::update(void)
     alSourcef(ui_source, AL_GAIN, ui_gain);
 }
 
-void sound::play_generic(const char *sound, bool looping, float pitch)
+void sound::play_generic(const char* sound, bool looping, float pitch)
 {
-    if(sound)
+    if(sound) {
         sound::play_generic(resource::load<SoundEffect>(sound), looping, pitch);
-    else sound::play_generic(static_cast<const char *>(nullptr), looping, pitch);
+    } else {
+        sound::play_generic(static_cast<const char*>(nullptr), looping, pitch);
+    }
 }
 
-void sound::play_entity(entt::entity entity, const char *sound, bool looping, float pitch)
+void sound::play_entity(entt::entity entity, const char* sound, bool looping, float pitch)
 {
-    if(sound)
+    if(sound) {
         sound::play_entity(entity, resource::load<SoundEffect>(sound), looping, pitch);
-    else sound::play_entity(entity, static_cast<const char *>(nullptr), looping, pitch);
+    } else {
+        sound::play_entity(entity, static_cast<const char*>(nullptr), looping, pitch);
+    }
 }
 
-void sound::play_player(const char *sound, bool looping, float pitch)
+void sound::play_player(const char* sound, bool looping, float pitch)
 {
-    if(sound)
+    if(sound) {
         sound::play_player(resource::load<SoundEffect>(sound), looping, pitch);
-    else sound::play_player(static_cast<const char *>(nullptr), looping, pitch);
+    } else {
+        sound::play_player(static_cast<const char*>(nullptr), looping, pitch);
+    }
 }
 
-void sound::play_ui(const char *sound, bool looping, float pitch)
+void sound::play_ui(const char* sound, bool looping, float pitch)
 {
-    if(sound)
+    if(sound) {
         sound::play_ui(resource::load<SoundEffect>(sound), looping, pitch);
-    else sound::play_ui(static_cast<const char *>(nullptr), looping, pitch);
+    } else {
+        sound::play_ui(static_cast<const char*>(nullptr), looping, pitch);
+    }
 }
 
 void sound::play_generic(resource_ptr<SoundEffect> sound, bool looping, float pitch)
@@ -169,7 +176,7 @@ void sound::play_player(resource_ptr<SoundEffect> sound, bool looping, float pit
 
     sfx_player = sound;
 
-    if(sfx_player) {        
+    if(sfx_player) {
         alSourcei(player_source, AL_BUFFER, sfx_player->buffer);
         alSourcei(player_source, AL_LOOPING, looping);
         alSourcef(player_source, AL_PITCH, cxpr::clamp(pitch, MIN_PITCH, MAX_PITCH));

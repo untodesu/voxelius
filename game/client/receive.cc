@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/receive.hh"
 
 #include "shared/dimension.hh"
@@ -17,7 +18,7 @@
 #include "client/sound.hh"
 #include "client/window_title.hh"
 
-static bool synchronize_entity_id(Dimension *dimension, entt::entity entity)
+static bool synchronize_entity_id(Dimension* dimension, entt::entity entity)
 {
     if(dimension->entities.valid(entity)) {
         // Entity ID already exists
@@ -32,8 +33,7 @@ static bool synchronize_entity_id(Dimension *dimension, entt::entity entity)
     }
 
     session::disconnect("protocol.entity_id_desync");
-    spdlog::critical("receive: entity desync: network {} resolved as client {}",
-        static_cast<std::uint64_t>(entity), static_cast<std::uint64_t>(created));
+    spdlog::critical("receive: entity desync: network {} resolved as client {}", static_cast<std::uint64_t>(entity), static_cast<std::uint64_t>(created));
 
     message_box::reset();
     message_box::set_title("disconnected.disconnected");
@@ -48,7 +48,7 @@ static bool synchronize_entity_id(Dimension *dimension, entt::entity entity)
     return false;
 }
 
-static void on_dimension_info_packet(const protocol::DimensionInfo &packet)
+static void on_dimension_info_packet(const protocol::DimensionInfo& packet)
 {
     if(session::peer) {
         if(globals::dimension) {
@@ -61,7 +61,7 @@ static void on_dimension_info_packet(const protocol::DimensionInfo &packet)
     }
 }
 
-static void on_chunk_voxels_packet(const protocol::ChunkVoxels &packet)
+static void on_chunk_voxels_packet(const protocol::ChunkVoxels& packet)
 {
     if(session::peer && globals::dimension) {
         auto chunk = globals::dimension->create_chunk(packet.chunk);
@@ -78,12 +78,12 @@ static void on_chunk_voxels_packet(const protocol::ChunkVoxels &packet)
     }
 }
 
-static void on_entity_head_packet(const protocol::EntityHead &packet)
+static void on_entity_head_packet(const protocol::EntityHead& packet)
 {
     if(session::peer && globals::dimension) {
         if(synchronize_entity_id(globals::dimension, packet.entity)) {
-            auto &component = globals::dimension->entities.get_or_emplace<HeadComponent>(packet.entity);
-            auto &prevcomp = globals::dimension->entities.get_or_emplace<HeadComponentPrev>(packet.entity);
+            auto& component = globals::dimension->entities.get_or_emplace<HeadComponent>(packet.entity);
+            auto& prevcomp = globals::dimension->entities.get_or_emplace<HeadComponentPrev>(packet.entity);
 
             // Store the previous component state
             prevcomp.angles = component.angles;
@@ -95,12 +95,12 @@ static void on_entity_head_packet(const protocol::EntityHead &packet)
     }
 }
 
-static void on_entity_transform_packet(const protocol::EntityTransform &packet)
+static void on_entity_transform_packet(const protocol::EntityTransform& packet)
 {
     if(session::peer && globals::dimension) {
         if(synchronize_entity_id(globals::dimension, packet.entity)) {
-            auto &component = globals::dimension->entities.get_or_emplace<TransformComponent>(packet.entity);
-            auto &prevcomp = globals::dimension->entities.get_or_emplace<TransformComponentPrev>(packet.entity);
+            auto& component = globals::dimension->entities.get_or_emplace<TransformComponent>(packet.entity);
+            auto& prevcomp = globals::dimension->entities.get_or_emplace<TransformComponentPrev>(packet.entity);
 
             // Store the previous component state
             prevcomp.angles = component.angles;
@@ -115,17 +115,17 @@ static void on_entity_transform_packet(const protocol::EntityTransform &packet)
     }
 }
 
-static void on_entity_velocity_packet(const protocol::EntityVelocity &packet)
+static void on_entity_velocity_packet(const protocol::EntityVelocity& packet)
 {
     if(session::peer && globals::dimension) {
         if(synchronize_entity_id(globals::dimension, packet.entity)) {
-            auto &component = globals::dimension->entities.get_or_emplace<VelocityComponent>(packet.entity);
+            auto& component = globals::dimension->entities.get_or_emplace<VelocityComponent>(packet.entity);
             component.value = packet.value;
         }
     }
 }
 
-static void on_entity_player_packet(const protocol::EntityPlayer &packet)
+static void on_entity_player_packet(const protocol::EntityPlayer& packet)
 {
     if(session::peer && globals::dimension) {
         if(synchronize_entity_id(globals::dimension, packet.entity)) {
@@ -134,7 +134,7 @@ static void on_entity_player_packet(const protocol::EntityPlayer &packet)
     }
 }
 
-static void on_spawn_player_packet(const protocol::SpawnPlayer &packet)
+static void on_spawn_player_packet(const protocol::SpawnPlayer& packet)
 {
     if(session::peer && globals::dimension) {
         if(synchronize_entity_id(globals::dimension, packet.entity)) {
@@ -150,21 +150,23 @@ static void on_spawn_player_packet(const protocol::SpawnPlayer &packet)
     }
 }
 
-static void on_remove_entity_packet(const protocol::RemoveEntity &packet)
+static void on_remove_entity_packet(const protocol::RemoveEntity& packet)
 {
     if(globals::dimension) {
-        if(packet.entity == globals::player)
+        if(packet.entity == globals::player) {
             globals::player = entt::null;
+        }
+
         globals::dimension->entities.destroy(packet.entity);
     }
 }
 
-static void on_generic_sound_packet(const protocol::GenericSound &packet)
+static void on_generic_sound_packet(const protocol::GenericSound& packet)
 {
     sound::play_generic(packet.sound.c_str(), packet.looping, packet.pitch);
 }
 
-static void on_entity_sound_packet(const protocol::EntitySound &packet)
+static void on_entity_sound_packet(const protocol::EntitySound& packet)
 {
     sound::play_entity(packet.entity, packet.sound.c_str(), packet.looping, packet.pitch);
 }

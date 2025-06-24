@@ -1,4 +1,5 @@
 #include "client/pch.hh"
+
 #include "client/progress_bar.hh"
 
 #include "core/constexpr.hh"
@@ -43,13 +44,13 @@ void progress_bar::layout(void)
         const float spinner_width = 0.8f * ImGui::CalcItemWidth();
         const float bar_width = spinner_width / static_cast<float>(num_bars);
         const float bar_height = 0.5f * ImGui::GetFrameHeight();
-        
+
         const float base_xpos = window_start.x + 0.5f * (window_size.x - spinner_width) + 0.5f;
         const float base_ypos = window_start.y + cursor.y;
         const float phase = 2.0f * ImGui::GetTime();
 
-        const ImVec4 &background = ImGui::GetStyleColorVec4(ImGuiCol_Button);
-        const ImVec4 &foreground = ImGui::GetStyleColorVec4(ImGuiCol_PlotHistogram);
+        const ImVec4& background = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+        const ImVec4& foreground = ImGui::GetStyleColorVec4(ImGuiCol_PlotHistogram);
 
         for(std::size_t i = 0; i < num_bars; ++i) {
             const float sinval = std::sin(M_PI * static_cast<float>(i) / static_cast<float>(num_bars) - phase);
@@ -60,7 +61,7 @@ void progress_bar::layout(void)
             color.y = cxpr::lerp(background.y, foreground.y, modifier);
             color.z = cxpr::lerp(background.z, foreground.z, modifier);
             color.w = cxpr::lerp(background.w, foreground.w, modifier);
-            
+
             const ImVec2 start = ImVec2(base_xpos + bar_width * i, base_ypos);
             const ImVec2 end = ImVec2(start.x + bar_width, start.y + bar_height);
             ImGui::GetWindowDrawList()->AddRectFilled(start, end, ImGui::GetColorU32(color));
@@ -97,12 +98,12 @@ void progress_bar::reset(void)
     button_action = nullptr;
 }
 
-void progress_bar::set_title(const char *title)
+void progress_bar::set_title(const char* title)
 {
     str_title = language::resolve(title);
 }
 
-void progress_bar::set_button(const char *text, const progress_bar_action &action)
+void progress_bar::set_button(const char* text, const progress_bar_action& action)
 {
     str_button = fmt::format("{}###ProgressBar_Button", language::resolve(text));
     button_action = action;

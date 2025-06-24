@@ -1,4 +1,5 @@
 #include "server/pch.hh"
+
 #include "server/worldgen.hh"
 
 #include "core/cmdline.hh"
@@ -14,22 +15,22 @@
 
 static bool aggressive_caching;
 
-static emhash8::HashMap<Dimension *, emhash8::HashMap<chunk_pos, std::unordered_set<Session *>>> active_tasks;
+static emhash8::HashMap<Dimension*, emhash8::HashMap<chunk_pos, std::unordered_set<Session*>>> active_tasks;
 
 class WorldgenTask final : public Task {
 public:
-    explicit WorldgenTask(Dimension *dimension, const chunk_pos &cpos);
+    explicit WorldgenTask(Dimension* dimension, const chunk_pos& cpos);
     virtual ~WorldgenTask(void) = default;
     virtual void process(void) override;
     virtual void finalize(void) override;
 
 private:
-    Dimension *m_dimension;
+    Dimension* m_dimension;
     VoxelStorage m_voxels;
     chunk_pos m_cpos;
 };
 
-WorldgenTask::WorldgenTask(Dimension *dimension, const chunk_pos &cpos)
+WorldgenTask::WorldgenTask(Dimension* dimension, const chunk_pos& cpos)
 {
     m_dimension = dimension;
     m_voxels.fill(rand()); // trolling
@@ -103,7 +104,7 @@ void worldgen::init(void)
     aggressive_caching = cmdline::contains("aggressive-caching");
 }
 
-bool worldgen::is_generating(Dimension *dimension, const chunk_pos &cpos)
+bool worldgen::is_generating(Dimension* dimension, const chunk_pos& cpos)
 {
     auto dim_tasks = active_tasks.find(dimension);
 
@@ -122,19 +123,19 @@ bool worldgen::is_generating(Dimension *dimension, const chunk_pos &cpos)
     return true;
 }
 
-void worldgen::request_chunk(Session *session, const chunk_pos &cpos)
+void worldgen::request_chunk(Session* session, const chunk_pos& cpos)
 {
     if(session->dimension) {
         auto dim_tasks = active_tasks.find(session->dimension);
 
         if(dim_tasks == active_tasks.cend()) {
-            dim_tasks = active_tasks.emplace(session->dimension, emhash8::HashMap<chunk_pos, std::unordered_set<Session *>>()).first;
+            dim_tasks = active_tasks.emplace(session->dimension, emhash8::HashMap<chunk_pos, std::unordered_set<Session*>>()).first;
         }
 
         auto it = dim_tasks->second.find(cpos);
 
         if(it == dim_tasks->second.cend()) {
-            auto &sessions = dim_tasks->second.insert_or_assign(cpos, std::unordered_set<Session *>()).first->second;
+            auto& sessions = dim_tasks->second.insert_or_assign(cpos, std::unordered_set<Session*>()).first->second;
             sessions.insert(session);
 
             threading::submit<WorldgenTask>(session->dimension, cpos);

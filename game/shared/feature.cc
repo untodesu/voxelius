@@ -1,4 +1,5 @@
 #include "shared/pch.hh"
+
 #include "shared/feature.hh"
 
 #include "shared/chunk.hh"
@@ -6,7 +7,7 @@
 #include "shared/dimension.hh"
 #include "shared/voxel_storage.hh"
 
-void Feature::place(const voxel_pos &vpos, Dimension *dimension) const
+void Feature::place(const voxel_pos& vpos, Dimension* dimension) const
 {
     for(const auto [rpos, voxel, overwrite] : (*this)) {
         auto it_vpos = vpos + rpos;
@@ -28,7 +29,7 @@ void Feature::place(const voxel_pos &vpos, Dimension *dimension) const
     }
 }
 
-void Feature::place(const voxel_pos &vpos, const chunk_pos &cpos, VoxelStorage &voxels) const
+void Feature::place(const voxel_pos& vpos, const chunk_pos& cpos, VoxelStorage& voxels) const
 {
     for(const auto [rpos, voxel, overwrite] : (*this)) {
         auto it_vpos = vpos + rpos;
