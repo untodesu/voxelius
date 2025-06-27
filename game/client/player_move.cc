@@ -70,7 +70,7 @@ static glm::fvec3 pm_accelerate(const glm::fvec3& wishdir, const glm::fvec3& vel
         return velocity;
     }
 
-    auto accel_speed = cxpr::min(add_speed, accel * globals::fixed_frametime * wishspeed);
+    auto accel_speed = vx::min(add_speed, accel * globals::fixed_frametime * wishspeed);
 
     auto result = glm::fvec3(velocity);
     result.x += accel_speed * wishdir.x;
@@ -89,7 +89,7 @@ static glm::fvec3 pm_ground_move(const glm::fvec3& wishdir, const glm::fvec3& ve
 {
     if(auto speed = glm::length(velocity)) {
         auto speed_drop = speed * PMOVE_FRICTION_GROUND * globals::fixed_frametime;
-        auto speed_factor = cxpr::max(speed - speed_drop, 0.0f) / speed;
+        auto speed_factor = vx::max(speed - speed_drop, 0.0f) / speed;
         return pm_accelerate(wishdir, velocity * speed_factor, PMOVE_ACCELERATION_GROUND, PMOVE_MAX_SPEED_GROUND);
     }
 
@@ -205,7 +205,7 @@ void player_move::fixed_update(void)
         velocity.value.y = -PMOVE_JUMP_FORCE * globals::dimension->get_gravity();
 
         auto new_speed = glm::length(glm::fvec2(velocity.value.x, velocity.value.z));
-        auto new_speed_text = fmt::format("{:.02f} M/S", new_speed);
+        auto new_speed_text = std::format("{:.02f} M/S", new_speed);
         auto speed_change = new_speed - speedometer_value;
 
         speedometer_value = new_speed;
@@ -213,7 +213,7 @@ void player_move::fixed_update(void)
         next_jump_us = globals::curtime + PMOVE_JUMP_COOLDOWN;
 
         if(enable_speedometer.get_value()) {
-            if(cxpr::abs(speed_change) < 0.01f) {
+            if(vx::abs(speed_change) < 0.01f) {
                 // No considerable speed increase within
                 // the precision we use to draw the speedometer
                 status_lines::set(STATUS_DEBUG, new_speed_text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f), 1.0f);

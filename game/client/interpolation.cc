@@ -16,9 +16,9 @@ static void transform_interpolate(float alpha)
     auto group = globals::dimension->entities.group<TransformComponentIntr>(entt::get<TransformComponent, TransformComponentPrev>);
 
     for(auto [entity, interp, current, previous] : group.each()) {
-        interp.angles[0] = cxpr::lerp(previous.angles[0], current.angles[0], alpha);
-        interp.angles[1] = cxpr::lerp(previous.angles[1], current.angles[1], alpha);
-        interp.angles[2] = cxpr::lerp(previous.angles[2], current.angles[2], alpha);
+        interp.angles[0] = vx::lerp(previous.angles[0], current.angles[0], alpha);
+        interp.angles[1] = vx::lerp(previous.angles[1], current.angles[1], alpha);
+        interp.angles[2] = vx::lerp(previous.angles[2], current.angles[2], alpha);
 
         // Figure out previous chunk-local floating-point coordinates transformed
         // to the current WorldCoord's chunk domain coordinates; we're interpolating
@@ -30,9 +30,9 @@ static void transform_interpolate(float alpha)
         interp.chunk.y = current.chunk.y;
         interp.chunk.z = current.chunk.z;
 
-        interp.local.x = cxpr::lerp(previous_local.x, current.local.x, alpha);
-        interp.local.y = cxpr::lerp(previous_local.y, current.local.y, alpha);
-        interp.local.z = cxpr::lerp(previous_local.z, current.local.z, alpha);
+        interp.local.x = vx::lerp(previous_local.x, current.local.x, alpha);
+        interp.local.y = vx::lerp(previous_local.y, current.local.y, alpha);
+        interp.local.z = vx::lerp(previous_local.z, current.local.z, alpha);
     }
 }
 
@@ -41,13 +41,13 @@ static void head_interpolate(float alpha)
     auto group = globals::dimension->entities.group<HeadComponentIntr>(entt::get<HeadComponent, HeadComponentPrev>);
 
     for(auto [entity, interp, current, previous] : group.each()) {
-        interp.angles[0] = cxpr::lerp(previous.angles[0], current.angles[0], alpha);
-        interp.angles[1] = cxpr::lerp(previous.angles[1], current.angles[1], alpha);
-        interp.angles[2] = cxpr::lerp(previous.angles[2], current.angles[2], alpha);
+        interp.angles[0] = vx::lerp(previous.angles[0], current.angles[0], alpha);
+        interp.angles[1] = vx::lerp(previous.angles[1], current.angles[1], alpha);
+        interp.angles[2] = vx::lerp(previous.angles[2], current.angles[2], alpha);
 
-        interp.offset.x = cxpr::lerp(previous.offset.x, current.offset.x, alpha);
-        interp.offset.y = cxpr::lerp(previous.offset.y, current.offset.y, alpha);
-        interp.offset.z = cxpr::lerp(previous.offset.z, current.offset.z, alpha);
+        interp.offset.x = vx::lerp(previous.offset.x, current.offset.x, alpha);
+        interp.offset.y = vx::lerp(previous.offset.y, current.offset.y, alpha);
+        interp.offset.z = vx::lerp(previous.offset.z, current.offset.z, alpha);
     }
 }
 

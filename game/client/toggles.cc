@@ -25,9 +25,9 @@ static void print_toggle_state(const ToggleInfo& info)
 {
     if(info.description) {
         if(info.is_enabled) {
-            client_chat::print(fmt::format("[toggles] {} ON", info.description));
+            client_chat::print(std::format("[toggles] {} ON", info.description));
         } else {
-            client_chat::print(fmt::format("[toggles] {} OFF", info.description));
+            client_chat::print(std::format("[toggles] {} OFF", info.description));
         }
     }
 }

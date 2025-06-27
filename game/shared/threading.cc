@@ -44,9 +44,9 @@ void threading::init(void)
         thread_pool_size = num_concurrent_threads;
     } else {
         if(num_concurrent_threads) {
-            thread_pool_size = cxpr::clamp<unsigned int>(std::strtoul(argument, nullptr, 10), 1U, num_concurrent_threads);
+            thread_pool_size = vx::clamp<unsigned int>(std::strtoul(argument, nullptr, 10), 1U, num_concurrent_threads);
         } else {
-            thread_pool_size = cxpr::max<unsigned int>(std::strtoul(argument, nullptr, 10), 1U);
+            thread_pool_size = vx::max<unsigned int>(std::strtoul(argument, nullptr, 10), 1U);
         }
     }
 

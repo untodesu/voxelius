@@ -71,7 +71,8 @@ static AtlasStrip* plane_new_strip(AtlasPlane& plane, const std::vector<std::str
             }
 
             const std::size_t offset = strip.offset + i;
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, offset, image->size.x, image->size.y, 1, GL_RGBA, GL_UNSIGNED_BYTE, image->pixels);
+            glTexSubImage3D(
+                GL_TEXTURE_2D_ARRAY, 0, 0, 0, offset, image->size.x, image->size.y, 1, GL_RGBA, GL_UNSIGNED_BYTE, image->pixels);
         }
     }
 
@@ -87,19 +88,19 @@ void voxel_atlas::create(int width, int height, std::size_t count)
 {
     GLint max_plane_layers;
 
-    atlas_width = 1 << cxpr::log2(width);
-    atlas_height = 1 << cxpr::log2(height);
+    atlas_width = 1 << vx::log2(width);
+    atlas_height = 1 << vx::log2(height);
 
     // Clipping this at OpenGL 4.5 limit of 2048 is important due to
     // how voxel quad meshes are packed in memory: each texture index is
     // confined in 11 bits so having bigger atlas planes makes no sense;
     glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_plane_layers);
-    max_plane_layers = cxpr::clamp(max_plane_layers, 256, 2048);
+    max_plane_layers = vx::clamp(max_plane_layers, 256, 2048);
 
     for(long i = count; i > 0L; i -= max_plane_layers) {
         AtlasPlane plane = {};
         plane.plane_id = planes.size();
-        plane.layer_count_max = cxpr::min<std::size_t>(max_plane_layers, i);
+        plane.layer_count_max = vx::min<std::size_t>(max_plane_layers, i);
         plane.layer_count = 0;
 
         const std::size_t save_id = plane.plane_id;

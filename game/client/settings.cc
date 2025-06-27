@@ -252,8 +252,8 @@ void SettingValue::layout_label(void) const
 
 void SettingValue_CheckBox::refresh_wids(void)
 {
-    wids[0] = fmt::format("{}###{}", str_checkbox_false, static_cast<void*>(value));
-    wids[1] = fmt::format("{}###{}", str_checkbox_true, static_cast<void*>(value));
+    wids[0] = std::format("{}###{}", str_checkbox_false, static_cast<void*>(value));
+    wids[1] = std::format("{}###{}", str_checkbox_true, static_cast<void*>(value));
 }
 
 void SettingValue_CheckBox::layout(void) const
@@ -386,8 +386,8 @@ void SettingValue_StepperInt::layout(void) const
 void SettingValue_StepperInt::refresh_wids(void)
 {
     for(std::size_t i = 0; i < wids.size(); ++i) {
-        auto key = fmt::format("settings.value.{}.{}", name, i);
-        wids[i] = fmt::format("{}###{}", language::resolve(key.c_str()), static_cast<const void*>(value));
+        auto key = std::format("settings.value.{}.{}", name, i);
+        wids[i] = std::format("{}###{}", language::resolve(key.c_str()), static_cast<const void*>(value));
     }
 }
 
@@ -416,8 +416,8 @@ void SettingValue_StepperUnsigned::layout(void) const
 void SettingValue_StepperUnsigned::refresh_wids(void)
 {
     for(std::size_t i = 0; i < wids.size(); ++i) {
-        auto key = fmt::format("settings.value.{}.{}", name, i);
-        wids[i] = fmt::format("{}###{}", language::resolve(key.c_str()), static_cast<const void*>(value));
+        auto key = std::format("settings.value.{}.{}", name, i);
+        wids[i] = std::format("{}###{}", language::resolve(key.c_str()), static_cast<const void*>(value));
     }
 }
 
@@ -437,8 +437,8 @@ void SettingValue_KeyBind::layout(void) const
 
 void SettingValue_KeyBind::refresh_wids(void)
 {
-    wids[0] = fmt::format("...###{}", static_cast<const void*>(value));
-    wids[1] = fmt::format("{}###{}", value->get(), static_cast<const void*>(value));
+    wids[0] = std::format("...###{}", static_cast<const void*>(value));
+    wids[1] = std::format("{}###{}", value->get(), static_cast<const void*>(value));
 }
 
 void SettingValue_GamepadAxis::layout(void) const
@@ -471,9 +471,9 @@ void SettingValue_GamepadAxis::layout(void) const
 
 void SettingValue_GamepadAxis::refresh_wids(void)
 {
-    wids[0] = fmt::format("...###{}", static_cast<const void*>(value));
-    wids[1] = fmt::format("{}###{}", value->get_name(), static_cast<const void*>(value));
-    wid_checkbox = fmt::format("###CHECKBOX_{}", static_cast<const void*>(value));
+    wids[0] = std::format("...###{}", static_cast<const void*>(value));
+    wids[1] = std::format("{}###{}", value->get_name(), static_cast<const void*>(value));
+    wid_checkbox = std::format("###CHECKBOX_{}", static_cast<const void*>(value));
 }
 
 void SettingValue_GamepadButton::layout(void) const
@@ -492,8 +492,8 @@ void SettingValue_GamepadButton::layout(void) const
 
 void SettingValue_GamepadButton::refresh_wids(void)
 {
-    wids[0] = fmt::format("...###{}", static_cast<const void*>(value));
-    wids[1] = fmt::format("{}###{}", value->get(), static_cast<const void*>(value));
+    wids[0] = std::format("...###{}", static_cast<const void*>(value));
+    wids[1] = std::format("{}###{}", value->get(), static_cast<const void*>(value));
 }
 
 void SettingValue_Language::layout(void) const
@@ -646,10 +646,10 @@ static void on_language_set(const LanguageSetEvent& event)
             stepper->refresh_wids();
         }
 
-        value->title = language::resolve(fmt::format("settings.value.{}", value->name).c_str());
+        value->title = language::resolve(std::format("settings.value.{}", value->name).c_str());
 
         if(value->has_tooltip) {
-            value->tooltip = language::resolve(fmt::format("settings.tooltip.{}", value->name).c_str());
+            value->tooltip = language::resolve(std::format("settings.tooltip.{}", value->name).c_str());
         }
     }
 }
@@ -864,7 +864,7 @@ void settings::add_input(int priority, ConfigInt& value, settings_location locat
     setting_value->value = &value;
     setting_value->name = name;
 
-    setting_value->wid = fmt::format("###{}", static_cast<const void*>(setting_value->value));
+    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value->value));
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
@@ -879,7 +879,7 @@ void settings::add_input(int priority, ConfigFloat& value, settings_location loc
     setting_value->value = &value;
     setting_value->name = name;
 
-    setting_value->wid = fmt::format("###{}", static_cast<const void*>(setting_value->value));
+    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value->value));
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
@@ -894,13 +894,14 @@ void settings::add_input(int priority, ConfigUnsigned& value, settings_location 
     setting_value->value = &value;
     setting_value->name = name;
 
-    setting_value->wid = fmt::format("###{}", static_cast<const void*>(setting_value->value));
+    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value->value));
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
-void settings::add_input(int priority, ConfigString& value, settings_location location, const char* name, bool tooltip, bool allow_whitespace)
+void settings::add_input(
+    int priority, ConfigString& value, settings_location location, const char* name, bool tooltip, bool allow_whitespace)
 {
     auto setting_value = new SettingValue_InputString;
     setting_value->type = setting_type::INPUT_STRING;
@@ -910,7 +911,7 @@ void settings::add_input(int priority, ConfigString& value, settings_location lo
     setting_value->name = name;
 
     setting_value->allow_whitespace = allow_whitespace;
-    setting_value->wid = fmt::format("###{}", static_cast<const void*>(setting_value->value));
+    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value->value));
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
@@ -925,7 +926,7 @@ void settings::add_slider(int priority, ConfigInt& value, settings_location loca
     setting_value->value = &value;
     setting_value->name = name;
 
-    setting_value->wid = fmt::format("###{}", static_cast<const void*>(setting_value->value));
+    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value->value));
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
@@ -941,7 +942,7 @@ void settings::add_slider(int priority, ConfigFloat& value, settings_location lo
     setting_value->name = name;
 
     setting_value->format = format;
-    setting_value->wid = fmt::format("###{}", static_cast<const void*>(setting_value->value));
+    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value->value));
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
@@ -956,7 +957,7 @@ void settings::add_slider(int priority, ConfigUnsigned& value, settings_location
     setting_value->value = &value;
     setting_value->name = name;
 
-    setting_value->wid = fmt::format("###{}", static_cast<const void*>(setting_value->value));
+    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value->value));
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
@@ -1047,7 +1048,7 @@ void settings::add_language_select(int priority, settings_location location, con
     setting_value->has_tooltip = false;
     setting_value->name = name;
 
-    setting_value->wid = fmt::format("###{}", static_cast<const void*>(setting_value));
+    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value));
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);

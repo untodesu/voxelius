@@ -104,7 +104,7 @@ add_executable(vclient
     "${CMAKE_CURRENT_LIST_DIR}/voxel_sounds.hh"
     "${CMAKE_CURRENT_LIST_DIR}/window_title.cc"
     "${CMAKE_CURRENT_LIST_DIR}/window_title.hh")
-target_compile_features(vclient PUBLIC cxx_std_17)
+target_compile_features(vclient PUBLIC cxx_std_20)
 target_compile_definitions(vclient PUBLIC GLFW_INCLUDE_NONE)
 target_include_directories(vclient PUBLIC "${DEPS_INCLUDE_DIR}")
 target_include_directories(vclient PRIVATE "${PROJECT_SOURCE_DIR}")

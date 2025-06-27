@@ -2,48 +2,46 @@
 #define CORE_VECTORS_HH 1
 #pragma once
 
-// cxvectors.hh - because NO ONE would POSSIBLY
+#include "core/concepts.hh"
+
+// core/vectors.hh - because NO ONE would POSSIBLY
 // need integer-based distance calculations in a
 // game about voxels. That would be INSANE! :D
 
-namespace cxvectors
+namespace vx
 {
-template<typename value_type>
-constexpr static inline const value_type length2(const glm::vec<2, value_type>& vector);
-template<typename value_type>
-constexpr static inline const value_type length2(const glm::vec<3, value_type>& vector);
-template<typename value_type>
-constexpr static inline const value_type distance2(const glm::vec<2, value_type>& vector_a, const glm::vec<2, value_type>& vector_b);
-template<typename value_type>
-constexpr static inline const value_type distance2(const glm::vec<3, value_type>& vector_a, const glm::vec<3, value_type>& vector_b);
-} // namespace cxvectors
+template<vx::Arithmetic T>
+constexpr static inline const T length2(const glm::vec<2, T>& vector);
+template<vx::Arithmetic T>
+constexpr static inline const T length2(const glm::vec<3, T>& vector);
+template<vx::Arithmetic T>
+constexpr static inline const T distance2(const glm::vec<2, T>& vector_a, const glm::vec<2, T>& vector_b);
+template<vx::Arithmetic T>
+constexpr static inline const T distance2(const glm::vec<3, T>& vector_a, const glm::vec<3, T>& vector_b);
+} // namespace vx
 
-template<typename value_type>
-constexpr static inline const value_type cxvectors::length2(const glm::vec<2, value_type>& vector)
+template<vx::Arithmetic T>
+constexpr static inline const T vx::length2(const glm::vec<2, T>& vector)
 {
-    static_assert(std::is_arithmetic_v<value_type>);
     return (vector.x * vector.x) + (vector.y * vector.y);
 }
 
-template<typename value_type>
-constexpr static inline const value_type cxvectors::length2(const glm::vec<3, value_type>& vector)
+template<vx::Arithmetic T>
+constexpr static inline const T vx::length2(const glm::vec<3, T>& vector)
 {
-    static_assert(std::is_arithmetic_v<value_type>);
     return (vector.x * vector.x) + (vector.y * vector.y) + (vector.z * vector.z);
 }
 
-template<typename value_type>
-constexpr static inline const value_type cxvectors::distance2(const glm::vec<2, value_type>& vector_a, const glm::vec<2, value_type>& vector_b)
+template<vx::Arithmetic T>
+constexpr static inline const T vx::distance2(const glm::vec<2, T>& vector_a, const glm::vec<2, T>& vector_b)
 {
-    static_assert(std::is_arithmetic_v<value_type>);
-    return cxvectors::length2(vector_a - vector_b);
+    return vx::length2(vector_a - vector_b);
 }
 
-template<typename value_type>
-constexpr static inline const value_type cxvectors::distance2(const glm::vec<3, value_type>& vector_a, const glm::vec<3, value_type>& vector_b)
+template<vx::Arithmetic T>
+constexpr static inline const T vx::distance2(const glm::vec<3, T>& vector_a, const glm::vec<3, T>& vector_b)
 {
-    static_assert(std::is_arithmetic_v<value_type>);
-    return cxvectors::length2(vector_a - vector_b);
+    return vx::length2(vector_a - vector_b);
 }
 
 #endif /* CORE_VECTORS_HH */

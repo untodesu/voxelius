@@ -39,7 +39,7 @@ ConfigGamepadAxis::ConfigGamepadAxis(int axis, bool inverted)
     m_inverted = inverted;
     m_gamepad_axis = axis;
     m_name = get_axis_name(axis);
-    m_full_string = fmt::format("{}:{}", m_name, m_inverted ? 1U : 0U);
+    m_full_string = std::format("{}:{}", m_name, m_inverted ? 1U : 0U);
 }
 
 const char* ConfigGamepadAxis::get(void) const
@@ -58,7 +58,7 @@ void ConfigGamepadAxis::set(const char* value)
                 m_inverted = new_invert;
                 m_gamepad_axis = it.first;
                 m_name = get_axis_name(m_gamepad_axis);
-                m_full_string = fmt::format("{}:{}", m_name, m_inverted ? 1U : 0U);
+                m_full_string = std::format("{}:{}", m_name, m_inverted ? 1U : 0U);
                 return;
             }
         }
@@ -67,7 +67,7 @@ void ConfigGamepadAxis::set(const char* value)
     m_inverted = false;
     m_gamepad_axis = INVALID_GAMEPAD_AXIS;
     m_name = UNKNOWN_AXIS_NAME;
-    m_full_string = fmt::format("{}:{}", m_name, m_inverted ? 1U : 0U);
+    m_full_string = std::format("{}:{}", m_name, m_inverted ? 1U : 0U);
 }
 
 int ConfigGamepadAxis::get_axis(void) const
@@ -79,7 +79,7 @@ void ConfigGamepadAxis::set_axis(int axis)
 {
     m_gamepad_axis = axis;
     m_name = get_axis_name(axis);
-    m_full_string = fmt::format("{}:{}", m_name, m_inverted ? 1U : 0U);
+    m_full_string = std::format("{}:{}", m_name, m_inverted ? 1U : 0U);
 }
 
 bool ConfigGamepadAxis::is_inverted(void) const
@@ -90,15 +90,15 @@ bool ConfigGamepadAxis::is_inverted(void) const
 void ConfigGamepadAxis::set_inverted(bool inverted)
 {
     m_inverted = inverted;
-    m_full_string = fmt::format("{}:{}", m_name, m_inverted ? 1U : 0U);
+    m_full_string = std::format("{}:{}", m_name, m_inverted ? 1U : 0U);
 }
 
 float ConfigGamepadAxis::get_value(const GLFWgamepadstate& state, float deadzone) const
 {
-    if(m_gamepad_axis <= cxpr::array_size(state.axes)) {
+    if(m_gamepad_axis <= vx::array_size(state.axes)) {
         auto value = state.axes[m_gamepad_axis];
 
-        if(cxpr::abs(value) > deadzone) {
+        if(vx::abs(value) > deadzone) {
             return m_inverted ? -value : value;
         }
 

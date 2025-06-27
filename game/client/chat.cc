@@ -41,7 +41,7 @@ static void append_text_message(const std::string& sender, const std::string& te
 {
     GuiChatMessage message;
     message.spawn = globals::curtime;
-    message.text = fmt::format("<{}> {}", sender, text);
+    message.text = std::format("<{}> {}", sender, text);
     message.color = ImGui::GetStyleColorVec4(ImGuiCol_Text);
     history.push_back(message);
 
@@ -54,7 +54,7 @@ static void append_player_join(const std::string& sender)
 {
     GuiChatMessage message;
     message.spawn = globals::curtime;
-    message.text = fmt::format("{} {}", sender, language::resolve("chat.client_join"));
+    message.text = std::format("{} {}", sender, language::resolve("chat.client_join"));
     message.color = ImGui::GetStyleColorVec4(ImGuiCol_DragDropTarget);
     history.push_back(message);
 
@@ -67,7 +67,7 @@ static void append_player_leave(const std::string& sender, const std::string& re
 {
     GuiChatMessage message;
     message.spawn = globals::curtime;
-    message.text = fmt::format("{} {} ({})", sender, language::resolve("chat.client_left"), language::resolve(reason.c_str()));
+    message.text = std::format("{} {} ({})", sender, language::resolve("chat.client_left"), language::resolve(reason.c_str()));
     message.color = ImGui::GetStyleColorVec4(ImGuiCol_DragDropTarget);
     history.push_back(message);
 
@@ -221,7 +221,8 @@ void client_chat::layout(void)
             auto text_col = ImGui::GetColorU32(ImVec4(it->color.x, it->color.y, it->color.z, it->color.w * text_alpha));
 
             draw_list->AddRectFilled(rect_pos, rect_end, rect_col);
-            draw_list->AddText(font, font->FontSize, text_pos, text_col, it->text.c_str(), it->text.c_str() + it->text.size(), window_size.x);
+            draw_list->AddText(
+                font, font->FontSize, text_pos, text_col, it->text.c_str(), it->text.c_str() + it->text.size(), window_size.x);
 
             ypos -= rect_size.y;
         }

@@ -18,8 +18,8 @@
 #include "client/session.hh"
 #include "client/settings.hh"
 
-constexpr static float PITCH_MIN = -1.0f * cxpr::radians(90.0f);
-constexpr static float PITCH_MAX = +1.0f * cxpr::radians(90.0f);
+constexpr static float PITCH_MIN = -1.0f * vx::radians(90.0f);
+constexpr static float PITCH_MAX = +1.0f * vx::radians(90.0f);
 
 // Mouse options
 static ConfigBoolean mouse_raw_input(true);
@@ -47,7 +47,7 @@ static void add_angles(float pitch, float yaw)
 
         head.angles[0] += pitch;
         head.angles[1] += yaw;
-        head.angles[0] = cxpr::clamp(head.angles[0], PITCH_MIN, PITCH_MAX);
+        head.angles[0] = vx::clamp(head.angles[0], PITCH_MIN, PITCH_MAX);
         head.angles = cxangles::wrap_180(head.angles);
 
         // Client-side head angles are not interpolated;
@@ -73,8 +73,8 @@ static void on_glfw_cursor_pos(const GlfwCursorPosEvent& event)
         return;
     }
 
-    auto dx = -0.01f * static_cast<float>(mouse_sensitivity.get_value()) * cxpr::radians(event.pos.x - last_cursor.x);
-    auto dy = -0.01f * static_cast<float>(mouse_sensitivity.get_value()) * cxpr::radians(event.pos.y - last_cursor.y);
+    auto dx = -0.01f * static_cast<float>(mouse_sensitivity.get_value()) * vx::radians(event.pos.x - last_cursor.x);
+    auto dy = -0.01f * static_cast<float>(mouse_sensitivity.get_value()) * vx::radians(event.pos.y - last_cursor.y);
     add_angles(dy, dx);
 
     last_cursor = event.pos;
@@ -105,7 +105,8 @@ void player_look::init(void)
     settings::add_slider(1, gamepad_accel_yaw, settings_location::GAMEPAD_GAMEPLAY, "player_look.gamepad.accel_yaw", false);
     settings::add_gamepad_axis(2, axis_pitch, settings_location::GAMEPAD_GAMEPLAY, "player_look.gp_axis.pitch");
     settings::add_gamepad_axis(3, axis_yaw, settings_location::GAMEPAD_GAMEPLAY, "player_look.gp_axis.yaw");
-    settings::add_slider(4, gamepad_fastlook_factor, settings_location::GAMEPAD_GAMEPLAY, "player_look.gamepad.fastlook_factor", true, "%.02f");
+    settings::add_slider(
+        4, gamepad_fastlook_factor, settings_location::GAMEPAD_GAMEPLAY, "player_look.gamepad.fastlook_factor", true, "%.02f");
     settings::add_gamepad_button(5, button_fastlook, settings_location::GAMEPAD_GAMEPLAY, "player_look.gp_button.fastlook");
 
     fastlook_enabled = false;

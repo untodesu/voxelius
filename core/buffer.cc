@@ -183,7 +183,7 @@ void WriteBuffer::write_UI64(std::uint64_t value)
 
 void WriteBuffer::write_string(const std::string& value)
 {
-    const std::size_t size = cxpr::min<std::size_t>(UINT16_MAX, value.size());
+    const std::size_t size = vx::min<std::size_t>(UINT16_MAX, value.size());
 
     write_UI16(static_cast<std::uint16_t>(size));
 

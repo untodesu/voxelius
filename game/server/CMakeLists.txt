@@ -24,7 +24,7 @@ add_executable(vserver
     "${CMAKE_CURRENT_LIST_DIR}/whitelist.hh"
     "${CMAKE_CURRENT_LIST_DIR}/worldgen.cc"
     "${CMAKE_CURRENT_LIST_DIR}/worldgen.hh")
-target_compile_features(vserver PUBLIC cxx_std_17)
+target_compile_features(vserver PUBLIC cxx_std_20)
 target_include_directories(vserver PUBLIC "${DEPS_INCLUDE_DIR}")
 target_include_directories(vserver PRIVATE "${PROJECT_SOURCE_DIR}")
 target_include_directories(vserver PRIVATE "${PROJECT_SOURCE_DIR}/game")

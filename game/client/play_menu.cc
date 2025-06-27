@@ -88,7 +88,7 @@ static void parse_hostname(ServerStatusItem* item, const std::string& hostname)
     }
 
     if(parts.size() >= 2) {
-        item->port = cxpr::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 1024, UINT16_MAX);
+        item->port = vx::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 1024, UINT16_MAX);
     } else {
         item->port = protocol::PORT;
     }
@@ -122,7 +122,7 @@ static void edit_selected_server(void)
     input_itemname = selected_server->name;
 
     if(selected_server->port != protocol::PORT) {
-        input_hostname = fmt::format("{}:{}", selected_server->hostname, selected_server->port);
+        input_hostname = std::format("{}:{}", selected_server->hostname, selected_server->port);
     } else {
         input_hostname = selected_server->hostname;
     }
@@ -229,7 +229,7 @@ static void layout_server_item(ServerStatusItem* item)
 
     const float item_width = ImGui::GetContentRegionAvail().x;
     const float line_height = ImGui::GetTextLineHeightWithSpacing();
-    const std::string sid = fmt::format("###play_menu.servers.{}", static_cast<void*>(item));
+    const std::string sid = std::format("###play_menu.servers.{}", static_cast<void*>(item));
     if(ImGui::Selectable(sid.c_str(), (item == selected_server), 0, ImVec2(0.0, 2.0f * (line_height + padding.y + spacing.y)))) {
         selected_server = item;
         editing_server = false;
@@ -252,7 +252,7 @@ static void layout_server_item(ServerStatusItem* item)
     draw_list->AddText(name_pos, ImGui::GetColorU32(ImGuiCol_Text), item->name.c_str(), item->name.c_str() + item->name.size());
 
     if(item->status == item_status::REACHED) {
-        auto stats = fmt::format("{}/{}", item->num_players, item->max_players);
+        auto stats = std::format("{}/{}", item->num_players, item->max_players);
         auto stats_width = ImGui::CalcTextSize(stats.c_str(), stats.c_str() + stats.size()).x;
         auto stats_pos = ImVec2(cursor.x + item_width - stats_width - padding.x, cursor.y + padding.y);
         draw_list->AddText(stats_pos, ImGui::GetColorU32(ImGuiCol_TextDisabled), stats.c_str(), stats.c_str() + stats.size());
@@ -318,7 +318,8 @@ static void layout_server_edit(ServerStatusItem* item)
 
     ImGui::BeginDisabled(ignore_input);
 
-    if(ImGui::Button("OK###play_menu.servers.submit_input", ImVec2(-1.0f, 0.0f)) || (!ignore_input && ImGui::IsKeyPressed(ImGuiKey_Enter))) {
+    if(ImGui::Button("OK###play_menu.servers.submit_input", ImVec2(-1.0f, 0.0f))
+        || (!ignore_input && ImGui::IsKeyPressed(ImGuiKey_Enter))) {
         parse_hostname(item, input_hostname);
         item->password = input_password;
         item->name = input_itemname.substr(0, MAX_SERVER_ITEM_NAME);
@@ -481,7 +482,7 @@ void play_menu::deinit(void)
     std::ostringstream stream;
 
     for(const auto item : servers_deque) {
-        stream << fmt::format("{}:{}%{}%{}", item->hostname, item->port, item->password, item->name) << std::endl;
+        stream << std::format("{}:{}%{}%{}", item->hostname, item->port, item->password, item->name) << std::endl;
     }
 
     if(auto file = PHYSFS_openWrite(SERVERS_TXT)) {

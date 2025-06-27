@@ -5,7 +5,6 @@
 #include "core/angles.hh"
 #include "core/binfile.hh"
 #include "core/config.hh"
-#include "core/feature.hh"
 #include "core/resource.hh"
 
 #include "shared/collision.hh"
@@ -88,9 +87,9 @@ static void on_glfw_framebuffer_size(const GlfwFramebufferSizeEvent& event)
 {
     auto width_float = static_cast<float>(event.size.x);
     auto height_float = static_cast<float>(event.size.y);
-    auto wscale = cxpr::max(1U, cxpr::floor<unsigned int>(width_float / static_cast<float>(BASE_WIDTH)));
-    auto hscale = cxpr::max(1U, cxpr::floor<unsigned int>(height_float / static_cast<float>(BASE_HEIGHT)));
-    auto scale = cxpr::min(wscale, hscale);
+    auto wscale = vx::max(1U, vx::floor<unsigned int>(width_float / static_cast<float>(BASE_WIDTH)));
+    auto hscale = vx::max(1U, vx::floor<unsigned int>(height_float / static_cast<float>(BASE_HEIGHT)));
+    auto scale = vx::min(wscale, hscale);
 
     if(globals::gui_scale != scale) {
         auto& io = ImGui::GetIO();
@@ -113,8 +112,10 @@ static void on_glfw_framebuffer_size(const GlfwFramebufferSizeEvent& event)
         ImVector<ImWchar> ranges = {};
         builder.BuildRanges(&ranges);
 
-        globals::font_default = io.Fonts->AddFontFromMemoryTTF(bin_unscii16->buffer, bin_unscii16->size, 16.0f * scale, &font_config, ranges.Data);
-        globals::font_chat = io.Fonts->AddFontFromMemoryTTF(bin_unscii16->buffer, bin_unscii16->size, 8.0f * scale, &font_config, ranges.Data);
+        globals::font_default = io.Fonts->AddFontFromMemoryTTF(
+            bin_unscii16->buffer, bin_unscii16->size, 16.0f * scale, &font_config, ranges.Data);
+        globals::font_chat = io.Fonts->AddFontFromMemoryTTF(
+            bin_unscii16->buffer, bin_unscii16->size, 8.0f * scale, &font_config, ranges.Data);
         globals::font_debug = io.Fonts->AddFontFromMemoryTTF(bin_unscii8->buffer, bin_unscii8->size, 4.0f * scale, &font_config);
 
         // Re-assign the default font
@@ -578,8 +579,8 @@ void client_game::update_late(void)
 
 void client_game::render(void)
 {
-    auto scaled_width = globals::width / cxpr::max<int>(1, client_game::pixel_size.get_value());
-    auto scaled_height = globals::height / cxpr::max<int>(1, client_game::pixel_size.get_value());
+    auto scaled_width = globals::width / vx::max<int>(1, client_game::pixel_size.get_value());
+    auto scaled_height = globals::height / vx::max<int>(1, client_game::pixel_size.get_value());
 
     glViewport(0, 0, scaled_width, scaled_height);
     glBindFramebuffer(GL_FRAMEBUFFER, globals::world_fbo);
@@ -595,7 +596,8 @@ void client_game::render(void)
     player_target::render();
 
     if(globals::dimension) {
-        auto group = globals::dimension->entities.group(entt::get<PlayerComponent, CollisionComponent, HeadComponentIntr, TransformComponentIntr>);
+        auto group = globals::dimension->entities.group(
+            entt::get<PlayerComponent, CollisionComponent, HeadComponentIntr, TransformComponentIntr>);
 
         outline::prepare();
 

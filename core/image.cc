@@ -55,7 +55,8 @@ resource_ptr<Image> resource::load<Image>(const char* name, unsigned int flags)
     if(flags & IMAGE_LOAD_GRAY) {
         new_resource->pixels = stbi_load_from_callbacks(&callbacks, file, &new_resource->size.x, &new_resource->size.y, nullptr, STBI_grey);
     } else {
-        new_resource->pixels = stbi_load_from_callbacks(&callbacks, file, &new_resource->size.x, &new_resource->size.y, nullptr, STBI_rgb_alpha);
+        new_resource->pixels = stbi_load_from_callbacks(
+            &callbacks, file, &new_resource->size.x, &new_resource->size.y, nullptr, STBI_rgb_alpha);
     }
 
     PHYSFS_close(file);

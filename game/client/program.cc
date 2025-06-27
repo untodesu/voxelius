@@ -112,9 +112,9 @@ bool GL_Program::update(void)
     }
 
     for(const auto& macro : vert_variants)
-        vert_source[macro.line] = fmt::format("#define {} {}", macro.name, macro.value);
+        vert_source[macro.line] = std::format("#define {} {}", macro.name, macro.value);
     for(const auto& macro : frag_variants)
-        frag_source[macro.line] = fmt::format("#define {} {}", macro.name, macro.value);
+        frag_source[macro.line] = std::format("#define {} {}", macro.name, macro.value);
 
     const std::string vsource = strtools::join(vert_source, "\r\n");
     const std::string fsource = strtools::join(frag_source, "\r\n");

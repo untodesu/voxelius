@@ -86,5 +86,5 @@ bool ConfigGamepadButton::equals(int button) const
 
 bool ConfigGamepadButton::is_pressed(const GLFWgamepadstate& state) const
 {
-    return m_gamepad_button < cxpr::array_size(state.buttons) && state.buttons[m_gamepad_button] == GLFW_PRESS;
+    return m_gamepad_button < vx::array_size(state.buttons) && state.buttons[m_gamepad_button] == GLFW_PRESS;
 }

@@ -66,11 +66,14 @@ void game_voxels::populate(void)
                              .build();
 
     // VTest-CK; a pure blue chromakey I used to make the game's logo
-    game_voxels::vtest_ck = voxel_registry::construct("vtest_ck", voxel_type::CUBE, false, false).add_texture_default("textures/voxel/chromakey.png").build();
+    game_voxels::vtest_ck =
+        voxel_registry::construct("vtest_ck", voxel_type::CUBE, false, false).add_texture_default("textures/voxel/chromakey.png").build();
 
     // Oak leaves; greenery. TODO: add trees as surface features
-    game_voxels::oak_leaves =
-        voxel_registry::construct("oak_leaves", voxel_type::CUBE, false, false).add_texture_default("textures/voxel/oak_leaves.png").set_surface(voxel_surface::GRASS).build();
+    game_voxels::oak_leaves = voxel_registry::construct("oak_leaves", voxel_type::CUBE, false, false)
+                                  .add_texture_default("textures/voxel/oak_leaves.png")
+                                  .set_surface(voxel_surface::GRASS)
+                                  .build();
 
     // Oak planks; the thing that comes out of oak logs
     game_voxels::oak_planks = voxel_registry::construct("oak_planks", voxel_type::CUBE, false, false)
@@ -89,8 +92,10 @@ void game_voxels::populate(void)
                                .build();
 
     // Glass; blend rendering test
-    game_voxels::glass =
-        voxel_registry::construct("glass", voxel_type::CUBE, false, true).add_texture_default("textures/voxel/glass_01.png").set_surface(voxel_surface::GLASS).build();
+    game_voxels::glass = voxel_registry::construct("glass", voxel_type::CUBE, false, true)
+                             .add_texture_default("textures/voxel/glass_01.png")
+                             .set_surface(voxel_surface::GLASS)
+                             .build();
 
     // Slime; it's bouncy!
     game_voxels::slime = voxel_registry::construct("slime", voxel_type::CUBE, false, true)

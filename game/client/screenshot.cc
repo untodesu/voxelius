@@ -62,8 +62,8 @@ void screenshot::take(void)
     glPixelStorei(GL_PACK_ALIGNMENT, old_pack_alignment);
 
     const auto directory = std::string("screenshots");
-    const auto filename = fmt::format("{}.png", epoch::microseconds());
-    const auto filepath = fmt::format("{}/{}", directory, filename);
+    const auto filename = std::format("{}.png", epoch::microseconds());
+    const auto filepath = std::format("{}/{}", directory, filename);
 
     PHYSFS_mkdir(directory.c_str());
 
@@ -73,7 +73,7 @@ void screenshot::take(void)
 
         spdlog::info("screenshot: wrote {}", filepath);
 
-        client_chat::print(fmt::format("{} {}", language::resolve("chat.screenshot_message"), filename));
+        client_chat::print(std::format("{} {}", language::resolve("chat.screenshot_message"), filename));
 
         PHYSFS_close(file);
     }

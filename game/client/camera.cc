@@ -94,13 +94,13 @@ void camera::update(void)
 
     if(!toggles::get(TOGGLE_PM_FLIGHT)) {
         // Apply the quake-like view rolling
-        client_angles[2] = cxpr::radians(-camera::roll_angle.get_value() * glm::dot(velocity.value / PMOVE_MAX_SPEED_GROUND, right_vector));
+        client_angles[2] = vx::radians(-camera::roll_angle.get_value() * glm::dot(velocity.value / PMOVE_MAX_SPEED_GROUND, right_vector));
     }
 
     const auto z_near = 0.01f;
     const auto z_far = 1.25f * static_cast<float>(CHUNK_SIZE * camera::view_distance.get_value());
 
-    auto proj = glm::perspective(cxpr::radians(camera::vertical_fov.get_value()), globals::aspect, z_near, z_far);
+    auto proj = glm::perspective(vx::radians(camera::vertical_fov.get_value()), globals::aspect, z_near, z_far);
     auto view = platinumsrc_viewmatrix(camera::position_local, client_angles);
 
     camera::matrix = proj * view;

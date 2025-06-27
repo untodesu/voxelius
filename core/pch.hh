@@ -10,7 +10,9 @@
 
 #include <algorithm>
 #include <chrono>
+#include <concepts>
 #include <filesystem>
+#include <format>
 #include <iostream>
 #include <limits>
 #include <mutex>
@@ -40,7 +42,6 @@
 
 #include <physfs.h>
 
-#include <spdlog/fmt/fmt.h>
 #include <spdlog/spdlog.h>
 
 #include <stb_image.h>

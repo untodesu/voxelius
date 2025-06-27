@@ -133,7 +133,7 @@ bool Config::save_file(const char* path) const
 
     auto curtime = std::time(nullptr);
 
-    stream << "# Voxelius " << PROJECT_VERSION_STRING << " configuration file" << std::endl;
+    stream << "# Voxelius " << project_version_string << " configuration file" << std::endl;
     stream << "# Generated at: " << std::put_time(std::gmtime(&curtime), "%Y-%m-%d %H:%M:%S %z") << std::endl << std::endl;
 
     for(const auto& it : m_values) {

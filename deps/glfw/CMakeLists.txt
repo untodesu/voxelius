@@ -1,0 +1,12 @@
+find_package(glfw3 3.4 QUIET)
+
+if(NOT glfw3_FOUND)
+    include(FetchContent)
+    set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(glfw GIT_REPOSITORY https://github.com/glfw/glfw.git GIT_TAG 3.4)
+    FetchContent_MakeAvailable(glfw)
+    add_library(glfw3 ALIAS glfw)
+endif()

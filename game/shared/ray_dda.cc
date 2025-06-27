@@ -22,9 +22,9 @@ void RayDDA::reset(const Dimension* dimension, const chunk_pos& start_chunk, con
     this->start_fpos = start_fpos;
     this->direction = direction;
 
-    this->delta_dist.x = direction.x ? cxpr::abs(1.0f / direction.x) : std::numeric_limits<float>::max();
-    this->delta_dist.y = direction.y ? cxpr::abs(1.0f / direction.y) : std::numeric_limits<float>::max();
-    this->delta_dist.z = direction.z ? cxpr::abs(1.0f / direction.z) : std::numeric_limits<float>::max();
+    this->delta_dist.x = direction.x ? vx::abs(1.0f / direction.x) : std::numeric_limits<float>::max();
+    this->delta_dist.y = direction.y ? vx::abs(1.0f / direction.y) : std::numeric_limits<float>::max();
+    this->delta_dist.z = direction.z ? vx::abs(1.0f / direction.z) : std::numeric_limits<float>::max();
 
     this->distance = 0.0f;
     this->vpos = coord::to_voxel(start_chunk, start_fpos);

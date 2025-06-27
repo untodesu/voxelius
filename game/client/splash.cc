@@ -5,7 +5,6 @@
 #include "core/cmdline.hh"
 #include "core/constexpr.hh"
 #include "core/epoch.hh"
-#include "core/feature.hh"
 #include "core/resource.hh"
 
 #include "client/glfw.hh"
@@ -93,7 +92,7 @@ void client_splash::init_late(void)
             break;
         }
 
-        texture_alpha = cxpr::smoothstep(0.25f, 0.6f, static_cast<float>(remains) / static_cast<float>(DELAY_MICROSECONDS));
+        texture_alpha = vx::smoothstep(0.25f, 0.6f, static_cast<float>(remains) / static_cast<float>(DELAY_MICROSECONDS));
 
         client_splash::render();
     }

@@ -64,7 +64,7 @@ void language::init(void)
             LanguageInfo info;
             info.ietf = std::string(ietf);
             info.endonym = std::string(endonym);
-            info.display = fmt::format("{} ({})", endonym, ietf);
+            info.display = std::format("{} ({})", endonym, ietf);
             manifest.push_back(info);
         }
     }
@@ -105,7 +105,7 @@ void language::init_late(void)
 void language::set(LanguageIterator new_language)
 {
     if(new_language != manifest.cend()) {
-        auto path = fmt::format("lang/lang.{}.json", new_language->ietf);
+        auto path = std::format("lang/lang.{}.json", new_language->ietf);
 
         auto file = PHYSFS_openRead(path.c_str());
 
@@ -192,5 +192,5 @@ std::string language::resolve_gui(const char* key)
     // We need window tags to retain their hierarchy when a language
     // dynamically changes; ImGui allows to provide hidden unique identifiers
     // to GUI primitives that have their name change dynamically, so we're using this
-    return fmt::format("{}###{}", language::resolve(key), key);
+    return std::format("{}###{}", language::resolve(key), key);
 }

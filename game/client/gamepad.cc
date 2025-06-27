@@ -132,7 +132,8 @@ void gamepad::update_late(void)
 
     if(glfwGetGamepadState(active_gamepad_id, &gamepad::state)) {
         for(int i = 0; i < NUM_AXES; ++i) {
-            if((cxpr::abs(gamepad::state.axes[i]) > GAMEPAD_AXIS_EVENT_THRESHOLD) && (cxpr::abs(gamepad::last_state.axes[i]) <= GAMEPAD_AXIS_EVENT_THRESHOLD)) {
+            if((vx::abs(gamepad::state.axes[i]) > GAMEPAD_AXIS_EVENT_THRESHOLD)
+                && (vx::abs(gamepad::last_state.axes[i]) <= GAMEPAD_AXIS_EVENT_THRESHOLD)) {
                 GamepadAxisEvent event;
                 event.action = GLFW_PRESS;
                 event.axis = i;
@@ -140,7 +141,8 @@ void gamepad::update_late(void)
                 continue;
             }
 
-            if((cxpr::abs(gamepad::state.axes[i]) <= GAMEPAD_AXIS_EVENT_THRESHOLD) && (cxpr::abs(gamepad::last_state.axes[i]) > GAMEPAD_AXIS_EVENT_THRESHOLD)) {
+            if((vx::abs(gamepad::state.axes[i]) <= GAMEPAD_AXIS_EVENT_THRESHOLD)
+                && (vx::abs(gamepad::last_state.axes[i]) > GAMEPAD_AXIS_EVENT_THRESHOLD)) {
                 GamepadAxisEvent event;
                 event.action = GLFW_RELEASE;
                 event.axis = i;

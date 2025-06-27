@@ -39,8 +39,8 @@ static void update_requests(void)
             }
 
     std::sort(requests.begin(), requests.end(), [](const chunk_pos& cpos_a, const chunk_pos& cpos_b) {
-        auto da = cxvectors::distance2(cpos_a, camera::position_chunk);
-        auto db = cxvectors::distance2(cpos_b, camera::position_chunk);
+        auto da = vx::distance2(cpos_a, camera::position_chunk);
+        auto db = vx::distance2(cpos_b, camera::position_chunk);
         return da > db;
     });
 }

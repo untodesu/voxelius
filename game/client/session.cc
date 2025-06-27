@@ -33,7 +33,7 @@ static std::uint64_t server_password_hash = UINT64_MAX;
 
 static void set_fixed_tickrate(std::uint16_t tickrate)
 {
-    globals::fixed_frametime_us = 1000000U / cxpr::clamp<std::uint64_t>(tickrate, 10U, 300U);
+    globals::fixed_frametime_us = 1000000U / vx::clamp<std::uint64_t>(tickrate, 10U, 300U);
     globals::fixed_frametime = static_cast<float>(globals::fixed_frametime_us) / 1000000.0f;
     globals::fixed_accumulator = 0;
 }

@@ -1,0 +1,12 @@
+#include "core/pch.hh"
+
+#include "core/version.hh"
+
+// clang-format off
+const unsigned long project_version_major = ${PROJECT_VERSION_MAJOR};
+const unsigned long project_version_minor = ${PROJECT_VERSION_MINOR};
+const unsigned long project_version_patch = ${PROJECT_VERSION_PATCH};
+const unsigned long project_version_tweak = ${PROJECT_VERSION_TWEAK};
+// clang-format on
+
+const std::string project_version_string = "${PROJECT_VERSION}";

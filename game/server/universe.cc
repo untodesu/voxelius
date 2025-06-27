@@ -33,7 +33,7 @@ static std::string make_chunk_filename(const DimensionMetadata* metadata, const 
     const auto unsigned_x = static_cast<std::uint32_t>(cpos.x);
     const auto unsigned_y = static_cast<std::uint32_t>(cpos.y);
     const auto unsigned_z = static_cast<std::uint32_t>(cpos.z);
-    return fmt::format("{}/{:08X}-{:08X}-{:08X}.zvox", metadata->zvox_dir, unsigned_x, unsigned_y, unsigned_z);
+    return std::format("{}/{:08X}-{:08X}-{:08X}.zvox", metadata->zvox_dir, unsigned_x, unsigned_y, unsigned_z);
 }
 
 static void add_new_dimension(Dimension* dimension)
@@ -43,7 +43,7 @@ static void add_new_dimension(Dimension* dimension)
         std::terminate();
     }
 
-    auto dimension_dir = fmt::format("{}/{}", universe_name.get(), dimension->get_name());
+    auto dimension_dir = std::format("{}/{}", universe_name.get(), dimension->get_name());
 
     if(!PHYSFS_mkdir(dimension_dir.c_str())) {
         spdlog::critical("universe: {}: {}", dimension_dir, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -51,8 +51,8 @@ static void add_new_dimension(Dimension* dimension)
     }
 
     auto metadata = new DimensionMetadata;
-    metadata->config_path = fmt::format("{}/dimension.conf", dimension_dir);
-    metadata->zvox_dir = fmt::format("{}/chunk", dimension_dir);
+    metadata->config_path = std::format("{}/dimension.conf", dimension_dir);
+    metadata->zvox_dir = std::format("{}/chunk", dimension_dir);
 
     if(!PHYSFS_mkdir(metadata->zvox_dir.c_str())) {
         spdlog::critical("universe: {}: {}", metadata->zvox_dir, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -107,7 +107,7 @@ void universe::init_late(void)
         std::terminate();
     }
 
-    universe_config_path = fmt::format("{}/universe.conf", universe_dir);
+    universe_config_path = std::format("{}/universe.conf", universe_dir);
     universe_config.load_file(universe_config_path.c_str());
 
     add_new_dimension(new Overworld("world"));

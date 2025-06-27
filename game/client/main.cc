@@ -4,7 +4,6 @@
 #include "core/cmdline.hh"
 #include "core/config.hh"
 #include "core/epoch.hh"
-#include "core/feature.hh"
 #include "core/image.hh"
 #include "core/resource.hh"
 #include "core/version.hh"
@@ -122,7 +121,8 @@ static void on_glfw_window_focus(GLFWwindow* window, int focused)
     ImGui_ImplGlfw_WindowFocusCallback(window, focused);
 }
 
-static void GLAD_API_PTR on_opengl_message(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* param)
+static void GLAD_API_PTR on_opengl_message(
+    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* param)
 {
     spdlog::info("opengl: {}", reinterpret_cast<const char*>(message));
 }
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
 
     shared_game::init(argc, argv);
 
-    spdlog::info("Voxelius Client {}", PROJECT_VERSION_STRING);
+    spdlog::info("Voxelius Client {}", project_version_string);
 
     glfwSetErrorCallback(&on_glfw_error);
 
@@ -306,8 +306,8 @@ int main(int argc, char** argv)
 
     if(auto vmode = cmdline::get("mode")) {
         std::sscanf(vmode, "%dx%d", &vmode_width, &vmode_height);
-        vmode_height = cxpr::max(vmode_height, MIN_HEIGHT);
-        vmode_width = cxpr::max(vmode_width, MIN_WIDTH);
+        vmode_height = vx::max(vmode_height, MIN_HEIGHT);
+        vmode_width = vx::max(vmode_width, MIN_WIDTH);
     }
 
     glfwSetWindowSize(globals::window, vmode_width, vmode_height);

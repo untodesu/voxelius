@@ -2,6 +2,8 @@
 #define CORE_CONFIG_HH 1
 #pragma once
 
+#include "core/concepts.hh"
+
 class IConfigValue {
 public:
     virtual ~IConfigValue(void) = default;
@@ -29,10 +31,8 @@ public:
     static bool from_string(const char* value);
 };
 
-template<typename T>
+template<vx::Arithmetic T>
 class ConfigNumber : public IConfigValue {
-    static_assert(std::is_arithmetic_v<T>);
-
 public:
     explicit ConfigNumber(T default_value = T(0));
     explicit ConfigNumber(T default_value, T min_value, T max_value);
@@ -112,7 +112,7 @@ private:
     std::unordered_map<std::string, IConfigValue*> m_values;
 };
 
-template<typename T>
+template<vx::Arithmetic T>
 inline ConfigNumber<T>::ConfigNumber(T default_value)
 {
     m_value = default_value;
@@ -121,7 +121,7 @@ inline ConfigNumber<T>::ConfigNumber(T default_value)
     m_string = std::to_string(default_value);
 }
 
-template<typename T>
+template<vx::Arithmetic T>
 inline ConfigNumber<T>::ConfigNumber(T default_value, T min_value, T max_value)
 {
     m_value = default_value;
@@ -130,7 +130,7 @@ inline ConfigNumber<T>::ConfigNumber(T default_value, T min_value, T max_value)
     m_string = std::to_string(default_value);
 }
 
-template<typename T>
+template<vx::Arithmetic T>
 inline void ConfigNumber<T>::set(const char* value)
 {
     std::istringstream(value) >> m_value;
@@ -138,38 +138,38 @@ inline void ConfigNumber<T>::set(const char* value)
     m_string = std::to_string(m_value);
 }
 
-template<typename T>
+template<vx::Arithmetic T>
 inline const char* ConfigNumber<T>::get(void) const
 {
     return m_string.c_str();
 }
 
-template<typename T>
+template<vx::Arithmetic T>
 inline T ConfigNumber<T>::get_value(void) const
 {
     return m_value;
 }
 
-template<typename T>
+template<vx::Arithmetic T>
 inline void ConfigNumber<T>::set_value(T value)
 {
     m_value = std::clamp(value, m_min_value, m_max_value);
     m_string = std::to_string(m_value);
 }
 
-template<typename T>
+template<vx::Arithmetic T>
 inline T ConfigNumber<T>::get_min_value(void) const
 {
     return m_min_value;
 }
 
-template<typename T>
+template<vx::Arithmetic T>
 inline T ConfigNumber<T>::get_max_value(void) const
 {
     return m_max_value;
 }
 
-template<typename T>
+template<vx::Arithmetic T>
 inline void ConfigNumber<T>::set_limits(T min_value, T max_value)
 {
     m_min_value = min_value;

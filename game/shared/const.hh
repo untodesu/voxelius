@@ -7,7 +7,7 @@
 constexpr static unsigned int CHUNK_SIZE = 16;
 constexpr static unsigned int CHUNK_AREA = CHUNK_SIZE * CHUNK_SIZE;
 constexpr static unsigned int CHUNK_VOLUME = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
-constexpr static unsigned int CHUNK_BITSHIFT = cxpr::log2(CHUNK_SIZE);
+constexpr static unsigned int CHUNK_BITSHIFT = vx::log2(CHUNK_SIZE);
 
 template<typename T>
 constexpr static glm::vec<3, T> DIR_NORTH = glm::vec<3, T>(0, 0, +1);

@@ -49,9 +49,9 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/voxel_registry.hh"
     "${CMAKE_CURRENT_LIST_DIR}/voxel_storage.cc"
     "${CMAKE_CURRENT_LIST_DIR}/voxel_storage.hh")
-target_compile_features(shared PUBLIC cxx_std_17)
+target_compile_features(shared PUBLIC cxx_std_20)
 target_include_directories(shared PUBLIC "${DEPS_INCLUDE_DIR}")
 target_include_directories(shared PRIVATE "${PROJECT_SOURCE_DIR}")
 target_include_directories(shared PRIVATE "${PROJECT_SOURCE_DIR}/game")
 target_precompile_headers(shared PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
-target_link_libraries(shared PUBLIC core enet FNL miniz parson)
+target_link_libraries(shared PUBLIC core enet entt FNL miniz parson thread_pool)

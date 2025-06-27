@@ -53,9 +53,9 @@ inline constexpr chunk_pos coord::to_chunk(const voxel_pos& vpos)
 inline constexpr local_pos coord::to_local(const voxel_pos& vpos)
 {
     return local_pos {
-        static_cast<local_pos::value_type>(cxpr::mod_signed<voxel_pos::value_type>(vpos.x, CHUNK_SIZE)),
-        static_cast<local_pos::value_type>(cxpr::mod_signed<voxel_pos::value_type>(vpos.y, CHUNK_SIZE)),
-        static_cast<local_pos::value_type>(cxpr::mod_signed<voxel_pos::value_type>(vpos.z, CHUNK_SIZE)),
+        static_cast<local_pos::value_type>(vx::mod_signed<voxel_pos::value_type>(vpos.x, CHUNK_SIZE)),
+        static_cast<local_pos::value_type>(vx::mod_signed<voxel_pos::value_type>(vpos.y, CHUNK_SIZE)),
+        static_cast<local_pos::value_type>(vx::mod_signed<voxel_pos::value_type>(vpos.z, CHUNK_SIZE)),
     };
 }
 
@@ -118,7 +118,8 @@ inline constexpr glm::fvec3 coord::to_relative(const chunk_pos& pivot_cpos, cons
     };
 }
 
-inline constexpr glm::fvec3 coord::to_relative(const chunk_pos& pivot_cpos, const glm::fvec3& pivot_fvec, const chunk_pos& cpos, const glm::fvec3& fvec)
+inline constexpr glm::fvec3 coord::to_relative(
+    const chunk_pos& pivot_cpos, const glm::fvec3& pivot_fvec, const chunk_pos& cpos, const glm::fvec3& fvec)
 {
     return glm::fvec3 {
         static_cast<float>((cpos.x - pivot_cpos.x) << CHUNK_BITSHIFT) + (fvec.x - pivot_fvec.x),

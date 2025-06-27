@@ -33,7 +33,8 @@ static bool synchronize_entity_id(Dimension* dimension, entt::entity entity)
     }
 
     session::disconnect("protocol.entity_id_desync");
-    spdlog::critical("receive: entity desync: network {} resolved as client {}", static_cast<std::uint64_t>(entity), static_cast<std::uint64_t>(created));
+    spdlog::critical("receive: entity desync: network {} resolved as client {}", static_cast<std::uint64_t>(entity),
+        static_cast<std::uint64_t>(created));
 
     message_box::reset();
     message_box::set_title("disconnected.disconnected");

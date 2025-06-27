@@ -87,7 +87,7 @@ void message_box::set_subtitle(const char* subtitle)
 void message_box::add_button(const char* text, const message_box_action& action)
 {
     Button button = {};
-    button.str_title = fmt::format("{}###MessageBox_Button{}", language::resolve(text), buttons.size());
+    button.str_title = std::format("{}###MessageBox_Button{}", language::resolve(text), buttons.size());
     button.action = action;
 
     buttons.push_back(button);

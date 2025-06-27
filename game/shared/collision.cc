@@ -13,10 +13,11 @@
 #include "shared/velocity.hh"
 #include "shared/voxel_registry.hh"
 
-static int vgrid_collide(const Dimension* dimension, int d, CollisionComponent& collision, TransformComponent& transform, VelocityComponent& velocity, voxel_surface& touch_surface)
+static int vgrid_collide(const Dimension* dimension, int d, CollisionComponent& collision, TransformComponent& transform,
+    VelocityComponent& velocity, voxel_surface& touch_surface)
 {
     const auto move = globals::fixed_frametime * velocity.value[d];
-    const auto move_sign = cxpr::sign<int>(move);
+    const auto move_sign = vx::sign<int>(move);
 
     const auto& ref_aabb = collision.aabb;
     const auto current_aabb = ref_aabb.push(transform.local);
@@ -26,14 +27,14 @@ static int vgrid_collide(const Dimension* dimension, int d, CollisionComponent& 
     next_aabb.max[d] += move;
 
     local_pos lpos_min;
-    lpos_min.x = cxpr::floor<local_pos::value_type>(next_aabb.min.x);
-    lpos_min.y = cxpr::floor<local_pos::value_type>(next_aabb.min.y);
-    lpos_min.z = cxpr::floor<local_pos::value_type>(next_aabb.min.z);
+    lpos_min.x = vx::floor<local_pos::value_type>(next_aabb.min.x);
+    lpos_min.y = vx::floor<local_pos::value_type>(next_aabb.min.y);
+    lpos_min.z = vx::floor<local_pos::value_type>(next_aabb.min.z);
 
     local_pos lpos_max;
-    lpos_max.x = cxpr::ceil<local_pos::value_type>(next_aabb.max.x);
-    lpos_max.y = cxpr::ceil<local_pos::value_type>(next_aabb.max.y);
-    lpos_max.z = cxpr::ceil<local_pos::value_type>(next_aabb.max.z);
+    lpos_max.x = vx::ceil<local_pos::value_type>(next_aabb.max.x);
+    lpos_max.y = vx::ceil<local_pos::value_type>(next_aabb.max.y);
+    lpos_max.z = vx::ceil<local_pos::value_type>(next_aabb.max.z);
 
     // Other axes
     const int u = (d + 1) % 3;
@@ -108,7 +109,7 @@ static int vgrid_collide(const Dimension* dimension, int d, CollisionComponent& 
 
     if(latch_touch != voxel_touch::NOTHING) {
         if(latch_touch == voxel_touch::BOUNCE) {
-            const auto move_distance = cxpr::abs(current_aabb.min[d] - next_aabb.min[d]);
+            const auto move_distance = vx::abs(current_aabb.min[d] - next_aabb.min[d]);
             const auto threshold = 2.0f * globals::fixed_frametime;
 
             if(move_distance > threshold) {
@@ -150,7 +151,7 @@ void CollisionComponent::fixed_update(Dimension* dimension)
         auto vertical_move = vgrid_collide(dimension, 1, collision, transform, velocity, surface);
 
         if(dimension->entities.any_of<GravityComponent>(entity)) {
-            if(vertical_move == cxpr::sign<int>(dimension->get_gravity())) {
+            if(vertical_move == vx::sign<int>(dimension->get_gravity())) {
                 dimension->entities.emplace_or_replace<GroundedComponent>(entity, GroundedComponent { surface });
             } else {
                 dimension->entities.remove<GroundedComponent>(entity);

@@ -4,8 +4,8 @@
 
 #include "core/constexpr.hh"
 
-constexpr float A180 = cxpr::radians(180.0f);
-constexpr float A360 = cxpr::radians(360.0f);
+constexpr float A180 = vx::radians(180.0f);
+constexpr float A360 = vx::radians(360.0f);
 
 namespace cxangles
 {

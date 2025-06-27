@@ -57,10 +57,10 @@ void progress_bar::layout(void)
             const float modifier = std::exp(-8.0f * (0.5f + 0.5f * sinval));
 
             ImVec4 color = {};
-            color.x = cxpr::lerp(background.x, foreground.x, modifier);
-            color.y = cxpr::lerp(background.y, foreground.y, modifier);
-            color.z = cxpr::lerp(background.z, foreground.z, modifier);
-            color.w = cxpr::lerp(background.w, foreground.w, modifier);
+            color.x = vx::lerp(background.x, foreground.x, modifier);
+            color.y = vx::lerp(background.y, foreground.y, modifier);
+            color.z = vx::lerp(background.z, foreground.z, modifier);
+            color.w = vx::lerp(background.w, foreground.w, modifier);
 
             const ImVec2 start = ImVec2(base_xpos + bar_width * i, base_ypos);
             const ImVec2 end = ImVec2(start.x + bar_width, start.y + bar_height);
@@ -105,6 +105,6 @@ void progress_bar::set_title(const char* title)
 
 void progress_bar::set_button(const char* text, const progress_bar_action& action)
 {
-    str_button = fmt::format("{}###ProgressBar_Button", language::resolve(text));
+    str_button = std::format("{}###ProgressBar_Button", language::resolve(text));
     button_action = action;
 }

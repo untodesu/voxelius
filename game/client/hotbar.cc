@@ -138,7 +138,8 @@ void hotbar::layout(void)
     // Draw the hotbar selector image
     auto selector_padding_a = SELECTOR_PADDING * globals::gui_scale;
     auto selector_padding_b = SELECTOR_PADDING * globals::gui_scale * 2.0f;
-    auto selector_start = ImVec2(background_start.x + hotbar::active_slot * item_size - selector_padding_a, background_start.y - selector_padding_a);
+    auto selector_start = ImVec2(
+        background_start.x + hotbar::active_slot * item_size - selector_padding_a, background_start.y - selector_padding_a);
     auto selector_end = ImVec2(selector_start.x + item_size + selector_padding_b, selector_start.y + item_size + selector_padding_b);
     draw_list->AddImage(hotbar_selector->handle, selector_start, selector_end);
 

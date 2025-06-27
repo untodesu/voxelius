@@ -89,7 +89,7 @@ void main_menu::layout(void)
             ImGui::Dummy(ImVec2(0.0f, 32.0f * globals::gui_scale));
         } else {
             auto reference_height = 0.225f * window_size.y;
-            auto image_width = cxpr::min(window_size.x, reference_height * title_aspect);
+            auto image_width = vx::min(window_size.x, reference_height * title_aspect);
             auto image_height = image_width / title_aspect;
             ImGui::SetCursorPosX(0.5f * (window_size.x - image_width));
             ImGui::Image(title->handle, ImVec2(image_width, image_height));
@@ -152,7 +152,7 @@ void main_menu::layout(void)
 
             ImGui::PushFont(globals::font_debug);
             ImGui::SetCursorScreenPos(ImVec2(padding.x + spacing.x, window_size.y - globals::font_debug->FontSize - padding.y - spacing.y));
-            ImGui::Text("Voxelius %s", PROJECT_VERSION_STRING);
+            ImGui::Text("Voxelius %s", project_version_string.c_str());
             ImGui::PopFont();
         }
 

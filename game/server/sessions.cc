@@ -115,11 +115,8 @@ static void on_login_request_packet(const protocol::LoginRequest& packet)
         dim_info.gravity = globals::spawn_dimension->get_gravity();
         protocol::send(packet.peer, protocol::encode(dim_info));
 
-        spdlog::info("sessions: {} [{}] logged in with client_index={} in {}",
-            session->client_username,
-            session->client_identity,
-            session->client_index,
-            globals::spawn_dimension->get_name());
+        spdlog::info("sessions: {} [{}] logged in with client_index={} in {}", session->client_username, session->client_identity,
+            session->client_index, globals::spawn_dimension->get_name());
 
         // FIXME: only send entities that are present within the current
         // player's view bounding box; this also would mean we're not sending

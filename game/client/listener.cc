@@ -34,5 +34,5 @@ void listener::update(void)
         alListenerfv(AL_ORIENTATION, orientation);
     }
 
-    alListenerf(AL_GAIN, cxpr::clamp(sound::volume_master.get_value() * 0.01f, 0.0f, 1.0f));
+    alListenerf(AL_GAIN, vx::clamp(sound::volume_master.get_value() * 0.01f, 0.0f, 1.0f));
 }

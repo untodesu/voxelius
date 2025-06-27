@@ -12,7 +12,7 @@
 static void compute_tree_feature(unsigned int height, Feature& feature, voxel_id log_voxel, voxel_id leaves_voxel)
 {
     // Ensure the tree height is too small
-    height = cxpr::max<unsigned int>(height, 4U);
+    height = vx::max<unsigned int>(height, 4U);
 
     // Put down a single piece of dirt
     feature.push_back({ voxel_pos(0, -1, 0), game_voxels::dirt, true });
@@ -214,14 +214,14 @@ const Overworld_Metadata& Overworld::get_or_create_metadata(const chunk_pos_xz& 
     }
 
     auto nvdi_value = 0.5f + 0.5f * fnlGetNoise2D(&m_fnl_nvdi, cpos.x, cpos.y);
-    auto tree_density = (nvdi_value >= 0.33f) ? cxpr::floor<unsigned int>(nvdi_value * 4.0f) : 0U;
+    auto tree_density = (nvdi_value >= 0.33f) ? vx::floor<unsigned int>(nvdi_value * 4.0f) : 0U;
 
     for(unsigned int i = 0U; i < tree_density; ++i) {
         auto lpos = local_pos((twister() % CHUNK_SIZE), (twister() % OW_NUM_TREES), (twister() % CHUNK_SIZE));
         auto is_unique = true;
 
         for(const auto& check_lpos : metadata.trees) {
-            if(cxvectors::distance2(check_lpos, lpos) <= 9) {
+            if(vx::distance2(check_lpos, lpos) <= 9) {
                 is_unique = false;
                 break;
             }
@@ -350,7 +350,7 @@ void Overworld::generate_features(const chunk_pos& cpos, VoxelStorage& voxels)
         chunk_pos_xz(cpos.x + 1, cpos.z + 1),
     };
 
-    for(unsigned int i = 0U; i < cxpr::array_size(tree_chunks); ++i) {
+    for(unsigned int i = 0U; i < vx::array_size(tree_chunks); ++i) {
         const auto& cpos_xz = tree_chunks[i];
         const auto& metadata = get_or_create_metadata(cpos_xz);
 
