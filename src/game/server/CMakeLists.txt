@@ -26,8 +26,8 @@ add_executable(vserver
     "${CMAKE_CURRENT_LIST_DIR}/worldgen.hh")
 target_compile_features(vserver PUBLIC cxx_std_20)
 target_include_directories(vserver PUBLIC "${DEPS_INCLUDE_DIR}")
-target_include_directories(vserver PRIVATE "${PROJECT_SOURCE_DIR}")
-target_include_directories(vserver PRIVATE "${PROJECT_SOURCE_DIR}/game")
+target_include_directories(vserver PRIVATE "${PROJECT_SOURCE_DIR}/src")
+target_include_directories(vserver PRIVATE "${PROJECT_SOURCE_DIR}/src/game")
 target_precompile_headers(vserver PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
 target_link_libraries(vserver PUBLIC shared)
 

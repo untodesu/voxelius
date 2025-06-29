@@ -66,7 +66,6 @@
   "settings.value.game.fog_mode.2": "Fancy",
   "settings.value.game.fog_mode": "Fog mode",
   "settings.value.game.key.toggle_hide_hud": "Hide/Show HUD",
-  "settings.value.game.pixel_size": "Pixel size",
   "settings.value.game.streamer_mode": "Streamer mode",
   "settings.value.game.username": "Username",
   "settings.value.game.vertical_sync": "Vertical sync",
@@ -112,7 +111,6 @@
 
   "settings.tooltip.camera.roll_angle": "Quake-styled view roll applied with sideways moves",
   "settings.tooltip.camera.vertical_fov": "Field Of View",
-  "settings.tooltip.game.pixel_size": "Draw the world into a fraction of the window's frame size",
   "settings.tooltip.game.streamer_mode": "Conceal certain GUI elements to avoid issues during online game streaming",
   "settings.tooltip.game.username": "Username changes apply only upon reconnecting",
   "settings.tooltip.game.world_curvature": "Simulate Earth's\nhorizon warping",

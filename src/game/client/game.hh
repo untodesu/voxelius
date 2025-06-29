@@ -11,7 +11,6 @@ namespace client_game
 extern ConfigBoolean streamer_mode;
 extern ConfigBoolean vertical_sync;
 extern ConfigBoolean world_curvature;
-extern ConfigUnsigned pixel_size;
 extern ConfigUnsigned fog_mode;
 extern ConfigString username;
 } // namespace client_game

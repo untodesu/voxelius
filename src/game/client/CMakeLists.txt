@@ -107,8 +107,8 @@ add_executable(vclient
 target_compile_features(vclient PUBLIC cxx_std_20)
 target_compile_definitions(vclient PUBLIC GLFW_INCLUDE_NONE)
 target_include_directories(vclient PUBLIC "${DEPS_INCLUDE_DIR}")
-target_include_directories(vclient PRIVATE "${PROJECT_SOURCE_DIR}")
-target_include_directories(vclient PRIVATE "${PROJECT_SOURCE_DIR}/game")
+target_include_directories(vclient PRIVATE "${PROJECT_SOURCE_DIR}/src")
+target_include_directories(vclient PRIVATE "${PROJECT_SOURCE_DIR}/src/game")
 target_precompile_headers(vclient PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
 target_link_libraries(vclient PUBLIC shared dr_libs glad glfw3 imgui imgui_glfw imgui_opengl3 salad)
 

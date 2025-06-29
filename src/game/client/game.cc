@@ -72,7 +72,6 @@
 ConfigBoolean client_game::streamer_mode(false);
 ConfigBoolean client_game::vertical_sync(true);
 ConfigBoolean client_game::world_curvature(true);
-ConfigUnsigned client_game::pixel_size(2U, 1U, 4U);
 ConfigUnsigned client_game::fog_mode(1U, 0U, 2U);
 ConfigString client_game::username("player");
 
@@ -188,7 +187,6 @@ void client_game::init(void)
     globals::client_config.add_value("game.streamer_mode", client_game::streamer_mode);
     globals::client_config.add_value("game.vertical_sync", client_game::vertical_sync);
     globals::client_config.add_value("game.world_curvature", client_game::world_curvature);
-    globals::client_config.add_value("game.pixel_size", client_game::pixel_size);
     globals::client_config.add_value("game.fog_mode", client_game::fog_mode);
     globals::client_config.add_value("game.username", client_game::username);
     globals::client_config.add_value("game.key.toggle_hide_hud", hide_hud_toggle);
@@ -198,7 +196,6 @@ void client_game::init(void)
     settings::add_checkbox(0, client_game::streamer_mode, settings_location::VIDEO_GUI, "game.streamer_mode", true);
     settings::add_checkbox(5, client_game::vertical_sync, settings_location::VIDEO, "game.vertical_sync", false);
     settings::add_checkbox(4, client_game::world_curvature, settings_location::VIDEO, "game.world_curvature", true);
-    settings::add_slider(1, client_game::pixel_size, settings_location::VIDEO, "game.pixel_size", true);
     settings::add_stepper(3, client_game::fog_mode, settings_location::VIDEO, "game.fog_mode", false);
     settings::add_input(1, client_game::username, settings_location::GENERAL, "game.username", true, false);
     settings::add_keybind(4, hide_hud_toggle, settings_location::KEYBOARD_MISC, "game.key.toggle_hide_hud");
@@ -579,10 +576,7 @@ void client_game::update_late(void)
 
 void client_game::render(void)
 {
-    auto scaled_width = globals::width / vx::max<int>(1, client_game::pixel_size.get_value());
-    auto scaled_height = globals::height / vx::max<int>(1, client_game::pixel_size.get_value());
-
-    glViewport(0, 0, scaled_width, scaled_height);
+    glViewport(0, 0, globals::width, globals::height);
     glBindFramebuffer(GL_FRAMEBUFFER, globals::world_fbo);
     glClearColor(skybox::fog_color.r, skybox::fog_color.g, skybox::fog_color.b, 1.000f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -629,7 +623,7 @@ void client_game::render(void)
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, globals::world_fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(0, 0, scaled_width, scaled_height, 0, 0, globals::width, globals::height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, globals::width, globals::height, 0, 0, globals::width, globals::height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
 void client_game::layout(void)

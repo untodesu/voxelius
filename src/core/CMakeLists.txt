@@ -27,7 +27,7 @@ add_library(core STATIC
     "${CMAKE_CURRENT_LIST_DIR}/version.hh")
 target_compile_features(core PUBLIC cxx_std_20)
 target_include_directories(core PUBLIC "${DEPS_INCLUDE_DIR}")
-target_include_directories(core PUBLIC "${PROJECT_SOURCE_DIR}")
+target_include_directories(core PUBLIC "${PROJECT_SOURCE_DIR}/src")
 target_precompile_headers(core PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
 target_link_libraries(core PUBLIC enet emhash glm physfs spdlog stb)
 
