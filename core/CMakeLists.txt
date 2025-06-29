@@ -18,6 +18,7 @@ add_library(core STATIC
     "${CMAKE_CURRENT_LIST_DIR}/floathacks.hh"
     "${CMAKE_CURRENT_LIST_DIR}/image.cc"
     "${CMAKE_CURRENT_LIST_DIR}/image.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/macros.hh"
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
     "${CMAKE_CURRENT_LIST_DIR}/resource.hh"
     "${CMAKE_CURRENT_LIST_DIR}/strtools.cc"

@@ -2,11 +2,13 @@
 #define SHARED_CHUNK_AABB 1
 #pragma once
 
+#include "core/macros.hh"
+
 #include "shared/types.hh"
 
 class ChunkAABB final {
 public:
-    explicit ChunkAABB(void) = default;
+    DECLARE_DEFAULT_CONSTRUCTOR(ChunkAABB);
     virtual ~ChunkAABB(void) = default;
 
     void set_bounds(const chunk_pos& min, const chunk_pos& max);

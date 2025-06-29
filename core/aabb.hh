@@ -6,7 +6,7 @@
 
 class AABB final {
 public:
-    DECLARE_DEFAULT_CTOR(AABB);
+    DECLARE_DEFAULT_CONSTRUCTOR(AABB);
     explicit AABB(const glm::fvec3& min, const glm::fvec3& max);
     virtual ~AABB(void) = default;
 

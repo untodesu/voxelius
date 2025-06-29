@@ -2,10 +2,11 @@
 #define CORE_BUFFER_HH 1
 
 #include "core/floathacks.hh"
+#include "core/macros.hh"
 
 class ReadBuffer final {
 public:
-    explicit ReadBuffer(void) = default;
+    DECLARE_DEFAULT_CONSTRUCTOR(ReadBuffer);
     explicit ReadBuffer(const void* data, std::size_t size);
     explicit ReadBuffer(const ENetPacket* packet);
     explicit ReadBuffer(PHYSFS_File* file);
@@ -48,7 +49,7 @@ private:
 
 class WriteBuffer final {
 public:
-    explicit WriteBuffer(void) = default;
+    DECLARE_DEFAULT_CONSTRUCTOR(WriteBuffer);
     virtual ~WriteBuffer(void) = default;
 
     std::size_t size(void) const;
