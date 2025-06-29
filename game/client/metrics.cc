@@ -17,8 +17,8 @@
 #include "client/imdraw_ext.hh"
 #include "client/session.hh"
 
-constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs
-                                                 | ImGuiWindowFlags_NoNav;
+constexpr static ImGuiWindowFlags WINDOW_FLAGS =
+    ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav;
 
 static std::basic_string<GLubyte> r_version;
 static std::basic_string<GLubyte> r_renderer;

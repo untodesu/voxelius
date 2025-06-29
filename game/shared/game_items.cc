@@ -23,10 +23,11 @@ void game_items::populate(void)
         item_registry::construct("stone").set_texture("textures/item/stone.png").set_place_voxel(game_voxels::stone).build();
 
     // Cobblestone; a bunch of small stones
-    game_items::cobblestone = item_registry::construct("cobblestone")
-                                  .set_texture("textures/item/cobblestone.png")
-                                  .set_place_voxel(game_voxels::cobblestone)
-                                  .build();
+    game_items::cobblestone =
+        item_registry::construct("cobblestone")
+            .set_texture("textures/item/cobblestone.png")
+            .set_place_voxel(game_voxels::cobblestone)
+            .build();
 
     // Dirt; it's very dirty
     game_items::dirt = item_registry::construct("dirt").set_texture("textures/item/dirt.png").set_place_voxel(game_voxels::dirt).build();

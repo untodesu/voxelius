@@ -12,8 +12,8 @@
 #include "client/session.hh"
 #include "client/settings.hh"
 
-constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs
-                                                 | ImGuiWindowFlags_NoBackground;
+constexpr static ImGuiWindowFlags WINDOW_FLAGS =
+    ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground;
 
 static ConfigKeyBind list_key(GLFW_KEY_TAB);
 

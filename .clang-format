@@ -102,6 +102,7 @@ Language: Cpp
 LineEnding: CRLF
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
+PenaltyIndentedWhitespace: 1
 PointerAlignment: Left
 ReflowComments: true
 SortIncludes: true
