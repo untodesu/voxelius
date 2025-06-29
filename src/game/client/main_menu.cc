@@ -152,7 +152,7 @@ void main_menu::layout(void)
 
             ImGui::PushFont(globals::font_debug);
             ImGui::SetCursorScreenPos(ImVec2(padding.x + spacing.x, window_size.y - globals::font_debug->FontSize - padding.y - spacing.y));
-            ImGui::Text("Voxelius %s", project_version_string.c_str());
+            ImGui::Text("Voxelius %s", project_version_string);
             ImGui::PopFont();
         }
 

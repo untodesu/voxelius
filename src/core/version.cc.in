@@ -9,4 +9,4 @@ const unsigned long project_version_patch = ${PROJECT_VERSION_PATCH};
 const unsigned long project_version_tweak = ${PROJECT_VERSION_TWEAK};
 // clang-format on
 
-const std::string project_version_string = "${PROJECT_VERSION}";
+const char* project_version_string = "${PROJECT_VERSION}";

@@ -7,6 +7,6 @@ extern const unsigned long project_version_minor;
 extern const unsigned long project_version_patch;
 extern const unsigned long project_version_tweak;
 
-extern const std::string project_version_string;
+extern const char* project_version_string;
 
 #endif /* CORE_VERSION_HH */
