@@ -12,7 +12,7 @@ extern std::uint64_t client_identity;
 namespace session
 {
 void init(void);
-void deinit(void);
+void shutdown(void);
 void invalidate(void);
 } // namespace session
 

@@ -5,7 +5,7 @@
 namespace crosshair
 {
 void init(void);
-void deinit(void);
+void shutdown(void);
 void layout(void);
 } // namespace crosshair
 

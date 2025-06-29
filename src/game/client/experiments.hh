@@ -6,7 +6,7 @@ namespace experiments
 {
 void init(void);
 void init_late(void);
-void deinit(void);
+void shutdown(void);
 void update(void);
 void update_late(void);
 } // namespace experiments

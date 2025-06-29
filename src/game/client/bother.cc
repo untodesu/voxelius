@@ -47,7 +47,7 @@ void bother::init(void)
     bother_dispatcher.sink<protocol::StatusResponse>().connect<&on_status_response_packet>();
 }
 
-void bother::deinit(void)
+void bother::shutdown(void)
 {
     enet_host_destroy(bother_host);
     bother_dispatcher.clear();

@@ -72,7 +72,7 @@ void whitelist::init_late(void)
     PHYSFS_close(file);
 }
 
-void whitelist::deinit(void)
+void whitelist::shutdown(void)
 {
     // UNDONE: implement saving
 }

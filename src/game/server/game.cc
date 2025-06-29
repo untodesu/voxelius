@@ -94,21 +94,21 @@ void server_game::init_late(void)
     sessions::init_post_universe();
 }
 
-void server_game::deinit(void)
+void server_game::shutdown(void)
 {
     protocol::Disconnect packet;
     packet.reason = "protocol.server_shutdown";
     protocol::broadcast(globals::server_host, protocol::encode(packet));
 
-    whitelist::deinit();
+    whitelist::shutdown();
 
-    sessions::deinit();
+    sessions::shutdown();
 
     enet_host_flush(globals::server_host);
     enet_host_service(globals::server_host, nullptr, 500);
     enet_host_destroy(globals::server_host);
 
-    universe::deinit();
+    universe::shutdown();
 }
 
 void server_game::fixed_update(void)

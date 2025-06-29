@@ -144,7 +144,7 @@ void session::init(void)
     globals::dispatcher.sink<VoxelSetEvent>().connect<&on_voxel_set>();
 }
 
-void session::deinit(void)
+void session::shutdown(void)
 {
     session::disconnect("protocol.client_shutdown");
 

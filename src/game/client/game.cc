@@ -412,29 +412,29 @@ void client_game::init_late(void)
     window_title::update();
 }
 
-void client_game::deinit(void)
+void client_game::shutdown(void)
 {
-    voxel_sounds::deinit();
+    voxel_sounds::shutdown();
 
-    experiments::deinit();
+    experiments::shutdown();
 
-    session::deinit();
+    session::shutdown();
 
     if(globals::sound_ctx) {
-        sound::deinit();
+        sound::shutdown();
     }
 
-    hotbar::deinit();
-    main_menu::deinit();
-    play_menu::deinit();
+    hotbar::shutdown();
+    main_menu::shutdown();
+    play_menu::shutdown();
 
-    bother::deinit();
+    bother::shutdown();
 
-    client_chat::deinit();
+    client_chat::shutdown();
 
-    background::deinit();
+    background::shutdown();
 
-    crosshair::deinit();
+    crosshair::shutdown();
 
     delete globals::dimension;
     globals::player = entt::null;
@@ -449,9 +449,9 @@ void client_game::deinit(void)
     glDeleteTextures(1, &globals::world_fbo_color);
     glDeleteFramebuffers(1, &globals::world_fbo);
 
-    outline::deinit();
-    chunk_renderer::deinit();
-    chunk_mesher::deinit();
+    outline::shutdown();
+    chunk_renderer::shutdown();
+    chunk_mesher::shutdown();
 
     enet_host_destroy(globals::client_host);
 

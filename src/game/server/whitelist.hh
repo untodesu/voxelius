@@ -15,7 +15,7 @@ namespace whitelist
 {
 void init(void);
 void init_late(void);
-void deinit(void);
+void shutdown(void);
 } // namespace whitelist
 
 namespace whitelist

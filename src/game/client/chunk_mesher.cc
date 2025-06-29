@@ -451,7 +451,7 @@ void chunk_mesher::init(void)
     globals::dispatcher.sink<VoxelSetEvent>().connect<&on_voxel_set>();
 }
 
-void chunk_mesher::deinit(void)
+void chunk_mesher::shutdown(void)
 {
 }
 

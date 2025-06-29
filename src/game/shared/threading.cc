@@ -57,7 +57,7 @@ void threading::init(void)
     task_deque.clear();
 }
 
-void threading::deinit(void)
+void threading::shutdown(void)
 {
     for(auto task : task_deque) {
         auto status = task->get_status();

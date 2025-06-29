@@ -26,7 +26,7 @@ protected:
 namespace threading
 {
 void init(void);
-void deinit(void);
+void shutdown(void);
 void update(void);
 } // namespace threading
 

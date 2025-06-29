@@ -7,7 +7,7 @@
 namespace outline
 {
 void init(void);
-void deinit(void);
+void shutdown(void);
 void prepare(void);
 } // namespace outline
 

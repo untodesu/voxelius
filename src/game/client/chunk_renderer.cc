@@ -75,7 +75,7 @@ void chunk_renderer::init(void)
     glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(glm::fvec3), nullptr);
 }
 
-void chunk_renderer::deinit(void)
+void chunk_renderer::shutdown(void)
 {
     glDeleteBuffers(1, &quad_vbo);
     glDeleteVertexArrays(1, &quad_vaobj);

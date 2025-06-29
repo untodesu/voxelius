@@ -5,7 +5,7 @@
 namespace chunk_renderer
 {
 void init(void);
-void deinit(void);
+void shutdown(void);
 void render(void);
 } // namespace chunk_renderer
 

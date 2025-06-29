@@ -128,7 +128,7 @@ void universe::init_late(void)
     globals::spawn_dimension = spawn_dimension->second;
 }
 
-void universe::deinit(void)
+void universe::shutdown(void)
 {
     for(const auto metadata : metadata_map) {
         metadata.second->config.save_file(metadata.second->config_path.c_str());

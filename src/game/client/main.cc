@@ -406,7 +406,7 @@ int main(int argc, char** argv)
         threading::update();
     }
 
-    client_game::deinit();
+    client_game::shutdown();
 
     resource::hard_cleanup<BinFile>();
     resource::hard_cleanup<Image>();
@@ -433,9 +433,9 @@ int main(int argc, char** argv)
 
     globals::client_config.save_file("client.conf");
 
-    threading::deinit();
+    threading::shutdown();
 
-    shared_game::deinit();
+    shared_game::shutdown();
 
     return EXIT_SUCCESS;
 }

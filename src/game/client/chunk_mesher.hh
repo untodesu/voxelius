@@ -12,7 +12,7 @@ struct ChunkMeshComponent final {
 namespace chunk_mesher
 {
 void init(void);
-void deinit(void);
+void shutdown(void);
 void update(void);
 } // namespace chunk_mesher
 

@@ -34,7 +34,7 @@ namespace settings
 {
 void init(void);
 void init_late(void);
-void deinit(void);
+void shutdown(void);
 void layout(void);
 } // namespace settings
 

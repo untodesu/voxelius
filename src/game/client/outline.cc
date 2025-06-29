@@ -88,7 +88,7 @@ void outline::init(void)
     glVertexAttribDivisor(0, 0);
 }
 
-void outline::deinit(void)
+void outline::shutdown(void)
 {
     glDeleteVertexArrays(1, &vaobj);
     glDeleteBuffers(1, &line_vbo);

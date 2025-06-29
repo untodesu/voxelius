@@ -18,7 +18,7 @@ extern item_id slots[HOTBAR_SIZE];
 namespace hotbar
 {
 void init(void);
-void deinit(void);
+void shutdown(void);
 void layout(void);
 } // namespace hotbar
 

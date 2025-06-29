@@ -113,7 +113,7 @@ void hotbar::init(void)
     globals::dispatcher.sink<GlfwScrollEvent>().connect<&on_glfw_scroll>();
 }
 
-void hotbar::deinit(void)
+void hotbar::shutdown(void)
 {
     hotbar_background = nullptr;
     hotbar_selector = nullptr;

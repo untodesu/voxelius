@@ -71,7 +71,7 @@ void sound::init_late(void)
 {
 }
 
-void sound::deinit(void)
+void sound::shutdown(void)
 {
     sfx_ui = nullptr;
     sfx_player = nullptr;

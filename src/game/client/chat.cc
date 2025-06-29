@@ -145,7 +145,7 @@ void client_chat::init_late(void)
 {
 }
 
-void client_chat::deinit(void)
+void client_chat::shutdown(void)
 {
     sfx_chat_message = nullptr;
 }

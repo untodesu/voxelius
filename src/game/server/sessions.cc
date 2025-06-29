@@ -285,7 +285,7 @@ void sessions::init_post_universe(void)
     }
 }
 
-void sessions::deinit(void)
+void sessions::shutdown(void)
 {
     username_map.clear();
     identity_map.clear();

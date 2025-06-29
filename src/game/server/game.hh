@@ -18,7 +18,7 @@ namespace server_game
 {
 void init(void);
 void init_late(void);
-void deinit(void);
+void shutdown(void);
 void fixed_update(void);
 void fixed_update_late(void);
 } // namespace server_game

@@ -477,7 +477,7 @@ void play_menu::init(void)
     globals::dispatcher.sink<BotherResponseEvent>().connect<&on_bother_response>();
 }
 
-void play_menu::deinit(void)
+void play_menu::shutdown(void)
 {
     std::ostringstream stream;
 

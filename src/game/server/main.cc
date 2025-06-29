@@ -84,12 +84,12 @@ int main(int argc, char** argv)
         threading::update();
     }
 
-    server_game::deinit();
+    server_game::shutdown();
 
     resource::hard_cleanup<BinFile>();
     resource::hard_cleanup<Image>();
 
-    threading::deinit();
+    threading::shutdown();
 
     spdlog::info("server: shutdown after {} frames", globals::fixed_framecount);
     spdlog::info("server: average framerate: {:.03f} TPS", 1.0f / globals::fixed_frametime_avg);
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 
     globals::server_config.save_file("server.conf");
 
-    shared_game::deinit();
+    shared_game::shutdown();
 
     return EXIT_SUCCESS;
 }

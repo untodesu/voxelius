@@ -26,7 +26,7 @@ namespace sessions
 void init(void);
 void init_late(void);
 void init_post_universe(void);
-void deinit(void);
+void shutdown(void);
 } // namespace sessions
 
 namespace sessions

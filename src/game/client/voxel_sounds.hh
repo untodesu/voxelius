@@ -11,7 +11,7 @@ struct SoundEffect;
 namespace voxel_sounds
 {
 void init(void);
-void deinit(void);
+void shutdown(void);
 } // namespace voxel_sounds
 
 namespace voxel_sounds

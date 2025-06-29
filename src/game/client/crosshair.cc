@@ -22,7 +22,7 @@ void crosshair::init(void)
     }
 }
 
-void crosshair::deinit(void)
+void crosshair::shutdown(void)
 {
     texture = nullptr;
 }

@@ -12,7 +12,7 @@ namespace universe
 {
 void init(void);
 void init_late(void);
-void deinit(void);
+void shutdown(void);
 } // namespace universe
 
 namespace universe

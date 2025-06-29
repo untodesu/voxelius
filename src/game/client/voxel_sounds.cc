@@ -60,7 +60,7 @@ void voxel_sounds::init(void)
     add_footsteps_effect(voxel_surface::WOOD, "sounds/surface/wood3.wav");
 }
 
-void voxel_sounds::deinit(void)
+void voxel_sounds::shutdown(void)
 {
     for(std::size_t i = 0; i < NUM_SURFACES; ++i) {
         footsteps_sounds[i].clear();

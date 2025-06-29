@@ -6,7 +6,7 @@ namespace client_chat
 {
 void init(void);
 void init_late(void);
-void deinit(void);
+void shutdown(void);
 void update(void);
 void layout(void);
 } // namespace client_chat

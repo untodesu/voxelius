@@ -779,7 +779,7 @@ void settings::init_late(void)
     refresh_input_wids();
 }
 
-void settings::deinit(void)
+void settings::shutdown(void)
 {
     for(const SettingValue* value : values_all)
         delete value;

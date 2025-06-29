@@ -20,7 +20,7 @@ void background::init(void)
     }
 }
 
-void background::deinit(void)
+void background::shutdown(void)
 {
     texture = nullptr;
 }

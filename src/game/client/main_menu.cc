@@ -68,7 +68,7 @@ void main_menu::init(void)
     globals::dispatcher.sink<LanguageSetEvent>().connect<&on_language_set>();
 }
 
-void main_menu::deinit(void)
+void main_menu::shutdown(void)
 {
     title = nullptr;
 }

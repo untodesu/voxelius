@@ -50,7 +50,7 @@ void experiments::init_late(void)
     hotbar::slots[8] = game_items::slime;
 }
 
-void experiments::deinit(void)
+void experiments::shutdown(void)
 {
 }
 

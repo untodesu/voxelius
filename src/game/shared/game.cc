@@ -110,7 +110,7 @@ void shared_game::init(int argc, char** argv)
     }
 }
 
-void shared_game::deinit(void)
+void shared_game::shutdown(void)
 {
     enet_deinitialize();
 

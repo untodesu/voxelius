@@ -14,7 +14,7 @@ struct BotherResponseEvent final {
 namespace bother
 {
 void init(void);
-void deinit(void);
+void shutdown(void);
 void update_late(void);
 void ping(unsigned int identity, const char* host, std::uint16_t port);
 void cancel(unsigned int identity);
