@@ -9,4 +9,4 @@ void deinit(void);
 void layout(void);
 } // namespace crosshair
 
-#endif /* CLIENT_CROSSHAIR_HH  */
+#endif // CLIENT_CROSSHAIR_HH

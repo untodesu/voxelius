@@ -33,4 +33,4 @@ void render(void);
 void layout(void);
 } // namespace client_game
 
-#endif /* CLIENT_GAME_HH */
+#endif // CLIENT_GAME_HH

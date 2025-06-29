@@ -10,4 +10,4 @@ struct Image final {
     glm::ivec2 size;
 };
 
-#endif /* CORE_IMAGE_HH */
+#endif // CORE_IMAGE_HH

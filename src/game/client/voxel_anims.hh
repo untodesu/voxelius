@@ -14,4 +14,4 @@ void init(void);
 void update(void);
 } // namespace voxel_anims
 
-#endif /* CLIENT_VOXEL_ANIMS_HH  */
+#endif // CLIENT_VOXEL_ANIMS_HH

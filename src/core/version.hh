@@ -9,4 +9,4 @@ extern const unsigned long project_version_tweak;
 
 extern const char* project_version_string;
 
-#endif /* CORE_VERSION_HH */
+#endif // CORE_VERSION_HH

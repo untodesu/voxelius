@@ -59,4 +59,4 @@ namespace item_registry
 std::uint64_t calcualte_checksum(void);
 } // namespace item_registry
 
-#endif /* SHARED_ITEM_REGISTRY_HH */
+#endif // SHARED_ITEM_REGISTRY_HH

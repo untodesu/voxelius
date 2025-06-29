@@ -18,4 +18,4 @@ void refresh_timings(void);
 void print(const std::string& string);
 } // namespace client_chat
 
-#endif /* CLIENT_CHAT_HH  */
+#endif // CLIENT_CHAT_HH

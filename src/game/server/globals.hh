@@ -22,4 +22,4 @@ extern Dimension* spawn_dimension;
 extern std::unordered_map<std::string, Dimension*> dimensions;
 } // namespace globals
 
-#endif /* SERVER_GLOBALS_HH  */
+#endif // SERVER_GLOBALS_HH

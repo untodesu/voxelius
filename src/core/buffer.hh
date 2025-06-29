@@ -252,4 +252,4 @@ inline WriteBuffer& WriteBuffer::operator<<(const std::string& value)
     return *this;
 }
 
-#endif /* CORE_BUFFER_HH */
+#endif // CORE_BUFFER_HH

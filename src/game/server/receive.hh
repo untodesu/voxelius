@@ -7,4 +7,4 @@ namespace server_recieve
 void init(void);
 } // namespace server_recieve
 
-#endif /* SERVER_RECEIVE_HH  */
+#endif // SERVER_RECEIVE_HH

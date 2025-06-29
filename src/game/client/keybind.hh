@@ -23,4 +23,4 @@ private:
     int m_glfw_keycode;
 };
 
-#endif /* CLIENT_KEYBIND_HH */
+#endif // CLIENT_KEYBIND_HH

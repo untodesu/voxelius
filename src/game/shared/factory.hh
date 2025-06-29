@@ -9,4 +9,4 @@ namespace shared_factory
 void create_player(Dimension* dimension, entt::entity entity);
 } // namespace shared_factory
 
-#endif /* SHARED_FACTORY */
+#endif // SHARED_FACTORY

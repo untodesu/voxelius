@@ -12,4 +12,4 @@ namespace skybox
 void init(void);
 } // namespace skybox
 
-#endif /* CLIENT_SKYBOX_HH  */
+#endif // CLIENT_SKYBOX_HH

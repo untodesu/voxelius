@@ -22,4 +22,4 @@ void save_chunk(Dimension* dimension, const chunk_pos& cpos);
 void save_all_chunks(Dimension* dimension);
 } // namespace universe
 
-#endif /* SERVER_UNIVERSE_HH  */
+#endif // SERVER_UNIVERSE_HH

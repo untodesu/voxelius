@@ -54,4 +54,4 @@ inline void Randomizer<T>::clear(void)
     m_dist = std::uniform_int_distribution<std::size_t>(0, 0);
 }
 
-#endif /* CORE_RANDOMIZER_HH */
+#endif // CORE_RANDOMIZER_HH

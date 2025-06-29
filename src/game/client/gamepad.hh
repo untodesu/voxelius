@@ -42,4 +42,4 @@ struct GamepadButtonEvent final {
     int button;
 };
 
-#endif /* CLIENT_GAMEPAD_HH  */
+#endif // CLIENT_GAMEPAD_HH

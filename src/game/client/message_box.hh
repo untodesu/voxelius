@@ -18,4 +18,4 @@ void set_subtitle(const char* subtitle);
 void add_button(const char* text, const message_box_action& action);
 } // namespace message_box
 
-#endif /* CLIENT_MESSAGE_BOX_HH */
+#endif // CLIENT_MESSAGE_BOX_HH

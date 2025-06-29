@@ -28,4 +28,4 @@ void next_slot(void);
 void prev_slot(void);
 } // namespace hotbar
 
-#endif /* CLIENT_HOTBAR_HH  */
+#endif // CLIENT_HOTBAR_HH

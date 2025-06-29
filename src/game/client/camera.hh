@@ -29,4 +29,4 @@ void init(void);
 void update(void);
 } // namespace camera
 
-#endif /* CLIENT_CAMERA_HH */
+#endif // CLIENT_CAMERA_HH

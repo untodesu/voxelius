@@ -9,4 +9,4 @@ void deinit(void);
 void layout(void);
 } // namespace main_menu
 
-#endif /* CLIENT_MAIN_MENU_HH */
+#endif // CLIENT_MAIN_MENU_HH

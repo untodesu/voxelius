@@ -35,4 +35,4 @@ public:
     GLuint handle;
 };
 
-#endif /* CLIENT_PROGRAM_HH  */
+#endif // CLIENT_PROGRAM_HH

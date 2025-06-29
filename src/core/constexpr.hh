@@ -188,4 +188,4 @@ constexpr static inline const T vx::smoothstep(const T x, const T y, const F a)
     return static_cast<T>(t * t * (F(3) - F(2) * t));
 }
 
-#endif /* CORE_CONSTEXPR_HH */
+#endif // CORE_CONSTEXPR_HH

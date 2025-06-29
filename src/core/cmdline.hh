@@ -10,4 +10,4 @@ const char* get(const char* option, const char* fallback = nullptr);
 bool contains(const char* option);
 } // namespace cmdline
 
-#endif /* CORE_CMDLINE_HH */
+#endif // CORE_CMDLINE_HH

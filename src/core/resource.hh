@@ -15,4 +15,4 @@ template<typename T>
 void soft_cleanup(void);
 } // namespace resource
 
-#endif /* CORE_RESOURCE_HH */
+#endif // CORE_RESOURCE_HH

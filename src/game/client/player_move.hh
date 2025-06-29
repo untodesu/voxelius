@@ -16,4 +16,4 @@ void fixed_update(void);
 void update_late(void);
 } // namespace player_move
 
-#endif /* CLIENT_PLAYER_MOVE_HH  */
+#endif // CLIENT_PLAYER_MOVE_HH

@@ -8,4 +8,4 @@ void init(void);
 void layout(void);
 } // namespace scoreboard
 
-#endif /* CLIENT_SCOREBOARD_HH  */
+#endif // CLIENT_SCOREBOARD_HH

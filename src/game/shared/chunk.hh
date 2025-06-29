@@ -36,4 +36,4 @@ private:
     unsigned int m_biome;
 };
 
-#endif /* SHARED_CHUNK_HH */
+#endif // SHARED_CHUNK_HH

@@ -7,4 +7,4 @@ namespace window_title
 void update(void);
 } // namespace window_title
 
-#endif /* CLIENT_WINDOW_TITLE_HH */
+#endif // CLIENT_WINDOW_TITLE_HH

@@ -11,4 +11,4 @@ public:
     static void fixed_update(Dimension* dimension);
 };
 
-#endif /* SHARED_STASIS_HH */
+#endif // SHARED_STASIS_HH

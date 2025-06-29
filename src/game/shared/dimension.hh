@@ -82,4 +82,4 @@ struct VoxelSetEvent final {
     Chunk* chunk;
 };
 
-#endif /* SHARED_DIMENSION_HH */
+#endif // SHARED_DIMENSION_HH

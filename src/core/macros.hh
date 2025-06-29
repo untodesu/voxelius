@@ -16,4 +16,4 @@ public:                                               \
 public:                                         \
     class_name(void) = default
 
-#endif /* CORE_MACROS_HH */
+#endif // CORE_MACROS_HH

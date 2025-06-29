@@ -8,4 +8,4 @@ void init(void);
 void take(void);
 } // namespace screenshot
 
-#endif /* CLIENT_SCREENSHOT_HH  */
+#endif // CLIENT_SCREENSHOT_HH

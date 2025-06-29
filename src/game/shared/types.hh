@@ -41,4 +41,4 @@ struct std::hash<chunk_pos_xz> final {
     }
 };
 
-#endif /* SHARED_TYPES_HH */
+#endif // SHARED_TYPES_HH

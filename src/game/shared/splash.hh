@@ -9,4 +9,4 @@ void init_server(void);
 const char* get(void);
 } // namespace splash
 
-#endif /* SHARED_SPLASH_HH */
+#endif // SHARED_SPLASH_HH

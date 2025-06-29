@@ -16,4 +16,4 @@ std::int64_t signed_milliseconds(void);
 std::int64_t signed_microseconds(void);
 } // namespace epoch
 
-#endif /* CORE_EPOCH_HH */
+#endif // CORE_EPOCH_HH

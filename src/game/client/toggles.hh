@@ -36,4 +36,4 @@ bool get(toggle_type type);
 void set(toggle_type type, bool value);
 } // namespace toggles
 
-#endif /* CLIENT_TOGGLES_HH */
+#endif // CLIENT_TOGGLES_HH

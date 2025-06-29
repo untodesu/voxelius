@@ -9,4 +9,4 @@ void deinit(void);
 void render(void);
 } // namespace chunk_renderer
 
-#endif /* CLIENT_CHUNK_RENDERER_HH  */
+#endif // CLIENT_CHUNK_RENDERER_HH

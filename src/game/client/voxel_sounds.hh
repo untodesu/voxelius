@@ -20,4 +20,4 @@ resource_ptr<SoundEffect> get_footsteps(voxel_surface surface);
 resource_ptr<SoundEffect> get_placebreak(voxel_surface surface);
 } // namespace voxel_sounds
 
-#endif /* CLIENT_VOXEL_SOUNDS_HH  */
+#endif // CLIENT_VOXEL_SOUNDS_HH

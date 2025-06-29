@@ -9,4 +9,4 @@ public:
     static void fixed_update(Dimension* dimension);
 };
 
-#endif /* SHARED_GRAVITY_HH */
+#endif // SHARED_GRAVITY_HH

@@ -19,4 +19,4 @@ public:
     void place(const voxel_pos& vpos, const chunk_pos& cpos, VoxelStorage& voxels) const;
 };
 
-#endif /* SHARED_FEATURE_HH */
+#endif // SHARED_FEATURE_HH

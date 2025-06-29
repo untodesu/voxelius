@@ -80,4 +80,4 @@ namespace settings
 void add_language_select(int priority, settings_location location, const char* name);
 } // namespace settings
 
-#endif /* CLIENT_SETTINGS_HH */
+#endif // CLIENT_SETTINGS_HH

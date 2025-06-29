@@ -14,4 +14,4 @@ struct TextureGUI {
     glm::ivec2 size;
 };
 
-#endif /* CLIENT_TEXTURE2D_HH */
+#endif // CLIENT_TEXTURE2D_HH

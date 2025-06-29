@@ -36,4 +36,4 @@ private:
     const char* m_name;
 };
 
-#endif /* CLIENT_GAMEPAD_AXIS_HH */
+#endif // CLIENT_GAMEPAD_AXIS_HH

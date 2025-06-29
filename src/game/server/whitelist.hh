@@ -24,4 +24,4 @@ bool contains(const char* username);
 bool matches(const char* username, std::uint64_t password_hash);
 } // namespace whitelist
 
-#endif /* SERVER_WHITELIST_HH  */
+#endif // SERVER_WHITELIST_HH

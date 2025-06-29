@@ -63,4 +63,4 @@ extern ALCdevice* sound_dev;
 extern ALCcontext* sound_ctx;
 } // namespace globals
 
-#endif /* CLIENTOBALS_HH */
+#endif // CLIENTOBALS_HH

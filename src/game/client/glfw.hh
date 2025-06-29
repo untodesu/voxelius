@@ -34,4 +34,4 @@ struct GlfwScrollEvent final {
     float dy;
 };
 
-#endif /* CLIENTFW */
+#endif // CLIENTFW

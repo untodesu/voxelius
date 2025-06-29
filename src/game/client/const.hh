@@ -24,4 +24,4 @@ static_assert(DEFAULT_HEIGHT >= MIN_HEIGHT);
 constexpr static float MIN_PITCH = 0.0625f;
 constexpr static float MAX_PITCH = 10.0f;
 
-#endif /* CLIENT_CONST_HH */
+#endif // CLIENT_CONST_HH

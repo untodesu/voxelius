@@ -9,4 +9,4 @@ void deinit(void);
 void layout(void);
 } // namespace background
 
-#endif /* CLIENT_BACKGROUND_HH */
+#endif // CLIENT_BACKGROUND_HH

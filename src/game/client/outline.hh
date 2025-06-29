@@ -17,4 +17,4 @@ void cube(const chunk_pos& cpos, const glm::fvec3& fpos, const glm::fvec3& size,
 void line(const chunk_pos& cpos, const glm::fvec3& fpos, const glm::fvec3& size, float thickness, const glm::fvec4& color);
 } // namespace outline
 
-#endif /* CLIENT_OUTLINE_HH  */
+#endif // CLIENT_OUTLINE_HH

@@ -7,4 +7,4 @@ namespace client_receive
 void init(void);
 } // namespace client_receive
 
-#endif /* CLIENT_RECEIVE_HH */
+#endif // CLIENT_RECEIVE_HH

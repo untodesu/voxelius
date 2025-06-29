@@ -7,4 +7,4 @@ namespace status
 void init(void);
 } // namespace status
 
-#endif /* SERVER_STATUS_HH  */
+#endif // SERVER_STATUS_HH

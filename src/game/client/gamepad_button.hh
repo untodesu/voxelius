@@ -26,4 +26,4 @@ private:
     const char* m_name;
 };
 
-#endif /* CLIENT_GAMEPAD_BUTTON_HH */
+#endif // CLIENT_GAMEPAD_BUTTON_HH

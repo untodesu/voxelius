@@ -9,4 +9,4 @@ std::uint64_t get(const std::vector<std::byte>& buffer, std::uint64_t combine = 
 std::uint64_t get(const std::string& buffer, std::uint64_t combine = UINT64_C(0));
 } // namespace crc64
 
-#endif /* CORE_CRC64_HH */
+#endif // CORE_CRC64_HH

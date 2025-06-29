@@ -47,4 +47,4 @@ inline void threading::submit(AT&&... args)
     threading::detail::submit_new(new T(args...));
 }
 
-#endif /* SHARED_THREADING_HH  */
+#endif // SHARED_THREADING_HH

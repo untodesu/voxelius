@@ -53,4 +53,4 @@ static inline std::uint32_t floathacks::float_to_uint32(const float value)
     return hack.dst;
 }
 
-#endif /* CORE_FLOATHACKS_HH */
+#endif // CORE_FLOATHACKS_HH

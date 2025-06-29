@@ -4,4 +4,4 @@
 
 struct PlayerComponent final {};
 
-#endif /* SHARED_PLAYER_HH */
+#endif // SHARED_PLAYER_HH

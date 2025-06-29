@@ -22,4 +22,4 @@ public:
 struct TransformComponentIntr final : public TransformComponent {};
 struct TransformComponentPrev final : public TransformComponent {};
 
-#endif /* SHARED_TRANSFORM_HH */
+#endif // SHARED_TRANSFORM_HH

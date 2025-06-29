@@ -4,4 +4,4 @@
 
 #include <shared/pch.hh>
 
-#endif /* SERVER_PCH_HH  */
+#endif // SERVER_PCH_HH

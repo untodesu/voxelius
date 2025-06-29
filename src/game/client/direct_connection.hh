@@ -8,4 +8,4 @@ void init(void);
 void layout(void);
 } // namespace direct_connection
 
-#endif /* CLIENT_DIRECT_CONNECTION_HH */
+#endif // CLIENT_DIRECT_CONNECTION_HH

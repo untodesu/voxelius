@@ -210,4 +210,4 @@ struct protocol::DimensionInfo final : public protocol::Base<0x0012> {
     float gravity;
 };
 
-#endif /* SHARED_PROTOCOL_HH */
+#endif // SHARED_PROTOCOL_HH

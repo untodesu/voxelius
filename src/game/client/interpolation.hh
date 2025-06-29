@@ -7,4 +7,4 @@ namespace interpolation
 void update(void);
 } // namespace interpolation
 
-#endif /* CLIENT_INTERPOLATION_HH  */
+#endif // CLIENT_INTERPOLATION_HH

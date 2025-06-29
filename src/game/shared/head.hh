@@ -11,4 +11,4 @@ struct HeadComponent {
 struct HeadComponentIntr final : public HeadComponent {};
 struct HeadComponentPrev final : public HeadComponent {};
 
-#endif /* SHARED_HEAD_HH */
+#endif // SHARED_HEAD_HH

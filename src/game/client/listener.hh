@@ -7,4 +7,4 @@ namespace listener
 void update(void);
 } // namespace listener
 
-#endif /* CLIENT_LISTENER_HH  */
+#endif // CLIENT_LISTENER_HH

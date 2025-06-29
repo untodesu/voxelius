@@ -60,4 +60,4 @@ private:
     std::mutex m_mutex;
 };
 
-#endif /* SERVER_OVERWORLD_HH */
+#endif // SERVER_OVERWORLD_HH

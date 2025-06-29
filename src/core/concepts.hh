@@ -12,4 +12,4 @@ template<typename T>
 concept FloatingPoint = std::is_floating_point_v<T>;
 } // namespace vx
 
-#endif /* CORE_CONCEPTS_HH */
+#endif // CORE_CONCEPTS_HH

@@ -50,4 +50,4 @@ namespace sessions
 void refresh_scoreboard(void);
 } // namespace sessions
 
-#endif /* SERVER_SESSIONS_HH  */
+#endif // SERVER_SESSIONS_HH

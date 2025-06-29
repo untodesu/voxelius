@@ -19,4 +19,4 @@ void set(unsigned int line, const std::string& text, const ImVec4& color, float 
 void unset(unsigned int line);
 } // namespace status_lines
 
-#endif /* CLIENT_STATUS_LINES_HH  */
+#endif // CLIENT_STATUS_LINES_HH

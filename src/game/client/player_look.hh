@@ -8,4 +8,4 @@ void init(void);
 void update_late(void);
 } // namespace player_look
 
-#endif /* CLIENT_PLAYER_LOOK_HH  */
+#endif // CLIENT_PLAYER_LOOK_HH

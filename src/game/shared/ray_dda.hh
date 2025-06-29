@@ -34,4 +34,4 @@ public:
     voxel_pos vpos;
 };
 
-#endif /* SHARED_RAY_DDA */
+#endif // SHARED_RAY_DDA

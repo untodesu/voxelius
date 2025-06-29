@@ -146,4 +146,4 @@ inline constexpr glm::fvec3 coord::to_fvec3(const chunk_pos& cpos, const glm::fv
     };
 }
 
-#endif /* SHARED_COORD_HH */
+#endif // SHARED_COORD_HH

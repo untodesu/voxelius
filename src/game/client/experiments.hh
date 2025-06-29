@@ -17,4 +17,4 @@ void attack(void);
 void interact(void);
 } // namespace experiments
 
-#endif /* CLIENT_EXPERIMENTS_HH  */
+#endif // CLIENT_EXPERIMENTS_HH

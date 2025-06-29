@@ -10,4 +10,4 @@ void layout(void);
 void update_late(void);
 } // namespace play_menu
 
-#endif /* CLIENT_PLAY_MENU_HH */
+#endif // CLIENT_PLAY_MENU_HH

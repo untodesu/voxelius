@@ -20,4 +20,4 @@ namespace globals
 extern std::uint64_t curtime;
 } // namespace globals
 
-#endif /* SHARED_GLOBALS_HH */
+#endif // SHARED_GLOBALS_HH

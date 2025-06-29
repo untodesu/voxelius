@@ -18,4 +18,4 @@ namespace strtools
 std::string trim_whitespace(const std::string& string);
 } // namespace strtools
 
-#endif /* CORE_STRTOOLS_HH */
+#endif // CORE_STRTOOLS_HH

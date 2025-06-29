@@ -18,4 +18,4 @@ bool is_generating(Dimension* dimension, const chunk_pos& cpos);
 void request_chunk(Session* session, const chunk_pos& cpos);
 } // namespace worldgen
 
-#endif /* SERVER_WORLDGEN_HH */
+#endif // SERVER_WORLDGEN_HH

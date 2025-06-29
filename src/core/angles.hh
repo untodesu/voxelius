@@ -104,4 +104,4 @@ inline void cxangles::vectors(const glm::fvec3& angles, glm::fvec3* forward, glm
     }
 }
 
-#endif /* CORE_ANGLES_HH */
+#endif // CORE_ANGLES_HH

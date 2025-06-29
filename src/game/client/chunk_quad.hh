@@ -36,4 +36,4 @@ constexpr inline static ChunkQuad make_chunk_quad(
     return result;
 }
 
-#endif /* CLIENT_CHUNK_QUAD_HH  */
+#endif // CLIENT_CHUNK_QUAD_HH

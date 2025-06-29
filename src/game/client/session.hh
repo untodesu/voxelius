@@ -28,4 +28,4 @@ namespace session
 bool is_ingame(void);
 } // namespace session
 
-#endif /* CLIENT_SESSION_HH */
+#endif // CLIENT_SESSION_HH

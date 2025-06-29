@@ -25,4 +25,4 @@ namespace game_voxels
 void populate(void);
 } // namespace game_voxels
 
-#endif /* SHARED_GAME_VOXELS */
+#endif // SHARED_GAME_VOXELS

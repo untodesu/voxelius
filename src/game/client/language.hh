@@ -40,4 +40,4 @@ const char* resolve(const char* key);
 std::string resolve_gui(const char* key);
 } // namespace language
 
-#endif /* CLIENT_LANGUAGE_HH */
+#endif // CLIENT_LANGUAGE_HH

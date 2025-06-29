@@ -8,4 +8,4 @@ void init(void);
 void layout(void);
 } // namespace metrics
 
-#endif /* CLIENT_METRICS_HH  */
+#endif // CLIENT_METRICS_HH

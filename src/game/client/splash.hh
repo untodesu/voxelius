@@ -9,4 +9,4 @@ void init_late(void);
 void render(void);
 } // namespace client_splash
 
-#endif /* CLIENT_SPLASH_HH */
+#endif // CLIENT_SPLASH_HH

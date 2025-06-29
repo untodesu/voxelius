@@ -10,4 +10,4 @@ struct GroundedComponent final {
     voxel_surface surface;
 };
 
-#endif /* SHARED_GROUNDED */
+#endif // SHARED_GROUNDED

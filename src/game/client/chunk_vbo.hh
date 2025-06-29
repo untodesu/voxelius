@@ -20,4 +20,4 @@ public:
     }
 };
 
-#endif /* CLIENT_CHUNK_VBO_HH  */
+#endif // CLIENT_CHUNK_VBO_HH

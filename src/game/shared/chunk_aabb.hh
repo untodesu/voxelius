@@ -29,4 +29,4 @@ public:
     chunk_pos max;
 };
 
-#endif /* SHARED_CHUNK_AABB */
+#endif // SHARED_CHUNK_AABB

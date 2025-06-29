@@ -23,4 +23,4 @@ namespace game_items
 void populate(void);
 } // namespace game_items
 
-#endif /* SHARED_GAME_ITEMS */
+#endif // SHARED_GAME_ITEMS

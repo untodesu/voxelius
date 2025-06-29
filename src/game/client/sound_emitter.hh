@@ -18,4 +18,4 @@ public:
     static void update(void);
 };
 
-#endif /* CLIENT_SOUND_EMITTER_HH  */
+#endif // CLIENT_SOUND_EMITTER_HH

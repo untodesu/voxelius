@@ -16,4 +16,4 @@ void deinit(void);
 void update(void);
 } // namespace chunk_mesher
 
-#endif /* CLIENT_CHUNK_MESHER_HH  */
+#endif // CLIENT_CHUNK_MESHER_HH

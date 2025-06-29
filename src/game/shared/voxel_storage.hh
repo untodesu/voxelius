@@ -15,4 +15,4 @@ public:
     void deserialize(ReadBuffer& buffer);
 };
 
-#endif /* SHARED_VOXEL_STORAGE_HH */
+#endif // SHARED_VOXEL_STORAGE_HH

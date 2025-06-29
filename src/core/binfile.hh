@@ -7,4 +7,4 @@ struct BinFile final {
     std::size_t size;
 };
 
-#endif /* CORE_BINFILE_HH */
+#endif // CORE_BINFILE_HH

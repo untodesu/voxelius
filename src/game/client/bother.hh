@@ -20,4 +20,4 @@ void ping(unsigned int identity, const char* host, std::uint16_t port);
 void cancel(unsigned int identity);
 } // namespace bother
 
-#endif /* CLIENT_BOTHER_HH */
+#endif // CLIENT_BOTHER_HH

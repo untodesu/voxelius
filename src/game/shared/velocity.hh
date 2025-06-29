@@ -14,4 +14,4 @@ public:
     static void fixed_update(Dimension* dimension);
 };
 
-#endif /* SHARED_VELOCITY_HH */
+#endif // SHARED_VELOCITY_HH

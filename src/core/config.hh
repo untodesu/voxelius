@@ -179,4 +179,4 @@ inline void ConfigNumber<T>::set_limits(T min_value, T max_value)
     m_string = std::to_string(m_value);
 }
 
-#endif /* CORE_CONFIG_HH */
+#endif // CORE_CONFIG_HH

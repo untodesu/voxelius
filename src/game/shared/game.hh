@@ -8,4 +8,4 @@ void init(int argc, char** argv);
 void deinit(void);
 } // namespace shared_game
 
-#endif /* SHARED_GAME */
+#endif // SHARED_GAME

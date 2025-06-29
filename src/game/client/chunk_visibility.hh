@@ -9,4 +9,4 @@ namespace chunk_visibility
 void update_late(void);
 } // namespace chunk_visibility
 
-#endif /* CLIENT_CHUNK_VISIBILITY_HH  */
+#endif // CLIENT_CHUNK_VISIBILITY_HH

@@ -4,4 +4,4 @@
 
 struct InhabitedComponent final {};
 
-#endif /* SERVER_INHABITED_HH  */
+#endif // SERVER_INHABITED_HH

@@ -23,4 +23,4 @@ void fixed_update(void);
 void fixed_update_late(void);
 } // namespace server_game
 
-#endif /* SERVER_GAME_HH  */
+#endif // SERVER_GAME_HH

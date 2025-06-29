@@ -13,4 +13,4 @@ void send(Session* session, const char* message);
 void send(Session* session, const char* message, const char* sender);
 } // namespace server_chat
 
-#endif /* SERVER_CHAT_HH  */
+#endif // SERVER_CHAT_HH

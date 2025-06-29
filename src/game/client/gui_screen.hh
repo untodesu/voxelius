@@ -11,4 +11,4 @@ constexpr static unsigned int GUI_MESSAGE_BOX = 0x0005U;
 constexpr static unsigned int GUI_CHAT = 0x0006U;
 constexpr static unsigned int GUI_DIRECT_CONNECTION = 0x0007U;
 
-#endif /* CLIENT_GUI_SCREEN_HH */
+#endif // CLIENT_GUI_SCREEN_HH

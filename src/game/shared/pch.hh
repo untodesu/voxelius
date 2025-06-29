@@ -22,4 +22,4 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-#endif /* SHARED_PCH_HH */
+#endif // SHARED_PCH_HH

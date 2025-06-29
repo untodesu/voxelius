@@ -7,4 +7,4 @@ struct SoundEffect final {
     ALuint buffer;
 };
 
-#endif /* CLIENT_SOUND_EFFECT_HH  */
+#endif // CLIENT_SOUND_EFFECT_HH

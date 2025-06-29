@@ -9,4 +9,4 @@ namespace client_factory
 void create_player(Dimension* dimension, entt::entity entity);
 } // namespace client_factory
 
-#endif /* CLIENT_FACTORY_HH */
+#endif // CLIENT_FACTORY_HH

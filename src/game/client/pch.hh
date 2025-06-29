@@ -29,4 +29,4 @@
 #include <dlfcn.h>
 #endif
 
-#endif /* CLIENT_PCH_HH */
+#endif // CLIENT_PCH_HH

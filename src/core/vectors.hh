@@ -44,4 +44,4 @@ constexpr static inline const T vx::distance2(const glm::vec<3, T>& vector_a, co
     return vx::length2(vector_a - vector_b);
 }
 
-#endif /* CORE_VECTORS_HH */
+#endif // CORE_VECTORS_HH

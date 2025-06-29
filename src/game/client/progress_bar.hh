@@ -17,4 +17,4 @@ void set_title(const char* title);
 void set_button(const char* text, const progress_bar_action& action);
 } // namespace progress_bar
 
-#endif /* CLIENT_PROGRESS_BAR_HH */
+#endif // CLIENT_PROGRESS_BAR_HH
