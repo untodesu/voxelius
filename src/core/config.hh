@@ -3,7 +3,6 @@
 #pragma once
 
 #include "core/concepts.hh"
-#include "core/macros.hh"
 
 class IConfigValue {
 public:
@@ -95,7 +94,7 @@ private:
 
 class Config final {
 public:
-    DECLARE_DEFAULT_CONSTRUCTOR(Config);
+    Config(void) = default;
     virtual ~Config(void) = default;
 
     void load_cmdline(void);

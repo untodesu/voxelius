@@ -2,15 +2,13 @@
 #define SHARED_RAY_DDA 1
 #pragma once
 
-#include "core/macros.hh"
-
 #include "shared/types.hh"
 
 class Dimension;
 
 class RayDDA final {
 public:
-    DECLARE_DEFAULT_CONSTRUCTOR(RayDDA);
+    RayDDA(void) = default;
     explicit RayDDA(const Dimension* dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction);
     explicit RayDDA(const Dimension& dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction);
 

@@ -2,11 +2,9 @@
 #define CORE_AABB_HH 1
 #pragma once
 
-#include "core/macros.hh"
-
 class AABB final {
 public:
-    DECLARE_DEFAULT_CONSTRUCTOR(AABB);
+    AABB(void) = default;
     explicit AABB(const glm::fvec3& min, const glm::fvec3& max);
     virtual ~AABB(void) = default;
 
