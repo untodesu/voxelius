@@ -1,6 +1,6 @@
 /.vscode/*
 !/.vscode/c_cpp_properties.json
-/src/core/version.cc
+/core/version.cc
 /build32/
 /build64/
 /build/
