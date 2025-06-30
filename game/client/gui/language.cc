@@ -164,7 +164,8 @@ gui::LanguageIterator gui::language::find(const char* ietf)
     const auto it = ietf_map.find(ietf);
     if(it != ietf_map.cend()) {
         return it->second;
-    } else {
+    }
+    else {
         return manifest.cend();
     }
 }
@@ -184,7 +185,8 @@ const char* gui::language::resolve(const char* key)
     const auto it = language_map.find(key);
     if(it != language_map.cend()) {
         return it->second.c_str();
-    } else {
+    }
+    else {
         return key;
     }
 }

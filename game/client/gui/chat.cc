@@ -215,7 +215,8 @@ void gui::client_chat::layout(void)
             if(globals::gui_screen == GUI_CHAT) {
                 rect_alpha = 0.75f;
                 text_alpha = 1.00f;
-            } else {
+            }
+            else {
                 rect_alpha = 0.50f * fadeout;
                 text_alpha = 1.00f * fadeout;
             }

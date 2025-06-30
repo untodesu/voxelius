@@ -131,7 +131,8 @@ GLuint world::voxel_atlas::plane_texture(std::size_t plane_id)
 {
     if(plane_id < planes.size()) {
         return planes[plane_id].gl_texture;
-    } else {
+    }
+    else {
         return 0;
     }
 }

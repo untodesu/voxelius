@@ -114,7 +114,8 @@ voxel_id world::VoxelInfoBuilder::build(void) const
             new_info->textures[i].paths = default_texture.paths;
             new_info->textures[i].cached_offset = SIZE_MAX;
             new_info->textures[i].cached_plane = SIZE_MAX;
-        } else {
+        }
+        else {
             new_info->textures[i].paths = prototype.textures[i].paths;
             new_info->textures[i].cached_offset = SIZE_MAX;
             new_info->textures[i].cached_plane = SIZE_MAX;
@@ -145,7 +146,8 @@ world::VoxelInfoBuilder& world::voxel_registry::construct(const char* name, voxe
 
     if(it != world::voxel_registry::builders.cend()) {
         return it->second;
-    } else {
+    }
+    else {
         return world::voxel_registry::builders.emplace(name, VoxelInfoBuilder(name, type, animated, blending)).first->second;
     }
 }
@@ -156,7 +158,8 @@ world::VoxelInfo* world::voxel_registry::find(const char* name)
 
     if(it != world::voxel_registry::names.cend()) {
         return world::voxel_registry::find(it->second);
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -165,7 +168,8 @@ world::VoxelInfo* world::voxel_registry::find(const voxel_id voxel)
 {
     if((voxel != NULL_VOXEL_ID) && (voxel <= world::voxel_registry::voxels.size())) {
         return world::voxel_registry::voxels[voxel - 1].get();
-    } else {
+    }
+    else {
         return nullptr;
     }
 }

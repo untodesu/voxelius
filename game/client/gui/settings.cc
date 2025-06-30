@@ -315,7 +315,8 @@ void SettingValue_InputString::layout(void) const
 
     if(allow_whitespace) {
         flags = ImGuiInputTextFlags_AllowTabInput;
-    } else {
+    }
+    else {
         flags = 0;
     }
 
@@ -379,7 +380,8 @@ void SettingValue_StepperInt::layout(void) const
 
     if(current_value > max_value) {
         value->set_value(min_value);
-    } else {
+    }
+    else {
         value->set_value(current_value);
     }
 
@@ -409,7 +411,8 @@ void SettingValue_StepperUnsigned::layout(void) const
 
     if(current_value > max_value) {
         value->set_value(min_value);
-    } else {
+    }
+    else {
         value->set_value(current_value);
     }
 

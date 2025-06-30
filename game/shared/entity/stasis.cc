@@ -12,7 +12,8 @@ void entity::Stasis::fixed_update(world::Dimension* dimension)
     for(auto [entity, transform] : view.each()) {
         if(dimension->find_chunk(transform.chunk)) {
             dimension->entities.remove<entity::Stasis>(entity);
-        } else {
+        }
+        else {
             dimension->entities.emplace_or_replace<entity::Stasis>(entity);
         }
     }

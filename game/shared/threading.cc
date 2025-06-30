@@ -42,10 +42,12 @@ void threading::init(void)
         // Use the maximum available number of concurrent
         // hardware threads provided by the implementation
         thread_pool_size = num_concurrent_threads;
-    } else {
+    }
+    else {
         if(num_concurrent_threads) {
             thread_pool_size = math::clamp<unsigned int>(std::strtoul(argument, nullptr, 10), 1U, num_concurrent_threads);
-        } else {
+        }
+        else {
             thread_pool_size = math::max<unsigned int>(std::strtoul(argument, nullptr, 10), 1U);
         }
     }

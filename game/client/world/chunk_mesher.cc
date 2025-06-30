@@ -43,9 +43,11 @@ static const CachedChunkCoord get_cached_cpos(const chunk_pos& pivot, const chun
 
         if(delta[0]) {
             return nx[delta[0] + 1];
-        } else if(delta[1]) {
+        }
+        else if(delta[1]) {
             return ny[delta[1] + 1];
-        } else {
+        }
+        else {
             return nz[delta[2] + 1];
         }
     }
@@ -210,7 +212,8 @@ void GL_MeshingTask::finalize(void)
                 buffer.handle = 0;
                 buffer.size = 0;
             }
-        } else {
+        }
+        else {
             if(!buffer.handle) {
                 glGenBuffers(1, &buffer.handle);
             }
@@ -232,7 +235,8 @@ void GL_MeshingTask::finalize(void)
                 buffer.handle = 0;
                 buffer.size = 0;
             }
-        } else {
+        }
+        else {
             if(!buffer.handle) {
                 glGenBuffers(1, &buffer.handle);
             }
@@ -264,18 +268,22 @@ bool GL_MeshingTask::vis_test(voxel_id voxel, const world::VoxelInfo* info, cons
 
     if(neighbour == NULL_VOXEL_ID) {
         result = true;
-    } else if(neighbour == voxel) {
+    }
+    else if(neighbour == voxel) {
         result = false;
-    } else if(auto neighbour_info = world::voxel_registry::find(neighbour)) {
+    }
+    else if(auto neighbour_info = world::voxel_registry::find(neighbour)) {
         if(neighbour_info->blending != info->blending) {
             // Voxel types that use blending are semi-transparent;
             // this means they're rendered using a different setup
             // and they must have visible faces with opaque voxels
             result = neighbour_info->blending;
-        } else {
+        }
+        else {
             result = false;
         }
-    } else {
+    }
+    else {
         result = false;
     }
 
@@ -289,7 +297,8 @@ void GL_MeshingTask::push_quad_a(const world::VoxelInfo* info, const glm::fvec3&
 
     if(info->blending) {
         m_quads_b[vtex.cached_plane].push_back(make_chunk_quad(pos, size, facing, vtex.cached_offset, vtex.paths.size()));
-    } else {
+    }
+    else {
         m_quads_s[vtex.cached_plane].push_back(make_chunk_quad(pos, size, facing, vtex.cached_offset, vtex.paths.size()));
     }
 }
@@ -303,7 +312,8 @@ void GL_MeshingTask::push_quad_v(
 
     if(info->blending) {
         m_quads_b[vtex.cached_plane].push_back(make_chunk_quad(pos, size, facing, vtex.cached_offset + entropy_mod, 0));
-    } else {
+    }
+    else {
         m_quads_s[vtex.cached_plane].push_back(make_chunk_quad(pos, size, facing, vtex.cached_offset + entropy_mod, 0));
     }
 }
@@ -338,7 +348,8 @@ void GL_MeshingTask::make_cube(
         if(vis & world::VIS_DOWN) {
             push_quad_a(info, fpos, fsize, world::voxel_face::CUBE_BOTTOM);
         }
-    } else {
+    }
+    else {
         if(vis & world::VIS_NORTH) {
             push_quad_v(info, fpos, fsize, world::voxel_face::CUBE_NORTH, entropy);
         }

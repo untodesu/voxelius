@@ -17,7 +17,8 @@ static drwav_bool32 drwav_seek_physfs(void* file, int offset, drwav_seek_origin 
 {
     if(origin == drwav_seek_origin_current) {
         return PHYSFS_seek(reinterpret_cast<PHYSFS_File*>(file), PHYSFS_tell(reinterpret_cast<PHYSFS_File*>(file)) + offset);
-    } else {
+    }
+    else {
         return PHYSFS_seek(reinterpret_cast<PHYSFS_File*>(file), offset);
     }
 }
@@ -84,7 +85,8 @@ void resource::hard_cleanup<SoundEffect>(void)
     for(const auto& it : resource_map) {
         if(it.second.use_count() > 1L) {
             spdlog::warn("resource: zombie resource [SoundEffect] {} [use_count={}]", it.first, it.second.use_count());
-        } else {
+        }
+        else {
             spdlog::debug("resource: releasing [SoundEffect] {}", it.first);
         }
 

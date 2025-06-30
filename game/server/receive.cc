@@ -135,7 +135,8 @@ static void on_request_chunk_packet(const protocol::RequestChunk& packet)
                     response.chunk = packet.cpos;
                     response.voxels = chunk->get_voxels();
                     protocol::send(packet.peer, protocol::encode(response));
-                } else {
+                }
+                else {
                     world::worldgen::request_chunk(session, packet.cpos);
                 }
             }

@@ -296,7 +296,8 @@ void world::Overworld::generate_surface(const chunk_pos& cpos, VoxelStorage& vox
                 }
 
                 depth += 1U;
-            } else {
+            }
+            else {
                 if(voxels[d_index] == NULL_VOXEL_ID) {
                     break;
                 }
@@ -308,7 +309,8 @@ void world::Overworld::generate_surface(const chunk_pos& cpos, VoxelStorage& vox
         if(depth < 5U) {
             if(depth == 0U) {
                 voxels[i] = game_voxels::grass;
-            } else {
+            }
+            else {
                 voxels[i] = game_voxels::dirt;
             }
         }

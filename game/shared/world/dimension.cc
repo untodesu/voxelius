@@ -61,7 +61,8 @@ world::Chunk* world::Dimension::find_chunk(entt::entity entity) const
 {
     if(chunks.valid(entity)) {
         return chunks.get<ChunkComponent>(entity).chunk;
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -72,7 +73,8 @@ world::Chunk* world::Dimension::find_chunk(const chunk_pos& cpos) const
 
     if(it != m_chunkmap.cend()) {
         return it->second;
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -112,7 +114,8 @@ voxel_id world::Dimension::get_voxel(const voxel_pos& vpos) const
 
     if(auto chunk = find_chunk(cpos)) {
         return chunk->get_voxel(lpos);
-    } else {
+    }
+    else {
         return NULL_VOXEL_ID;
     }
 }

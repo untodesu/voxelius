@@ -61,7 +61,8 @@ void gui::client_splash::init(void)
     if(texture) {
         if(texture->size.x > texture->size.y) {
             texture_aspect = static_cast<float>(texture->size.x) / static_cast<float>(texture->size.y);
-        } else {
+        }
+        else {
             texture_aspect = static_cast<float>(texture->size.y) / static_cast<float>(texture->size.x);
         }
 

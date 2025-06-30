@@ -48,7 +48,8 @@ void world::player_target::update(void)
             world::player_target::normal = voxel_pos();
             world::player_target::info = nullptr;
         } while(ray.distance < MAX_REACH);
-    } else {
+    }
+    else {
         world::player_target::voxel = NULL_VOXEL_ID;
         world::player_target::coord = voxel_pos();
         world::player_target::normal = voxel_pos();

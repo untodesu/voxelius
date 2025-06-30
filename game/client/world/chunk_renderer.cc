@@ -94,7 +94,8 @@ void world::chunk_renderer::render(void)
 
     if(toggles::get(TOGGLE_WIREFRAME)) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    } else {
+    }
+    else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 

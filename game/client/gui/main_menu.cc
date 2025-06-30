@@ -62,7 +62,8 @@ void gui::main_menu::init(void)
 
     if(title->size.x > title->size.y) {
         title_aspect = static_cast<float>(title->size.x) / static_cast<float>(title->size.y);
-    } else {
+    }
+    else {
         title_aspect = static_cast<float>(title->size.y) / static_cast<float>(title->size.x);
     }
 
@@ -89,7 +90,8 @@ void gui::main_menu::layout(void)
 
         if(session::is_ingame()) {
             ImGui::Dummy(ImVec2(0.0f, 32.0f * globals::gui_scale));
-        } else {
+        }
+        else {
             auto reference_height = 0.225f * window_size.y;
             auto image_width = math::min(window_size.x, reference_height * title_aspect);
             auto image_height = image_width / title_aspect;
@@ -110,7 +112,8 @@ void gui::main_menu::layout(void)
             }
 
             ImGui::Spacing();
-        } else {
+        }
+        else {
             ImGui::SetCursorPosX(button_xpos);
 
             if(ImGui::Button(str_play.c_str(), ImVec2(button_width, 0.0f))) {
@@ -138,7 +141,8 @@ void gui::main_menu::layout(void)
             }
 
             ImGui::Spacing();
-        } else {
+        }
+        else {
             ImGui::SetCursorPosX(button_xpos);
 
             if(ImGui::Button(str_quit.c_str(), ImVec2(button_width, 0.0f))) {

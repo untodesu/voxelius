@@ -11,7 +11,8 @@ static void on_chat_message_packet(const protocol::ChatMessage& packet)
     if(packet.type == protocol::ChatMessage::TEXT_MESSAGE) {
         if(auto session = sessions::find(packet.peer)) {
             server_chat::broadcast(packet.message.c_str(), session->client_username.c_str());
-        } else {
+        }
+        else {
             server_chat::broadcast(packet.message.c_str(), packet.sender.c_str());
         }
     }

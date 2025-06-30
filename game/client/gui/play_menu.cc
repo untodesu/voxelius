@@ -85,13 +85,15 @@ static void parse_hostname(ServerStatusItem* item, const std::string& hostname)
 
     if(!parts[0].empty()) {
         item->hostname = parts[0];
-    } else {
+    }
+    else {
         item->hostname = std::string("localhost");
     }
 
     if(parts.size() >= 2) {
         item->port = math::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 1024, UINT16_MAX);
-    } else {
+    }
+    else {
         item->port = protocol::PORT;
     }
 }
@@ -125,7 +127,8 @@ static void edit_selected_server(void)
 
     if(selected_server->port != protocol::PORT) {
         input_hostname = std::format("{}:{}", selected_server->hostname, selected_server->port);
-    } else {
+    }
+    else {
         input_hostname = selected_server->hostname;
     }
 
@@ -163,7 +166,8 @@ static void on_glfw_key(const io::GlfwKeyEvent& event)
             if(editing_server) {
                 if(adding_server) {
                     remove_selected_server();
-                } else {
+                }
+                else {
                     input_itemname.clear();
                     input_hostname.clear();
                     input_password.clear();
@@ -209,7 +213,8 @@ static void on_bother_response(const gui::BotherResponseEvent& event)
                 item->max_players = UINT16_MAX;
                 item->motd = str_status_fail;
                 item->status = item_status::FAILURE;
-            } else {
+            }
+            else {
                 item->protocol_version = event.protocol_version;
                 item->num_players = event.num_players;
                 item->max_players = event.max_players;
@@ -270,7 +275,8 @@ static void layout_server_item(ServerStatusItem* item)
 
                 if(item->protocol_version < protocol::VERSION) {
                     ImGui::TextUnformatted(str_outdated_server.c_str(), str_outdated_server.c_str() + str_outdated_server.size());
-                } else {
+                }
+                else {
                     ImGui::TextUnformatted(str_outdated_client.c_str(), str_outdated_client.c_str() + str_outdated_client.size());
                 }
 
@@ -359,7 +365,8 @@ static void layout_servers(void)
         for(ServerStatusItem* item : servers_deque) {
             if(editing_server && item == selected_server) {
                 layout_server_edit(item);
-            } else {
+            }
+            else {
                 layout_server_item(item);
             }
         }
@@ -460,13 +467,15 @@ void gui::play_menu::init(void)
 
             if(parts.size() >= 2) {
                 item->password = parts[1];
-            } else {
+            }
+            else {
                 item->password = std::string();
             }
 
             if(parts.size() >= 3) {
                 item->name = parts[2].substr(0, MAX_SERVER_ITEM_NAME);
-            } else {
+            }
+            else {
                 item->name = DEFAULT_SERVER_NAME;
             }
 

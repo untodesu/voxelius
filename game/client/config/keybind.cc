@@ -153,7 +153,8 @@ config::KeyBind::KeyBind(int default_value)
     if(default_value == DEBUG_KEY) {
         m_glfw_keycode = GLFW_KEY_UNKNOWN;
         m_name = UNKNOWN_KEY_NAME;
-    } else {
+    }
+    else {
         m_glfw_keycode = default_value;
         m_name = get_key_name(default_value);
     }
@@ -183,7 +184,8 @@ void config::KeyBind::set_key(int keycode)
     if(keycode == DEBUG_KEY) {
         m_glfw_keycode = GLFW_KEY_UNKNOWN;
         m_name = UNKNOWN_KEY_NAME;
-    } else {
+    }
+    else {
         m_glfw_keycode = keycode;
         m_name = get_key_name(keycode);
     }

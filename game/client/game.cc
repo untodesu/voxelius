@@ -512,7 +512,8 @@ void client_game::update(void)
     if(session::is_ingame()) {
         if(toggles::get(TOGGLE_PM_FLIGHT)) {
             globals::dimension->entities.remove<entity::Gravity>(globals::player);
-        } else {
+        }
+        else {
             globals::dimension->entities.emplace_or_replace<entity::Gravity>(globals::player);
         }
     }
@@ -574,7 +575,8 @@ void client_game::update_late(void)
 
     if(client_game::vertical_sync.get_value()) {
         glfwSwapInterval(1);
-    } else {
+    }
+    else {
         glfwSwapInterval(0);
     }
 }

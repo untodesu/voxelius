@@ -32,7 +32,8 @@ bool io::ConfigMap::load_file(const char* path)
 
             if(comment == std::string::npos) {
                 kv_string = utils::trim_whitespace(line);
-            } else {
+            }
+            else {
                 kv_string = utils::trim_whitespace(line.substr(0, comment));
             }
 
@@ -109,7 +110,8 @@ const char* io::ConfigMap::get_value(const char* name) const
     auto kv_pair = m_values.find(name);
     if(kv_pair != m_values.cend()) {
         return kv_pair->second->get();
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -125,7 +127,8 @@ const config::IValue* io::ConfigMap::find(const char* name) const
 
     if(kv_pair != m_values.cend()) {
         return kv_pair->second;
-    } else {
+    }
+    else {
         return nullptr;
     }
 }

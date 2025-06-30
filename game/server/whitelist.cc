@@ -64,7 +64,8 @@ void whitelist::init_late(void)
             // to the global server password; this allows easier adding
             // of guest accounts which can later be edited to use a better password
             whitelist_map[line] = server_game::password_hash;
-        } else {
+        }
+        else {
             const auto username = line.substr(0, location);
             const auto password = line.substr(location + 1);
             whitelist_map[username] = math::crc64(password);

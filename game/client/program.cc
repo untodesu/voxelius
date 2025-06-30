@@ -30,7 +30,8 @@ static void parse_source(const char* source, std::vector<std::string>& out_lines
 
             out_lines.push_back(std::string());
             line_number += 1UL;
-        } else {
+        }
+        else {
             out_lines.push_back(line);
             line_number += 1UL;
         }

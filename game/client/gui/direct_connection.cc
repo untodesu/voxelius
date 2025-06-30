@@ -55,13 +55,15 @@ static void connect_to_server(void)
 
     if(!parts[0].empty()) {
         parsed_hostname = parts[0];
-    } else {
+    }
+    else {
         parsed_hostname = std::string("localhost");
     }
 
     if(parts.size() >= 2) {
         parsed_port = math::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 1024, UINT16_MAX);
-    } else {
+    }
+    else {
         parsed_port = protocol::PORT;
     }
 

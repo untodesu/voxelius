@@ -8,9 +8,11 @@ bool utils::is_whitespace(const std::string& string)
 {
     if(string.find_first_not_of(WHITESPACE_CHARS) == std::string::npos) {
         return true;
-    } else if((string.size() == 1) && string[0] == 0x00) {
+    }
+    else if((string.size() == 1) && string[0] == 0x00) {
         return true;
-    } else {
+    }
+    else {
         return string.empty();
     }
 }
@@ -48,7 +50,8 @@ std::string utils::trim_whitespace(const std::string& string)
 
     if(su == std::string::npos) {
         return std::string();
-    } else {
+    }
+    else {
         return string.substr(su, sv - su + 1);
     }
 }

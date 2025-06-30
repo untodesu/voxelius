@@ -35,7 +35,8 @@ static void splash_init_filename(const char* filename)
         while(std::getline(stream, line))
             splash_lines.push_back(sanitize_line(line));
         splash_random.seed(std::random_device()());
-    } else {
+    }
+    else {
         splash_lines.push_back(std::format("{}: {}", filename, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())));
         splash_random.seed(std::random_device()());
     }

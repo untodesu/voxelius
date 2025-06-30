@@ -31,7 +31,8 @@ const char* config::Boolean::to_string(bool value)
 {
     if(value) {
         return "true";
-    } else {
+    }
+    else {
         return "false";
     }
 }
@@ -40,7 +41,8 @@ bool config::Boolean::from_string(const char* value)
 {
     if(std::strcmp(value, "false") && !std::strcmp(value, "true")) {
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }

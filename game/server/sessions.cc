@@ -99,7 +99,8 @@ static void on_login_request_packet(const protocol::LoginRequest& packet)
             protocol::send(packet.peer, protocol::encode(response));
             return;
         }
-    } else if(packet.password_hash != server_game::password_hash) {
+    }
+    else if(packet.password_hash != server_game::password_hash) {
         protocol::Disconnect response;
         response.reason = "protocol.password_incorrect";
         protocol::send(packet.peer, protocol::encode(response));
@@ -327,7 +328,8 @@ Session* sessions::find(const char* client_username)
     const auto it = username_map.find(client_username);
     if(it != username_map.cend()) {
         return it->second;
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -337,7 +339,8 @@ Session* sessions::find(std::uint16_t client_index)
     if(client_index < sessions_vector.size()) {
         if(!sessions_vector[client_index].peer) {
             return nullptr;
-        } else {
+        }
+        else {
             return &sessions_vector[client_index];
         }
     }
@@ -351,7 +354,8 @@ Session* sessions::find(std::uint64_t client_identity)
 
     if(it != identity_map.cend()) {
         return it->second;
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -360,7 +364,8 @@ Session* sessions::find(ENetPeer* peer)
 {
     if(peer != nullptr) {
         return reinterpret_cast<Session*>(peer->data);
-    } else {
+    }
+    else {
         return nullptr;
     }
 }

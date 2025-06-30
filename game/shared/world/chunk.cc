@@ -21,7 +21,8 @@ voxel_id world::Chunk::get_voxel(const std::size_t index) const
 {
     if(index >= CHUNK_VOLUME) {
         return NULL_VOXEL_ID;
-    } else {
+    }
+    else {
         return m_voxels[index];
     }
 }

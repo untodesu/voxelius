@@ -65,9 +65,11 @@ void shared_game::init(int argc, char** argv)
 
     if(io::cmdline::contains("quiet")) {
         logger->set_level(spdlog::level::warn);
-    } else if(io::cmdline::contains("verbose")) {
+    }
+    else if(io::cmdline::contains("verbose")) {
         logger->set_level(spdlog::level::trace);
-    } else {
+    }
+    else {
         logger->set_level(default_loglevel);
     }
 

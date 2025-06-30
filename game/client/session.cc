@@ -296,7 +296,8 @@ bool session::is_ingame(void)
 {
     if(globals::dimension) {
         return globals::dimension->entities.valid(globals::player);
-    } else {
+    }
+    else {
         return false;
     }
 }

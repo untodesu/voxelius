@@ -14,7 +14,8 @@ void gui::window_title::update(void)
 
     if(globals::sound_ctx && globals::sound_dev) {
         title = std::format("Voxelius {}: {}", project_version_string, splash::get());
-    } else {
+    }
+    else {
         title = std::format("Voxelius {}: {} [NOSOUND]", project_version_string, splash::get());
     }
 

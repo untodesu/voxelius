@@ -61,7 +61,8 @@ void io::cmdline::insert(const char* option, const char* argument)
 {
     if(argument == nullptr) {
         options.insert_or_assign(option, std::string());
-    } else {
+    }
+    else {
         options.insert_or_assign(option, argument);
     }
 }

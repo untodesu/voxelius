@@ -49,7 +49,8 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
         ddir = local_pos::value_type(+1);
         dmin = lpos_min[d];
         dmax = lpos_max[d];
-    } else {
+    }
+    else {
         ddir = local_pos::value_type(-1);
         dmin = lpos_max[d];
         dmax = lpos_min[d];
@@ -115,7 +116,8 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
 
             if(move_distance > threshold) {
                 velocity.value[d] *= -latch_values[d];
-            } else {
+            }
+            else {
                 velocity.value[d] = 0.0f;
             }
 
@@ -154,10 +156,12 @@ void entity::Collision::fixed_update(world::Dimension* dimension)
         if(dimension->entities.any_of<entity::Gravity>(entity)) {
             if(vertical_move == math::sign<int>(dimension->get_gravity())) {
                 dimension->entities.emplace_or_replace<entity::Grounded>(entity, entity::Grounded { surface });
-            } else {
+            }
+            else {
                 dimension->entities.remove<entity::Grounded>(entity);
             }
-        } else {
+        }
+        else {
             // The entity cannot be grounded because the component
             // setup of said entity should not let it comprehend the
             // concept of resting on the ground (it flies around)

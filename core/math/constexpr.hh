@@ -46,7 +46,8 @@ constexpr static inline const T math::abs(const T x)
 {
     if(x < static_cast<T>(0)) {
         return -x;
-    } else {
+    }
+    else {
         return x;
     }
 }
@@ -64,7 +65,8 @@ constexpr static inline const T math::ceil(const F x)
 
     if(ival < x) {
         return ival + static_cast<T>(1);
-    } else {
+    }
+    else {
         return ival;
     }
 }
@@ -82,7 +84,8 @@ constexpr static inline const T math::floor(const F x)
 
     if(ival > x) {
         return ival - static_cast<T>(1);
-    } else {
+    }
+    else {
         return ival;
     }
 }
@@ -92,9 +95,11 @@ constexpr static inline const T math::clamp(const T x, const T min, const T max)
 {
     if(x < min) {
         return min;
-    } else if(x > max) {
+    }
+    else if(x > max) {
         return max;
-    } else {
+    }
+    else {
         return x;
     }
 }
@@ -110,7 +115,8 @@ constexpr static inline const T math::log2(const T x)
 {
     if(x < 2) {
         return 0;
-    } else {
+    }
+    else {
         return math::log2<T>((x + 1) >> 1) + 1;
     }
 }
@@ -120,7 +126,8 @@ constexpr static inline const T math::max(const T x, const T y)
 {
     if(x < y) {
         return y;
-    } else {
+    }
+    else {
         return x;
     }
 }
@@ -130,7 +137,8 @@ constexpr static inline const T math::min(const T x, const T y)
 {
     if(x > y) {
         return y;
-    } else {
+    }
+    else {
         return x;
     }
 }
@@ -143,7 +151,8 @@ constexpr static inline const T math::mod_signed(const T x, const T m)
 
     if(result < T(0)) {
         return result + m;
-    } else {
+    }
+    else {
         return result;
     }
 }
@@ -174,9 +183,11 @@ constexpr static inline const T math::sign(const F x)
 {
     if(x < F(0)) {
         return T(-1);
-    } else if(x > F(0)) {
+    }
+    else if(x > F(0)) {
         return T(+1);
-    } else {
+    }
+    else {
         return T(0);
     }
 }

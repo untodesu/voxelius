@@ -99,7 +99,8 @@ void sound::play_generic(const char* sound, bool looping, float pitch)
 {
     if(sound) {
         sound::play_generic(resource::load<SoundEffect>(sound), looping, pitch);
-    } else {
+    }
+    else {
         sound::play_generic(static_cast<const char*>(nullptr), looping, pitch);
     }
 }
@@ -108,7 +109,8 @@ void sound::play_entity(entt::entity entity, const char* sound, bool looping, fl
 {
     if(sound) {
         sound::play_entity(entity, resource::load<SoundEffect>(sound), looping, pitch);
-    } else {
+    }
+    else {
         sound::play_entity(entity, static_cast<const char*>(nullptr), looping, pitch);
     }
 }
@@ -117,7 +119,8 @@ void sound::play_player(const char* sound, bool looping, float pitch)
 {
     if(sound) {
         sound::play_player(resource::load<SoundEffect>(sound), looping, pitch);
-    } else {
+    }
+    else {
         sound::play_player(static_cast<const char*>(nullptr), looping, pitch);
     }
 }
@@ -126,7 +129,8 @@ void sound::play_ui(const char* sound, bool looping, float pitch)
 {
     if(sound) {
         sound::play_ui(resource::load<SoundEffect>(sound), looping, pitch);
-    } else {
+    }
+    else {
         sound::play_ui(static_cast<const char*>(nullptr), looping, pitch);
     }
 }

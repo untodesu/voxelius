@@ -58,7 +58,8 @@ world::ItemInfoBuilder& world::item_registry::construct(const char* name)
 
     if(it != world::item_registry::builders.cend()) {
         return it->second;
-    } else {
+    }
+    else {
         return world::item_registry::builders.emplace(name, ItemInfoBuilder(name)).first->second;
     }
 }
@@ -69,7 +70,8 @@ world::ItemInfo* world::item_registry::find(const char* name)
 
     if(it != world::item_registry::names.cend()) {
         return world::item_registry::find(it->second);
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -78,7 +80,8 @@ world::ItemInfo* world::item_registry::find(const item_id item)
 {
     if((item != NULL_ITEM_ID) && (item <= world::item_registry::items.size())) {
         return world::item_registry::items[item - 1].get();
-    } else {
+    }
+    else {
         return nullptr;
     }
 }

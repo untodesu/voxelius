@@ -180,7 +180,8 @@ void entity::player_move::fixed_update(void)
 
         if(new_speed > 0.01f) {
             footsteps_distance += globals::fixed_frametime * new_speed;
-        } else {
+        }
+        else {
             footsteps_distance = 0.0f;
         }
 
@@ -191,7 +192,8 @@ void entity::player_move::fixed_update(void)
 
             footsteps_distance = 0.0f;
         }
-    } else {
+    }
+    else {
         auto new_velocity = pm_air_move(wishdir, velocity_horizontal);
         velocity.value.x = new_velocity.x;
         velocity.value.z = new_velocity.z;
@@ -220,11 +222,13 @@ void entity::player_move::fixed_update(void)
                 // No considerable speed increase within
                 // the precision we use to draw the speedometer
                 gui::status_lines::set(gui::STATUS_DEBUG, new_speed_text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f), 1.0f);
-            } else if(speed_change < 0.0f) {
+            }
+            else if(speed_change < 0.0f) {
                 // Speed change is negative, we are actively
                 // slowing down; use the red color for the status line
                 gui::status_lines::set(gui::STATUS_DEBUG, new_speed_text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 1.0f);
-            } else {
+            }
+            else {
                 // Speed change is positive, we are actively
                 // speeding up; use the green color for the status line
                 gui::status_lines::set(gui::STATUS_DEBUG, new_speed_text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f), 1.0f);
@@ -258,7 +262,8 @@ void entity::player_move::update_late(void)
 
         movement_direction.x += axis_move_sideways.get_value(io::gamepad::state, io::gamepad::deadzone.get_value());
         movement_direction.z -= axis_move_forward.get_value(io::gamepad::state, io::gamepad::deadzone.get_value());
-    } else {
+    }
+    else {
         if(GLFW_PRESS == glfwGetKey(globals::window, key_move_forward.get_key())) {
             movement_direction += DIR_FORWARD<float>;
         }

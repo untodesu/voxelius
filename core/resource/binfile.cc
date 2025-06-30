@@ -39,7 +39,8 @@ void resource::hard_cleanup<BinFile>(void)
     for(const auto& it : resource_map) {
         if(it.second.use_count() > 1L) {
             spdlog::warn("resource: zombie resource [BinFile] {} [use_count={}]", it.first, it.second.use_count());
-        } else {
+        }
+        else {
             spdlog::debug("resource: releasing [BinFile] {}", it.first);
         }
 

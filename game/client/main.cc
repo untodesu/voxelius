@@ -207,11 +207,13 @@ int main(int argc, char** argv)
             // information about buffer usage into the debug callback
             static const std::uint32_t ignore_nvidia_131185 = 131185;
             glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 1, &ignore_nvidia_131185, GL_FALSE);
-        } else {
+        }
+        else {
             spdlog::warn("glad: nodebug command line parameter found");
             spdlog::warn("glad: OpenGL errors will not be logged");
         }
-    } else {
+    }
+    else {
         spdlog::warn("glad: KHR_debug extension not supported");
         spdlog::warn("glad: OpenGL errors will not be logged");
     }
@@ -256,18 +258,21 @@ int main(int argc, char** argv)
         spdlog::warn("client: sound disabled [per command line]");
         globals::sound_dev = nullptr;
         globals::sound_ctx = nullptr;
-    } else {
+    }
+    else {
         if(!saladLoadALdefault()) {
             spdlog::warn("client: sound disabled [openal loading failed]");
             globals::sound_dev = nullptr;
             globals::sound_ctx = nullptr;
-        } else {
+        }
+        else {
             globals::sound_dev = alcOpenDevice(nullptr);
 
             if(globals::sound_dev == nullptr) {
                 spdlog::warn("client: sound disabled [no device]");
                 globals::sound_ctx = nullptr;
-            } else {
+            }
+            else {
                 spdlog::info("sound: {}", reinterpret_cast<const char*>(alcGetString(globals::sound_dev, ALC_DEVICE_SPECIFIER)));
 
                 globals::sound_ctx = alcCreateContext(globals::sound_dev, nullptr);
@@ -276,7 +281,8 @@ int main(int argc, char** argv)
                     spdlog::warn("client: sound disabled [context creation failed]");
                     alcCloseDevice(globals::sound_dev);
                     globals::sound_dev = nullptr;
-                } else {
+                }
+                else {
                     alcMakeContextCurrent(globals::sound_ctx);
                 }
             }
@@ -340,7 +346,8 @@ int main(int argc, char** argv)
         if(globals::fixed_frametime_us == UINT64_MAX) {
             globals::fixed_framecount = 0;
             globals::fixed_accumulator = 0;
-        } else {
+        }
+        else {
             globals::fixed_accumulator += globals::window_frametime_us;
             globals::fixed_framecount = globals::fixed_accumulator / globals::fixed_frametime_us;
             globals::fixed_accumulator %= globals::fixed_frametime_us;

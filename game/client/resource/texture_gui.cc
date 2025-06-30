@@ -36,25 +36,29 @@ resource_ptr<TextureGUI> resource::load<TextureGUI>(const char* name, unsigned i
 
         if(flags & TEXTURE_GUI_LOAD_CLAMP_S) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        } else {
+        }
+        else {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         }
 
         if(flags & TEXTURE_GUI_LOAD_CLAMP_T) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        } else {
+        }
+        else {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         }
 
         if(flags & TEXTURE_GUI_LOAD_LINEAR_MAG) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        } else {
+        }
+        else {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         }
 
         if(flags & TEXTURE_GUI_LOAD_LINEAR_MIN) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        } else {
+        }
+        else {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         }
 
@@ -75,7 +79,8 @@ void resource::hard_cleanup<TextureGUI>(void)
     for(const auto& it : resource_map) {
         if(it.second.use_count() > 1L) {
             spdlog::warn("resource: zombie resource [TextureGUI] {} [use_count={}]", it.first, it.second.use_count());
-        } else {
+        }
+        else {
             spdlog::debug("resource: releasing [TextureGUI] {}", it.first);
         }
 

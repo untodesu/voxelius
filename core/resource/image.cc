@@ -41,7 +41,8 @@ resource_ptr<Image> resource::load<Image>(const char* name, unsigned int flags)
 
     if(flags & IMAGE_LOAD_FLIP) {
         stbi_set_flip_vertically_on_load(true);
-    } else {
+    }
+    else {
         stbi_set_flip_vertically_on_load(false);
     }
 
@@ -54,7 +55,8 @@ resource_ptr<Image> resource::load<Image>(const char* name, unsigned int flags)
 
     if(flags & IMAGE_LOAD_GRAY) {
         new_resource->pixels = stbi_load_from_callbacks(&callbacks, file, &new_resource->size.x, &new_resource->size.y, nullptr, STBI_grey);
-    } else {
+    }
+    else {
         new_resource->pixels = stbi_load_from_callbacks(
             &callbacks, file, &new_resource->size.x, &new_resource->size.y, nullptr, STBI_rgb_alpha);
     }
@@ -81,7 +83,8 @@ void resource::hard_cleanup<Image>(void)
     for(const auto& it : resource_map) {
         if(it.second.use_count() > 1L) {
             spdlog::warn("resource: zombie resource [Image] {} [use_count={}]", it.first, it.second.use_count());
-        } else {
+        }
+        else {
             spdlog::debug("resource: releasing [Image] {}", it.first);
         }
 

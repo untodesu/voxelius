@@ -27,7 +27,8 @@ static void print_toggle_state(const ToggleInfo& info)
     if(info.description) {
         if(info.is_enabled) {
             gui::client_chat::print(std::format("[toggles] {} ON", info.description));
-        } else {
+        }
+        else {
             gui::client_chat::print(std::format("[toggles] {} OFF", info.description));
         }
     }
@@ -38,7 +39,8 @@ static void toggle_value(ToggleInfo& info, toggle_type type)
     if(info.is_enabled) {
         info.is_enabled = false;
         globals::dispatcher.trigger(ToggleDisabledEvent { type });
-    } else {
+    }
+    else {
         info.is_enabled = true;
         globals::dispatcher.trigger(ToggleEnabledEvent { type });
     }
@@ -124,7 +126,8 @@ void toggles::init_late(void)
     for(toggle_type i = 0; i < TOGGLE_COUNT; ++i) {
         if(toggle_infos[i].is_enabled) {
             globals::dispatcher.trigger(ToggleEnabledEvent { i });
-        } else {
+        }
+        else {
             globals::dispatcher.trigger(ToggleDisabledEvent { i });
         }
     }
@@ -134,7 +137,8 @@ bool toggles::get(toggle_type type)
 {
     if(type < TOGGLE_COUNT) {
         return toggle_infos[type].is_enabled;
-    } else {
+    }
+    else {
         return false;
     }
 }
@@ -145,7 +149,8 @@ void toggles::set(toggle_type type, bool value)
         if(value) {
             toggle_infos[type].is_enabled = true;
             globals::dispatcher.trigger(ToggleEnabledEvent { type });
-        } else {
+        }
+        else {
             toggle_infos[type].is_enabled = false;
             globals::dispatcher.trigger(ToggleDisabledEvent { type });
         }
