@@ -27,8 +27,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_subdirectory(core)
 add_subdirectory(deps)
-add_subdirectory(src)
+add_subdirectory(game)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 add_custom_target(thirdpartylegalnotices ALL

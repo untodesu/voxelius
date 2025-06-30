@@ -1,0 +1,16 @@
+target_sources(shared PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/collision.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/collision.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/factory.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/factory.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/gravity.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/gravity.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/grounded.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/head.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/player.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/stasis.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/stasis.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/transform.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/transform.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/velocity.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/velocity.hh")

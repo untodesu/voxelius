@@ -14,8 +14,9 @@
                 "_USE_MATH_DEFINES"
             ],
             "includePath": [
-                "${workspaceFolder}/build*/_deps/glfw-src/include",
-                "${workspaceFolder}/build**/_deps/glfw-src/include",
+                "${workspaceFolder}/build/_deps/glfw-src/include",
+                "${workspaceFolder}/build32/_deps/glfw-src/include",
+                "${workspaceFolder}/build64/_deps/glfw-src/include",
                 "${workspaceFolder}/deps/dr_libs/include",
                 "${workspaceFolder}/deps/emhash/include",
                 "${workspaceFolder}/deps/enet/include",
@@ -31,8 +32,8 @@
                 "${workspaceFolder}/deps/spdlog/include",
                 "${workspaceFolder}/deps/stb/include",
                 "${workspaceFolder}/deps/thread_pool/include",
-                "${workspaceFolder}/src/game/",
-                "${workspaceFolder}/src",
+                "${workspaceFolder}/game/",
+                "${workspaceFolder}",
                 "${default}"
             ]
         }

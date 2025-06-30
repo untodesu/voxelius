@@ -1,0 +1,15 @@
+target_sources(vclient PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/camera.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/camera.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/factory.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/factory.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/interpolation.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/interpolation.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/listener.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/listener.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/player_look.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/player_look.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/player_move.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/player_move.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/sound_emitter.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/sound_emitter.hh")
