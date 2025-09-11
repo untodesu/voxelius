@@ -46,6 +46,9 @@ int main(int argc, char** argv)
     std::signal(SIGINT, &on_termination_signal);
     std::signal(SIGTERM, &on_termination_signal);
 
+    BinFile::register_resource();
+    Image::register_resource();
+
     server_game::init();
 
     threading::init();
@@ -80,16 +83,14 @@ int main(int argc, char** argv)
 
         std::this_thread::sleep_for(std::chrono::microseconds(globals::tickrate_dt));
 
-        resource::soft_cleanup<BinFile>();
-        resource::soft_cleanup<Image>();
+        resource::soft_cleanup();
 
         threading::update();
     }
 
     server_game::shutdown();
 
-    resource::hard_cleanup<BinFile>();
-    resource::hard_cleanup<Image>();
+    resource::hard_cleanup();
 
     threading::shutdown();
 

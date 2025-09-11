@@ -3,10 +3,9 @@
 #include "client/resource/sound_effect.hh"
 
 #include "core/resource/resource.hh"
+#include "core/utils/physfs.hh"
 
 #include "client/globals.hh"
-
-static emhash8::HashMap<std::string, resource_ptr<SoundEffect>> resource_map;
 
 static std::size_t drwav_read_physfs(void* file, void* output, std::size_t count)
 {
@@ -23,38 +22,32 @@ static drwav_bool32 drwav_seek_physfs(void* file, int offset, drwav_seek_origin 
     }
 }
 
-template<>
-resource_ptr<SoundEffect> resource::load<SoundEffect>(std::string_view name, unsigned int flags)
+static const void* sound_effect_load_func(const char* name, std::uint32_t flags)
 {
-    auto it = resource_map.find(std::string(name));
-
-    if(it != resource_map.cend()) {
-        // Return an existing resource
-        return it->second;
-    }
+    assert(name);
 
     if(globals::sound_ctx == nullptr) {
         // Sound is disabled
         return nullptr;
     }
 
-    auto file = PHYSFS_openRead(std::string(name).c_str());
+    auto file = PHYSFS_openRead(name);
 
     if(file == nullptr) {
-        spdlog::warn("resource: {} [SoundEffect]: {}", name, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::warn("sfx: {}: {}", name, utils::physfs_error());
         return nullptr;
     }
 
     drwav wav_info;
 
     if(!drwav_init(&wav_info, &drwav_read_physfs, &drwav_seek_physfs, file, nullptr)) {
-        spdlog::warn("resource: {} [SoundEffect]: drwav_init failed", name);
+        spdlog::warn("sfx: {}: drwav_init failed", name);
         PHYSFS_close(file);
         return nullptr;
     }
 
     if(wav_info.channels != 1) {
-        spdlog::warn("resource: {} [SoundEffect]: only mono sound files are allowed", name);
+        spdlog::warn("sfx: {}: only mono sound files are allowed", name);
         drwav_uninit(&wav_info);
         PHYSFS_close(file);
         return nullptr;
@@ -68,7 +61,7 @@ resource_ptr<SoundEffect> resource::load<SoundEffect>(std::string_view name, uns
     drwav_uninit(&wav_info);
     PHYSFS_close(file);
 
-    auto new_resource = std::make_shared<SoundEffect>();
+    auto new_resource = new SoundEffect();
     new_resource->name = std::string(name);
 
     alGenBuffers(1, &new_resource->buffer);
@@ -76,42 +69,21 @@ resource_ptr<SoundEffect> resource::load<SoundEffect>(std::string_view name, uns
 
     delete[] samples;
 
-    return resource_map.insert_or_assign(std::string(name), new_resource).first->second;
+    return new_resource;
 }
 
-template<>
-void resource::hard_cleanup<SoundEffect>(void)
+static void sound_effect_free_func(const void* resource)
 {
-    for(const auto& it : resource_map) {
-        if(it.second.use_count() > 1L) {
-            spdlog::warn("resource: zombie resource [SoundEffect] {} [use_count={}]", it.first, it.second.use_count());
-        }
-        else {
-            spdlog::debug("resource: releasing [SoundEffect] {}", it.first);
-        }
+    assert(resource);
 
-        alDeleteBuffers(1, &it.second->buffer);
-    }
+    auto sound_effect = reinterpret_cast<const SoundEffect*>(resource);
 
-    resource_map.clear();
+    alDeleteBuffers(1, &sound_effect->buffer);
+
+    delete sound_effect;
 }
 
-template<>
-void resource::soft_cleanup<SoundEffect>(void)
+void SoundEffect::register_resource(void)
 {
-    auto iter = resource_map.cbegin();
-
-    while(iter != resource_map.cend()) {
-        if(iter->second.use_count() == 1L) {
-            spdlog::debug("resource: releasing [SoundEffect] {}", iter->first);
-
-            alDeleteBuffers(1, &iter->second->buffer);
-
-            iter = resource_map.erase(iter);
-
-            continue;
-        }
-
-        iter = std::next(iter);
-    }
+    resource::register_loader<SoundEffect>(&sound_effect_load_func, &sound_effect_free_func);
 }

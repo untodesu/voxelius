@@ -4,68 +4,48 @@
 
 #include "core/resource/resource.hh"
 
-static emhash8::HashMap<std::string, resource_ptr<BinFile>> resource_map;
+#include "core/utils/physfs.hh"
 
-template<>
-resource_ptr<BinFile> resource::load<BinFile>(std::string_view name, unsigned int flags)
+static const void* binfile_load_func(const char* name, std::uint32_t flags)
 {
-    auto it = resource_map.find(std::string(name));
+    assert(name);
 
-    if(it != resource_map.cend()) {
-        // Return an existing resource
-        return it->second;
-    }
-
-    auto file = PHYSFS_openRead(std::string(name).c_str());
+    auto file = PHYSFS_openRead(name);
 
     if(file == nullptr) {
-        spdlog::warn("resource: {}: {}", name, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::error("binfile: {}: {}", name, utils::physfs_error());
         return nullptr;
     }
 
-    auto new_resource = std::make_shared<BinFile>();
-    new_resource->size = PHYSFS_fileLength(file);
-    new_resource->buffer = new std::byte[new_resource->size];
+    PHYSFS_sint64 file_size = PHYSFS_fileLength(file);
 
-    PHYSFS_readBytes(file, new_resource->buffer, new_resource->size);
+    if(file_size < 0) {
+        spdlog::error("binfile: {}: {}", name, utils::physfs_error());
+        PHYSFS_close(file);
+        return nullptr;
+    }
+
+    auto binfile = new BinFile();
+    binfile->size = static_cast<std::size_t>(file_size);
+    binfile->buffer = new std::byte[binfile->size];
+
+    PHYSFS_readBytes(file, binfile->buffer, file_size);
     PHYSFS_close(file);
 
-    return resource_map.insert_or_assign(std::string(name), new_resource).first->second;
+    return binfile;
 }
 
-template<>
-void resource::hard_cleanup<BinFile>(void)
+static void binfile_free_func(const void* resource)
 {
-    for(const auto& it : resource_map) {
-        if(it.second.use_count() > 1L) {
-            spdlog::warn("resource: zombie resource [BinFile] {} [use_count={}]", it.first, it.second.use_count());
-        }
-        else {
-            spdlog::debug("resource: releasing [BinFile] {}", it.first);
-        }
+    assert(resource);
 
-        delete[] it.second->buffer;
-    }
+    auto binfile = reinterpret_cast<const BinFile*>(resource);
+    delete[] binfile->buffer;
 
-    resource_map.clear();
+    delete binfile;
 }
 
-template<>
-void resource::soft_cleanup<BinFile>(void)
+void BinFile::register_resource(void)
 {
-    auto iter = resource_map.cbegin();
-
-    while(iter != resource_map.cend()) {
-        if(iter->second.use_count() == 1L) {
-            spdlog::debug("resource: releasing [BinFile] {}", iter->first);
-
-            delete[] iter->second->buffer;
-
-            iter = resource_map.erase(iter);
-
-            continue;
-        }
-
-        iter = std::next(iter);
-    }
+    resource::register_loader<BinFile>(&binfile_load_func, &binfile_free_func);
 }

@@ -5,17 +5,9 @@
 #include "core/resource/image.hh"
 #include "core/resource/resource.hh"
 
-static emhash8::HashMap<std::string, resource_ptr<TextureGUI>> resource_map;
-
-template<>
-resource_ptr<TextureGUI> resource::load<TextureGUI>(std::string_view name, unsigned int flags)
+static const void* texture_gui_load_func(const char* name, std::uint32_t flags)
 {
-    auto it = resource_map.find(std::string(name));
-
-    if(it != resource_map.cend()) {
-        // Return an existing resource
-        return it->second;
-    }
+    assert(name);
 
     unsigned int image_load_flags = 0U;
 
@@ -62,54 +54,30 @@ resource_ptr<TextureGUI> resource::load<TextureGUI>(std::string_view name, unsig
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         }
 
-        auto new_resource = std::make_shared<TextureGUI>();
+        auto new_resource = new TextureGUI();
         new_resource->handle = static_cast<ImTextureID>(gl_texture);
         new_resource->size.x = image->size.x;
         new_resource->size.y = image->size.y;
 
-        return resource_map.insert_or_assign(std::string(name), new_resource).first->second;
+        return new_resource;
     }
 
     return nullptr;
 }
 
-template<>
-void resource::hard_cleanup<TextureGUI>(void)
+static void texture_gui_free_func(const void* resource)
 {
-    for(const auto& it : resource_map) {
-        if(it.second.use_count() > 1L) {
-            spdlog::warn("resource: zombie resource [TextureGUI] {} [use_count={}]", it.first, it.second.use_count());
-        }
-        else {
-            spdlog::debug("resource: releasing [TextureGUI] {}", it.first);
-        }
+    assert(resource);
 
-        auto gl_texture = static_cast<GLuint>(it.second->handle);
+    auto texture_gui = reinterpret_cast<const TextureGUI*>(resource);
+    auto gl_texture = static_cast<GLuint>(texture_gui->handle);
 
-        glDeleteTextures(1, &gl_texture);
-    }
+    glDeleteTextures(1, &gl_texture);
 
-    resource_map.clear();
+    delete texture_gui;
 }
 
-template<>
-void resource::soft_cleanup<TextureGUI>(void)
+void TextureGUI::register_resource(void)
 {
-    auto iter = resource_map.cbegin();
-
-    while(iter != resource_map.cend()) {
-        if(iter->second.use_count() == 1L) {
-            spdlog::debug("resource: releasing [TextureGUI] {}", iter->first);
-
-            auto gl_texture = static_cast<GLuint>(iter->second->handle);
-
-            glDeleteTextures(1, &gl_texture);
-
-            iter = resource_map.erase(iter);
-
-            continue;
-        }
-
-        iter = std::next(iter);
-    }
+    resource::register_loader<TextureGUI>(&texture_gui_load_func, &texture_gui_free_func);
 }

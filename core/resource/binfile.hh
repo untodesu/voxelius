@@ -3,6 +3,8 @@
 #pragma once
 
 struct BinFile final {
+    static void register_resource(void);
+
     std::byte* buffer;
     std::size_t size;
 };

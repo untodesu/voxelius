@@ -221,6 +221,11 @@ int main(int argc, char** argv)
     spdlog::info("opengl: version: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
     spdlog::info("opengl: renderer: {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 
+    BinFile::register_resource();
+    Image::register_resource();
+    TextureGUI::register_resource();
+    SoundEffect::register_resource();
+
     glDisable(GL_MULTISAMPLE);
 
     IMGUI_CHECKVERSION();
@@ -406,22 +411,14 @@ int main(int argc, char** argv)
 
         globals::window_framecount += 1;
 
-        resource::soft_cleanup<BinFile>();
-        resource::soft_cleanup<Image>();
-
-        resource::soft_cleanup<SoundEffect>();
-        resource::soft_cleanup<TextureGUI>();
+        resource::soft_cleanup();
 
         threading::update();
     }
 
     client_game::shutdown();
 
-    resource::hard_cleanup<BinFile>();
-    resource::hard_cleanup<Image>();
-
-    resource::hard_cleanup<SoundEffect>();
-    resource::hard_cleanup<TextureGUI>();
+    resource::hard_cleanup();
 
     spdlog::info("client: shutdown after {} frames", globals::window_framecount);
     spdlog::info("client: average framerate: {:.03f} FPS", 1.0f / globals::window_frametime_avg);

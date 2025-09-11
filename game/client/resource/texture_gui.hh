@@ -9,7 +9,9 @@ constexpr static unsigned int TEXTURE_GUI_LOAD_LINEAR_MIN = 0x0008;
 constexpr static unsigned int TEXTURE_GUI_LOAD_VFLIP = 0x0010;
 constexpr static unsigned int TEXTURE_GUI_LOAD_GRAYSCALE = 0x0020;
 
-struct TextureGUI {
+struct TextureGUI final {
+    static void register_resource(void);
+
     ImTextureID handle;
     glm::ivec2 size;
 };
