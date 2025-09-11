@@ -6,7 +6,7 @@ namespace splash
 {
 void init_client(void);
 void init_server(void);
-const char* get(void);
+std::string_view get(void);
 } // namespace splash
 
 #endif // SHARED_SPLASH_HH

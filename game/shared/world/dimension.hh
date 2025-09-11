@@ -26,10 +26,10 @@ namespace world
 {
 class Dimension {
 public:
-    explicit Dimension(const char* name, float gravity);
+    explicit Dimension(std::string_view name, float gravity);
     virtual ~Dimension(void);
 
-    const char* get_name(void) const;
+    std::string_view get_name(void) const;
     float get_gravity(void) const;
 
 public:

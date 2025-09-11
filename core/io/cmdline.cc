@@ -57,19 +57,30 @@ void io::cmdline::create(int argc, char** argv)
     }
 }
 
-void io::cmdline::insert(const char* option, const char* argument)
+void io::cmdline::insert(std::string_view option)
 {
-    if(argument == nullptr) {
-        options.insert_or_assign(option, std::string());
-    }
-    else {
-        options.insert_or_assign(option, argument);
-    }
+    options.insert_or_assign(std::string(option), std::string());
 }
 
-const char* io::cmdline::get(const char* option, const char* fallback)
+void io::cmdline::insert(std::string_view option, std::string_view argument)
 {
-    auto it = options.find(option);
+    options.insert_or_assign(std::string(option), std::string(argument));
+}
+
+std::string_view io::cmdline::get(std::string_view option, std::string_view fallback)
+{
+    auto it = options.find(std::string(option));
+
+    if(it == options.cend()) {
+        return fallback;
+    }
+
+    return it->second;
+}
+
+const char* io::cmdline::get_cstr(std::string_view option, const char* fallback)
+{
+    auto it = options.find(std::string(option));
 
     if(it == options.cend()) {
         return fallback;
@@ -78,7 +89,7 @@ const char* io::cmdline::get(const char* option, const char* fallback)
     return it->second.c_str();
 }
 
-bool io::cmdline::contains(const char* option)
+bool io::cmdline::contains(std::string_view option)
 {
-    return options.count(option);
+    return options.count(std::string(option));
 }

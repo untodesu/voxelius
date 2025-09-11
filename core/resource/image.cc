@@ -23,16 +23,16 @@ static int stbi_physfs_eof(void* context)
 }
 
 template<>
-resource_ptr<Image> resource::load<Image>(const char* name, unsigned int flags)
+resource_ptr<Image> resource::load<Image>(std::string_view name, unsigned int flags)
 {
-    auto it = resource_map.find(name);
+    auto it = resource_map.find(std::string(name));
 
     if(it != resource_map.cend()) {
         // Return an existing resource
         return it->second;
     }
 
-    auto file = PHYSFS_openRead(name);
+    auto file = PHYSFS_openRead(std::string(name).c_str());
 
     if(file == nullptr) {
         spdlog::warn("resource: {}: {}", name, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -74,7 +74,7 @@ resource_ptr<Image> resource::load<Image>(const char* name, unsigned int flags)
         return nullptr;
     }
 
-    return resource_map.insert_or_assign(name, new_resource).first->second;
+    return resource_map.insert_or_assign(std::string(name), new_resource).first->second;
 }
 
 template<>

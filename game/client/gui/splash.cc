@@ -18,7 +18,7 @@ constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground |
 
 constexpr static int SPLASH_COUNT = 4;
 constexpr static std::size_t DELAY_MICROSECONDS = 2000000;
-constexpr static const char* SPLASH_PATH = "textures/gui/client_splash.png";
+constexpr static std::string_view SPLASH_PATH = "textures/gui/client_splash.png";
 
 static resource_ptr<TextureGUI> texture;
 static float texture_aspect;

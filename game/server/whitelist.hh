@@ -23,8 +23,8 @@ void shutdown(void);
 
 namespace whitelist
 {
-bool contains(const char* username);
-bool matches(const char* username, std::uint64_t password_hash);
+bool contains(std::string_view username);
+bool matches(std::string_view username, std::uint64_t password_hash);
 } // namespace whitelist
 
 #endif // SERVER_WHITELIST_HH

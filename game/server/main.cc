@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 
     shared_game::init(argc, argv);
 
-    spdlog::info("Voxelius Server {}", project_version_string);
+    spdlog::info("Voxelius Server {}", version::semver);
 
     globals::fixed_frametime = 0.0f;
     globals::fixed_frametime_avg = 0.0f;

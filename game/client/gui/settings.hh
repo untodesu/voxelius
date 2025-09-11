@@ -49,45 +49,46 @@ void layout(void);
 
 namespace settings
 {
-void add_checkbox(int priority, config::Boolean& value, settings_location location, const char* name, bool tooltip);
+void add_checkbox(int priority, config::Boolean& value, settings_location location, std::string_view name, bool tooltip);
 } // namespace settings
 
 namespace settings
 {
-void add_input(int priority, config::Int& value, settings_location location, const char* name, bool tooltip);
-void add_input(int priority, config::Float& value, settings_location location, const char* name, bool tooltip, const char* format = "%.3f");
-void add_input(int priority, config::Unsigned& value, settings_location location, const char* name, bool tooltip);
-void add_input(int priority, config::String& value, settings_location location, const char* name, bool tooltip, bool allow_whitespace);
+void add_input(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip);
+void add_input(
+    int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip, std::string_view fmt = "%.3f");
+void add_input(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip);
+void add_input(int priority, config::String& value, settings_location location, std::string_view name, bool tooltip, bool allow_whitespace);
 } // namespace settings
 
 namespace settings
 {
-void add_slider(int priority, config::Int& value, settings_location location, const char* name, bool tooltip);
+void add_slider(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip);
 void add_slider(
-    int priority, config::Float& value, settings_location location, const char* name, bool tooltip, const char* format = "%.3f");
-void add_slider(int priority, config::Unsigned& value, settings_location location, const char* name, bool tooltip);
+    int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip, std::string_view format = "%.3f");
+void add_slider(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip);
 } // namespace settings
 
 namespace settings
 {
-void add_stepper(int priority, config::Int& value, settings_location location, const char* name, bool tooltip);
-void add_stepper(int priority, config::Unsigned& value, settings_location location, const char* name, bool tooltip);
+void add_stepper(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip);
+void add_stepper(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip);
 } // namespace settings
 
 namespace settings
 {
-void add_keybind(int priority, config::KeyBind& value, settings_location location, const char* name);
+void add_keybind(int priority, config::KeyBind& value, settings_location location, std::string_view name);
 } // namespace settings
 
 namespace settings
 {
-void add_gamepad_axis(int priority, config::GamepadAxis& value, settings_location location, const char* name);
-void add_gamepad_button(int priority, config::GamepadButton& value, settings_location location, const char* name);
+void add_gamepad_axis(int priority, config::GamepadAxis& value, settings_location location, std::string_view name);
+void add_gamepad_button(int priority, config::GamepadButton& value, settings_location location, std::string_view name);
 } // namespace settings
 
 namespace settings
 {
-void add_language_select(int priority, settings_location location, const char* name);
+void add_language_select(int priority, settings_location location, std::string_view name);
 } // namespace settings
 
 #endif // CLIENT_SETTINGS_HH

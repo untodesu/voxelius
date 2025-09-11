@@ -61,14 +61,14 @@ static void on_login_request_packet(const protocol::LoginRequest& packet)
 
     // FIXME: calculate voxel registry checksum ahead of time
     // instead of figuring it out every time a new player connects
-    if(packet.voxel_registry_checksum != world::voxel_registry::calcualte_checksum()) {
+    if(packet.voxel_registry_checksum != world::voxel_registry::calculate_checksum()) {
         protocol::Disconnect response;
         response.reason = "protocol.voxel_registry_checksum";
         protocol::send(packet.peer, protocol::encode(response));
         return;
     }
 
-    if(packet.item_registry_checksum != world::item_registry::calcualte_checksum()) {
+    if(packet.item_registry_checksum != world::item_registry::calculate_checksum()) {
         protocol::Disconnect response;
         response.reason = "protocol.item_registry_checksum";
         protocol::send(packet.peer, protocol::encode(response));
@@ -297,11 +297,11 @@ void sessions::shutdown(void)
     dimension_listeners.clear();
 }
 
-Session* sessions::create(ENetPeer* peer, const char* client_username)
+Session* sessions::create(ENetPeer* peer, std::string_view client_username)
 {
     for(unsigned int i = 0U; i < sessions::max_players.get_value(); ++i) {
         if(!sessions_vector[i].peer) {
-            std::uint64_t client_identity = math::crc64(client_username);
+            std::uint64_t client_identity = math::crc64(client_username.data(), client_username.size());
 
             sessions_vector[i].client_index = i;
             sessions_vector[i].client_identity = client_identity;
@@ -309,7 +309,7 @@ Session* sessions::create(ENetPeer* peer, const char* client_username)
             sessions_vector[i].player_entity = entt::null;
             sessions_vector[i].peer = peer;
 
-            username_map[client_username] = &sessions_vector[i];
+            username_map[std::string(client_username)] = &sessions_vector[i];
             identity_map[client_identity] = &sessions_vector[i];
 
             peer->data = &sessions_vector[i];
@@ -323,9 +323,9 @@ Session* sessions::create(ENetPeer* peer, const char* client_username)
     return nullptr;
 }
 
-Session* sessions::find(const char* client_username)
+Session* sessions::find(std::string_view client_username)
 {
-    const auto it = username_map.find(client_username);
+    const auto it = username_map.find(std::string(client_username));
     if(it != username_map.cend()) {
         return it->second;
     }

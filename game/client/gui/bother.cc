@@ -117,7 +117,7 @@ void gui::bother::update_late(void)
     }
 }
 
-void gui::bother::ping(unsigned int identity, const char* host, std::uint16_t port)
+void gui::bother::ping(unsigned int identity, std::string_view host, std::uint16_t port)
 {
     if(bother_set.count(identity)) {
         // Already in the process
@@ -133,7 +133,7 @@ void gui::bother::ping(unsigned int identity, const char* host, std::uint16_t po
 
     BotherQueueItem item;
     item.identity = identity;
-    item.hostname = std::string(host);
+    item.hostname = host;
     item.port = port;
 
     bother_queue.push_back(item);

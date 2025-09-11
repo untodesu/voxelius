@@ -6,9 +6,9 @@
 
 #include "client/const.hh"
 
-constexpr static const char* UNKNOWN_KEY_NAME = "UNKNOWN";
+constexpr static std::string_view UNKNOWN_KEY_NAME = "UNKNOWN";
 
-static const std::pair<int, const char*> key_names[] = {
+static const std::pair<int, std::string_view> key_names[] = {
     { GLFW_KEY_SPACE, "SPACE" },
     { GLFW_KEY_APOSTROPHE, "'" },
     { GLFW_KEY_COMMA, "," },
@@ -131,7 +131,7 @@ static const std::pair<int, const char*> key_names[] = {
     { GLFW_KEY_MENU, "MENU" },
 };
 
-static const char* get_key_name(int keycode)
+static std::string_view get_key_name(int keycode)
 {
     for(const auto& it : key_names) {
         if(it.first == keycode) {
@@ -160,10 +160,10 @@ config::KeyBind::KeyBind(int default_value)
     }
 }
 
-void config::KeyBind::set(const char* value)
+void config::KeyBind::set(std::string_view value)
 {
     for(const auto& it : key_names) {
-        if((it.first != DEBUG_KEY) && !std::strcmp(it.second, value)) {
+        if((it.first != DEBUG_KEY) && 0 == it.second.compare(value)) {
             m_glfw_keycode = it.first;
             m_name = it.second;
             return;
@@ -174,7 +174,7 @@ void config::KeyBind::set(const char* value)
     m_name = UNKNOWN_KEY_NAME;
 }
 
-const char* config::KeyBind::get(void) const
+std::string_view config::KeyBind::get(void) const
 {
     return m_name;
 }

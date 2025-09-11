@@ -14,8 +14,8 @@ public:
     explicit GamepadButton(int button);
     virtual ~GamepadButton(void) = default;
 
-    virtual const char* get(void) const override;
-    virtual void set(const char* value) override;
+    virtual std::string_view get(void) const override;
+    virtual void set(std::string_view value) override;
 
     int get_button(void) const;
     void set_button(int button);
@@ -25,7 +25,7 @@ public:
 
 private:
     int m_gamepad_button;
-    const char* m_name;
+    std::string_view m_name;
 };
 } // namespace config
 

@@ -95,43 +95,43 @@ void sound::update(void)
     alSourcef(ui_source, AL_GAIN, ui_gain);
 }
 
-void sound::play_generic(const char* sound, bool looping, float pitch)
+void sound::play_generic(std::string_view sound, bool looping, float pitch)
 {
-    if(sound) {
+    if(sound.size()) {
         sound::play_generic(resource::load<SoundEffect>(sound), looping, pitch);
     }
     else {
-        sound::play_generic(static_cast<const char*>(nullptr), looping, pitch);
+        sound::play_generic(static_cast<resource_ptr<SoundEffect>>(nullptr), looping, pitch);
     }
 }
 
-void sound::play_entity(entt::entity entity, const char* sound, bool looping, float pitch)
+void sound::play_entity(entt::entity entity, std::string_view sound, bool looping, float pitch)
 {
-    if(sound) {
+    if(sound.size()) {
         sound::play_entity(entity, resource::load<SoundEffect>(sound), looping, pitch);
     }
     else {
-        sound::play_entity(entity, static_cast<const char*>(nullptr), looping, pitch);
+        sound::play_entity(entity, static_cast<resource_ptr<SoundEffect>>(nullptr), looping, pitch);
     }
 }
 
-void sound::play_player(const char* sound, bool looping, float pitch)
+void sound::play_player(std::string_view sound, bool looping, float pitch)
 {
-    if(sound) {
+    if(sound.size()) {
         sound::play_player(resource::load<SoundEffect>(sound), looping, pitch);
     }
     else {
-        sound::play_player(static_cast<const char*>(nullptr), looping, pitch);
+        sound::play_player(static_cast<resource_ptr<SoundEffect>>(nullptr), looping, pitch);
     }
 }
 
-void sound::play_ui(const char* sound, bool looping, float pitch)
+void sound::play_ui(std::string_view sound, bool looping, float pitch)
 {
-    if(sound) {
+    if(sound.size()) {
         sound::play_ui(resource::load<SoundEffect>(sound), looping, pitch);
     }
     else {
-        sound::play_ui(static_cast<const char*>(nullptr), looping, pitch);
+        sound::play_ui(static_cast<resource_ptr<SoundEffect>>(nullptr), looping, pitch);
     }
 }
 

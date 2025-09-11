@@ -37,8 +37,8 @@ void shutdown(void);
 
 namespace sessions
 {
-Session* create(ENetPeer* peer, const char* client_username);
-Session* find(const char* client_username);
+Session* create(ENetPeer* peer, std::string_view client_username);
+Session* find(std::string_view client_username);
 Session* find(std::uint16_t client_index);
 Session* find(std::uint64_t client_identity);
 Session* find(ENetPeer* peer);

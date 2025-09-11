@@ -14,8 +14,8 @@ public:
     explicit GamepadAxis(int axis, bool inverted);
     virtual ~GamepadAxis(void) = default;
 
-    virtual const char* get(void) const override;
-    virtual void set(const char* value) override;
+    virtual std::string_view get(void) const override;
+    virtual void set(std::string_view value) override;
 
     int get_axis(void) const;
     void set_axis(int axis);
@@ -29,13 +29,13 @@ public:
     // this configuration value actually contain the
     // inversion flag. Since we're updating that flag
     // in the UI by means of a separate checkbox, we only need the name here
-    const char* get_name(void) const;
+    std::string_view get_name(void) const;
 
 private:
     bool m_inverted;
     int m_gamepad_axis;
     std::string m_full_string;
-    const char* m_name;
+    std::string_view m_name;
 };
 } // namespace config
 

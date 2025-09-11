@@ -13,10 +13,10 @@ void gui::window_title::update(void)
     std::string title;
 
     if(globals::sound_ctx && globals::sound_dev) {
-        title = std::format("Voxelius {}: {}", project_version_string, splash::get());
+        title = std::format("Voxelius {}: {}", version::semver, splash::get());
     }
     else {
-        title = std::format("Voxelius {}: {} [NOSOUND]", project_version_string, splash::get());
+        title = std::format("Voxelius {}: {} [NOSOUND]", version::semver, splash::get());
     }
 
     glfwSetWindowTitle(globals::window, title.c_str());

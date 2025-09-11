@@ -7,7 +7,7 @@
 #include "shared/coord.hh"
 #include "shared/globals.hh"
 
-world::Dimension::Dimension(const char* name, float gravity)
+world::Dimension::Dimension(std::string_view name, float gravity)
 {
     m_name = name;
     m_gravity = gravity;
@@ -21,9 +21,9 @@ world::Dimension::~Dimension(void)
     chunks.clear();
 }
 
-const char* world::Dimension::get_name(void) const
+std::string_view world::Dimension::get_name(void) const
 {
-    return m_name.c_str();
+    return m_name;
 }
 
 float world::Dimension::get_gravity(void) const

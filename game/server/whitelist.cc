@@ -11,7 +11,7 @@
 #include "server/game.hh"
 #include "server/globals.hh"
 
-constexpr static const char* DEFAULT_FILENAME = "whitelist.txt";
+constexpr static std::string_view DEFAULT_FILENAME = "whitelist.txt";
 constexpr static char SEPARATOR_CHAR = ':';
 
 config::Boolean whitelist::enabled(false);
@@ -36,12 +36,12 @@ void whitelist::init_late(void)
         return;
     }
 
-    if(utils::is_whitespace(whitelist::filename.get())) {
+    if(utils::is_whitespace(whitelist::filename.get_value())) {
         spdlog::warn("whitelist: enabled but filename is empty, using default ({})", DEFAULT_FILENAME);
         whitelist::filename.set(DEFAULT_FILENAME);
     }
 
-    PHYSFS_File* file = PHYSFS_openRead(whitelist::filename.get());
+    PHYSFS_File* file = PHYSFS_openRead(whitelist::filename.c_str());
 
     if(file == nullptr) {
         spdlog::warn("whitelist: {}: {}", whitelist::filename.get(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -80,14 +80,14 @@ void whitelist::shutdown(void)
     // UNDONE: implement saving
 }
 
-bool whitelist::contains(const char* username)
+bool whitelist::contains(std::string_view username)
 {
-    return whitelist_map.contains(username);
+    return whitelist_map.contains(std::string(username));
 }
 
-bool whitelist::matches(const char* username, std::uint64_t password_hash)
+bool whitelist::matches(std::string_view username, std::uint64_t password_hash)
 {
-    const auto it = whitelist_map.find(username);
+    const auto it = whitelist_map.find(std::string(username));
 
     if(it == whitelist_map.cend()) {
         // Not whitelisted, no match

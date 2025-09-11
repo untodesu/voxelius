@@ -10,15 +10,15 @@
 void io::ConfigMap::load_cmdline(void)
 {
     for(auto it : m_values) {
-        if(auto value = io::cmdline::get(it.first.c_str())) {
+        if(auto value = io::cmdline::get_cstr(it.first.c_str())) {
             it.second->set(value);
         }
     }
 }
 
-bool io::ConfigMap::load_file(const char* path)
+bool io::ConfigMap::load_file(std::string_view path)
 {
-    if(auto file = PHYSFS_openRead(path)) {
+    if(auto file = PHYSFS_openRead(std::string(path).c_str())) {
         auto source = std::string(PHYSFS_fileLength(file), char(0x00));
         PHYSFS_readBytes(file, source.data(), source.size());
         PHYSFS_close(file);
@@ -68,13 +68,13 @@ bool io::ConfigMap::load_file(const char* path)
     return false;
 }
 
-bool io::ConfigMap::save_file(const char* path) const
+bool io::ConfigMap::save_file(std::string_view path) const
 {
     std::ostringstream stream;
 
     auto curtime = std::time(nullptr);
 
-    stream << "# Voxelius " << project_version_string << " configuration file" << std::endl;
+    stream << "# Voxelius " << version::semver << " configuration file" << std::endl;
     stream << "# Generated at: " << std::put_time(std::gmtime(&curtime), "%Y-%m-%d %H:%M:%S %z") << std::endl << std::endl;
 
     for(const auto& it : m_values) {
@@ -83,7 +83,7 @@ bool io::ConfigMap::save_file(const char* path) const
         stream << std::endl;
     }
 
-    if(auto file = PHYSFS_openWrite(path)) {
+    if(auto file = PHYSFS_openWrite(std::string(path).c_str())) {
         auto source = stream.str();
         PHYSFS_writeBytes(file, source.data(), source.size());
         PHYSFS_close(file);
@@ -93,9 +93,9 @@ bool io::ConfigMap::save_file(const char* path) const
     return false;
 }
 
-bool io::ConfigMap::set_value(const char* name, const char* value)
+bool io::ConfigMap::set_value(std::string_view name, std::string_view value)
 {
-    auto kv_pair = m_values.find(name);
+    auto kv_pair = m_values.find(std::string(name));
 
     if(kv_pair != m_values.cend()) {
         kv_pair->second->set(value);
@@ -105,25 +105,24 @@ bool io::ConfigMap::set_value(const char* name, const char* value)
     return false;
 }
 
-const char* io::ConfigMap::get_value(const char* name) const
+std::string_view io::ConfigMap::get_value(std::string_view name) const
 {
-    auto kv_pair = m_values.find(name);
+    auto kv_pair = m_values.find(std::string(name));
     if(kv_pair != m_values.cend()) {
         return kv_pair->second->get();
     }
-    else {
-        return nullptr;
-    }
+
+    return std::string_view();
 }
 
-void io::ConfigMap::add_value(const char* name, config::IValue& vref)
+void io::ConfigMap::add_value(std::string_view name, config::IValue& vref)
 {
-    m_values.insert_or_assign(name, &vref);
+    m_values.insert_or_assign(std::string(name), &vref);
 }
 
-const config::IValue* io::ConfigMap::find(const char* name) const
+const config::IValue* io::ConfigMap::find(std::string_view name) const
 {
-    auto kv_pair = m_values.find(name);
+    auto kv_pair = m_values.find(std::string(name));
 
     if(kv_pair != m_values.cend()) {
         return kv_pair->second;

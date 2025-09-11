@@ -91,7 +91,7 @@ void io::gamepad::init(void)
     settings::add_checkbox(0, io::gamepad::active, settings_location::GAMEPAD, "gamepad.active", true);
     settings::add_slider(1, io::gamepad::deadzone, settings_location::GAMEPAD, "gamepad.deadzone", true, "%.03f");
 
-    auto mappings_path = io::cmdline::get("gpmap", "misc/gamecontrollerdb.txt");
+    auto mappings_path = io::cmdline::get_cstr("gpmap", "misc/gamecontrollerdb.txt");
     auto mappings_file = PHYSFS_openRead(mappings_path);
 
     if(mappings_file) {

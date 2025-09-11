@@ -8,7 +8,7 @@ std::unordered_map<std::string, world::VoxelInfoBuilder> world::voxel_registry::
 std::unordered_map<std::string, voxel_id> world::voxel_registry::names = {};
 std::vector<std::shared_ptr<world::VoxelInfo>> world::voxel_registry::voxels = {};
 
-world::VoxelInfoBuilder::VoxelInfoBuilder(const char* name, voxel_type type, bool animated, bool blending)
+world::VoxelInfoBuilder::VoxelInfoBuilder(std::string_view name, voxel_type type, bool animated, bool blending)
 {
     prototype.name = name;
     prototype.type = type;
@@ -45,16 +45,16 @@ world::VoxelInfoBuilder::VoxelInfoBuilder(const char* name, voxel_type type, boo
     prototype.item_pick = NULL_ITEM_ID;
 }
 
-world::VoxelInfoBuilder& world::VoxelInfoBuilder::add_texture_default(const char* texture)
+world::VoxelInfoBuilder& world::VoxelInfoBuilder::add_texture_default(std::string_view texture)
 {
-    default_texture.paths.push_back(texture);
+    default_texture.paths.push_back(std::string(texture));
     return *this;
 }
 
-world::VoxelInfoBuilder& world::VoxelInfoBuilder::add_texture(voxel_face face, const char* texture)
+world::VoxelInfoBuilder& world::VoxelInfoBuilder::add_texture(voxel_face face, std::string_view texture)
 {
     const auto index = static_cast<std::size_t>(face);
-    prototype.textures[index].paths.push_back(texture);
+    prototype.textures[index].paths.push_back(std::string(texture));
     return *this;
 }
 
@@ -140,21 +140,21 @@ voxel_id world::VoxelInfoBuilder::build(void) const
     return new_info->base_voxel;
 }
 
-world::VoxelInfoBuilder& world::voxel_registry::construct(const char* name, voxel_type type, bool animated, bool blending)
+world::VoxelInfoBuilder& world::voxel_registry::construct(std::string_view name, voxel_type type, bool animated, bool blending)
 {
-    const auto it = world::voxel_registry::builders.find(name);
+    const auto it = world::voxel_registry::builders.find(std::string(name));
 
     if(it != world::voxel_registry::builders.cend()) {
         return it->second;
     }
     else {
-        return world::voxel_registry::builders.emplace(name, VoxelInfoBuilder(name, type, animated, blending)).first->second;
+        return world::voxel_registry::builders.emplace(std::string(name), VoxelInfoBuilder(name, type, animated, blending)).first->second;
     }
 }
 
-world::VoxelInfo* world::voxel_registry::find(const char* name)
+world::VoxelInfo* world::voxel_registry::find(std::string_view name)
 {
-    const auto it = world::voxel_registry::names.find(name);
+    const auto it = world::voxel_registry::names.find(std::string(name));
 
     if(it != world::voxel_registry::names.cend()) {
         return world::voxel_registry::find(it->second);
@@ -181,7 +181,7 @@ void world::voxel_registry::purge(void)
     world::voxel_registry::voxels.clear();
 }
 
-std::uint64_t world::voxel_registry::calcualte_checksum(void)
+std::uint64_t world::voxel_registry::calculate_checksum(void)
 {
     std::uint64_t result = 0;
 

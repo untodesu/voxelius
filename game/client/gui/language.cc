@@ -9,13 +9,13 @@
 
 #include "client/globals.hh"
 
-constexpr static const char* DEFAULT_LANGUAGE = "en_US";
+constexpr static std::string_view DEFAULT_LANGUAGE = "en_US";
 
 // Available languages are kept in a special manifest file which
 // is essentially a key-value map of semi-IETF-compliant language tags
 // and the language's endonym; after reading the manifest, the translation
 // system knows what language it can load and will act accordingly
-constexpr static const char* MANIFEST_PATH = "lang/manifest.json";
+constexpr static std::string_view MANIFEST_PATH = "lang/manifest.json";
 
 static gui::LanguageManifest manifest;
 static gui::LanguageIterator current_language;
@@ -36,7 +36,7 @@ void gui::language::init(void)
 
     settings::add_language_select(0, settings_location::GENERAL, "language");
 
-    auto file = PHYSFS_openRead(MANIFEST_PATH);
+    auto file = PHYSFS_openRead(std::string(MANIFEST_PATH).c_str());
 
     if(file == nullptr) {
         spdlog::critical("language: {}: {}", MANIFEST_PATH, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -85,14 +85,14 @@ void gui::language::init(void)
 
 void gui::language::init_late(void)
 {
-    auto user_language = ietf_map.find(config_language.get());
+    auto user_language = ietf_map.find(config_language.get_value());
 
     if(user_language != ietf_map.cend()) {
         gui::language::set(user_language->second);
         return;
     }
 
-    auto fallback = ietf_map.find(DEFAULT_LANGUAGE);
+    auto fallback = ietf_map.find(std::string(DEFAULT_LANGUAGE));
 
     if(fallback != ietf_map.cend()) {
         gui::language::set(fallback->second);
@@ -159,9 +159,9 @@ gui::LanguageIterator gui::language::get_current(void)
     return current_language;
 }
 
-gui::LanguageIterator gui::language::find(const char* ietf)
+gui::LanguageIterator gui::language::find(std::string_view ietf)
 {
-    const auto it = ietf_map.find(ietf);
+    const auto it = ietf_map.find(std::string(ietf));
     if(it != ietf_map.cend()) {
         return it->second;
     }
@@ -180,18 +180,18 @@ gui::LanguageIterator gui::language::cend(void)
     return manifest.cend();
 }
 
-const char* gui::language::resolve(const char* key)
+std::string_view gui::language::resolve(std::string_view key)
 {
-    const auto it = language_map.find(key);
+    const auto it = language_map.find(std::string(key));
+
     if(it != language_map.cend()) {
-        return it->second.c_str();
+        return it->second;
     }
-    else {
-        return key;
-    }
+
+    return key;
 }
 
-std::string gui::language::resolve_gui(const char* key)
+std::string gui::language::resolve_gui(std::string_view key)
 {
     // We need window tags to retain their hierarchy when a language
     // dynamically changes; ImGui allows to provide hidden unique identifiers

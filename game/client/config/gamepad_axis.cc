@@ -6,9 +6,9 @@
 
 #include "client/io/gamepad.hh"
 
-constexpr static const char* UNKNOWN_AXIS_NAME = "UNKNOWN";
+constexpr static std::string_view UNKNOWN_AXIS_NAME = "UNKNOWN";
 
-static const std::pair<int, const char*> axis_names[] = {
+static const std::pair<int, std::string_view> axis_names[] = {
     { GLFW_GAMEPAD_AXIS_LEFT_X, "LEFT_X" },
     { GLFW_GAMEPAD_AXIS_LEFT_Y, "LEFT_Y" },
     { GLFW_GAMEPAD_AXIS_RIGHT_X, "RIGHT_X" },
@@ -17,7 +17,7 @@ static const std::pair<int, const char*> axis_names[] = {
     { GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER, "RIGHT_TRIG" },
 };
 
-static const char* get_axis_name(int axis)
+static std::string_view get_axis_name(int axis)
 {
     for(const auto& it : axis_names) {
         if(it.first != axis) {
@@ -42,19 +42,20 @@ config::GamepadAxis::GamepadAxis(int axis, bool inverted)
     m_full_string = std::format("{}:{}", m_name, m_inverted ? 1U : 0U);
 }
 
-const char* config::GamepadAxis::get(void) const
+std::string_view config::GamepadAxis::get(void) const
 {
-    return m_full_string.c_str();
+    return m_full_string;
 }
 
-void config::GamepadAxis::set(const char* value)
+void config::GamepadAxis::set(std::string_view value)
 {
     char new_name[64];
     unsigned int new_invert;
+    std::string value_str(value);
 
-    if(2 == std::sscanf(value, "%63[^:]:%u", new_name, &new_invert)) {
+    if(2 == std::sscanf(value_str.c_str(), "%63[^:]:%u", new_name, &new_invert)) {
         for(const auto& it : axis_names) {
-            if(!std::strcmp(it.second, new_name)) {
+            if(0 == it.second.compare(new_name)) {
                 m_inverted = new_invert;
                 m_gamepad_axis = it.first;
                 m_name = get_axis_name(m_gamepad_axis);
@@ -108,7 +109,7 @@ float config::GamepadAxis::get_value(const GLFWgamepadstate& state, float deadzo
     return 0.0f;
 }
 
-const char* config::GamepadAxis::get_name(void) const
+std::string_view config::GamepadAxis::get_name(void) const
 {
     return m_name;
 }

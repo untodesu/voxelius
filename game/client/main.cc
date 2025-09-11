@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 
     shared_game::init(argc, argv);
 
-    spdlog::info("Voxelius Client {}", project_version_string);
+    spdlog::info("Voxelius Client {}", version::semver);
 
     glfwSetErrorCallback(&on_glfw_error);
 
@@ -312,7 +312,7 @@ int main(int argc, char** argv)
     int vmode_width = DEFAULT_WIDTH;
     int vmode_height = DEFAULT_HEIGHT;
 
-    if(auto vmode = io::cmdline::get("mode")) {
+    if(auto vmode = io::cmdline::get_cstr("mode")) {
         std::sscanf(vmode, "%dx%d", &vmode_width, &vmode_height);
         vmode_height = math::max(vmode_height, MIN_HEIGHT);
         vmode_width = math::max(vmode_width, MIN_WIDTH);

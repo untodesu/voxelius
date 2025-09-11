@@ -5,7 +5,7 @@
 #include "core/io/cmdline.hh"
 #include "core/math/constexpr.hh"
 
-constexpr static const char* DEFAULT_POOL_SIZE_ARG = "4";
+constexpr static std::string_view DEFAULT_POOL_SIZE_ARG = "4";
 
 static BS::light_thread_pool* thread_pool;
 static std::deque<Task*> task_deque;
@@ -38,17 +38,31 @@ void threading::init(void)
     auto num_concurrent_threads = std::thread::hardware_concurrency();
     unsigned int thread_pool_size;
 
-    if(num_concurrent_threads && !std::strcmp(argument, "max")) {
+    if(num_concurrent_threads && 0 == argument.compare("max")) {
         // Use the maximum available number of concurrent
         // hardware threads provided by the implementation
         thread_pool_size = num_concurrent_threads;
     }
     else {
         if(num_concurrent_threads) {
-            thread_pool_size = math::clamp<unsigned int>(std::strtoul(argument, nullptr, 10), 1U, num_concurrent_threads);
+            auto result = std::from_chars(argument.data(), argument.data() + argument.size(), thread_pool_size);
+
+            if(result.ec == std::errc()) {
+                thread_pool_size = math::clamp<unsigned int>(thread_pool_size, 1U, num_concurrent_threads);
+            }
+            else {
+                thread_pool_size = 4U;
+            }
         }
         else {
-            thread_pool_size = math::max<unsigned int>(std::strtoul(argument, nullptr, 10), 1U);
+            auto result = std::from_chars(argument.data(), argument.data() + argument.size(), thread_pool_size);
+
+            if(result.ec == std::errc()) {
+                thread_pool_size = math::max<unsigned int>(thread_pool_size, 1U);
+            }
+            else {
+                thread_pool_size = 4U;
+            }
         }
     }
 

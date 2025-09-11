@@ -15,11 +15,11 @@ struct GL_Uniform final {
 
 class GL_Program final {
 public:
-    bool setup(const char* vpath, const char* fpath);
+    bool setup(std::string_view vpath, std::string_view fpath);
     void destroy(void);
     bool update(void);
 
-    std::size_t add_uniform(const char* name);
+    std::size_t add_uniform(std::string_view name);
     void set_variant_vert(unsigned int variant, unsigned int value);
     void set_variant_frag(unsigned int variant, unsigned int value);
 

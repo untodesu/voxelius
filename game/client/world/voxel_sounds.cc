@@ -9,7 +9,7 @@ constexpr static std::size_t NUM_SURFACES = static_cast<std::size_t>(world::voxe
 static std::vector<resource_ptr<SoundEffect>> footsteps_sounds[NUM_SURFACES];
 static std::mt19937_64 randomizer;
 
-static void add_footsteps_effect(world::voxel_surface surface, const char* name)
+static void add_footsteps_effect(world::voxel_surface surface, std::string_view name)
 {
     if(auto effect = resource::load<SoundEffect>(name)) {
         auto surface_index = static_cast<std::size_t>(surface);

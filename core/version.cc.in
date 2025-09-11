@@ -3,10 +3,10 @@
 #include "core/version.hh"
 
 // clang-format off
-const unsigned long project_version_major = ${PROJECT_VERSION_MAJOR};
-const unsigned long project_version_minor = ${PROJECT_VERSION_MINOR};
-const unsigned long project_version_patch = ${PROJECT_VERSION_PATCH};
-const unsigned long project_version_tweak = ${PROJECT_VERSION_TWEAK};
+const unsigned long version::major = ${PROJECT_VERSION_MAJOR};
+const unsigned long version::minor = ${PROJECT_VERSION_MINOR};
+const unsigned long version::patch = ${PROJECT_VERSION_PATCH};
 // clang-format on
 
-const char* project_version_string = "${PROJECT_VERSION}";
+const std::string_view version::commit = "${GIT_COMMIT_HASH}";
+const std::string_view version::semver = "${PROJECT_VERSION}";

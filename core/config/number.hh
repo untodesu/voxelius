@@ -14,8 +14,8 @@ public:
     explicit Number(T default_value, T min_value, T max_value);
     virtual ~Number(void) = default;
 
-    virtual void set(const char* value) override;
-    virtual const char* get(void) const override;
+    virtual void set(std::string_view value) override;
+    virtual std::string_view get(void) const override;
 
     T get_value(void) const;
     void set_value(T value);
@@ -79,17 +79,21 @@ inline config::Number<T>::Number(T default_value, T min_value, T max_value)
 }
 
 template<math::Arithmetic T>
-inline void config::Number<T>::set(const char* value)
+inline void config::Number<T>::set(std::string_view value)
 {
-    std::istringstream(value) >> m_value;
-    m_value = std::clamp(m_value, m_min_value, m_max_value);
-    m_string = std::to_string(m_value);
+    T parsed_value;
+    auto result = std::from_chars(value.data(), value.data() + value.size(), parsed_value);
+
+    if(result.ec == std::errc()) {
+        m_value = std::clamp(parsed_value, m_min_value, m_max_value);
+        m_string = std::to_string(m_value);
+    }
 }
 
 template<math::Arithmetic T>
-inline const char* config::Number<T>::get(void) const
+inline std::string_view config::Number<T>::get(void) const
 {
-    return m_string.c_str();
+    return m_string;
 }
 
 template<math::Arithmetic T>

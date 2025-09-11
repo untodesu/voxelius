@@ -16,9 +16,9 @@ void reset(void);
 
 namespace gui::message_box
 {
-void set_title(const char* title);
-void set_subtitle(const char* subtitle);
-void add_button(const char* text, const message_box_action& action);
+void set_title(std::string_view title);
+void set_subtitle(std::string_view subtitle);
+void add_button(std::string_view text, const message_box_action& action);
 } // namespace gui::message_box
 
 #endif // CLIENT_MESSAGE_BOX_HH

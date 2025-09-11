@@ -6,9 +6,9 @@
 
 #include "client/io/gamepad.hh"
 
-constexpr static const char* UNKNOWN_BUTTON_NAME = "UNKNOWN";
+constexpr static std::string_view UNKNOWN_BUTTON_NAME = "UNKNOWN";
 
-static const std::pair<int, const char*> button_names[] = {
+static const std::pair<int, std::string_view> button_names[] = {
     { GLFW_GAMEPAD_BUTTON_A, "A" },
     { GLFW_GAMEPAD_BUTTON_B, "B" },
     { GLFW_GAMEPAD_BUTTON_X, "X" },
@@ -26,7 +26,7 @@ static const std::pair<int, const char*> button_names[] = {
     { GLFW_GAMEPAD_BUTTON_DPAD_LEFT, "DPAD_LEFT" },
 };
 
-static const char* get_button_name(int button)
+static std::string_view get_button_name(int button)
 {
     for(const auto& it : button_names) {
         if(it.first == button) {
@@ -49,15 +49,15 @@ config::GamepadButton::GamepadButton(int button)
     m_name = get_button_name(button);
 }
 
-const char* config::GamepadButton::get(void) const
+std::string_view config::GamepadButton::get(void) const
 {
     return m_name;
 }
 
-void config::GamepadButton::set(const char* value)
+void config::GamepadButton::set(std::string_view value)
 {
     for(const auto& it : button_names) {
-        if(!std::strcmp(it.second, value)) {
+        if(0 == it.second.compare(value)) {
             m_gamepad_button = it.first;
             m_name = it.second;
             return;

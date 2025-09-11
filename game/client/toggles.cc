@@ -13,7 +13,7 @@
 #include "client/globals.hh"
 
 struct ToggleInfo final {
-    const char* description;
+    std::string_view description;
     int glfw_keycode;
     bool is_enabled;
 };
@@ -24,7 +24,7 @@ static ToggleInfo toggle_infos[TOGGLE_COUNT];
 
 static void print_toggle_state(const ToggleInfo& info)
 {
-    if(info.description) {
+    if(info.description.size()) {
         if(info.is_enabled) {
             gui::client_chat::print(std::format("[toggles] {} ON", info.description));
         }
@@ -102,7 +102,7 @@ void toggles::init(void)
     toggle_infos[TOGGLE_CHUNK_AABB].glfw_keycode = GLFW_KEY_G;
     toggle_infos[TOGGLE_CHUNK_AABB].is_enabled = false;
 
-    toggle_infos[TOGGLE_METRICS_UI].description = nullptr;
+    toggle_infos[TOGGLE_METRICS_UI].description = std::string_view();
     toggle_infos[TOGGLE_METRICS_UI].glfw_keycode = GLFW_KEY_V;
     toggle_infos[TOGGLE_METRICS_UI].is_enabled = false;
 
@@ -113,10 +113,6 @@ void toggles::init(void)
     toggle_infos[TOGGLE_PM_FLIGHT].description = "flight mode";
     toggle_infos[TOGGLE_PM_FLIGHT].glfw_keycode = GLFW_KEY_F;
     toggle_infos[TOGGLE_PM_FLIGHT].is_enabled = false;
-
-#ifndef NDEBUG
-    toggle_infos[TOGGLE_WIREFRAME].is_enabled = true;
-#endif
 
     globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
 }

@@ -1,3 +1,7 @@
+execute_process(COMMAND git rev-parse --short=8 HEAD
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
 configure_file("${CMAKE_CURRENT_LIST_DIR}/version.cc.in" "${CMAKE_CURRENT_LIST_DIR}/version.cc")
 
 add_library(core STATIC

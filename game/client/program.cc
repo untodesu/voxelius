@@ -6,10 +6,10 @@
 
 // This fills up the array of source lines and figures out
 // which lines are to be dynamically resolved as variant macros
-static void parse_source(const char* source, std::vector<std::string>& out_lines, std::vector<GL_VariedMacro>& out_variants)
+static void parse_source(std::string_view source, std::vector<std::string>& out_lines, std::vector<GL_VariedMacro>& out_variants)
 {
     std::string line;
-    std::istringstream stream = std::istringstream(source);
+    std::istringstream stream = std::istringstream(std::string(source));
     unsigned long line_number = 0UL;
 
     out_lines.clear();
@@ -38,7 +38,7 @@ static void parse_source(const char* source, std::vector<std::string>& out_lines
     }
 }
 
-static GLuint compile_shader(const char* path, const char* source, GLenum shader_stage)
+static GLuint compile_shader(std::string_view path, const char* source, GLenum shader_stage)
 {
     GLuint shader = glCreateShader(shader_stage);
     glShaderSource(shader, 1, &source, nullptr);
@@ -66,14 +66,14 @@ static GLuint compile_shader(const char* path, const char* source, GLenum shader
     return shader;
 }
 
-bool GL_Program::setup(const char* vpath, const char* fpath)
+bool GL_Program::setup(std::string_view vpath, std::string_view fpath)
 {
     destroy();
 
     vert_path = std::string(vpath);
     frag_path = std::string(fpath);
 
-    auto vfile = PHYSFS_openRead(vpath);
+    auto vfile = PHYSFS_openRead(vert_path.c_str());
 
     if(vfile == nullptr) {
         spdlog::warn("gl_program: {}: {}", vpath, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -84,7 +84,7 @@ bool GL_Program::setup(const char* vpath, const char* fpath)
     PHYSFS_readBytes(vfile, vsource.data(), vsource.size());
     PHYSFS_close(vfile);
 
-    auto ffile = PHYSFS_openRead(fpath);
+    auto ffile = PHYSFS_openRead(frag_path.c_str());
 
     if(ffile == nullptr) {
         spdlog::warn("gl_program: {}: {}", fpath, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -188,10 +188,10 @@ void GL_Program::destroy(void)
     needs_update = false;
 }
 
-std::size_t GL_Program::add_uniform(const char* name)
+std::size_t GL_Program::add_uniform(std::string_view name)
 {
     for(std::size_t i = 0; i < uniforms.size(); ++i) {
-        if(!uniforms[i].name.compare(name)) {
+        if(0 == uniforms[i].name.compare(name)) {
             return i;
         }
     }

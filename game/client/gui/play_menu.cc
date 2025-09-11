@@ -19,9 +19,9 @@
 #include "client/session.hh"
 
 constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration;
-constexpr static const char* DEFAULT_SERVER_NAME = "Voxelius Server";
-constexpr static const char* SERVERS_TXT = "servers.txt";
-constexpr static const char* WARNING_TOAST = "[!]";
+constexpr static std::string_view DEFAULT_SERVER_NAME = "Voxelius Server";
+constexpr static std::string_view SERVERS_TXT = "servers.txt";
+constexpr static std::string_view WARNING_TOAST = "[!]";
 
 constexpr static std::size_t MAX_SERVER_ITEM_NAME = 24;
 
@@ -265,10 +265,11 @@ static void layout_server_item(ServerStatusItem* item)
         draw_list->AddText(stats_pos, ImGui::GetColorU32(ImGuiCol_TextDisabled), stats.c_str(), stats.c_str() + stats.size());
 
         if(item->protocol_version != protocol::VERSION) {
-            auto warning_size = ImGui::CalcTextSize(WARNING_TOAST);
+            auto warning_size = ImGui::CalcTextSize(WARNING_TOAST.data(), WARNING_TOAST.data() + WARNING_TOAST.size());
             auto warning_pos = ImVec2(stats_pos.x - warning_size.x - padding.x - 4.0f * globals::gui_scale, cursor.y + padding.y);
             auto warning_end = ImVec2(warning_pos.x + warning_size.x, warning_pos.y + warning_size.y);
-            draw_list->AddText(warning_pos, ImGui::GetColorU32(ImGuiCol_DragDropTarget), WARNING_TOAST);
+            draw_list->AddText(warning_pos, ImGui::GetColorU32(ImGuiCol_DragDropTarget), WARNING_TOAST.data(),
+                WARNING_TOAST.data() + WARNING_TOAST.size());
 
             if(ImGui::IsMouseHoveringRect(warning_pos, warning_end)) {
                 ImGui::BeginTooltip();
@@ -442,7 +443,7 @@ static void layout_servers_buttons(void)
 
 void gui::play_menu::init(void)
 {
-    if(auto file = PHYSFS_openRead(SERVERS_TXT)) {
+    if(auto file = PHYSFS_openRead(std::string(SERVERS_TXT).c_str())) {
         auto source = std::string(PHYSFS_fileLength(file), char(0x00));
         PHYSFS_readBytes(file, source.data(), source.size());
         PHYSFS_close(file);
@@ -496,7 +497,7 @@ void gui::play_menu::shutdown(void)
         stream << std::format("{}:{}%{}%{}", item->hostname, item->port, item->password, item->name) << std::endl;
     }
 
-    if(auto file = PHYSFS_openWrite(SERVERS_TXT)) {
+    if(auto file = PHYSFS_openWrite(std::string(SERVERS_TXT).c_str())) {
         auto source = stream.str();
         PHYSFS_writeBytes(file, source.data(), source.size());
         PHYSFS_close(file);

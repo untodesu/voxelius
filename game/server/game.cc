@@ -69,7 +69,7 @@ void server_game::init(void)
 
 void server_game::init_late(void)
 {
-    server_game::password_hash = math::crc64(password_string.get());
+    server_game::password_hash = math::crc64(password_string.get_value());
 
     sessions::init_late();
 

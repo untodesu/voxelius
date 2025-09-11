@@ -24,9 +24,9 @@ static drwav_bool32 drwav_seek_physfs(void* file, int offset, drwav_seek_origin 
 }
 
 template<>
-resource_ptr<SoundEffect> resource::load<SoundEffect>(const char* name, unsigned int flags)
+resource_ptr<SoundEffect> resource::load<SoundEffect>(std::string_view name, unsigned int flags)
 {
-    auto it = resource_map.find(name);
+    auto it = resource_map.find(std::string(name));
 
     if(it != resource_map.cend()) {
         // Return an existing resource
@@ -38,7 +38,7 @@ resource_ptr<SoundEffect> resource::load<SoundEffect>(const char* name, unsigned
         return nullptr;
     }
 
-    auto file = PHYSFS_openRead(name);
+    auto file = PHYSFS_openRead(std::string(name).c_str());
 
     if(file == nullptr) {
         spdlog::warn("resource: {} [SoundEffect]: {}", name, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -76,7 +76,7 @@ resource_ptr<SoundEffect> resource::load<SoundEffect>(const char* name, unsigned
 
     delete[] samples;
 
-    return resource_map.insert_or_assign(name, new_resource).first->second;
+    return resource_map.insert_or_assign(std::string(name), new_resource).first->second;
 }
 
 template<>

@@ -311,7 +311,7 @@ void SettingValue_InputUnsigned::layout(void) const
 void SettingValue_InputString::layout(void) const
 {
     ImGuiInputTextFlags flags;
-    std::string current_value = value->get();
+    std::string current_value(value->get_value());
 
     if(allow_whitespace) {
         flags = ImGuiInputTextFlags_AllowTabInput;
@@ -321,7 +321,7 @@ void SettingValue_InputString::layout(void) const
     }
 
     if(ImGui::InputText(wid.c_str(), &current_value, flags)) {
-        value->set(current_value.c_str());
+        value->set(current_value);
     }
 
     layout_label();
@@ -847,7 +847,7 @@ void settings::layout(void)
     ImGui::End();
 }
 
-void settings::add_checkbox(int priority, config::Boolean& value, settings_location location, const char* name, bool tooltip)
+void settings::add_checkbox(int priority, config::Boolean& value, settings_location location, std::string_view name, bool tooltip)
 {
     auto setting_value = new SettingValue_CheckBox;
     setting_value->type = setting_type::CHECKBOX;
@@ -862,7 +862,7 @@ void settings::add_checkbox(int priority, config::Boolean& value, settings_locat
     values_all.push_back(setting_value);
 }
 
-void settings::add_input(int priority, config::Int& value, settings_location location, const char* name, bool tooltip)
+void settings::add_input(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip)
 {
     auto setting_value = new SettingValue_InputInt;
     setting_value->type = setting_type::INPUT_INT;
@@ -877,13 +877,15 @@ void settings::add_input(int priority, config::Int& value, settings_location loc
     values_all.push_back(setting_value);
 }
 
-void settings::add_input(int priority, config::Float& value, settings_location location, const char* name, bool tooltip, const char* format)
+void settings::add_input(
+    int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip, std::string_view fmt)
 {
     auto setting_value = new SettingValue_InputFloat;
     setting_value->type = setting_type::INPUT_FLOAT;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
     setting_value->value = &value;
+    setting_value->format = fmt;
     setting_value->name = name;
 
     setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value->value));
@@ -892,7 +894,7 @@ void settings::add_input(int priority, config::Float& value, settings_location l
     values_all.push_back(setting_value);
 }
 
-void settings::add_input(int priority, config::Unsigned& value, settings_location location, const char* name, bool tooltip)
+void settings::add_input(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip)
 {
     auto setting_value = new SettingValue_InputUnsigned;
     setting_value->type = setting_type::INPUT_UINT;
@@ -908,7 +910,7 @@ void settings::add_input(int priority, config::Unsigned& value, settings_locatio
 }
 
 void settings::add_input(
-    int priority, config::String& value, settings_location location, const char* name, bool tooltip, bool allow_whitespace)
+    int priority, config::String& value, settings_location location, std::string_view name, bool tooltip, bool allow_whitespace)
 {
     auto setting_value = new SettingValue_InputString;
     setting_value->type = setting_type::INPUT_STRING;
@@ -924,7 +926,7 @@ void settings::add_input(
     values_all.push_back(setting_value);
 }
 
-void settings::add_slider(int priority, config::Int& value, settings_location location, const char* name, bool tooltip)
+void settings::add_slider(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip)
 {
     auto setting_value = new SettingValue_SliderInt;
     setting_value->type = setting_type::SLIDER_INT;
@@ -940,7 +942,7 @@ void settings::add_slider(int priority, config::Int& value, settings_location lo
 }
 
 void settings::add_slider(
-    int priority, config::Float& value, settings_location location, const char* name, bool tooltip, const char* format)
+    int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip, std::string_view fmt)
 {
     auto setting_value = new SettingValue_SliderFloat;
     setting_value->type = setting_type::SLIDER_FLOAT;
@@ -949,14 +951,14 @@ void settings::add_slider(
     setting_value->value = &value;
     setting_value->name = name;
 
-    setting_value->format = format;
+    setting_value->format = fmt;
     setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value->value));
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
-void settings::add_slider(int priority, config::Unsigned& value, settings_location location, const char* name, bool tooltip)
+void settings::add_slider(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip)
 {
     auto setting_value = new SettingValue_SliderUnsigned;
     setting_value->type = setting_type::SLIDER_UINT;
@@ -971,7 +973,7 @@ void settings::add_slider(int priority, config::Unsigned& value, settings_locati
     values_all.push_back(setting_value);
 }
 
-void settings::add_stepper(int priority, config::Int& value, settings_location location, const char* name, bool tooltip)
+void settings::add_stepper(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip)
 {
     auto setting_value = new SettingValue_StepperInt;
     setting_value->type = setting_type::STEPPER_INT;
@@ -987,7 +989,7 @@ void settings::add_stepper(int priority, config::Int& value, settings_location l
     values_all.push_back(setting_value);
 }
 
-void settings::add_stepper(int priority, config::Unsigned& value, settings_location location, const char* name, bool tooltip)
+void settings::add_stepper(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip)
 {
     auto setting_value = new SettingValue_StepperUnsigned;
     setting_value->type = setting_type::STEPPER_UINT;
@@ -1003,7 +1005,7 @@ void settings::add_stepper(int priority, config::Unsigned& value, settings_locat
     values_all.push_back(setting_value);
 }
 
-void settings::add_keybind(int priority, config::KeyBind& value, settings_location location, const char* name)
+void settings::add_keybind(int priority, config::KeyBind& value, settings_location location, std::string_view name)
 {
     auto setting_value = new SettingValue_KeyBind;
     setting_value->type = setting_type::KEYBIND;
@@ -1018,7 +1020,7 @@ void settings::add_keybind(int priority, config::KeyBind& value, settings_locati
     values_all.push_back(setting_value);
 }
 
-void settings::add_gamepad_axis(int priority, config::GamepadAxis& value, settings_location location, const char* name)
+void settings::add_gamepad_axis(int priority, config::GamepadAxis& value, settings_location location, std::string_view name)
 {
     auto setting_value = new SettingValue_GamepadAxis;
     setting_value->type = setting_type::GAMEPAD_AXIS;
@@ -1033,7 +1035,7 @@ void settings::add_gamepad_axis(int priority, config::GamepadAxis& value, settin
     values_all.push_back(setting_value);
 }
 
-void settings::add_gamepad_button(int priority, config::GamepadButton& value, settings_location location, const char* name)
+void settings::add_gamepad_button(int priority, config::GamepadButton& value, settings_location location, std::string_view name)
 {
     auto setting_value = new SettingValue_GamepadButton;
     setting_value->type = setting_type::GAMEPAD_BUTTON;
@@ -1048,7 +1050,7 @@ void settings::add_gamepad_button(int priority, config::GamepadButton& value, se
     values_all.push_back(setting_value);
 }
 
-void settings::add_language_select(int priority, settings_location location, const char* name)
+void settings::add_language_select(int priority, settings_location location, std::string_view name)
 {
     auto setting_value = new SettingValue_Language;
     setting_value->type = setting_type::LANGUAGE_SELECT;

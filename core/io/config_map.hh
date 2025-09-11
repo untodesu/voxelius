@@ -15,15 +15,15 @@ public:
     virtual ~ConfigMap(void) = default;
 
     void load_cmdline(void);
-    bool load_file(const char* path);
-    bool save_file(const char* path) const;
+    bool load_file(std::string_view path);
+    bool save_file(std::string_view path) const;
 
-    bool set_value(const char* name, const char* value);
-    const char* get_value(const char* name) const;
+    bool set_value(std::string_view name, std::string_view value);
+    std::string_view get_value(std::string_view name) const;
 
-    void add_value(const char* name, config::IValue& vref);
+    void add_value(std::string_view name, config::IValue& vref);
 
-    const config::IValue* find(const char* name) const;
+    const config::IValue* find(std::string_view name) const;
 
 private:
     std::unordered_map<std::string, config::IValue*> m_values;

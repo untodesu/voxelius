@@ -18,8 +18,8 @@ void invalidate(void);
 
 namespace session
 {
-void connect(const char* hostname, std::uint16_t port, const char* password);
-void disconnect(const char* reason);
+void connect(std::string_view hostname, std::uint16_t port, std::string_view password);
+void disconnect(std::string_view reason);
 void send_login_request(void);
 } // namespace session
 

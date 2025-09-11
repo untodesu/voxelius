@@ -25,7 +25,7 @@ namespace world
 {
 class Overworld final : public Dimension {
 public:
-    explicit Overworld(const char* name);
+    explicit Overworld(std::string_view name);
     virtual ~Overworld(void) = default;
 
 public:

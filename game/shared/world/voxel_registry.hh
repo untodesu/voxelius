@@ -108,12 +108,12 @@ namespace world
 {
 class VoxelInfoBuilder final {
 public:
-    explicit VoxelInfoBuilder(const char* name, voxel_type type, bool animated, bool blending);
+    explicit VoxelInfoBuilder(std::string_view name, voxel_type type, bool animated, bool blending);
     virtual ~VoxelInfoBuilder(void) = default;
 
 public:
-    VoxelInfoBuilder& add_texture_default(const char* texture);
-    VoxelInfoBuilder& add_texture(voxel_face face, const char* texture);
+    VoxelInfoBuilder& add_texture_default(std::string_view texture);
+    VoxelInfoBuilder& add_texture(voxel_face face, std::string_view texture);
     VoxelInfoBuilder& set_touch(voxel_touch type, const glm::fvec3& values);
     VoxelInfoBuilder& set_surface(voxel_surface surface);
 
@@ -135,8 +135,8 @@ extern std::vector<std::shared_ptr<VoxelInfo>> voxels;
 
 namespace world::voxel_registry
 {
-VoxelInfoBuilder& construct(const char* name, voxel_type type, bool animated, bool blending);
-VoxelInfo* find(const char* name);
+VoxelInfoBuilder& construct(std::string_view name, voxel_type type, bool animated, bool blending);
+VoxelInfo* find(std::string_view name);
 VoxelInfo* find(const voxel_id voxel);
 } // namespace world::voxel_registry
 
@@ -147,7 +147,7 @@ void purge(void);
 
 namespace world::voxel_registry
 {
-std::uint64_t calcualte_checksum(void);
+std::uint64_t calculate_checksum(void);
 } // namespace world::voxel_registry
 
 #endif // SHARED_VOXEL_REGISTRY_HH

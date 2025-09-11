@@ -10,7 +10,7 @@ std::unordered_map<std::string, world::ItemInfoBuilder> world::item_registry::bu
 std::unordered_map<std::string, item_id> world::item_registry::names = {};
 std::vector<std::shared_ptr<world::ItemInfo>> world::item_registry::items = {};
 
-world::ItemInfoBuilder::ItemInfoBuilder(const char* name)
+world::ItemInfoBuilder::ItemInfoBuilder(std::string_view name)
 {
     prototype.name = name;
     prototype.texture = std::string();
@@ -18,7 +18,7 @@ world::ItemInfoBuilder::ItemInfoBuilder(const char* name)
     prototype.cached_texture = nullptr;
 }
 
-world::ItemInfoBuilder& world::ItemInfoBuilder::set_texture(const char* texture)
+world::ItemInfoBuilder& world::ItemInfoBuilder::set_texture(std::string_view texture)
 {
     prototype.texture = texture;
     prototype.cached_texture = nullptr;
@@ -52,21 +52,21 @@ item_id world::ItemInfoBuilder::build(void) const
     return static_cast<item_id>(world::item_registry::items.size());
 }
 
-world::ItemInfoBuilder& world::item_registry::construct(const char* name)
+world::ItemInfoBuilder& world::item_registry::construct(std::string_view name)
 {
-    const auto it = world::item_registry::builders.find(name);
+    const auto it = world::item_registry::builders.find(std::string(name));
 
     if(it != world::item_registry::builders.cend()) {
         return it->second;
     }
     else {
-        return world::item_registry::builders.emplace(name, ItemInfoBuilder(name)).first->second;
+        return world::item_registry::builders.emplace(std::string(name), ItemInfoBuilder(name)).first->second;
     }
 }
 
-world::ItemInfo* world::item_registry::find(const char* name)
+world::ItemInfo* world::item_registry::find(std::string_view name)
 {
-    const auto it = world::item_registry::names.find(name);
+    const auto it = world::item_registry::names.find(std::string(name));
 
     if(it != world::item_registry::names.cend()) {
         return world::item_registry::find(it->second);
@@ -93,7 +93,7 @@ void world::item_registry::purge(void)
     world::item_registry::items.clear();
 }
 
-std::uint64_t world::item_registry::calcualte_checksum(void)
+std::uint64_t world::item_registry::calculate_checksum(void)
 {
     std::uint64_t result = 0;
 

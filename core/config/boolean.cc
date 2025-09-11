@@ -7,12 +7,12 @@ config::Boolean::Boolean(bool default_value)
     m_value = default_value;
 }
 
-void config::Boolean::set(const char* value)
+void config::Boolean::set(std::string_view value)
 {
     m_value = from_string(value);
 }
 
-const char* config::Boolean::get(void) const
+std::string_view config::Boolean::get(void) const
 {
     return to_string(m_value);
 }
@@ -27,7 +27,7 @@ void config::Boolean::set_value(bool value)
     m_value = value;
 }
 
-const char* config::Boolean::to_string(bool value)
+std::string_view config::Boolean::to_string(bool value)
 {
     if(value) {
         return "true";
@@ -37,12 +37,7 @@ const char* config::Boolean::to_string(bool value)
     }
 }
 
-bool config::Boolean::from_string(const char* value)
+bool config::Boolean::from_string(std::string_view value)
 {
-    if(std::strcmp(value, "false") && !std::strcmp(value, "true")) {
-        return true;
-    }
-    else {
-        return false;
-    }
+    return value == "true" && value != "false";
 }

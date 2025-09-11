@@ -41,7 +41,7 @@ static std::string make_chunk_filename(const DimensionMetadata* metadata, const 
 
 static void add_new_dimension(world::Dimension* dimension)
 {
-    if(globals::dimensions.count(dimension->get_name())) {
+    if(globals::dimensions.count(std::string(dimension->get_name()))) {
         spdlog::critical("universe: dimension named {} already exists", dimension->get_name());
         std::terminate();
     }
@@ -62,7 +62,7 @@ static void add_new_dimension(world::Dimension* dimension)
         std::terminate();
     }
 
-    globals::dimensions.insert_or_assign(dimension->get_name(), dimension);
+    globals::dimensions.insert_or_assign(std::string(dimension->get_name()), dimension);
 
     auto& mapped_metadata = metadata_map.insert_or_assign(dimension, metadata).first->second;
 
@@ -122,7 +122,7 @@ void world::universe::init_late(void)
         std::terminate();
     }
 
-    auto spawn_dimension = globals::dimensions.find(universe_spawn_dimension.get());
+    auto spawn_dimension = globals::dimensions.find(universe_spawn_dimension.get_value());
 
     if(spawn_dimension == globals::dimensions.cend()) {
         spdlog::critical("universe: {} is not a valid dimension name", universe_spawn_dimension.get());

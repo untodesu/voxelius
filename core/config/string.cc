@@ -2,17 +2,17 @@
 
 #include "core/config/string.hh"
 
-config::String::String(const char* default_value)
+config::String::String(std::string_view default_value)
 {
     m_value = default_value;
 }
 
-void config::String::set(const char* value)
+void config::String::set(std::string_view value)
 {
     m_value = value;
 }
 
-const char* config::String::get(void) const
+std::string_view config::String::get(void) const
 {
-    return m_value.c_str();
+    return m_value;
 }

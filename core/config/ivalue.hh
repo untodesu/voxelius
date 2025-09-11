@@ -7,8 +7,8 @@ namespace config
 class IValue {
 public:
     virtual ~IValue(void) = default;
-    virtual void set(const char* value) = 0;
-    virtual const char* get(void) const = 0;
+    virtual void set(std::string_view value) = 0;
+    virtual std::string_view get(void) const = 0;
 };
 } // namespace config
 

@@ -70,7 +70,7 @@ static void compute_tree_feature(unsigned int height, world::Feature& feature, v
     }
 }
 
-world::Overworld::Overworld(const char* name) : Dimension(name, -30.0f)
+world::Overworld::Overworld(std::string_view name) : Dimension(name, -30.0f)
 {
     m_bottommost_chunk.set_limits(-64, -4);
     m_terrain_variation.set_limits(16, 256);

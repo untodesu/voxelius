@@ -50,7 +50,7 @@ void gui::metrics::layout(void)
     auto y_step = 1.5f * globals::font_debug->FontSize;
 
     // Draw version
-    auto version_line = std::format("Voxelius {}", project_version_string);
+    auto version_line = std::format("Voxelius {} [{}]", version::semver, version::commit);
     gui::imdraw_ext::text_shadow(version_line, position, text_color, shadow_color, globals::font_debug, draw_list);
     position.y += 1.5f * y_step;
 

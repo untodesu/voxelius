@@ -32,15 +32,15 @@ void set(LanguageIterator new_language);
 namespace gui::language
 {
 LanguageIterator get_current(void);
-LanguageIterator find(const char* ietf);
+LanguageIterator find(std::string_view ietf);
 LanguageIterator cbegin(void);
 LanguageIterator cend(void);
 } // namespace gui::language
 
 namespace gui::language
 {
-const char* resolve(const char* key);
-std::string resolve_gui(const char* key);
+std::string_view resolve(std::string_view key);
+std::string resolve_gui(std::string_view key);
 } // namespace gui::language
 
 #endif // CLIENT_LANGUAGE_HH

@@ -99,12 +99,12 @@ void gui::progress_bar::reset(void)
     button_action = nullptr;
 }
 
-void gui::progress_bar::set_title(const char* title)
+void gui::progress_bar::set_title(std::string_view title)
 {
     str_title = gui::language::resolve(title);
 }
 
-void gui::progress_bar::set_button(const char* text, const progress_bar_action& action)
+void gui::progress_bar::set_button(std::string_view text, const progress_bar_action& action)
 {
     str_button = std::format("{}###ProgressBar_Button", gui::language::resolve(text));
     button_action = action;

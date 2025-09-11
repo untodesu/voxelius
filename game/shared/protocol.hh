@@ -90,8 +90,8 @@ void decode(entt::dispatcher& dispatcher, const ENetPacket* packet, ENetPeer* pe
 
 namespace protocol::utils
 {
-ENetPacket* make_disconnect(const char* reason, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket* make_chat_message(const char* message, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_disconnect(std::string_view reason, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_chat_message(std::string_view message, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
 } // namespace protocol::utils
 
 namespace protocol::utils

@@ -188,10 +188,10 @@ void session::invalidate(void)
     globals::dimension = nullptr;
 }
 
-void session::connect(const char* host, std::uint16_t port, const char* password)
+void session::connect(std::string_view host, std::uint16_t port, std::string_view password)
 {
     ENetAddress address;
-    enet_address_set_host(&address, host);
+    enet_address_set_host(&address, std::string(host).c_str());
     address.port = port;
 
     session::peer = enet_host_connect(globals::client_host, &address, 1, 0);
@@ -202,7 +202,7 @@ void session::connect(const char* host, std::uint16_t port, const char* password
     globals::fixed_frametime = 0.0f;
     globals::fixed_accumulator = 0;
 
-    server_password_hash = math::crc64(password);
+    server_password_hash = math::crc64(password.data(), password.size());
 
     if(!session::peer) {
         server_password_hash = UINT64_MAX;
@@ -245,7 +245,7 @@ void session::connect(const char* host, std::uint16_t port, const char* password
     globals::gui_screen = GUI_PROGRESS_BAR;
 }
 
-void session::disconnect(const char* reason)
+void session::disconnect(std::string_view reason)
 {
     if(session::peer) {
         protocol::Disconnect packet;
@@ -279,8 +279,8 @@ void session::send_login_request(void)
 {
     protocol::LoginRequest packet;
     packet.version = protocol::VERSION;
-    packet.voxel_registry_checksum = world::voxel_registry::calcualte_checksum();
-    packet.item_registry_checksum = world::item_registry::calcualte_checksum();
+    packet.voxel_registry_checksum = world::voxel_registry::calculate_checksum();
+    packet.item_registry_checksum = world::item_registry::calculate_checksum();
     packet.password_hash = server_password_hash;
     packet.username = client_game::username.get();
 

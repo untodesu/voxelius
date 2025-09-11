@@ -8,9 +8,9 @@
 static emhash8::HashMap<std::string, resource_ptr<TextureGUI>> resource_map;
 
 template<>
-resource_ptr<TextureGUI> resource::load<TextureGUI>(const char* name, unsigned int flags)
+resource_ptr<TextureGUI> resource::load<TextureGUI>(std::string_view name, unsigned int flags)
 {
-    auto it = resource_map.find(name);
+    auto it = resource_map.find(std::string(name));
 
     if(it != resource_map.cend()) {
         // Return an existing resource
@@ -67,7 +67,7 @@ resource_ptr<TextureGUI> resource::load<TextureGUI>(const char* name, unsigned i
         new_resource->size.x = image->size.x;
         new_resource->size.y = image->size.y;
 
-        return resource_map.insert_or_assign(name, new_resource).first->second;
+        return resource_map.insert_or_assign(std::string(name), new_resource).first->second;
     }
 
     return nullptr;

@@ -26,11 +26,11 @@ namespace world
 {
 class ItemInfoBuilder final {
 public:
-    explicit ItemInfoBuilder(const char* name);
+    explicit ItemInfoBuilder(std::string_view name);
     virtual ~ItemInfoBuilder(void) = default;
 
 public:
-    ItemInfoBuilder& set_texture(const char* texture);
+    ItemInfoBuilder& set_texture(std::string_view texture);
     ItemInfoBuilder& set_place_voxel(voxel_id place_voxel);
 
 public:
@@ -50,8 +50,8 @@ extern std::vector<std::shared_ptr<ItemInfo>> items;
 
 namespace world::item_registry
 {
-ItemInfoBuilder& construct(const char* name);
-ItemInfo* find(const char* name);
+ItemInfoBuilder& construct(std::string_view name);
+ItemInfo* find(std::string_view name);
 ItemInfo* find(const item_id item);
 } // namespace world::item_registry
 
@@ -62,7 +62,7 @@ void purge(void);
 
 namespace world::item_registry
 {
-std::uint64_t calcualte_checksum(void);
+std::uint64_t calculate_checksum(void);
 } // namespace world::item_registry
 
 #endif // SHARED_ITEM_REGISTRY_HH

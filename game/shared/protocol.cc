@@ -424,18 +424,18 @@ void protocol::decode(entt::dispatcher& dispatcher, const ENetPacket* packet, EN
     }
 }
 
-ENetPacket* protocol::utils::make_disconnect(const char* reason, enet_uint32 flags)
+ENetPacket* protocol::utils::make_disconnect(std::string_view reason, enet_uint32 flags)
 {
     protocol::Disconnect packet;
-    packet.reason = std::string(reason);
+    packet.reason = reason;
     return protocol::encode(packet, flags);
 }
 
-ENetPacket* protocol::utils::make_chat_message(const char* message, enet_uint32 flags)
+ENetPacket* protocol::utils::make_chat_message(std::string_view message, enet_uint32 flags)
 {
     protocol::ChatMessage packet;
     packet.type = protocol::ChatMessage::TEXT_MESSAGE;
-    packet.message = std::string(message);
+    packet.message = message;
     return protocol::encode(packet, flags);
 }
 

@@ -6,7 +6,7 @@
 
 static std::filesystem::path get_gamepath(void)
 {
-    if(auto gamepath = io::cmdline::get("gamepath")) {
+    if(auto gamepath = io::cmdline::get_cstr("gamepath")) {
         // Allow users and third-party launchers to override
         // content location. Perhaps this would work to allow
         // for a Minecraft-like versioning approach?
@@ -18,7 +18,7 @@ static std::filesystem::path get_gamepath(void)
 
 static std::filesystem::path get_userpath(void)
 {
-    if(auto userpath = io::cmdline::get("userpath")) {
+    if(auto userpath = io::cmdline::get_cstr("userpath")) {
         // Allow users and third-party launchers to override
         // user data location. Perhaps this would work to allow
         // for a Minecraft-like versioning approach?

@@ -30,10 +30,10 @@ void update(void);
 
 namespace sound
 {
-void play_generic(const char* sound, bool looping, float pitch);
-void play_entity(entt::entity entity, const char* sound, bool looping, float pitch);
-void play_player(const char* sound, bool looping, float pitch);
-void play_ui(const char* sound, bool looping, float pitch);
+void play_generic(std::string_view sound, bool looping, float pitch);
+void play_entity(entt::entity entity, std::string_view sound, bool looping, float pitch);
+void play_player(std::string_view sound, bool looping, float pitch);
+void play_ui(std::string_view sound, bool looping, float pitch);
 } // namespace sound
 
 namespace sound

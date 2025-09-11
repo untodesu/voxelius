@@ -75,17 +75,17 @@ void gui::message_box::reset(void)
     buttons.clear();
 }
 
-void gui::message_box::set_title(const char* title)
+void gui::message_box::set_title(std::string_view title)
 {
     str_title = gui::language::resolve(title);
 }
 
-void gui::message_box::set_subtitle(const char* subtitle)
+void gui::message_box::set_subtitle(std::string_view subtitle)
 {
     str_subtitle = gui::language::resolve(subtitle);
 }
 
-void gui::message_box::add_button(const char* text, const message_box_action& action)
+void gui::message_box::add_button(std::string_view text, const message_box_action& action)
 {
     Button button = {};
     button.str_title = std::format("{}###MessageBox_Button{}", gui::language::resolve(text), buttons.size());
