@@ -17,9 +17,6 @@ public:
     constexpr void set_bounds(const vector_type& start, const vector_type& end);
     constexpr void set_offset(const vector_type& base, const vector_type& size);
 
-    constexpr const vector_type& get_min(void) const;
-    constexpr const vector_type& get_max(void) const;
-
     constexpr bool contains(const vector_type& point) const;
     constexpr bool intersect(const AABB<value_type>& other_box) const;
 
@@ -56,18 +53,6 @@ constexpr void math::AABB<T>::set_offset(const vector_type& base, const vector_t
 {
     min = base;
     max = base + size;
-}
-
-template<math::Arithmetic T>
-constexpr const typename math::AABB<T>::vector_type& math::AABB<T>::get_min(void) const
-{
-    return min;
-}
-
-template<math::Arithmetic T>
-constexpr const typename math::AABB<T>::vector_type& math::AABB<T>::get_max(void) const
-{
-    return max;
 }
 
 template<math::Arithmetic T>
