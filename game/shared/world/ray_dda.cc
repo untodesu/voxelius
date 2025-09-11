@@ -71,7 +71,7 @@ void world::RayDDA::reset(const world::Dimension& dimension, const chunk_pos& st
     reset(&dimension, start_chunk, start_fpos, direction);
 }
 
-voxel_id world::RayDDA::step(void)
+const world::Voxel* world::RayDDA::step(void)
 {
     if(side_dist.x < side_dist.z) {
         if(side_dist.x < side_dist.y) {

@@ -7,6 +7,7 @@
 namespace world
 {
 class Dimension;
+class Voxel;
 } // namespace world
 
 namespace world
@@ -20,7 +21,7 @@ public:
     void reset(const Dimension* dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction);
     void reset(const Dimension& dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction);
 
-    voxel_id step(void);
+    const Voxel* step(void);
 
 public:
     const Dimension* dimension;

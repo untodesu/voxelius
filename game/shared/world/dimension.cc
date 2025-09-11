@@ -3,6 +3,7 @@
 #include "shared/world/dimension.hh"
 
 #include "shared/world/chunk.hh"
+#include "shared/world/voxel_registry.hh"
 
 #include "shared/coord.hh"
 #include "shared/globals.hh"
@@ -107,7 +108,7 @@ void world::Dimension::remove_chunk(Chunk* chunk)
     }
 }
 
-voxel_id world::Dimension::get_voxel(const voxel_pos& vpos) const
+const world::Voxel* world::Dimension::get_voxel(const voxel_pos& vpos) const
 {
     auto cpos = coord::to_chunk(vpos);
     auto lpos = coord::to_local(vpos);
@@ -115,12 +116,11 @@ voxel_id world::Dimension::get_voxel(const voxel_pos& vpos) const
     if(auto chunk = find_chunk(cpos)) {
         return chunk->get_voxel(lpos);
     }
-    else {
-        return NULL_VOXEL_ID;
-    }
+
+    return nullptr;
 }
 
-voxel_id world::Dimension::get_voxel(const chunk_pos& cpos, const local_pos& lpos) const
+const world::Voxel* world::Dimension::get_voxel(const chunk_pos& cpos, const local_pos& lpos) const
 {
     // This allows accessing get_voxel with negative
     // local coordinates that usually would result in an
@@ -128,19 +128,33 @@ voxel_id world::Dimension::get_voxel(const chunk_pos& cpos, const local_pos& lpo
     return get_voxel(coord::to_voxel(cpos, lpos));
 }
 
-bool world::Dimension::set_voxel(voxel_id voxel, const voxel_pos& vpos)
+bool world::Dimension::set_voxel(const Voxel* voxel, const voxel_pos& vpos)
 {
     auto cpos = coord::to_chunk(vpos);
     auto lpos = coord::to_local(vpos);
 
     if(auto chunk = find_chunk(cpos)) {
+        if(auto old_voxel = chunk->get_voxel(lpos)) {
+            if(old_voxel != voxel) {
+                // Notify the old voxel that it is
+                // being replaced with a different voxel
+                old_voxel->on_remove(this, vpos);
+            }
+        }
+
         chunk->set_voxel(voxel, lpos);
+
+        if(voxel) {
+            // If we're not placing air, notify the
+            // new voxel that it has been placed
+            voxel->on_place(this, vpos);
+        }
 
         VoxelSetEvent event;
         event.dimension = this;
+        event.voxel = voxel;
         event.cpos = cpos;
         event.lpos = lpos;
-        event.voxel = voxel;
         event.chunk = chunk;
 
         globals::dispatcher.trigger(event);
@@ -151,7 +165,7 @@ bool world::Dimension::set_voxel(voxel_id voxel, const voxel_pos& vpos)
     return false;
 }
 
-bool world::Dimension::set_voxel(voxel_id voxel, const chunk_pos& cpos, const local_pos& lpos)
+bool world::Dimension::set_voxel(const Voxel* voxel, const chunk_pos& cpos, const local_pos& lpos)
 {
     // This allows accessing set_voxel with negative
     // local coordinates that usually would result in an

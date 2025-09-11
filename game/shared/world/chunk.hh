@@ -9,6 +9,7 @@ constexpr static unsigned int BIOME_VOID = 0U;
 namespace world
 {
 class Dimension;
+class Voxel;
 } // namespace world
 
 namespace world
@@ -18,11 +19,11 @@ public:
     explicit Chunk(entt::entity entity, Dimension* dimension);
     virtual ~Chunk(void) = default;
 
-    voxel_id get_voxel(const local_pos& lpos) const;
-    voxel_id get_voxel(const std::size_t index) const;
+    const Voxel* get_voxel(const local_pos& lpos) const;
+    const Voxel* get_voxel(const std::size_t index) const;
 
-    void set_voxel(voxel_id voxel, const local_pos& lpos);
-    void set_voxel(voxel_id voxel, const std::size_t index);
+    void set_voxel(const Voxel* voxel, const local_pos& lpos);
+    void set_voxel(const Voxel* voxel, const std::size_t index);
 
     const VoxelStorage& get_voxels(void) const;
     void set_voxels(const VoxelStorage& voxels);

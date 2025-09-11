@@ -4,7 +4,6 @@
 
 #include "shared/world/chunk.hh"
 #include "shared/world/dimension.hh"
-#include "shared/world/voxel_storage.hh"
 
 #include "shared/coord.hh"
 
@@ -30,7 +29,7 @@ void world::Feature::place(const voxel_pos& vpos, Dimension* dimension) const
     }
 }
 
-void world::Feature::place(const voxel_pos& vpos, const chunk_pos& cpos, VoxelStorage& voxels) const
+void world::Feature::place(const voxel_pos& vpos, const chunk_pos& cpos, Chunk& chunk) const
 {
     for(const auto [rpos, voxel, overwrite] : (*this)) {
         auto it_vpos = vpos + rpos;
@@ -40,14 +39,14 @@ void world::Feature::place(const voxel_pos& vpos, const chunk_pos& cpos, VoxelSt
             auto it_lpos = coord::to_local(it_vpos);
             auto it_index = coord::to_index(it_lpos);
 
-            if(voxels[it_index] && !overwrite) {
+            if(chunk.get_voxel(it_index) && !overwrite) {
                 // There is something in the way
                 // and the called intentionally requested
                 // we do not force feature to overwrite voxels
                 continue;
             }
 
-            voxels[it_index] = voxel;
+            chunk.set_voxel(voxel, it_index);
         }
     }
 }

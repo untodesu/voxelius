@@ -2,6 +2,8 @@
 
 #include "shared/world/chunk.hh"
 
+#include "shared/world/voxel_registry.hh"
+
 #include "shared/coord.hh"
 
 world::Chunk::Chunk(entt::entity entity, Dimension* dimension)
@@ -12,30 +14,35 @@ world::Chunk::Chunk(entt::entity entity, Dimension* dimension)
     m_biome = BIOME_VOID;
 }
 
-voxel_id world::Chunk::get_voxel(const local_pos& lpos) const
+const world::Voxel* world::Chunk::get_voxel(const local_pos& lpos) const
 {
     return get_voxel(coord::to_index(lpos));
 }
 
-voxel_id world::Chunk::get_voxel(const std::size_t index) const
+const world::Voxel* world::Chunk::get_voxel(const std::size_t index) const
 {
     if(index >= CHUNK_VOLUME) {
-        return NULL_VOXEL_ID;
+        return nullptr;
     }
-    else {
-        return m_voxels[index];
-    }
+
+    return voxel_registry::find(m_voxels[index]);
 }
 
-void world::Chunk::set_voxel(voxel_id voxel, const local_pos& lpos)
+void world::Chunk::set_voxel(const Voxel* voxel, const local_pos& lpos)
 {
     set_voxel(voxel, coord::to_index(lpos));
 }
 
-void world::Chunk::set_voxel(voxel_id voxel, const std::size_t index)
+void world::Chunk::set_voxel(const Voxel* voxel, const std::size_t index)
 {
     if(index < CHUNK_VOLUME) {
-        m_voxels[index] = voxel;
+        if(voxel == nullptr) {
+            m_voxels[index] = NULL_VOXEL_ID;
+            return;
+        }
+
+        m_voxels[index] = voxel->get_id();
+        return;
     }
 }
 
