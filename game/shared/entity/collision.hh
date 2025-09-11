@@ -10,7 +10,7 @@ class Dimension;
 namespace entity
 {
 struct Collision final {
-    math::AABB aabb;
+    math::AABBf aabb;
 
 public:
     // NOTE: entity::Collision::fixed_update must be called

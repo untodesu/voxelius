@@ -24,7 +24,7 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
     const auto& ref_aabb = collision.aabb;
     const auto current_aabb = ref_aabb.push(transform.local);
 
-    auto next_aabb = math::AABB(current_aabb);
+    auto next_aabb = math::AABBf(current_aabb);
     next_aabb.min[d] += move;
     next_aabb.max[d] += move;
 
@@ -60,7 +60,7 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
     world::voxel_touch latch_touch = world::voxel_touch::NOTHING;
     glm::fvec3 latch_values = glm::fvec3(0.0f, 0.0f, 0.0f);
     world::voxel_surface latch_surface = world::voxel_surface::UNKNOWN;
-    math::AABB latch_vbox;
+    math::AABBf latch_vbox;
 
     for(auto i = dmin; i != dmax; i += ddir) {
         for(auto j = lpos_min[u]; j < lpos_max[u]; ++j)
@@ -79,7 +79,7 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
                     continue;
                 }
 
-                math::AABB vbox;
+                math::AABBf vbox;
                 vbox.min = glm::fvec3(lpos);
                 vbox.max = glm::fvec3(lpos) + 1.0f;
 

@@ -1,8 +1,7 @@
 target_sources(shared PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/chunk_aabb.hh"
     "${CMAKE_CURRENT_LIST_DIR}/chunk.cc"
     "${CMAKE_CURRENT_LIST_DIR}/chunk.hh"
-    "${CMAKE_CURRENT_LIST_DIR}/chunk_aabb.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/chunk_aabb.hh"
     "${CMAKE_CURRENT_LIST_DIR}/dimension.cc"
     "${CMAKE_CURRENT_LIST_DIR}/dimension.hh"
     "${CMAKE_CURRENT_LIST_DIR}/feature.cc"
