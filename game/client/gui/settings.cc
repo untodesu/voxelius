@@ -881,8 +881,8 @@ void settings::add_input(int priority, config::Int& value, settings_location loc
     values_all.push_back(setting_value);
 }
 
-void settings::add_input(
-    int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip, std::string_view fmt)
+void settings::add_input(int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip,
+    std::string_view fmt)
 {
     auto setting_value = new SettingValue_InputFloat;
     setting_value->type = setting_type::INPUT_FLOAT;
@@ -913,8 +913,8 @@ void settings::add_input(int priority, config::Unsigned& value, settings_locatio
     values_all.push_back(setting_value);
 }
 
-void settings::add_input(
-    int priority, config::String& value, settings_location location, std::string_view name, bool tooltip, bool allow_whitespace)
+void settings::add_input(int priority, config::String& value, settings_location location, std::string_view name, bool tooltip,
+    bool allow_whitespace)
 {
     auto setting_value = new SettingValue_InputString;
     setting_value->type = setting_type::INPUT_STRING;
@@ -945,8 +945,8 @@ void settings::add_slider(int priority, config::Int& value, settings_location lo
     values_all.push_back(setting_value);
 }
 
-void settings::add_slider(
-    int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip, std::string_view fmt)
+void settings::add_slider(int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip,
+    std::string_view fmt)
 {
     auto setting_value = new SettingValue_SliderFloat;
     setting_value->type = setting_type::SLIDER_FLOAT;

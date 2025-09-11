@@ -27,7 +27,7 @@ void world::voxel_anims::update(void)
 {
     if(globals::curtime >= world::voxel_anims::nextframe) {
         world::voxel_anims::nextframe = globals::curtime
-                + static_cast<std::uint64_t>(1000000.0 / static_cast<float>(base_framerate.get_value()));
+            + static_cast<std::uint64_t>(1000000.0 / static_cast<float>(base_framerate.get_value()));
         world::voxel_anims::frame += 1U;
     }
 }

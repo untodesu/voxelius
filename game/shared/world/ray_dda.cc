@@ -6,20 +6,20 @@
 
 #include "shared/coord.hh"
 
-world::RayDDA::RayDDA(
-    const world::Dimension* dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction)
+world::RayDDA::RayDDA(const world::Dimension* dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos,
+    const glm::fvec3& direction)
 {
     reset(dimension, start_chunk, start_fpos, direction);
 }
 
-world::RayDDA::RayDDA(
-    const world::Dimension& dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction)
+world::RayDDA::RayDDA(const world::Dimension& dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos,
+    const glm::fvec3& direction)
 {
     reset(dimension, start_chunk, start_fpos, direction);
 }
 
-void world::RayDDA::reset(
-    const world::Dimension* dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction)
+void world::RayDDA::reset(const world::Dimension* dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos,
+    const glm::fvec3& direction)
 {
     this->dimension = dimension;
     this->start_chunk = start_chunk;
@@ -65,8 +65,8 @@ void world::RayDDA::reset(
     }
 }
 
-void world::RayDDA::reset(
-    const world::Dimension& dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos, const glm::fvec3& direction)
+void world::RayDDA::reset(const world::Dimension& dimension, const chunk_pos& start_chunk, const glm::fvec3& start_fpos,
+    const glm::fvec3& direction)
 {
     reset(&dimension, start_chunk, start_fpos, direction);
 }

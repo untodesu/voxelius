@@ -100,8 +100,8 @@ void entity::camera::update(void)
 
     if(!toggles::get(TOGGLE_PM_FLIGHT)) {
         // Apply the quake-like view rolling
-        client_angles[2] = math::radians(
-            -entity::camera::roll_angle.get_value() * glm::dot(velocity.value / PMOVE_MAX_SPEED_GROUND, right_vector));
+        client_angles[2] = math::radians(-entity::camera::roll_angle.get_value()
+            * glm::dot(velocity.value / PMOVE_MAX_SPEED_GROUND, right_vector));
     }
 
     const auto z_near = 0.01f;

@@ -14,8 +14,8 @@
 #include "client/globals.hh"
 #include "client/session.hh"
 
-constexpr static ImGuiWindowFlags WINDOW_FLAGS =
-    ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground;
+constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs
+    | ImGuiWindowFlags_NoBackground;
 
 static config::KeyBind list_key(GLFW_KEY_TAB);
 
@@ -93,8 +93,8 @@ void gui::scoreboard::layout(void)
 
             // draw_list->AddRect(rect_a, rect_b, border_col, 0.0f, ImDrawFlags_None, globals::gui_scale);
             draw_list->AddRectFilled(rect_a, rect_b, rect_col, 0.0f, ImDrawFlags_None);
-            draw_list->AddText(
-                font, 0.5f * ImGui::GetFontSize(), text_pos, text_col, usernames[i].c_str(), usernames[i].c_str() + usernames[i].size());
+            draw_list->AddText(font, 0.5f * ImGui::GetFontSize(), text_pos, text_col, usernames[i].c_str(),
+                usernames[i].c_str() + usernames[i].size());
         }
 
         ImGui::PopFont();

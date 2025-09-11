@@ -113,8 +113,8 @@ void entity::player_look::init(void)
     settings::add_slider(1, gamepad_accel_yaw, settings_location::GAMEPAD_GAMEPLAY, "player_look.gamepad.accel_yaw", false);
     settings::add_gamepad_axis(2, axis_pitch, settings_location::GAMEPAD_GAMEPLAY, "player_look.gp_axis.pitch");
     settings::add_gamepad_axis(3, axis_yaw, settings_location::GAMEPAD_GAMEPLAY, "player_look.gp_axis.yaw");
-    settings::add_slider(
-        4, gamepad_fastlook_factor, settings_location::GAMEPAD_GAMEPLAY, "player_look.gamepad.fastlook_factor", true, "%.02f");
+    settings::add_slider(4, gamepad_fastlook_factor, settings_location::GAMEPAD_GAMEPLAY, "player_look.gamepad.fastlook_factor", true,
+        "%.02f");
     settings::add_gamepad_button(5, button_fastlook, settings_location::GAMEPAD_GAMEPLAY, "player_look.gp_button.fastlook");
 
     fastlook_enabled = false;

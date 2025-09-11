@@ -24,11 +24,10 @@ void game_items::populate(void)
         world::item_registry::construct("stone").set_texture("textures/item/stone.png").set_place_voxel(game_voxels::stone).build();
 
     // Cobblestone; a bunch of small stones
-    game_items::cobblestone =
-        world::item_registry::construct("cobblestone")
-            .set_texture("textures/item/cobblestone.png")
-            .set_place_voxel(game_voxels::cobblestone)
-            .build();
+    game_items::cobblestone = world::item_registry::construct("cobblestone")
+                                  .set_texture("textures/item/cobblestone.png")
+                                  .set_place_voxel(game_voxels::cobblestone)
+                                  .build();
 
     // Dirt; it's very dirty
     game_items::dirt =
@@ -39,18 +38,16 @@ void game_items::populate(void)
         world::item_registry::construct("grass").set_texture("textures/item/grass.png").set_place_voxel(game_voxels::grass).build();
 
     // Oak leaves; they're bushy!
-    game_items::oak_leaves =
-        world::item_registry::construct("oak_leaves")
-            .set_texture("textures/item/oak_leaves.png")
-            .set_place_voxel(game_voxels::oak_leaves)
-            .build();
+    game_items::oak_leaves = world::item_registry::construct("oak_leaves")
+                                 .set_texture("textures/item/oak_leaves.png")
+                                 .set_place_voxel(game_voxels::oak_leaves)
+                                 .build();
 
     // Oak planks; watch for splinters!
-    game_items::oak_planks =
-        world::item_registry::construct("oak_planks")
-            .set_texture("textures/item/oak_planks.png")
-            .set_place_voxel(game_voxels::oak_planks)
-            .build();
+    game_items::oak_planks = world::item_registry::construct("oak_planks")
+                                 .set_texture("textures/item/oak_planks.png")
+                                 .set_place_voxel(game_voxels::oak_planks)
+                                 .build();
 
     // Oak log; a big wad of wood
     game_items::oak_log =

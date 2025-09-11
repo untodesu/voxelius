@@ -62,34 +62,30 @@ void game_voxels::populate(void)
             .build();
 
     // VTest; a test voxel to ensure animations work
-    game_voxels::vtest =
-        world::voxel_registry::construct("vtest", world::voxel_type::CUBE, true, false)
-            .add_texture_default("textures/voxel/vtest_F1.png")
-            .add_texture_default("textures/voxel/vtest_F2.png")
-            .add_texture_default("textures/voxel/vtest_F3.png")
-            .add_texture_default("textures/voxel/vtest_F4.png")
-            .build();
+    game_voxels::vtest = world::voxel_registry::construct("vtest", world::voxel_type::CUBE, true, false)
+                             .add_texture_default("textures/voxel/vtest_F1.png")
+                             .add_texture_default("textures/voxel/vtest_F2.png")
+                             .add_texture_default("textures/voxel/vtest_F3.png")
+                             .add_texture_default("textures/voxel/vtest_F4.png")
+                             .build();
 
     // VTest-CK; a pure blue chromakey I used to make the game's logo
-    game_voxels::vtest_ck =
-        world::voxel_registry::construct("vtest_ck", world::voxel_type::CUBE, false, false)
-            .add_texture_default("textures/voxel/chromakey.png")
-            .build();
+    game_voxels::vtest_ck = world::voxel_registry::construct("vtest_ck", world::voxel_type::CUBE, false, false)
+                                .add_texture_default("textures/voxel/chromakey.png")
+                                .build();
 
     // Oak leaves; greenery. TODO: add trees as surface features
-    game_voxels::oak_leaves =
-        world::voxel_registry::construct("oak_leaves", world::voxel_type::CUBE, false, false)
-            .add_texture_default("textures/voxel/oak_leaves.png")
-            .set_surface(world::voxel_surface::GRASS)
-            .build();
+    game_voxels::oak_leaves = world::voxel_registry::construct("oak_leaves", world::voxel_type::CUBE, false, false)
+                                  .add_texture_default("textures/voxel/oak_leaves.png")
+                                  .set_surface(world::voxel_surface::GRASS)
+                                  .build();
 
     // Oak planks; the thing that comes out of oak logs
-    game_voxels::oak_planks =
-        world::voxel_registry::construct("oak_planks", world::voxel_type::CUBE, false, false)
-            .add_texture_default("textures/voxel/oak_planks_01.png")
-            .add_texture_default("textures/voxel/oak_planks_02.png")
-            .set_surface(world::voxel_surface::WOOD)
-            .build();
+    game_voxels::oak_planks = world::voxel_registry::construct("oak_planks", world::voxel_type::CUBE, false, false)
+                                  .add_texture_default("textures/voxel/oak_planks_01.png")
+                                  .add_texture_default("textures/voxel/oak_planks_02.png")
+                                  .set_surface(world::voxel_surface::WOOD)
+                                  .build();
 
     // Oak logs; greenery. TODO: add trees as surface features
     game_voxels::oak_log =
@@ -102,25 +98,22 @@ void game_voxels::populate(void)
             .build();
 
     // Glass; blend rendering test
-    game_voxels::glass =
-        world::voxel_registry::construct("glass", world::voxel_type::CUBE, false, true)
-            .add_texture_default("textures/voxel/glass_01.png")
-            .set_surface(world::voxel_surface::GLASS)
-            .build();
+    game_voxels::glass = world::voxel_registry::construct("glass", world::voxel_type::CUBE, false, true)
+                             .add_texture_default("textures/voxel/glass_01.png")
+                             .set_surface(world::voxel_surface::GLASS)
+                             .build();
 
     // Slime; it's bouncy!
-    game_voxels::slime =
-        world::voxel_registry::construct("slime", world::voxel_type::CUBE, false, true)
-            .set_touch(world::voxel_touch::BOUNCE, glm::fvec3(0.00f, 0.60f, 0.00f))
-            .add_texture_default("textures/voxel/slime_01.png")
-            .build();
+    game_voxels::slime = world::voxel_registry::construct("slime", world::voxel_type::CUBE, false, true)
+                             .set_touch(world::voxel_touch::BOUNCE, glm::fvec3(0.00f, 0.60f, 0.00f))
+                             .add_texture_default("textures/voxel/slime_01.png")
+                             .build();
 
     // Mud; you sink in it
-    game_voxels::mud =
-        world::voxel_registry::construct("mud", world::voxel_type::CUBE, false, false)
-            .set_touch(world::voxel_touch::SINK, glm::fvec3(0.50f, 0.75f, 0.50f))
-            .add_texture_default("textures/voxel/mud_01.png")
-            .add_texture_default("textures/voxel/mud_02.png")
-            .set_surface(world::voxel_surface::DIRT)
-            .build();
+    game_voxels::mud = world::voxel_registry::construct("mud", world::voxel_type::CUBE, false, false)
+                           .set_touch(world::voxel_touch::SINK, glm::fvec3(0.50f, 0.75f, 0.50f))
+                           .add_texture_default("textures/voxel/mud_01.png")
+                           .add_texture_default("textures/voxel/mud_02.png")
+                           .set_surface(world::voxel_surface::DIRT)
+                           .build();
 }
