@@ -8,6 +8,7 @@
 
 static float line_offsets[gui::STATUS_COUNT];
 static ImFont* line_fonts[gui::STATUS_COUNT];
+static float line_sizes[gui::STATUS_COUNT];
 
 static ImVec4 line_text_colors[gui::STATUS_COUNT];
 static ImVec4 line_shadow_colors[gui::STATUS_COUNT];
@@ -34,8 +35,11 @@ void gui::status_lines::init_late(void)
 
 void gui::status_lines::layout(void)
 {
-    line_fonts[STATUS_DEBUG] = globals::font_debug;
-    line_fonts[STATUS_HOTBAR] = globals::font_chat;
+    line_fonts[STATUS_DEBUG] = globals::font_unscii8;
+    line_sizes[STATUS_DEBUG] = 4.0f;
+
+    line_fonts[STATUS_HOTBAR] = globals::font_unscii16;
+    line_sizes[STATUS_HOTBAR] = 8.0f;
 
     auto viewport = ImGui::GetMainViewport();
     auto draw_list = ImGui::GetForegroundDrawList();
@@ -45,7 +49,7 @@ void gui::status_lines::layout(void)
         auto& text = line_strings[i];
         auto* font = line_fonts[i];
 
-        auto size = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text.c_str(), text.c_str() + text.size());
+        auto size = font->CalcTextSizeA(line_sizes[i] * globals::gui_scale, FLT_MAX, 0.0f, text.c_str(), text.c_str() + text.size());
         auto pos = ImVec2(0.5f * (viewport->Size.x - size.x), viewport->Size.y - offset);
 
         auto spawn = line_spawns[i];
@@ -57,7 +61,7 @@ void gui::status_lines::layout(void)
         auto color_U32 = ImGui::GetColorU32(ImVec4(color.x, color.y, color.z, color.w * alpha));
         auto shadow_U32 = ImGui::GetColorU32(ImVec4(shadow.x, shadow.y, shadow.z, color.w * alpha));
 
-        gui::imdraw_ext::text_shadow(text, pos, color_U32, shadow_U32, font, draw_list);
+        gui::imdraw_ext::text_shadow(text, pos, color_U32, shadow_U32, font, draw_list, line_sizes[i]);
     }
 }
 

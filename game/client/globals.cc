@@ -33,9 +33,8 @@ ENetHost* globals::client_host;
 world::Dimension* globals::dimension = nullptr;
 entt::entity globals::player;
 
-ImFont* globals::font_debug;
-ImFont* globals::font_default;
-ImFont* globals::font_chat;
+ImFont* globals::font_unscii16;
+ImFont* globals::font_unscii8;
 
 config::KeyBind* globals::gui_keybind_ptr = nullptr;
 config::GamepadAxis* globals::gui_gamepad_axis_ptr = nullptr;

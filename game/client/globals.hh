@@ -58,9 +58,8 @@ extern ENetHost* client_host;
 extern world::Dimension* dimension;
 extern entt::entity player;
 
-extern ImFont* font_debug;
-extern ImFont* font_default;
-extern ImFont* font_chat;
+extern ImFont* font_unscii16;
+extern ImFont* font_unscii8;
 
 extern config::KeyBind* gui_keybind_ptr;
 extern config::GamepadAxis* gui_gamepad_axis_ptr;

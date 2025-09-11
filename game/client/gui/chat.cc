@@ -12,6 +12,7 @@
 
 #include "client/config/keybind.hh"
 #include "client/gui/gui_screen.hh"
+#include "client/gui/imdraw_ext.hh"
 #include "client/gui/language.hh"
 #include "client/gui/settings.hh"
 #include "client/io/glfw.hh"
@@ -169,7 +170,7 @@ void gui::client_chat::layout(void)
     ImGui::SetNextWindowPos(window_start);
     ImGui::SetNextWindowSize(window_size);
 
-    ImGui::PushFont(globals::font_chat);
+    ImGui::PushFont(globals::font_unscii16, 8.0f);
 
     if(!ImGui::Begin("###chat", nullptr, WINDOW_FLAGS)) {
         ImGui::End();
@@ -184,7 +185,7 @@ void gui::client_chat::layout(void)
 
     // The text input widget occupies the bottom part
     // of the chat window, we need to reserve some space for it
-    auto ypos = window_size.y - 2.5f * font->FontSize - 2.0f * padding.y - 2.0f * spacing.y;
+    auto ypos = window_size.y - 2.5f * ImGui::GetFontSize() - 2.0f * padding.y - 2.0f * spacing.y;
 
     if(globals::gui_screen == GUI_CHAT) {
         if(needs_focus) {
@@ -223,10 +224,11 @@ void gui::client_chat::layout(void)
 
             auto rect_col = ImGui::GetColorU32(ImGuiCol_FrameBg, rect_alpha);
             auto text_col = ImGui::GetColorU32(ImVec4(it->color.x, it->color.y, it->color.z, it->color.w * text_alpha));
+            auto shadow_col = ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, text_alpha));
 
             draw_list->AddRectFilled(rect_pos, rect_end, rect_col);
-            draw_list->AddText(
-                font, font->FontSize, text_pos, text_col, it->text.c_str(), it->text.c_str() + it->text.size(), window_size.x);
+
+            imdraw_ext::text_shadow_w(it->text, text_pos, text_col, shadow_col, font, draw_list, 8.0f, window_size.x);
 
             ypos -= rect_size.y;
         }

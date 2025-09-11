@@ -2,7 +2,6 @@
 
 #include "core/io/cmdline.hh"
 #include "core/io/config_map.hh"
-#include "core/resource/binfile.hh"
 #include "core/resource/image.hh"
 #include "core/resource/resource.hh"
 #include "core/utils/epoch.hh"
@@ -221,7 +220,6 @@ int main(int argc, char** argv)
     spdlog::info("opengl: version: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
     spdlog::info("opengl: renderer: {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 
-    BinFile::register_resource();
     Image::register_resource();
     TextureGUI::register_resource();
     SoundEffect::register_resource();

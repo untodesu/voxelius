@@ -156,8 +156,8 @@ void gui::main_menu::layout(void)
             const auto& padding = ImGui::GetStyle().FramePadding;
             const auto& spacing = ImGui::GetStyle().ItemSpacing;
 
-            ImGui::PushFont(globals::font_debug);
-            ImGui::SetCursorScreenPos(ImVec2(padding.x + spacing.x, window_size.y - globals::font_debug->FontSize - padding.y - spacing.y));
+            ImGui::PushFont(globals::font_unscii8, 4.0f);
+            ImGui::SetCursorScreenPos(ImVec2(padding.x + spacing.x, window_size.y - ImGui::GetFontSize() - padding.y - spacing.y));
             ImGui::Text("Voxelius %*s", version::semver.size(), version::semver.data()); // string_view is not always null-terminated
             ImGui::PopFont();
         }

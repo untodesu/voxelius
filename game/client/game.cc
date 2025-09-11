@@ -7,8 +7,8 @@
 #include "core/config/string.hh"
 #include "core/io/config_map.hh"
 #include "core/math/angles.hh"
-#include "core/resource/binfile.hh"
 #include "core/resource/resource.hh"
+#include "core/utils/physfs.hh"
 
 #include "shared/entity/collision.hh"
 #include "shared/entity/gravity.hh"
@@ -84,62 +84,29 @@ bool client_game::hide_hud = false;
 
 static config::KeyBind hide_hud_toggle(GLFW_KEY_F1);
 
-static resource_ptr<BinFile> bin_unscii16;
-static resource_ptr<BinFile> bin_unscii8;
+static ImFont* load_font(std::string_view path, float size, ImFontConfig& font_config, ImVector<ImWchar>& ranges)
+{
+    bool font_load_success;
+    std::vector<std::byte> font;
+
+    if(!utils::read_file(path, font)) {
+        spdlog::error("{}: utils::read_file failed", path);
+        std::terminate();
+    }
+
+    auto& io = ImGui::GetIO();
+    auto font_ptr = io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), size, &font_config, ranges.Data);
+
+    if(font_ptr == nullptr) {
+        spdlog::error("{}: AddFontFromMemoryTTF failed", path);
+        std::terminate();
+    }
+
+    return font_ptr;
+}
 
 static void on_glfw_framebuffer_size(const io::GlfwFramebufferSizeEvent& event)
 {
-    auto width_float = static_cast<float>(event.size.x);
-    auto height_float = static_cast<float>(event.size.y);
-    auto wscale = math::max(1U, math::floor<unsigned int>(width_float / static_cast<float>(BASE_WIDTH)));
-    auto hscale = math::max(1U, math::floor<unsigned int>(height_float / static_cast<float>(BASE_HEIGHT)));
-    auto scale = math::min(wscale, hscale);
-
-    if(globals::gui_scale != scale) {
-        auto& io = ImGui::GetIO();
-        auto& style = ImGui::GetStyle();
-
-        ImFontConfig font_config;
-        font_config.FontDataOwnedByAtlas = false;
-
-        io.Fonts->Clear();
-
-        ImFontGlyphRangesBuilder builder;
-
-        // This should cover a hefty range of glyph ranges.
-        // UNDONE: just slap the whole UNICODE Plane-0 here?
-        builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
-        builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());
-        builder.AddRanges(io.Fonts->GetGlyphRangesGreek());
-        builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
-
-        ImVector<ImWchar> ranges = {};
-        builder.BuildRanges(&ranges);
-
-        globals::font_default = io.Fonts->AddFontFromMemoryTTF(
-            bin_unscii16->buffer, bin_unscii16->size, 16.0f * scale, &font_config, ranges.Data);
-        globals::font_chat = io.Fonts->AddFontFromMemoryTTF(
-            bin_unscii16->buffer, bin_unscii16->size, 8.0f * scale, &font_config, ranges.Data);
-        globals::font_debug = io.Fonts->AddFontFromMemoryTTF(bin_unscii8->buffer, bin_unscii8->size, 4.0f * scale, &font_config);
-
-        // Re-assign the default font
-        io.FontDefault = globals::font_default;
-
-        // This should be here!!! Just calling Build()
-        // on the font atlas does not invalidate internal
-        // device objects defined by the implementation!!!
-        ImGui_ImplOpenGL3_CreateDeviceObjects();
-
-        if(globals::gui_scale) {
-            // Well, ImGuiStyle::ScaleAllSizes indeed takes
-            // the scale values as a RELATIVE scaling, not as
-            // absolute. So I have to make a special crutch
-            style.ScaleAllSizes(static_cast<float>(scale) / static_cast<float>(globals::gui_scale));
-        }
-
-        globals::gui_scale = scale;
-    }
-
     if(globals::world_fbo) {
         glDeleteRenderbuffers(1, &globals::world_fbo_depth);
         glDeleteTextures(1, &globals::world_fbo_color);
@@ -178,13 +145,24 @@ static void on_glfw_key(const io::GlfwKeyEvent& event)
 
 void client_game::init(void)
 {
-    bin_unscii16 = resource::load<BinFile>("fonts/unscii-16.ttf");
-    bin_unscii8 = resource::load<BinFile>("fonts/unscii-8.ttf");
+    auto& io = ImGui::GetIO();
+    io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.IniFilename = nullptr;
+    io.Fonts->Clear();
 
-    if((bin_unscii16 == nullptr) || (bin_unscii8 == nullptr)) {
-        spdlog::critical("client_game: font loading failed");
-        std::terminate();
-    }
+    ImFontConfig font_config;
+    font_config.FontDataOwnedByAtlas = false;
+
+    ImFontGlyphRangesBuilder builder;
+    builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
+    builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());
+
+    ImVector<ImWchar> ranges;
+    builder.BuildRanges(&ranges);
+
+    globals::font_unscii16 = load_font("fonts/unscii-16.ttf", 16.0f, font_config, ranges);
+    globals::font_unscii8 = load_font("fonts/unscii-8.ttf", 8.0f, font_config, ranges);
 
     gui::client_splash::init();
     gui::client_splash::render();
@@ -314,7 +292,7 @@ void client_game::init(void)
     // taught me one important thing: dimensions
     // of UI elements must be calculated at semi-runtime
     // so there's simply no point for an INI file.
-    ImGui::GetIO().IniFilename = nullptr;
+    io.IniFilename = nullptr;
 
     toggles::init();
 
@@ -459,9 +437,6 @@ void client_game::shutdown(void)
     world::chunk_mesher::shutdown();
 
     enet_host_destroy(globals::client_host);
-
-    bin_unscii8 = nullptr;
-    bin_unscii16 = nullptr;
 }
 
 void client_game::fixed_update(void)
@@ -539,6 +514,21 @@ void client_game::update(void)
     gui::client_chat::update();
 
     experiments::update();
+
+    constexpr auto half_base_width = 0.5f * static_cast<float>(BASE_WIDTH);
+    constexpr auto half_base_height = 0.5f * static_cast<float>(BASE_HEIGHT);
+
+    auto twice_scale_x = static_cast<float>(globals::width) / half_base_width;
+    auto twice_scale_y = static_cast<float>(globals::height) / half_base_height;
+
+    auto scale_x = math::max(1.0f, 0.5f * glm::floor(twice_scale_x));
+    auto scale_y = math::max(1.0f, 0.5f * glm::floor(twice_scale_y));
+    auto scale_min = math::ceil<unsigned int>(math::min(scale_x, scale_y));
+    auto scale_int = math::max(1U, (scale_min / 2U) * 2U);
+
+    auto& io = ImGui::GetIO();
+    io.FontGlobalScale = scale_int;
+    globals::gui_scale = scale_int;
 }
 
 void client_game::update_late(void)

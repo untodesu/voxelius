@@ -51,11 +51,11 @@ void gui::scoreboard::layout(void)
             return;
         }
 
-        ImGui::PushFont(globals::font_chat);
+        ImGui::PushFont(globals::font_unscii16, 8.0f);
 
         const auto& padding = ImGui::GetStyle().FramePadding;
         const auto& spacing = ImGui::GetStyle().ItemSpacing;
-        auto font = globals::font_chat;
+        auto font = globals::font_unscii8;
 
         // Figure out the maximum username size
         for(const auto& username : usernames) {
@@ -74,7 +74,7 @@ void gui::scoreboard::layout(void)
         const float rect_start_x = 0.5f * window_size.x - 0.5f * true_size;
         const float rect_start_y = 0.15f * window_size.y;
         const float rect_size_x = 2.0f * padding.x + true_size;
-        const float rect_size_y = 2.0f * padding.y + font->FontSize;
+        const float rect_size_y = 2.0f * padding.y + 0.5f * ImGui::GetFontSize();
 
         // const ImU32 border_col = ImGui::GetColorU32(ImGuiCol_Border, 1.00f);
         const ImU32 rect_col = ImGui::GetColorU32(ImGuiCol_FrameBg, 0.80f);
@@ -92,7 +92,8 @@ void gui::scoreboard::layout(void)
 
             // draw_list->AddRect(rect_a, rect_b, border_col, 0.0f, ImDrawFlags_None, globals::gui_scale);
             draw_list->AddRectFilled(rect_a, rect_b, rect_col, 0.0f, ImDrawFlags_None);
-            draw_list->AddText(font, font->FontSize, text_pos, text_col, usernames[i].c_str(), usernames[i].c_str() + usernames[i].size());
+            draw_list->AddText(
+                font, 0.5f * ImGui::GetFontSize(), text_pos, text_col, usernames[i].c_str(), usernames[i].c_str() + usernames[i].size());
         }
 
         ImGui::PopFont();

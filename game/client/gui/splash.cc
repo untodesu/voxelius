@@ -148,7 +148,7 @@ void gui::client_splash::render(void)
         const ImVec2 image_pos = ImVec2(image_x, image_y);
 
         if(!current_text.empty()) {
-            ImGui::PushFont(globals::font_chat);
+            ImGui::PushFont(globals::font_unscii8, 16.0f);
             ImGui::SetCursorPos(ImVec2(16.0f, 16.0f));
             ImGui::TextDisabled("%s", current_text.c_str());
             ImGui::PopFont();
