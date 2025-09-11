@@ -20,10 +20,10 @@ void world::VoxelStorage::serialize(io::WriteBuffer& buffer) const
 
     mz_compress(zdata.data(), &bound, reinterpret_cast<unsigned char*>(net_storage.data()), sizeof(VoxelStorage));
 
-    buffer.write_UI64(bound);
+    buffer.write<std::uint64_t>(bound);
 
     // Write all the compressed data into the buffer
-    for(std::size_t i = 0; i < bound; buffer.write_UI8(zdata[i++])) {
+    for(std::size_t i = 0; i < bound; buffer.write<std::uint8_t>(zdata[i++])) {
         // empty
     }
 }
@@ -31,11 +31,11 @@ void world::VoxelStorage::serialize(io::WriteBuffer& buffer) const
 void world::VoxelStorage::deserialize(io::ReadBuffer& buffer)
 {
     auto size = static_cast<mz_ulong>(sizeof(VoxelStorage));
-    auto bound = static_cast<mz_ulong>(buffer.read_UI64());
+    auto bound = static_cast<mz_ulong>(buffer.read<std::uint64_t>());
     auto zdata = std::vector<unsigned char>(bound);
 
     // Read all the compressed data from the buffer
-    for(std::size_t i = 0; i < bound; zdata[i++] = buffer.read_UI8()) {
+    for(std::size_t i = 0; i < bound; zdata[i++] = buffer.read<std::uint8_t>()) {
         // empty
     }
 

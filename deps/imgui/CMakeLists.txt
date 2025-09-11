@@ -20,7 +20,7 @@ set_target_properties(imgui PROPERTIES FOLDER Dependencies)
 add_library(imgui_glfw STATIC
     "${CMAKE_CURRENT_LIST_DIR}/include/imgui_impl_glfw.h"
     "${CMAKE_CURRENT_LIST_DIR}/src/imgui_impl_glfw.cpp")
-target_link_libraries(imgui_glfw PUBLIC glfw3 imgui)
+target_link_libraries(imgui_glfw PUBLIC glfw imgui)
 set_target_properties(imgui_glfw PROPERTIES FOLDER Dependencies)
 
 add_library(imgui_opengl3 STATIC

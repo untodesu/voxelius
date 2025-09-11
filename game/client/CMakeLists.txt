@@ -23,7 +23,7 @@ target_compile_definitions(vclient PUBLIC GLFW_INCLUDE_NONE)
 target_include_directories(vclient PRIVATE "${PROJECT_SOURCE_DIR}")
 target_include_directories(vclient PRIVATE "${PROJECT_SOURCE_DIR}/game")
 target_precompile_headers(vclient PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
-target_link_libraries(vclient PUBLIC shared dr_libs glad glfw3 imgui imgui_glfw imgui_opengl3 salad)
+target_link_libraries(vclient PUBLIC shared dr_libs glad glfw imgui imgui_glfw imgui_opengl3 salad)
 
 add_subdirectory(config)
 add_subdirectory(entity)

@@ -45,8 +45,8 @@ dependencies_dir = os.sys.argv[1]
 dependencies = get_dependencies(dependencies_dir)
 assert len(dependencies) > 0, "No licenses found in the dependencies directory."
 
-with open("thirdpartylegalnotices.txt", 'w', encoding='utf-8') as out_file:
-    out_file.write("Voxelius uses third-party code for certain functions. All the\n")
+with open("thirdparty.txt", 'w', encoding='utf-8') as out_file:
+    out_file.write("QFengine uses third-party code for certain functions. All the\n")
     out_file.write("license texts are included below using an automated script; this generated\n")
     out_file.write("file is to be included in binary distributions of the project.\n\n")
 

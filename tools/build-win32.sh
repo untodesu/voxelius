@@ -1,0 +1,5 @@
+#!/usr/bin/sh
+cd $(dirname $(dirname ${0})) || exit 1
+cmake -B build/win32 -A Win32 -DCMAKE_BUILD_TYPE=${1:-Debug} || exit 1
+cmake --build build/win32 --config ${1:-Debug} --parallel || exit 1
+exit 0

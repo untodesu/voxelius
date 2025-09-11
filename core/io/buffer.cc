@@ -4,18 +4,29 @@
 
 #include "core/math/constexpr.hh"
 
+io::ReadBuffer::ReadBuffer(const ReadBuffer& other)
+{
+    reset(other.data(), other.size());
+}
+
 io::ReadBuffer::ReadBuffer(const void* data, std::size_t size)
 {
+    assert(data);
+
     reset(data, size);
 }
 
 io::ReadBuffer::ReadBuffer(const ENetPacket* packet)
 {
+    assert(packet);
+
     reset(packet);
 }
 
 io::ReadBuffer::ReadBuffer(PHYSFS_File* file)
 {
+    assert(file);
+
     reset(file);
 }
 
@@ -31,6 +42,8 @@ const std::byte* io::ReadBuffer::data(void) const
 
 void io::ReadBuffer::reset(const void* data, std::size_t size)
 {
+    assert(data);
+
     auto bytes = reinterpret_cast<const std::byte*>(data);
     m_vector.assign(bytes, bytes + size);
     m_position = 0U;
@@ -38,6 +51,8 @@ void io::ReadBuffer::reset(const void* data, std::size_t size)
 
 void io::ReadBuffer::reset(const ENetPacket* packet)
 {
+    assert(packet);
+
     auto bytes_ptr = reinterpret_cast<const std::byte*>(packet->data);
     m_vector.assign(bytes_ptr, bytes_ptr + packet->dataLength);
     m_position = 0;
@@ -45,6 +60,8 @@ void io::ReadBuffer::reset(const ENetPacket* packet)
 
 void io::ReadBuffer::reset(PHYSFS_File* file)
 {
+    assert(file);
+
     m_vector.resize(PHYSFS_fileLength(file));
     m_position = 0;
 
@@ -52,12 +69,21 @@ void io::ReadBuffer::reset(PHYSFS_File* file)
     PHYSFS_readBytes(file, m_vector.data(), m_vector.size());
 }
 
-float io::ReadBuffer::read_FP32(void)
+template<>
+std::byte io::ReadBuffer::read<std::byte>(void)
 {
-    return math::uint32_to_float(read_UI32());
+    if(m_position < m_vector.size()) {
+        auto result = m_vector[m_position];
+        m_position += 1U;
+        return result;
+    }
+
+    m_position += 1U;
+    return static_cast<std::byte>(0x00);
 }
 
-std::uint8_t io::ReadBuffer::read_UI8(void)
+template<>
+std::uint8_t io::ReadBuffer::read<std::uint8_t>(void)
 {
     if((m_position + 1U) <= m_vector.size()) {
         auto result = static_cast<std::uint8_t>(m_vector[m_position]);
@@ -69,12 +95,13 @@ std::uint8_t io::ReadBuffer::read_UI8(void)
     return 0;
 }
 
-std::uint16_t io::ReadBuffer::read_UI16(void)
+template<>
+std::uint16_t io::ReadBuffer::read<std::uint16_t>(void)
 {
     if((m_position + 2U) <= m_vector.size()) {
         auto result = UINT16_C(0x0000);
-        result |= static_cast<std::uint16_t>(m_vector[m_position + 0U]) << 8U;
-        result |= static_cast<std::uint16_t>(m_vector[m_position + 1U]) << 0U;
+        result |= (UINT16_C(0x00FF) & static_cast<std::uint16_t>(m_vector[m_position + 0U])) << 8U;
+        result |= (UINT16_C(0x00FF) & static_cast<std::uint16_t>(m_vector[m_position + 1U])) << 0U;
         m_position += 2U;
         return result;
     }
@@ -83,14 +110,15 @@ std::uint16_t io::ReadBuffer::read_UI16(void)
     return 0;
 }
 
-std::uint32_t io::ReadBuffer::read_UI32(void)
+template<>
+std::uint32_t io::ReadBuffer::read<std::uint32_t>(void)
 {
     if((m_position + 4U) <= m_vector.size()) {
         auto result = UINT32_C(0x00000000);
-        result |= static_cast<std::uint32_t>(m_vector[m_position + 0U]) << 24U;
-        result |= static_cast<std::uint32_t>(m_vector[m_position + 1U]) << 16U;
-        result |= static_cast<std::uint32_t>(m_vector[m_position + 2U]) << 8U;
-        result |= static_cast<std::uint32_t>(m_vector[m_position + 3U]) << 0U;
+        result |= (UINT32_C(0x000000FF) & static_cast<std::uint32_t>(m_vector[m_position + 0U])) << 24U;
+        result |= (UINT32_C(0x000000FF) & static_cast<std::uint32_t>(m_vector[m_position + 1U])) << 16U;
+        result |= (UINT32_C(0x000000FF) & static_cast<std::uint32_t>(m_vector[m_position + 2U])) << 8U;
+        result |= (UINT32_C(0x000000FF) & static_cast<std::uint32_t>(m_vector[m_position + 3U])) << 0U;
         m_position += 4U;
         return result;
     }
@@ -99,18 +127,19 @@ std::uint32_t io::ReadBuffer::read_UI32(void)
     return 0;
 }
 
-std::uint64_t io::ReadBuffer::read_UI64(void)
+template<>
+std::uint64_t io::ReadBuffer::read<std::uint64_t>(void)
 {
     if((m_position + 8U) <= m_vector.size()) {
         auto result = UINT64_C(0x0000000000000000);
-        result |= (0x00000000000000FF & static_cast<std::uint64_t>(m_vector[m_position + 0U])) << 56U;
-        result |= (0x00000000000000FF & static_cast<std::uint64_t>(m_vector[m_position + 1U])) << 48U;
-        result |= (0x00000000000000FF & static_cast<std::uint64_t>(m_vector[m_position + 2U])) << 40U;
-        result |= (0x00000000000000FF & static_cast<std::uint64_t>(m_vector[m_position + 3U])) << 32U;
-        result |= (0x00000000000000FF & static_cast<std::uint64_t>(m_vector[m_position + 4U])) << 24U;
-        result |= (0x00000000000000FF & static_cast<std::uint64_t>(m_vector[m_position + 5U])) << 16U;
-        result |= (0x00000000000000FF & static_cast<std::uint64_t>(m_vector[m_position + 6U])) << 8U;
-        result |= (0x00000000000000FF & static_cast<std::uint64_t>(m_vector[m_position + 7U])) << 0U;
+        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 0U])) << 56U;
+        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 1U])) << 48U;
+        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 2U])) << 40U;
+        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 3U])) << 32U;
+        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 4U])) << 24U;
+        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 5U])) << 16U;
+        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 6U])) << 8U;
+        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 7U])) << 0U;
         m_position += 8U;
         return result;
     }
@@ -119,20 +148,68 @@ std::uint64_t io::ReadBuffer::read_UI64(void)
     return 0;
 }
 
-std::string io::ReadBuffer::read_string(void)
+template<>
+float io::ReadBuffer::read<float>(void)
 {
-    auto size = static_cast<std::size_t>(read_UI16());
-    auto result = std::string();
+    return std::bit_cast<float>(read<std::uint32_t>());
+}
 
-    for(std::size_t i = 0; i < size; ++i) {
+template<>
+std::int8_t io::ReadBuffer::read<std::int8_t>(void)
+{
+    return std::bit_cast<std::int8_t>(read<std::uint8_t>());
+}
+
+template<>
+std::int16_t io::ReadBuffer::read<std::int16_t>(void)
+{
+    return std::bit_cast<std::int16_t>(read<std::uint16_t>());
+}
+
+template<>
+std::int32_t io::ReadBuffer::read<std::int32_t>(void)
+{
+    return std::bit_cast<std::int32_t>(read<std::uint32_t>());
+}
+
+template<>
+std::int64_t io::ReadBuffer::read<std::int64_t>(void)
+{
+    return std::bit_cast<std::int64_t>(read<std::uint64_t>());
+}
+
+template<>
+std::string io::ReadBuffer::read<std::string>(void)
+{
+    std::string result;
+    result.resize(read<std::uint16_t>());
+
+    for(std::size_t i = 0; i < result.size(); ++i) {
         if(m_position < m_vector.size()) {
-            result.push_back(static_cast<char>(m_vector[m_position]));
+            result[i] = static_cast<char>(m_vector[m_position]);
         }
 
         m_position += 1U;
     }
 
     return result;
+}
+
+void io::ReadBuffer::read(void* buffer, std::size_t size)
+{
+    auto bytes = reinterpret_cast<std::byte*>(buffer);
+    auto amount_to_read = std::min(size, m_vector.size() - m_position);
+
+    if(amount_to_read > 0) {
+        std::copy(m_vector.cbegin() + m_position, m_vector.cbegin() + m_position + amount_to_read, bytes);
+    }
+
+    m_position += size;
+}
+
+io::WriteBuffer::WriteBuffer(const WriteBuffer& other)
+{
+    m_vector = other.m_vector;
 }
 
 std::size_t io::WriteBuffer::size(void) const
@@ -150,18 +227,40 @@ void io::WriteBuffer::reset(void)
     m_vector.clear();
 }
 
-void io::WriteBuffer::write_UI8(std::uint8_t value)
+void io::WriteBuffer::write(const WriteBuffer& other)
+{
+    m_vector.insert(m_vector.end(), other.m_vector.begin(), other.m_vector.end());
+}
+
+void io::WriteBuffer::write(const void* data, std::size_t size)
+{
+    assert(data);
+
+    auto bytes = reinterpret_cast<const std::byte*>(data);
+    m_vector.insert(m_vector.end(), bytes, bytes + size);
+}
+
+template<>
+void io::WriteBuffer::write<std::byte>(const std::byte value)
+{
+    m_vector.push_back(value);
+}
+
+template<>
+void io::WriteBuffer::write<std::uint8_t>(const std::uint8_t value)
 {
     m_vector.push_back(static_cast<std::byte>(value));
 }
 
-void io::WriteBuffer::write_UI16(std::uint16_t value)
+template<>
+void io::WriteBuffer::write<std::uint16_t>(const std::uint16_t value)
 {
     m_vector.push_back(static_cast<std::byte>(UINT16_C(0xFF) & ((value & UINT16_C(0xFF00)) >> 8U)));
     m_vector.push_back(static_cast<std::byte>(UINT16_C(0xFF) & ((value & UINT16_C(0x00FF)) >> 0U)));
 }
 
-void io::WriteBuffer::write_UI32(std::uint32_t value)
+template<>
+void io::WriteBuffer::write<std::uint32_t>(const std::uint32_t value)
 {
     m_vector.push_back(static_cast<std::byte>(UINT32_C(0xFF) & ((value & UINT32_C(0xFF000000)) >> 24U)));
     m_vector.push_back(static_cast<std::byte>(UINT32_C(0xFF) & ((value & UINT32_C(0x00FF0000)) >> 16U)));
@@ -169,7 +268,8 @@ void io::WriteBuffer::write_UI32(std::uint32_t value)
     m_vector.push_back(static_cast<std::byte>(UINT32_C(0xFF) & ((value & UINT32_C(0x000000FF)) >> 0U)));
 }
 
-void io::WriteBuffer::write_UI64(std::uint64_t value)
+template<>
+void io::WriteBuffer::write<std::uint64_t>(const std::uint64_t value)
 {
     m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0xFF00000000000000)) >> 56U)));
     m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x00FF000000000000)) >> 48U)));
@@ -181,25 +281,62 @@ void io::WriteBuffer::write_UI64(std::uint64_t value)
     m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x00000000000000FF)) >> 0U)));
 }
 
-void io::WriteBuffer::write_string(const std::string& value)
+template<>
+void io::WriteBuffer::write(const float value)
 {
-    const std::size_t size = math::min<std::size_t>(UINT16_MAX, value.size());
+    write(std::bit_cast<std::uint32_t>(value));
+}
 
-    write_UI16(static_cast<std::uint16_t>(size));
+template<>
+void io::WriteBuffer::write(const std::int8_t value)
+{
+    write(std::bit_cast<std::uint8_t>(value));
+}
 
-    for(std::size_t i = 0; i < size; m_vector.push_back(static_cast<std::byte>(value[i++]))) {
-        // empty
+template<>
+void io::WriteBuffer::write(const std::int16_t value)
+{
+    write(std::bit_cast<std::uint16_t>(value));
+}
+
+template<>
+void io::WriteBuffer::write(const std::int32_t value)
+{
+    write(std::bit_cast<std::uint32_t>(value));
+}
+
+template<>
+void io::WriteBuffer::write(const std::int64_t value)
+{
+    write(std::bit_cast<std::uint64_t>(value));
+}
+
+template<>
+void io::WriteBuffer::write<std::string_view>(const std::string_view value)
+{
+    write<std::uint16_t>(value.size());
+
+    for(const auto& character : value) {
+        m_vector.push_back(static_cast<std::byte>(character));
     }
 }
 
-PHYSFS_File* io::WriteBuffer::to_file(const char* path, bool append) const
+PHYSFS_File* io::WriteBuffer::to_file(const std::string& path, bool append) const
 {
-    if(auto file = (append ? PHYSFS_openAppend(path) : PHYSFS_openWrite(path))) {
-        PHYSFS_writeBytes(file, m_vector.data(), m_vector.size());
-        return file;
+    PHYSFS_File* file = nullptr;
+
+    if(append) {
+        file = PHYSFS_openAppend(path.c_str());
+    }
+    else {
+        file = PHYSFS_openWrite(path.c_str());
     }
 
-    return nullptr;
+    if(file) {
+        PHYSFS_writeBytes(file, m_vector.data(), m_vector.size());
+    }
+
+    return file;
 }
 
 ENetPacket* io::WriteBuffer::to_packet(enet_uint32 flags) const
