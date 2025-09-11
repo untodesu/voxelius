@@ -1,5 +1,3 @@
-#ifndef SHARED_PCH_HH
-#define SHARED_PCH_HH 1
 #pragma once
 
 #include <core/pch.hh> // inherit dependent includes from core.lib
@@ -19,5 +17,3 @@
 
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
-
-#endif // SHARED_PCH_HH

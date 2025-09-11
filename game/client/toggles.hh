@@ -1,5 +1,3 @@
-#ifndef CLIENT_TOGGLES_HH
-#define CLIENT_TOGGLES_HH 1
 #pragma once
 
 using toggle_type = unsigned int;
@@ -35,5 +33,3 @@ void init_late(void);
 bool get(toggle_type type);
 void set(toggle_type type, bool value);
 } // namespace toggles
-
-#endif // CLIENT_TOGGLES_HH

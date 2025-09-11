@@ -1,5 +1,3 @@
-#ifndef CLIENT_PROGRAM_HH
-#define CLIENT_PROGRAM_HH 1
 #pragma once
 
 struct GL_VariedMacro final {
@@ -34,5 +32,3 @@ public:
     bool needs_update;
     GLuint handle;
 };
-
-#endif // CLIENT_PROGRAM_HH

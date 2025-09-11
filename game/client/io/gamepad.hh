@@ -1,5 +1,3 @@
-#ifndef CLIENT_GAMEPAD_HH
-#define CLIENT_GAMEPAD_HH 1
 #pragma once
 
 namespace io
@@ -50,5 +48,3 @@ struct GamepadButtonEvent final {
     int button;
 };
 } // namespace io
-
-#endif // CLIENT_GAMEPAD_HH

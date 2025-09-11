@@ -1,5 +1,3 @@
-#ifndef CORE_CONFIG_MAP_HH
-#define CORE_CONFIG_MAP_HH 1
 #pragma once
 
 namespace config
@@ -29,5 +27,3 @@ private:
     std::unordered_map<std::string, config::IValue*> m_values;
 };
 } // namespace io
-
-#endif // CORE_CONFIG_MAP_HH

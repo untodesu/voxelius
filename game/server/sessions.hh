@@ -1,5 +1,3 @@
-#ifndef SERVER_SESSIONS_HH
-#define SERVER_SESSIONS_HH 1
 #pragma once
 
 namespace world
@@ -55,5 +53,3 @@ namespace sessions
 {
 void refresh_scoreboard(void);
 } // namespace sessions
-
-#endif // SERVER_SESSIONS_HH

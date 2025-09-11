@@ -1,5 +1,3 @@
-#ifndef CORE_CONFIG_STRING_HH
-#define CORE_CONFIG_STRING_HH 1
 #pragma once
 
 #include "core/config/ivalue.hh"
@@ -31,5 +29,3 @@ constexpr const char* config::String::c_str(void) const noexcept
 {
     return m_value.c_str();
 }
-
-#endif // CORE_CONFIG_STRING_HH

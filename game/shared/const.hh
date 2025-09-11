@@ -1,5 +1,3 @@
-#ifndef SHARED_CONST_HH
-#define SHARED_CONST_HH 1
 #pragma once
 
 #include "core/math/constexpr.hh"
@@ -43,5 +41,3 @@ constexpr static glm::vec<2, T> ZERO_VEC2 = glm::vec<2, T>(0, 0);
 
 template<typename T>
 constexpr static glm::vec<3, T> ZERO_VEC3 = glm::vec<3, T>(0, 0, 0);
-
-#endif // SHARED_CONST_HH

@@ -1,5 +1,3 @@
-#ifndef CLIENT_VOXEL_ATLAS_HH
-#define CLIENT_VOXEL_ATLAS_HH 1
 #pragma once
 
 namespace world
@@ -28,5 +26,3 @@ namespace world::voxel_atlas
 AtlasStrip* find_or_load(const std::vector<std::string>& paths);
 AtlasStrip* find(const std::vector<std::string>& paths);
 } // namespace world::voxel_atlas
-
-#endif // CLIENT_VOXEL_ATLAS_HH

@@ -1,5 +1,3 @@
-#ifndef CLIENT_CHUNK_VBO_HH
-#define CLIENT_CHUNK_VBO_HH 1
 #pragma once
 
 namespace world
@@ -22,5 +20,3 @@ public:
     }
 };
 } // namespace world
-
-#endif // CLIENT_CHUNK_VBO_HH

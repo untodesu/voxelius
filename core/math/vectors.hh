@@ -1,5 +1,3 @@
-#ifndef CORE_MATH_VECTORS_HH
-#define CORE_MATH_VECTORS_HH 1
 #pragma once
 
 #include "core/math/concepts.hh"
@@ -43,5 +41,3 @@ constexpr static inline const T math::distance2(const glm::vec<3, T>& vector_a, 
 {
     return math::length2(vector_a - vector_b);
 }
-
-#endif // CORE_MATH_VECTORS_HH

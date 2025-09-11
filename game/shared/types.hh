@@ -1,5 +1,3 @@
-#ifndef SHARED_TYPES_HH
-#define SHARED_TYPES_HH 1
 #pragma once
 
 using item_id = std::uint32_t;
@@ -40,5 +38,3 @@ struct std::hash<chunk_pos_xz> final {
         return value;
     }
 };
-
-#endif // SHARED_TYPES_HH

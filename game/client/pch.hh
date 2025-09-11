@@ -1,5 +1,3 @@
-#ifndef CLIENT_PCH_HH
-#define CLIENT_PCH_HH 1
 #pragma once
 
 #include <shared/pch.hh>
@@ -28,5 +26,3 @@
 #if defined(__unix__)
 #include <dlfcn.h>
 #endif
-
-#endif // CLIENT_PCH_HH

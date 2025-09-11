@@ -1,5 +1,3 @@
-#ifndef CLIENT_LANGUAGE_HH
-#define CLIENT_LANGUAGE_HH 1
 #pragma once
 
 namespace gui
@@ -42,5 +40,3 @@ namespace gui::language
 std::string_view resolve(std::string_view key);
 std::string resolve_gui(std::string_view key);
 } // namespace gui::language
-
-#endif // CLIENT_LANGUAGE_HH

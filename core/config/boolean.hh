@@ -1,5 +1,3 @@
-#ifndef CORE_CONFIG_BOOLEAN_HH
-#define CORE_CONFIG_BOOLEAN_HH 1
 #pragma once
 
 #include "core/config/ivalue.hh"
@@ -25,5 +23,3 @@ public:
     static bool from_string(std::string_view value);
 };
 } // namespace config
-
-#endif // CORE_CONFIG_BOOLEAN_HH

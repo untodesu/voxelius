@@ -1,5 +1,3 @@
-#ifndef CORE_RESOURCE_RESOURCE_HH
-#define CORE_RESOURCE_RESOURCE_HH 1
 #pragma once
 
 template<typename T>
@@ -53,5 +51,3 @@ resource_ptr<T> resource::find(std::string_view name)
     auto result = resource::detail::find_resource(typeid(T), name);
     return std::reinterpret_pointer_cast<const T>(result);
 }
-
-#endif // CORE_RESOURCE_RESOURCE_HH

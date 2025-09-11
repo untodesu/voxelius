@@ -1,5 +1,3 @@
-#ifndef CORE_MATH_RANDOMIZER_HH
-#define CORE_MATH_RANDOMIZER_HH 1
 #pragma once
 
 namespace math
@@ -56,5 +54,3 @@ inline void math::Randomizer<T>::clear(void)
     m_vector.clear();
     m_dist = std::uniform_int_distribution<std::size_t>(0, 0);
 }
-
-#endif // CORE_MATH_RANDOMIZER_HH

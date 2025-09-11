@@ -1,5 +1,3 @@
-#ifndef CLIENT_VOXEL_SOUNDS_HH
-#define CLIENT_VOXEL_SOUNDS_HH 1
 #pragma once
 
 #include "core/resource/resource.hh"
@@ -19,5 +17,3 @@ namespace world::voxel_sounds
 resource_ptr<SoundEffect> get_footsteps(voxel_surface surface);
 resource_ptr<SoundEffect> get_placebreak(voxel_surface surface);
 } // namespace world::voxel_sounds
-
-#endif // CLIENT_VOXEL_SOUNDS_HH

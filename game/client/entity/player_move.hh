@@ -1,5 +1,3 @@
-#ifndef CLIENT_PLAYER_MOVE_HH
-#define CLIENT_PLAYER_MOVE_HH 1
 #pragma once
 
 constexpr static float PMOVE_MAX_SPEED_AIR = 16.0f;
@@ -15,5 +13,3 @@ void init(void);
 void fixed_update(void);
 void update_late(void);
 } // namespace entity::player_move
-
-#endif // CLIENT_PLAYER_MOVE_HH

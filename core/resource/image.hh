@@ -1,5 +1,3 @@
-#ifndef CORE_RESOURCE_IMAGE_HH
-#define CORE_RESOURCE_IMAGE_HH 1
 #pragma once
 
 constexpr static unsigned int IMAGE_LOAD_GRAY = 0x0001U;
@@ -11,5 +9,3 @@ struct Image final {
     stbi_uc* pixels;
     glm::ivec2 size;
 };
-
-#endif // CORE_RESOURCE_IMAGE_HH

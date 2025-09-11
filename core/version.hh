@@ -1,5 +1,3 @@
-#ifndef CORE_VERSION_HH
-#define CORE_VERSION_HH 1
 #pragma once
 
 namespace version
@@ -14,5 +12,3 @@ namespace version
 extern const std::string_view commit;
 extern const std::string_view semver;
 } // namespace version
-
-#endif // CORE_VERSION_HH

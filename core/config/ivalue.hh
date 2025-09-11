@@ -1,5 +1,3 @@
-#ifndef CORE_CONFIG_IVALUE_HH
-#define CORE_CONFIG_IVALUE_HH 1
 #pragma once
 
 namespace config
@@ -11,5 +9,3 @@ public:
     virtual std::string_view get(void) const = 0;
 };
 } // namespace config
-
-#endif // CORE_CONFIG_IVALUE_HH

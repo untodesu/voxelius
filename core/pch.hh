@@ -1,5 +1,3 @@
-#ifndef CORE_PCH_HH
-#define CORE_PCH_HH 1
 #pragma once
 
 #include <cinttypes>
@@ -49,5 +47,3 @@
 
 #include <stb_image.h>
 #include <stb_image_write.h>
-
-#endif // CORE_PCH_HH

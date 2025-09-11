@@ -1,5 +1,3 @@
-#ifndef CLIENT_KEYBIND_HH
-#define CLIENT_KEYBIND_HH 1
 #pragma once
 
 #include "core/config/ivalue.hh"
@@ -25,5 +23,3 @@ private:
     int m_glfw_keycode;
 };
 } // namespace config
-
-#endif // CLIENT_KEYBIND_HH

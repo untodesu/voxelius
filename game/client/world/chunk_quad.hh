@@ -1,5 +1,3 @@
-#ifndef CLIENT_CHUNK_QUAD_HH
-#define CLIENT_CHUNK_QUAD_HH 1
 #pragma once
 
 #include "core/math/constexpr.hh"
@@ -15,8 +13,8 @@ using ChunkQuad = std::array<std::uint32_t, 2>;
 
 namespace world
 {
-constexpr inline static ChunkQuad make_chunk_quad(
-    const glm::fvec3& position, const glm::fvec2& size, voxel_facing facing, std::size_t texture, std::size_t frames)
+constexpr inline static ChunkQuad make_chunk_quad(const glm::fvec3& position, const glm::fvec2& size, voxel_facing facing,
+    std::size_t texture, std::size_t frames)
 {
     ChunkQuad result = {};
     result[0] = 0x00000000;
@@ -41,5 +39,3 @@ constexpr inline static ChunkQuad make_chunk_quad(
     return result;
 }
 } // namespace world
-
-#endif // CLIENT_CHUNK_QUAD_HH

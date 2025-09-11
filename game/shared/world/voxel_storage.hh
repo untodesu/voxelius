@@ -1,5 +1,3 @@
-#ifndef SHARED_VOXEL_STORAGE_HH
-#define SHARED_VOXEL_STORAGE_HH 1
 #pragma once
 
 #include "shared/const.hh"
@@ -20,5 +18,3 @@ public:
     void deserialize(io::ReadBuffer& buffer);
 };
 } // namespace world
-
-#endif // SHARED_VOXEL_STORAGE_HH

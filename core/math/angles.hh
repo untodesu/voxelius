@@ -1,5 +1,3 @@
-#ifndef CORE_MATH_ANGLES_HH
-#define CORE_MATH_ANGLES_HH 1
 #pragma once
 
 #include "core/math/constexpr.hh"
@@ -103,5 +101,3 @@ inline void math::vectors(const glm::fvec3& angles, glm::fvec3* forward, glm::fv
         up->z = nsv.x * ncv.y * pcv.z + psv.y * psv.z;
     }
 }
-
-#endif // CORE_MATH_ANGLES_HH

@@ -1,5 +1,3 @@
-#ifndef SHARED_FEATURE_HH
-#define SHARED_FEATURE_HH 1
 #pragma once
 
 #include "shared/types.hh"
@@ -22,5 +20,3 @@ public:
     void place(const voxel_pos& vpos, const chunk_pos& cpos, VoxelStorage& voxels) const;
 };
 } // namespace world
-
-#endif // SHARED_FEATURE_HH

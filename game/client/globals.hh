@@ -1,5 +1,3 @@
-#ifndef CLIENTOBALS_HH
-#define CLIENTOBALS_HH 1
 #pragma once
 
 #include "shared/globals.hh"
@@ -71,5 +69,3 @@ extern unsigned int gui_screen;
 extern ALCdevice* sound_dev;
 extern ALCcontext* sound_ctx;
 } // namespace globals
-
-#endif // CLIENTOBALS_HH

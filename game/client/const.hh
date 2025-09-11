@@ -1,5 +1,3 @@
-#ifndef CLIENT_CONST_HH
-#define CLIENT_CONST_HH 1
 #pragma once
 
 #include "shared/const.hh"
@@ -23,5 +21,3 @@ static_assert(DEFAULT_HEIGHT >= MIN_HEIGHT);
 
 constexpr static float MIN_PITCH = 0.0625f;
 constexpr static float MAX_PITCH = 10.0f;
-
-#endif // CLIENT_CONST_HH

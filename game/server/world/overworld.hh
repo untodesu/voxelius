@@ -1,5 +1,3 @@
-#ifndef SERVER_OVERWORLD_HH
-#define SERVER_OVERWORLD_HH 1
 #pragma once
 
 #include "core/config/number.hh"
@@ -68,5 +66,3 @@ private:
     std::mutex m_mutex;
 };
 } // namespace world
-
-#endif // SERVER_OVERWORLD_HH

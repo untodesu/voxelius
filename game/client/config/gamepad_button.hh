@@ -1,5 +1,3 @@
-#ifndef CLIENT_GAMEPAD_BUTTON_HH
-#define CLIENT_GAMEPAD_BUTTON_HH 1
 #pragma once
 
 #include "core/config/ivalue.hh"
@@ -28,5 +26,3 @@ private:
     std::string_view m_name;
 };
 } // namespace config
-
-#endif // CLIENT_GAMEPAD_BUTTON_HH

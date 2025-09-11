@@ -1,5 +1,3 @@
-#ifndef CLIENT_CHUNK_MESHER_HH
-#define CLIENT_CHUNK_MESHER_HH 1
 #pragma once
 
 #include "client/world/chunk_vbo.hh"
@@ -18,5 +16,3 @@ void init(void);
 void shutdown(void);
 void update(void);
 } // namespace world::chunk_mesher
-
-#endif // CLIENT_CHUNK_MESHER_HH

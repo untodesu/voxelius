@@ -1,5 +1,3 @@
-#ifndef CLIENT_CAMERA_HH
-#define CLIENT_CAMERA_HH 1
 #pragma once
 
 #include "shared/types.hh"
@@ -31,5 +29,3 @@ namespace entity::camera
 void init(void);
 void update(void);
 } // namespace entity::camera
-
-#endif // CLIENT_CAMERA_HH

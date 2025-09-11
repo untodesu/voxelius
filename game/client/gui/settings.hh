@@ -1,5 +1,3 @@
-#ifndef CLIENT_SETTINGS_HH
-#define CLIENT_SETTINGS_HH 1
 #pragma once
 
 namespace config
@@ -55,8 +53,8 @@ void add_checkbox(int priority, config::Boolean& value, settings_location locati
 namespace settings
 {
 void add_input(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip);
-void add_input(
-    int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip, std::string_view fmt = "%.3f");
+void add_input(int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip,
+    std::string_view fmt = "%.3f");
 void add_input(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip);
 void add_input(int priority, config::String& value, settings_location location, std::string_view name, bool tooltip, bool allow_whitespace);
 } // namespace settings
@@ -64,8 +62,8 @@ void add_input(int priority, config::String& value, settings_location location, 
 namespace settings
 {
 void add_slider(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip);
-void add_slider(
-    int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip, std::string_view format = "%.3f");
+void add_slider(int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip,
+    std::string_view format = "%.3f");
 void add_slider(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip);
 } // namespace settings
 
@@ -90,5 +88,3 @@ namespace settings
 {
 void add_language_select(int priority, settings_location location, std::string_view name);
 } // namespace settings
-
-#endif // CLIENT_SETTINGS_HH

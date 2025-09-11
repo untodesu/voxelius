@@ -1,5 +1,3 @@
-#ifndef CLIENT_STATUS_LINES_HH
-#define CLIENT_STATUS_LINES_HH 1
 #pragma once
 
 namespace gui
@@ -21,5 +19,3 @@ namespace gui::status_lines
 void set(unsigned int line, const std::string& text, const ImVec4& color, float fadeout);
 void unset(unsigned int line);
 } // namespace gui::status_lines
-
-#endif // CLIENT_STATUS_LINES_HH

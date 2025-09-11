@@ -1,5 +1,3 @@
-#ifndef CORE_MATH_CONSTEXPR_HH
-#define CORE_MATH_CONSTEXPR_HH 1
 #pragma once
 
 #include "core/math/concepts.hh"
@@ -198,5 +196,3 @@ constexpr static inline const T math::smoothstep(const T x, const T y, const F a
     const F t = math::clamp<F>((a - x) / (y - x), F(0), F(1));
     return static_cast<T>(t * t * (F(3) - F(2) * t));
 }
-
-#endif // CORE_MATH_CONSTEXPR_HH

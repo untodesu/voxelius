@@ -1,5 +1,3 @@
-#ifndef SERVER_GLOBALS_HH
-#define SERVER_GLOBALS_HH 1
 #pragma once
 
 #include "shared/globals.hh"
@@ -27,5 +25,3 @@ extern std::uint64_t tickrate_dt;
 extern world::Dimension* spawn_dimension;
 extern std::unordered_map<std::string, world::Dimension*> dimensions;
 } // namespace globals
-
-#endif // SERVER_GLOBALS_HH

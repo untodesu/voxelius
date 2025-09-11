@@ -1,6 +1,3 @@
-#ifndef CORE_IO_BUFFER_HH
-#define CORE_IO_BUFFER_HH 1
-
 namespace io
 {
 class ReadBuffer final {
@@ -89,5 +86,3 @@ io::WriteBuffer& io::WriteBuffer::operator<<(const T value)
     write<T>(value);
     return *this;
 }
-
-#endif // CORE_BUFFER_HH

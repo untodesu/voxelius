@@ -1,5 +1,3 @@
-#ifndef CLIENT_BOTHER_HH
-#define CLIENT_BOTHER_HH 1
 #pragma once
 
 namespace gui
@@ -22,5 +20,3 @@ void update_late(void);
 void ping(unsigned int identity, std::string_view host, std::uint16_t port);
 void cancel(unsigned int identity);
 } // namespace gui::bother
-
-#endif // CLIENT_BOTHER_HH

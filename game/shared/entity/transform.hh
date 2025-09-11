@@ -1,5 +1,3 @@
-#ifndef SHARED_ENTITY_TRANSFORM_HH
-#define SHARED_ENTITY_TRANSFORM_HH 1
 #pragma once
 
 #include "shared/types.hh"
@@ -30,5 +28,3 @@ namespace entity::client
 struct TransformIntr final : public Transform {};
 struct TransformPrev final : public Transform {};
 } // namespace entity::client
-
-#endif // SHARED_ENTITY_TRANSFORM_HH

@@ -1,5 +1,3 @@
-#ifndef SHARED_CHUNK_HH
-#define SHARED_CHUNK_HH 1
 #pragma once
 
 #include "shared/world/voxel_storage.hh"
@@ -42,5 +40,3 @@ private:
     unsigned int m_biome;
 };
 } // namespace world
-
-#endif // SHARED_CHUNK_HH

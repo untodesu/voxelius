@@ -1,5 +1,3 @@
-#ifndef SERVER_GAME_HH
-#define SERVER_GAME_HH 1
 #pragma once
 
 namespace config
@@ -25,5 +23,3 @@ void shutdown(void);
 void fixed_update(void);
 void fixed_update_late(void);
 } // namespace server_game
-
-#endif // SERVER_GAME_HH

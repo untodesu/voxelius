@@ -1,5 +1,3 @@
-#ifndef CLIENT_HOTBAR_HH
-#define CLIENT_HOTBAR_HH 1
 #pragma once
 
 #include "shared/types.hh"
@@ -27,5 +25,3 @@ namespace gui::hotbar
 void next_slot(void);
 void prev_slot(void);
 } // namespace gui::hotbar
-
-#endif // CLIENT_HOTBAR_HH

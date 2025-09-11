@@ -1,5 +1,3 @@
-#ifndef SHARED_DIMENSION_HH
-#define SHARED_DIMENSION_HH 1
 #pragma once
 
 #include "shared/const.hh"
@@ -100,5 +98,3 @@ struct VoxelSetEvent final {
     Chunk* chunk;
 };
 } // namespace world
-
-#endif // SHARED_DIMENSION_HH

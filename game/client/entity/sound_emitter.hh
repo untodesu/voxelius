@@ -1,5 +1,3 @@
-#ifndef CLIENT_SOUND_EMITTER_HH
-#define CLIENT_SOUND_EMITTER_HH 1
 #pragma once
 
 #include "core/resource/resource.hh"
@@ -20,5 +18,3 @@ public:
     static void update(void);
 };
 } // namespace entity
-
-#endif // CLIENT_SOUND_EMITTER_HH

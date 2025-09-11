@@ -1,5 +1,3 @@
-#ifndef SHARED_COORD_HH
-#define SHARED_COORD_HH 1
 #pragma once
 
 #include "shared/const.hh"
@@ -118,8 +116,8 @@ inline constexpr glm::fvec3 coord::to_relative(const chunk_pos& pivot_cpos, cons
     };
 }
 
-inline constexpr glm::fvec3 coord::to_relative(
-    const chunk_pos& pivot_cpos, const glm::fvec3& pivot_fvec, const chunk_pos& cpos, const glm::fvec3& fvec)
+inline constexpr glm::fvec3 coord::to_relative(const chunk_pos& pivot_cpos, const glm::fvec3& pivot_fvec, const chunk_pos& cpos,
+    const glm::fvec3& fvec)
 {
     return glm::fvec3 {
         static_cast<float>((cpos.x - pivot_cpos.x) << CHUNK_BITSHIFT) + (fvec.x - pivot_fvec.x),
@@ -145,5 +143,3 @@ inline constexpr glm::fvec3 coord::to_fvec3(const chunk_pos& cpos, const glm::fv
         fpos.z + static_cast<float>(cpos.z << CHUNK_BITSHIFT),
     };
 }
-
-#endif // SHARED_COORD_HH

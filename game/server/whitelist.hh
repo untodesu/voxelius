@@ -1,5 +1,3 @@
-#ifndef SERVER_WHITELIST_HH
-#define SERVER_WHITELIST_HH 1
 #pragma once
 
 namespace config
@@ -26,5 +24,3 @@ namespace whitelist
 bool contains(std::string_view username);
 bool matches(std::string_view username, std::uint64_t password_hash);
 } // namespace whitelist
-
-#endif // SERVER_WHITELIST_HH

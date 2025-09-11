@@ -1,5 +1,3 @@
-#ifndef CORE_MATH_AABB_HH
-#define CORE_MATH_AABB_HH 1
 #pragma once
 
 namespace math
@@ -28,5 +26,3 @@ public:
     glm::fvec3 max;
 };
 } // namespace math
-
-#endif // CORE_MATH_AABB_HH

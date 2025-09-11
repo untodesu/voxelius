@@ -1,5 +1,3 @@
-#ifndef CORE_UTILS_STRING_HH
-#define CORE_UTILS_STRING_HH 1
 #pragma once
 
 namespace utils
@@ -17,5 +15,3 @@ namespace utils
 {
 std::string trim_whitespace(const std::string& string);
 } // namespace utils
-
-#endif // CORE_UTILS_STRING_HH

@@ -1,5 +1,3 @@
-#ifndef UTILS_PHYSFS_HH
-#define UTILS_PHYSFS_HH 1
 #pragma once
 
 namespace utils
@@ -14,5 +12,3 @@ namespace utils
 {
 std::string_view physfs_error(void);
 } // namespace utils
-
-#endif // UTILS_PHYSFS_HH

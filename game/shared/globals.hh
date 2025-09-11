@@ -1,5 +1,3 @@
-#ifndef SHARED_GLOBALS_HH
-#define SHARED_GLOBALS_HH 1
 #pragma once
 
 namespace globals
@@ -19,5 +17,3 @@ namespace globals
 {
 extern std::uint64_t curtime;
 } // namespace globals
-
-#endif // SHARED_GLOBALS_HH

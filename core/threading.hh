@@ -1,5 +1,3 @@
-#ifndef CORE_THREADING_HH
-#define CORE_THREADING_HH 1
 #pragma once
 
 enum class task_status : unsigned int {
@@ -46,5 +44,3 @@ inline void threading::submit(AT&&... args)
 {
     threading::detail::submit_new(new T(args...));
 }
-
-#endif // CORE_THREADING_HH

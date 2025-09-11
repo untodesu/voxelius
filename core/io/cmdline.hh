@@ -1,5 +1,3 @@
-#ifndef CORE_IO_CMDLINE_HH
-#define CORE_IO_CMDLINE_HH 1
 #pragma once
 
 namespace io::cmdline
@@ -11,5 +9,3 @@ std::string_view get(std::string_view option, std::string_view fallback = "");
 const char* get_cstr(std::string_view option, const char* fallback = nullptr);
 bool contains(std::string_view option);
 } // namespace io::cmdline
-
-#endif // CORE_IO_CMDLINE_HH

@@ -1,5 +1,3 @@
-#ifndef SERVER_UNIVERSE_HH
-#define SERVER_UNIVERSE_HH 1
 #pragma once
 
 #include "shared/types.hh"
@@ -25,5 +23,3 @@ Chunk* load_chunk(Dimension* dimension, const chunk_pos& cpos);
 void save_chunk(Dimension* dimension, const chunk_pos& cpos);
 void save_all_chunks(Dimension* dimension);
 } // namespace world::universe
-
-#endif // SERVER_UNIVERSE_HH

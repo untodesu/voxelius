@@ -1,5 +1,3 @@
-#ifndef SHARED_ITEM_REGISTRY_HH
-#define SHARED_ITEM_REGISTRY_HH 1
 #pragma once
 
 #include "core/resource/resource.hh"
@@ -64,5 +62,3 @@ namespace world::item_registry
 {
 std::uint64_t calculate_checksum(void);
 } // namespace world::item_registry
-
-#endif // SHARED_ITEM_REGISTRY_HH

@@ -1,5 +1,3 @@
-#ifndef CLIENT_TEXTURE2D_HH
-#define CLIENT_TEXTURE2D_HH 1
 #pragma once
 
 constexpr static unsigned int TEXTURE_GUI_LOAD_CLAMP_S = 0x0001;
@@ -15,5 +13,3 @@ struct TextureGUI final {
     ImTextureID handle;
     glm::ivec2 size;
 };
-
-#endif // CLIENT_TEXTURE2D_HH

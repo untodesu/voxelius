@@ -1,5 +1,3 @@
-#ifndef CLIENT_PLAYER_TARGET_HH
-#define CLIENT_PLAYER_TARGET_HH 1
 #pragma once
 
 #include "shared/world/voxel_registry.hh"
@@ -18,5 +16,3 @@ void init(void);
 void update(void);
 void render(void);
 } // namespace world::player_target
-
-#endif // CLIENT_PLAYER_TARGET_HH

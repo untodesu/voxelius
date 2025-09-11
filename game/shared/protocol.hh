@@ -1,5 +1,3 @@
-#ifndef SHARED_PROTOCOL_HH
-#define SHARED_PROTOCOL_HH 1
 #pragma once
 
 #include "shared/world/chunk.hh"
@@ -212,5 +210,3 @@ struct protocol::DimensionInfo final : public protocol::Base<0x0012> {
     std::string name;
     float gravity;
 };
-
-#endif // SHARED_PROTOCOL_HH

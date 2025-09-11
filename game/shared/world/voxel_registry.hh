@@ -1,5 +1,3 @@
-#ifndef SHARED_VOXEL_REGISTRY_HH
-#define SHARED_VOXEL_REGISTRY_HH 1
 #pragma once
 
 #include "shared/types.hh"
@@ -149,5 +147,3 @@ namespace world::voxel_registry
 {
 std::uint64_t calculate_checksum(void);
 } // namespace world::voxel_registry
-
-#endif // SHARED_VOXEL_REGISTRY_HH

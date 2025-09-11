@@ -1,5 +1,3 @@
-#ifndef CLIENT_SESSION_HH
-#define CLIENT_SESSION_HH 1
 #pragma once
 
 namespace session
@@ -27,5 +25,3 @@ namespace session
 {
 bool is_ingame(void);
 } // namespace session
-
-#endif // CLIENT_SESSION_HH
