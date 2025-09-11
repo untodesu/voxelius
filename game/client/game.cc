@@ -5,9 +5,13 @@
 #include "core/config/boolean.hh"
 #include "core/config/number.hh"
 #include "core/config/string.hh"
+
 #include "core/io/config_map.hh"
+
 #include "core/math/angles.hh"
+
 #include "core/resource/resource.hh"
+
 #include "core/utils/physfs.hh"
 
 #include "shared/entity/collision.hh"
@@ -17,8 +21,10 @@
 #include "shared/entity/stasis.hh"
 #include "shared/entity/transform.hh"
 #include "shared/entity/velocity.hh"
+
 #include "shared/game_items.hh"
 #include "shared/game_voxels.hh"
+
 #include "shared/world/dimension.hh"
 #include "shared/world/item_registry.hh"
 #include "shared/world/ray_dda.hh"
@@ -28,12 +34,14 @@
 #include "shared/protocol.hh"
 
 #include "client/config/keybind.hh"
+
 #include "client/entity/camera.hh"
 #include "client/entity/interpolation.hh"
 #include "client/entity/listener.hh"
 #include "client/entity/player_look.hh"
 #include "client/entity/player_move.hh"
 #include "client/entity/sound_emitter.hh"
+
 #include "client/gui/background.hh"
 #include "client/gui/bother.hh"
 #include "client/gui/chat.hh"
@@ -52,10 +60,14 @@
 #include "client/gui/splash.hh"
 #include "client/gui/status_lines.hh"
 #include "client/gui/window_title.hh"
+
 #include "client/io/gamepad.hh"
 #include "client/io/glfw.hh"
+
 #include "client/resource/texture_gui.hh"
+
 #include "client/sound/sound.hh"
+
 #include "client/world/chunk_mesher.hh"
 #include "client/world/chunk_renderer.hh"
 #include "client/world/chunk_visibility.hh"

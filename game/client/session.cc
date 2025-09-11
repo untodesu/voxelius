@@ -3,12 +3,14 @@
 #include "client/session.hh"
 
 #include "core/config/string.hh"
+
 #include "core/math/crc64.hh"
 
 #include "shared/entity/head.hh"
 #include "shared/entity/player.hh"
 #include "shared/entity/transform.hh"
 #include "shared/entity/velocity.hh"
+
 #include "shared/world/dimension.hh"
 #include "shared/world/item_registry.hh"
 #include "shared/world/voxel_registry.hh"
@@ -17,11 +19,13 @@
 #include "shared/protocol.hh"
 
 #include "client/entity/camera.hh"
+
 #include "client/gui/chat.hh"
 #include "client/gui/gui_screen.hh"
 #include "client/gui/message_box.hh"
 #include "client/gui/progress_bar.hh"
 #include "client/gui/window_title.hh"
+
 #include "client/world/chunk_visibility.hh"
 
 #include "client/game.hh"

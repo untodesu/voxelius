@@ -3,6 +3,7 @@
 #pragma once
 
 #include "core/config/ivalue.hh"
+
 #include "core/math/concepts.hh"
 
 namespace config

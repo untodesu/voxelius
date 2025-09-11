@@ -3,12 +3,15 @@
 #include "client/screenshot.hh"
 
 #include "core/io/config_map.hh"
+
 #include "core/utils/epoch.hh"
 
 #include "client/config/keybind.hh"
+
 #include "client/gui/chat.hh"
 #include "client/gui/language.hh"
 #include "client/gui/settings.hh"
+
 #include "client/io/glfw.hh"
 
 #include "client/globals.hh"

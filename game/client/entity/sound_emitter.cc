@@ -3,15 +3,18 @@
 #include "client/entity/sound_emitter.hh"
 
 #include "core/config/number.hh"
+
 #include "core/math/constexpr.hh"
 
 #include "shared/entity/transform.hh"
 #include "shared/entity/velocity.hh"
+
 #include "shared/world/dimension.hh"
 
 #include "shared/coord.hh"
 
 #include "client/entity/camera.hh"
+
 #include "client/sound/sound.hh"
 
 #include "client/globals.hh"

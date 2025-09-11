@@ -5,14 +5,18 @@
 #include "core/config/boolean.hh"
 #include "core/config/number.hh"
 #include "core/config/string.hh"
+
 #include "core/io/config_map.hh"
+
 #include "core/math/constexpr.hh"
 
 #include "client/config/gamepad_axis.hh"
 #include "client/config/gamepad_button.hh"
 #include "client/config/keybind.hh"
+
 #include "client/gui/gui_screen.hh"
 #include "client/gui/language.hh"
+
 #include "client/io/gamepad.hh"
 #include "client/io/glfw.hh"
 

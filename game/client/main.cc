@@ -2,8 +2,10 @@
 
 #include "core/io/cmdline.hh"
 #include "core/io/config_map.hh"
+
 #include "core/resource/image.hh"
 #include "core/resource/resource.hh"
+
 #include "core/utils/epoch.hh"
 
 #include "core/threading.hh"
@@ -13,7 +15,9 @@
 #include "shared/splash.hh"
 
 #include "client/gui/window_title.hh"
+
 #include "client/io/glfw.hh"
+
 #include "client/resource/sound_effect.hh"
 #include "client/resource/texture_gui.hh"
 
@@ -122,8 +126,8 @@ static void on_glfw_window_focus(GLFWwindow* window, int focused)
     ImGui_ImplGlfw_WindowFocusCallback(window, focused);
 }
 
-static void GLAD_API_PTR on_opengl_message(
-    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* param)
+static void GLAD_API_PTR on_opengl_message(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message,
+    const void* param)
 {
     spdlog::info("opengl: {}", reinterpret_cast<const char*>(message));
 }

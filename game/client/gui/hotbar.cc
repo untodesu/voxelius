@@ -3,14 +3,18 @@
 #include "client/gui/hotbar.hh"
 
 #include "core/io/config_map.hh"
+
 #include "core/resource/resource.hh"
 
 #include "shared/world/item_registry.hh"
 
 #include "client/config/keybind.hh"
+
 #include "client/gui/settings.hh"
 #include "client/gui/status_lines.hh"
+
 #include "client/io/glfw.hh"
+
 #include "client/resource/texture_gui.hh"
 
 #include "client/globals.hh"

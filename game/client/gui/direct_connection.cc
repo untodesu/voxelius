@@ -3,12 +3,14 @@
 #include "client/gui/direct_connection.hh"
 
 #include "core/config/boolean.hh"
+
 #include "core/utils/string.hh"
 
 #include "shared/protocol.hh"
 
 #include "client/gui/gui_screen.hh"
 #include "client/gui/language.hh"
+
 #include "client/io/glfw.hh"
 
 #include "client/game.hh"

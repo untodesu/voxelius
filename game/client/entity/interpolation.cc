@@ -6,6 +6,7 @@
 
 #include "shared/entity/head.hh"
 #include "shared/entity/transform.hh"
+
 #include "shared/world/dimension.hh"
 
 #include "shared/coord.hh"

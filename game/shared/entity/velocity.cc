@@ -4,6 +4,7 @@
 
 #include "shared/entity/stasis.hh"
 #include "shared/entity/transform.hh"
+
 #include "shared/world/dimension.hh"
 
 #include "shared/globals.hh"

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "core/config/number.hh"
+
 #include "core/io/config_map.hh"
 
 #include "shared/world/dimension.hh"

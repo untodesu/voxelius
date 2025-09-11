@@ -5,6 +5,7 @@
 #include "shared/entity/factory.hh"
 #include "shared/entity/head.hh"
 #include "shared/entity/transform.hh"
+
 #include "shared/world/dimension.hh"
 
 #include "client/entity/sound_emitter.hh"

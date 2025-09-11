@@ -3,8 +3,11 @@
 #include "core/io/config_map.hh"
 
 #include "core/config/ivalue.hh"
+
 #include "core/io/cmdline.hh"
+
 #include "core/utils/string.hh"
+
 #include "core/version.hh"
 
 void io::ConfigMap::load_cmdline(void)

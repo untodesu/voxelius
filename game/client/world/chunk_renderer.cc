@@ -4,6 +4,7 @@
 
 #include "core/config/boolean.hh"
 #include "core/config/number.hh"
+
 #include "core/io/config_map.hh"
 
 #include "shared/world/chunk.hh"
@@ -12,7 +13,9 @@
 #include "shared/coord.hh"
 
 #include "client/entity/camera.hh"
+
 #include "client/gui/settings.hh"
+
 #include "client/world/chunk_mesher.hh"
 #include "client/world/chunk_quad.hh"
 #include "client/world/outline.hh"

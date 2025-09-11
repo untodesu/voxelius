@@ -3,6 +3,7 @@
 #include "client/gui/language.hh"
 
 #include "core/config/string.hh"
+
 #include "core/io/config_map.hh"
 
 #include "client/gui/settings.hh"

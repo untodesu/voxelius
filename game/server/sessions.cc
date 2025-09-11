@@ -4,9 +4,12 @@
 
 #include "core/config/boolean.hh"
 #include "core/config/number.hh"
+
 #include "core/io/config_map.hh"
+
 #include "core/math/constexpr.hh"
 #include "core/math/crc64.hh"
+
 #include "core/utils/string.hh"
 
 #include "shared/entity/factory.hh"
@@ -14,6 +17,7 @@
 #include "shared/entity/player.hh"
 #include "shared/entity/transform.hh"
 #include "shared/entity/velocity.hh"
+
 #include "shared/world/chunk.hh"
 #include "shared/world/dimension.hh"
 #include "shared/world/item_registry.hh"

@@ -3,6 +3,7 @@
 #include "client/gui/background.hh"
 
 #include "core/math/constexpr.hh"
+
 #include "core/resource/resource.hh"
 
 #include "client/resource/texture_gui.hh"

@@ -68,10 +68,13 @@ static void on_glfw_joystick_event(const io::GlfwJoystickEvent& event)
 
         active_gamepad_id = INVALID_GAMEPAD_ID;
 
-        for(int i = 0; i < NUM_AXES; io::gamepad::last_state.axes[i++] = 0.0f)
-            ;
-        for(int i = 0; i < NUM_BUTTONS; io::gamepad::last_state.buttons[i++] = GLFW_RELEASE)
-            ;
+        for(int i = 0; i < NUM_AXES; io::gamepad::last_state.axes[i++] = 0.0f) {
+            // empty
+        }
+
+        for(int i = 0; i < NUM_BUTTONS; io::gamepad::last_state.buttons[i++] = GLFW_RELEASE) {
+            // empty
+        }
 
         spdlog::warn("gamepad: disconnected");
 
@@ -145,7 +148,7 @@ void io::gamepad::update_late(void)
     if(glfwGetGamepadState(active_gamepad_id, &io::gamepad::state)) {
         for(int i = 0; i < NUM_AXES; ++i) {
             if((math::abs(io::gamepad::state.axes[i]) > GAMEPAD_AXIS_EVENT_THRESHOLD)
-                && (math::abs(io::gamepad::last_state.axes[i]) <= GAMEPAD_AXIS_EVENT_THRESHOLD)) {
+                    && (math::abs(io::gamepad::last_state.axes[i]) <= GAMEPAD_AXIS_EVENT_THRESHOLD)) {
                 GamepadAxisEvent event;
                 event.action = GLFW_PRESS;
                 event.axis = i;
@@ -154,7 +157,7 @@ void io::gamepad::update_late(void)
             }
 
             if((math::abs(io::gamepad::state.axes[i]) <= GAMEPAD_AXIS_EVENT_THRESHOLD)
-                && (math::abs(io::gamepad::last_state.axes[i]) > GAMEPAD_AXIS_EVENT_THRESHOLD)) {
+                    && (math::abs(io::gamepad::last_state.axes[i]) > GAMEPAD_AXIS_EVENT_THRESHOLD)) {
                 GamepadAxisEvent event;
                 event.action = GLFW_RELEASE;
                 event.axis = i;

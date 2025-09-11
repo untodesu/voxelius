@@ -4,7 +4,9 @@
 
 #include "core/config/boolean.hh"
 #include "core/config/number.hh"
+
 #include "core/io/config_map.hh"
+
 #include "core/math/angles.hh"
 #include "core/math/constexpr.hh"
 
@@ -12,16 +14,21 @@
 #include "shared/entity/head.hh"
 #include "shared/entity/transform.hh"
 #include "shared/entity/velocity.hh"
+
 #include "shared/world/dimension.hh"
 
 #include "client/config/gamepad_axis.hh"
 #include "client/config/gamepad_button.hh"
 #include "client/config/keybind.hh"
+
 #include "client/gui/gui_screen.hh"
 #include "client/gui/settings.hh"
 #include "client/gui/status_lines.hh"
+
 #include "client/io/gamepad.hh"
+
 #include "client/sound/sound.hh"
+
 #include "client/world/voxel_sounds.hh"
 
 #include "client/const.hh"

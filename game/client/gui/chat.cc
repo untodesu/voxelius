@@ -4,19 +4,26 @@
 
 #include "core/config/number.hh"
 #include "core/config/string.hh"
+
 #include "core/io/config_map.hh"
+
 #include "core/resource/resource.hh"
+
 #include "core/utils/string.hh"
 
 #include "shared/protocol.hh"
 
 #include "client/config/keybind.hh"
+
 #include "client/gui/gui_screen.hh"
 #include "client/gui/imdraw_ext.hh"
 #include "client/gui/language.hh"
 #include "client/gui/settings.hh"
+
 #include "client/io/glfw.hh"
+
 #include "client/resource/sound_effect.hh"
+
 #include "client/sound/sound.hh"
 
 #include "client/game.hh"

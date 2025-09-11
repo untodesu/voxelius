@@ -2,8 +2,9 @@
 #define SHARED_CHUNK_HH 1
 #pragma once
 
-#include "shared/types.hh"
 #include "shared/world/voxel_storage.hh"
+
+#include "shared/types.hh"
 
 constexpr static unsigned int BIOME_VOID = 0U;
 

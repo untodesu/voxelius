@@ -97,8 +97,8 @@ public:
 private:
     bool vis_test(voxel_id voxel, const world::VoxelInfo* info, const local_pos& lpos) const;
     void push_quad_a(const world::VoxelInfo* info, const glm::fvec3& pos, const glm::fvec2& size, world::voxel_face face);
-    void push_quad_v(
-        const world::VoxelInfo* info, const glm::fvec3& pos, const glm::fvec2& size, world::voxel_face face, std::size_t entropy);
+    void push_quad_v(const world::VoxelInfo* info, const glm::fvec3& pos, const glm::fvec2& size, world::voxel_face face,
+            std::size_t entropy);
     void make_cube(voxel_id voxel, const world::VoxelInfo* info, const local_pos& lpos, world::voxel_vis vis, std::size_t entropy);
     void cache_chunk(const chunk_pos& cpos);
 
@@ -304,8 +304,8 @@ void GL_MeshingTask::push_quad_a(const world::VoxelInfo* info, const glm::fvec3&
     }
 }
 
-void GL_MeshingTask::push_quad_v(
-    const world::VoxelInfo* info, const glm::fvec3& pos, const glm::fvec2& size, world::voxel_face face, std::size_t entropy)
+void GL_MeshingTask::push_quad_v(const world::VoxelInfo* info, const glm::fvec3& pos, const glm::fvec2& size, world::voxel_face face,
+        std::size_t entropy)
 {
     const world::voxel_facing facing = get_facing(face, info->type);
     const world::VoxelTexture& vtex = info->textures[static_cast<std::size_t>(face)];
@@ -319,8 +319,8 @@ void GL_MeshingTask::push_quad_v(
     }
 }
 
-void GL_MeshingTask::make_cube(
-    voxel_id voxel, const world::VoxelInfo* info, const local_pos& lpos, world::voxel_vis vis, std::size_t entropy)
+void GL_MeshingTask::make_cube(voxel_id voxel, const world::VoxelInfo* info, const local_pos& lpos, world::voxel_vis vis,
+        std::size_t entropy)
 {
     const glm::fvec3 fpos = glm::fvec3(lpos);
     const glm::fvec2 fsize = glm::fvec2(1.0f, 1.0f);

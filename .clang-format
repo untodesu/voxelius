@@ -30,9 +30,11 @@ AlignConsecutiveMacros:
   AlignFunctionPointers: false
   PadOperators: true
 AlignEscapedNewlines: Left
-AlignOperands: true
-PenaltyBreakAssignment: 21
+AlignOperands: false
+PenaltyBreakAssignment: 50
 PenaltyBreakBeforeFirstCallParameter: 21
+PenaltyBreakOpenParenthesis: 21
+PenaltyIndentedWhitespace: 1
 AlignTrailingComments:
   Kind: Always
   OverEmptyLines: 0
@@ -90,7 +92,7 @@ DerivePointerAlignment: false
 EmptyLineBeforeAccessModifier: LogicalBlock
 FixNamespaceComments: true
 ShortNamespaceLines: 0
-IndentCaseBlocks: true
+IndentCaseBlocks: false
 IndentCaseLabels: true
 IndentGotoLabels: true
 IndentPPDirectives: None
@@ -102,7 +104,6 @@ Language: Cpp
 LineEnding: CRLF
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-PenaltyIndentedWhitespace: 2
 PointerAlignment: Left
 ReflowComments: true
 SortIncludes: true

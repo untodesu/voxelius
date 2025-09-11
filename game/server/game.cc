@@ -4,10 +4,13 @@
 
 #include "core/config/number.hh"
 #include "core/config/string.hh"
+
 #include "core/io/cmdline.hh"
 #include "core/io/config_map.hh"
+
 #include "core/math/constexpr.hh"
 #include "core/math/crc64.hh"
+
 #include "core/utils/epoch.hh"
 
 #include "shared/entity/collision.hh"
@@ -17,6 +20,7 @@
 #include "shared/entity/stasis.hh"
 #include "shared/entity/transform.hh"
 #include "shared/entity/velocity.hh"
+
 #include "shared/world/dimension.hh"
 
 #include "shared/game_items.hh"

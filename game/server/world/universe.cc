@@ -4,8 +4,10 @@
 
 #include "core/config/number.hh"
 #include "core/config/string.hh"
+
 #include "core/io/buffer.hh"
 #include "core/io/config_map.hh"
+
 #include "core/utils/epoch.hh"
 
 #include "shared/world/chunk.hh"
@@ -73,8 +75,8 @@ static void add_new_dimension(world::Dimension* dimension)
     dimension->init_late(universe_config_seed.get_value());
 }
 
-static void internal_save_chunk(
-    const DimensionMetadata* metadata, const world::Dimension* dimension, const chunk_pos& cpos, const world::Chunk* chunk)
+static void internal_save_chunk(const DimensionMetadata* metadata, const world::Dimension* dimension, const chunk_pos& cpos,
+    const world::Chunk* chunk)
 {
     auto path = make_chunk_filename(metadata, cpos);
 

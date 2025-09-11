@@ -3,7 +3,9 @@
 #include "client/world/voxel_anims.hh"
 
 #include "core/config/number.hh"
+
 #include "core/io/config_map.hh"
+
 #include "core/math/constexpr.hh"
 
 #include "client/globals.hh"
@@ -24,8 +26,8 @@ void world::voxel_anims::init(void)
 void world::voxel_anims::update(void)
 {
     if(globals::curtime >= world::voxel_anims::nextframe) {
-        world::voxel_anims::nextframe =
-            globals::curtime + static_cast<std::uint64_t>(1000000.0 / static_cast<float>(base_framerate.get_value()));
+        world::voxel_anims::nextframe = globals::curtime
+                + static_cast<std::uint64_t>(1000000.0 / static_cast<float>(base_framerate.get_value()));
         world::voxel_anims::frame += 1U;
     }
 }

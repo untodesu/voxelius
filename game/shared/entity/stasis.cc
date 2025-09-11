@@ -3,6 +3,7 @@
 #include "shared/entity/stasis.hh"
 
 #include "shared/entity/transform.hh"
+
 #include "shared/world/dimension.hh"
 
 void entity::Stasis::fixed_update(world::Dimension* dimension)

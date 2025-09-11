@@ -3,6 +3,7 @@
 #include "client/world/chunk_visibility.hh"
 
 #include "core/config/number.hh"
+
 #include "core/math/vectors.hh"
 
 #include "shared/world/chunk.hh"

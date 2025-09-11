@@ -3,15 +3,19 @@
 #include "client/entity/camera.hh"
 
 #include "core/config/number.hh"
+
 #include "core/io/config_map.hh"
+
 #include "core/math/angles.hh"
 
 #include "shared/entity/head.hh"
 #include "shared/entity/transform.hh"
 #include "shared/entity/velocity.hh"
+
 #include "shared/world/dimension.hh"
 
 #include "client/entity/player_move.hh"
+
 #include "client/gui/settings.hh"
 
 #include "client/const.hh"

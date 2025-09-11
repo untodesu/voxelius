@@ -7,6 +7,7 @@
 #include "shared/entity/head.hh"
 #include "shared/entity/transform.hh"
 #include "shared/entity/velocity.hh"
+
 #include "shared/world/chunk_aabb.hh"
 #include "shared/world/dimension.hh"
 

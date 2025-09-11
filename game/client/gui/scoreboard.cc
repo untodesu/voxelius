@@ -7,6 +7,7 @@
 #include "shared/protocol.hh"
 
 #include "client/config/keybind.hh"
+
 #include "client/gui/gui_screen.hh"
 #include "client/gui/settings.hh"
 

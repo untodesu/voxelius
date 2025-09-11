@@ -1,11 +1,15 @@
 #include "server/pch.hh"
 
 #include "core/config/number.hh"
+
 #include "core/io/cmdline.hh"
 #include "core/io/config_map.hh"
+
 #include "core/math/constexpr.hh"
+
 #include "core/resource/image.hh"
 #include "core/resource/resource.hh"
+
 #include "core/utils/epoch.hh"
 
 #include "core/threading.hh"

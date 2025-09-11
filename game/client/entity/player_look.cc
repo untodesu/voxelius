@@ -4,16 +4,21 @@
 
 #include "core/config/boolean.hh"
 #include "core/config/number.hh"
+
 #include "core/io/config_map.hh"
+
 #include "core/math/angles.hh"
 
 #include "shared/entity/head.hh"
+
 #include "shared/world/dimension.hh"
 
 #include "client/config/gamepad_axis.hh"
 #include "client/config/gamepad_button.hh"
 #include "client/config/keybind.hh"
+
 #include "client/gui/settings.hh"
+
 #include "client/io/gamepad.hh"
 #include "client/io/glfw.hh"
 

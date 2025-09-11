@@ -3,6 +3,7 @@
 #include "client/resource/sound_effect.hh"
 
 #include "core/resource/resource.hh"
+
 #include "core/utils/physfs.hh"
 
 #include "client/globals.hh"

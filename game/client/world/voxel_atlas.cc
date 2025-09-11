@@ -4,6 +4,7 @@
 
 #include "core/math/constexpr.hh"
 #include "core/math/crc64.hh"
+
 #include "core/resource/image.hh"
 #include "core/resource/resource.hh"
 
@@ -71,8 +72,8 @@ static world::AtlasStrip* plane_new_strip(AtlasPlane& plane, const std::vector<s
             }
 
             const std::size_t offset = strip.offset + i;
-            glTexSubImage3D(
-                GL_TEXTURE_2D_ARRAY, 0, 0, 0, offset, image->size.x, image->size.y, 1, GL_RGBA, GL_UNSIGNED_BYTE, image->pixels);
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, offset, image->size.x, image->size.y, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                image->pixels);
         }
     }
 

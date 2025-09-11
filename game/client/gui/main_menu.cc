@@ -3,6 +3,7 @@
 #include "client/gui/main_menu.hh"
 
 #include "core/math/constexpr.hh"
+
 #include "core/resource/resource.hh"
 
 #include "core/version.hh"
@@ -10,7 +11,9 @@
 #include "client/gui/gui_screen.hh"
 #include "client/gui/language.hh"
 #include "client/gui/window_title.hh"
+
 #include "client/io/glfw.hh"
+
 #include "client/resource/texture_gui.hh"
 
 #include "client/globals.hh"

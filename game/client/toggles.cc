@@ -6,6 +6,7 @@
 
 #include "client/gui/chat.hh"
 #include "client/gui/language.hh"
+
 #include "client/io/gamepad.hh"
 #include "client/io/glfw.hh"
 

@@ -4,8 +4,11 @@
 
 #include "core/config/boolean.hh"
 #include "core/config/string.hh"
+
 #include "core/io/config_map.hh"
+
 #include "core/math/crc64.hh"
+
 #include "core/utils/string.hh"
 
 #include "server/game.hh"

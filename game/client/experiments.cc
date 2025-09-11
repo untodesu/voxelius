@@ -11,7 +11,9 @@
 #include "client/gui/chat.hh"
 #include "client/gui/hotbar.hh"
 #include "client/gui/status_lines.hh"
+
 #include "client/io/glfw.hh"
+
 #include "client/world/player_target.hh"
 
 #include "client/globals.hh"

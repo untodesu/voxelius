@@ -6,15 +6,18 @@
 #include "shared/entity/player.hh"
 #include "shared/entity/transform.hh"
 #include "shared/entity/velocity.hh"
+
 #include "shared/world/dimension.hh"
 
 #include "shared/protocol.hh"
 
 #include "client/entity/factory.hh"
+
 #include "client/gui/chat.hh"
 #include "client/gui/gui_screen.hh"
 #include "client/gui/message_box.hh"
 #include "client/gui/window_title.hh"
+
 #include "client/sound/sound.hh"
 
 #include "client/globals.hh"

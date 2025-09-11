@@ -3,8 +3,11 @@
 #include "client/sound/sound.hh"
 
 #include "core/config/number.hh"
+
 #include "core/io/config_map.hh"
+
 #include "core/math/constexpr.hh"
+
 #include "core/resource/resource.hh"
 
 #include "shared/world/dimension.hh"
@@ -14,7 +17,9 @@
 
 #include "client/entity/camera.hh"
 #include "client/entity/sound_emitter.hh"
+
 #include "client/gui/settings.hh"
+
 #include "client/resource/sound_effect.hh"
 
 #include "client/const.hh"

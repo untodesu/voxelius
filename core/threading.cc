@@ -3,6 +3,7 @@
 #include "core/threading.hh"
 
 #include "core/io/cmdline.hh"
+
 #include "core/math/constexpr.hh"
 
 constexpr static std::string_view DEFAULT_POOL_SIZE_ARG = "4";
