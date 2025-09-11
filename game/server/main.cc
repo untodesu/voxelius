@@ -9,11 +9,11 @@
 #include "core/resource/resource.hh"
 #include "core/utils/epoch.hh"
 
+#include "core/threading.hh"
 #include "core/version.hh"
 
 #include "shared/game.hh"
 #include "shared/protocol.hh"
-#include "shared/threading.hh"
 
 #include "server/game.hh"
 #include "server/globals.hh"

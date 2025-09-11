@@ -7,11 +7,11 @@
 #include "core/resource/resource.hh"
 #include "core/utils/epoch.hh"
 
+#include "core/threading.hh"
 #include "core/version.hh"
 
 #include "shared/game.hh"
 #include "shared/splash.hh"
-#include "shared/threading.hh"
 
 #include "client/gui/window_title.hh"
 #include "client/io/glfw.hh"

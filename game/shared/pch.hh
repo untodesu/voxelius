@@ -6,8 +6,6 @@
 
 #include <csignal>
 
-#include <BS_thread_pool.hpp>
-
 #include <enet/enet.h>
 
 #include <entt/entity/registry.hpp>

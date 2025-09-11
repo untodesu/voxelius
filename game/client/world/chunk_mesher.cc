@@ -4,12 +4,13 @@
 
 #include "core/math/crc64.hh"
 
+#include "core/threading.hh"
+
 #include "shared/world/chunk.hh"
 #include "shared/world/dimension.hh"
 #include "shared/world/voxel_registry.hh"
 
 #include "shared/coord.hh"
-#include "shared/threading.hh"
 
 #include "client/world/chunk_quad.hh"
 #include "client/world/voxel_atlas.hh"

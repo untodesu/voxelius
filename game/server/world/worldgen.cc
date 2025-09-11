@@ -4,11 +4,12 @@
 
 #include "core/io/cmdline.hh"
 
+#include "core/threading.hh"
+
 #include "shared/world/chunk.hh"
 #include "shared/world/dimension.hh"
 
 #include "shared/protocol.hh"
-#include "shared/threading.hh"
 
 #include "server/world/inhabited.hh"
 

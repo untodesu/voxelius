@@ -1,6 +1,6 @@
-#include "shared/pch.hh"
+#include "core/pch.hh"
 
-#include "shared/threading.hh"
+#include "core/threading.hh"
 
 #include "core/io/cmdline.hh"
 #include "core/math/constexpr.hh"
