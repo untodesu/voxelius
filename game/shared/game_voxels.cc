@@ -61,81 +61,81 @@ static void dirt_tick(world::Dimension* dimension, const voxel_pos& vpos)
 
 void game_voxels::populate(void)
 {
-    world::VoxelBuilder builder;
+    auto stone_builder = world::VoxelBuilder("stone");
+    stone_builder.add_default_texture("textures/voxel/stone_01.png");
+    stone_builder.add_default_texture("textures/voxel/stone_02.png");
+    stone_builder.add_default_texture("textures/voxel/stone_03.png");
+    stone_builder.add_default_texture("textures/voxel/stone_04.png");
+    stone = world::voxel_registry::register_voxel(stone_builder);
 
-    builder = world::VoxelBuilder("stone");
-    builder.add_default_texture("textures/voxel/stone_01.png")
-        .add_default_texture("textures/voxel/stone_02.png")
-        .add_default_texture("textures/voxel/stone_03.png")
-        .add_default_texture("textures/voxel/stone_04.png");
-    stone = world::voxel_registry::register_voxel(builder);
+    auto cobblestone_builder = world::VoxelBuilder("cobblestone");
+    cobblestone_builder.add_default_texture("textures/voxel/cobblestone_01.png");
+    cobblestone_builder.add_default_texture("textures/voxel/cobblestone_02.png");
+    cobblestone = world::voxel_registry::register_voxel(cobblestone_builder);
 
-    builder = world::VoxelBuilder("cobblestone");
-    builder.add_default_texture("textures/voxel/cobblestone_01.png").add_default_texture("textures/voxel/cobblestone_02.png");
-    cobblestone = world::voxel_registry::register_voxel(builder);
+    auto dirt_builder = world::VoxelBuilder("dirt");
+    dirt_builder.add_default_texture("textures/voxel/dirt_01.png");
+    dirt_builder.add_default_texture("textures/voxel/dirt_02.png");
+    dirt_builder.add_default_texture("textures/voxel/dirt_03.png");
+    dirt_builder.add_default_texture("textures/voxel/dirt_04.png");
+    dirt_builder.set_surface_material(world::VMAT_DIRT);
+    dirt_builder.set_on_tick(&dirt_tick);
+    dirt = world::voxel_registry::register_voxel(dirt_builder);
 
-    builder = world::VoxelBuilder("dirt");
-    builder.add_default_texture("textures/voxel/dirt_01.png")
-        .add_default_texture("textures/voxel/dirt_02.png")
-        .add_default_texture("textures/voxel/dirt_03.png")
-        .add_default_texture("textures/voxel/dirt_04.png");
-    builder.set_surface_material(world::VMAT_DIRT);
-    builder.set_on_tick(&dirt_tick);
-    dirt = world::voxel_registry::register_voxel(builder);
+    auto grass_builder = world::VoxelBuilder("grass");
+    grass_builder.add_default_texture("textures/voxel/grass_side_01.png");
+    grass_builder.add_default_texture("textures/voxel/grass_side_02.png");
+    grass_builder.add_face_texture(world::VFACE_BOTTOM, "textures/voxel/dirt_01.png");
+    grass_builder.add_face_texture(world::VFACE_BOTTOM, "textures/voxel/dirt_02.png");
+    grass_builder.add_face_texture(world::VFACE_BOTTOM, "textures/voxel/dirt_03.png");
+    grass_builder.add_face_texture(world::VFACE_BOTTOM, "textures/voxel/dirt_04.png");
+    grass_builder.add_face_texture(world::VFACE_TOP, "textures/voxel/grass_01.png");
+    grass_builder.add_face_texture(world::VFACE_TOP, "textures/voxel/grass_02.png");
+    grass_builder.set_surface_material(world::VMAT_GRASS);
+    grass = world::voxel_registry::register_voxel(grass_builder);
 
-    builder = world::VoxelBuilder("grass");
-    builder.add_default_texture("textures/voxel/grass_side_01.png")
-        .add_default_texture("textures/voxel/grass_side_02.png")
-        .add_face_texture(world::VFACE_BOTTOM, "textures/voxel/dirt_01.png")
-        .add_face_texture(world::VFACE_BOTTOM, "textures/voxel/dirt_02.png")
-        .add_face_texture(world::VFACE_BOTTOM, "textures/voxel/dirt_03.png")
-        .add_face_texture(world::VFACE_BOTTOM, "textures/voxel/dirt_04.png")
-        .add_face_texture(world::VFACE_TOP, "textures/voxel/grass_01.png")
-        .add_face_texture(world::VFACE_TOP, "textures/voxel/grass_02.png");
-    builder.set_surface_material(world::VMAT_GRASS);
-    grass = world::voxel_registry::register_voxel(builder);
+    auto vtest_builder = world::VoxelBuilder("vtest");
+    vtest_builder.add_default_texture("textures/voxel/vtest_F1.png");
+    vtest_builder.add_default_texture("textures/voxel/vtest_F2.png");
+    vtest_builder.add_default_texture("textures/voxel/vtest_F3.png");
+    vtest_builder.add_default_texture("textures/voxel/vtest_F4.png");
+    vtest_builder.set_animated(true);
+    vtest = world::voxel_registry::register_voxel(vtest_builder);
 
-    builder = world::VoxelBuilder("vtest");
-    builder.add_default_texture("textures/voxel/vtest_F1.png")
-        .add_default_texture("textures/voxel/vtest_F2.png")
-        .add_default_texture("textures/voxel/vtest_F3.png")
-        .add_default_texture("textures/voxel/vtest_F4.png");
-    builder.set_animated(true);
-    vtest = world::voxel_registry::register_voxel(builder);
+    auto vtest_ck_builder = world::VoxelBuilder("vtest_ck");
+    vtest_ck_builder.add_default_texture("textures/voxel/chromakey.png");
+    vtest_ck = world::voxel_registry::register_voxel(vtest_ck_builder);
 
-    builder = world::VoxelBuilder("vtest_ck");
-    builder.add_default_texture("textures/voxel/chromakey.png");
-    vtest_ck = world::voxel_registry::register_voxel(builder);
+    auto oak_leaves_builder = world::VoxelBuilder("oak_leaves");
+    oak_leaves_builder.add_default_texture("textures/voxel/oak_leaves.png");
+    oak_leaves_builder.set_surface_material(world::VMAT_GRASS);
+    oak_leaves = world::voxel_registry::register_voxel(oak_leaves_builder);
 
-    builder = world::VoxelBuilder("oak_leaves");
-    builder.add_default_texture("textures/voxel/oak_leaves.png");
-    builder.set_render_mode(world::VRENDER_BLEND);
-    builder.set_surface_material(world::VMAT_GRASS);
-    oak_leaves = world::voxel_registry::register_voxel(builder);
+    auto oak_planks_builder = world::VoxelBuilder("oak_planks");
+    oak_planks_builder.add_default_texture("textures/voxel/oak_planks_01.png");
+    oak_planks_builder.add_default_texture("textures/voxel/oak_planks_02.png");
+    oak_planks_builder.set_surface_material(world::VMAT_WOOD);
+    oak_planks = world::voxel_registry::register_voxel(oak_planks_builder);
 
-    builder = world::VoxelBuilder("oak_planks");
-    builder.add_default_texture("textures/voxel/oak_planks_01.png").add_default_texture("textures/voxel/oak_planks_02.png");
-    builder.set_surface_material(world::VMAT_WOOD);
-    oak_planks = world::voxel_registry::register_voxel(builder);
+    auto oak_log_builder = world::VoxelBuilder("oak_log");
+    oak_log_builder.add_default_texture("textures/voxel/oak_wood_01.png");
+    oak_log_builder.add_default_texture("textures/voxel/oak_wood_02.png");
+    oak_log_builder.add_face_texture(world::VFACE_BOTTOM, "textures/voxel/oak_wood_top.png");
+    oak_log_builder.add_face_texture(world::VFACE_TOP, "textures/voxel/oak_wood_top.png");
+    oak_log_builder.set_surface_material(world::VMAT_WOOD);
+    oak_log = world::voxel_registry::register_voxel(oak_log_builder);
 
-    builder = world::VoxelBuilder("oak_log");
-    builder.add_default_texture("textures/voxel/oak_wood_01.png")
-        .add_default_texture("textures/voxel/oak_wood_02.png")
-        .add_face_texture(world::VFACE_BOTTOM, "textures/voxel/oak_wood_top.png")
-        .add_face_texture(world::VFACE_TOP, "textures/voxel/oak_wood_top.png");
-    builder.set_surface_material(world::VMAT_WOOD);
-    oak_log = world::voxel_registry::register_voxel(builder);
+    auto glass_builder = world::VoxelBuilder("glass");
+    glass_builder.add_default_texture("textures/voxel/glass_01.png");
+    glass_builder.set_render_mode(world::VRENDER_BLEND);
+    glass_builder.set_surface_material(world::VMAT_GLASS);
+    glass = world::voxel_registry::register_voxel(glass_builder);
 
-    builder = world::VoxelBuilder("glass");
-    builder.add_default_texture("textures/voxel/glass_01.png");
-    builder.set_render_mode(world::VRENDER_BLEND);
-    builder.set_surface_material(world::VMAT_GLASS);
-    glass = world::voxel_registry::register_voxel(builder);
-
-    builder = world::VoxelBuilder("slime");
-    builder.add_default_texture("textures/voxel/slime_01.png");
-    builder.set_render_mode(world::VRENDER_BLEND);
-    builder.set_surface_material(world::VMAT_SLOSH);
-    builder.set_touch_type(world::VTOUCH_BOUNCE).set_touch_values({ 0.00f, 0.60f, 0.00f });
-    slime = world::voxel_registry::register_voxel(builder);
+    auto slime_builder = world::VoxelBuilder("slime");
+    slime_builder.add_default_texture("textures/voxel/slime_01.png");
+    slime_builder.set_render_mode(world::VRENDER_BLEND);
+    slime_builder.set_surface_material(world::VMAT_SLOSH);
+    slime_builder.set_touch_type(world::VTOUCH_BOUNCE);
+    slime_builder.set_touch_values({ 0.00f, 0.60f, 0.00f });
+    slime = world::voxel_registry::register_voxel(slime_builder);
 }

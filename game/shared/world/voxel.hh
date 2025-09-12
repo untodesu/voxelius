@@ -129,7 +129,7 @@ public:
     /// Calculate a checksum for the voxel's properties
     /// @param combine An optional initial checksum to combine with
     /// @return The calculated checksum
-    std::uint64_t calculate_checksum(std::uint64_t combine = 0U) const;
+    std::uint64_t get_checksum(std::uint64_t combine = 0U) const;
 
 protected:
     std::string m_name;
@@ -163,24 +163,24 @@ public:
     VoxelBuilder(void) = default;
     explicit VoxelBuilder(std::string_view name);
 
-    VoxelBuilder& set_on_place(VoxelOnPlaceFunc func) noexcept;
-    VoxelBuilder& set_on_remove(VoxelOnRemoveFunc func) noexcept;
-    VoxelBuilder& set_on_tick(VoxelOnTickFunc func) noexcept;
+    void set_on_place(VoxelOnPlaceFunc func) noexcept;
+    void set_on_remove(VoxelOnRemoveFunc func) noexcept;
+    void set_on_tick(VoxelOnTickFunc func) noexcept;
 
-    VoxelBuilder& set_name(std::string_view name) noexcept;
+    void set_name(std::string_view name) noexcept;
 
-    VoxelBuilder& set_render_mode(VoxelRender mode) noexcept;
-    VoxelBuilder& set_shape(VoxelShape shape) noexcept;
-    VoxelBuilder& set_animated(bool animated) noexcept;
+    void set_render_mode(VoxelRender mode) noexcept;
+    void set_shape(VoxelShape shape) noexcept;
+    void set_animated(bool animated) noexcept;
 
-    VoxelBuilder& set_touch_type(VoxelTouch type) noexcept;
-    VoxelBuilder& set_touch_values(const glm::fvec3& values) noexcept;
-    VoxelBuilder& set_surface_material(VoxelMaterial material) noexcept;
+    void set_touch_type(VoxelTouch type) noexcept;
+    void set_touch_values(const glm::fvec3& values) noexcept;
+    void set_surface_material(VoxelMaterial material) noexcept;
 
-    VoxelBuilder& set_collision(const math::AABBf& box) noexcept;
+    void set_collision(const math::AABBf& box) noexcept;
 
-    VoxelBuilder& add_default_texture(std::string_view path);
-    VoxelBuilder& add_face_texture(VoxelFace face, std::string_view path);
+    void add_default_texture(std::string_view path);
+    void add_face_texture(VoxelFace face, std::string_view path);
 
     std::unique_ptr<Voxel> build(voxel_id id) const;
 };

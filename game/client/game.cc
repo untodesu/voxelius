@@ -412,8 +412,8 @@ void client_game::init_late(void)
 
     world::voxel_atlas::generate_mipmaps();
 
-    for(std::shared_ptr<world::ItemInfo>& info : world::item_registry::items) {
-        info->cached_texture = resource::load<TextureGUI>(info->texture.c_str(), TEXTURE_GUI_LOAD_CLAMP_S | TEXTURE_GUI_LOAD_CLAMP_T);
+    for(auto& item : world::item_registry::items) {
+        item->set_cached_texture(resource::load<TextureGUI>(item->get_texture(), TEXTURE_GUI_LOAD_CLAMP_S | TEXTURE_GUI_LOAD_CLAMP_T));
     }
 
     experiments::init_late();

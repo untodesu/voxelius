@@ -2,20 +2,22 @@
 #define SHARED_GAME_ITEMS 1
 #pragma once
 
-#include "shared/types.hh"
+namespace world
+{
+class Item;
+} // namespace world
 
 namespace game_items
 {
-extern item_id stone;
-extern item_id cobblestone;
-extern item_id dirt;
-extern item_id grass;
-extern item_id oak_leaves;
-extern item_id oak_planks;
-extern item_id oak_log;
-extern item_id glass;
-extern item_id slime;
-extern item_id mud;
+extern const world::Item* stone;
+extern const world::Item* cobblestone;
+extern const world::Item* dirt;
+extern const world::Item* grass;
+extern const world::Item* oak_leaves;
+extern const world::Item* oak_planks;
+extern const world::Item* oak_log;
+extern const world::Item* glass;
+extern const world::Item* slime;
 } // namespace game_items
 
 namespace game_items

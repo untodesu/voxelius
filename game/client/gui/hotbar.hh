@@ -1,16 +1,19 @@
 #pragma once
 
-#include "shared/types.hh"
-
 // TODO: design an inventory system and an item
 // registry and integrate the hotbar into that system
+
+namespace world
+{
+class Item;
+} // namespace world
 
 constexpr static unsigned int HOTBAR_SIZE = 9U;
 
 namespace gui::hotbar
 {
 extern unsigned int active_slot;
-extern item_id slots[HOTBAR_SIZE];
+extern std::array<const world::Item*, HOTBAR_SIZE> slots;
 } // namespace gui::hotbar
 
 namespace gui::hotbar

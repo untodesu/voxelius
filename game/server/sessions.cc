@@ -72,7 +72,7 @@ static void on_login_request_packet(const protocol::LoginRequest& packet)
         return;
     }
 
-    if(packet.item_registry_checksum != world::item_registry::calculate_checksum()) {
+    if(packet.item_registry_checksum != world::item_registry::get_checksum()) {
         protocol::Disconnect response;
         response.reason = "protocol.item_registry_checksum";
         protocol::send(packet.peer, protocol::encode(response));

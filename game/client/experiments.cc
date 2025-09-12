@@ -73,9 +73,12 @@ void experiments::attack(void)
 
 void experiments::interact(void)
 {
-    if(auto info = world::item_registry::find(gui::hotbar::slots[gui::hotbar::active_slot])) {
-        if(info->place_voxel) {
-            globals::dimension->set_voxel(info->place_voxel, world::player_target::coord + world::player_target::normal);
+    auto active_item = gui::hotbar::slots[gui::hotbar::active_slot];
+
+    if(active_item) {
+        if(auto place_voxel = active_item->get_place_voxel()) {
+            globals::dimension->set_voxel(place_voxel, world::player_target::coord + world::player_target::normal);
+            return;
         }
     }
 }

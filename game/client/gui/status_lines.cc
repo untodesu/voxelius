@@ -65,11 +65,11 @@ void gui::status_lines::layout(void)
     }
 }
 
-void gui::status_lines::set(unsigned int line, const std::string& text, const ImVec4& color, float fadeout)
+void gui::status_lines::set(unsigned int line, std::string_view text, const ImVec4& color, float fadeout)
 {
     line_text_colors[line] = ImVec4(color.x, color.y, color.z, color.w);
     line_shadow_colors[line] = ImVec4(color.x * 0.1f, color.y * 0.1f, color.z * 0.1f, color.w);
-    line_strings[line] = std::string(text);
+    line_strings[line] = text;
     line_spawns[line] = globals::curtime;
     line_fadeouts[line] = fadeout;
 }

@@ -11,7 +11,7 @@ static void recalculate_checksum(void)
     registry_checksum = 0U;
 
     for(const auto& voxel : world::voxel_registry::voxels) {
-        registry_checksum = voxel->calculate_checksum(registry_checksum);
+        registry_checksum = voxel->get_checksum(registry_checksum);
     }
 }
 
@@ -39,7 +39,7 @@ world::Voxel* world::voxel_registry::find(std::string_view name)
         return nullptr;
     }
 
-    return voxels[it->second].get();
+    return voxels[it->second - 1].get();
 }
 
 world::Voxel* world::voxel_registry::find(voxel_id id)

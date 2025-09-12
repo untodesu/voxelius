@@ -6,61 +6,60 @@
 
 #include "shared/game_voxels.hh"
 
-item_id game_items::stone = NULL_ITEM_ID;
-item_id game_items::cobblestone = NULL_ITEM_ID;
-item_id game_items::dirt = NULL_ITEM_ID;
-item_id game_items::grass = NULL_ITEM_ID;
-item_id game_items::oak_leaves = NULL_ITEM_ID;
-item_id game_items::oak_planks = NULL_ITEM_ID;
-item_id game_items::oak_log = NULL_ITEM_ID;
-item_id game_items::glass = NULL_ITEM_ID;
-item_id game_items::slime = NULL_ITEM_ID;
-item_id game_items::mud = NULL_ITEM_ID;
+const world::Item* game_items::stone = nullptr;
+const world::Item* game_items::cobblestone = nullptr;
+const world::Item* game_items::dirt = nullptr;
+const world::Item* game_items::grass = nullptr;
+const world::Item* game_items::oak_leaves = nullptr;
+const world::Item* game_items::oak_planks = nullptr;
+const world::Item* game_items::oak_log = nullptr;
+const world::Item* game_items::glass = nullptr;
+const world::Item* game_items::slime = nullptr;
 
 void game_items::populate(void)
 {
-    // Stone; a hardened slate rock
-    game_items::stone =
-        world::item_registry::construct("stone").set_texture("textures/item/stone.png").set_place_voxel(game_voxels::stone).build();
+    auto stone_builder = world::ItemBuilder("stone");
+    stone_builder.set_texture("textures/item/stone.png");
+    stone_builder.set_place_voxel(game_voxels::stone);
+    stone = world::item_registry::register_item(stone_builder);
 
-    // Cobblestone; a bunch of small stones
-    game_items::cobblestone = world::item_registry::construct("cobblestone")
-                                  .set_texture("textures/item/cobblestone.png")
-                                  .set_place_voxel(game_voxels::cobblestone)
-                                  .build();
+    auto cobblestone_builder = world::ItemBuilder("cobblestone");
+    cobblestone_builder.set_texture("textures/item/cobblestone.png");
+    cobblestone_builder.set_place_voxel(game_voxels::cobblestone);
+    cobblestone = world::item_registry::register_item(cobblestone_builder);
 
-    // Dirt; it's very dirty
-    game_items::dirt =
-        world::item_registry::construct("dirt").set_texture("textures/item/dirt.png").set_place_voxel(game_voxels::dirt).build();
+    auto dirt_builder = world::ItemBuilder("dirt");
+    dirt_builder.set_texture("textures/item/dirt.png");
+    dirt_builder.set_place_voxel(game_voxels::dirt);
+    dirt = world::item_registry::register_item(dirt_builder);
 
-    // Grass; literally just grassy dirt
-    game_items::grass =
-        world::item_registry::construct("grass").set_texture("textures/item/grass.png").set_place_voxel(game_voxels::grass).build();
+    auto grass_builder = world::ItemBuilder("grass");
+    grass_builder.set_texture("textures/item/grass.png");
+    grass_builder.set_place_voxel(game_voxels::grass);
+    grass = world::item_registry::register_item(grass_builder);
 
-    // Oak leaves; they're bushy!
-    game_items::oak_leaves = world::item_registry::construct("oak_leaves")
-                                 .set_texture("textures/item/oak_leaves.png")
-                                 .set_place_voxel(game_voxels::oak_leaves)
-                                 .build();
+    auto oak_leaves_builder = world::ItemBuilder("oak_leaves");
+    oak_leaves_builder.set_texture("textures/item/oak_leaves.png");
+    oak_leaves_builder.set_place_voxel(game_voxels::oak_leaves);
+    oak_leaves = world::item_registry::register_item(oak_leaves_builder);
 
-    // Oak planks; watch for splinters!
-    game_items::oak_planks = world::item_registry::construct("oak_planks")
-                                 .set_texture("textures/item/oak_planks.png")
-                                 .set_place_voxel(game_voxels::oak_planks)
-                                 .build();
+    auto oak_planks_builder = world::ItemBuilder("oak_planks");
+    oak_planks_builder.set_texture("textures/item/oak_planks.png");
+    oak_planks_builder.set_place_voxel(game_voxels::oak_planks);
+    oak_planks = world::item_registry::register_item(oak_planks_builder);
 
-    // Oak log; a big wad of wood
-    game_items::oak_log =
-        world::item_registry::construct("oak_log").set_texture("textures/item/oak_log.png").set_place_voxel(game_voxels::oak_log).build();
+    auto oak_log_builder = world::ItemBuilder("oak_log");
+    oak_log_builder.set_texture("textures/item/oak_log.png");
+    oak_log_builder.set_place_voxel(game_voxels::oak_log);
+    oak_log = world::item_registry::register_item(oak_log_builder);
 
-    // Glass; used for windowing
-    game_items::glass =
-        world::item_registry::construct("glass").set_texture("textures/item/glass.png").set_place_voxel(game_voxels::glass).build();
+    auto glass_builder = world::ItemBuilder("glass");
+    glass_builder.set_texture("textures/item/glass.png");
+    glass_builder.set_place_voxel(game_voxels::glass);
+    glass = world::item_registry::register_item(glass_builder);
 
-    // Slime; it's bouncy!
-    game_items::slime =
-        world::item_registry::construct("slime").set_texture("textures/item/slime.png").set_place_voxel(game_voxels::slime).build();
-
-    // Mud; you sink in it!
-    game_items::mud = world::item_registry::construct("mud").set_texture("textures/item/mud.png").build();
+    auto slime_builder = world::ItemBuilder("slime");
+    slime_builder.set_texture("textures/item/slime.png");
+    slime_builder.set_place_voxel(game_voxels::slime);
+    slime = world::item_registry::register_item(slime_builder);
 }

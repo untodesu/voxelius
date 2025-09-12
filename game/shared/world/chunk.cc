@@ -36,12 +36,7 @@ void world::Chunk::set_voxel(const Voxel* voxel, const local_pos& lpos)
 void world::Chunk::set_voxel(const Voxel* voxel, const std::size_t index)
 {
     if(index < CHUNK_VOLUME) {
-        if(voxel == nullptr) {
-            m_voxels[index] = NULL_VOXEL_ID;
-            return;
-        }
-
-        m_voxels[index] = voxel->get_id();
+        m_voxels[index] = voxel ? voxel->get_id() : NULL_VOXEL_ID;
         return;
     }
 }

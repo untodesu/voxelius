@@ -69,12 +69,7 @@ void world::Feature::place(const voxel_pos& vpos, const chunk_pos& cpos, VoxelSt
                 continue;
             }
 
-            if(voxel == nullptr) {
-                voxels[it_index] = NULL_VOXEL_ID;
-            }
-            else {
-                voxels[it_index] = voxel->get_id();
-            }
+            voxels[it_index] = voxel ? voxel->get_id() : NULL_VOXEL_ID;
         }
     }
 }
