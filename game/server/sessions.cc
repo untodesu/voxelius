@@ -280,6 +280,7 @@ void DimensionListener::on_destroy_entity(const entt::registry& registry, entt::
 
 void sessions::init(void)
 {
+    globals::server_config.add_value("sessions.strict_version_matching", strict_version_matching);
     globals::server_config.add_value("sessions.max_players", sessions::max_players);
 
     globals::dispatcher.sink<protocol::LoginRequest>().connect<&on_login_request_packet>();
