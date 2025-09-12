@@ -1,5 +1,3 @@
-#ifndef SHARED_GAME_ITEMS
-#define SHARED_GAME_ITEMS 1
 #pragma once
 
 namespace world
@@ -24,5 +22,3 @@ namespace game_items
 {
 void populate(void);
 } // namespace game_items
-
-#endif // SHARED_GAME_ITEMS

@@ -54,8 +54,18 @@ static void dirt_tick(world::Dimension* dimension, const voxel_pos& vpos)
     }
 
     if(grass_found && air_above) {
-        // Replace itself with the grass voxel
         dimension->set_voxel(game_voxels::grass, vpos);
+    }
+}
+
+static void grass_tick(world::Dimension* dimension, const voxel_pos& vpos)
+{
+    auto above_vpos = vpos + voxel_pos(0, 1, 0);
+    auto above_voxel = dimension->get_voxel(above_vpos);
+
+    if(above_voxel && !above_voxel->is_surface_material<world::VMAT_GLASS>()) {
+        // Decay into dirt if something is blocking airflow
+        dimension->set_voxel(game_voxels::dirt, vpos);
     }
 }
 
@@ -92,6 +102,7 @@ void game_voxels::populate(void)
     grass_builder.add_face_texture(world::VFACE_TOP, "textures/voxel/grass_01.png");
     grass_builder.add_face_texture(world::VFACE_TOP, "textures/voxel/grass_02.png");
     grass_builder.set_surface_material(world::VMAT_GRASS);
+    grass_builder.set_on_tick(&grass_tick);
     grass = world::voxel_registry::register_voxel(grass_builder);
 
     auto vtest_builder = world::VoxelBuilder("vtest");

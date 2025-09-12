@@ -1,8 +1,6 @@
-#ifndef SHARED_ENTITY_GROUNDED
-#define SHARED_ENTITY_GROUNDED 1
 #pragma once
 
-#include "shared/world/voxel_registry.hh"
+#include "shared/world/voxel.hh"
 
 namespace entity
 {
@@ -12,5 +10,3 @@ struct Grounded final {
     world::VoxelMaterial surface;
 };
 } // namespace entity
-
-#endif // SHARED_ENTITY_GROUNDED

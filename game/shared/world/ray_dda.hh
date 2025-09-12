@@ -1,5 +1,3 @@
-#ifndef SHARED_RAY_DDA
-#define SHARED_RAY_DDA 1
 #pragma once
 
 #include "shared/types.hh"
@@ -38,5 +36,3 @@ public:
     voxel_pos vpos;
 };
 } // namespace world
-
-#endif // SHARED_RAY_DDA

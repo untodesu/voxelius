@@ -1,5 +1,3 @@
-#ifndef SHARED_GAME_VOXELS
-#define SHARED_GAME_VOXELS 1
 #pragma once
 
 namespace world
@@ -26,5 +24,3 @@ namespace game_voxels
 {
 void populate(void);
 } // namespace game_voxels
-
-#endif // SHARED_GAME_VOXELS
