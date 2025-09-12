@@ -2,6 +2,8 @@
 
 #include "client/gui/bother.hh"
 
+#include "core/version.hh"
+
 #include "shared/protocol.hh"
 
 #include "client/globals.hh"
@@ -29,10 +31,12 @@ static void on_status_response_packet(const protocol::StatusResponse& packet)
     gui::BotherResponseEvent event;
     event.identity = identity;
     event.is_server_unreachable = false;
-    event.protocol_version = packet.version;
     event.num_players = packet.num_players;
     event.max_players = packet.max_players;
     event.motd = packet.motd;
+    event.game_version_major = packet.game_version_major;
+    event.game_version_minor = packet.game_version_minor;
+    event.game_version_patch = packet.game_version_patch;
     globals::dispatcher.trigger(event);
 
     enet_peer_disconnect(packet.peer, protocol::CHANNEL);
@@ -89,7 +93,7 @@ void gui::bother::update_late(void)
     if(0 < enet_host_service(bother_host, &enet_event, 0)) {
         if(enet_event.type == ENET_EVENT_TYPE_CONNECT) {
             protocol::StatusRequest packet;
-            packet.version = protocol::VERSION;
+            packet.game_version_major = version::major;
             protocol::send(enet_event.peer, protocol::encode(packet));
             return;
         }

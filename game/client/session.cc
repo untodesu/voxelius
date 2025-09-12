@@ -6,6 +6,8 @@
 
 #include "core/math/crc64.hh"
 
+#include "core/version.hh"
+
 #include "shared/entity/head.hh"
 #include "shared/entity/player.hh"
 #include "shared/entity/transform.hh"
@@ -284,11 +286,13 @@ void session::disconnect(std::string_view reason)
 void session::send_login_request(void)
 {
     protocol::LoginRequest packet;
-    packet.version = protocol::VERSION;
+    packet.game_version_major = version::major;
     packet.voxel_registry_checksum = world::voxel_registry::get_checksum();
     packet.item_registry_checksum = world::item_registry::get_checksum();
     packet.password_hash = server_password_hash;
     packet.username = client_game::username.get();
+    packet.game_version_minor = version::minor;
+    packet.game_version_patch = version::patch;
 
     protocol::send(session::peer, protocol::encode(packet));
 

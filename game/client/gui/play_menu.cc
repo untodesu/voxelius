@@ -10,6 +10,8 @@
 
 #include "core/utils/string.hh"
 
+#include "core/version.hh"
+
 #include "shared/protocol.hh"
 
 #include "client/gui/bother.hh"
@@ -25,9 +27,8 @@
 constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration;
 constexpr static std::string_view DEFAULT_SERVER_NAME = "Voxelius Server";
 constexpr static std::string_view SERVERS_TXT = "servers.txt";
-constexpr static std::string_view WARNING_TOAST = "[!]";
 
-constexpr static std::size_t MAX_SERVER_ITEM_NAME = 24;
+constexpr static std::size_t MAX_SERVER_ITEM_NAME = 18;
 
 enum class item_status : unsigned int {
     UNKNOWN = 0x0000U,
@@ -43,10 +44,12 @@ struct ServerStatusItem final {
     std::uint16_t port;
 
     // Things pulled from bother events
-    std::uint32_t protocol_version;
     std::uint16_t num_players;
     std::uint16_t max_players;
     std::string motd;
+    std::uint16_t game_version_major;
+    std::uint16_t game_version_minor;
+    std::uint16_t game_version_patch;
 
     // Unique identifier that monotonically
     // grows with each new server added and
@@ -68,9 +71,6 @@ static std::string str_refresh;
 static std::string str_status_init;
 static std::string str_status_ping;
 static std::string str_status_fail;
-
-static std::string str_outdated_client;
-static std::string str_outdated_server;
 
 static std::string input_itemname;
 static std::string input_hostname;
@@ -106,11 +106,13 @@ static void add_new_server(void)
 {
     auto item = new ServerStatusItem();
     item->port = protocol::PORT;
-    item->protocol_version = protocol::VERSION;
     item->max_players = UINT16_MAX;
     item->num_players = UINT16_MAX;
     item->identity = next_identity;
     item->status = item_status::UNKNOWN;
+    item->game_version_major = 0U;
+    item->game_version_minor = 0U;
+    item->game_version_patch = 0U;
 
     next_identity += 1U;
 
@@ -202,9 +204,6 @@ static void on_language_set(const gui::LanguageSetEvent& event)
     str_status_init = gui::language::resolve("play_menu.status.init");
     str_status_ping = gui::language::resolve("play_menu.status.ping");
     str_status_fail = gui::language::resolve("play_menu.status.fail");
-
-    str_outdated_client = gui::language::resolve("play_menu.outdated_client");
-    str_outdated_server = gui::language::resolve("play_menu.outdated_server");
 }
 
 static void on_bother_response(const gui::BotherResponseEvent& event)
@@ -212,18 +211,22 @@ static void on_bother_response(const gui::BotherResponseEvent& event)
     for(auto item : servers_deque) {
         if(item->identity == event.identity) {
             if(event.is_server_unreachable) {
-                item->protocol_version = 0U;
                 item->num_players = UINT16_MAX;
                 item->max_players = UINT16_MAX;
                 item->motd = str_status_fail;
                 item->status = item_status::FAILURE;
+                item->game_version_major = 0U;
+                item->game_version_minor = 0U;
+                item->game_version_patch = 0U;
             }
             else {
-                item->protocol_version = event.protocol_version;
                 item->num_players = event.num_players;
                 item->max_players = event.max_players;
                 item->motd = event.motd;
                 item->status = item_status::REACHED;
+                item->game_version_major = event.game_version_major;
+                item->game_version_minor = event.game_version_minor;
+                item->game_version_patch = event.game_version_patch;
             }
 
             break;
@@ -264,30 +267,50 @@ static void layout_server_item(ServerStatusItem* item)
 
     if(item->status == item_status::REACHED) {
         auto stats = std::format("{}/{}", item->num_players, item->max_players);
-        auto stats_width = ImGui::CalcTextSize(stats.c_str(), stats.c_str() + stats.size()).x;
-        auto stats_pos = ImVec2(cursor.x + item_width - stats_width - padding.x, cursor.y + padding.y);
+        auto stats_size = ImGui::CalcTextSize(stats.c_str(), stats.c_str() + stats.size());
+        auto stats_pos = ImVec2(cursor.x + item_width - stats_size.x - padding.x, cursor.y + padding.y);
         draw_list->AddText(stats_pos, ImGui::GetColorU32(ImGuiCol_TextDisabled), stats.c_str(), stats.c_str() + stats.size());
 
-        if(item->protocol_version != protocol::VERSION) {
-            auto warning_size = ImGui::CalcTextSize(WARNING_TOAST.data(), WARNING_TOAST.data() + WARNING_TOAST.size());
-            auto warning_pos = ImVec2(stats_pos.x - warning_size.x - padding.x - 4.0f * globals::gui_scale, cursor.y + padding.y);
-            auto warning_end = ImVec2(warning_pos.x + warning_size.x, warning_pos.y + warning_size.y);
-            draw_list->AddText(warning_pos, ImGui::GetColorU32(ImGuiCol_DragDropTarget), WARNING_TOAST.data(),
-                WARNING_TOAST.data() + WARNING_TOAST.size());
+        auto major_version_mismatch = item->game_version_major != version::major;
+        auto minor_version_mismatch = item->game_version_minor != version::minor;
+        auto patch_version_mismatch = item->game_version_patch != version::patch;
 
-            if(ImGui::IsMouseHoveringRect(warning_pos, warning_end)) {
-                ImGui::BeginTooltip();
+        ImU32 version_color;
 
-                if(item->protocol_version < protocol::VERSION) {
-                    ImGui::TextUnformatted(str_outdated_server.c_str(), str_outdated_server.c_str() + str_outdated_server.size());
-                }
-                else {
-                    ImGui::TextUnformatted(str_outdated_client.c_str(), str_outdated_client.c_str() + str_outdated_client.size());
-                }
-
-                ImGui::EndTooltip();
-            }
+        if(major_version_mismatch || minor_version_mismatch || patch_version_mismatch) {
+            version_color = ImGui::GetColorU32(major_version_mismatch ? ImGuiCol_PlotLinesHovered : ImGuiCol_DragDropTarget);
         }
+        else {
+            version_color = ImGui::GetColorU32(ImGuiCol_PlotHistogram);
+        }
+
+        ImGui::PushFont(globals::font_unscii8, 4.0f);
+
+        std::string version_toast;
+
+        if(item->game_version_major < 16U) {
+            // Pre v16.x.x servers didn't send minor and patch versions
+            // and also used a different versioning scheme; post v16 the
+            // major version became the protocol version and the semver lost the tweak part
+            version_toast = std::string("0.0.1");
+        }
+        else {
+            version_toast = std::format("{}.{}.{}", item->game_version_major, item->game_version_minor, item->game_version_patch);
+        }
+
+        auto version_size = ImGui::CalcTextSize(version_toast.c_str(), version_toast.c_str() + version_toast.size());
+        auto version_pos = ImVec2(stats_pos.x - version_size.x - padding.x - 4.0f * globals::gui_scale,
+            cursor.y + padding.y + 0.5f * (stats_size.y - version_size.y));
+        auto version_end = ImVec2(version_pos.x + version_size.x, version_pos.y + version_size.y);
+
+        auto outline_pos = ImVec2(version_pos.x - 2U * globals::gui_scale, version_pos.y - 2U * globals::gui_scale);
+        auto outline_end = ImVec2(version_end.x + 2U * globals::gui_scale, version_end.y + 2U * globals::gui_scale);
+        auto outline_thickness = math::max<float>(1.0f, 0.5f * static_cast<float>(globals::gui_scale));
+
+        draw_list->AddRect(outline_pos, outline_end, version_color, 0.0f, 0, outline_thickness);
+        draw_list->AddText(version_pos, version_color, version_toast.c_str(), version_toast.c_str() + version_toast.size());
+
+        ImGui::PopFont();
     }
 
     ImU32 motd_color = {};
@@ -460,11 +483,13 @@ void gui::play_menu::init(void)
 
             auto item = new ServerStatusItem();
             item->port = protocol::PORT;
-            item->protocol_version = protocol::VERSION;
             item->max_players = UINT16_MAX;
             item->num_players = UINT16_MAX;
             item->identity = next_identity;
             item->status = item_status::UNKNOWN;
+            item->game_version_major = version::major;
+            item->game_version_minor = version::minor;
+            item->game_version_patch = version::patch;
 
             next_identity += 1U;
 
@@ -540,6 +565,11 @@ void gui::play_menu::layout(void)
 
                 layout_servers_buttons();
 
+                ImGui::EndTabItem();
+            }
+
+            if(ImGui::BeginTabItem("debug###play_menu.debug.child")) {
+                ImGui::ShowStyleEditor();
                 ImGui::EndTabItem();
             }
 
