@@ -11,10 +11,15 @@ struct TextureGUI;
 
 namespace world
 {
+class Voxel;
+} // namespace world
+
+namespace world
+{
 struct ItemInfo final {
     std::string name;
     std::string texture;
-    voxel_id place_voxel;
+    const Voxel* place_voxel;
 
     resource_ptr<TextureGUI> cached_texture; // Client-side only
 };
@@ -29,7 +34,7 @@ public:
 
 public:
     ItemInfoBuilder& set_texture(std::string_view texture);
-    ItemInfoBuilder& set_place_voxel(voxel_id place_voxel);
+    ItemInfoBuilder& set_place_voxel(const Voxel* place_voxel);
 
 public:
     item_id build(void) const;

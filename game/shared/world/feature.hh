@@ -7,6 +7,7 @@ namespace world
 class Chunk;
 class Dimension;
 class Voxel;
+class VoxelStorage;
 } // namespace world
 
 namespace world
@@ -19,5 +20,6 @@ public:
 public:
     void place(const voxel_pos& vpos, Dimension* dimension) const;
     void place(const voxel_pos& vpos, const chunk_pos& cpos, Chunk& chunk) const;
+    void place(const voxel_pos& vpos, const chunk_pos& cpos, VoxelStorage& voxels) const;
 };
 } // namespace world

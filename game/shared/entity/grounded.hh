@@ -9,7 +9,7 @@ namespace entity
 // Assigned to entities which are grounded
 // according to the collision and gravity system
 struct Grounded final {
-    world::voxel_surface surface;
+    world::VoxelMaterial surface;
 };
 } // namespace entity
 

@@ -13,8 +13,8 @@ using ChunkQuad = std::array<std::uint32_t, 2>;
 
 namespace world
 {
-constexpr inline static ChunkQuad make_chunk_quad(const glm::fvec3& position, const glm::fvec2& size, voxel_facing facing,
-    std::size_t texture, std::size_t frames)
+constexpr inline static ChunkQuad make_chunk_quad(const glm::fvec3& position, const glm::fvec2& size, VoxelFace face, std::size_t texture,
+    std::size_t frames)
 {
     ChunkQuad result = {};
     result[0] = 0x00000000;
@@ -30,7 +30,7 @@ constexpr inline static ChunkQuad make_chunk_quad(const glm::fvec3& position, co
     result[0] |= (0x0000000FU & static_cast<std::uint32_t>(size.y * 16.0f - 1.0f));
 
     // [1] FFFF----------------------------
-    result[1] |= (0x0000000FU & static_cast<std::uint32_t>(facing)) << 28U;
+    result[1] |= (0x0000000FU & static_cast<std::uint32_t>(face)) << 28U;
 
     // [1] ----TTTTTTTTTTTAAAAA------------
     result[1] |= (0x000007FFU & static_cast<std::uint32_t>(texture)) << 17U;

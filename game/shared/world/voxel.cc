@@ -6,24 +6,30 @@
 
 #include "shared/world/dimension.hh"
 
+world::Voxel::Voxel(const Voxel& source, voxel_id id) noexcept : Voxel(source)
+{
+    m_id = id;
+}
+
 void world::Voxel::on_place(Dimension* dimension, const voxel_pos& vpos) const
 {
-    // empty
+    if(m_on_place) {
+        m_on_place(dimension, vpos);
+    }
 }
 
 void world::Voxel::on_remove(Dimension* dimension, const voxel_pos& vpos) const
 {
-    // empty
+    if(m_on_remove) {
+        m_on_remove(dimension, vpos);
+    }
 }
 
 void world::Voxel::on_tick(Dimension* dimension, const voxel_pos& vpos) const
 {
-    // empty
-}
-
-void world::Voxel::set_id(voxel_id id) noexcept
-{
-    m_id = id;
+    if(m_on_tick) {
+        m_on_tick(dimension, vpos);
+    }
 }
 
 std::size_t world::Voxel::get_random_texture_index(VoxelFace face, const voxel_pos& vpos) const
@@ -57,64 +63,113 @@ std::uint64_t world::Voxel::calculate_checksum(std::uint64_t combine) const
     return combine;
 }
 
-std::shared_ptr<world::Voxel> world::Voxel::clone(void) const
+world::VoxelBuilder::VoxelBuilder(std::string_view name)
 {
-    return std::make_shared<Voxel>(*this);
+    set_name(name);
 }
 
-void world::Voxel::set_name(std::string_view name) noexcept
+world::VoxelBuilder& world::VoxelBuilder::set_on_place(VoxelOnPlaceFunc func) noexcept
+{
+    m_on_place = std::move(func);
+
+    return *this;
+}
+
+world::VoxelBuilder& world::VoxelBuilder::set_on_remove(VoxelOnRemoveFunc func) noexcept
+{
+    m_on_remove = std::move(func);
+
+    return *this;
+}
+
+world::VoxelBuilder& world::VoxelBuilder::set_on_tick(VoxelOnTickFunc func) noexcept
+{
+    m_on_tick = std::move(func);
+
+    return *this;
+}
+
+world::VoxelBuilder& world::VoxelBuilder::set_name(std::string_view name) noexcept
 {
     assert(name.size());
 
     m_name = name;
+
+    return *this;
 }
 
-void world::Voxel::set_render_mode(VoxelRender mode) noexcept
+world::VoxelBuilder& world::VoxelBuilder::set_render_mode(VoxelRender mode) noexcept
 {
     m_render_mode = mode;
+
+    return *this;
 }
 
-void world::Voxel::set_shape(VoxelShape shape) noexcept
+world::VoxelBuilder& world::VoxelBuilder::set_shape(VoxelShape shape) noexcept
 {
     m_shape = shape;
+
+    return *this;
 }
 
-void world::Voxel::set_animated(bool animated) noexcept
+world::VoxelBuilder& world::VoxelBuilder::set_animated(bool animated) noexcept
 {
     m_animated = animated;
+
+    return *this;
 }
 
-void world::Voxel::set_touch_type(VoxelTouch type) noexcept
+world::VoxelBuilder& world::VoxelBuilder::set_touch_type(VoxelTouch type) noexcept
 {
     m_touch_type = type;
+
+    return *this;
 }
 
-void world::Voxel::set_touch_values(const glm::fvec3& values) noexcept
+world::VoxelBuilder& world::VoxelBuilder::set_touch_values(const glm::fvec3& values) noexcept
 {
     m_touch_values = values;
+
+    return *this;
 }
 
-void world::Voxel::set_surface_material(VoxelMaterial material) noexcept
+world::VoxelBuilder& world::VoxelBuilder::set_surface_material(VoxelMaterial material) noexcept
 {
     m_surface_material = material;
+
+    return *this;
 }
 
-void world::Voxel::set_collision(const math::AABBf& box) noexcept
+world::VoxelBuilder& world::VoxelBuilder::set_collision(const math::AABBf& box) noexcept
 {
     m_collision = box;
+
+    return *this;
 }
 
-void world::Voxel::add_default_texture(std::string_view path)
+world::VoxelBuilder& world::VoxelBuilder::add_default_texture(std::string_view path)
 {
     assert(path.size());
 
     m_default_textures.emplace_back(path);
+
+    return *this;
 }
 
-void world::Voxel::add_face_texture(VoxelFace face, std::string_view path)
+world::VoxelBuilder& world::VoxelBuilder::add_face_texture(VoxelFace face, std::string_view path)
 {
     assert(face < m_face_textures.size());
     assert(path.size());
 
     m_face_textures[face].emplace_back(path);
+
+    return *this;
+}
+
+std::unique_ptr<world::Voxel> world::VoxelBuilder::build(voxel_id id) const
+{
+    assert(m_name.size());
+    assert(id);
+
+    return std::make_unique<Voxel>(*this, id);
 }

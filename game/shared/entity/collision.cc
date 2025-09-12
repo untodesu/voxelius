@@ -16,7 +16,7 @@
 #include "shared/globals.hh"
 
 static int vgrid_collide(const world::Dimension* dimension, int d, entity::Collision& collision, entity::Transform& transform,
-    entity::Velocity& velocity, world::voxel_surface& touch_surface)
+    entity::Velocity& velocity, world::VoxelMaterial& touch_surface)
 {
     const auto move = globals::fixed_frametime * velocity.value[d];
     const auto move_sign = math::sign<int>(move);
@@ -57,9 +57,9 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
         dmax = lpos_min[d];
     }
 
-    world::voxel_touch latch_touch = world::voxel_touch::NOTHING;
+    world::VoxelTouch latch_touch = world::VTOUCH_NONE;
     glm::fvec3 latch_values = glm::fvec3(0.0f, 0.0f, 0.0f);
-    world::voxel_surface latch_surface = world::voxel_surface::UNKNOWN;
+    world::VoxelMaterial latch_surface = world::VMAT_UNKNOWN;
     math::AABBf latch_vbox;
 
     for(auto i = dmin; i != dmax; i += ddir) {
@@ -70,18 +70,16 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
                 lpos[u] = j;
                 lpos[v] = k;
 
-                const auto vpos = coord::to_voxel(transform.chunk, lpos);
-                const auto info = world::voxel_registry::find(dimension->get_voxel(vpos));
+                auto vpos = coord::to_voxel(transform.chunk, lpos);
+                auto voxel = dimension->get_voxel(vpos);
 
-                if(info == nullptr) {
+                if(voxel == nullptr) {
                     // Don't collide with something
                     // that we assume to be nothing
                     continue;
                 }
 
-                math::AABBf vbox;
-                vbox.min = glm::fvec3(lpos);
-                vbox.max = glm::fvec3(lpos) + 1.0f;
+                math::AABBf vbox(voxel->get_collision().push(lpos));
 
                 if(!next_aabb.intersect(vbox)) {
                     // No intersection between the voxel
@@ -89,29 +87,29 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
                     continue;
                 }
 
-                if(info->touch_type == world::voxel_touch::SOLID) {
+                if(voxel->is_touch_type<world::VTOUCH_SOLID>()) {
                     // Solid touch type makes a collision
                     // response whenever it is encountered
                     velocity.value[d] = 0.0f;
-                    touch_surface = info->surface;
+                    touch_surface = voxel->get_surface_material();
                     return move_sign;
                 }
 
                 // In case of other touch types, they
                 // are latched and the last ever touch
                 // type is then responded to
-                if(info->touch_type != world::voxel_touch::NOTHING) {
-                    latch_touch = info->touch_type;
-                    latch_values = info->touch_values;
-                    latch_surface = info->surface;
+                if(voxel->get_touch_type() != world::VTOUCH_NONE) {
+                    latch_touch = voxel->get_touch_type();
+                    latch_values = voxel->get_touch_values();
+                    latch_surface = voxel->get_surface_material();
                     latch_vbox = vbox;
                     continue;
                 }
             }
     }
 
-    if(latch_touch != world::voxel_touch::NOTHING) {
-        if(latch_touch == world::voxel_touch::BOUNCE) {
+    if(latch_touch != world::VTOUCH_NONE) {
+        if(latch_touch == world::VTOUCH_BOUNCE) {
             const auto move_distance = math::abs(current_aabb.min[d] - next_aabb.min[d]);
             const auto threshold = 2.0f * globals::fixed_frametime;
 
@@ -127,7 +125,7 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
             return move_sign;
         }
 
-        if(latch_touch == world::voxel_touch::SINK) {
+        if(latch_touch == world::VTOUCH_SINK) {
             velocity.value[d] *= latch_values[d];
             touch_surface = latch_surface;
             return move_sign;
@@ -151,7 +149,7 @@ void entity::Collision::fixed_update(world::Dimension* dimension)
     auto group = dimension->entities.group<entity::Collision>(entt::get<entity::Transform, entity::Velocity>);
 
     for(auto [entity, collision, transform, velocity] : group.each()) {
-        auto surface = world::voxel_surface::UNKNOWN;
+        auto surface = world::VMAT_UNKNOWN;
         auto vertical_move = vgrid_collide(dimension, 1, collision, transform, velocity, surface);
 
         if(dimension->entities.any_of<entity::Gravity>(entity)) {

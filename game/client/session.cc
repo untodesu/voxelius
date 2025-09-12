@@ -98,8 +98,10 @@ static void on_set_voxel_packet(const protocol::SetVoxel& packet)
     auto index = coord::to_index(lpos);
 
     if(auto chunk = globals::dimension->find_chunk(cpos)) {
-        if(chunk->get_voxel(index) != packet.voxel) {
-            chunk->set_voxel(packet.voxel, index);
+        auto packet_voxel = world::voxel_registry::find(packet.voxel);
+
+        if(chunk->get_voxel(index) != packet_voxel) {
+            chunk->set_voxel(packet_voxel, index);
 
             world::ChunkUpdateEvent event;
             event.dimension = globals::dimension;
@@ -125,7 +127,7 @@ static void on_voxel_set(const world::VoxelSetEvent& event)
         // FIXME: should we also validate things here or wait for the server to do so
         protocol::SetVoxel packet;
         packet.vpos = coord::to_voxel(event.cpos, event.lpos);
-        packet.voxel = event.voxel;
+        packet.voxel = event.voxel->get_id();
 
         protocol::send(session::peer, protocol::encode(packet));
     }
@@ -283,7 +285,7 @@ void session::send_login_request(void)
 {
     protocol::LoginRequest packet;
     packet.version = protocol::VERSION;
-    packet.voxel_registry_checksum = world::voxel_registry::calculate_checksum();
+    packet.voxel_registry_checksum = world::voxel_registry::get_checksum();
     packet.item_registry_checksum = world::item_registry::calculate_checksum();
     packet.password_hash = server_password_hash;
     packet.username = client_game::username.get();

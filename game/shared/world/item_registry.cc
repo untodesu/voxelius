@@ -14,7 +14,7 @@ world::ItemInfoBuilder::ItemInfoBuilder(std::string_view name)
 {
     prototype.name = name;
     prototype.texture = std::string();
-    prototype.place_voxel = NULL_VOXEL_ID;
+    prototype.place_voxel = nullptr;
     prototype.cached_texture = nullptr;
 }
 
@@ -25,7 +25,7 @@ world::ItemInfoBuilder& world::ItemInfoBuilder::set_texture(std::string_view tex
     return *this;
 }
 
-world::ItemInfoBuilder& world::ItemInfoBuilder::set_place_voxel(voxel_id place_voxel)
+world::ItemInfoBuilder& world::ItemInfoBuilder::set_place_voxel(const Voxel* place_voxel)
 {
     prototype.place_voxel = place_voxel;
     return *this;
@@ -99,7 +99,10 @@ std::uint64_t world::item_registry::calculate_checksum(void)
 
     for(const auto& info : world::item_registry::items) {
         result = math::crc64(info->name, result);
-        result += static_cast<std::uint64_t>(info->place_voxel);
+
+        if(info->place_voxel) {
+            result += static_cast<std::uint64_t>(info->place_voxel->get_id());
+        }
     }
 
     return result;

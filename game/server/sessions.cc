@@ -65,7 +65,7 @@ static void on_login_request_packet(const protocol::LoginRequest& packet)
 
     // FIXME: calculate voxel registry checksum ahead of time
     // instead of figuring it out every time a new player connects
-    if(packet.voxel_registry_checksum != world::voxel_registry::calculate_checksum()) {
+    if(packet.voxel_registry_checksum != world::voxel_registry::get_checksum()) {
         protocol::Disconnect response;
         response.reason = "protocol.voxel_registry_checksum";
         protocol::send(packet.peer, protocol::encode(response));
@@ -241,7 +241,7 @@ static void on_voxel_set(const world::VoxelSetEvent& event)
 {
     protocol::SetVoxel packet;
     packet.vpos = coord::to_voxel(event.cpos, event.lpos);
-    packet.voxel = event.voxel;
+    packet.voxel = event.voxel ? event.voxel->get_id() : NULL_VOXEL_ID;
     packet.flags = 0U; // UNDONE
     protocol::broadcast(globals::server_host, protocol::encode(packet));
 }

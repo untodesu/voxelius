@@ -11,19 +11,19 @@ class Dimension;
 
 namespace world
 {
-enum VoxelRender : unsigned short {
+enum VoxelRender : unsigned int {
     VRENDER_NONE = 0U, ///< The voxel is not rendered at all
     VRENDER_OPAQUE,    ///< The voxel is fully opaque
     VRENDER_BLEND,     ///< The voxel is blended (e.g. water, glass)
 };
 
-enum VoxelShape : unsigned short {
+enum VoxelShape : unsigned int {
     VSHAPE_CUBE = 0U, ///< Full cube shape
     VSHAPE_CROSS,     ///< TODO: Cross shape
     VSHAPE_MODEL,     ///< TODO: Custom model shape
 };
 
-enum VoxelFace : unsigned short {
+enum VoxelFace : unsigned int {
     VFACE_NORTH = 0U, ///< Positive Z face
     VFACE_SOUTH,      ///< Negative Z face
     VFACE_EAST,       ///< Positive X face
@@ -35,14 +35,15 @@ enum VoxelFace : unsigned short {
     VFACE_COUNT
 };
 
-enum VoxelTouch : unsigned short {
+enum VoxelTouch : unsigned int {
     VTOUCH_NONE = 0xFFFFU,
     VTOUCH_SOLID = 0U, ///< The entity is stopped in its tracks
     VTOUCH_BOUNCE,     ///< The entity bounces back with some energy loss
     VTOUCH_SINK,       ///< The entity phases/sinks through the voxel
 };
 
-enum VoxelMaterial : unsigned short {
+enum VoxelMaterial : unsigned int {
+    VMAT_UNKNOWN = 0xFFFFU,
     VMAT_DEFAULT = 0U,
     VMAT_STONE,
     VMAT_DIRT,
@@ -56,7 +57,7 @@ enum VoxelMaterial : unsigned short {
     VMAT_COUNT
 };
 
-enum VoxelVisBits : unsigned short {
+enum VoxelVisBits : unsigned int {
     VVIS_NORTH = 1U << VFACE_NORTH, ///< Positive Z
     VVIS_SOUTH = 1U << VFACE_SOUTH, ///< Negative Z
     VVIS_EAST = 1U << VFACE_EAST,   ///< Positive X
@@ -68,26 +69,24 @@ enum VoxelVisBits : unsigned short {
 
 namespace world
 {
+using VoxelOnPlaceFunc = std::function<void(Dimension*, const voxel_pos&)>;
+using VoxelOnRemoveFunc = std::function<void(Dimension*, const voxel_pos&)>;
+using VoxelOnTickFunc = std::function<void(Dimension*, const voxel_pos&)>;
+} // namespace world
+
+namespace world
+{
 class Voxel {
 public:
-    /// Called when the voxel is placed in the world
-    /// @param dimension The dimension the voxel is placed in
-    /// @param vpos The absolute voxel position where the voxel is placed
-    virtual void on_place(Dimension* dimension, const voxel_pos& vpos) const;
+    Voxel(void) = default;
+    explicit Voxel(const Voxel& source, voxel_id id) noexcept;
 
-    /// Called when the voxel is removed from the world
-    /// @param dimension The dimension the voxel is removed from
-    /// @param vpos The absolute voxel position where the voxel is removed
-    virtual void on_remove(Dimension* dimension, const voxel_pos& vpos) const;
-
-    /// Called when the voxel is ticked by something
-    /// @param dimension The dimension the voxel is ticked in
-    /// @param vpos The absolute voxel position where the voxel is ticked
-    virtual void on_tick(Dimension* dimension, const voxel_pos& vpos) const;
+    void on_place(Dimension* dimension, const voxel_pos& vpos) const;
+    void on_remove(Dimension* dimension, const voxel_pos& vpos) const;
+    void on_tick(Dimension* dimension, const voxel_pos& vpos) const;
 
     constexpr std::string_view get_name(void) const noexcept;
     constexpr voxel_id get_id(void) const noexcept;
-    void set_id(voxel_id id) noexcept;
 
     constexpr VoxelRender get_render_mode(void) const noexcept;
     constexpr VoxelShape get_shape(void) const noexcept;
@@ -103,6 +102,15 @@ public:
     constexpr const std::vector<std::string>& get_face_textures(VoxelFace face) const noexcept;
     constexpr std::size_t get_cached_face_offset(VoxelFace face) const noexcept;
     constexpr std::size_t get_cached_face_plane(VoxelFace face) const noexcept;
+
+    template<VoxelRender RenderMode>
+    constexpr bool is_render_mode(void) const noexcept;
+    template<VoxelShape Shape>
+    constexpr bool is_shape(void) const noexcept;
+    template<VoxelTouch TouchType>
+    constexpr bool is_touch_type(void) const noexcept;
+    template<VoxelMaterial Material>
+    constexpr bool is_surface_material(void) const noexcept;
 
     /// Non-model voxel shapes support texture variation based on the
     /// voxel position on the world; this method handles the math behind this
@@ -123,27 +131,7 @@ public:
     /// @return The calculated checksum
     std::uint64_t calculate_checksum(std::uint64_t combine = 0U) const;
 
-    /// Produce a copy of itself as a shared pointer; the voxel registry
-    /// does not change the owner of a voxel instance it registers
-    virtual std::shared_ptr<Voxel> clone(void) const;
-
 protected:
-    void set_name(std::string_view name) noexcept;
-
-    void set_render_mode(VoxelRender mode) noexcept;
-    void set_shape(VoxelShape shape) noexcept;
-    void set_animated(bool animated) noexcept;
-
-    void set_touch_type(VoxelTouch type) noexcept;
-    void set_touch_values(const glm::fvec3& values) noexcept;
-    void set_surface_material(VoxelMaterial material) noexcept;
-
-    void set_collision(const math::AABBf& box) noexcept;
-
-    void add_default_texture(std::string_view path);
-    void add_face_texture(VoxelFace face, std::string_view path);
-
-private:
     std::string m_name;
     voxel_id m_id { NULL_VOXEL_ID };
 
@@ -161,6 +149,40 @@ private:
     std::array<std::vector<std::string>, VFACE_COUNT> m_face_textures;
     std::array<std::size_t, VFACE_COUNT> m_cached_face_offsets;
     std::array<std::size_t, VFACE_COUNT> m_cached_face_planes;
+
+    VoxelOnPlaceFunc m_on_place;
+    VoxelOnRemoveFunc m_on_remove;
+    VoxelOnTickFunc m_on_tick;
+};
+} // namespace world
+
+namespace world
+{
+class VoxelBuilder final : public Voxel {
+public:
+    VoxelBuilder(void) = default;
+    explicit VoxelBuilder(std::string_view name);
+
+    VoxelBuilder& set_on_place(VoxelOnPlaceFunc func) noexcept;
+    VoxelBuilder& set_on_remove(VoxelOnRemoveFunc func) noexcept;
+    VoxelBuilder& set_on_tick(VoxelOnTickFunc func) noexcept;
+
+    VoxelBuilder& set_name(std::string_view name) noexcept;
+
+    VoxelBuilder& set_render_mode(VoxelRender mode) noexcept;
+    VoxelBuilder& set_shape(VoxelShape shape) noexcept;
+    VoxelBuilder& set_animated(bool animated) noexcept;
+
+    VoxelBuilder& set_touch_type(VoxelTouch type) noexcept;
+    VoxelBuilder& set_touch_values(const glm::fvec3& values) noexcept;
+    VoxelBuilder& set_surface_material(VoxelMaterial material) noexcept;
+
+    VoxelBuilder& set_collision(const math::AABBf& box) noexcept;
+
+    VoxelBuilder& add_default_texture(std::string_view path);
+    VoxelBuilder& add_face_texture(VoxelFace face, std::string_view path);
+
+    std::unique_ptr<Voxel> build(voxel_id id) const;
 };
 } // namespace world
 
@@ -218,6 +240,10 @@ constexpr const std::vector<std::string>& world::Voxel::get_face_textures(VoxelF
 {
     assert(face <= m_face_textures.size());
 
+    if(m_face_textures[face].empty()) {
+        return m_default_textures;
+    }
+
     return m_face_textures[face];
 }
 
@@ -233,4 +259,28 @@ constexpr std::size_t world::Voxel::get_cached_face_plane(VoxelFace face) const 
     assert(face <= m_cached_face_planes.size());
 
     return m_cached_face_planes[face];
+}
+
+template<world::VoxelRender RenderMode>
+constexpr bool world::Voxel::is_render_mode(void) const noexcept
+{
+    return m_render_mode == RenderMode;
+}
+
+template<world::VoxelShape Shape>
+constexpr bool world::Voxel::is_shape(void) const noexcept
+{
+    return m_shape == Shape;
+}
+
+template<world::VoxelTouch TouchType>
+constexpr bool world::Voxel::is_touch_type(void) const noexcept
+{
+    return m_touch_type == TouchType;
+}
+
+template<world::VoxelMaterial Material>
+constexpr bool world::Voxel::is_surface_material(void) const noexcept
+{
+    return m_surface_material == Material;
 }

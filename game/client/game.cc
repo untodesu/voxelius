@@ -372,24 +372,40 @@ void client_game::init_late(void)
     // NOTE: this is very debug, early and a quite
     // conservative limit choice; there must be a better
     // way to make this limit way smaller than it currently is
-    for(const std::shared_ptr<world::VoxelInfo>& info : world::voxel_registry::voxels) {
-        for(const world::VoxelTexture& vtex : info->textures) {
-            max_texture_count += vtex.paths.size();
-        }
+    for(const auto& voxel : world::voxel_registry::voxels) {
+        max_texture_count += voxel->get_default_textures().size();
+        max_texture_count += voxel->get_face_textures(world::VFACE_NORTH).size();
+        max_texture_count += voxel->get_face_textures(world::VFACE_SOUTH).size();
+        max_texture_count += voxel->get_face_textures(world::VFACE_EAST).size();
+        max_texture_count += voxel->get_face_textures(world::VFACE_WEST).size();
+        max_texture_count += voxel->get_face_textures(world::VFACE_TOP).size();
+        max_texture_count += voxel->get_face_textures(world::VFACE_BOTTOM).size();
+        max_texture_count += voxel->get_face_textures(world::VFACE_CROSS_NWSE).size();
+        max_texture_count += voxel->get_face_textures(world::VFACE_CROSS_NESW).size();
     }
 
     // UNDONE: asset packs for non-16x16 stuff
     world::voxel_atlas::create(16, 16, max_texture_count);
 
-    for(std::shared_ptr<world::VoxelInfo>& info : world::voxel_registry::voxels) {
-        for(world::VoxelTexture& vtex : info->textures) {
-            if(auto strip = world::voxel_atlas::find_or_load(vtex.paths)) {
-                vtex.cached_offset = strip->offset;
-                vtex.cached_plane = strip->plane;
+    for(auto& voxel : world::voxel_registry::voxels) {
+        constexpr std::array faces = {
+            world::VFACE_NORTH,
+            world::VFACE_SOUTH,
+            world::VFACE_EAST,
+            world::VFACE_WEST,
+            world::VFACE_TOP,
+            world::VFACE_BOTTOM,
+            world::VFACE_CROSS_NWSE,
+            world::VFACE_CROSS_NESW,
+        };
+
+        for(auto face : faces) {
+            if(auto strip = world::voxel_atlas::find_or_load(voxel->get_face_textures(face))) {
+                voxel->set_face_cache(face, strip->offset, strip->plane);
                 continue;
             }
 
-            spdlog::critical("client_gl: {}: failed to load atlas strips", info->name);
+            spdlog::critical("client_gl: {}: failed to load atlas strips", voxel->get_name());
             std::terminate();
         }
     }

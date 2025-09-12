@@ -10,6 +10,7 @@
 
 #include "shared/world/chunk_aabb.hh"
 #include "shared/world/dimension.hh"
+#include "shared/world/voxel_registry.hh"
 
 #include "shared/coord.hh"
 #include "shared/protocol.hh"
@@ -83,7 +84,7 @@ static void on_entity_head_packet(const protocol::EntityHead& packet)
 static void on_set_voxel_packet(const protocol::SetVoxel& packet)
 {
     if(auto session = sessions::find(packet.peer)) {
-        if(session->dimension && !session->dimension->set_voxel(packet.voxel, packet.vpos)) {
+        if(session->dimension && !session->dimension->set_voxel(world::voxel_registry::find(packet.voxel), packet.vpos)) {
             auto cpos = coord::to_chunk(packet.vpos);
             auto lpos = coord::to_local(packet.vpos);
             auto index = coord::to_index(lpos);
@@ -102,7 +103,7 @@ static void on_set_voxel_packet(const protocol::SetVoxel& packet)
                 return;
             }
 
-            chunk->set_voxel(packet.voxel, index);
+            chunk->set_voxel(world::voxel_registry::find(packet.voxel), index);
 
             session->dimension->chunks.emplace_or_replace<world::Inhabited>(chunk->get_entity());
 

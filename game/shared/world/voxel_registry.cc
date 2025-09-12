@@ -4,7 +4,7 @@
 
 static std::uint64_t registry_checksum = 0U;
 emhash8::HashMap<std::string, voxel_id> world::voxel_registry::names;
-std::vector<std::shared_ptr<world::Voxel>> world::voxel_registry::voxels;
+std::vector<std::unique_ptr<world::Voxel>> world::voxel_registry::voxels;
 
 static void recalculate_checksum(void)
 {
@@ -15,17 +15,15 @@ static void recalculate_checksum(void)
     }
 }
 
-world::Voxel* world::voxel_registry::register_voxel(const Voxel& voxel_template)
+world::Voxel* world::voxel_registry::register_voxel(const VoxelBuilder& builder)
 {
-    assert(voxel_template.get_name().size());
-    assert(nullptr == find(voxel_template.get_name()));
+    assert(builder.get_name().size());
+    assert(nullptr == find(builder.get_name()));
 
-    const auto id = static_cast<voxel_id>(voxels.size());
+    const auto id = static_cast<voxel_id>(1 + voxels.size());
 
-    auto voxel = voxel_template.clone();
-    voxel->set_id(id);
-
-    names.emplace(std::string(voxel_template.get_name()), id);
+    std::unique_ptr<Voxel> voxel(builder.build(id));
+    names.emplace(std::string(builder.get_name()), id);
     voxels.push_back(std::move(voxel));
 
     recalculate_checksum();
@@ -35,7 +33,7 @@ world::Voxel* world::voxel_registry::register_voxel(const Voxel& voxel_template)
 
 world::Voxel* world::voxel_registry::find(std::string_view name)
 {
-    const auto it = names.find(name);
+    const auto it = names.find(std::string(name));
 
     if(it == names.end()) {
         return nullptr;
@@ -46,11 +44,11 @@ world::Voxel* world::voxel_registry::find(std::string_view name)
 
 world::Voxel* world::voxel_registry::find(voxel_id id)
 {
-    if(id >= voxels.size()) {
+    if(id == NULL_VOXEL_ID || id > voxels.size()) {
         return nullptr;
     }
 
-    return voxels[id].get();
+    return voxels[id - 1].get();
 }
 
 void world::voxel_registry::purge(void)

@@ -20,7 +20,6 @@ extern const world::Voxel* oak_planks;
 extern const world::Voxel* oak_log;
 extern const world::Voxel* glass;
 extern const world::Voxel* slime;
-extern const world::Voxel* mud;
 } // namespace game_voxels
 
 namespace game_voxels

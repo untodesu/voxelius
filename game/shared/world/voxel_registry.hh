@@ -5,12 +5,12 @@
 namespace world::voxel_registry
 {
 extern emhash8::HashMap<std::string, voxel_id> names;
-extern std::vector<std::shared_ptr<Voxel>> voxels;
+extern std::vector<std::unique_ptr<Voxel>> voxels;
 } // namespace world::voxel_registry
 
 namespace world::voxel_registry
 {
-Voxel* register_voxel(const Voxel& voxel_template);
+Voxel* register_voxel(const VoxelBuilder& builder);
 Voxel* find(std::string_view name);
 Voxel* find(voxel_id id);
 } // namespace world::voxel_registry
