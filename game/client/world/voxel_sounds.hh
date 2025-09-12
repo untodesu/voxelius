@@ -2,7 +2,7 @@
 
 #include "core/resource/resource.hh"
 
-#include "shared/world/voxel_registry.hh"
+#include "shared/world/voxel.hh"
 
 struct SoundEffect;
 
@@ -14,6 +14,6 @@ void shutdown(void);
 
 namespace world::voxel_sounds
 {
-resource_ptr<SoundEffect> get_footsteps(voxel_surface surface);
-resource_ptr<SoundEffect> get_placebreak(voxel_surface surface);
+resource_ptr<SoundEffect> get_footsteps(VoxelMaterial material);
+resource_ptr<SoundEffect> get_placebreak(VoxelMaterial material);
 } // namespace world::voxel_sounds

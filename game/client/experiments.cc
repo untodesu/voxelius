@@ -22,7 +22,7 @@
 static void on_glfw_mouse_button(const io::GlfwMouseButtonEvent& event)
 {
     if(!globals::gui_screen && session::is_ingame()) {
-        if((event.action == GLFW_PRESS) && (world::player_target::voxel != NULL_VOXEL_ID)) {
+        if((event.action == GLFW_PRESS) && world::player_target::voxel) {
             if(event.button == GLFW_MOUSE_BUTTON_LEFT) {
                 experiments::attack();
                 return;
@@ -68,14 +68,17 @@ void experiments::update_late(void)
 
 void experiments::attack(void)
 {
-    globals::dimension->set_voxel(NULL_VOXEL_ID, world::player_target::coord);
+    globals::dimension->set_voxel(nullptr, world::player_target::coord);
 }
 
 void experiments::interact(void)
 {
-    if(auto info = world::item_registry::find(gui::hotbar::slots[gui::hotbar::active_slot])) {
-        if(info->place_voxel != NULL_VOXEL_ID) {
-            globals::dimension->set_voxel(info->place_voxel, world::player_target::coord + world::player_target::normal);
+    auto active_item = gui::hotbar::slots[gui::hotbar::active_slot];
+
+    if(active_item) {
+        if(auto place_voxel = active_item->get_place_voxel()) {
+            globals::dimension->set_voxel(place_voxel, world::player_target::coord + world::player_target::normal);
+            return;
         }
     }
 }

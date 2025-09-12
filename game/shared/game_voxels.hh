@@ -1,28 +1,26 @@
-#ifndef SHARED_GAME_VOXELS
-#define SHARED_GAME_VOXELS 1
 #pragma once
 
-#include "shared/types.hh"
+namespace world
+{
+class Voxel;
+} // namespace world
 
 namespace game_voxels
 {
-extern voxel_id cobblestone;
-extern voxel_id dirt;
-extern voxel_id grass;
-extern voxel_id stone;
-extern voxel_id vtest;
-extern voxel_id vtest_ck;
-extern voxel_id oak_leaves;
-extern voxel_id oak_planks;
-extern voxel_id oak_log;
-extern voxel_id glass;
-extern voxel_id slime;
-extern voxel_id mud;
+extern const world::Voxel* cobblestone;
+extern const world::Voxel* dirt;
+extern const world::Voxel* grass;
+extern const world::Voxel* stone;
+extern const world::Voxel* vtest;
+extern const world::Voxel* vtest_ck;
+extern const world::Voxel* oak_leaves;
+extern const world::Voxel* oak_planks;
+extern const world::Voxel* oak_log;
+extern const world::Voxel* glass;
+extern const world::Voxel* slime;
 } // namespace game_voxels
 
 namespace game_voxels
 {
 void populate(void);
 } // namespace game_voxels
-
-#endif // SHARED_GAME_VOXELS

@@ -14,7 +14,6 @@ constexpr static std::size_t MAX_USERNAME = 64;
 constexpr static std::size_t MAX_SOUNDNAME = 1024;
 constexpr static std::uint16_t TICKRATE = 60;
 constexpr static std::uint16_t PORT = 43103;
-constexpr static std::uint32_t VERSION = 15;
 constexpr static std::uint8_t CHANNEL = 0;
 } // namespace protocol
 
@@ -107,22 +106,26 @@ ENetPacket* make_dimension_info(const world::Dimension* dimension);
 } // namespace protocol::utils
 
 struct protocol::StatusRequest final : public protocol::Base<0x0000> {
-    std::uint32_t version;
+    std::uint32_t game_version_major; // renamed from 'version' in v16.x.x
 };
 
 struct protocol::StatusResponse final : public protocol::Base<0x0001> {
-    std::uint32_t version;
+    std::uint32_t game_version_major; // renamed from 'version' in v16.x.x
     std::uint16_t max_players;
     std::uint16_t num_players;
     std::string motd;
+    std::uint32_t game_version_minor { UINT32_MAX }; // added in v16.x.x
+    std::uint32_t game_version_patch { UINT32_MAX };
 };
 
 struct protocol::LoginRequest final : public protocol::Base<0x0002> {
-    std::uint32_t version;
+    std::uint32_t game_version_major; // renamed from 'version' in v16.x.x
     std::uint64_t voxel_registry_checksum;
     std::uint64_t item_registry_checksum;
     std::uint64_t password_hash;
     std::string username;
+    std::uint32_t game_version_minor; // added in v16.x.x
+    std::uint32_t game_version_patch;
 };
 
 struct protocol::LoginResponse final : public protocol::Base<0x0003> {

@@ -25,7 +25,7 @@ constexpr static float SELECTOR_PADDING = 1.0f;
 constexpr static float HOTBAR_PADDING = 2.0f;
 
 unsigned int gui::hotbar::active_slot = 0U;
-item_id gui::hotbar::slots[HOTBAR_SIZE];
+std::array<const world::Item*, HOTBAR_SIZE> gui::hotbar::slots = {};
 
 static config::KeyBind hotbar_keys[HOTBAR_SIZE];
 
@@ -40,14 +40,13 @@ static ImU32 get_color_alpha(ImGuiCol style_color, float alpha)
 
 static void update_hotbar_item(void)
 {
-    if(gui::hotbar::slots[gui::hotbar::active_slot] == NULL_ITEM_ID) {
-        gui::status_lines::unset(gui::STATUS_HOTBAR);
-        return;
-    }
+    auto current_item = gui::hotbar::slots[gui::hotbar::active_slot];
 
-    if(auto info = world::item_registry::find(gui::hotbar::slots[gui::hotbar::active_slot])) {
-        gui::status_lines::set(gui::STATUS_HOTBAR, info->name, ImVec4(1.0f, 1.0f, 1.0f, 1.0f), 5.0f);
-        return;
+    if(current_item == nullptr) {
+        gui::status_lines::unset(gui::STATUS_HOTBAR);
+    }
+    else {
+        gui::status_lines::set(gui::STATUS_HOTBAR, current_item->get_name(), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), 5.0f);
     }
 }
 
@@ -154,9 +153,9 @@ void gui::hotbar::layout(void)
 
     // Draw individual item textures in the hotbar
     for(std::size_t i = 0; i < HOTBAR_SIZE; ++i) {
-        const auto info = world::item_registry::find(gui::hotbar::slots[i]);
+        auto item = gui::hotbar::slots[i];
 
-        if((info == nullptr) || (info->cached_texture == nullptr)) {
+        if((item == nullptr) || (item->get_cached_texture() == nullptr)) {
             // There's either no item in the slot
             // or the item doesn't have a texture
             continue;
@@ -164,7 +163,7 @@ void gui::hotbar::layout(void)
 
         const auto item_start = ImVec2(background_start.x + i * item_size + item_padding_a, background_start.y + item_padding_a);
         const auto item_end = ImVec2(item_start.x + item_size - item_padding_b, item_start.y + item_size - item_padding_b);
-        draw_list->AddImage(info->cached_texture->handle, item_start, item_end);
+        draw_list->AddImage(item->get_cached_texture()->handle, item_start, item_end);
     }
 }
 

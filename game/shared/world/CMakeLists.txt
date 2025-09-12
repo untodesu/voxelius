@@ -8,9 +8,13 @@ target_sources(shared PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/feature.hh"
     "${CMAKE_CURRENT_LIST_DIR}/item_registry.cc"
     "${CMAKE_CURRENT_LIST_DIR}/item_registry.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/item.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/item.hh"
     "${CMAKE_CURRENT_LIST_DIR}/ray_dda.cc"
     "${CMAKE_CURRENT_LIST_DIR}/ray_dda.hh"
     "${CMAKE_CURRENT_LIST_DIR}/voxel_registry.cc"
     "${CMAKE_CURRENT_LIST_DIR}/voxel_registry.hh"
     "${CMAKE_CURRENT_LIST_DIR}/voxel_storage.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/voxel_storage.hh")
+    "${CMAKE_CURRENT_LIST_DIR}/voxel_storage.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/voxel.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/voxel.hh")

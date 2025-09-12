@@ -21,7 +21,7 @@ ENetPacket* protocol::encode(const protocol::StatusRequest& packet, enet_uint32 
 {
     write_buffer.reset();
     write_buffer.write<std::uint16_t>(protocol::StatusRequest::ID);
-    write_buffer.write<std::uint32_t>(packet.version);
+    write_buffer.write<std::uint32_t>(packet.game_version_major);
     return write_buffer.to_packet(flags);
 }
 
@@ -29,10 +29,12 @@ ENetPacket* protocol::encode(const protocol::StatusResponse& packet, enet_uint32
 {
     write_buffer.reset();
     write_buffer.write<std::uint16_t>(protocol::StatusResponse::ID);
-    write_buffer.write<std::uint32_t>(packet.version);
+    write_buffer.write<std::uint32_t>(packet.game_version_major);
     write_buffer.write<std::uint16_t>(packet.max_players);
     write_buffer.write<std::uint16_t>(packet.num_players);
     write_buffer.write<std::string_view>(packet.motd);
+    write_buffer.write<std::uint32_t>(packet.game_version_minor);
+    write_buffer.write<std::uint32_t>(packet.game_version_patch);
     return write_buffer.to_packet(flags);
 }
 
@@ -40,11 +42,13 @@ ENetPacket* protocol::encode(const protocol::LoginRequest& packet, enet_uint32 f
 {
     write_buffer.reset();
     write_buffer.write<std::uint16_t>(protocol::LoginRequest::ID);
-    write_buffer.write<std::uint32_t>(packet.version);
+    write_buffer.write<std::uint32_t>(packet.game_version_major);
     write_buffer.write<std::uint64_t>(packet.voxel_registry_checksum);
     write_buffer.write<std::uint64_t>(packet.item_registry_checksum);
     write_buffer.write<std::uint64_t>(packet.password_hash);
     write_buffer.write<std::string_view>(packet.username.substr(0, protocol::MAX_USERNAME));
+    write_buffer.write<std::uint32_t>(packet.game_version_minor);
+    write_buffer.write<std::uint32_t>(packet.game_version_patch);
     return write_buffer.to_packet(flags);
 }
 
@@ -268,26 +272,30 @@ void protocol::decode(entt::dispatcher& dispatcher, const ENetPacket* packet, EN
     switch(id) {
         case protocol::StatusRequest::ID:
             status_request.peer = peer;
-            status_request.version = read_buffer.read<std::uint32_t>();
+            status_request.game_version_major = read_buffer.read<std::uint32_t>();
             dispatcher.trigger(status_request);
             break;
 
         case protocol::StatusResponse::ID:
             status_response.peer = peer;
-            status_response.version = read_buffer.read<std::uint32_t>();
+            status_response.game_version_major = read_buffer.read<std::uint32_t>();
             status_response.max_players = read_buffer.read<std::uint16_t>();
             status_response.num_players = read_buffer.read<std::uint16_t>();
             status_response.motd = read_buffer.read<std::string>();
+            status_response.game_version_minor = read_buffer.read<std::uint32_t>();
+            status_response.game_version_patch = read_buffer.read<std::uint32_t>();
             dispatcher.trigger(status_response);
             break;
 
         case protocol::LoginRequest::ID:
             login_request.peer = peer;
-            login_request.version = read_buffer.read<std::uint32_t>();
+            login_request.game_version_major = read_buffer.read<std::uint32_t>();
             login_request.voxel_registry_checksum = read_buffer.read<std::uint64_t>();
             login_request.item_registry_checksum = read_buffer.read<std::uint64_t>();
             login_request.password_hash = read_buffer.read<std::uint64_t>();
             login_request.username = read_buffer.read<std::string>();
+            login_request.game_version_minor = read_buffer.read<std::uint32_t>();
+            login_request.game_version_patch = read_buffer.read<std::uint32_t>();
             dispatcher.trigger(login_request);
             break;
 

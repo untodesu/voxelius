@@ -4,10 +4,9 @@
 
 namespace world::player_target
 {
-extern voxel_id voxel;
 extern voxel_pos coord;
 extern voxel_pos normal;
-extern const VoxelInfo* info;
+extern const Voxel* voxel;
 } // namespace world::player_target
 
 namespace world::player_target

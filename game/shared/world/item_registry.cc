@@ -6,101 +6,63 @@
 
 #include "shared/world/voxel_registry.hh"
 
-std::unordered_map<std::string, world::ItemInfoBuilder> world::item_registry::builders = {};
+static std::uint64_t registry_checksum = 0U;
 std::unordered_map<std::string, item_id> world::item_registry::names = {};
-std::vector<std::shared_ptr<world::ItemInfo>> world::item_registry::items = {};
+std::vector<std::unique_ptr<world::Item>> world::item_registry::items = {};
 
-world::ItemInfoBuilder::ItemInfoBuilder(std::string_view name)
+static void recalculate_checksum(void)
 {
-    prototype.name = name;
-    prototype.texture = std::string();
-    prototype.place_voxel = NULL_VOXEL_ID;
-    prototype.cached_texture = nullptr;
-}
+    registry_checksum = 0U;
 
-world::ItemInfoBuilder& world::ItemInfoBuilder::set_texture(std::string_view texture)
-{
-    prototype.texture = texture;
-    prototype.cached_texture = nullptr;
-    return *this;
-}
-
-world::ItemInfoBuilder& world::ItemInfoBuilder::set_place_voxel(voxel_id place_voxel)
-{
-    prototype.place_voxel = place_voxel;
-    return *this;
-}
-
-item_id world::ItemInfoBuilder::build(void) const
-{
-    const auto it = world::item_registry::names.find(prototype.name);
-
-    if(it != world::item_registry::names.cend()) {
-        spdlog::warn("item_registry: cannot build {}: name already present", prototype.name);
-        return it->second;
-    }
-
-    auto new_info = std::make_shared<ItemInfo>();
-    new_info->name = prototype.name;
-    new_info->texture = prototype.texture;
-    new_info->place_voxel = prototype.place_voxel;
-    new_info->cached_texture = nullptr;
-
-    world::item_registry::items.push_back(new_info);
-    world::item_registry::names.insert_or_assign(prototype.name, static_cast<item_id>(world::item_registry::items.size()));
-
-    return static_cast<item_id>(world::item_registry::items.size());
-}
-
-world::ItemInfoBuilder& world::item_registry::construct(std::string_view name)
-{
-    const auto it = world::item_registry::builders.find(std::string(name));
-
-    if(it != world::item_registry::builders.cend()) {
-        return it->second;
-    }
-    else {
-        return world::item_registry::builders.emplace(std::string(name), ItemInfoBuilder(name)).first->second;
+    for(const auto& item : world::item_registry::items) {
+        registry_checksum = item->get_checksum(registry_checksum);
     }
 }
 
-world::ItemInfo* world::item_registry::find(std::string_view name)
+world::Item* world::item_registry::register_item(const ItemBuilder& builder)
 {
-    const auto it = world::item_registry::names.find(std::string(name));
+    assert(builder.get_name().size());
+    assert(nullptr == find(builder.get_name()));
 
-    if(it != world::item_registry::names.cend()) {
-        return world::item_registry::find(it->second);
-    }
-    else {
+    const auto id = static_cast<item_id>(1 + items.size());
+
+    std::unique_ptr<Item> item(builder.build(id));
+    names.emplace(std::string(builder.get_name()), id);
+    items.push_back(std::move(item));
+
+    recalculate_checksum();
+
+    return items.back().get();
+}
+
+world::Item* world::item_registry::find(std::string_view name)
+{
+    const auto it = names.find(std::string(name));
+
+    if(it == names.end()) {
         return nullptr;
     }
+
+    return items[it->second - 1].get();
 }
 
-world::ItemInfo* world::item_registry::find(const item_id item)
+world::Item* world::item_registry::find(const item_id item)
 {
-    if((item != NULL_ITEM_ID) && (item <= world::item_registry::items.size())) {
-        return world::item_registry::items[item - 1].get();
-    }
-    else {
+    if(item == NULL_ITEM_ID || item > items.size()) {
         return nullptr;
     }
+
+    return items[item - 1].get();
 }
 
 void world::item_registry::purge(void)
 {
-    world::item_registry::builders.clear();
-    world::item_registry::names.clear();
-    world::item_registry::items.clear();
+    registry_checksum = 0U;
+    items.clear();
+    names.clear();
 }
 
-std::uint64_t world::item_registry::calculate_checksum(void)
+std::uint64_t world::item_registry::get_checksum(void)
 {
-    std::uint64_t result = 0;
-
-    for(const auto& info : world::item_registry::items) {
-        result = math::crc64(info->name, result);
-        result += static_cast<std::uint64_t>(info->place_voxel);
-    }
-
-    return result;
+    return registry_checksum;
 }

@@ -4,24 +4,21 @@
 
 #include "client/resource/sound_effect.hh"
 
-constexpr static std::size_t NUM_SURFACES = static_cast<std::size_t>(world::voxel_surface::COUNT);
-
-static std::vector<resource_ptr<SoundEffect>> footsteps_sounds[NUM_SURFACES];
+static std::vector<resource_ptr<SoundEffect>> footsteps_sounds[world::VMAT_COUNT];
 static std::mt19937_64 randomizer;
 
-static void add_footsteps_effect(world::voxel_surface surface, std::string_view name)
+static void add_footsteps_effect(world::VoxelMaterial material, std::string_view name)
 {
     if(auto effect = resource::load<SoundEffect>(name)) {
-        auto surface_index = static_cast<std::size_t>(surface);
-        footsteps_sounds[surface_index].push_back(effect);
+        footsteps_sounds[material].push_back(effect);
     }
 }
 
-static resource_ptr<SoundEffect> get_footsteps_effect(world::voxel_surface surface)
+static resource_ptr<SoundEffect> get_footsteps_effect(world::VoxelMaterial material)
 {
-    auto surface_index = static_cast<std::size_t>(surface);
+    auto surface_index = static_cast<std::size_t>(material);
 
-    if(surface_index >= NUM_SURFACES) {
+    if(surface_index >= world::VMAT_COUNT) {
         // Surface index out of range
         return nullptr;
     }
@@ -39,48 +36,48 @@ static resource_ptr<SoundEffect> get_footsteps_effect(world::voxel_surface surfa
 
 void world::voxel_sounds::init(void)
 {
-    add_footsteps_effect(voxel_surface::DEFAULT, "sounds/surface/default1.wav");
-    add_footsteps_effect(voxel_surface::DEFAULT, "sounds/surface/default2.wav");
-    add_footsteps_effect(voxel_surface::DEFAULT, "sounds/surface/default3.wav");
-    add_footsteps_effect(voxel_surface::DEFAULT, "sounds/surface/default4.wav");
+    add_footsteps_effect(VMAT_DEFAULT, "sounds/surface/default1.wav");
+    add_footsteps_effect(VMAT_DEFAULT, "sounds/surface/default2.wav");
+    add_footsteps_effect(VMAT_DEFAULT, "sounds/surface/default3.wav");
+    add_footsteps_effect(VMAT_DEFAULT, "sounds/surface/default4.wav");
 
-    add_footsteps_effect(voxel_surface::DIRT, "sounds/surface/dirt1.wav");
+    add_footsteps_effect(VMAT_DIRT, "sounds/surface/dirt1.wav");
 
-    add_footsteps_effect(voxel_surface::GRASS, "sounds/surface/grass1.wav");
-    add_footsteps_effect(voxel_surface::GRASS, "sounds/surface/grass2.wav");
-    add_footsteps_effect(voxel_surface::GRASS, "sounds/surface/grass3.wav");
+    add_footsteps_effect(VMAT_GRASS, "sounds/surface/grass1.wav");
+    add_footsteps_effect(VMAT_GRASS, "sounds/surface/grass2.wav");
+    add_footsteps_effect(VMAT_GRASS, "sounds/surface/grass3.wav");
 
-    add_footsteps_effect(voxel_surface::GRAVEL, "sounds/surface/gravel1.wav");
+    add_footsteps_effect(VMAT_GRAVEL, "sounds/surface/gravel1.wav");
 
-    add_footsteps_effect(voxel_surface::SAND, "sounds/surface/sand1.wav");
-    add_footsteps_effect(voxel_surface::SAND, "sounds/surface/sand2.wav");
+    add_footsteps_effect(VMAT_SAND, "sounds/surface/sand1.wav");
+    add_footsteps_effect(VMAT_SAND, "sounds/surface/sand2.wav");
 
-    add_footsteps_effect(voxel_surface::WOOD, "sounds/surface/wood1.wav");
-    add_footsteps_effect(voxel_surface::WOOD, "sounds/surface/wood2.wav");
-    add_footsteps_effect(voxel_surface::WOOD, "sounds/surface/wood3.wav");
+    add_footsteps_effect(VMAT_WOOD, "sounds/surface/wood1.wav");
+    add_footsteps_effect(VMAT_WOOD, "sounds/surface/wood2.wav");
+    add_footsteps_effect(VMAT_WOOD, "sounds/surface/wood3.wav");
 }
 
 void world::voxel_sounds::shutdown(void)
 {
-    for(std::size_t i = 0; i < NUM_SURFACES; ++i) {
+    for(std::size_t i = 0; i < world::VMAT_COUNT; ++i) {
         footsteps_sounds[i].clear();
     }
 }
 
-resource_ptr<SoundEffect> world::voxel_sounds::get_footsteps(voxel_surface surface)
+resource_ptr<SoundEffect> world::voxel_sounds::get_footsteps(world::VoxelMaterial material)
 {
-    if(auto effect = get_footsteps_effect(surface)) {
+    if(auto effect = get_footsteps_effect(material)) {
         return effect;
     }
 
-    if(auto effect = get_footsteps_effect(voxel_surface::DEFAULT)) {
+    if(auto effect = get_footsteps_effect(VMAT_DEFAULT)) {
         return effect;
     }
 
     return nullptr;
 }
 
-resource_ptr<SoundEffect> world::voxel_sounds::get_placebreak(voxel_surface surface)
+resource_ptr<SoundEffect> world::voxel_sounds::get_placebreak(world::VoxelMaterial material)
 {
     return nullptr;
 }

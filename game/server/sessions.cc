@@ -12,6 +12,8 @@
 
 #include "core/utils/string.hh"
 
+#include "core/version.hh"
+
 #include "shared/entity/factory.hh"
 #include "shared/entity/head.hh"
 #include "shared/entity/player.hh"
@@ -42,6 +44,8 @@ private:
 config::Unsigned sessions::max_players(8U, 1U, 128U);
 unsigned int sessions::num_players = 0U;
 
+static config::Boolean strict_version_matching(true);
+
 static emhash8::HashMap<std::string, Session*> username_map;
 static emhash8::HashMap<std::uint64_t, Session*> identity_map;
 static std::vector<DimensionListener> dimension_listeners;
@@ -49,30 +53,46 @@ static std::vector<Session> sessions_vector;
 
 static void on_login_request_packet(const protocol::LoginRequest& packet)
 {
-    if(packet.version > protocol::VERSION) {
+    if(packet.game_version_major > version::major) {
         protocol::Disconnect response;
         response.reason = "protocol.outdated_server";
         protocol::send(packet.peer, protocol::encode(response));
         return;
     }
 
-    if(packet.version < protocol::VERSION) {
+    if(packet.game_version_minor < version::minor) {
         protocol::Disconnect response;
         response.reason = "protocol.outdated_client";
         protocol::send(packet.peer, protocol::encode(response));
         return;
     }
 
+    if(strict_version_matching.get_value()) {
+        if(packet.game_version_minor > version::minor || packet.game_version_patch > version::patch) {
+            protocol::Disconnect response;
+            response.reason = "protocol.outdated_server";
+            protocol::send(packet.peer, protocol::encode(response));
+            return;
+        }
+
+        if(packet.game_version_minor < version::minor || packet.game_version_patch < version::patch) {
+            protocol::Disconnect response;
+            response.reason = "protocol.outdated_client";
+            protocol::send(packet.peer, protocol::encode(response));
+            return;
+        }
+    }
+
     // FIXME: calculate voxel registry checksum ahead of time
     // instead of figuring it out every time a new player connects
-    if(packet.voxel_registry_checksum != world::voxel_registry::calculate_checksum()) {
+    if(packet.voxel_registry_checksum != world::voxel_registry::get_checksum()) {
         protocol::Disconnect response;
         response.reason = "protocol.voxel_registry_checksum";
         protocol::send(packet.peer, protocol::encode(response));
         return;
     }
 
-    if(packet.item_registry_checksum != world::item_registry::calculate_checksum()) {
+    if(packet.item_registry_checksum != world::item_registry::get_checksum()) {
         protocol::Disconnect response;
         response.reason = "protocol.item_registry_checksum";
         protocol::send(packet.peer, protocol::encode(response));
@@ -241,7 +261,7 @@ static void on_voxel_set(const world::VoxelSetEvent& event)
 {
     protocol::SetVoxel packet;
     packet.vpos = coord::to_voxel(event.cpos, event.lpos);
-    packet.voxel = event.voxel;
+    packet.voxel = event.voxel ? event.voxel->get_id() : NULL_VOXEL_ID;
     packet.flags = 0U; // UNDONE
     protocol::broadcast(globals::server_host, protocol::encode(packet));
 }

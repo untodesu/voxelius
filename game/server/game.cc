@@ -28,6 +28,7 @@
 #include "shared/protocol.hh"
 #include "shared/splash.hh"
 
+#include "server/world/random_tick.hh"
 #include "server/world/universe.hh"
 #include "server/world/unloader.hh"
 #include "server/world/worldgen.hh"
@@ -69,6 +70,8 @@ void server_game::init(void)
 
     world::unloader::init();
     world::universe::init();
+
+    world::random_tick::init();
 }
 
 void server_game::init_late(void)
@@ -128,6 +131,10 @@ void server_game::fixed_update(void)
         entity::Transform::fixed_update(dimension.second);
         entity::Gravity::fixed_update(dimension.second);
         entity::Stasis::fixed_update(dimension.second);
+
+        for(auto [entity, component] : dimension.second->chunks.view<world::ChunkComponent>().each()) {
+            world::random_tick::tick(component.cpos, component.chunk);
+        }
     }
 }
 

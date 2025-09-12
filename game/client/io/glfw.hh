@@ -1,5 +1,3 @@
-#ifndef CLIENTFW
-#define CLIENTFW 1
 #pragma once
 
 namespace io
@@ -36,5 +34,3 @@ struct GlfwScrollEvent final {
     float dy;
 };
 } // namespace io
-
-#endif // CLIENTFW

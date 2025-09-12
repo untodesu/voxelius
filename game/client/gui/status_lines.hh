@@ -16,6 +16,6 @@ void layout(void);
 
 namespace gui::status_lines
 {
-void set(unsigned int line, const std::string& text, const ImVec4& color, float fadeout);
+void set(unsigned int line, std::string_view text, const ImVec4& color, float fadeout);
 void unset(unsigned int line);
 } // namespace gui::status_lines

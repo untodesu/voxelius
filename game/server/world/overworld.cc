@@ -4,13 +4,15 @@
 
 #include "core/math/vectors.hh"
 
+#include "shared/world/voxel.hh"
 #include "shared/world/voxel_storage.hh"
 
 #include "shared/coord.hh"
 #include "shared/game_voxels.hh"
 
 // FIXME: load these from a file
-static void compute_tree_feature(unsigned int height, world::Feature& feature, voxel_id log_voxel, voxel_id leaves_voxel)
+static void compute_tree_feature(unsigned int height, world::Feature& feature, const world::Voxel* log_voxel,
+    const world::Voxel* leaves_voxel)
 {
     // Ensure the tree height is too small
     height = math::max<unsigned int>(height, 4U);
@@ -251,12 +253,12 @@ void world::Overworld::generate_terrain(const chunk_pos& cpos, VoxelStorage& vox
         }
 
         if(vpos.y < -variation) {
-            voxels[i] = game_voxels::stone;
+            voxels[i] = game_voxels::stone->get_id();
             continue;
         }
 
         if(is_inside_terrain(vpos)) {
-            voxels[i] = game_voxels::stone;
+            voxels[i] = game_voxels::stone->get_id();
             continue;
         }
     }
@@ -308,10 +310,10 @@ void world::Overworld::generate_surface(const chunk_pos& cpos, VoxelStorage& vox
 
         if(depth < 5U) {
             if(depth == 0U) {
-                voxels[i] = game_voxels::grass;
+                voxels[i] = game_voxels::grass->get_id();
             }
             else {
-                voxels[i] = game_voxels::dirt;
+                voxels[i] = game_voxels::dirt->get_id();
             }
         }
     }

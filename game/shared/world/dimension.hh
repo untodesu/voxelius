@@ -11,6 +11,7 @@ class ConfigMap;
 namespace world
 {
 class Chunk;
+class Voxel;
 class VoxelStorage;
 } // namespace world
 
@@ -40,11 +41,11 @@ public:
     void remove_chunk(Chunk* chunk);
 
 public:
-    voxel_id get_voxel(const voxel_pos& vpos) const;
-    voxel_id get_voxel(const chunk_pos& cpos, const local_pos& lpos) const;
+    const Voxel* get_voxel(const voxel_pos& vpos) const;
+    const Voxel* get_voxel(const chunk_pos& cpos, const local_pos& lpos) const;
 
-    bool set_voxel(voxel_id voxel, const voxel_pos& vpos);
-    bool set_voxel(voxel_id voxel, const chunk_pos& cpos, const local_pos& lpos);
+    bool set_voxel(const Voxel* voxel, const voxel_pos& vpos);
+    bool set_voxel(const Voxel* voxel, const chunk_pos& cpos, const local_pos& lpos);
 
 public:
     virtual void init(io::ConfigMap& config);
@@ -92,9 +93,9 @@ struct ChunkUpdateEvent final {
 
 struct VoxelSetEvent final {
     Dimension* dimension;
+    const Voxel* voxel;
     chunk_pos cpos;
     local_pos lpos;
-    voxel_id voxel;
     Chunk* chunk;
 };
 } // namespace world
