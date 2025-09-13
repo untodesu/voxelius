@@ -292,7 +292,7 @@ static void layout_server_item(ServerStatusItem* item)
             // Pre v16.x.x servers didn't send minor and patch versions
             // and also used a different versioning scheme; post v16 the
             // major version became the protocol version and the semver lost the tweak part
-            version_toast = std::string("0.0.1");
+            version_toast = std::string("15.x.x");
         }
         else {
             version_toast = std::format("{}.{}.{}", item->game_version_major, item->game_version_minor, item->game_version_patch);

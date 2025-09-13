@@ -14,9 +14,9 @@
                 "_USE_MATH_DEFINES"
             ],
             "includePath": [
-                "${workspaceFolder}/build/_deps/glfw-src/include",
-                "${workspaceFolder}/build32/_deps/glfw-src/include",
-                "${workspaceFolder}/build64/_deps/glfw-src/include",
+                "${workspaceFolder}/build/unix/**/_deps/glfw-src/include",
+                "${workspaceFolder}/build/win32/_deps/glfw-src/include",
+                "${workspaceFolder}/build/win64/_deps/glfw-src/include",
                 "${workspaceFolder}/deps/dr_libs/include",
                 "${workspaceFolder}/deps/emhash/include",
                 "${workspaceFolder}/deps/enet/include",
