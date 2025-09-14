@@ -38,5 +38,5 @@ void entity::listener::update(void)
         alListenerfv(AL_ORIENTATION, orientation);
     }
 
-    alListenerf(AL_GAIN, math::clamp(sound::volume_master.get_value() * 0.01f, 0.0f, 1.0f));
+    alListenerf(AL_GAIN, glm::clamp(sound::volume_master.get_value() * 0.01f, 0.0f, 1.0f));
 }

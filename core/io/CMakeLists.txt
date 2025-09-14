@@ -4,4 +4,6 @@ target_sources(core PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/cmdline.cc"
     "${CMAKE_CURRENT_LIST_DIR}/cmdline.hh"
     "${CMAKE_CURRENT_LIST_DIR}/config_map.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/config_map.hh")
+    "${CMAKE_CURRENT_LIST_DIR}/config_map.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/physfs.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/physfs.hh")

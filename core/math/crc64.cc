@@ -69,3 +69,8 @@ std::uint64_t math::crc64(const std::string& buffer, std::uint64_t combine)
 {
     return math::crc64(buffer.data(), buffer.size(), combine);
 }
+
+std::uint64_t math::crc64(std::string_view buffer, std::uint64_t combine)
+{
+    return math::crc64(buffer.data(), buffer.size(), combine);
+}

@@ -96,12 +96,12 @@ void world::voxel_atlas::create(int width, int height, std::size_t count)
     // how voxel quad meshes are packed in memory: each texture index is
     // confined in 11 bits so having bigger atlas planes makes no sense;
     glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_plane_layers);
-    max_plane_layers = math::clamp(max_plane_layers, 256, 2048);
+    max_plane_layers = glm::clamp(max_plane_layers, 256, 2048);
 
     for(long i = count; i > 0L; i -= max_plane_layers) {
         AtlasPlane plane = {};
         plane.plane_id = planes.size();
-        plane.layer_count_max = math::min<std::size_t>(max_plane_layers, i);
+        plane.layer_count_max = glm::min<std::size_t>(max_plane_layers, i);
         plane.layer_count = 0;
 
         const std::size_t save_id = plane.plane_id;

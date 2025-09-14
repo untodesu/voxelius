@@ -99,7 +99,7 @@ void gui::client_splash::init_late(void)
             break;
         }
 
-        texture_alpha = math::smoothstep(0.25f, 0.6f, static_cast<float>(remains) / static_cast<float>(DELAY_MICROSECONDS));
+        texture_alpha = glm::smoothstep(0.25f, 0.6f, static_cast<float>(remains) / static_cast<float>(DELAY_MICROSECONDS));
 
         gui::client_splash::render();
     }

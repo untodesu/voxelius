@@ -8,35 +8,35 @@
 
 namespace math
 {
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr static inline const T length2(const glm::vec<2, T>& vector);
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr static inline const T length2(const glm::vec<3, T>& vector);
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr static inline const T distance2(const glm::vec<2, T>& vector_a, const glm::vec<2, T>& vector_b);
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr static inline const T distance2(const glm::vec<3, T>& vector_a, const glm::vec<3, T>& vector_b);
 } // namespace math
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr static inline const T math::length2(const glm::vec<2, T>& vector)
 {
     return (vector.x * vector.x) + (vector.y * vector.y);
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr static inline const T math::length2(const glm::vec<3, T>& vector)
 {
     return (vector.x * vector.x) + (vector.y * vector.y) + (vector.z * vector.z);
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr static inline const T math::distance2(const glm::vec<2, T>& vector_a, const glm::vec<2, T>& vector_b)
 {
     return math::length2(vector_a - vector_b);
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr static inline const T math::distance2(const glm::vec<3, T>& vector_a, const glm::vec<3, T>& vector_b)
 {
     return math::length2(vector_a - vector_b);

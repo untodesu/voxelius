@@ -49,7 +49,7 @@ void threading::init(void)
             auto result = std::from_chars(argument.data(), argument.data() + argument.size(), thread_pool_size);
 
             if(result.ec == std::errc()) {
-                thread_pool_size = math::clamp<unsigned int>(thread_pool_size, 1U, num_concurrent_threads);
+                thread_pool_size = glm::clamp<unsigned int>(thread_pool_size, 1U, num_concurrent_threads);
             }
             else {
                 thread_pool_size = 4U;
@@ -59,7 +59,7 @@ void threading::init(void)
             auto result = std::from_chars(argument.data(), argument.data() + argument.size(), thread_pool_size);
 
             if(result.ec == std::errc()) {
-                thread_pool_size = math::max<unsigned int>(thread_pool_size, 1U);
+                thread_pool_size = glm::max<unsigned int>(thread_pool_size, 1U);
             }
             else {
                 thread_pool_size = 4U;

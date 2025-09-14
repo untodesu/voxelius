@@ -10,10 +10,7 @@ struct ResourceLoader final {
     std::string class_name;
 };
 
-namespace
-{
-emhash8::HashMap<std::type_index, std::unique_ptr<ResourceLoader>> loaders;
-} // namespace
+static emhash8::HashMap<std::type_index, std::unique_ptr<ResourceLoader>> loaders;
 
 void resource::detail::register_loader(const std::type_info& type, ResourceLoadFunc load_func, ResourceFreeFunc free_func)
 {

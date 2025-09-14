@@ -4,7 +4,7 @@
 
 #include "core/resource/resource.hh"
 
-#include "core/utils/physfs.hh"
+#include "core/io/physfs.hh"
 
 static int stbi_physfs_read(void* context, char* data, int size)
 {
@@ -36,7 +36,7 @@ static const void* image_load_func(const char* name, std::uint32_t flags)
     auto file = PHYSFS_openRead(name);
 
     if(file == nullptr) {
-        spdlog::error("image: {}: {}", name, utils::physfs_error());
+        spdlog::error("image: {}: {}", name, io::physfs_error());
         return nullptr;
     }
 

@@ -5,6 +5,7 @@
 #include "core/config/string.hh"
 
 #include "core/io/config_map.hh"
+#include "core/io/physfs.hh"
 
 #include "client/gui/settings.hh"
 
@@ -40,7 +41,7 @@ void gui::language::init(void)
     auto file = PHYSFS_openRead(std::string(MANIFEST_PATH).c_str());
 
     if(file == nullptr) {
-        spdlog::critical("language: {}: {}", MANIFEST_PATH, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::critical("language: {}: {}", MANIFEST_PATH, io::physfs_error());
         std::terminate();
     }
 
@@ -113,7 +114,7 @@ void gui::language::set(LanguageIterator new_language)
         auto file = PHYSFS_openRead(path.c_str());
 
         if(file == nullptr) {
-            spdlog::warn("language: {}: {}", path, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+            spdlog::warn("language: {}: {}", path, io::physfs_error());
             send_language_event(new_language);
             return;
         }

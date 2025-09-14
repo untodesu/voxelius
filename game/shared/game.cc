@@ -3,6 +3,7 @@
 #include "shared/game.hh"
 
 #include "core/io/cmdline.hh"
+#include "core/io/physfs.hh"
 
 static std::filesystem::path get_gamepath(void)
 {
@@ -77,7 +78,7 @@ void shared_game::init(int argc, char** argv)
     logger->flush();
 
     if(!PHYSFS_init(argv[0])) {
-        spdlog::critical("physfs: init failed: {}", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::critical("physfs: init failed: {}", io::physfs_error());
         std::terminate();
     }
 
@@ -92,17 +93,17 @@ void shared_game::init(int argc, char** argv)
     std::filesystem::create_directories(userpath, ignore_error);
 
     if(!PHYSFS_mount(gamepath.string().c_str(), nullptr, false)) {
-        spdlog::critical("physfs: mount {} failed: {}", gamepath.string(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::critical("physfs: mount {} failed: {}", gamepath.string(), io::physfs_error());
         std::terminate();
     }
 
     if(!PHYSFS_mount(userpath.string().c_str(), nullptr, false)) {
-        spdlog::critical("physfs: mount {} failed: {}", userpath.string(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::critical("physfs: mount {} failed: {}", userpath.string(), io::physfs_error());
         std::terminate();
     }
 
     if(!PHYSFS_setWriteDir(userpath.string().c_str())) {
-        spdlog::critical("physfs: setwritedir {} failed: {}", userpath.string(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::critical("physfs: setwritedir {} failed: {}", userpath.string(), io::physfs_error());
         std::terminate();
     }
 
@@ -117,7 +118,7 @@ void shared_game::shutdown(void)
     enet_deinitialize();
 
     if(!PHYSFS_deinit()) {
-        spdlog::critical("physfs: deinit failed: {}", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::critical("physfs: deinit failed: {}", io::physfs_error());
         std::terminate();
     }
 }

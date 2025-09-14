@@ -2,6 +2,8 @@
 
 #include "shared/splash.hh"
 
+#include "core/io/physfs.hh"
+
 constexpr static std::string_view SPLASHES_FILENAME_CLIENT = "misc/splashes_client.txt";
 constexpr static std::string_view SPLASHES_FILENAME_SERVER = "misc/splashes_server.txt";
 constexpr static std::size_t SPLASH_SERVER_MAX_LENGTH = 32;
@@ -37,7 +39,7 @@ static void splash_init_filename(std::string_view filename)
         splash_random.seed(std::random_device()());
     }
     else {
-        splash_lines.push_back(std::format("{}: {}", filename, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())));
+        splash_lines.push_back(std::format("{}: {}", filename, io::physfs_error()));
         splash_random.seed(std::random_device()());
     }
 }

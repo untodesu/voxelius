@@ -96,7 +96,7 @@ void gui::main_menu::layout(void)
         }
         else {
             auto reference_height = 0.225f * window_size.y;
-            auto image_width = math::min(window_size.x, reference_height * title_aspect);
+            auto image_width = glm::min(window_size.x, reference_height * title_aspect);
             auto image_height = image_width / title_aspect;
             ImGui::SetCursorPosX(0.5f * (window_size.x - image_width));
             ImGui::Image(title->handle, ImVec2(image_width, image_height));

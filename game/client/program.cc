@@ -2,6 +2,8 @@
 
 #include "client/program.hh"
 
+#include "core/io/physfs.hh"
+
 #include "core/utils/string.hh"
 
 // This fills up the array of source lines and figures out
@@ -76,7 +78,7 @@ bool GL_Program::setup(std::string_view vpath, std::string_view fpath)
     auto vfile = PHYSFS_openRead(vert_path.c_str());
 
     if(vfile == nullptr) {
-        spdlog::warn("gl_program: {}: {}", vpath, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::warn("gl_program: {}: {}", vpath, io::physfs_error());
         return false;
     }
 
@@ -87,7 +89,7 @@ bool GL_Program::setup(std::string_view vpath, std::string_view fpath)
     auto ffile = PHYSFS_openRead(frag_path.c_str());
 
     if(ffile == nullptr) {
-        spdlog::warn("gl_program: {}: {}", fpath, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::warn("gl_program: {}: {}", fpath, io::physfs_error());
         return false;
     }
 

@@ -26,9 +26,9 @@ void world::RayDDA::reset(const world::Dimension* dimension, const chunk_pos& st
     this->start_fpos = start_fpos;
     this->direction = direction;
 
-    this->delta_dist.x = direction.x ? math::abs(1.0f / direction.x) : std::numeric_limits<float>::max();
-    this->delta_dist.y = direction.y ? math::abs(1.0f / direction.y) : std::numeric_limits<float>::max();
-    this->delta_dist.z = direction.z ? math::abs(1.0f / direction.z) : std::numeric_limits<float>::max();
+    this->delta_dist.x = direction.x ? glm::abs(1.0f / direction.x) : std::numeric_limits<float>::max();
+    this->delta_dist.y = direction.y ? glm::abs(1.0f / direction.y) : std::numeric_limits<float>::max();
+    this->delta_dist.z = direction.z ? glm::abs(1.0f / direction.z) : std::numeric_limits<float>::max();
 
     this->distance = 0.0f;
     this->vpos = coord::to_voxel(start_chunk, start_fpos);

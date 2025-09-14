@@ -37,7 +37,7 @@ void entity::SoundEmitter::update(void)
         const auto view = globals::dimension->entities.view<entity::SoundEmitter>();
 
         const auto& pivot = entity::camera::position_chunk;
-        const auto gain = math::clamp(sound::volume_effects.get_value() * 0.01f, 0.0f, 1.0f);
+        const auto gain = glm::clamp(sound::volume_effects.get_value() * 0.01f, 0.0f, 1.0f);
 
         for(const auto [entity, emitter] : view.each()) {
             alSourcef(emitter.source, AL_GAIN, gain);

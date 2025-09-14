@@ -6,6 +6,7 @@
 #include "core/config/string.hh"
 
 #include "core/io/config_map.hh"
+#include "core/io/physfs.hh"
 
 #include "core/math/crc64.hh"
 
@@ -47,7 +48,7 @@ void whitelist::init_late(void)
     PHYSFS_File* file = PHYSFS_openRead(whitelist::filename.c_str());
 
     if(file == nullptr) {
-        spdlog::warn("whitelist: {}: {}", whitelist::filename.get(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::warn("whitelist: {}: {}", whitelist::filename.get(), io::physfs_error());
         whitelist::enabled.set_value(false);
         return;
     }

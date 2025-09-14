@@ -80,7 +80,7 @@ static glm::fvec3 pm_accelerate(const glm::fvec3& wishdir, const glm::fvec3& vel
         return velocity;
     }
 
-    auto accel_speed = math::min(add_speed, accel * globals::fixed_frametime * wishspeed);
+    auto accel_speed = glm::min(add_speed, accel * globals::fixed_frametime * wishspeed);
 
     auto result = glm::fvec3(velocity);
     result.x += accel_speed * wishdir.x;
@@ -99,7 +99,7 @@ static glm::fvec3 pm_ground_move(const glm::fvec3& wishdir, const glm::fvec3& ve
 {
     if(auto speed = glm::length(velocity)) {
         auto speed_drop = speed * PMOVE_FRICTION_GROUND * globals::fixed_frametime;
-        auto speed_factor = math::max(speed - speed_drop, 0.0f) / speed;
+        auto speed_factor = glm::max(speed - speed_drop, 0.0f) / speed;
         return pm_accelerate(wishdir, velocity * speed_factor, PMOVE_ACCELERATION_GROUND, PMOVE_MAX_SPEED_GROUND);
     }
 
@@ -225,7 +225,7 @@ void entity::player_move::fixed_update(void)
         next_jump_us = globals::curtime + PMOVE_JUMP_COOLDOWN;
 
         if(enable_speedometer.get_value()) {
-            if(math::abs(speed_change) < 0.01f) {
+            if(glm::abs(speed_change) < 0.01f) {
                 // No considerable speed increase within
                 // the precision we use to draw the speedometer
                 gui::status_lines::set(gui::STATUS_DEBUG, new_speed_text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f), 1.0f);

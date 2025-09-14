@@ -15,7 +15,7 @@ static void compute_tree_feature(unsigned int height, world::Feature& feature, c
     const world::Voxel* leaves_voxel)
 {
     // Ensure the tree height is too small
-    height = math::max<unsigned int>(height, 4U);
+    height = glm::max<unsigned int>(height, 4U);
 
     // Put down a single piece of dirt
     feature.push_back({ voxel_pos(0, -1, 0), game_voxels::dirt, true });
@@ -217,7 +217,7 @@ const world::Overworld_Metadata& world::Overworld::get_or_create_metadata(const 
     }
 
     auto nvdi_value = 0.5f + 0.5f * fnlGetNoise2D(&m_fnl_nvdi, cpos.x, cpos.y);
-    auto tree_density = (nvdi_value >= 0.33f) ? math::floor<unsigned int>(nvdi_value * 4.0f) : 0U;
+    auto tree_density = (nvdi_value >= 0.33f) ? static_cast<unsigned int>(glm::floor(nvdi_value * 4.0f)) : 0U;
 
     for(unsigned int i = 0U; i < tree_density; ++i) {
         auto lpos = local_pos((twister() % CHUNK_SIZE), (twister() % OW_NUM_TREES), (twister() % CHUNK_SIZE));

@@ -55,7 +55,7 @@ static void add_angles(float pitch, float yaw)
 
         head.angles[0] += pitch;
         head.angles[1] += yaw;
-        head.angles[0] = math::clamp(head.angles[0], PITCH_MIN, PITCH_MAX);
+        head.angles[0] = glm::clamp(head.angles[0], PITCH_MIN, PITCH_MAX);
         head.angles = math::wrap_180(head.angles);
 
         // Client-side head angles are not interpolated;

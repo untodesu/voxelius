@@ -6,7 +6,7 @@
 
 namespace config
 {
-template<math::Arithmetic T>
+template<math::arithmetic T>
 class Number : public IValue {
 public:
     explicit Number(T default_value = T(0));
@@ -59,7 +59,7 @@ public:
 };
 } // namespace config
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 inline config::Number<T>::Number(T default_value)
 {
     m_value = default_value;
@@ -68,7 +68,7 @@ inline config::Number<T>::Number(T default_value)
     m_string = std::to_string(default_value);
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 inline config::Number<T>::Number(T default_value, T min_value, T max_value)
 {
     m_value = default_value;
@@ -77,7 +77,7 @@ inline config::Number<T>::Number(T default_value, T min_value, T max_value)
     m_string = std::to_string(default_value);
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 inline void config::Number<T>::set(std::string_view value)
 {
     T parsed_value;
@@ -89,38 +89,38 @@ inline void config::Number<T>::set(std::string_view value)
     }
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 inline std::string_view config::Number<T>::get(void) const
 {
     return m_string;
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 inline T config::Number<T>::get_value(void) const
 {
     return m_value;
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 inline void config::Number<T>::set_value(T value)
 {
     m_value = std::clamp(value, m_min_value, m_max_value);
     m_string = std::to_string(m_value);
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 inline T config::Number<T>::get_min_value(void) const
 {
     return m_min_value;
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 inline T config::Number<T>::get_max_value(void) const
 {
     return m_max_value;
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 inline void config::Number<T>::set_limits(T min_value, T max_value)
 {
     m_min_value = min_value;

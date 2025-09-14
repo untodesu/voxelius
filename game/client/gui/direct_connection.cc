@@ -63,7 +63,7 @@ static void connect_to_server(void)
     }
 
     if(parts.size() >= 2) {
-        parsed_port = math::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 1024, UINT16_MAX);
+        parsed_port = glm::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 1024, UINT16_MAX);
     }
     else {
         parsed_port = protocol::PORT;

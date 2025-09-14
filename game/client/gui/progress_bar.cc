@@ -58,10 +58,10 @@ void gui::progress_bar::layout(void)
             const float modifier = std::exp(-8.0f * (0.5f + 0.5f * sinval));
 
             ImVec4 color = {};
-            color.x = math::lerp(background.x, foreground.x, modifier);
-            color.y = math::lerp(background.y, foreground.y, modifier);
-            color.z = math::lerp(background.z, foreground.z, modifier);
-            color.w = math::lerp(background.w, foreground.w, modifier);
+            color.x = glm::mix(background.x, foreground.x, modifier);
+            color.y = glm::mix(background.y, foreground.y, modifier);
+            color.z = glm::mix(background.z, foreground.z, modifier);
+            color.w = glm::mix(background.w, foreground.w, modifier);
 
             const ImVec2 start = ImVec2(base_xpos + bar_width * i, base_ypos);
             const ImVec2 end = ImVec2(start.x + bar_width, start.y + bar_height);

@@ -69,7 +69,7 @@ void gui::scoreboard::layout(void)
 
         // Having a minimum size allows for
         // generally better in-game visibility
-        const float true_size = math::max<float>(0.25f * window_size.x, max_username_size);
+        const float true_size = glm::max<float>(0.25f * window_size.x, max_username_size);
 
         // Figure out username rect dimensions
         const float rect_start_x = 0.5f * window_size.x - 0.5f * true_size;

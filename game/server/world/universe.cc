@@ -7,6 +7,7 @@
 
 #include "core/io/buffer.hh"
 #include "core/io/config_map.hh"
+#include "core/io/physfs.hh"
 
 #include "core/utils/epoch.hh"
 
@@ -51,7 +52,7 @@ static void add_new_dimension(world::Dimension* dimension)
     auto dimension_dir = std::format("{}/{}", universe_name.get(), dimension->get_name());
 
     if(!PHYSFS_mkdir(dimension_dir.c_str())) {
-        spdlog::critical("universe: {}: {}", dimension_dir, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::critical("universe: {}: {}", dimension_dir, io::physfs_error());
         std::terminate();
     }
 
@@ -60,7 +61,7 @@ static void add_new_dimension(world::Dimension* dimension)
     metadata->zvox_dir = std::format("{}/chunk", dimension_dir);
 
     if(!PHYSFS_mkdir(metadata->zvox_dir.c_str())) {
-        spdlog::critical("universe: {}: {}", metadata->zvox_dir, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::critical("universe: {}: {}", metadata->zvox_dir, io::physfs_error());
         std::terminate();
     }
 
@@ -109,7 +110,7 @@ void world::universe::init_late(void)
     const auto universe_dir = std::string(universe_name.get());
 
     if(!PHYSFS_mkdir(universe_dir.c_str())) {
-        spdlog::critical("universe: {}: {}", universe_dir, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        spdlog::critical("universe: {}: {}", universe_dir, io::physfs_error());
         std::terminate();
     }
 

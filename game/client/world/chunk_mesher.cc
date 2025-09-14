@@ -39,9 +39,9 @@ static const CachedChunkCoord get_cached_cpos(const chunk_pos& pivot, const chun
 
     if(pivot != cpos) {
         chunk_pos delta = pivot - cpos;
-        delta[0] = math::clamp<std::int64_t>(delta[0], -1, 1);
-        delta[1] = math::clamp<std::int64_t>(delta[1], -1, 1);
-        delta[2] = math::clamp<std::int64_t>(delta[2], -1, 1);
+        delta[0] = glm::clamp<std::int64_t>(delta[0], -1, 1);
+        delta[1] = glm::clamp<std::int64_t>(delta[1], -1, 1);
+        delta[2] = glm::clamp<std::int64_t>(delta[2], -1, 1);
 
         if(delta[0]) {
             return nx[delta[0] + 1];

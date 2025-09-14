@@ -12,7 +12,7 @@
 
 #include "core/resource/resource.hh"
 
-#include "core/utils/physfs.hh"
+#include "core/io/physfs.hh"
 
 #include "shared/entity/collision.hh"
 #include "shared/entity/gravity.hh"
@@ -101,7 +101,7 @@ static ImFont* load_font(std::string_view path, float size, ImFontConfig& font_c
     bool font_load_success;
     std::vector<std::byte> font;
 
-    if(!utils::read_file(path, font)) {
+    if(!io::read_file(path, font)) {
         spdlog::error("{}: utils::read_file failed", path);
         std::terminate();
     }
@@ -549,10 +549,10 @@ void client_game::update(void)
     auto twice_scale_x = static_cast<float>(globals::width) / half_base_width;
     auto twice_scale_y = static_cast<float>(globals::height) / half_base_height;
 
-    auto scale_x = math::max(1.0f, 0.5f * glm::floor(twice_scale_x));
-    auto scale_y = math::max(1.0f, 0.5f * glm::floor(twice_scale_y));
-    auto scale_min = math::ceil<unsigned int>(math::min(scale_x, scale_y));
-    auto scale_int = math::max(1U, (scale_min / 2U) * 2U);
+    auto scale_x = glm::max(1.0f, 0.5f * glm::floor(twice_scale_x));
+    auto scale_y = glm::max(1.0f, 0.5f * glm::floor(twice_scale_y));
+    auto scale_min = static_cast<unsigned int>(glm::ceil(glm::min(scale_x, scale_y)));
+    auto scale_int = glm::max(1U, (scale_min / 2U) * 2U);
 
     auto& io = ImGui::GetIO();
     io.FontGlobalScale = scale_int;

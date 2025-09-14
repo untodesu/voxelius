@@ -4,7 +4,7 @@
 
 namespace math
 {
-template<Arithmetic T>
+template<arithmetic T>
 class AABB {
 public:
     using value_type = T;
@@ -35,27 +35,27 @@ namespace math
 using AABBf = AABB<float>;
 } // namespace math
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr math::AABB<T>::AABB(const vector_type& start, const vector_type& end)
 {
     set_bounds(start, end);
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr void math::AABB<T>::set_bounds(const vector_type& start, const vector_type& end)
 {
     min = start;
     max = end;
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr void math::AABB<T>::set_offset(const vector_type& base, const vector_type& size)
 {
     min = base;
     max = base + size;
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr bool math::AABB<T>::contains(const vector_type& point) const
 {
     auto result = true;
@@ -65,7 +65,7 @@ constexpr bool math::AABB<T>::contains(const vector_type& point) const
     return result;
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr bool math::AABB<T>::intersect(const AABB<value_type>& other_box) const
 {
     auto result = true;
@@ -75,7 +75,7 @@ constexpr bool math::AABB<T>::intersect(const AABB<value_type>& other_box) const
     return result;
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr math::AABB<T> math::AABB<T>::combine(const AABB<value_type>& other_box) const
 {
     AABB<value_type> result;
@@ -88,7 +88,7 @@ constexpr math::AABB<T> math::AABB<T>::combine(const AABB<value_type>& other_box
     return result;
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr math::AABB<T> math::AABB<T>::multiply(const AABB<value_type>& other_box) const
 {
     AABB<value_type> result;
@@ -101,7 +101,7 @@ constexpr math::AABB<T> math::AABB<T>::multiply(const AABB<value_type>& other_bo
     return result;
 }
 
-template<math::Arithmetic T>
+template<math::arithmetic T>
 constexpr math::AABB<T> math::AABB<T>::push(const vector_type& vector) const
 {
     AABB<value_type> result;

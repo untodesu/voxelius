@@ -95,7 +95,7 @@ static void parse_hostname(ServerStatusItem* item, const std::string& hostname)
     }
 
     if(parts.size() >= 2) {
-        item->port = math::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 1024, UINT16_MAX);
+        item->port = glm::clamp<std::uint16_t>(strtoul(parts[1].c_str(), nullptr, 10), 1024, UINT16_MAX);
     }
     else {
         item->port = protocol::PORT;
@@ -305,7 +305,7 @@ static void layout_server_item(ServerStatusItem* item)
 
         auto outline_pos = ImVec2(version_pos.x - 2U * globals::gui_scale, version_pos.y - 2U * globals::gui_scale);
         auto outline_end = ImVec2(version_end.x + 2U * globals::gui_scale, version_end.y + 2U * globals::gui_scale);
-        auto outline_thickness = math::max<float>(1.0f, 0.5f * static_cast<float>(globals::gui_scale));
+        auto outline_thickness = glm::max<float>(1.0f, 0.5f * static_cast<float>(globals::gui_scale));
 
         draw_list->AddRect(outline_pos, outline_end, version_color, 0.0f, 0, outline_thickness);
         draw_list->AddText(version_pos, version_color, version_toast.c_str(), version_toast.c_str() + version_toast.size());

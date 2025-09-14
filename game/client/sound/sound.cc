@@ -92,11 +92,11 @@ void sound::shutdown(void)
 
 void sound::update(void)
 {
-    auto effects_gain = math::clamp(0.01f * sound::volume_effects.get_value(), 0.0f, 1.0f);
+    auto effects_gain = glm::clamp(0.01f * sound::volume_effects.get_value(), 0.0f, 1.0f);
     alSourcef(generic_source, AL_GAIN, effects_gain);
     alSourcef(player_source, AL_GAIN, effects_gain);
 
-    auto ui_gain = math::clamp(0.01f * sound::volume_ui.get_value(), 0.0f, 1.0f);
+    auto ui_gain = glm::clamp(0.01f * sound::volume_ui.get_value(), 0.0f, 1.0f);
     alSourcef(ui_source, AL_GAIN, ui_gain);
 }
 
@@ -149,7 +149,7 @@ void sound::play_generic(resource_ptr<SoundEffect> sound, bool looping, float pi
     if(sfx_generic) {
         alSourcei(generic_source, AL_BUFFER, sfx_generic->buffer);
         alSourcei(generic_source, AL_LOOPING, looping);
-        alSourcef(generic_source, AL_PITCH, math::clamp(pitch, MIN_PITCH, MAX_PITCH));
+        alSourcef(generic_source, AL_PITCH, glm::clamp(pitch, MIN_PITCH, MAX_PITCH));
         alSourcePlay(generic_source);
     }
 }
@@ -165,7 +165,7 @@ void sound::play_entity(entt::entity entity, resource_ptr<SoundEffect> sound, bo
             if(emitter->sound) {
                 alSourcei(emitter->source, AL_BUFFER, emitter->sound->buffer);
                 alSourcei(emitter->source, AL_LOOPING, looping);
-                alSourcef(emitter->source, AL_PITCH, math::clamp(pitch, MIN_PITCH, MAX_PITCH));
+                alSourcef(emitter->source, AL_PITCH, glm::clamp(pitch, MIN_PITCH, MAX_PITCH));
                 alSourcePlay(emitter->source);
             }
         }
@@ -191,7 +191,7 @@ void sound::play_player(resource_ptr<SoundEffect> sound, bool looping, float pit
     if(sfx_player) {
         alSourcei(player_source, AL_BUFFER, sfx_player->buffer);
         alSourcei(player_source, AL_LOOPING, looping);
-        alSourcef(player_source, AL_PITCH, math::clamp(pitch, MIN_PITCH, MAX_PITCH));
+        alSourcef(player_source, AL_PITCH, glm::clamp(pitch, MIN_PITCH, MAX_PITCH));
         alSourcePlay(player_source);
     }
 }
@@ -205,7 +205,7 @@ void sound::play_ui(resource_ptr<SoundEffect> sound, bool looping, float pitch)
     if(sfx_ui) {
         alSourcei(ui_source, AL_BUFFER, sfx_ui->buffer);
         alSourcei(ui_source, AL_LOOPING, looping);
-        alSourcef(ui_source, AL_PITCH, math::clamp(pitch, MIN_PITCH, MAX_PITCH));
+        alSourcef(ui_source, AL_PITCH, glm::clamp(pitch, MIN_PITCH, MAX_PITCH));
         alSourcePlay(ui_source);
     }
 }

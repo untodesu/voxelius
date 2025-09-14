@@ -4,7 +4,7 @@
 
 #include "core/resource/resource.hh"
 
-#include "core/utils/physfs.hh"
+#include "core/io/physfs.hh"
 
 #include "client/globals.hh"
 
@@ -35,7 +35,7 @@ static const void* sound_effect_load_func(const char* name, std::uint32_t flags)
     auto file = PHYSFS_openRead(name);
 
     if(file == nullptr) {
-        spdlog::warn("sfx: {}: {}", name, utils::physfs_error());
+        spdlog::warn("sfx: {}: {}", name, io::physfs_error());
         return nullptr;
     }
 

@@ -99,7 +99,7 @@ float config::GamepadAxis::get_value(const GLFWgamepadstate& state, float deadzo
     if(m_gamepad_axis <= math::array_size(state.axes)) {
         auto value = state.axes[m_gamepad_axis];
 
-        if(math::abs(value) > deadzone) {
+        if(glm::abs(value) > deadzone) {
             return m_inverted ? -value : value;
         }
 

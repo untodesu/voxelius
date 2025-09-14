@@ -29,14 +29,14 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
     next_aabb.max[d] += move;
 
     local_pos lpos_min;
-    lpos_min.x = math::floor<local_pos::value_type>(next_aabb.min.x);
-    lpos_min.y = math::floor<local_pos::value_type>(next_aabb.min.y);
-    lpos_min.z = math::floor<local_pos::value_type>(next_aabb.min.z);
+    lpos_min.x = static_cast<local_pos::value_type>(glm::floor(next_aabb.min.x));
+    lpos_min.y = static_cast<local_pos::value_type>(glm::floor(next_aabb.min.y));
+    lpos_min.z = static_cast<local_pos::value_type>(glm::floor(next_aabb.min.z));
 
     local_pos lpos_max;
-    lpos_max.x = math::ceil<local_pos::value_type>(next_aabb.max.x);
-    lpos_max.y = math::ceil<local_pos::value_type>(next_aabb.max.y);
-    lpos_max.z = math::ceil<local_pos::value_type>(next_aabb.max.z);
+    lpos_max.x = static_cast<local_pos::value_type>(glm::ceil(next_aabb.max.x));
+    lpos_max.y = static_cast<local_pos::value_type>(glm::ceil(next_aabb.max.y));
+    lpos_max.z = static_cast<local_pos::value_type>(glm::ceil(next_aabb.max.z));
 
     // Other axes
     const int u = (d + 1) % 3;
@@ -110,7 +110,7 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
 
     if(latch_touch != world::VTOUCH_NONE) {
         if(latch_touch == world::VTOUCH_BOUNCE) {
-            const auto move_distance = math::abs(current_aabb.min[d] - next_aabb.min[d]);
+            const auto move_distance = glm::abs(current_aabb.min[d] - next_aabb.min[d]);
             const auto threshold = 2.0f * globals::fixed_frametime;
 
             if(move_distance > threshold) {
