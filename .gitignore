@@ -1,10 +1,14 @@
+/.vs/*
 /.vscode/*
 !/.vscode/c_cpp_properties.json
-/core/version.cc
 /build/
+/dist/
+/out/
 /*.log
 /*.ini
 /*.dll
 /*.exe
 /*.lib
 /*.so
+/CMakePresets.json
+/CMakeUserPresets.json

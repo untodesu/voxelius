@@ -1,0 +1,6 @@
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/fonts"     DESTINATION "assets")
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/lang"      DESTINATION "assets")
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/misc"      DESTINATION "assets")
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/shaders"   DESTINATION "assets")
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/sounds"    DESTINATION "assets")
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/textures"  DESTINATION "assets")

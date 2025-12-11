@@ -1,2 +1,2 @@
-/core/version.cc.in linguist-language=C
-/deps/* linguist-vendored
+/src/core/version.cc.in linguist-language=C
+/external/* linguist-vendored

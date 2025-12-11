@@ -32,8 +32,8 @@ AlignConsecutiveMacros:
 AlignEscapedNewlines: Left
 AlignOperands: false
 PenaltyBreakAssignment: 50
-PenaltyBreakBeforeFirstCallParameter: 21
-PenaltyBreakOpenParenthesis: 21
+PenaltyBreakBeforeFirstCallParameter: 90
+PenaltyBreakOpenParenthesis: 90
 PenaltyIndentedWhitespace: 1
 AlignTrailingComments:
   Kind: Always
