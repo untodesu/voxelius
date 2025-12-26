@@ -17,14 +17,14 @@
 static config::Int random_tick_speed(2, 1, 1000);
 static std::mt19937_64 random_source;
 
-void world::random_tick::init(void)
+void random_tick::init(void)
 {
     globals::server_config.add_value("world.random_tick_speed", random_tick_speed);
 
     random_source.seed(std::random_device {}());
 }
 
-void world::random_tick::tick(const chunk_pos& cpos, Chunk* chunk)
+void random_tick::tick(const chunk_pos& cpos, Chunk* chunk)
 {
     assert(chunk);
 

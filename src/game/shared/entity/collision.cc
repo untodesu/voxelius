@@ -15,8 +15,8 @@
 #include "shared/coord.hh"
 #include "shared/globals.hh"
 
-static int vgrid_collide(const world::Dimension* dimension, int d, entity::Collision& collision, entity::Transform& transform,
-    entity::Velocity& velocity, world::VoxelMaterial& touch_surface)
+static int vgrid_collide(const Dimension* dimension, int d, Collision& collision, Transform& transform, Velocity& velocity,
+    VoxelMaterial& touch_surface)
 {
     const auto move = globals::fixed_frametime * velocity.value[d];
     const auto move_sign = math::sign<int>(move);
@@ -57,9 +57,9 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
         dmax = lpos_min[d];
     }
 
-    world::VoxelTouch latch_touch = world::VTOUCH_NONE;
+    VoxelTouch latch_touch = VTOUCH_NONE;
     glm::fvec3 latch_values = glm::fvec3(0.0f, 0.0f, 0.0f);
-    world::VoxelMaterial latch_surface = world::VMAT_UNKNOWN;
+    VoxelMaterial latch_surface = VMAT_UNKNOWN;
     math::AABBf latch_vbox;
 
     for(auto i = dmin; i != dmax; i += ddir) {
@@ -87,7 +87,7 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
                     continue;
                 }
 
-                if(voxel->is_touch_type<world::VTOUCH_SOLID>()) {
+                if(voxel->is_touch_type<VTOUCH_SOLID>()) {
                     // Solid touch type makes a collision
                     // response whenever it is encountered
                     velocity.value[d] = 0.0f;
@@ -98,7 +98,7 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
                 // In case of other touch types, they
                 // are latched and the last ever touch
                 // type is then responded to
-                if(voxel->get_touch_type() != world::VTOUCH_NONE) {
+                if(voxel->get_touch_type() != VTOUCH_NONE) {
                     latch_touch = voxel->get_touch_type();
                     latch_values = voxel->get_touch_values();
                     latch_surface = voxel->get_surface_material();
@@ -108,8 +108,8 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
             }
     }
 
-    if(latch_touch != world::VTOUCH_NONE) {
-        if(latch_touch == world::VTOUCH_BOUNCE) {
+    if(latch_touch != VTOUCH_NONE) {
+        if(latch_touch == VTOUCH_BOUNCE) {
             const auto move_distance = glm::abs(current_aabb.min[d] - next_aabb.min[d]);
             const auto threshold = 2.0f * globals::fixed_frametime;
 
@@ -125,7 +125,7 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
             return move_sign;
         }
 
-        if(latch_touch == world::VTOUCH_SINK) {
+        if(latch_touch == VTOUCH_SINK) {
             velocity.value[d] *= latch_values[d];
             touch_surface = latch_surface;
             return move_sign;
@@ -135,7 +135,7 @@ static int vgrid_collide(const world::Dimension* dimension, int d, entity::Colli
     return 0;
 }
 
-void entity::Collision::fixed_update(world::Dimension* dimension)
+void Collision::fixed_update(Dimension* dimension)
 {
     // FIXME: this isn't particularly accurate considering
     // some voxels might be passable and some other voxels
@@ -146,25 +146,25 @@ void entity::Collision::fixed_update(world::Dimension* dimension)
     // we shouldn't treat all voxels as full cubes if we want
     // to support slabs, stairs and non-full liquid voxels in the future
 
-    auto group = dimension->entities.group<entity::Collision>(entt::get<entity::Transform, entity::Velocity>);
+    auto group = dimension->entities.group<Collision>(entt::get<Transform, Velocity>);
 
     for(auto [entity, collision, transform, velocity] : group.each()) {
-        auto surface = world::VMAT_UNKNOWN;
+        auto surface = VMAT_UNKNOWN;
         auto vertical_move = vgrid_collide(dimension, 1, collision, transform, velocity, surface);
 
-        if(dimension->entities.any_of<entity::Gravity>(entity)) {
+        if(dimension->entities.any_of<Gravity>(entity)) {
             if(vertical_move == math::sign<int>(dimension->get_gravity())) {
-                dimension->entities.emplace_or_replace<entity::Grounded>(entity, entity::Grounded { surface });
+                dimension->entities.emplace_or_replace<Grounded>(entity, Grounded { surface });
             }
             else {
-                dimension->entities.remove<entity::Grounded>(entity);
+                dimension->entities.remove<Grounded>(entity);
             }
         }
         else {
             // The entity cannot be grounded because the component
             // setup of said entity should not let it comprehend the
             // concept of resting on the ground (it flies around)
-            dimension->entities.remove<entity::Grounded>(entity);
+            dimension->entities.remove<Grounded>(entity);
         }
 
         vgrid_collide(dimension, 0, collision, transform, velocity, surface);

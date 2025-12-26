@@ -19,35 +19,35 @@
 
 #include "client/globals.hh"
 
-entity::SoundEmitter::SoundEmitter(void)
+SoundEmitter::SoundEmitter(void)
 {
     alGenSources(1, &source);
     sound = nullptr;
 }
 
-entity::SoundEmitter::~SoundEmitter(void)
+SoundEmitter::~SoundEmitter(void)
 {
     alSourceStop(source);
     alDeleteSources(1, &source);
 }
 
-void entity::SoundEmitter::update(void)
+void SoundEmitter::update(void)
 {
     if(globals::dimension) {
-        const auto view = globals::dimension->entities.view<entity::SoundEmitter>();
+        const auto view = globals::dimension->entities.view<SoundEmitter>();
 
-        const auto& pivot = entity::camera::position_chunk;
+        const auto& pivot = camera::position_chunk;
         const auto gain = glm::clamp(sound::volume_effects.get_value() * 0.01f, 0.0f, 1.0f);
 
         for(const auto [entity, emitter] : view.each()) {
             alSourcef(emitter.source, AL_GAIN, gain);
 
-            if(const auto transform = globals::dimension->entities.try_get<entity::client::TransformIntr>(entity)) {
+            if(const auto transform = globals::dimension->entities.try_get<client::TransformIntr>(entity)) {
                 auto position = coord::to_relative(pivot, transform->chunk, transform->local);
                 alSource3f(emitter.source, AL_POSITION, position.x, position.y, position.z);
             }
 
-            if(const auto velocity = globals::dimension->entities.try_get<entity::Velocity>(entity)) {
+            if(const auto velocity = globals::dimension->entities.try_get<Velocity>(entity)) {
                 alSource3f(emitter.source, AL_VELOCITY, velocity->value.x, velocity->value.y, velocity->value.z);
             }
 

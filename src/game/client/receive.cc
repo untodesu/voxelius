@@ -23,7 +23,7 @@
 #include "client/globals.hh"
 #include "client/session.hh"
 
-static bool synchronize_entity_id(world::Dimension* dimension, entt::entity entity)
+static bool synchronize_entity_id(Dimension* dimension, entt::entity entity)
 {
     if(dimension->entities.valid(entity)) {
         // Entity ID already exists
@@ -41,12 +41,12 @@ static bool synchronize_entity_id(world::Dimension* dimension, entt::entity enti
     spdlog::critical("receive: entity desync: network {} resolved as client {}", static_cast<std::uint64_t>(entity),
         static_cast<std::uint64_t>(created));
 
-    gui::message_box::reset();
-    gui::message_box::set_title("disconnected.disconnected");
-    gui::message_box::set_subtitle("protocol.entity_id_desync");
-    gui::message_box::add_button("disconnected.back", [](void) {
+    message_box::reset();
+    message_box::set_title("disconnected.disconnected");
+    message_box::set_subtitle("protocol.entity_id_desync");
+    message_box::add_button("disconnected.back", [](void) {
         globals::gui_screen = GUI_PLAY_MENU;
-        gui::window_title::update();
+        window_title::update();
     });
 
     globals::gui_screen = GUI_MESSAGE_BOX;
@@ -63,7 +63,7 @@ static void on_dimension_info_packet(const protocol::DimensionInfo& packet)
             globals::player = entt::null;
         }
 
-        globals::dimension = new world::Dimension(packet.name.c_str(), packet.gravity);
+        globals::dimension = new Dimension(packet.name.c_str(), packet.gravity);
     }
 }
 
@@ -73,7 +73,7 @@ static void on_chunk_voxels_packet(const protocol::ChunkVoxels& packet)
         auto chunk = globals::dimension->create_chunk(packet.chunk);
         chunk->set_voxels(packet.voxels);
 
-        world::ChunkUpdateEvent event;
+        ChunkUpdateEvent event;
         event.dimension = globals::dimension;
         event.cpos = packet.chunk;
         event.chunk = chunk;
@@ -88,8 +88,8 @@ static void on_entity_head_packet(const protocol::EntityHead& packet)
 {
     if(session::peer && globals::dimension) {
         if(synchronize_entity_id(globals::dimension, packet.entity)) {
-            auto& component = globals::dimension->entities.get_or_emplace<entity::Head>(packet.entity);
-            auto& prevcomp = globals::dimension->entities.get_or_emplace<entity::client::HeadPrev>(packet.entity);
+            auto& component = globals::dimension->entities.get_or_emplace<Head>(packet.entity);
+            auto& prevcomp = globals::dimension->entities.get_or_emplace<client::HeadPrev>(packet.entity);
 
             // Store the previous component state
             prevcomp.angles = component.angles;
@@ -105,8 +105,8 @@ static void on_entity_transform_packet(const protocol::EntityTransform& packet)
 {
     if(session::peer && globals::dimension) {
         if(synchronize_entity_id(globals::dimension, packet.entity)) {
-            auto& component = globals::dimension->entities.get_or_emplace<entity::Transform>(packet.entity);
-            auto& prevcomp = globals::dimension->entities.get_or_emplace<entity::client::TransformPrev>(packet.entity);
+            auto& component = globals::dimension->entities.get_or_emplace<Transform>(packet.entity);
+            auto& prevcomp = globals::dimension->entities.get_or_emplace<client::TransformPrev>(packet.entity);
 
             // Store the previous component state
             prevcomp.angles = component.angles;
@@ -125,7 +125,7 @@ static void on_entity_velocity_packet(const protocol::EntityVelocity& packet)
 {
     if(session::peer && globals::dimension) {
         if(synchronize_entity_id(globals::dimension, packet.entity)) {
-            auto& component = globals::dimension->entities.get_or_emplace<entity::Velocity>(packet.entity);
+            auto& component = globals::dimension->entities.get_or_emplace<Velocity>(packet.entity);
             component.value = packet.value;
         }
     }
@@ -135,7 +135,7 @@ static void on_entity_player_packet(const protocol::EntityPlayer& packet)
 {
     if(session::peer && globals::dimension) {
         if(synchronize_entity_id(globals::dimension, packet.entity)) {
-            entity::client::create_player(globals::dimension, packet.entity);
+            client::create_player(globals::dimension, packet.entity);
         }
     }
 }
@@ -144,14 +144,14 @@ static void on_spawn_player_packet(const protocol::SpawnPlayer& packet)
 {
     if(session::peer && globals::dimension) {
         if(synchronize_entity_id(globals::dimension, packet.entity)) {
-            entity::client::create_player(globals::dimension, packet.entity);
+            client::create_player(globals::dimension, packet.entity);
 
             globals::player = packet.entity;
             globals::gui_screen = GUI_SCREEN_NONE;
 
-            gui::client_chat::refresh_timings();
+            client_chat::refresh_timings();
 
-            gui::window_title::update();
+            window_title::update();
         }
     }
 }

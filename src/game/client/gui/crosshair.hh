@@ -1,8 +1,8 @@
 #pragma once
 
-namespace gui::crosshair
+namespace crosshair
 {
 void init(void);
 void shutdown(void);
 void layout(void);
-} // namespace gui::crosshair
+} // namespace crosshair

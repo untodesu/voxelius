@@ -39,7 +39,7 @@ static std::string_view get_button_name(int button)
 
 config::GamepadButton::GamepadButton(void)
 {
-    m_gamepad_button = io::INVALID_GAMEPAD_BUTTON;
+    m_gamepad_button = INVALID_GAMEPAD_BUTTON;
     m_name = UNKNOWN_BUTTON_NAME;
 }
 
@@ -64,7 +64,7 @@ void config::GamepadButton::set(std::string_view value)
         }
     }
 
-    m_gamepad_button = io::INVALID_GAMEPAD_BUTTON;
+    m_gamepad_button = INVALID_GAMEPAD_BUTTON;
     m_name = UNKNOWN_BUTTON_NAME;
 }
 

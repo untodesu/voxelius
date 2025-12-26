@@ -57,7 +57,7 @@ static void on_login_response_packet(const protocol::LoginResponse& packet)
 
     set_fixed_tickrate(packet.server_tickrate);
 
-    gui::progress_bar::set_title("connecting.loading_world");
+    progress_bar::set_title("connecting.loading_world");
 }
 
 static void on_disconnect_packet(const protocol::Disconnect& packet)
@@ -66,7 +66,7 @@ static void on_disconnect_packet(const protocol::Disconnect& packet)
 
     spdlog::info("session: disconnected: {}", packet.reason);
 
-    gui::client_chat::clear();
+    client_chat::clear();
 
     session::peer = nullptr;
     session::client_index = UINT16_MAX;
@@ -82,12 +82,12 @@ static void on_disconnect_packet(const protocol::Disconnect& packet)
     globals::player = entt::null;
     globals::dimension = nullptr;
 
-    gui::message_box::reset();
-    gui::message_box::set_title("disconnected.disconnected");
-    gui::message_box::set_subtitle(packet.reason.c_str());
-    gui::message_box::add_button("disconnected.back", [](void) {
+    message_box::reset();
+    message_box::set_title("disconnected.disconnected");
+    message_box::set_subtitle(packet.reason.c_str());
+    message_box::add_button("disconnected.back", [](void) {
         globals::gui_screen = GUI_PLAY_MENU;
-        gui::window_title::update();
+        window_title::update();
     });
 
     globals::gui_screen = GUI_MESSAGE_BOX;
@@ -100,18 +100,18 @@ static void on_set_voxel_packet(const protocol::SetVoxel& packet)
     auto index = coord::to_index(lpos);
 
     if(auto chunk = globals::dimension->find_chunk(cpos)) {
-        auto packet_voxel = world::voxel_registry::find(packet.voxel);
+        auto packet_voxel = voxel_registry::find(packet.voxel);
 
         if(chunk->get_voxel(index) != packet_voxel) {
             chunk->set_voxel(packet_voxel, index);
 
-            world::ChunkUpdateEvent event;
+            ChunkUpdateEvent event;
             event.dimension = globals::dimension;
             event.chunk = chunk;
             event.cpos = cpos;
 
             // Send a generic ChunkUpdate event to shake
-            // up the mesher; directly calling world::set_voxel
+            // up the mesher; directly calling set_voxel
             // here would result in a networked feedback loop
             // caused by event handler below tripping
             globals::dispatcher.trigger(event);
@@ -122,7 +122,7 @@ static void on_set_voxel_packet(const protocol::SetVoxel& packet)
 // NOTE: [session] is a good place for this since [receive]
 // handles entity data sent by the server and [session] handles
 // everything else network related that is not player movement
-static void on_voxel_set(const world::VoxelSetEvent& event)
+static void on_voxel_set(const VoxelSetEvent& event)
 {
     if(session::peer) {
         // Propagate changes to the server
@@ -151,7 +151,7 @@ void session::init(void)
     globals::dispatcher.sink<protocol::Disconnect>().connect<&on_disconnect_packet>();
     globals::dispatcher.sink<protocol::SetVoxel>().connect<&on_set_voxel_packet>();
 
-    globals::dispatcher.sink<world::VoxelSetEvent>().connect<&on_voxel_set>();
+    globals::dispatcher.sink<VoxelSetEvent>().connect<&on_voxel_set>();
 }
 
 void session::shutdown(void)
@@ -168,18 +168,18 @@ void session::invalidate(void)
     if(session::peer) {
         enet_peer_reset(session::peer);
 
-        gui::message_box::reset();
-        gui::message_box::set_title("disconnected.disconnected");
-        gui::message_box::set_subtitle("enet.peer_connection_timeout");
-        gui::message_box::add_button("disconnected.back", [](void) {
+        message_box::reset();
+        message_box::set_title("disconnected.disconnected");
+        message_box::set_subtitle("enet.peer_connection_timeout");
+        message_box::add_button("disconnected.back", [](void) {
             globals::gui_screen = GUI_PLAY_MENU;
-            gui::window_title::update();
+            window_title::update();
         });
 
         globals::gui_screen = GUI_MESSAGE_BOX;
     }
 
-    gui::client_chat::clear();
+    client_chat::clear();
 
     session::peer = nullptr;
     session::client_index = UINT16_MAX;
@@ -215,12 +215,12 @@ void session::connect(std::string_view host, std::uint16_t port, std::string_vie
     if(!session::peer) {
         server_password_hash = UINT64_MAX;
 
-        gui::message_box::reset();
-        gui::message_box::set_title("disconnected.disconnected");
-        gui::message_box::set_subtitle("enet.peer_connection_failed");
-        gui::message_box::add_button("disconnected.back", [](void) {
+        message_box::reset();
+        message_box::set_title("disconnected.disconnected");
+        message_box::set_subtitle("enet.peer_connection_failed");
+        message_box::add_button("disconnected.back", [](void) {
             globals::gui_screen = GUI_PLAY_MENU;
-            gui::window_title::update();
+            window_title::update();
         });
 
         globals::gui_screen = GUI_MESSAGE_BOX;
@@ -228,9 +228,9 @@ void session::connect(std::string_view host, std::uint16_t port, std::string_vie
         return;
     }
 
-    gui::progress_bar::reset();
-    gui::progress_bar::set_title("connecting.connecting");
-    gui::progress_bar::set_button("connecting.cancel_button", [](void) {
+    progress_bar::reset();
+    progress_bar::set_title("connecting.connecting");
+    progress_bar::set_button("connecting.cancel_button", [](void) {
         enet_peer_disconnect(session::peer, 0);
 
         session::peer = nullptr;
@@ -279,7 +279,7 @@ void session::disconnect(std::string_view reason)
         globals::player = entt::null;
         globals::dimension = nullptr;
 
-        gui::client_chat::clear();
+        client_chat::clear();
     }
 }
 
@@ -287,8 +287,8 @@ void session::send_login_request(void)
 {
     protocol::LoginRequest packet;
     packet.game_version_major = version::major;
-    packet.voxel_registry_checksum = world::voxel_registry::get_checksum();
-    packet.item_registry_checksum = world::item_registry::get_checksum();
+    packet.voxel_registry_checksum = voxel_registry::get_checksum();
+    packet.item_registry_checksum = item_registry::get_checksum();
     packet.password_hash = server_password_hash;
     packet.username = client_game::username.get();
     packet.game_version_minor = version::minor;
@@ -298,7 +298,7 @@ void session::send_login_request(void)
 
     server_password_hash = UINT64_MAX;
 
-    gui::progress_bar::set_title("connecting.logging_in");
+    progress_bar::set_title("connecting.logging_in");
     globals::gui_screen = GUI_PROGRESS_BAR;
 }
 

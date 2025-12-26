@@ -100,7 +100,7 @@ static ImFont* load_font(std::string_view path, float size, ImFontConfig& font_c
 {
     std::vector<std::byte> font;
 
-    if(!io::read_file(path, font)) {
+    if(!read_file(path, font)) {
         spdlog::error("{}: utils::read_file failed", path);
         std::terminate();
     }
@@ -116,7 +116,7 @@ static ImFont* load_font(std::string_view path, float size, ImFontConfig& font_c
     return font_ptr;
 }
 
-static void on_glfw_framebuffer_size(const io::GlfwFramebufferSizeEvent& event)
+static void on_glfw_framebuffer_size(const GlfwFramebufferSizeEvent& event)
 {
     if(globals::world_fbo) {
         glDeleteRenderbuffers(1, &globals::world_fbo_depth);
@@ -147,7 +147,7 @@ static void on_glfw_framebuffer_size(const io::GlfwFramebufferSizeEvent& event)
     }
 }
 
-static void on_glfw_key(const io::GlfwKeyEvent& event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if(!globals::gui_keybind_ptr && hide_hud_toggle.equals(event.key) && (event.action == GLFW_PRESS)) {
         client_game::hide_hud = !client_game::hide_hud;
@@ -175,8 +175,8 @@ void client_game::init(void)
     globals::font_unscii16 = load_font("fonts/unscii-16.ttf", 16.0f, font_config, ranges);
     globals::font_unscii8 = load_font("fonts/unscii-8.ttf", 8.0f, font_config, ranges);
 
-    gui::client_splash::init();
-    gui::client_splash::render();
+    client_splash::init();
+    client_splash::render();
 
     globals::client_config.add_value("game.streamer_mode", client_game::streamer_mode);
     globals::client_config.add_value("game.vertical_sync", client_game::vertical_sync);
@@ -201,31 +201,31 @@ void client_game::init(void)
         std::terminate();
     }
 
-    gui::language::init();
+    language::init();
 
     session::init();
 
-    entity::player_look::init();
-    entity::player_move::init();
-    world::player_target::init();
+    player_look::init();
+    player_move::init();
+    player_target::init();
 
-    io::gamepad::init();
+    gamepad::init();
 
-    entity::camera::init();
+    camera::init();
 
-    world::voxel_anims::init();
+    voxel_anims::init();
 
-    world::outline::init();
-    world::chunk_mesher::init();
-    world::chunk_renderer::init();
+    outline::init();
+    chunk_mesher::init();
+    chunk_renderer::init();
 
     globals::world_fbo = 0;
     globals::world_fbo_color = 0;
     globals::world_fbo_depth = 0;
 
-    world::voxel_sounds::init();
+    voxel_sounds::init();
 
-    world::skybox::init();
+    skybox::init();
 
     ImGuiStyle& style = ImGui::GetStyle();
 
@@ -237,94 +237,91 @@ void client_game::init(void)
     // Rounding on elements looks cool but I am
     // aiming for a more or less blocky and
     // visually simple HiDPI-friendly UI style
-    style.TabRounding = 0.0f;
-    style.GrabRounding = 0.0f;
     style.ChildRounding = 0.0f;
     style.FrameRounding = 0.0f;
+    style.GrabRounding = 0.0f;
     style.PopupRounding = 0.0f;
-    style.WindowRounding = 0.0f;
     style.ScrollbarRounding = 0.0f;
+    style.TabRounding = 0.0f;
+    style.WindowRounding = 0.0f;
 
-    style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.06f, 0.06f, 0.94f);
-    style.Colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
     style.Colors[ImGuiCol_Border] = ImVec4(0.79f, 0.79f, 0.79f, 0.50f);
     style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_Button] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
+    style.Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    style.Colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.38f);
+    style.Colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 1.00f);
     style.Colors[ImGuiCol_FrameBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.54f);
-    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.36f, 0.36f, 0.36f, 0.40f);
     style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.63f, 0.63f, 0.63f, 0.67f);
+    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.36f, 0.36f, 0.36f, 0.40f);
+    style.Colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.75f);
+    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
+    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+    style.Colors[ImGuiCol_NavCursor] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_NavHighlight] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 1.00f, 0.20f, 1.00f);
+    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+    style.Colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.69f, 0.00f, 0.00f, 1.00f);
+    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.34f, 0.34f, 0.34f, 0.20f);
+    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.95f);
+    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.57f, 0.57f, 0.57f, 0.67f);
+    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
+    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.00f, 0.00f, 0.00f, 0.75f);
+    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
+    style.Colors[ImGuiCol_Separator] = ImVec4(0.49f, 0.49f, 0.49f, 0.50f);
+    style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
+    style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.56f, 0.56f, 0.56f, 0.78f);
+    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.81f, 0.81f, 0.81f, 0.75f);
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+    style.Colors[ImGuiCol_Tab] = ImVec4(0.00f, 0.00f, 0.00f, 0.75f);
+    style.Colors[ImGuiCol_TabActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+    style.Colors[ImGuiCol_TabHovered] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
+    style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);
+    style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);
+    style.Colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
+    style.Colors[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
+    style.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.13f, 0.13f, 0.13f, 0.97f);
+    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.44f, 0.44f, 0.44f, 1.00f);
+    style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.61f, 0.61f, 0.61f, 0.35f);
     style.Colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
     style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
-    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
-    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.00f, 0.00f, 0.00f, 0.75f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-    style.Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.81f, 0.81f, 0.81f, 0.75f);
-    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_Button] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-    style.Colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.75f);
-    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-    style.Colors[ImGuiCol_Separator] = ImVec4(0.49f, 0.49f, 0.49f, 0.50f);
-    style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.56f, 0.56f, 0.56f, 0.78f);
-    style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
-    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.34f, 0.34f, 0.34f, 0.20f);
-    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.57f, 0.57f, 0.57f, 0.67f);
-    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.95f);
-    style.Colors[ImGuiCol_Tab] = ImVec4(0.00f, 0.00f, 0.00f, 0.75f);
-    style.Colors[ImGuiCol_TabHovered] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-    style.Colors[ImGuiCol_TabActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-    style.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.13f, 0.13f, 0.13f, 0.97f);
-    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.44f, 0.44f, 0.44f, 1.00f);
-    style.Colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
-    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.69f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 1.00f, 0.20f, 1.00f);
-    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
-    style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);
-    style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);
-    style.Colors[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
-    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.61f, 0.61f, 0.61f, 0.35f);
-    style.Colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_NavHighlight] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-    style.Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-    style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-    style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.06f, 0.06f, 0.94f);
+    style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.75f);
 
-    // Making my own Game UI for Source Engine
-    // taught me one important thing: dimensions
-    // of UI elements must be calculated at semi-runtime
-    // so there's simply no point for an INI file.
     io.IniFilename = nullptr;
 
     toggles::init();
 
-    gui::background::init();
+    background::init();
 
-    gui::scoreboard::init();
+    scoreboard::init();
 
-    gui::client_chat::init();
+    client_chat::init();
 
-    gui::bother::init();
+    bother::init();
 
-    gui::main_menu::init();
-    gui::play_menu::init();
-    gui::progress_bar::init();
-    gui::message_box::init();
-    gui::direct_connection::init();
+    main_menu::init();
+    play_menu::init();
+    progress_bar::init();
+    message_box::init();
+    direct_connection::init();
 
-    gui::crosshair::init();
-    gui::hotbar::init();
-    gui::metrics::init();
-    gui::status_lines::init();
+    crosshair::init();
+    hotbar::init();
+    metrics::init();
+    status_lines::init();
 
     screenshot::init();
 
@@ -342,8 +339,8 @@ void client_game::init(void)
 
     experiments::init();
 
-    globals::dispatcher.sink<io::GlfwFramebufferSizeEvent>().connect<&on_glfw_framebuffer_size>();
-    globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<GlfwFramebufferSizeEvent>().connect<&on_glfw_framebuffer_size>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
 }
 
 void client_game::init_late(void)
@@ -354,13 +351,13 @@ void client_game::init_late(void)
         sound::init_late();
     }
 
-    gui::language::init_late();
+    language::init_late();
 
     settings::init_late();
 
-    gui::client_chat::init_late();
+    client_chat::init_late();
 
-    gui::status_lines::init_late();
+    status_lines::init_late();
 
     game_voxels::populate();
     game_items::populate();
@@ -371,35 +368,35 @@ void client_game::init_late(void)
     // NOTE: this is very debug, early and a quite
     // conservative limit choice; there must be a better
     // way to make this limit way smaller than it currently is
-    for(const auto& voxel : world::voxel_registry::voxels) {
+    for(const auto& voxel : voxel_registry::voxels) {
         max_texture_count += voxel->get_default_textures().size();
-        max_texture_count += voxel->get_face_textures(world::VFACE_NORTH).size();
-        max_texture_count += voxel->get_face_textures(world::VFACE_SOUTH).size();
-        max_texture_count += voxel->get_face_textures(world::VFACE_EAST).size();
-        max_texture_count += voxel->get_face_textures(world::VFACE_WEST).size();
-        max_texture_count += voxel->get_face_textures(world::VFACE_TOP).size();
-        max_texture_count += voxel->get_face_textures(world::VFACE_BOTTOM).size();
-        max_texture_count += voxel->get_face_textures(world::VFACE_CROSS_NWSE).size();
-        max_texture_count += voxel->get_face_textures(world::VFACE_CROSS_NESW).size();
+        max_texture_count += voxel->get_face_textures(VFACE_NORTH).size();
+        max_texture_count += voxel->get_face_textures(VFACE_SOUTH).size();
+        max_texture_count += voxel->get_face_textures(VFACE_EAST).size();
+        max_texture_count += voxel->get_face_textures(VFACE_WEST).size();
+        max_texture_count += voxel->get_face_textures(VFACE_TOP).size();
+        max_texture_count += voxel->get_face_textures(VFACE_BOTTOM).size();
+        max_texture_count += voxel->get_face_textures(VFACE_CROSS_NWSE).size();
+        max_texture_count += voxel->get_face_textures(VFACE_CROSS_NESW).size();
     }
 
     // UNDONE: asset packs for non-16x16 stuff
-    world::voxel_atlas::create(16, 16, max_texture_count);
+    voxel_atlas::create(16, 16, max_texture_count);
 
-    for(auto& voxel : world::voxel_registry::voxels) {
+    for(auto& voxel : voxel_registry::voxels) {
         constexpr std::array faces = {
-            world::VFACE_NORTH,
-            world::VFACE_SOUTH,
-            world::VFACE_EAST,
-            world::VFACE_WEST,
-            world::VFACE_TOP,
-            world::VFACE_BOTTOM,
-            world::VFACE_CROSS_NWSE,
-            world::VFACE_CROSS_NESW,
+            VFACE_NORTH,
+            VFACE_SOUTH,
+            VFACE_EAST,
+            VFACE_WEST,
+            VFACE_TOP,
+            VFACE_BOTTOM,
+            VFACE_CROSS_NWSE,
+            VFACE_CROSS_NESW,
         };
 
         for(auto face : faces) {
-            if(auto strip = world::voxel_atlas::find_or_load(voxel->get_face_textures(face))) {
+            if(auto strip = voxel_atlas::find_or_load(voxel->get_face_textures(face))) {
                 voxel->set_face_cache(face, strip->offset, strip->plane);
                 continue;
             }
@@ -409,22 +406,22 @@ void client_game::init_late(void)
         }
     }
 
-    world::voxel_atlas::generate_mipmaps();
+    voxel_atlas::generate_mipmaps();
 
-    for(auto& item : world::item_registry::items) {
+    for(auto& item : item_registry::items) {
         item->set_cached_texture(resource::load<TextureGUI>(item->get_texture(), TEXTURE_GUI_LOAD_CLAMP_S | TEXTURE_GUI_LOAD_CLAMP_T));
     }
 
     experiments::init_late();
 
-    gui::client_splash::init_late();
+    client_splash::init_late();
 
-    gui::window_title::update();
+    window_title::update();
 }
 
 void client_game::shutdown(void)
 {
-    world::voxel_sounds::shutdown();
+    voxel_sounds::shutdown();
 
     experiments::shutdown();
 
@@ -434,60 +431,60 @@ void client_game::shutdown(void)
         sound::shutdown();
     }
 
-    gui::hotbar::shutdown();
-    gui::main_menu::shutdown();
-    gui::play_menu::shutdown();
+    hotbar::shutdown();
+    main_menu::shutdown();
+    play_menu::shutdown();
 
-    gui::bother::shutdown();
+    bother::shutdown();
 
-    gui::client_chat::shutdown();
+    client_chat::shutdown();
 
-    gui::background::shutdown();
+    background::shutdown();
 
-    gui::crosshair::shutdown();
+    crosshair::shutdown();
 
     delete globals::dimension;
     globals::player = entt::null;
     globals::dimension = nullptr;
 
-    world::item_registry::purge();
-    world::voxel_registry::purge();
+    item_registry::purge();
+    voxel_registry::purge();
 
-    world::voxel_atlas::destroy();
+    voxel_atlas::destroy();
 
     glDeleteRenderbuffers(1, &globals::world_fbo_depth);
     glDeleteTextures(1, &globals::world_fbo_color);
     glDeleteFramebuffers(1, &globals::world_fbo);
 
-    world::outline::shutdown();
-    world::chunk_renderer::shutdown();
-    world::chunk_mesher::shutdown();
+    outline::shutdown();
+    chunk_renderer::shutdown();
+    chunk_mesher::shutdown();
 
     enet_host_destroy(globals::client_host);
 }
 
 void client_game::fixed_update(void)
 {
-    entity::player_move::fixed_update();
+    player_move::fixed_update();
 
     // Only update world simulation gamesystems
     // if the player can actually observe all the
     // changes these gamesystems cause visually
     if(session::is_ingame()) {
-        entity::Collision::fixed_update(globals::dimension);
-        entity::Velocity::fixed_update(globals::dimension);
-        entity::Transform::fixed_update(globals::dimension);
-        entity::Gravity::fixed_update(globals::dimension);
-        entity::Stasis::fixed_update(globals::dimension);
+        Collision::fixed_update(globals::dimension);
+        Velocity::fixed_update(globals::dimension);
+        Transform::fixed_update(globals::dimension);
+        Gravity::fixed_update(globals::dimension);
+        Stasis::fixed_update(globals::dimension);
     }
 }
 
 void client_game::fixed_update_late(void)
 {
     if(session::is_ingame()) {
-        const auto& head = globals::dimension->entities.get<entity::Head>(globals::player);
-        const auto& transform = globals::dimension->entities.get<entity::Transform>(globals::player);
-        const auto& velocity = globals::dimension->entities.get<entity::Velocity>(globals::player);
+        const auto& head = globals::dimension->entities.get<Head>(globals::player);
+        const auto& transform = globals::dimension->entities.get<Transform>(globals::player);
+        const auto& velocity = globals::dimension->entities.get<Velocity>(globals::player);
 
         protocol::EntityHead head_packet;
         head_packet.entity = entt::null; // ignored by server
@@ -513,49 +510,42 @@ void client_game::update(void)
 {
     if(session::is_ingame()) {
         if(toggles::get(TOGGLE_PM_FLIGHT)) {
-            globals::dimension->entities.remove<entity::Gravity>(globals::player);
+            globals::dimension->entities.remove<Gravity>(globals::player);
         }
         else {
-            globals::dimension->entities.emplace_or_replace<entity::Gravity>(globals::player);
+            globals::dimension->entities.emplace_or_replace<Gravity>(globals::player);
         }
     }
 
     if(globals::sound_ctx) {
         sound::update();
 
-        entity::listener::update();
+        listener::update();
 
-        entity::SoundEmitter::update();
+        SoundEmitter::update();
     }
 
-    entity::interpolation::update();
+    interpolation::update();
 
-    world::player_target::update();
+    player_target::update();
 
-    entity::camera::update();
+    camera::update();
 
-    world::voxel_anims::update();
+    voxel_anims::update();
 
-    world::chunk_mesher::update();
+    chunk_mesher::update();
 
-    gui::client_chat::update();
+    client_chat::update();
 
     experiments::update();
 
-    constexpr auto half_base_width = 0.5f * static_cast<float>(BASE_WIDTH);
-    constexpr auto half_base_height = 0.5f * static_cast<float>(BASE_HEIGHT);
-
-    auto twice_scale_x = static_cast<float>(globals::width) / half_base_width;
-    auto twice_scale_y = static_cast<float>(globals::height) / half_base_height;
-
-    auto scale_x = glm::max(1.0f, 0.5f * glm::floor(twice_scale_x));
-    auto scale_y = glm::max(1.0f, 0.5f * glm::floor(twice_scale_y));
-    auto scale_min = static_cast<unsigned int>(glm::ceil(glm::min(scale_x, scale_y)));
-    auto scale_int = glm::max<unsigned int>(1U, (scale_min / 2U) * 2U);
+    auto scale_x = glm::max(1.0f, glm::floor(static_cast<float>(globals::width) / static_cast<float>(BASE_WIDTH)));
+    auto scale_y = glm::max(1.0f, glm::floor(static_cast<float>(globals::height) / static_cast<float>(BASE_HEIGHT)));
+    auto scale_min = glm::min(scale_x, scale_y);
 
     auto& io = ImGui::GetIO();
-    io.FontGlobalScale = scale_int;
-    globals::gui_scale = scale_int;
+    io.FontGlobalScale = scale_min;
+    globals::gui_scale = scale_min;
 }
 
 void client_game::update_late(void)
@@ -577,18 +567,18 @@ void client_game::update_late(void)
         }
     }
 
-    entity::player_look::update_late();
-    entity::player_move::update_late();
+    player_look::update_late();
+    player_move::update_late();
 
-    gui::play_menu::update_late();
+    play_menu::update_late();
 
-    gui::bother::update_late();
+    bother::update_late();
 
     experiments::update_late();
 
-    io::gamepad::update_late();
+    gamepad::update_late();
 
-    world::chunk_visibility::update_late();
+    chunk_visibility::update_late();
 
     if(client_game::vertical_sync.get_value()) {
         glfwSwapInterval(1);
@@ -602,22 +592,21 @@ void client_game::render(void)
 {
     glViewport(0, 0, globals::width, globals::height);
     glBindFramebuffer(GL_FRAMEBUFFER, globals::world_fbo);
-    glClearColor(world::skybox::fog_color.r, world::skybox::fog_color.g, world::skybox::fog_color.b, 1.000f);
+    glClearColor(skybox::fog_color.r, skybox::fog_color.g, skybox::fog_color.b, 1.000f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if(globals::dimension) {
-        world::chunk_renderer::render();
+        chunk_renderer::render();
     }
 
     glEnable(GL_DEPTH_TEST);
 
-    world::player_target::render();
+    player_target::render();
 
     if(globals::dimension) {
-        auto group = globals::dimension->entities.group(
-            entt::get<entity::Player, entity::Collision, entity::client::HeadIntr, entity::client::TransformIntr>);
+        auto group = globals::dimension->entities.group(entt::get<Player, Collision, client::HeadIntr, client::TransformIntr>);
 
-        world::outline::prepare();
+        outline::prepare();
 
         for(const auto [entity, collision, head, transform] : group.each()) {
             if(entity == globals::player) {
@@ -633,8 +622,8 @@ void client_game::render(void)
             glm::fvec3 hull_fpos = transform.local + collision.aabb.min;
             glm::fvec3 look = transform.local + head.offset;
 
-            world::outline::cube(transform.chunk, hull_fpos, hull_size, 1.0f, glm::fvec4(1.0f, 0.0f, 0.0f, 1.0f));
-            world::outline::line(transform.chunk, look, forward, 1.0f, glm::fvec4(0.9f, 0.9f, 0.9f, 1.0f));
+            outline::cube(transform.chunk, hull_fpos, hull_size, 1.0f, glm::fvec4(1.0f, 0.0f, 0.0f, 1.0f));
+            outline::line(transform.chunk, look, forward, 1.0f, glm::fvec4(0.9f, 0.9f, 0.9f, 1.0f));
         }
     }
 
@@ -653,7 +642,7 @@ void client_game::render(void)
 void client_game::layout(void)
 {
     if(!session::is_ingame()) {
-        gui::background::layout();
+        background::layout();
     }
 
     if(!globals::gui_screen || (globals::gui_screen == GUI_CHAT)) {
@@ -661,47 +650,50 @@ void client_game::layout(void)
             // This contains Minecraft-esque debug information
             // about the hardware, world state and other
             // things that might be uesful
-            gui::metrics::layout();
+            metrics::layout();
         }
     }
 
     if(session::is_ingame()) {
-        gui::client_chat::layout();
-        gui::scoreboard::layout();
+        client_chat::layout();
+        scoreboard::layout();
 
         if(!globals::gui_screen && !client_game::hide_hud) {
-            gui::hotbar::layout();
-            gui::status_lines::layout();
-            gui::crosshair::layout();
+            hotbar::layout();
+            status_lines::layout();
+            crosshair::layout();
         }
     }
 
     if(globals::gui_screen) {
         if(session::is_ingame() && (globals::gui_screen != GUI_CHAT)) {
-            const float width_f = static_cast<float>(globals::width);
-            const float height_f = static_cast<float>(globals::height);
-            const ImU32 darken = ImGui::GetColorU32(ImVec4(0.00f, 0.00f, 0.00f, 0.75f));
-            ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(), ImVec2(width_f, height_f), darken);
+            auto width_f = static_cast<float>(globals::width);
+            auto height_f = static_cast<float>(globals::height);
+            auto darken = ImGui::GetColorU32(ImVec4(0.00f, 0.00f, 0.00f, 0.75f));
+            auto darker = ImGui::GetColorU32(ImVec4(0.00f, 0.00f, 0.00f, 0.95f));
+            auto draw_list = ImGui::GetBackgroundDrawList();
+
+            draw_list->AddRectFilledMultiColor({}, { width_f, height_f }, darker, darken, darken, darker);
         }
 
         switch(globals::gui_screen) {
             case GUI_MAIN_MENU:
-                gui::main_menu::layout();
+                main_menu::layout();
                 break;
             case GUI_PLAY_MENU:
-                gui::play_menu::layout();
+                play_menu::layout();
                 break;
             case GUI_SETTINGS:
                 settings::layout();
                 break;
             case GUI_PROGRESS_BAR:
-                gui::progress_bar::layout();
+                progress_bar::layout();
                 break;
             case GUI_MESSAGE_BOX:
-                gui::message_box::layout();
+                message_box::layout();
                 break;
             case GUI_DIRECT_CONNECTION:
-                gui::direct_connection::layout();
+                direct_connection::layout();
                 break;
         }
     }

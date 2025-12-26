@@ -2,10 +2,7 @@
 
 #include "shared/world/chunk.hh"
 
-namespace world
-{
 class Dimension;
-} // namespace world
 
 namespace protocol
 {
@@ -93,16 +90,16 @@ ENetPacket* make_chat_message(std::string_view message, enet_uint32 flags = ENET
 
 namespace protocol::utils
 {
-ENetPacket* make_chunk_voxels(world::Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_chunk_voxels(Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
 } // namespace protocol::utils
 
 namespace protocol::utils
 {
-ENetPacket* make_entity_head(world::Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket* make_entity_transform(world::Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket* make_entity_velocity(world::Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket* make_entity_player(world::Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
-ENetPacket* make_dimension_info(const world::Dimension* dimension);
+ENetPacket* make_entity_head(Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_entity_transform(Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_entity_velocity(Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_entity_player(Dimension* dimension, entt::entity entity, enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE);
+ENetPacket* make_dimension_info(const Dimension* dimension);
 } // namespace protocol::utils
 
 struct protocol::StatusRequest final : public protocol::Base<0x0000> {
@@ -140,7 +137,7 @@ struct protocol::Disconnect final : public protocol::Base<0x0004> {
 
 struct protocol::ChunkVoxels final : public protocol::Base<0x0005> {
     chunk_pos chunk;
-    world::VoxelStorage voxels;
+    VoxelStorage voxels;
 };
 
 struct protocol::EntityTransform final : public protocol::Base<0x0006> {

@@ -1,11 +1,11 @@
 #pragma once
 
-namespace world::skybox
+namespace skybox
 {
 extern glm::fvec3 fog_color;
-} // namespace world::skybox
+} // namespace skybox
 
-namespace world::skybox
+namespace skybox
 {
 void init(void);
-} // namespace world::skybox
+} // namespace skybox

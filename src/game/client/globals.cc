@@ -6,7 +6,7 @@
 
 #include "client/gui/gui_screen.hh"
 
-io::ConfigMap globals::client_config;
+ConfigMap globals::client_config;
 
 GLFWwindow* globals::window;
 
@@ -30,7 +30,7 @@ std::size_t globals::num_triangles;
 
 ENetHost* globals::client_host;
 
-world::Dimension* globals::dimension = nullptr;
+Dimension* globals::dimension = nullptr;
 entt::entity globals::player;
 
 ImFont* globals::font_unscii16;

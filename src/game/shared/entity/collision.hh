@@ -2,20 +2,14 @@
 
 #include "core/math/aabb.hh"
 
-namespace world
-{
 class Dimension;
-} // namespace world
 
-namespace entity
-{
 struct Collision final {
     math::AABBf aabb;
 
 public:
-    // NOTE: entity::Collision::fixed_update must be called
-    // before entity::Transform::fixed_update and entity::Velocity::fixed_update
+    // NOTE: Collision::fixed_update must be called
+    // before Transform::fixed_update and Velocity::fixed_update
     // because both transform and velocity may be updated internally
-    static void fixed_update(world::Dimension* dimension);
+    static void fixed_update(Dimension* dimension);
 };
-} // namespace entity

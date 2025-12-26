@@ -9,13 +9,8 @@
 // anywhere else in the shared and server code
 struct TextureGUI;
 
-namespace world
-{
 class Voxel;
-} // namespace world
 
-namespace world
-{
 class Item {
 public:
     Item(void) = default;
@@ -41,10 +36,7 @@ protected:
 
     mutable resource_ptr<TextureGUI> m_cached_texture; // Client-side only
 };
-} // namespace world
 
-namespace world
-{
 class ItemBuilder final : public Item {
 public:
     explicit ItemBuilder(std::string_view name);
@@ -56,29 +48,28 @@ public:
 
     std::unique_ptr<Item> build(item_id id) const;
 };
-} // namespace world
 
-constexpr std::string_view world::Item::get_name(void) const noexcept
+constexpr std::string_view Item::get_name(void) const noexcept
 {
     return m_name;
 }
 
-constexpr item_id world::Item::get_id(void) const noexcept
+constexpr item_id Item::get_id(void) const noexcept
 {
     return m_id;
 }
 
-constexpr std::string_view world::Item::get_texture(void) const noexcept
+constexpr std::string_view Item::get_texture(void) const noexcept
 {
     return m_texture;
 }
 
-constexpr const world::Voxel* world::Item::get_place_voxel(void) const noexcept
+constexpr const Voxel* Item::get_place_voxel(void) const noexcept
 {
     return m_place_voxel;
 }
 
-constexpr resource_ptr<TextureGUI>& world::Item::get_cached_texture(void) const noexcept
+constexpr resource_ptr<TextureGUI>& Item::get_cached_texture(void) const noexcept
 {
     return m_cached_texture;
 }

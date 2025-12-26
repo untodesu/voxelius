@@ -8,13 +8,13 @@
 #include "shared/coord.hh"
 #include "shared/globals.hh"
 
-world::Dimension::Dimension(std::string_view name, float gravity)
+Dimension::Dimension(std::string_view name, float gravity)
 {
     m_name = name;
     m_gravity = gravity;
 }
 
-world::Dimension::~Dimension(void)
+Dimension::~Dimension(void)
 {
     for(const auto it : m_chunkmap)
         delete it.second;
@@ -22,17 +22,17 @@ world::Dimension::~Dimension(void)
     chunks.clear();
 }
 
-std::string_view world::Dimension::get_name(void) const
+std::string_view Dimension::get_name(void) const
 {
     return m_name;
 }
 
-float world::Dimension::get_gravity(void) const
+float Dimension::get_gravity(void) const
 {
     return m_gravity;
 }
 
-world::Chunk* world::Dimension::create_chunk(const chunk_pos& cpos)
+Chunk* Dimension::create_chunk(const chunk_pos& cpos)
 {
     auto it = m_chunkmap.find(cpos);
 
@@ -58,7 +58,7 @@ world::Chunk* world::Dimension::create_chunk(const chunk_pos& cpos)
     return m_chunkmap.insert_or_assign(cpos, std::move(chunk)).first->second;
 }
 
-world::Chunk* world::Dimension::find_chunk(entt::entity entity) const
+Chunk* Dimension::find_chunk(entt::entity entity) const
 {
     if(chunks.valid(entity)) {
         return chunks.get<ChunkComponent>(entity).chunk;
@@ -68,7 +68,7 @@ world::Chunk* world::Dimension::find_chunk(entt::entity entity) const
     }
 }
 
-world::Chunk* world::Dimension::find_chunk(const chunk_pos& cpos) const
+Chunk* Dimension::find_chunk(const chunk_pos& cpos) const
 {
     auto it = m_chunkmap.find(cpos);
 
@@ -80,7 +80,7 @@ world::Chunk* world::Dimension::find_chunk(const chunk_pos& cpos) const
     }
 }
 
-void world::Dimension::remove_chunk(entt::entity entity)
+void Dimension::remove_chunk(entt::entity entity)
 {
     if(chunks.valid(entity)) {
         auto& component = chunks.get<ChunkComponent>(entity);
@@ -89,7 +89,7 @@ void world::Dimension::remove_chunk(entt::entity entity)
     }
 }
 
-void world::Dimension::remove_chunk(const chunk_pos& cpos)
+void Dimension::remove_chunk(const chunk_pos& cpos)
 {
     auto it = m_chunkmap.find(cpos);
 
@@ -99,7 +99,7 @@ void world::Dimension::remove_chunk(const chunk_pos& cpos)
     }
 }
 
-void world::Dimension::remove_chunk(Chunk* chunk)
+void Dimension::remove_chunk(Chunk* chunk)
 {
     if(chunk) {
         const auto& component = chunks.get<ChunkComponent>(chunk->get_entity());
@@ -108,7 +108,7 @@ void world::Dimension::remove_chunk(Chunk* chunk)
     }
 }
 
-const world::Voxel* world::Dimension::get_voxel(const voxel_pos& vpos) const
+const Voxel* Dimension::get_voxel(const voxel_pos& vpos) const
 {
     auto cpos = coord::to_chunk(vpos);
     auto lpos = coord::to_local(vpos);
@@ -120,7 +120,7 @@ const world::Voxel* world::Dimension::get_voxel(const voxel_pos& vpos) const
     return nullptr;
 }
 
-const world::Voxel* world::Dimension::get_voxel(const chunk_pos& cpos, const local_pos& lpos) const
+const Voxel* Dimension::get_voxel(const chunk_pos& cpos, const local_pos& lpos) const
 {
     // This allows accessing get_voxel with negative
     // local coordinates that usually would result in an
@@ -128,7 +128,7 @@ const world::Voxel* world::Dimension::get_voxel(const chunk_pos& cpos, const loc
     return get_voxel(coord::to_voxel(cpos, lpos));
 }
 
-bool world::Dimension::set_voxel(const Voxel* voxel, const voxel_pos& vpos)
+bool Dimension::set_voxel(const Voxel* voxel, const voxel_pos& vpos)
 {
     auto cpos = coord::to_chunk(vpos);
     auto lpos = coord::to_local(vpos);
@@ -165,7 +165,7 @@ bool world::Dimension::set_voxel(const Voxel* voxel, const voxel_pos& vpos)
     return false;
 }
 
-bool world::Dimension::set_voxel(const Voxel* voxel, const chunk_pos& cpos, const local_pos& lpos)
+bool Dimension::set_voxel(const Voxel* voxel, const chunk_pos& cpos, const local_pos& lpos)
 {
     // This allows accessing set_voxel with negative
     // local coordinates that usually would result in an
@@ -173,15 +173,15 @@ bool world::Dimension::set_voxel(const Voxel* voxel, const chunk_pos& cpos, cons
     return set_voxel(voxel, coord::to_voxel(cpos, lpos));
 }
 
-void world::Dimension::init(io::ConfigMap& config)
+void Dimension::init(ConfigMap& config)
 {
 }
 
-void world::Dimension::init_late(std::uint64_t global_seed)
+void Dimension::init_late(std::uint64_t global_seed)
 {
 }
 
-bool world::Dimension::generate(const chunk_pos& cpos, VoxelStorage& voxels)
+bool Dimension::generate(const chunk_pos& cpos, VoxelStorage& voxels)
 {
     return false;
 }

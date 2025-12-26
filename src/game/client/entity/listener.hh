@@ -1,6 +1,6 @@
 #pragma once
 
-namespace entity::listener
+namespace listener
 {
 void update(void);
-} // namespace entity::listener
+} // namespace listener

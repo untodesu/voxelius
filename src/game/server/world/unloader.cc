@@ -17,29 +17,29 @@
 #include "server/game.hh"
 #include "server/globals.hh"
 
-static void on_chunk_update(const world::ChunkUpdateEvent& event)
+static void on_chunk_update(const ChunkUpdateEvent& event)
 {
-    event.dimension->chunks.emplace_or_replace<world::Inhabited>(event.chunk->get_entity());
+    event.dimension->chunks.emplace_or_replace<Inhabited>(event.chunk->get_entity());
 }
 
-static void on_voxel_set(const world::VoxelSetEvent& event)
+static void on_voxel_set(const VoxelSetEvent& event)
 {
-    event.dimension->chunks.emplace_or_replace<world::Inhabited>(event.chunk->get_entity());
+    event.dimension->chunks.emplace_or_replace<Inhabited>(event.chunk->get_entity());
 }
 
-void world::unloader::init(void)
+void unloader::init(void)
 {
-    globals::dispatcher.sink<world::ChunkUpdateEvent>().connect<&on_chunk_update>();
-    globals::dispatcher.sink<world::VoxelSetEvent>().connect<&on_voxel_set>();
+    globals::dispatcher.sink<ChunkUpdateEvent>().connect<&on_chunk_update>();
+    globals::dispatcher.sink<VoxelSetEvent>().connect<&on_voxel_set>();
 }
 
-void world::unloader::init_late(void)
+void unloader::init_late(void)
 {
 }
 
-void world::unloader::fixed_update_late(Dimension* dimension)
+void unloader::fixed_update_late(Dimension* dimension)
 {
-    auto group = dimension->entities.group(entt::get<entity::Player, entity::Transform>);
+    auto group = dimension->entities.group(entt::get<Player, Transform>);
     auto boxes = std::vector<ChunkAABB>();
 
     for(const auto [entity, transform] : group.each()) {
@@ -70,7 +70,7 @@ void world::unloader::fixed_update_late(Dimension* dimension)
 
         if(dimension->chunks.any_of<Inhabited>(entity)) {
             // Only store inhabited chunks on disk
-            world::universe::save_chunk(dimension, chunk.cpos);
+            universe::save_chunk(dimension, chunk.cpos);
         }
 
         dimension->remove_chunk(entity);

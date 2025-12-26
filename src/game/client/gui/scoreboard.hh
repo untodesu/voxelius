@@ -1,7 +1,7 @@
 #pragma once
 
-namespace gui::scoreboard
+namespace scoreboard
 {
 void init(void);
 void layout(void);
-} // namespace gui::scoreboard
+} // namespace scoreboard

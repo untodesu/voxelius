@@ -27,10 +27,10 @@ static void print_toggle_state(const ToggleInfo& info)
 {
     if(info.description.size()) {
         if(info.is_enabled) {
-            gui::client_chat::print(std::format("[toggles] {} ON", info.description));
+            client_chat::print(std::format("[toggles] {} ON", info.description));
         }
         else {
-            gui::client_chat::print(std::format("[toggles] {} OFF", info.description));
+            client_chat::print(std::format("[toggles] {} OFF", info.description));
         }
     }
 }
@@ -49,7 +49,7 @@ static void toggle_value(ToggleInfo& info, toggle_type type)
     print_toggle_state(info);
 }
 
-static void on_glfw_key(const io::GlfwKeyEvent& event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if(globals::gui_keybind_ptr) {
         // The UI keybind subsystem has the authority
@@ -76,7 +76,7 @@ static void on_glfw_key(const io::GlfwKeyEvent& event)
             // This causes the language subsystem
             // to re-parse the JSON file essentially
             // causing the game to soft-reload language
-            gui::language::set(gui::language::get_current());
+            language::set(language::get_current());
             return;
         }
 
@@ -115,7 +115,7 @@ void toggles::init(void)
     toggle_infos[TOGGLE_PM_FLIGHT].glfw_keycode = GLFW_KEY_F;
     toggle_infos[TOGGLE_PM_FLIGHT].is_enabled = false;
 
-    globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
 }
 
 void toggles::init_late(void)

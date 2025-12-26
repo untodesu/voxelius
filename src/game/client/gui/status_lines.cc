@@ -2,21 +2,21 @@
 
 #include "client/gui/status_lines.hh"
 
-#include "client/gui/imdraw_ext.hh"
+#include "client/gui/imutils_text.hh"
 
 #include "client/globals.hh"
 
-static float line_offsets[gui::STATUS_COUNT];
-static ImFont* line_fonts[gui::STATUS_COUNT];
-static float line_sizes[gui::STATUS_COUNT];
+static float line_offsets[STATUS_COUNT];
+static ImFont* line_fonts[STATUS_COUNT];
+static float line_sizes[STATUS_COUNT];
 
-static ImVec4 line_text_colors[gui::STATUS_COUNT];
-static ImVec4 line_shadow_colors[gui::STATUS_COUNT];
-static std::string line_strings[gui::STATUS_COUNT];
-static std::uint64_t line_spawns[gui::STATUS_COUNT];
-static float line_fadeouts[gui::STATUS_COUNT];
+static ImVec4 line_text_colors[STATUS_COUNT];
+static ImVec4 line_shadow_colors[STATUS_COUNT];
+static std::string line_strings[STATUS_COUNT];
+static std::uint64_t line_spawns[STATUS_COUNT];
+static float line_fadeouts[STATUS_COUNT];
 
-void gui::status_lines::init(void)
+void status_lines::init(void)
 {
     for(unsigned int i = 0U; i < STATUS_COUNT; ++i) {
         line_text_colors[i] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -27,19 +27,19 @@ void gui::status_lines::init(void)
     }
 }
 
-void gui::status_lines::init_late(void)
+void status_lines::init_late(void)
 {
-    line_offsets[STATUS_DEBUG] = 64.0f;
-    line_offsets[STATUS_HOTBAR] = 40.0f;
+    line_offsets[STATUS_DEBUG] = 128.0f;
+    line_offsets[STATUS_HOTBAR] = 80.0f;
 }
 
-void gui::status_lines::layout(void)
+void status_lines::layout(void)
 {
     line_fonts[STATUS_DEBUG] = globals::font_unscii8;
-    line_sizes[STATUS_DEBUG] = 4.0f;
+    line_sizes[STATUS_DEBUG] = 8.0f;
 
     line_fonts[STATUS_HOTBAR] = globals::font_unscii16;
-    line_sizes[STATUS_HOTBAR] = 8.0f;
+    line_sizes[STATUS_HOTBAR] = 16.0f;
 
     auto viewport = ImGui::GetMainViewport();
     auto draw_list = ImGui::GetForegroundDrawList();
@@ -61,11 +61,11 @@ void gui::status_lines::layout(void)
         auto color_U32 = ImGui::GetColorU32(ImVec4(color.x, color.y, color.z, color.w * alpha));
         auto shadow_U32 = ImGui::GetColorU32(ImVec4(shadow.x, shadow.y, shadow.z, color.w * alpha));
 
-        gui::imdraw_ext::text_shadow(text, pos, color_U32, shadow_U32, font, draw_list, line_sizes[i]);
+        imutils::text_nw(draw_list, text, pos, color_U32, shadow_U32, font, line_sizes[i] * globals::gui_scale);
     }
 }
 
-void gui::status_lines::set(unsigned int line, std::string_view text, const ImVec4& color, float fadeout)
+void status_lines::set(unsigned int line, std::string_view text, const ImVec4& color, float fadeout)
 {
     line_text_colors[line] = ImVec4(color.x, color.y, color.z, color.w);
     line_shadow_colors[line] = ImVec4(color.x * 0.1f, color.y * 0.1f, color.z * 0.1f, color.w);
@@ -74,7 +74,7 @@ void gui::status_lines::set(unsigned int line, std::string_view text, const ImVe
     line_fadeouts[line] = fadeout;
 }
 
-void gui::status_lines::unset(unsigned int line)
+void status_lines::unset(unsigned int line)
 {
     line_text_colors[line] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
     line_shadow_colors[line] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);

@@ -28,7 +28,7 @@ static void on_scoreboard_update_packet(const protocol::ScoreboardUpdate& packet
     max_username_size = 0.0f;
 }
 
-void gui::scoreboard::init(void)
+void scoreboard::init(void)
 {
     globals::client_config.add_value("scoreboard.key", list_key);
 
@@ -37,7 +37,7 @@ void gui::scoreboard::init(void)
     globals::dispatcher.sink<protocol::ScoreboardUpdate>().connect<&on_scoreboard_update_packet>();
 }
 
-void gui::scoreboard::layout(void)
+void scoreboard::layout(void)
 {
     if(globals::gui_screen == GUI_SCREEN_NONE && session::is_ingame() && glfwGetKey(globals::window, list_key.get_key()) == GLFW_PRESS) {
         const auto viewport = ImGui::GetMainViewport();

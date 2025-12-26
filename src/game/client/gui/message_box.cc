@@ -10,7 +10,7 @@
 constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration;
 
 struct Button final {
-    gui::message_box_action action;
+    message_box_action action;
     std::string str_title;
 };
 
@@ -18,14 +18,14 @@ static std::string str_title;
 static std::string str_subtitle;
 static std::vector<Button> buttons;
 
-void gui::message_box::init(void)
+void message_box::init(void)
 {
     str_title = std::string();
     str_subtitle = std::string();
     buttons.clear();
 }
 
-void gui::message_box::layout(void)
+void message_box::layout(void)
 {
     const auto viewport = ImGui::GetMainViewport();
     const auto window_start = ImVec2(0.0f, viewport->Size.y * 0.30f);
@@ -68,27 +68,27 @@ void gui::message_box::layout(void)
     ImGui::End();
 }
 
-void gui::message_box::reset(void)
+void message_box::reset(void)
 {
     str_title.clear();
     str_subtitle.clear();
     buttons.clear();
 }
 
-void gui::message_box::set_title(std::string_view title)
+void message_box::set_title(std::string_view title)
 {
-    str_title = gui::language::resolve(title);
+    str_title = language::resolve(title);
 }
 
-void gui::message_box::set_subtitle(std::string_view subtitle)
+void message_box::set_subtitle(std::string_view subtitle)
 {
-    str_subtitle = gui::language::resolve(subtitle);
+    str_subtitle = language::resolve(subtitle);
 }
 
-void gui::message_box::add_button(std::string_view text, const message_box_action& action)
+void message_box::add_button(std::string_view text, const message_box_action& action)
 {
     Button button = {};
-    button.str_title = std::format("{}###MessageBox_Button{}", gui::language::resolve(text), buttons.size());
+    button.str_title = std::format("{}###MessageBox_Button{}", language::resolve(text), buttons.size());
     button.action = action;
 
     buttons.push_back(button);

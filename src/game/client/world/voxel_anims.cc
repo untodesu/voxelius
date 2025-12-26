@@ -12,22 +12,21 @@
 
 static config::Unsigned base_framerate(16U, 1U, 16U);
 
-std::uint64_t world::voxel_anims::nextframe = 0U;
-std::uint32_t world::voxel_anims::frame = 0U;
+std::uint64_t voxel_anims::nextframe = 0U;
+std::uint32_t voxel_anims::frame = 0U;
 
-void world::voxel_anims::init(void)
+void voxel_anims::init(void)
 {
     globals::client_config.add_value("voxel_anims.base_framerate", base_framerate);
 
-    world::voxel_anims::nextframe = 0U;
-    world::voxel_anims::frame = 0U;
+    voxel_anims::nextframe = 0U;
+    voxel_anims::frame = 0U;
 }
 
-void world::voxel_anims::update(void)
+void voxel_anims::update(void)
 {
-    if(globals::curtime >= world::voxel_anims::nextframe) {
-        world::voxel_anims::nextframe = globals::curtime
-            + static_cast<std::uint64_t>(1000000.0 / static_cast<float>(base_framerate.get_value()));
-        world::voxel_anims::frame += 1U;
+    if(globals::curtime >= voxel_anims::nextframe) {
+        voxel_anims::nextframe = globals::curtime + static_cast<std::uint64_t>(1000000.0 / static_cast<float>(base_framerate.get_value()));
+        voxel_anims::frame += 1U;
     }
 }

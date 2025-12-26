@@ -35,7 +35,7 @@ static const void* sound_effect_load_func(const char* name, std::uint32_t flags)
     auto file = PHYSFS_openRead(name);
 
     if(file == nullptr) {
-        spdlog::warn("sfx: {}: {}", name, io::physfs_error());
+        spdlog::warn("sfx: {}: {}", name, physfs_error());
         return nullptr;
     }
 

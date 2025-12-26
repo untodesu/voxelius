@@ -27,7 +27,7 @@ static void on_entity_transform_packet(const protocol::EntityTransform& packet)
 {
     if(auto session = sessions::find(packet.peer)) {
         if(session->dimension && session->dimension->entities.valid(session->player_entity)) {
-            auto& component = session->dimension->entities.emplace_or_replace<entity::Transform>(session->player_entity);
+            auto& component = session->dimension->entities.emplace_or_replace<Transform>(session->player_entity);
             component.angles = packet.angles;
             component.chunk = packet.chunk;
             component.local = packet.local;
@@ -49,7 +49,7 @@ static void on_entity_velocity_packet(const protocol::EntityVelocity& packet)
 {
     if(auto session = sessions::find(packet.peer)) {
         if(session->dimension && session->dimension->entities.valid(session->player_entity)) {
-            auto& component = session->dimension->entities.emplace_or_replace<entity::Velocity>(session->player_entity);
+            auto& component = session->dimension->entities.emplace_or_replace<Velocity>(session->player_entity);
             component.value = packet.value;
 
             protocol::EntityVelocity response;
@@ -67,7 +67,7 @@ static void on_entity_head_packet(const protocol::EntityHead& packet)
 {
     if(auto session = sessions::find(packet.peer)) {
         if(session->dimension && session->dimension->entities.valid(session->player_entity)) {
-            auto& component = session->dimension->entities.emplace_or_replace<entity::Head>(session->player_entity);
+            auto& component = session->dimension->entities.emplace_or_replace<Head>(session->player_entity);
             component.angles = packet.angles;
 
             protocol::EntityHead response;
@@ -84,12 +84,12 @@ static void on_entity_head_packet(const protocol::EntityHead& packet)
 static void on_set_voxel_packet(const protocol::SetVoxel& packet)
 {
     if(auto session = sessions::find(packet.peer)) {
-        if(session->dimension && !session->dimension->set_voxel(world::voxel_registry::find(packet.voxel), packet.vpos)) {
+        if(session->dimension && !session->dimension->set_voxel(voxel_registry::find(packet.voxel), packet.vpos)) {
             auto cpos = coord::to_chunk(packet.vpos);
             auto lpos = coord::to_local(packet.vpos);
             auto index = coord::to_index(lpos);
 
-            if(world::worldgen::is_generating(session->dimension, cpos)) {
+            if(worldgen::is_generating(session->dimension, cpos)) {
                 // The chunk is currently being generated;
                 // ignore all requests from players to build there
                 return;
@@ -103,9 +103,9 @@ static void on_set_voxel_packet(const protocol::SetVoxel& packet)
                 return;
             }
 
-            chunk->set_voxel(world::voxel_registry::find(packet.voxel), index);
+            chunk->set_voxel(voxel_registry::find(packet.voxel), index);
 
-            session->dimension->chunks.emplace_or_replace<world::Inhabited>(chunk->get_entity());
+            session->dimension->chunks.emplace_or_replace<Inhabited>(chunk->get_entity());
 
             protocol::SetVoxel response;
             response.vpos = packet.vpos;
@@ -126,20 +126,20 @@ static void on_request_chunk_packet(const protocol::RequestChunk& packet)
             return;
         }
 
-        if(auto transform = session->dimension->entities.try_get<entity::Transform>(session->player_entity)) {
-            world::ChunkAABB view_box;
+        if(auto transform = session->dimension->entities.try_get<Transform>(session->player_entity)) {
+            ChunkAABB view_box;
             view_box.min = transform->chunk - static_cast<chunk_pos::value_type>(server_game::view_distance.get_value());
             view_box.max = transform->chunk + static_cast<chunk_pos::value_type>(server_game::view_distance.get_value());
 
             if(view_box.contains(packet.cpos)) {
-                if(auto chunk = world::universe::load_chunk(session->dimension, packet.cpos)) {
+                if(auto chunk = universe::load_chunk(session->dimension, packet.cpos)) {
                     protocol::ChunkVoxels response;
                     response.chunk = packet.cpos;
                     response.voxels = chunk->get_voxels();
                     protocol::send(packet.peer, protocol::encode(response));
                 }
                 else {
-                    world::worldgen::request_chunk(session, packet.cpos);
+                    worldgen::request_chunk(session, packet.cpos);
                 }
             }
         }

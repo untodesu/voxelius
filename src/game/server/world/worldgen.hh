@@ -2,20 +2,17 @@
 
 #include "shared/types.hh"
 
-namespace world
-{
 class Dimension;
-} // namespace world
 
 struct Session;
 
-namespace world::worldgen
+namespace worldgen
 {
 void init(void);
-} // namespace world::worldgen
+} // namespace worldgen
 
-namespace world::worldgen
+namespace worldgen
 {
 bool is_generating(Dimension* dimension, const chunk_pos& cpos);
 void request_chunk(Session* session, const chunk_pos& cpos);
-} // namespace world::worldgen
+} // namespace worldgen

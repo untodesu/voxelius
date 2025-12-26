@@ -3,26 +3,15 @@
 #include "shared/const.hh"
 #include "shared/types.hh"
 
-namespace io
-{
 class ConfigMap;
-} // namespace io
 
-namespace world
-{
 class Chunk;
 class Voxel;
 class VoxelStorage;
-} // namespace world
 
-namespace world
-{
 using dimension_entropy_map = std::array<std::uint64_t, CHUNK_AREA>;
 using dimension_height_map = std::array<voxel_pos::value_type, CHUNK_AREA>;
-} // namespace world
 
-namespace world
-{
 class Dimension {
 public:
     explicit Dimension(std::string_view name, float gravity);
@@ -48,7 +37,7 @@ public:
     bool set_voxel(const Voxel* voxel, const chunk_pos& cpos, const local_pos& lpos);
 
 public:
-    virtual void init(io::ConfigMap& config);
+    virtual void init(ConfigMap& config);
     virtual void init_late(std::uint64_t global_seed);
     virtual bool generate(const chunk_pos& cpos, VoxelStorage& voxels);
 
@@ -61,18 +50,12 @@ private:
     emhash8::HashMap<chunk_pos, Chunk*> m_chunkmap;
     float m_gravity;
 };
-} // namespace world
 
-namespace world
-{
 struct ChunkComponent final {
     chunk_pos cpos;
     Chunk* chunk;
 };
-} // namespace world
 
-namespace world
-{
 struct ChunkCreateEvent final {
     Dimension* dimension;
     chunk_pos cpos;
@@ -98,4 +81,3 @@ struct VoxelSetEvent final {
     local_pos lpos;
     Chunk* chunk;
 };
-} // namespace world

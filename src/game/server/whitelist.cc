@@ -48,7 +48,7 @@ void whitelist::init_late(void)
     PHYSFS_File* file = PHYSFS_openRead(whitelist::filename.c_str());
 
     if(file == nullptr) {
-        spdlog::warn("whitelist: {}: {}", whitelist::filename.get(), io::physfs_error());
+        spdlog::warn("whitelist: {}: {}", whitelist::filename.get(), physfs_error());
         whitelist::enabled.set_value(false);
         return;
     }

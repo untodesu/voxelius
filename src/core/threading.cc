@@ -35,7 +35,7 @@ void Task::set_status(task_status status)
 
 void threading::init(void)
 {
-    auto argument = io::cmdline::get("threads", DEFAULT_POOL_SIZE_ARG);
+    auto argument = cmdline::get("threads", DEFAULT_POOL_SIZE_ARG);
     auto num_concurrent_threads = std::thread::hardware_concurrency();
     unsigned int thread_pool_size;
 

@@ -1,11 +1,16 @@
 {
   "splash.skip_prompt": "Press any key to skip",
 
-  "main_menu.leave": "Disconnect",
-  "main_menu.play": "Play Game",
-  "main_menu.quit": "Quit",
-  "main_menu.resume": "Resume",
-  "main_menu.settings": "Settings",
+  "main_menu.button.play": "Play Game",
+  "main_menu.button.resume": "Resume",
+  "main_menu.button.settings": "Settings",
+  "main_menu.button.disconnect": "Disconnect",
+  "main_menu.button.quit": "Quit",
+
+  "main_menu.quit_popup.title": "Quit Game",
+  "main_menu.quit_popup.question": "Are you sure?",
+  "main_menu.quit_popup.choice.yes": "Yes",
+  "main_menu.quit_popup.choice.no": "No",
   
   "play_menu.tab.servers": "Servers",
 
@@ -30,31 +35,29 @@
   "direct_connection.hostname": "Hostname",
   "direct_connection.password": "Password",
 
+  "settings.location.general": "General",
+  "settings.location.bindings": "Bindings",
+  "settings.location.video": "Graphics",
+  "settings.location.audio": "Audio",
+  "settings.location.keyboard": "Keyboard",
+  "settings.location.mouse": "Mouse",
+  "settings.location.gamepad": "Gamepad",
+
+  "settings.label.multiplayer": "Multiplayer",
+  "settings.label.movement": "Movement",
+  "settings.label.gameplay": "Gameplay",
+  "settings.label.miscellaneous": "Miscellaneous",
+  "settings.label.gui": "GUI",
+  "settings.label.world": "World",
+  "settings.label.levels": "Levels",
+
+  "settings.separator.settings": "Settings",
+  "settings.separator.devices": "Devices",
+
+  "settings.gamepad.checkbox_tooltip": "Invert axis",
+
   "settings.checkbox.false": "OFF",
   "settings.checkbox.true": "ON",
-
-  "settings.tab.general": "General",
-  "settings.tab.input": "Input",
-  "settings.tab.video": "Video",
-  "settings.tab.sound": "Sound",
-  
-  "settings.input.keyboard": "Keyboard",
-  "settings.input.gamepad": "Gamepad",
-  "settings.input.mouse": "Mouse",
-
-  "settings.keyboard.movement": "Movement",
-  "settings.keyboard.gameplay": "Gameplay",
-  "settings.keyboard.misc": "Miscellaneous",
-
-  "settings.gamepad.checkbox_tooltip": "Inverted when checked",
-
-  "settings.gamepad.movement": "Movement",
-  "settings.gamepad.gameplay": "Gameplay",
-  "settings.gamepad.misc": "Miscellaneous",
-
-  "settings.video.gui": "GUI",
-
-  "settings.sound.levels": "Levels",
 
   "settings.value.camera.roll_angle": "Roll angle",
   "settings.value.camera.vertical_fov": "FOV",

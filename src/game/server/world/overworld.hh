@@ -11,24 +11,19 @@
 
 constexpr static unsigned int OW_NUM_TREES = 4U;
 
-namespace world
-{
 struct Overworld_Metadata final {
-    world::dimension_entropy_map entropy;
-    world::dimension_height_map heightmap;
+    dimension_entropy_map entropy;
+    dimension_height_map heightmap;
     std::vector<local_pos> trees;
 };
-} // namespace world
 
-namespace world
-{
 class Overworld final : public Dimension {
 public:
     explicit Overworld(std::string_view name);
     virtual ~Overworld(void) = default;
 
 public:
-    virtual void init(io::ConfigMap& config) override;
+    virtual void init(ConfigMap& config) override;
     virtual void init_late(std::uint64_t global_seed) override;
     virtual bool generate(const chunk_pos& cpos, VoxelStorage& voxels) override;
 
@@ -65,4 +60,3 @@ private:
 private:
     std::mutex m_mutex;
 };
-} // namespace world

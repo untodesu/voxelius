@@ -66,12 +66,12 @@ void server_game::init(void)
     server_chat::init();
     server_recieve::init();
 
-    world::worldgen::init();
+    worldgen::init();
 
-    world::unloader::init();
-    world::universe::init();
+    unloader::init();
+    universe::init();
 
-    world::random_tick::init();
+    random_tick::init();
 }
 
 void server_game::init_late(void)
@@ -99,8 +99,8 @@ void server_game::init_late(void)
     game_voxels::populate();
     game_items::populate();
 
-    world::unloader::init_late();
-    world::universe::init_late();
+    unloader::init_late();
+    universe::init_late();
 
     sessions::init_post_universe();
 }
@@ -119,21 +119,21 @@ void server_game::shutdown(void)
     enet_host_service(globals::server_host, nullptr, 500);
     enet_host_destroy(globals::server_host);
 
-    world::universe::shutdown();
+    universe::shutdown();
 }
 
 void server_game::fixed_update(void)
 {
     // FIXME: threading
     for(auto dimension : globals::dimensions) {
-        entity::Collision::fixed_update(dimension.second);
-        entity::Velocity::fixed_update(dimension.second);
-        entity::Transform::fixed_update(dimension.second);
-        entity::Gravity::fixed_update(dimension.second);
-        entity::Stasis::fixed_update(dimension.second);
+        Collision::fixed_update(dimension.second);
+        Velocity::fixed_update(dimension.second);
+        Transform::fixed_update(dimension.second);
+        Gravity::fixed_update(dimension.second);
+        Stasis::fixed_update(dimension.second);
 
-        for(auto [entity, component] : dimension.second->chunks.view<world::ChunkComponent>().each()) {
-            world::random_tick::tick(component.cpos, component.chunk);
+        for(auto [entity, component] : dimension.second->chunks.view<ChunkComponent>().each()) {
+            random_tick::tick(component.cpos, component.chunk);
         }
     }
 }
@@ -158,6 +158,6 @@ void server_game::fixed_update_late(void)
 
     // FIXME: threading
     for(auto dimension : globals::dimensions) {
-        world::unloader::fixed_update_late(dimension.second);
+        unloader::fixed_update_late(dimension.second);
     }
 }

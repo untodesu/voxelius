@@ -6,7 +6,7 @@
 
 #include "shared/protocol.hh"
 
-io::ConfigMap globals::server_config;
+ConfigMap globals::server_config;
 
 ENetHost* globals::server_host;
 
@@ -14,5 +14,5 @@ bool globals::is_running;
 unsigned int globals::tickrate;
 std::uint64_t globals::tickrate_dt;
 
-world::Dimension* globals::spawn_dimension;
-std::unordered_map<std::string, world::Dimension*> globals::dimensions;
+Dimension* globals::spawn_dimension;
+std::unordered_map<std::string, Dimension*> globals::dimensions;

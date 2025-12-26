@@ -114,7 +114,7 @@ static glm::fvec3 pm_flight_move(const glm::fvec3& wishdir)
     return wishdir * PMOVE_MAX_SPEED_AIR;
 }
 
-void entity::player_move::init(void)
+void player_move::init(void)
 {
     movement_direction = ZERO_VEC3<float>;
 
@@ -153,14 +153,14 @@ void entity::player_move::init(void)
     settings::add_checkbox(2, enable_speedometer, settings_location::VIDEO_GUI, "player_move.enable_speedometer", true);
 }
 
-void entity::player_move::fixed_update(void)
+void player_move::fixed_update(void)
 {
-    const auto& head = globals::dimension->entities.get<entity::Head>(globals::player);
-    auto& transform = globals::dimension->entities.get<entity::Transform>(globals::player);
-    auto& velocity = globals::dimension->entities.get<entity::Velocity>(globals::player);
+    const auto& head = globals::dimension->entities.get<Head>(globals::player);
+    auto& transform = globals::dimension->entities.get<Transform>(globals::player);
+    auto& velocity = globals::dimension->entities.get<Velocity>(globals::player);
 
     // Interpolation - preserve current component states
-    globals::dimension->entities.emplace_or_replace<entity::client::TransformPrev>(globals::player, transform);
+    globals::dimension->entities.emplace_or_replace<client::TransformPrev>(globals::player, transform);
 
     glm::fvec3 forward, right;
     math::vectors(glm::fvec3(0.0f, head.angles[1], 0.0f), &forward, &right, nullptr);
@@ -175,7 +175,7 @@ void entity::player_move::fixed_update(void)
         return;
     }
 
-    auto grounded = globals::dimension->entities.try_get<entity::Grounded>(globals::player);
+    auto grounded = globals::dimension->entities.try_get<Grounded>(globals::player);
     auto velocity_horizontal = glm::fvec3(velocity.value.x, 0.0f, velocity.value.z);
 
     if(grounded) {
@@ -193,7 +193,7 @@ void entity::player_move::fixed_update(void)
         }
 
         if(footsteps_distance >= PMOVE_FOOTSTEP_SIZE) {
-            if(auto effect = world::voxel_sounds::get_footsteps(grounded->surface)) {
+            if(auto effect = voxel_sounds::get_footsteps(grounded->surface)) {
                 sound::play_player(effect, false, pitch_distrib(pitch_random));
             }
 
@@ -228,27 +228,27 @@ void entity::player_move::fixed_update(void)
             if(glm::abs(speed_change) < 0.01f) {
                 // No considerable speed increase within
                 // the precision we use to draw the speedometer
-                gui::status_lines::set(gui::STATUS_DEBUG, new_speed_text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f), 1.0f);
+                status_lines::set(STATUS_DEBUG, new_speed_text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f), 1.0f);
             }
             else if(speed_change < 0.0f) {
                 // Speed change is negative, we are actively
                 // slowing down; use the red color for the status line
-                gui::status_lines::set(gui::STATUS_DEBUG, new_speed_text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 1.0f);
+                status_lines::set(STATUS_DEBUG, new_speed_text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 1.0f);
             }
             else {
                 // Speed change is positive, we are actively
                 // speeding up; use the green color for the status line
-                gui::status_lines::set(gui::STATUS_DEBUG, new_speed_text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f), 1.0f);
+                status_lines::set(STATUS_DEBUG, new_speed_text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f), 1.0f);
             }
         }
 
-        if(auto effect = world::voxel_sounds::get_footsteps(grounded->surface)) {
+        if(auto effect = voxel_sounds::get_footsteps(grounded->surface)) {
             sound::play_player(effect, false, 1.0f);
         }
     }
 }
 
-void entity::player_move::update_late(void)
+void player_move::update_late(void)
 {
     movement_direction = ZERO_VEC3<float>;
 
@@ -258,17 +258,17 @@ void entity::player_move::update_late(void)
         return;
     }
 
-    if(io::gamepad::available && io::gamepad::active.get_value()) {
-        if(button_move_down.is_pressed(io::gamepad::state)) {
+    if(gamepad::available && gamepad::active.get_value()) {
+        if(button_move_down.is_pressed(gamepad::state)) {
             movement_direction += DIR_DOWN<float>;
         }
 
-        if(button_move_up.is_pressed(io::gamepad::state)) {
+        if(button_move_up.is_pressed(gamepad::state)) {
             movement_direction += DIR_UP<float>;
         }
 
-        movement_direction.x += axis_move_sideways.get_value(io::gamepad::state, io::gamepad::deadzone.get_value());
-        movement_direction.z -= axis_move_forward.get_value(io::gamepad::state, io::gamepad::deadzone.get_value());
+        movement_direction.x += axis_move_sideways.get_value(gamepad::state, gamepad::deadzone.get_value());
+        movement_direction.z -= axis_move_forward.get_value(gamepad::state, gamepad::deadzone.get_value());
     }
     else {
         if(GLFW_PRESS == glfwGetKey(globals::window, key_move_forward.get_key())) {

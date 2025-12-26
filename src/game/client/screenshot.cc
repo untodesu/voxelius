@@ -24,7 +24,7 @@ static void stbi_png_physfs_callback(void* context, void* data, int size)
     PHYSFS_writeBytes(reinterpret_cast<PHYSFS_File*>(context), data, size);
 }
 
-static void on_glfw_key(const io::GlfwKeyEvent& event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if(!globals::gui_keybind_ptr && !toggles::is_sequence_await) {
         if(screenshot_key.equals(event.key) && (event.action == GLFW_PRESS)) {
@@ -40,7 +40,7 @@ void screenshot::init(void)
 
     settings::add_keybind(0, screenshot_key, settings_location::KEYBOARD_MISC, "key.screenshot");
 
-    globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
 }
 
 void screenshot::take(void)
@@ -77,7 +77,7 @@ void screenshot::take(void)
 
         spdlog::info("screenshot: wrote {}", filepath);
 
-        gui::client_chat::print(std::format("{} {}", gui::language::resolve("chat.screenshot_message"), filename));
+        client_chat::print(std::format("{} {}", language::resolve("chat.screenshot_message"), filename));
 
         PHYSFS_close(file);
     }

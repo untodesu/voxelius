@@ -16,7 +16,7 @@
 #include "client/config/keybind.hh"
 
 #include "client/gui/gui_screen.hh"
-#include "client/gui/imdraw_ext.hh"
+#include "client/gui/imutils_text.hh"
 #include "client/gui/language.hh"
 #include "client/gui/settings.hh"
 
@@ -65,7 +65,7 @@ static void append_player_join(const std::string& sender)
 {
     GuiChatMessage message;
     message.spawn = globals::curtime;
-    message.text = std::format("{} {}", sender, gui::language::resolve("chat.client_join"));
+    message.text = std::format("{} {}", sender, language::resolve("chat.client_join"));
     message.color = ImGui::GetStyleColorVec4(ImGuiCol_DragDropTarget);
     history.push_back(message);
 
@@ -78,7 +78,7 @@ static void append_player_leave(const std::string& sender, const std::string& re
 {
     GuiChatMessage message;
     message.spawn = globals::curtime;
-    message.text = std::format("{} {} ({})", sender, gui::language::resolve("chat.client_left"), gui::language::resolve(reason.c_str()));
+    message.text = std::format("{} {} ({})", sender, language::resolve("chat.client_left"), language::resolve(reason.c_str()));
     message.color = ImGui::GetStyleColorVec4(ImGuiCol_DragDropTarget);
     history.push_back(message);
 
@@ -105,7 +105,7 @@ static void on_chat_message_packet(const protocol::ChatMessage& packet)
     }
 }
 
-static void on_glfw_key(const io::GlfwKeyEvent& event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if(event.action == GLFW_PRESS) {
         if((event.key == GLFW_KEY_ENTER) && (globals::gui_screen == GUI_CHAT)) {
@@ -138,7 +138,7 @@ static void on_glfw_key(const io::GlfwKeyEvent& event)
     }
 }
 
-void gui::client_chat::init(void)
+void client_chat::init(void)
 {
     globals::client_config.add_value("chat.key", key_chat);
     globals::client_config.add_value("chat.history_size", history_size);
@@ -147,28 +147,28 @@ void gui::client_chat::init(void)
     settings::add_slider(1, history_size, settings_location::VIDEO_GUI, "chat.history_size", false);
 
     globals::dispatcher.sink<protocol::ChatMessage>().connect<&on_chat_message_packet>();
-    globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
 
     sfx_chat_message = resource::load<SoundEffect>("sounds/ui/chat_message.wav");
 }
 
-void gui::client_chat::init_late(void)
+void client_chat::init_late(void)
 {
 }
 
-void gui::client_chat::shutdown(void)
+void client_chat::shutdown(void)
 {
     sfx_chat_message = nullptr;
 }
 
-void gui::client_chat::update(void)
+void client_chat::update(void)
 {
     while(history.size() > history_size.get_value()) {
         history.pop_front();
     }
 }
 
-void gui::client_chat::layout(void)
+void client_chat::layout(void)
 {
     auto viewport = ImGui::GetMainViewport();
     auto window_start = ImVec2(0.0f, 0.0f);
@@ -177,7 +177,7 @@ void gui::client_chat::layout(void)
     ImGui::SetNextWindowPos(window_start);
     ImGui::SetNextWindowSize(window_size);
 
-    ImGui::PushFont(globals::font_unscii16, 8.0f);
+    ImGui::PushFont(globals::font_unscii16, 16.0f);
 
     if(!ImGui::Begin("###chat", nullptr, WINDOW_FLAGS)) {
         ImGui::End();
@@ -235,7 +235,7 @@ void gui::client_chat::layout(void)
 
             draw_list->AddRectFilled(rect_pos, rect_end, rect_col);
 
-            imdraw_ext::text_shadow_w(it->text, text_pos, text_col, shadow_col, font, draw_list, 8.0f, window_size.x);
+            imutils::text_wr(draw_list, it->text, text_pos, text_col, shadow_col, font, window_size.x, ImGui::GetFontSize());
 
             ypos -= rect_size.y;
         }
@@ -245,12 +245,12 @@ void gui::client_chat::layout(void)
     ImGui::PopFont();
 }
 
-void gui::client_chat::clear(void)
+void client_chat::clear(void)
 {
     history.clear();
 }
 
-void gui::client_chat::refresh_timings(void)
+void client_chat::refresh_timings(void)
 {
     for(auto it = history.begin(); it < history.end(); ++it) {
         // Reset the spawn time so the fadeout timer
@@ -259,7 +259,7 @@ void gui::client_chat::refresh_timings(void)
     }
 }
 
-void gui::client_chat::print(const std::string& text)
+void client_chat::print(const std::string& text)
 {
     GuiChatMessage message = {};
     message.spawn = globals::curtime;

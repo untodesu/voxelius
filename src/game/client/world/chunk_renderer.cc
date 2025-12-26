@@ -45,7 +45,7 @@ static std::size_t u_quad_textures;
 static GLuint quad_vaobj;
 static GLuint quad_vbo;
 
-void world::chunk_renderer::init(void)
+void chunk_renderer::init(void)
 {
     globals::client_config.add_value("chunk_renderer.depth_sort_chunks", depth_sort_chunks);
 
@@ -82,14 +82,14 @@ void world::chunk_renderer::init(void)
     glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(glm::fvec3), nullptr);
 }
 
-void world::chunk_renderer::shutdown(void)
+void chunk_renderer::shutdown(void)
 {
     glDeleteBuffers(1, &quad_vbo);
     glDeleteVertexArrays(1, &quad_vaobj);
     quad_program.destroy();
 }
 
-void world::chunk_renderer::render(void)
+void chunk_renderer::render(void)
 {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -115,17 +115,17 @@ void world::chunk_renderer::render(void)
     GLuint timings[3];
     timings[0] = static_cast<GLuint>(globals::window_frametime);
     timings[1] = static_cast<GLuint>(globals::window_frametime_avg);
-    timings[2] = static_cast<GLuint>(world::voxel_anims::frame);
+    timings[2] = static_cast<GLuint>(voxel_anims::frame);
 
-    const auto group = globals::dimension->chunks.group<ChunkComponent>(entt::get<world::ChunkMesh>);
+    const auto group = globals::dimension->chunks.group<ChunkComponent>(entt::get<ChunkMesh>);
 
     if(depth_sort_chunks.get_value()) {
         // FIXME: speed! sorting every frame doesn't look
         // like a good idea. Can we store the group elsewhere and
         // still have all the up-to-date chunk things inside?
         group.sort([](entt::entity ea, entt::entity eb) {
-            const auto dir_a = globals::dimension->chunks.get<ChunkComponent>(ea).cpos - entity::camera::position_chunk;
-            const auto dir_b = globals::dimension->chunks.get<ChunkComponent>(eb).cpos - entity::camera::position_chunk;
+            const auto dir_a = globals::dimension->chunks.get<ChunkComponent>(ea).cpos - camera::position_chunk;
+            const auto dir_b = globals::dimension->chunks.get<ChunkComponent>(eb).cpos - camera::position_chunk;
 
             const auto da = dir_a[0] * dir_a[0] + dir_a[1] * dir_a[1] + dir_a[2] * dir_a[2];
             const auto db = dir_b[0] * dir_b[0] + dir_b[1] * dir_b[1] + dir_b[2] * dir_b[2];
@@ -134,18 +134,18 @@ void world::chunk_renderer::render(void)
         });
     }
 
-    for(std::size_t plane_id = 0; plane_id < world::voxel_atlas::plane_count(); ++plane_id) {
+    for(std::size_t plane_id = 0; plane_id < voxel_atlas::plane_count(); ++plane_id) {
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, world::voxel_atlas::plane_texture(plane_id));
+        glBindTexture(GL_TEXTURE_2D_ARRAY, voxel_atlas::plane_texture(plane_id));
 
         glBindVertexArray(quad_vaobj);
 
         glUseProgram(quad_program.handle);
-        glUniformMatrix4fv(quad_program.uniforms[u_quad_vproj_matrix].location, 1, false, glm::value_ptr(entity::camera::matrix));
+        glUniformMatrix4fv(quad_program.uniforms[u_quad_vproj_matrix].location, 1, false, glm::value_ptr(camera::matrix));
         glUniform3uiv(quad_program.uniforms[u_quad_timings].location, 1, timings);
-        glUniform4fv(quad_program.uniforms[u_quad_fog_color].location, 1, glm::value_ptr(world::skybox::fog_color));
+        glUniform4fv(quad_program.uniforms[u_quad_fog_color].location, 1, glm::value_ptr(skybox::fog_color));
         glUniform1f(quad_program.uniforms[u_quad_view_distance].location,
-            static_cast<GLfloat>(entity::camera::view_distance.get_value() * CHUNK_SIZE));
+            static_cast<GLfloat>(camera::view_distance.get_value() * CHUNK_SIZE));
         glUniform1i(quad_program.uniforms[u_quad_textures].location, 0); // GL_TEXTURE0
 
         glDisable(GL_BLEND);
@@ -156,7 +156,7 @@ void world::chunk_renderer::render(void)
 
         for(const auto [entity, chunk, mesh] : group.each()) {
             if(plane_id < mesh.quad_nb.size() && mesh.quad_nb[plane_id].handle && mesh.quad_nb[plane_id].size) {
-                const auto wpos = coord::to_fvec3(chunk.cpos - entity::camera::position_chunk);
+                const auto wpos = coord::to_fvec3(chunk.cpos - camera::position_chunk);
                 glUniform3fv(quad_program.uniforms[u_quad_world_position].location, 1, glm::value_ptr(wpos));
 
                 glBindBuffer(GL_ARRAY_BUFFER, mesh.quad_nb[plane_id].handle);
@@ -177,7 +177,7 @@ void world::chunk_renderer::render(void)
 
         for(const auto [entity, chunk, mesh] : group.each()) {
             if(plane_id < mesh.quad_b.size() && mesh.quad_b[plane_id].handle && mesh.quad_b[plane_id].size) {
-                const auto wpos = coord::to_fvec3(chunk.cpos - entity::camera::position_chunk);
+                const auto wpos = coord::to_fvec3(chunk.cpos - camera::position_chunk);
                 glUniform3fv(quad_program.uniforms[u_quad_world_position].location, 1, glm::value_ptr(wpos));
 
                 glBindBuffer(GL_ARRAY_BUFFER, mesh.quad_b[plane_id].handle);
@@ -195,11 +195,11 @@ void world::chunk_renderer::render(void)
     }
 
     if(toggles::get(TOGGLE_CHUNK_AABB)) {
-        world::outline::prepare();
+        outline::prepare();
 
         for(const auto [entity, chunk, mesh] : group.each()) {
             const auto size = glm::fvec3(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
-            world::outline::cube(chunk.cpos, glm::fvec3(0.0f, 0.0f, 0.0f), size, 1.0f, glm::fvec4(1.0f, 1.0f, 0.0f, 1.0f));
+            outline::cube(chunk.cpos, glm::fvec3(0.0f, 0.0f, 0.0f), size, 1.0f, glm::fvec4(1.0f, 1.0f, 0.0f, 1.0f));
         }
     }
 }

@@ -15,6 +15,7 @@
 #include "client/config/keybind.hh"
 
 #include "client/gui/gui_screen.hh"
+#include "client/gui/imutils_button.hh"
 #include "client/gui/language.hh"
 
 #include "client/io/gamepad.hh"
@@ -25,22 +26,33 @@
 
 constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration;
 constexpr static unsigned int NUM_LOCATIONS = static_cast<unsigned int>(settings_location::COUNT);
+constexpr static const char* TOOLTIP_TEXT = "[?]";
 
-enum class setting_type : unsigned int {
-    CHECKBOX = 0x0000U,        ///< config::Boolean
-    INPUT_INT = 0x0001U,       ///< config::Number<int>
-    INPUT_FLOAT = 0x0002U,     ///< config::Number<float>
-    INPUT_UINT = 0x0003U,      ///< config::Number<unsigned int>
-    INPUT_STRING = 0x0004U,    ///< config::String
-    SLIDER_INT = 0x0005U,      ///< config::Number<int>
-    SLIDER_FLOAT = 0x0006U,    ///< config::Number<float>
-    SLIDER_UINT = 0x0007U,     ///< config::Number<unsigned int>
-    STEPPER_INT = 0x0008U,     ///< config::Number<int>
-    STEPPER_UINT = 0x0009U,    ///< config::Number<unsigned int>
-    KEYBIND = 0x000AU,         ///< config::KeyBind
-    GAMEPAD_AXIS = 0x000BU,    ///< config::GamepadAxis
-    GAMEPAD_BUTTON = 0x000CU,  ///< config::GamepadButton
-    LANGUAGE_SELECT = 0x000DU, ///< config::String internally
+enum class setting_type {
+    CHECKBOX,        ///< config::Boolean
+    INPUT_INT,       ///< config::Number<int>
+    INPUT_FLOAT,     ///< config::Number<float>
+    INPUT_UINT,      ///< config::Number<unsigned int>
+    INPUT_STRING,    ///< config::String
+    SLIDER_INT,      ///< config::Number<int>
+    SLIDER_FLOAT,    ///< config::Number<float>
+    SLIDER_UINT,     ///< config::Number<unsigned int>
+    STEPPER_INT,     ///< config::Number<int>
+    STEPPER_UINT,    ///< config::Number<unsigned int>
+    KEYBIND,         ///< config::KeyBind
+    GAMEPAD_AXIS,    ///< config::GamepadAxis
+    GAMEPAD_BUTTON,  ///< config::GamepadButton
+    LANGUAGE_SELECT, ///< config::String internally
+};
+
+enum class gui_location {
+    GENERAL,
+    BINDINGS,
+    AUDIO,
+    VIDEO,
+    KEYBOARD,
+    MOUSE,
+    GAMEPAD,
 };
 
 class SettingValue {
@@ -206,42 +218,41 @@ public:
     virtual void layout(void) const override;
 };
 
+static std::string str_label_movement;
+static std::string str_label_gameplay;
+static std::string str_label_miscellaneous;
+static std::string str_label_gui;
+static std::string str_label_levels;
+
+static std::string str_location_general;
+static std::string str_location_video;
+static std::string str_location_audio;
+static std::string str_location_keyboard;
+static std::string str_location_mouse;
+static std::string str_location_gamepad;
+
+static std::string str_separator_settings;
+static std::string str_separator_devices;
+
 static std::string str_checkbox_false;
 static std::string str_checkbox_true;
 
-static std::string str_tab_general;
-static std::string str_tab_input;
-static std::string str_tab_video;
-static std::string str_tab_sound;
-
-static std::string str_input_keyboard;
-static std::string str_input_gamepad;
-static std::string str_input_mouse;
-
-static std::string str_keyboard_movement;
-static std::string str_keyboard_gameplay;
-static std::string str_keyboard_misc;
-
-static std::string str_gamepad_movement;
-static std::string str_gamepad_gameplay;
-static std::string str_gamepad_misc;
+static std::vector<std::shared_ptr<SettingValue>> values_all;
+static std::vector<std::shared_ptr<SettingValue>> values[NUM_LOCATIONS];
 
 static std::string str_gamepad_axis_prefix;
 static std::string str_gamepad_button_prefix;
 static std::string str_gamepad_checkbox_tooltip;
 
-static std::string str_video_gui;
-
-static std::string str_sound_levels;
-
-static std::vector<SettingValue*> values_all;
-static std::vector<SettingValue*> values[NUM_LOCATIONS];
+static gui_location selected_location;
 
 void SettingValue::layout_tooltip(void) const
 {
     if(has_tooltip) {
-        ImGui::SameLine();
-        ImGui::TextDisabled("[?]");
+        ImVec2 tooltip_size(ImGui::CalcTextSize(TOOLTIP_TEXT));
+
+        ImGui::SameLine(ImGui::GetWindowWidth() - tooltip_size.x - ImGui::GetStyle().WindowPadding.x);
+        ImGui::TextDisabled(TOOLTIP_TEXT);
 
         if(ImGui::BeginItemTooltip()) {
             ImGui::PushTextWrapPos(ImGui::GetFontSize() * 16.0f);
@@ -397,7 +408,7 @@ void SettingValue_StepperInt::refresh_wids(void)
 {
     for(std::size_t i = 0; i < wids.size(); ++i) {
         auto key = std::format("settings.value.{}.{}", name, i);
-        wids[i] = std::format("{}###{}", gui::language::resolve(key.c_str()), static_cast<const void*>(value));
+        wids[i] = std::format("{}###{}", language::resolve(key.c_str()), static_cast<const void*>(value));
     }
 }
 
@@ -428,7 +439,7 @@ void SettingValue_StepperUnsigned::refresh_wids(void)
 {
     for(std::size_t i = 0; i < wids.size(); ++i) {
         auto key = std::format("settings.value.{}.{}", name, i);
-        wids[i] = std::format("{}###{}", gui::language::resolve(key.c_str()), static_cast<const void*>(value));
+        wids[i] = std::format("{}###{}", language::resolve(key.c_str()), static_cast<const void*>(value));
     }
 }
 
@@ -509,12 +520,12 @@ void SettingValue_GamepadButton::refresh_wids(void)
 
 void SettingValue_Language::layout(void) const
 {
-    auto current_language = gui::language::get_current();
+    auto current_language = language::get_current();
 
     if(ImGui::BeginCombo(wid.c_str(), current_language->endonym.c_str())) {
-        for(auto it = gui::language::cbegin(); it != gui::language::cend(); ++it) {
+        for(auto it = language::cbegin(); it != language::cend(); ++it) {
             if(ImGui::Selectable(it->display.c_str(), it == current_language)) {
-                gui::language::set(it);
+                language::set(it);
                 continue;
             }
         }
@@ -528,27 +539,27 @@ void SettingValue_Language::layout(void) const
 
 static void refresh_input_wids(void)
 {
-    for(SettingValue* value : values_all) {
+    for(auto& value : values_all) {
         if(value->type == setting_type::KEYBIND) {
-            auto keybind = static_cast<SettingValue_KeyBind*>(value);
+            auto keybind = std::static_pointer_cast<SettingValue_KeyBind>(value);
             keybind->refresh_wids();
             continue;
         }
 
         if(value->type == setting_type::GAMEPAD_AXIS) {
-            auto gamepad_axis = static_cast<SettingValue_GamepadAxis*>(value);
+            auto gamepad_axis = std::static_pointer_cast<SettingValue_GamepadAxis>(value);
             gamepad_axis->refresh_wids();
             continue;
         }
 
         if(value->type == setting_type::GAMEPAD_BUTTON) {
-            auto gamepad_button = static_cast<SettingValue_GamepadButton*>(value);
+            auto gamepad_button = std::static_pointer_cast<SettingValue_GamepadButton>(value);
             gamepad_button->refresh_wids();
         }
     }
 }
 
-static void on_glfw_key(const io::GlfwKeyEvent& event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if((event.action == GLFW_PRESS) && (event.key != DEBUG_KEY)) {
         if(globals::gui_keybind_ptr || globals::gui_gamepad_axis_ptr || globals::gui_gamepad_button_ptr) {
@@ -581,7 +592,7 @@ static void on_glfw_key(const io::GlfwKeyEvent& event)
     }
 }
 
-static void on_gamepad_axis(const io::GamepadAxisEvent& event)
+static void on_gamepad_axis(const GamepadAxisEvent& event)
 {
     if(globals::gui_gamepad_axis_ptr) {
         auto& io = ImGui::GetIO();
@@ -596,7 +607,7 @@ static void on_gamepad_axis(const io::GamepadAxisEvent& event)
     }
 }
 
-static void on_gamepad_button(const io::GamepadButtonEvent& event)
+static void on_gamepad_button(const GamepadButtonEvent& event)
 {
     if(globals::gui_gamepad_button_ptr) {
         auto& io = ImGui::GetIO();
@@ -611,56 +622,51 @@ static void on_gamepad_button(const io::GamepadButtonEvent& event)
     }
 }
 
-static void on_language_set(const gui::LanguageSetEvent& event)
+static void on_language_set(const LanguageSetEvent& event)
 {
-    str_checkbox_false = gui::language::resolve("settings.checkbox.false");
-    str_checkbox_true = gui::language::resolve("settings.checkbox.true");
+    str_label_movement = language::resolve("settings.label.movement");
+    str_label_gameplay = language::resolve("settings.label.gameplay");
+    str_label_miscellaneous = language::resolve("settings.label.miscellaneous");
+    str_label_gui = language::resolve("settings.label.gui");
+    str_label_levels = language::resolve("settings.label.levels");
 
-    str_tab_general = gui::language::resolve("settings.tab.general");
-    str_tab_input = gui::language::resolve("settings.tab.input");
-    str_tab_video = gui::language::resolve("settings.tab.video");
-    str_tab_sound = gui::language::resolve("settings.tab.sound");
+    str_location_general = language::resolve_gui("settings.location.general");
+    str_location_keyboard = language::resolve_gui("settings.location.keyboard");
+    str_location_mouse = language::resolve_gui("settings.location.mouse");
+    str_location_gamepad = language::resolve_gui("settings.location.gamepad");
+    str_location_video = language::resolve_gui("settings.location.video");
+    str_location_audio = language::resolve_gui("settings.location.audio");
 
-    str_input_keyboard = gui::language::resolve("settings.input.keyboard");
-    str_input_gamepad = gui::language::resolve("settings.input.gamepad");
-    str_input_mouse = gui::language::resolve("settings.input.mouse");
+    str_separator_settings = language::resolve("settings.separator.settings");
+    str_separator_devices = language::resolve("settings.separator.devices");
 
-    str_keyboard_movement = gui::language::resolve("settings.keyboard.movement");
-    str_keyboard_gameplay = gui::language::resolve("settings.keyboard.gameplay");
-    str_keyboard_misc = gui::language::resolve("settings.keyboard.misc");
+    str_checkbox_false = language::resolve("settings.checkbox.false");
+    str_checkbox_true = language::resolve("settings.checkbox.true");
 
-    str_gamepad_movement = gui::language::resolve("settings.gamepad.movement");
-    str_gamepad_gameplay = gui::language::resolve("settings.gamepad.gameplay");
-    str_gamepad_misc = gui::language::resolve("settings.gamepad.misc");
+    str_gamepad_axis_prefix = language::resolve("settings.gamepad.axis");
+    str_gamepad_button_prefix = language::resolve("settings.gamepad.button");
+    str_gamepad_checkbox_tooltip = language::resolve("settings.gamepad.checkbox_tooltip");
 
-    str_gamepad_axis_prefix = gui::language::resolve("settings.gamepad.axis");
-    str_gamepad_button_prefix = gui::language::resolve("settings.gamepad.button");
-    str_gamepad_checkbox_tooltip = gui::language::resolve("settings.gamepad.checkbox_tooltip");
-
-    str_video_gui = gui::language::resolve("settings.video.gui");
-
-    str_sound_levels = gui::language::resolve("settings.sound.levels");
-
-    for(SettingValue* value : values_all) {
+    for(auto value : values_all) {
         if(value->type == setting_type::CHECKBOX) {
-            auto checkbox = static_cast<SettingValue_CheckBox*>(value);
+            auto checkbox = std::static_pointer_cast<SettingValue_CheckBox>(value);
             checkbox->refresh_wids();
         }
 
         if(value->type == setting_type::STEPPER_INT) {
-            auto stepper = static_cast<SettingValue_StepperInt*>(value);
+            auto stepper = std::static_pointer_cast<SettingValue_StepperInt>(value);
             stepper->refresh_wids();
         }
 
         if(value->type == setting_type::STEPPER_UINT) {
-            auto stepper = static_cast<SettingValue_StepperUnsigned*>(value);
+            auto stepper = std::static_pointer_cast<SettingValue_StepperUnsigned>(value);
             stepper->refresh_wids();
         }
 
-        value->title = gui::language::resolve(std::format("settings.value.{}", value->name).c_str());
+        value->title = language::resolve(std::format("settings.value.{}", value->name).c_str());
 
         if(value->has_tooltip) {
-            value->tooltip = gui::language::resolve(std::format("settings.tooltip.{}", value->name).c_str());
+            value->tooltip = language::resolve(std::format("settings.tooltip.{}", value->name).c_str());
         }
     }
 }
@@ -669,120 +675,32 @@ static void layout_values(settings_location location)
 {
     ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.70f);
 
-    for(const SettingValue* value : values[static_cast<unsigned int>(location)]) {
+    for(auto& value : values[static_cast<unsigned int>(location)]) {
         value->layout();
     }
 
     ImGui::PopItemWidth();
 }
 
-static void layout_general(void)
+static void layout_location_selectable(const std::string& label, gui_location target_location, const ImVec2& size)
 {
-    if(ImGui::BeginChild("###settings.general.child")) {
-        layout_values(settings_location::GENERAL);
+    if(imutils::selectable_button(label.c_str(), size, selected_location == target_location)) {
+        selected_location = target_location;
     }
-
-    ImGui::EndChild();
-}
-
-static void layout_input_keyboard(void)
-{
-    if(ImGui::BeginChild("###settings.input.keyboard.child")) {
-        ImGui::SeparatorText(str_keyboard_movement.c_str());
-        layout_values(settings_location::KEYBOARD_MOVEMENT);
-        ImGui::SeparatorText(str_keyboard_gameplay.c_str());
-        layout_values(settings_location::KEYBOARD_GAMEPLAY);
-        ImGui::SeparatorText(str_keyboard_misc.c_str());
-        layout_values(settings_location::KEYBOARD_MISC);
-    }
-
-    ImGui::EndChild();
-}
-
-static void layout_input_gamepad(void)
-{
-    if(ImGui::BeginChild("###settings.input.gamepad.child")) {
-        layout_values(settings_location::GAMEPAD);
-        ImGui::SeparatorText(str_gamepad_movement.c_str());
-        layout_values(settings_location::GAMEPAD_MOVEMENT);
-        ImGui::SeparatorText(str_gamepad_gameplay.c_str());
-        layout_values(settings_location::GAMEPAD_GAMEPLAY);
-        ImGui::SeparatorText(str_gamepad_misc.c_str());
-        layout_values(settings_location::GAMEPAD_MISC);
-    }
-
-    ImGui::EndChild();
-}
-
-static void layout_input_mouse(void)
-{
-    if(ImGui::BeginChild("###settings.input.mouse.child")) {
-        layout_values(settings_location::MOUSE);
-    }
-
-    ImGui::EndChild();
-}
-
-static void layout_input(void)
-{
-    if(ImGui::BeginTabBar("###settings.input.tabs", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-        if(ImGui::BeginTabItem(str_input_keyboard.c_str())) {
-            layout_input_keyboard();
-            ImGui::EndTabItem();
-        }
-
-        if(io::gamepad::available) {
-            if(ImGui::BeginTabItem(str_input_gamepad.c_str())) {
-                globals::gui_keybind_ptr = nullptr;
-                layout_input_gamepad();
-                ImGui::EndTabItem();
-            }
-        }
-
-        if(ImGui::BeginTabItem(str_input_mouse.c_str())) {
-            globals::gui_keybind_ptr = nullptr;
-            layout_input_mouse();
-            ImGui::EndTabItem();
-        }
-
-        ImGui::EndTabBar();
-    }
-}
-
-static void layout_video(void)
-{
-    if(ImGui::BeginChild("###settings.video.child")) {
-        layout_values(settings_location::VIDEO);
-        ImGui::SeparatorText(str_video_gui.c_str());
-        layout_values(settings_location::VIDEO_GUI);
-    }
-
-    ImGui::EndChild();
-}
-
-static void layout_sound(void)
-{
-    if(ImGui::BeginChild("###settings.sound.child")) {
-        layout_values(settings_location::SOUND);
-        ImGui::SeparatorText(str_sound_levels.c_str());
-        layout_values(settings_location::SOUND_LEVELS);
-    }
-
-    ImGui::EndChild();
 }
 
 void settings::init(void)
 {
-    globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
-    globals::dispatcher.sink<io::GamepadAxisEvent>().connect<&on_gamepad_axis>();
-    globals::dispatcher.sink<io::GamepadButtonEvent>().connect<&on_gamepad_button>();
-    globals::dispatcher.sink<gui::LanguageSetEvent>().connect<&on_language_set>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<GamepadAxisEvent>().connect<&on_gamepad_axis>();
+    globals::dispatcher.sink<GamepadButtonEvent>().connect<&on_gamepad_button>();
+    globals::dispatcher.sink<LanguageSetEvent>().connect<&on_language_set>();
 }
 
 void settings::init_late(void)
 {
     for(std::size_t i = 0; i < NUM_LOCATIONS; ++i) {
-        std::sort(values[i].begin(), values[i].end(), [](const SettingValue* a, const SettingValue* b) {
+        std::sort(values[i].begin(), values[i].end(), [](const auto& a, const auto& b) {
             return a->priority < b->priority;
         });
     }
@@ -792,68 +710,122 @@ void settings::init_late(void)
 
 void settings::shutdown(void)
 {
-    for(const SettingValue* value : values_all)
-        delete value;
-    for(std::size_t i = 0; i < NUM_LOCATIONS; values[i++].clear())
-        ;
+    for(std::size_t i = 0; i < NUM_LOCATIONS; ++i) {
+        values[i].clear();
+    }
+
     values_all.clear();
 }
 
 void settings::layout(void)
 {
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    const ImVec2 window_start = ImVec2(viewport->Size.x * 0.05f, viewport->Size.y * 0.05f);
-    const ImVec2 window_size = ImVec2(viewport->Size.x * 0.90f, viewport->Size.y * 0.90f);
+    const auto viewport = ImGui::GetMainViewport();
+    auto window_start = ImVec2(viewport->Size.x * 0.025f, viewport->Size.y * 0.025f);
+    auto window_size = ImVec2(viewport->Size.x * 0.95f, viewport->Size.y * 0.95f);
 
     ImGui::SetNextWindowPos(window_start);
     ImGui::SetNextWindowSize(window_size);
 
-    if(ImGui::Begin("###settings", nullptr, WINDOW_FLAGS)) {
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3.0f * globals::gui_scale, 3.0f * globals::gui_scale));
+    ImGui::PushFont(globals::font_unscii16, 16.0f);
+    ImGui::PushStyleVarX(ImGuiStyleVar_FramePadding, 8.0f * globals::gui_scale);
+    ImGui::PushStyleVarY(ImGuiStyleVar_FramePadding, 3.2f * globals::gui_scale);
 
-        if(ImGui::BeginTabBar("###settings.tabs", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-            if(ImGui::TabItemButton("<<")) {
+    if(ImGui::Begin("###settings.window", nullptr, WINDOW_FLAGS)) {
+        auto sidebar_width = 0.25f * window_size.x;
+        auto draw_list = ImGui::GetWindowDrawList();
+        auto separator_color = ImGui::GetColorU32(ImGuiCol_Text);
+
+        if(ImGui::BeginChild("###settings.window.sidebar", ImVec2(sidebar_width, -1.0f), 0, ImGuiWindowFlags_AlwaysUseWindowPadding)) {
+            auto selectable_height = 24.0f * globals::gui_scale;
+            auto selectable_size = ImVec2(ImGui::GetContentRegionAvail().x, selectable_height);
+
+            ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+
+            ImGui::BeginDisabled(globals::gui_gamepad_axis_ptr || globals::gui_gamepad_button_ptr || globals::gui_keybind_ptr);
+
+            if(ImGui::Button("<<###settings.window.back", ImVec2(-1.0f, 0.0f))) {
                 globals::gui_screen = GUI_MAIN_MENU;
-                globals::gui_keybind_ptr = nullptr;
-            }
 
-            if(ImGui::BeginTabItem(str_tab_general.c_str())) {
-                globals::gui_keybind_ptr = nullptr;
-                layout_general();
-                ImGui::EndTabItem();
-            }
-
-            if(ImGui::BeginTabItem(str_tab_input.c_str())) {
-                layout_input();
-                ImGui::EndTabItem();
-            }
-
-            if(ImGui::BeginTabItem(str_tab_video.c_str())) {
-                globals::gui_keybind_ptr = nullptr;
-                layout_video();
-                ImGui::EndTabItem();
-            }
-
-            if(globals::sound_ctx && globals::sound_dev) {
-                if(ImGui::BeginTabItem(str_tab_sound.c_str())) {
+                if(globals::gui_keybind_ptr) {
+                    globals::gui_keybind_ptr->set_key(GLFW_KEY_UNKNOWN);
                     globals::gui_keybind_ptr = nullptr;
-                    layout_sound();
-                    ImGui::EndTabItem();
                 }
             }
 
-            ImGui::EndTabBar();
+            ImGui::SeparatorText(str_separator_settings.c_str());
+            layout_location_selectable(str_location_general, gui_location::GENERAL, selectable_size);
+            layout_location_selectable(str_location_video, gui_location::VIDEO, selectable_size);
+            layout_location_selectable(str_location_audio, gui_location::AUDIO, selectable_size);
+
+            ImGui::SeparatorText(str_separator_devices.c_str());
+            layout_location_selectable(str_location_keyboard, gui_location::KEYBOARD, selectable_size);
+            layout_location_selectable(str_location_mouse, gui_location::MOUSE, selectable_size);
+            layout_location_selectable(str_location_gamepad, gui_location::GAMEPAD, selectable_size);
+
+            ImGui::EndDisabled();
+
+            ImGui::PopStyleVar();
         }
 
-        ImGui::PopStyleVar();
+        ImGui::EndChild();
+        ImGui::SameLine();
+
+        if(ImGui::BeginChild("###settings.window.contents", ImVec2(-1.0f, -1.0f), 0, ImGuiWindowFlags_AlwaysUseWindowPadding)) {
+            switch(selected_location) {
+                case gui_location::GENERAL:
+                    layout_values(settings_location::GENERAL);
+                    break;
+
+                case gui_location::VIDEO:
+                    layout_values(settings_location::VIDEO);
+                    ImGui::SeparatorText(str_label_gui.c_str());
+                    layout_values(settings_location::VIDEO_GUI);
+                    break;
+
+                case gui_location::AUDIO:
+                    ImGui::BeginDisabled(globals::sound_ctx == nullptr);
+                    layout_values(settings_location::SOUND);
+                    ImGui::SeparatorText(str_label_levels.c_str());
+                    layout_values(settings_location::SOUND_LEVELS);
+                    ImGui::EndDisabled();
+                    break;
+
+                case gui_location::KEYBOARD:
+                    ImGui::SeparatorText(str_label_movement.c_str());
+                    layout_values(settings_location::KEYBOARD_MOVEMENT);
+                    ImGui::SeparatorText(str_label_gameplay.c_str());
+                    layout_values(settings_location::KEYBOARD_GAMEPLAY);
+                    ImGui::SeparatorText(str_label_miscellaneous.c_str());
+                    layout_values(settings_location::KEYBOARD_MISC);
+                    break;
+
+                case gui_location::MOUSE:
+                    layout_values(settings_location::MOUSE);
+                    break;
+
+                case gui_location::GAMEPAD:
+                    ImGui::SeparatorText(str_label_movement.c_str());
+                    layout_values(settings_location::GAMEPAD_MOVEMENT);
+                    ImGui::SeparatorText(str_label_gameplay.c_str());
+                    layout_values(settings_location::GAMEPAD_GAMEPLAY);
+                    ImGui::SeparatorText(str_label_miscellaneous.c_str());
+                    layout_values(settings_location::GAMEPAD_MISC);
+                    break;
+            }
+        }
+
+        ImGui::EndChild();
     }
+
+    ImGui::PopStyleVar(2);
+    ImGui::PopFont();
 
     ImGui::End();
 }
 
 void settings::add_checkbox(int priority, config::Boolean& value, settings_location location, std::string_view name, bool tooltip)
 {
-    auto setting_value = new SettingValue_CheckBox;
+    auto setting_value = std::make_shared<SettingValue_CheckBox>();
     setting_value->type = setting_type::CHECKBOX;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
@@ -868,7 +840,7 @@ void settings::add_checkbox(int priority, config::Boolean& value, settings_locat
 
 void settings::add_input(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip)
 {
-    auto setting_value = new SettingValue_InputInt;
+    auto setting_value = std::make_shared<SettingValue_InputInt>();
     setting_value->type = setting_type::INPUT_INT;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
@@ -884,7 +856,7 @@ void settings::add_input(int priority, config::Int& value, settings_location loc
 void settings::add_input(int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip,
     std::string_view fmt)
 {
-    auto setting_value = new SettingValue_InputFloat;
+    auto setting_value = std::make_shared<SettingValue_InputFloat>();
     setting_value->type = setting_type::INPUT_FLOAT;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
@@ -900,7 +872,7 @@ void settings::add_input(int priority, config::Float& value, settings_location l
 
 void settings::add_input(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip)
 {
-    auto setting_value = new SettingValue_InputUnsigned;
+    auto setting_value = std::make_shared<SettingValue_InputUnsigned>();
     setting_value->type = setting_type::INPUT_UINT;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
@@ -916,7 +888,7 @@ void settings::add_input(int priority, config::Unsigned& value, settings_locatio
 void settings::add_input(int priority, config::String& value, settings_location location, std::string_view name, bool tooltip,
     bool allow_whitespace)
 {
-    auto setting_value = new SettingValue_InputString;
+    auto setting_value = std::make_shared<SettingValue_InputString>();
     setting_value->type = setting_type::INPUT_STRING;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
@@ -932,7 +904,7 @@ void settings::add_input(int priority, config::String& value, settings_location 
 
 void settings::add_slider(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip)
 {
-    auto setting_value = new SettingValue_SliderInt;
+    auto setting_value = std::make_shared<SettingValue_SliderInt>();
     setting_value->type = setting_type::SLIDER_INT;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
@@ -948,7 +920,7 @@ void settings::add_slider(int priority, config::Int& value, settings_location lo
 void settings::add_slider(int priority, config::Float& value, settings_location location, std::string_view name, bool tooltip,
     std::string_view fmt)
 {
-    auto setting_value = new SettingValue_SliderFloat;
+    auto setting_value = std::make_shared<SettingValue_SliderFloat>();
     setting_value->type = setting_type::SLIDER_FLOAT;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
@@ -964,7 +936,7 @@ void settings::add_slider(int priority, config::Float& value, settings_location 
 
 void settings::add_slider(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip)
 {
-    auto setting_value = new SettingValue_SliderUnsigned;
+    auto setting_value = std::make_shared<SettingValue_SliderUnsigned>();
     setting_value->type = setting_type::SLIDER_UINT;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
@@ -979,7 +951,7 @@ void settings::add_slider(int priority, config::Unsigned& value, settings_locati
 
 void settings::add_stepper(int priority, config::Int& value, settings_location location, std::string_view name, bool tooltip)
 {
-    auto setting_value = new SettingValue_StepperInt;
+    auto setting_value = std::make_shared<SettingValue_StepperInt>();
     setting_value->type = setting_type::STEPPER_INT;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
@@ -995,7 +967,7 @@ void settings::add_stepper(int priority, config::Int& value, settings_location l
 
 void settings::add_stepper(int priority, config::Unsigned& value, settings_location location, std::string_view name, bool tooltip)
 {
-    auto setting_value = new SettingValue_StepperUnsigned;
+    auto setting_value = std::make_shared<SettingValue_StepperUnsigned>();
     setting_value->type = setting_type::STEPPER_UINT;
     setting_value->priority = priority;
     setting_value->has_tooltip = tooltip;
@@ -1011,7 +983,7 @@ void settings::add_stepper(int priority, config::Unsigned& value, settings_locat
 
 void settings::add_keybind(int priority, config::KeyBind& value, settings_location location, std::string_view name)
 {
-    auto setting_value = new SettingValue_KeyBind;
+    auto setting_value = std::make_shared<SettingValue_KeyBind>();
     setting_value->type = setting_type::KEYBIND;
     setting_value->priority = priority;
     setting_value->has_tooltip = false;
@@ -1026,7 +998,7 @@ void settings::add_keybind(int priority, config::KeyBind& value, settings_locati
 
 void settings::add_gamepad_axis(int priority, config::GamepadAxis& value, settings_location location, std::string_view name)
 {
-    auto setting_value = new SettingValue_GamepadAxis;
+    auto setting_value = std::make_shared<SettingValue_GamepadAxis>();
     setting_value->type = setting_type::GAMEPAD_AXIS;
     setting_value->priority = priority;
     setting_value->has_tooltip = false;
@@ -1041,7 +1013,7 @@ void settings::add_gamepad_axis(int priority, config::GamepadAxis& value, settin
 
 void settings::add_gamepad_button(int priority, config::GamepadButton& value, settings_location location, std::string_view name)
 {
-    auto setting_value = new SettingValue_GamepadButton;
+    auto setting_value = std::make_shared<SettingValue_GamepadButton>();
     setting_value->type = setting_type::GAMEPAD_BUTTON;
     setting_value->priority = priority;
     setting_value->has_tooltip = false;
@@ -1056,13 +1028,13 @@ void settings::add_gamepad_button(int priority, config::GamepadButton& value, se
 
 void settings::add_language_select(int priority, settings_location location, std::string_view name)
 {
-    auto setting_value = new SettingValue_Language;
+    auto setting_value = std::make_shared<SettingValue_Language>();
     setting_value->type = setting_type::LANGUAGE_SELECT;
     setting_value->priority = priority;
     setting_value->has_tooltip = false;
     setting_value->name = name;
 
-    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value));
+    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value.get()));
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);

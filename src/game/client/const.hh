@@ -7,11 +7,11 @@
 // use this key for conventional gameplay things
 constexpr static int DEBUG_KEY = GLFW_KEY_F3;
 
-constexpr static int BASE_WIDTH = 320;
-constexpr static int BASE_HEIGHT = 240;
+constexpr static int BASE_WIDTH = 640;
+constexpr static int BASE_HEIGHT = 480;
 
-constexpr static int MIN_WIDTH = 2 * BASE_WIDTH;
-constexpr static int MIN_HEIGHT = 2 * BASE_HEIGHT;
+constexpr static int MIN_WIDTH = BASE_WIDTH;
+constexpr static int MIN_HEIGHT = BASE_HEIGHT;
 
 constexpr static int DEFAULT_WIDTH = 720;
 constexpr static int DEFAULT_HEIGHT = 480;

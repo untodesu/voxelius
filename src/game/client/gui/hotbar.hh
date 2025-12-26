@@ -3,28 +3,25 @@
 // TODO: design an inventory system and an item
 // registry and integrate the hotbar into that system
 
-namespace world
-{
 class Item;
-} // namespace world
 
 constexpr static unsigned int HOTBAR_SIZE = 9U;
 
-namespace gui::hotbar
+namespace hotbar
 {
 extern unsigned int active_slot;
-extern std::array<const world::Item*, HOTBAR_SIZE> slots;
-} // namespace gui::hotbar
+extern std::array<const Item*, HOTBAR_SIZE> slots;
+} // namespace hotbar
 
-namespace gui::hotbar
+namespace hotbar
 {
 void init(void);
 void shutdown(void);
 void layout(void);
-} // namespace gui::hotbar
+} // namespace hotbar
 
-namespace gui::hotbar
+namespace hotbar
 {
 void next_slot(void);
 void prev_slot(void);
-} // namespace gui::hotbar
+} // namespace hotbar

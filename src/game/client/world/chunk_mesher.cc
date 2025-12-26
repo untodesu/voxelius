@@ -19,7 +19,7 @@
 #include "client/globals.hh"
 #include "client/session.hh"
 
-using QuadBuilder = std::vector<world::ChunkQuad>;
+using QuadBuilder = std::vector<ChunkQuad>;
 
 using CachedChunkCoord = unsigned short;
 constexpr static CachedChunkCoord CPOS_ITSELF = 0x0000;
@@ -65,14 +65,14 @@ public:
     virtual void finalize(void) override;
 
 private:
-    bool vis_test(const world::Voxel* voxel, const local_pos& lpos) const;
-    void push_quad_a(const world::Voxel* voxel, const glm::fvec3& pos, const glm::fvec2& size, world::VoxelFace face);
-    void push_quad_v(const world::Voxel* voxel, const glm::fvec3& pos, const glm::fvec2& size, world::VoxelFace face, std::size_t entropy);
-    void make_cube(const world::Voxel* voxel, const local_pos& lpos, world::VoxelVisBits vis, std::size_t entropy);
+    bool vis_test(const Voxel* voxel, const local_pos& lpos) const;
+    void push_quad_a(const Voxel* voxel, const glm::fvec3& pos, const glm::fvec2& size, VoxelFace face);
+    void push_quad_v(const Voxel* voxel, const glm::fvec3& pos, const glm::fvec2& size, VoxelFace face, std::size_t entropy);
+    void make_cube(const Voxel* voxel, const local_pos& lpos, VoxelVisBits vis, std::size_t entropy);
     void cache_chunk(const chunk_pos& cpos);
 
 private:
-    std::array<world::VoxelStorage, NUM_CACHED_CPOS> m_cache;
+    std::array<VoxelStorage, NUM_CACHED_CPOS> m_cache;
     std::vector<QuadBuilder> m_quads_b; // blending
     std::vector<QuadBuilder> m_quads_s; // solid
     entt::entity m_entity;
@@ -95,8 +95,8 @@ GL_MeshingTask::GL_MeshingTask(entt::entity entity, const chunk_pos& cpos)
 
 void GL_MeshingTask::process(void)
 {
-    m_quads_b.resize(world::voxel_atlas::plane_count());
-    m_quads_s.resize(world::voxel_atlas::plane_count());
+    m_quads_b.resize(voxel_atlas::plane_count());
+    m_quads_s.resize(voxel_atlas::plane_count());
 
     const auto& voxels = m_cache.at(CPOS_ITSELF);
 
@@ -108,7 +108,7 @@ void GL_MeshingTask::process(void)
         }
 
         const auto lpos = coord::to_local(i);
-        const auto voxel = world::voxel_registry::find(voxels[i]);
+        const auto voxel = voxel_registry::find(voxels[i]);
 
         if(voxel == nullptr) {
             // Either a NULL_VOXEL_ID or something went
@@ -119,27 +119,27 @@ void GL_MeshingTask::process(void)
         unsigned int vis = 0U;
 
         if(vis_test(voxel, lpos + DIR_NORTH<local_pos::value_type>)) {
-            vis |= world::VVIS_NORTH;
+            vis |= VVIS_NORTH;
         }
 
         if(vis_test(voxel, lpos + DIR_SOUTH<local_pos::value_type>)) {
-            vis |= world::VVIS_SOUTH;
+            vis |= VVIS_SOUTH;
         }
 
         if(vis_test(voxel, lpos + DIR_EAST<local_pos::value_type>)) {
-            vis |= world::VVIS_EAST;
+            vis |= VVIS_EAST;
         }
 
         if(vis_test(voxel, lpos + DIR_WEST<local_pos::value_type>)) {
-            vis |= world::VVIS_WEST;
+            vis |= VVIS_WEST;
         }
 
         if(vis_test(voxel, lpos + DIR_UP<local_pos::value_type>)) {
-            vis |= world::VVIS_UP;
+            vis |= VVIS_UP;
         }
 
         if(vis_test(voxel, lpos + DIR_DOWN<local_pos::value_type>)) {
-            vis |= world::VVIS_DOWN;
+            vis |= VVIS_DOWN;
         }
 
         const auto vpos = coord::to_voxel(m_cpos, lpos);
@@ -147,7 +147,7 @@ void GL_MeshingTask::process(void)
         const auto entropy = math::crc64(&entropy_src, sizeof(entropy_src));
 
         // FIXME: handle different voxel types
-        make_cube(voxel, lpos, world::VoxelVisBits(vis), entropy);
+        make_cube(voxel, lpos, VoxelVisBits(vis), entropy);
     }
 }
 
@@ -159,7 +159,7 @@ void GL_MeshingTask::finalize(void)
         return;
     }
 
-    auto& component = globals::dimension->chunks.emplace_or_replace<world::ChunkMesh>(m_entity);
+    auto& component = globals::dimension->chunks.emplace_or_replace<ChunkMesh>(m_entity);
 
     const std::size_t plane_count_nb = m_quads_s.size();
     const std::size_t plane_count_b = m_quads_b.size();
@@ -187,7 +187,7 @@ void GL_MeshingTask::finalize(void)
             }
 
             glBindBuffer(GL_ARRAY_BUFFER, buffer.handle);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(world::ChunkQuad) * builder.size(), builder.data(), GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(ChunkQuad) * builder.size(), builder.data(), GL_STATIC_DRAW);
             buffer.size = builder.size();
             has_no_submeshes_nb = false;
         }
@@ -210,18 +210,18 @@ void GL_MeshingTask::finalize(void)
             }
 
             glBindBuffer(GL_ARRAY_BUFFER, buffer.handle);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(world::ChunkQuad) * builder.size(), builder.data(), GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(ChunkQuad) * builder.size(), builder.data(), GL_STATIC_DRAW);
             buffer.size = builder.size();
             has_no_submeshes_b = false;
         }
     }
 
     if(has_no_submeshes_b && has_no_submeshes_nb) {
-        globals::dimension->chunks.remove<world::ChunkMesh>(m_entity);
+        globals::dimension->chunks.remove<ChunkMesh>(m_entity);
     }
 }
 
-bool GL_MeshingTask::vis_test(const world::Voxel* voxel, const local_pos& lpos) const
+bool GL_MeshingTask::vis_test(const Voxel* voxel, const local_pos& lpos) const
 {
     const auto pvpos = coord::to_voxel(m_cpos, lpos);
     const auto pcpos = coord::to_chunk(pvpos);
@@ -230,7 +230,7 @@ bool GL_MeshingTask::vis_test(const world::Voxel* voxel, const local_pos& lpos) 
 
     const auto cached_cpos = get_cached_cpos(m_cpos, pcpos);
     const auto& voxels = m_cache.at(cached_cpos);
-    const auto neighbour = world::voxel_registry::find(voxels[index]);
+    const auto neighbour = voxel_registry::find(voxels[index]);
 
     bool result;
 
@@ -250,25 +250,24 @@ bool GL_MeshingTask::vis_test(const world::Voxel* voxel, const local_pos& lpos) 
     return result;
 }
 
-void GL_MeshingTask::push_quad_a(const world::Voxel* voxel, const glm::fvec3& pos, const glm::fvec2& size, world::VoxelFace face)
+void GL_MeshingTask::push_quad_a(const Voxel* voxel, const glm::fvec3& pos, const glm::fvec2& size, VoxelFace face)
 {
     auto cached_offset = voxel->get_cached_face_offset(face);
     auto cached_plane = voxel->get_cached_face_plane(face);
     auto& textures = voxel->get_face_textures(face);
 
     switch(voxel->get_render_mode()) {
-        case world::VRENDER_OPAQUE:
+        case VRENDER_OPAQUE:
             m_quads_s[cached_plane].push_back(make_chunk_quad(pos, size, face, cached_offset, textures.size()));
             break;
 
-        case world::VRENDER_BLEND:
+        case VRENDER_BLEND:
             m_quads_b[cached_plane].push_back(make_chunk_quad(pos, size, face, cached_offset, textures.size()));
             break;
     }
 }
 
-void GL_MeshingTask::push_quad_v(const world::Voxel* voxel, const glm::fvec3& pos, const glm::fvec2& size, world::VoxelFace face,
-    std::size_t entropy)
+void GL_MeshingTask::push_quad_v(const Voxel* voxel, const glm::fvec3& pos, const glm::fvec2& size, VoxelFace face, std::size_t entropy)
 {
     auto cached_offset = voxel->get_cached_face_offset(face);
     auto cached_plane = voxel->get_cached_face_plane(face);
@@ -276,69 +275,69 @@ void GL_MeshingTask::push_quad_v(const world::Voxel* voxel, const glm::fvec3& po
     auto index = entropy % textures.size();
 
     switch(voxel->get_render_mode()) {
-        case world::VRENDER_OPAQUE:
+        case VRENDER_OPAQUE:
             m_quads_s[cached_plane].push_back(make_chunk_quad(pos, size, face, cached_offset + index, 0));
             break;
 
-        case world::VRENDER_BLEND:
+        case VRENDER_BLEND:
             m_quads_b[cached_plane].push_back(make_chunk_quad(pos, size, face, cached_offset + index, 0));
             break;
     }
 }
 
-void GL_MeshingTask::make_cube(const world::Voxel* voxel, const local_pos& lpos, world::VoxelVisBits vis, std::size_t entropy)
+void GL_MeshingTask::make_cube(const Voxel* voxel, const local_pos& lpos, VoxelVisBits vis, std::size_t entropy)
 {
     const glm::fvec3 fpos = glm::fvec3(lpos);
     const glm::fvec2 fsize = glm::fvec2(1.0f, 1.0f);
 
     if(voxel->is_animated()) {
-        if(vis & world::VVIS_NORTH) {
-            push_quad_a(voxel, fpos, fsize, world::VFACE_NORTH);
+        if(vis & VVIS_NORTH) {
+            push_quad_a(voxel, fpos, fsize, VFACE_NORTH);
         }
 
-        if(vis & world::VVIS_SOUTH) {
-            push_quad_a(voxel, fpos, fsize, world::VFACE_SOUTH);
+        if(vis & VVIS_SOUTH) {
+            push_quad_a(voxel, fpos, fsize, VFACE_SOUTH);
         }
 
-        if(vis & world::VVIS_EAST) {
-            push_quad_a(voxel, fpos, fsize, world::VFACE_EAST);
+        if(vis & VVIS_EAST) {
+            push_quad_a(voxel, fpos, fsize, VFACE_EAST);
         }
 
-        if(vis & world::VVIS_WEST) {
-            push_quad_a(voxel, fpos, fsize, world::VFACE_WEST);
+        if(vis & VVIS_WEST) {
+            push_quad_a(voxel, fpos, fsize, VFACE_WEST);
         }
 
-        if(vis & world::VVIS_UP) {
-            push_quad_a(voxel, fpos, fsize, world::VFACE_TOP);
+        if(vis & VVIS_UP) {
+            push_quad_a(voxel, fpos, fsize, VFACE_TOP);
         }
 
-        if(vis & world::VVIS_DOWN) {
-            push_quad_a(voxel, fpos, fsize, world::VFACE_BOTTOM);
+        if(vis & VVIS_DOWN) {
+            push_quad_a(voxel, fpos, fsize, VFACE_BOTTOM);
         }
     }
     else {
-        if(vis & world::VVIS_NORTH) {
-            push_quad_v(voxel, fpos, fsize, world::VFACE_NORTH, entropy);
+        if(vis & VVIS_NORTH) {
+            push_quad_v(voxel, fpos, fsize, VFACE_NORTH, entropy);
         }
 
-        if(vis & world::VVIS_SOUTH) {
-            push_quad_v(voxel, fpos, fsize, world::VFACE_SOUTH, entropy);
+        if(vis & VVIS_SOUTH) {
+            push_quad_v(voxel, fpos, fsize, VFACE_SOUTH, entropy);
         }
 
-        if(vis & world::VVIS_EAST) {
-            push_quad_v(voxel, fpos, fsize, world::VFACE_EAST, entropy);
+        if(vis & VVIS_EAST) {
+            push_quad_v(voxel, fpos, fsize, VFACE_EAST, entropy);
         }
 
-        if(vis & world::VVIS_WEST) {
-            push_quad_v(voxel, fpos, fsize, world::VFACE_WEST, entropy);
+        if(vis & VVIS_WEST) {
+            push_quad_v(voxel, fpos, fsize, VFACE_WEST, entropy);
         }
 
-        if(vis & world::VVIS_UP) {
-            push_quad_v(voxel, fpos, fsize, world::VFACE_TOP, entropy);
+        if(vis & VVIS_UP) {
+            push_quad_v(voxel, fpos, fsize, VFACE_TOP, entropy);
         }
 
-        if(vis & world::VVIS_DOWN) {
-            push_quad_v(voxel, fpos, fsize, world::VFACE_BOTTOM, entropy);
+        if(vis & VVIS_DOWN) {
+            push_quad_v(voxel, fpos, fsize, VFACE_BOTTOM, entropy);
         }
     }
 }
@@ -356,7 +355,7 @@ void GL_MeshingTask::cache_chunk(const chunk_pos& cpos)
 // Bogus internal flag component
 struct NeedsMeshingComponent final {};
 
-static void on_chunk_create(const world::ChunkCreateEvent& event)
+static void on_chunk_create(const ChunkCreateEvent& event)
 {
     const std::array<chunk_pos, 6> neighbours = {
         event.cpos + DIR_NORTH<chunk_pos::value_type>,
@@ -370,14 +369,14 @@ static void on_chunk_create(const world::ChunkCreateEvent& event)
     globals::dimension->chunks.emplace_or_replace<NeedsMeshingComponent>(event.chunk->get_entity());
 
     for(const chunk_pos& cpos : neighbours) {
-        if(const world::Chunk* chunk = globals::dimension->find_chunk(cpos)) {
+        if(const Chunk* chunk = globals::dimension->find_chunk(cpos)) {
             globals::dimension->chunks.emplace_or_replace<NeedsMeshingComponent>(chunk->get_entity());
             continue;
         }
     }
 }
 
-static void on_chunk_update(const world::ChunkUpdateEvent& event)
+static void on_chunk_update(const ChunkUpdateEvent& event)
 {
     const std::array<chunk_pos, 6> neighbours = {
         event.cpos + DIR_NORTH<chunk_pos::value_type>,
@@ -391,14 +390,14 @@ static void on_chunk_update(const world::ChunkUpdateEvent& event)
     globals::dimension->chunks.emplace_or_replace<NeedsMeshingComponent>(event.chunk->get_entity());
 
     for(const chunk_pos& cpos : neighbours) {
-        if(const world::Chunk* chunk = globals::dimension->find_chunk(cpos)) {
+        if(const Chunk* chunk = globals::dimension->find_chunk(cpos)) {
             globals::dimension->chunks.emplace_or_replace<NeedsMeshingComponent>(chunk->get_entity());
             continue;
         }
     }
 }
 
-static void on_voxel_set(const world::VoxelSetEvent& event)
+static void on_voxel_set(const VoxelSetEvent& event)
 {
     globals::dimension->chunks.emplace_or_replace<NeedsMeshingComponent>(event.chunk->get_entity());
 
@@ -420,25 +419,25 @@ static void on_voxel_set(const world::VoxelSetEvent& event)
     }
 
     for(const chunk_pos& cpos : neighbours) {
-        if(const world::Chunk* chunk = globals::dimension->find_chunk(cpos)) {
+        if(const Chunk* chunk = globals::dimension->find_chunk(cpos)) {
             globals::dimension->chunks.emplace_or_replace<NeedsMeshingComponent>(chunk->get_entity());
             continue;
         }
     }
 }
 
-void world::chunk_mesher::init(void)
+void chunk_mesher::init(void)
 {
     globals::dispatcher.sink<ChunkCreateEvent>().connect<&on_chunk_create>();
     globals::dispatcher.sink<ChunkUpdateEvent>().connect<&on_chunk_update>();
     globals::dispatcher.sink<VoxelSetEvent>().connect<&on_voxel_set>();
 }
 
-void world::chunk_mesher::shutdown(void)
+void chunk_mesher::shutdown(void)
 {
 }
 
-void world::chunk_mesher::update(void)
+void chunk_mesher::update(void)
 {
     if(session::is_ingame()) {
         const auto group = globals::dimension->chunks.group<NeedsMeshingComponent>(entt::get<ChunkComponent>);

@@ -1,10 +1,7 @@
 #pragma once
 
-namespace io
-{
 constexpr static int INVALID_GAMEPAD_AXIS = INT_MAX;
 constexpr static int INVALID_GAMEPAD_BUTTON = INT_MAX;
-} // namespace io
 
 namespace config
 {
@@ -14,23 +11,21 @@ class Float;
 
 struct GLFWgamepadstate;
 
-namespace io::gamepad
+namespace gamepad
 {
 extern bool available;
 extern config::Float deadzone;
 extern config::Boolean active;
 extern GLFWgamepadstate state;
 extern GLFWgamepadstate last_state;
-} // namespace io::gamepad
+} // namespace gamepad
 
-namespace io::gamepad
+namespace gamepad
 {
 void init(void);
 void update_late(void);
-} // namespace io::gamepad
+} // namespace gamepad
 
-namespace io
-{
 // This simulates buttons using axes. When an axis
 // value exceeds 1.5 times the deadzone, the event is
 // queued with a GLFW_PRESS action, when it falls back
@@ -47,4 +42,3 @@ struct GamepadButtonEvent final {
     int action;
     int button;
 };
-} // namespace io

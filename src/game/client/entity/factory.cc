@@ -12,19 +12,19 @@
 
 #include "client/globals.hh"
 
-void entity::client::create_player(world::Dimension* dimension, entt::entity entity)
+void client::create_player(Dimension* dimension, entt::entity entity)
 {
-    entity::shared::create_player(dimension, entity);
+    shared::create_player(dimension, entity);
 
-    const auto& head = dimension->entities.get<entity::Head>(entity);
-    dimension->entities.emplace_or_replace<entity::client::HeadIntr>(entity, head);
-    dimension->entities.emplace_or_replace<entity::client::HeadPrev>(entity, head);
+    const auto& head = dimension->entities.get<Head>(entity);
+    dimension->entities.emplace_or_replace<client::HeadIntr>(entity, head);
+    dimension->entities.emplace_or_replace<client::HeadPrev>(entity, head);
 
-    const auto& transform = dimension->entities.get<entity::Transform>(entity);
-    dimension->entities.emplace_or_replace<entity::client::TransformIntr>(entity, transform);
-    dimension->entities.emplace_or_replace<entity::client::TransformPrev>(entity, transform);
+    const auto& transform = dimension->entities.get<Transform>(entity);
+    dimension->entities.emplace_or_replace<client::TransformIntr>(entity, transform);
+    dimension->entities.emplace_or_replace<client::TransformPrev>(entity, transform);
 
     if(globals::sound_ctx) {
-        dimension->entities.emplace_or_replace<entity::SoundEmitter>(entity);
+        dimension->entities.emplace_or_replace<SoundEmitter>(entity);
     }
 }

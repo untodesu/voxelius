@@ -4,7 +4,7 @@
 
 #include "core/io/buffer.hh"
 
-void world::VoxelStorage::serialize(io::WriteBuffer& buffer) const
+void VoxelStorage::serialize(WriteBuffer& buffer) const
 {
     auto bound = mz_compressBound(sizeof(VoxelStorage));
     auto zdata = std::vector<unsigned char>(bound);
@@ -28,7 +28,7 @@ void world::VoxelStorage::serialize(io::WriteBuffer& buffer) const
     }
 }
 
-void world::VoxelStorage::deserialize(io::ReadBuffer& buffer)
+void VoxelStorage::deserialize(ReadBuffer& buffer)
 {
     auto size = static_cast<mz_ulong>(sizeof(VoxelStorage));
     auto bound = static_cast<mz_ulong>(buffer.read<std::uint64_t>());

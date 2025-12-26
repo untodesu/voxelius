@@ -10,16 +10,16 @@
 
 #include "core/version.hh"
 
-void io::ConfigMap::load_cmdline(void)
+void ConfigMap::load_cmdline(void)
 {
     for(auto it : m_values) {
-        if(auto value = io::cmdline::get_cstr(it.first.c_str())) {
+        if(auto value = cmdline::get_cstr(it.first.c_str())) {
             it.second->set(value);
         }
     }
 }
 
-bool io::ConfigMap::load_file(std::string_view path)
+bool ConfigMap::load_file(std::string_view path)
 {
     if(auto file = PHYSFS_openRead(std::string(path).c_str())) {
         auto source = std::string(PHYSFS_fileLength(file), char(0x00));
@@ -71,7 +71,7 @@ bool io::ConfigMap::load_file(std::string_view path)
     return false;
 }
 
-bool io::ConfigMap::save_file(std::string_view path) const
+bool ConfigMap::save_file(std::string_view path) const
 {
     std::ostringstream stream;
 
@@ -96,7 +96,7 @@ bool io::ConfigMap::save_file(std::string_view path) const
     return false;
 }
 
-bool io::ConfigMap::set_value(std::string_view name, std::string_view value)
+bool ConfigMap::set_value(std::string_view name, std::string_view value)
 {
     auto kv_pair = m_values.find(std::string(name));
 
@@ -108,7 +108,7 @@ bool io::ConfigMap::set_value(std::string_view name, std::string_view value)
     return false;
 }
 
-std::string_view io::ConfigMap::get_value(std::string_view name) const
+std::string_view ConfigMap::get_value(std::string_view name) const
 {
     auto kv_pair = m_values.find(std::string(name));
     if(kv_pair != m_values.cend()) {
@@ -118,12 +118,12 @@ std::string_view io::ConfigMap::get_value(std::string_view name) const
     return std::string_view();
 }
 
-void io::ConfigMap::add_value(std::string_view name, config::IValue& vref)
+void ConfigMap::add_value(std::string_view name, config::IValue& vref)
 {
     m_values.insert_or_assign(std::string(name), &vref);
 }
 
-const config::IValue* io::ConfigMap::find(std::string_view name) const
+const config::IValue* ConfigMap::find(std::string_view name) const
 {
     auto kv_pair = m_values.find(std::string(name));
 

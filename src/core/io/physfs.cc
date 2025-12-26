@@ -2,7 +2,7 @@
 
 #include "core/io/physfs.hh"
 
-bool io::read_file(std::string_view path, std::vector<std::byte>& buffer)
+bool read_file(std::string_view path, std::vector<std::byte>& buffer)
 {
     auto file = PHYSFS_openRead(std::string(path).c_str());
 
@@ -20,7 +20,7 @@ bool io::read_file(std::string_view path, std::vector<std::byte>& buffer)
     return true;
 }
 
-bool io::read_file(std::string_view path, std::string& buffer)
+bool read_file(std::string_view path, std::string& buffer)
 {
     auto file = PHYSFS_openRead(std::string(path).c_str());
 
@@ -38,7 +38,7 @@ bool io::read_file(std::string_view path, std::string& buffer)
     return true;
 }
 
-bool io::write_file(std::string_view path, const std::vector<std::byte>& buffer)
+bool write_file(std::string_view path, const std::vector<std::byte>& buffer)
 {
     auto file = PHYSFS_openWrite(std::string(path).c_str());
 
@@ -53,7 +53,7 @@ bool io::write_file(std::string_view path, const std::vector<std::byte>& buffer)
     return true;
 }
 
-bool io::write_file(std::string_view path, const std::string& buffer)
+bool write_file(std::string_view path, const std::string& buffer)
 {
     auto file = PHYSFS_openWrite(std::string(path).c_str());
 
@@ -68,7 +68,7 @@ bool io::write_file(std::string_view path, const std::string& buffer)
     return true;
 }
 
-std::string_view io::physfs_error(void)
+std::string_view physfs_error(void)
 {
     auto error_code = PHYSFS_getLastErrorCode();
     auto error_string = PHYSFS_getErrorByCode(error_code);

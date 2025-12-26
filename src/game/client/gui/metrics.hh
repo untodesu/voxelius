@@ -1,7 +1,7 @@
 #pragma once
 
-namespace gui::metrics
+namespace metrics
 {
 void init(void);
 void layout(void);
-} // namespace gui::metrics
+} // namespace metrics

@@ -31,7 +31,7 @@ static void on_termination_signal(int)
 
 int main(int argc, char** argv)
 {
-    io::cmdline::create(argc, argv);
+    cmdline::create(argc, argv);
 
     shared_game::init(argc, argv, "voxelius-server.log");
 

@@ -22,17 +22,17 @@
 struct DimensionMetadata final {
     std::string config_path;
     std::string zvox_dir;
-    io::ConfigMap config;
+    ConfigMap config;
 };
 
 static config::String universe_name("save");
 
-static io::ConfigMap universe_config;
+static ConfigMap universe_config;
 static config::Unsigned64 universe_config_seed;
 static config::String universe_spawn_dimension("world");
 
 static std::string universe_config_path;
-static std::unordered_map<world::Dimension*, DimensionMetadata*> metadata_map;
+static std::unordered_map<Dimension*, DimensionMetadata*> metadata_map;
 
 static std::string make_chunk_filename(const DimensionMetadata* metadata, const chunk_pos& cpos)
 {
@@ -42,7 +42,7 @@ static std::string make_chunk_filename(const DimensionMetadata* metadata, const 
     return std::format("{}/{:08X}-{:08X}-{:08X}.zvox", metadata->zvox_dir, unsigned_x, unsigned_y, unsigned_z);
 }
 
-static void add_new_dimension(world::Dimension* dimension)
+static void add_new_dimension(Dimension* dimension)
 {
     if(globals::dimensions.count(std::string(dimension->get_name()))) {
         spdlog::critical("universe: dimension named {} already exists", dimension->get_name());
@@ -52,7 +52,7 @@ static void add_new_dimension(world::Dimension* dimension)
     auto dimension_dir = std::format("{}/{}", universe_name.get(), dimension->get_name());
 
     if(!PHYSFS_mkdir(dimension_dir.c_str())) {
-        spdlog::critical("universe: {}: {}", dimension_dir, io::physfs_error());
+        spdlog::critical("universe: {}: {}", dimension_dir, physfs_error());
         std::terminate();
     }
 
@@ -61,7 +61,7 @@ static void add_new_dimension(world::Dimension* dimension)
     metadata->zvox_dir = std::format("{}/chunk", dimension_dir);
 
     if(!PHYSFS_mkdir(metadata->zvox_dir.c_str())) {
-        spdlog::critical("universe: {}: {}", metadata->zvox_dir, io::physfs_error());
+        spdlog::critical("universe: {}: {}", metadata->zvox_dir, physfs_error());
         std::terminate();
     }
 
@@ -76,12 +76,11 @@ static void add_new_dimension(world::Dimension* dimension)
     dimension->init_late(universe_config_seed.get_value());
 }
 
-static void internal_save_chunk(const DimensionMetadata* metadata, const world::Dimension* dimension, const chunk_pos& cpos,
-    const world::Chunk* chunk)
+static void internal_save_chunk(const DimensionMetadata* metadata, const Dimension* dimension, const chunk_pos& cpos, const Chunk* chunk)
 {
     auto path = make_chunk_filename(metadata, cpos);
 
-    io::WriteBuffer buffer;
+    WriteBuffer buffer;
     chunk->get_voxels().serialize(buffer);
 
     if(auto file = buffer.to_file(path.c_str())) {
@@ -90,7 +89,7 @@ static void internal_save_chunk(const DimensionMetadata* metadata, const world::
     }
 }
 
-void world::universe::init(void)
+void universe::init(void)
 {
     // If the world is newly created, the seed will
     // be chosed based on the current system's view on UNIX time
@@ -105,12 +104,12 @@ void world::universe::init(void)
     universe_config.add_value("spawn_dimension", universe_spawn_dimension);
 }
 
-void world::universe::init_late(void)
+void universe::init_late(void)
 {
     const auto universe_dir = std::string(universe_name.get());
 
     if(!PHYSFS_mkdir(universe_dir.c_str())) {
-        spdlog::critical("universe: {}: {}", universe_dir, io::physfs_error());
+        spdlog::critical("universe: {}: {}", universe_dir, physfs_error());
         std::terminate();
     }
 
@@ -135,7 +134,7 @@ void world::universe::init_late(void)
     globals::spawn_dimension = spawn_dimension->second;
 }
 
-void world::universe::shutdown(void)
+void universe::shutdown(void)
 {
     for(const auto metadata : metadata_map) {
         metadata.second->config.save_file(metadata.second->config_path.c_str());
@@ -145,7 +144,7 @@ void world::universe::shutdown(void)
     metadata_map.clear();
 
     for(const auto dimension : globals::dimensions) {
-        world::universe::save_all_chunks(dimension.second);
+        universe::save_all_chunks(dimension.second);
         delete dimension.second;
     }
 
@@ -155,7 +154,7 @@ void world::universe::shutdown(void)
     universe_config.save_file(universe_config_path.c_str());
 }
 
-world::Chunk* world::universe::load_chunk(Dimension* dimension, const chunk_pos& cpos)
+Chunk* universe::load_chunk(Dimension* dimension, const chunk_pos& cpos)
 {
     if(auto chunk = dimension->find_chunk(cpos)) {
         // Just return the existing chunk which is
@@ -173,7 +172,7 @@ world::Chunk* world::universe::load_chunk(Dimension* dimension, const chunk_pos&
 
     if(auto file = PHYSFS_openRead(make_chunk_filename(metadata->second, cpos).c_str())) {
         VoxelStorage voxels;
-        io::ReadBuffer buffer(file);
+        ReadBuffer buffer(file);
         voxels.deserialize(buffer);
 
         PHYSFS_close(file);
@@ -190,7 +189,7 @@ world::Chunk* world::universe::load_chunk(Dimension* dimension, const chunk_pos&
     return nullptr;
 }
 
-void world::universe::save_chunk(Dimension* dimension, const chunk_pos& cpos)
+void universe::save_chunk(Dimension* dimension, const chunk_pos& cpos)
 {
     auto metadata = metadata_map.find(dimension);
 
@@ -205,7 +204,7 @@ void world::universe::save_chunk(Dimension* dimension, const chunk_pos& cpos)
     }
 }
 
-void world::universe::save_all_chunks(Dimension* dimension)
+void universe::save_all_chunks(Dimension* dimension)
 {
     auto group = dimension->chunks.group(entt::get<ChunkComponent, Inhabited>);
     auto metadata = metadata_map.find(dimension);

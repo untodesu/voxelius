@@ -2,14 +2,9 @@
 
 #include "shared/types.hh"
 
-namespace world
-{
 class Dimension;
 class Voxel;
-} // namespace world
 
-namespace world
-{
 class RayDDA final {
 public:
     RayDDA(void) = default;
@@ -35,4 +30,3 @@ public:
     voxel_pos vnormal;
     voxel_pos vpos;
 };
-} // namespace world

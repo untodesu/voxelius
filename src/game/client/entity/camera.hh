@@ -8,24 +8,24 @@ class Float;
 class Unsigned;
 } // namespace config
 
-namespace entity::camera
+namespace camera
 {
 extern config::Float roll_angle;
 extern config::Float vertical_fov;
 extern config::Unsigned view_distance;
-} // namespace entity::camera
+} // namespace camera
 
-namespace entity::camera
+namespace camera
 {
 extern glm::fvec3 angles;
 extern glm::fvec3 direction;
 extern glm::fmat4x4 matrix;
 extern chunk_pos position_chunk;
 extern glm::fvec3 position_local;
-} // namespace entity::camera
+} // namespace camera
 
-namespace entity::camera
+namespace camera
 {
 void init(void);
 void update(void);
-} // namespace entity::camera
+} // namespace camera

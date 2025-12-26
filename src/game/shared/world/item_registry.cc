@@ -7,19 +7,19 @@
 #include "shared/world/voxel_registry.hh"
 
 static std::uint64_t registry_checksum = 0U;
-std::unordered_map<std::string, item_id> world::item_registry::names = {};
-std::vector<std::unique_ptr<world::Item>> world::item_registry::items = {};
+std::unordered_map<std::string, item_id> item_registry::names = {};
+std::vector<std::unique_ptr<Item>> item_registry::items = {};
 
 static void recalculate_checksum(void)
 {
     registry_checksum = 0U;
 
-    for(const auto& item : world::item_registry::items) {
+    for(const auto& item : item_registry::items) {
         registry_checksum = item->get_checksum(registry_checksum);
     }
 }
 
-world::Item* world::item_registry::register_item(const ItemBuilder& builder)
+Item* item_registry::register_item(const ItemBuilder& builder)
 {
     assert(builder.get_name().size());
     assert(nullptr == find(builder.get_name()));
@@ -35,7 +35,7 @@ world::Item* world::item_registry::register_item(const ItemBuilder& builder)
     return items.back().get();
 }
 
-world::Item* world::item_registry::find(std::string_view name)
+Item* item_registry::find(std::string_view name)
 {
     const auto it = names.find(std::string(name));
 
@@ -46,7 +46,7 @@ world::Item* world::item_registry::find(std::string_view name)
     return items[it->second - 1].get();
 }
 
-world::Item* world::item_registry::find(const item_id item)
+Item* item_registry::find(const item_id item)
 {
     if(item == NULL_ITEM_ID || item > items.size()) {
         return nullptr;
@@ -55,14 +55,14 @@ world::Item* world::item_registry::find(const item_id item)
     return items[item - 1].get();
 }
 
-void world::item_registry::purge(void)
+void item_registry::purge(void)
 {
     registry_checksum = 0U;
     items.clear();
     names.clear();
 }
 
-std::uint64_t world::item_registry::get_checksum(void)
+std::uint64_t item_registry::get_checksum(void)
 {
     return registry_checksum;
 }

@@ -18,22 +18,22 @@
 
 static bool aggressive_caching;
 
-static emhash8::HashMap<world::Dimension*, emhash8::HashMap<chunk_pos, std::unordered_set<Session*>>> active_tasks;
+static emhash8::HashMap<Dimension*, emhash8::HashMap<chunk_pos, std::unordered_set<Session*>>> active_tasks;
 
 class WorldgenTask final : public Task {
 public:
-    explicit WorldgenTask(world::Dimension* dimension, const chunk_pos& cpos);
+    explicit WorldgenTask(Dimension* dimension, const chunk_pos& cpos);
     virtual ~WorldgenTask(void) = default;
     virtual void process(void) override;
     virtual void finalize(void) override;
 
 private:
-    world::Dimension* m_dimension;
-    world::VoxelStorage m_voxels;
+    Dimension* m_dimension;
+    VoxelStorage m_voxels;
     chunk_pos m_cpos;
 };
 
-WorldgenTask::WorldgenTask(world::Dimension* dimension, const chunk_pos& cpos)
+WorldgenTask::WorldgenTask(Dimension* dimension, const chunk_pos& cpos)
 {
     m_dimension = dimension;
     m_voxels.fill(rand()); // trolling
@@ -75,7 +75,7 @@ void WorldgenTask::finalize(void)
         // it so that it is saved regardles of whether it was
         // modified by players or not. This isn't particularly
         // good for server-side disk usage but it might improve performance
-        m_dimension->chunks.emplace<world::Inhabited>(chunk->get_entity());
+        m_dimension->chunks.emplace<Inhabited>(chunk->get_entity());
     }
 
     protocol::ChunkVoxels response;
@@ -102,12 +102,12 @@ void WorldgenTask::finalize(void)
     }
 }
 
-void world::worldgen::init(void)
+void worldgen::init(void)
 {
-    aggressive_caching = io::cmdline::contains("aggressive-caching");
+    aggressive_caching = cmdline::contains("aggressive-caching");
 }
 
-bool world::worldgen::is_generating(Dimension* dimension, const chunk_pos& cpos)
+bool worldgen::is_generating(Dimension* dimension, const chunk_pos& cpos)
 {
     auto dim_tasks = active_tasks.find(dimension);
 
@@ -126,7 +126,7 @@ bool world::worldgen::is_generating(Dimension* dimension, const chunk_pos& cpos)
     return true;
 }
 
-void world::worldgen::request_chunk(Session* session, const chunk_pos& cpos)
+void worldgen::request_chunk(Session* session, const chunk_pos& cpos)
 {
     if(session->dimension) {
         auto dim_tasks = active_tasks.find(session->dimension);

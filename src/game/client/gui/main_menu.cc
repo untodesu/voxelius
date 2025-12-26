@@ -9,6 +9,8 @@
 #include "core/version.hh"
 
 #include "client/gui/gui_screen.hh"
+#include "client/gui/imutils_button.hh"
+#include "client/gui/imutils_popup.hh"
 #include "client/gui/language.hh"
 #include "client/gui/window_title.hh"
 
@@ -19,18 +21,17 @@
 #include "client/globals.hh"
 #include "client/session.hh"
 
-constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration;
+static std::string str_button_play;
+static std::string str_button_resume;
+static std::string str_button_settings;
+static std::string str_button_disconnect;
+static std::string str_button_quit;
 
-static std::string str_play;
-static std::string str_resume;
-static std::string str_settings;
-static std::string str_leave;
-static std::string str_quit;
+static std::string str_quit_popup_title;
+static std::string str_quit_popup_question;
+static std::string str_quit_popup_choices[2];
 
-static resource_ptr<TextureGUI> title;
-static float title_aspect;
-
-static void on_glfw_key(const io::GlfwKeyEvent& event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if(session::is_ingame() && (event.key == GLFW_KEY_ESCAPE) && (event.action == GLFW_PRESS)) {
         if(globals::gui_screen == GUI_SCREEN_NONE) {
@@ -45,127 +46,106 @@ static void on_glfw_key(const io::GlfwKeyEvent& event)
     }
 }
 
-static void on_language_set(const gui::LanguageSetEvent& event)
+static void on_language_set(const LanguageSetEvent& event)
 {
-    str_play = gui::language::resolve_gui("main_menu.play");
-    str_resume = gui::language::resolve_gui("main_menu.resume");
-    str_settings = gui::language::resolve("main_menu.settings");
-    str_leave = gui::language::resolve("main_menu.leave");
-    str_quit = gui::language::resolve("main_menu.quit");
+    str_button_play = language::resolve_gui("main_menu.button.play");
+    str_button_resume = language::resolve_gui("main_menu.button.resume");
+    str_button_settings = language::resolve("main_menu.button.settings");
+    str_button_disconnect = language::resolve("main_menu.button.disconnect");
+    str_button_quit = language::resolve("main_menu.button.quit");
+
+    str_quit_popup_title = language::resolve_gui("main_menu.quit_popup.title");
+    str_quit_popup_question = language::resolve("main_menu.quit_popup.question");
+    str_quit_popup_choices[0] = language::resolve_gui("main_menu.quit_popup.choice.yes");
+    str_quit_popup_choices[1] = language::resolve_gui("main_menu.quit_popup.choice.no");
 }
 
-void gui::main_menu::init(void)
+void main_menu::init(void)
 {
-    title = resource::load<TextureGUI>("textures/gui/menu_title.png", TEXTURE_GUI_LOAD_CLAMP_S | TEXTURE_GUI_LOAD_CLAMP_T);
-
-    if(title == nullptr) {
-        spdlog::critical("main_menu: texture load failed");
-        std::terminate();
-    }
-
-    if(title->size.x > title->size.y) {
-        title_aspect = static_cast<float>(title->size.x) / static_cast<float>(title->size.y);
-    }
-    else {
-        title_aspect = static_cast<float>(title->size.y) / static_cast<float>(title->size.x);
-    }
-
-    globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
     globals::dispatcher.sink<LanguageSetEvent>().connect<&on_language_set>();
 }
 
-void gui::main_menu::shutdown(void)
+void main_menu::shutdown(void)
 {
-    title = nullptr;
+    // empty
 }
 
-void gui::main_menu::layout(void)
+void main_menu::layout(void)
 {
     const auto viewport = ImGui::GetMainViewport();
-    const auto window_start = ImVec2(0.0f, viewport->Size.y * 0.15f);
-    const auto window_size = ImVec2(viewport->Size.x, viewport->Size.y);
+    const auto& viewport_size = viewport->Size;
 
-    ImGui::SetNextWindowPos(window_start);
-    ImGui::SetNextWindowSize(window_size);
+    ImVec2 margin(globals::gui_scale * 8.0f, globals::gui_scale * 8.0f);
+    ImVec2 control(globals::gui_scale * 256.0f, globals::gui_scale * 32.0f);
 
-    if(ImGui::Begin("###main_menu", nullptr, WINDOW_FLAGS)) {
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 2.0f * globals::gui_scale));
+    ImGui::SetNextWindowPos({});
+    ImGui::SetNextWindowSize(viewport_size);
 
-        if(session::is_ingame()) {
-            ImGui::Dummy(ImVec2(0.0f, 32.0f * globals::gui_scale));
-        }
-        else {
-            auto reference_height = 0.225f * window_size.y;
-            auto image_width = glm::min(window_size.x, reference_height * title_aspect);
-            auto image_height = image_width / title_aspect;
-            ImGui::SetCursorPosX(0.5f * (window_size.x - image_width));
-            ImGui::Image(title->handle, ImVec2(image_width, image_height));
-        }
+    ImGuiWindowFlags flags = 0U;
+    flags |= ImGuiWindowFlags_NoBackground;
+    flags |= ImGuiWindowFlags_NoDecoration;
 
-        ImGui::Dummy(ImVec2(0.0f, 24.0f * globals::gui_scale));
+    if(!ImGui::Begin("###gui::main_menu", nullptr, flags)) {
+        ImGui::End();
+        return;
+    }
 
-        const float button_width = 240.0f * globals::gui_scale;
-        const float button_xpos = 0.5f * (window_size.x - button_width);
+    ImGui::PushFont(globals::font_unscii16, 16.0f);
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.000f, 0.000f, 0.000f, 0.000f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.500f, 0.500f, 0.500f, 0.125f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.500f, 0.500f, 0.500f, 0.500f));
+    ImGui::PushStyleVarX(ImGuiStyleVar_FramePadding, 16.0f * globals::gui_scale);
+    ImGui::PushStyleVarX(ImGuiStyleVar_ButtonTextAlign, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 
-        if(session::is_ingame()) {
-            ImGui::SetCursorPosX(button_xpos);
+    ImVec2 cursor_pos(margin.x, viewport_size.y - margin.y);
 
-            if(ImGui::Button(str_resume.c_str(), ImVec2(button_width, 0.0f))) {
-                globals::gui_screen = GUI_SCREEN_NONE;
-            }
+    cursor_pos.y -= control.y * 1.5f;
+    ImGui::SetCursorPos(cursor_pos);
 
-            ImGui::Spacing();
-        }
-        else {
-            ImGui::SetCursorPosX(button_xpos);
+    if(session::is_ingame()) {
+        imutils::button(str_button_disconnect.c_str(), control, [] {
+            session::disconnect("protocol.client_disconnect");
+        });
+    }
+    else {
+        imutils::button(str_button_quit.c_str(), control, [] {
+            ImGui::OpenPopup(str_quit_popup_title.c_str());
+        });
+    }
 
-            if(ImGui::Button(str_play.c_str(), ImVec2(button_width, 0.0f))) {
-                globals::gui_screen = GUI_PLAY_MENU;
-            }
+    cursor_pos.y -= control.y;
+    ImGui::SetCursorPos(cursor_pos);
 
-            ImGui::Spacing();
-        }
+    imutils::button(str_button_settings.c_str(), control, [] {
+        globals::gui_screen = GUI_SETTINGS;
+    });
 
-        ImGui::SetCursorPosX(button_xpos);
+    cursor_pos.y -= control.y * 1.5f;
+    ImGui::SetCursorPos(cursor_pos);
 
-        if(ImGui::Button(str_settings.c_str(), ImVec2(button_width, 0.0f))) {
-            globals::gui_screen = GUI_SETTINGS;
-        }
+    if(session::is_ingame()) {
+        imutils::button(str_button_resume.c_str(), control, [] {
+            globals::gui_screen = GUI_SCREEN_NONE;
+        });
+    }
+    else {
+        imutils::button(str_button_play.c_str(), control, [] {
+            globals::gui_screen = GUI_PLAY_MENU;
+        });
+    }
 
-        ImGui::Spacing();
+    ImGui::PopStyleVar(3);
+    ImGui::PopStyleColor(3);
+    ImGui::PopFont();
 
-        if(session::is_ingame()) {
-            ImGui::SetCursorPosX(button_xpos);
-
-            if(ImGui::Button(str_leave.c_str(), ImVec2(button_width, 0.0f))) {
-                session::disconnect("protocol.client_disconnect");
-                globals::gui_screen = GUI_PLAY_MENU;
-                gui::window_title::update();
-            }
-
-            ImGui::Spacing();
-        }
-        else {
-            ImGui::SetCursorPosX(button_xpos);
-
-            if(ImGui::Button(str_quit.c_str(), ImVec2(button_width, 0.0f))) {
-                glfwSetWindowShouldClose(globals::window, true);
-            }
-
-            ImGui::Spacing();
-        }
-
-        if(!session::is_ingame()) {
-            const auto& padding = ImGui::GetStyle().FramePadding;
-            const auto& spacing = ImGui::GetStyle().ItemSpacing;
-
-            ImGui::PushFont(globals::font_unscii8, 4.0f);
-            ImGui::SetCursorScreenPos(ImVec2(padding.x + spacing.x, window_size.y - ImGui::GetFontSize() - padding.y - spacing.y));
-            ImGui::Text("Voxelius %*s", version::full.size(), version::full.data()); // string_view is not always null-terminated
-            ImGui::PopFont();
-        }
-
-        ImGui::PopStyleVar();
+    if(0 == imutils::popup(str_quit_popup_title, str_quit_popup_question, str_quit_popup_choices, 2)) {
+        // We don't really have a good way to
+        // pass "i want to quit" boolean to the main loop,
+        // so instead we just raise an external interrupt signal
+        // which handler latches an internal flag in the main loop
+        std::raise(SIGINT);
     }
 
     ImGui::End();

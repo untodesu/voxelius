@@ -19,13 +19,13 @@
 
 #include "client/globals.hh"
 
-constexpr static float ITEM_SIZE = 20.0f;
-constexpr static float ITEM_PADDING = 2.0f;
-constexpr static float SELECTOR_PADDING = 1.0f;
-constexpr static float HOTBAR_PADDING = 2.0f;
+constexpr static float ITEM_SIZE = 40.0f;
+constexpr static float ITEM_PADDING = 4.0f;
+constexpr static float SELECTOR_PADDING = 2.0f;
+constexpr static float HOTBAR_PADDING = 4.0f;
 
-unsigned int gui::hotbar::active_slot = 0U;
-std::array<const world::Item*, HOTBAR_SIZE> gui::hotbar::slots = {};
+unsigned int hotbar::active_slot = 0U;
+std::array<const Item*, HOTBAR_SIZE> hotbar::slots = {};
 
 static config::KeyBind hotbar_keys[HOTBAR_SIZE];
 
@@ -40,22 +40,22 @@ static ImU32 get_color_alpha(ImGuiCol style_color, float alpha)
 
 static void update_hotbar_item(void)
 {
-    auto current_item = gui::hotbar::slots[gui::hotbar::active_slot];
+    auto current_item = hotbar::slots[hotbar::active_slot];
 
     if(current_item == nullptr) {
-        gui::status_lines::unset(gui::STATUS_HOTBAR);
+        status_lines::unset(STATUS_HOTBAR);
     }
     else {
-        gui::status_lines::set(gui::STATUS_HOTBAR, current_item->get_name(), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), 5.0f);
+        status_lines::set(STATUS_HOTBAR, current_item->get_name(), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), 5.0f);
     }
 }
 
-static void on_glfw_key(const io::GlfwKeyEvent& event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if((event.action == GLFW_PRESS) && !globals::gui_screen) {
         for(unsigned int i = 0U; i < HOTBAR_SIZE; ++i) {
             if(hotbar_keys[i].equals(event.key)) {
-                gui::hotbar::active_slot = i;
+                hotbar::active_slot = i;
                 update_hotbar_item();
                 break;
             }
@@ -63,22 +63,22 @@ static void on_glfw_key(const io::GlfwKeyEvent& event)
     }
 }
 
-static void on_glfw_scroll(const io::GlfwScrollEvent& event)
+static void on_glfw_scroll(const GlfwScrollEvent& event)
 {
     if(!globals::gui_screen) {
         if(event.dy < 0.0) {
-            gui::hotbar::next_slot();
+            hotbar::next_slot();
             return;
         }
 
         if(event.dy > 0.0) {
-            gui::hotbar::prev_slot();
+            hotbar::prev_slot();
             return;
         }
     }
 }
 
-void gui::hotbar::init(void)
+void hotbar::init(void)
 {
     hotbar_keys[0].set_key(GLFW_KEY_1);
     hotbar_keys[1].set_key(GLFW_KEY_2);
@@ -113,17 +113,17 @@ void gui::hotbar::init(void)
     hotbar_background = resource::load<TextureGUI>("textures/gui/hud_hotbar.png", TEXTURE_GUI_LOAD_CLAMP_S | TEXTURE_GUI_LOAD_CLAMP_T);
     hotbar_selector = resource::load<TextureGUI>("textures/gui/hud_selector.png", TEXTURE_GUI_LOAD_CLAMP_S | TEXTURE_GUI_LOAD_CLAMP_T);
 
-    globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
-    globals::dispatcher.sink<io::GlfwScrollEvent>().connect<&on_glfw_scroll>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<GlfwScrollEvent>().connect<&on_glfw_scroll>();
 }
 
-void gui::hotbar::shutdown(void)
+void hotbar::shutdown(void)
 {
     hotbar_background = nullptr;
     hotbar_selector = nullptr;
 }
 
-void gui::hotbar::layout(void)
+void hotbar::layout(void)
 {
     auto& style = ImGui::GetStyle();
 
@@ -142,7 +142,7 @@ void gui::hotbar::layout(void)
     // Draw the hotbar selector image
     auto selector_padding_a = SELECTOR_PADDING * globals::gui_scale;
     auto selector_padding_b = SELECTOR_PADDING * globals::gui_scale * 2.0f;
-    auto selector_start = ImVec2(background_start.x + gui::hotbar::active_slot * item_size - selector_padding_a,
+    auto selector_start = ImVec2(background_start.x + hotbar::active_slot * item_size - selector_padding_a,
         background_start.y - selector_padding_a);
     auto selector_end = ImVec2(selector_start.x + item_size + selector_padding_b, selector_start.y + item_size + selector_padding_b);
     draw_list->AddImage(hotbar_selector->handle, selector_start, selector_end);
@@ -153,7 +153,7 @@ void gui::hotbar::layout(void)
 
     // Draw individual item textures in the hotbar
     for(std::size_t i = 0; i < HOTBAR_SIZE; ++i) {
-        auto item = gui::hotbar::slots[i];
+        auto item = hotbar::slots[i];
 
         if((item == nullptr) || (item->get_cached_texture() == nullptr)) {
             // There's either no item in the slot
@@ -167,16 +167,16 @@ void gui::hotbar::layout(void)
     }
 }
 
-void gui::hotbar::next_slot(void)
+void hotbar::next_slot(void)
 {
-    gui::hotbar::active_slot += 1U;
-    gui::hotbar::active_slot %= HOTBAR_SIZE;
+    hotbar::active_slot += 1U;
+    hotbar::active_slot %= HOTBAR_SIZE;
     update_hotbar_item();
 }
 
-void gui::hotbar::prev_slot(void)
+void hotbar::prev_slot(void)
 {
-    gui::hotbar::active_slot += HOTBAR_SIZE - 1U;
-    gui::hotbar::active_slot %= HOTBAR_SIZE;
+    hotbar::active_slot += HOTBAR_SIZE - 1U;
+    hotbar::active_slot %= HOTBAR_SIZE;
     update_hotbar_item();
 }

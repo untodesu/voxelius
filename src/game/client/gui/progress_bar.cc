@@ -12,16 +12,16 @@ constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground |
 
 static std::string str_title;
 static std::string str_button;
-static gui::progress_bar_action button_action;
+static progress_bar_action button_action;
 
-void gui::progress_bar::init(void)
+void progress_bar::init(void)
 {
     str_title = "Loading";
     str_button = std::string();
     button_action = nullptr;
 }
 
-void gui::progress_bar::layout(void)
+void progress_bar::layout(void)
 {
     const auto viewport = ImGui::GetMainViewport();
     const auto window_start = ImVec2(0.0f, viewport->Size.y * 0.30f);
@@ -92,20 +92,20 @@ void gui::progress_bar::layout(void)
     ImGui::End();
 }
 
-void gui::progress_bar::reset(void)
+void progress_bar::reset(void)
 {
     str_title.clear();
     str_button.clear();
     button_action = nullptr;
 }
 
-void gui::progress_bar::set_title(std::string_view title)
+void progress_bar::set_title(std::string_view title)
 {
-    str_title = gui::language::resolve(title);
+    str_title = language::resolve(title);
 }
 
-void gui::progress_bar::set_button(std::string_view text, const progress_bar_action& action)
+void progress_bar::set_button(std::string_view text, const progress_bar_action& action)
 {
-    str_button = std::format("{}###ProgressBar_Button", gui::language::resolve(text));
+    str_button = std::format("{}###ProgressBar_Button", language::resolve(text));
     button_action = action;
 }

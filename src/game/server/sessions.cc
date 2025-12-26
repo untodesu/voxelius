@@ -34,11 +34,11 @@
 
 class DimensionListener final {
 public:
-    explicit DimensionListener(world::Dimension* dimension);
+    explicit DimensionListener(Dimension* dimension);
     void on_destroy_entity(const entt::registry& registry, entt::entity entity);
 
 private:
-    world::Dimension* dimension;
+    Dimension* dimension;
 };
 
 config::Unsigned sessions::max_players(8U, 1U, 128U);
@@ -85,14 +85,14 @@ static void on_login_request_packet(const protocol::LoginRequest& packet)
 
     // FIXME: calculate voxel registry checksum ahead of time
     // instead of figuring it out every time a new player connects
-    if(packet.voxel_registry_checksum != world::voxel_registry::get_checksum()) {
+    if(packet.voxel_registry_checksum != voxel_registry::get_checksum()) {
         protocol::Disconnect response;
         response.reason = "protocol.voxel_registry_checksum";
         protocol::send(packet.peer, protocol::encode(response));
         return;
     }
 
-    if(packet.item_registry_checksum != world::item_registry::get_checksum()) {
+    if(packet.item_registry_checksum != item_registry::get_checksum()) {
         protocol::Disconnect response;
         response.reason = "protocol.item_registry_checksum";
         protocol::send(packet.peer, protocol::encode(response));
@@ -151,14 +151,14 @@ static void on_login_request_packet(const protocol::LoginRequest& packet)
         // anything here and just straight up spawing the player and await them
         // to receive all the chunks and entites they feel like requesting
         for(auto entity : globals::spawn_dimension->entities.view<entt::entity>()) {
-            if(const auto head = globals::spawn_dimension->entities.try_get<entity::Head>(entity)) {
+            if(const auto head = globals::spawn_dimension->entities.try_get<Head>(entity)) {
                 protocol::EntityHead head_packet;
                 head_packet.entity = entity;
                 head_packet.angles = head->angles;
                 protocol::send(session->peer, protocol::encode(head_packet));
             }
 
-            if(const auto transform = globals::spawn_dimension->entities.try_get<entity::Transform>(entity)) {
+            if(const auto transform = globals::spawn_dimension->entities.try_get<Transform>(entity)) {
                 protocol::EntityTransform transform_packet;
                 transform_packet.entity = entity;
                 transform_packet.angles = transform->angles;
@@ -167,14 +167,14 @@ static void on_login_request_packet(const protocol::LoginRequest& packet)
                 protocol::send(session->peer, protocol::encode(transform_packet));
             }
 
-            if(const auto velocity = globals::spawn_dimension->entities.try_get<entity::Velocity>(entity)) {
+            if(const auto velocity = globals::spawn_dimension->entities.try_get<Velocity>(entity)) {
                 protocol::EntityVelocity velocity_packet;
                 velocity_packet.entity = entity;
                 velocity_packet.value = velocity->value;
                 protocol::send(session->peer, protocol::encode(velocity_packet));
             }
 
-            if(globals::spawn_dimension->entities.all_of<entity::Player>(entity)) {
+            if(globals::spawn_dimension->entities.all_of<Player>(entity)) {
                 protocol::EntityPlayer player_packet;
                 player_packet.entity = entity;
                 protocol::send(session->peer, protocol::encode(player_packet));
@@ -183,11 +183,11 @@ static void on_login_request_packet(const protocol::LoginRequest& packet)
 
         session->dimension = globals::spawn_dimension;
         session->player_entity = globals::spawn_dimension->entities.create();
-        entity::shared::create_player(globals::spawn_dimension, session->player_entity);
+        shared::create_player(globals::spawn_dimension, session->player_entity);
 
-        const auto& head = globals::spawn_dimension->entities.get<entity::Head>(session->player_entity);
-        const auto& transform = globals::spawn_dimension->entities.get<entity::Transform>(session->player_entity);
-        const auto& velocity = globals::spawn_dimension->entities.get<entity::Velocity>(session->player_entity);
+        const auto& head = globals::spawn_dimension->entities.get<Head>(session->player_entity);
+        const auto& transform = globals::spawn_dimension->entities.get<Transform>(session->player_entity);
+        const auto& velocity = globals::spawn_dimension->entities.get<Velocity>(session->player_entity);
 
         protocol::EntityHead head_packet;
         head_packet.entity = session->player_entity;
@@ -257,7 +257,7 @@ static void on_disconnect_packet(const protocol::Disconnect& packet)
 // NOTE: [sessions] is a good place for this since [receive]
 // handles entity data sent by players and [sessions] handles
 // everything else network related that is not player movement
-static void on_voxel_set(const world::VoxelSetEvent& event)
+static void on_voxel_set(const VoxelSetEvent& event)
 {
     protocol::SetVoxel packet;
     packet.vpos = coord::to_voxel(event.cpos, event.lpos);
@@ -266,7 +266,7 @@ static void on_voxel_set(const world::VoxelSetEvent& event)
     protocol::broadcast(globals::server_host, protocol::encode(packet));
 }
 
-DimensionListener::DimensionListener(world::Dimension* dimension)
+DimensionListener::DimensionListener(Dimension* dimension)
 {
     this->dimension = dimension;
 }
@@ -286,7 +286,7 @@ void sessions::init(void)
     globals::dispatcher.sink<protocol::LoginRequest>().connect<&on_login_request_packet>();
     globals::dispatcher.sink<protocol::Disconnect>().connect<&on_disconnect_packet>();
 
-    globals::dispatcher.sink<world::VoxelSetEvent>().connect<&on_voxel_set>();
+    globals::dispatcher.sink<VoxelSetEvent>().connect<&on_voxel_set>();
 }
 
 void sessions::init_late(void)
@@ -420,7 +420,7 @@ void sessions::destroy(Session* session)
     }
 }
 
-void sessions::broadcast(const world::Dimension* dimension, ENetPacket* packet)
+void sessions::broadcast(const Dimension* dimension, ENetPacket* packet)
 {
     for(const auto& session : sessions_vector) {
         if(session.peer && (session.dimension == dimension)) {
@@ -429,7 +429,7 @@ void sessions::broadcast(const world::Dimension* dimension, ENetPacket* packet)
     }
 }
 
-void sessions::broadcast(const world::Dimension* dimension, ENetPacket* packet, ENetPeer* except)
+void sessions::broadcast(const Dimension* dimension, ENetPacket* packet, ENetPeer* except)
 {
     for(const auto& session : sessions_vector) {
         if(session.peer && (session.peer != except)) {

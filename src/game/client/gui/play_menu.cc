@@ -146,7 +146,7 @@ static void edit_selected_server(void)
 
 static void remove_selected_server(void)
 {
-    gui::bother::cancel(selected_server->identity);
+    bother::cancel(selected_server->identity);
 
     for(auto it = servers_deque.cbegin(); it != servers_deque.cend(); ++it) {
         if(selected_server == (*it)) {
@@ -165,7 +165,7 @@ static void join_selected_server(void)
     }
 }
 
-static void on_glfw_key(const io::GlfwKeyEvent& event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if((event.key == GLFW_KEY_ESCAPE) && (event.action == GLFW_PRESS)) {
         if(globals::gui_screen == GUI_PLAY_MENU) {
@@ -173,14 +173,13 @@ static void on_glfw_key(const io::GlfwKeyEvent& event)
                 if(adding_server) {
                     remove_selected_server();
                 }
-                else {
-                    input_itemname.clear();
-                    input_hostname.clear();
-                    input_password.clear();
-                    editing_server = false;
-                    adding_server = false;
-                    return;
-                }
+
+                input_itemname.clear();
+                input_hostname.clear();
+                input_password.clear();
+                editing_server = false;
+                adding_server = false;
+                return;
             }
 
             globals::gui_screen = GUI_MAIN_MENU;
@@ -190,23 +189,23 @@ static void on_glfw_key(const io::GlfwKeyEvent& event)
     }
 }
 
-static void on_language_set(const gui::LanguageSetEvent& event)
+static void on_language_set(const LanguageSetEvent& event)
 {
-    str_tab_servers = gui::language::resolve_gui("play_menu.tab.servers");
+    str_tab_servers = language::resolve_gui("play_menu.tab.servers");
 
-    str_join = gui::language::resolve_gui("play_menu.join");
-    str_connect = gui::language::resolve_gui("play_menu.connect");
-    str_add = gui::language::resolve_gui("play_menu.add");
-    str_edit = gui::language::resolve_gui("play_menu.edit");
-    str_remove = gui::language::resolve_gui("play_menu.remove");
-    str_refresh = gui::language::resolve_gui("play_menu.refresh");
+    str_join = language::resolve_gui("play_menu.join");
+    str_connect = language::resolve_gui("play_menu.connect");
+    str_add = language::resolve_gui("play_menu.add");
+    str_edit = language::resolve_gui("play_menu.edit");
+    str_remove = language::resolve_gui("play_menu.remove");
+    str_refresh = language::resolve_gui("play_menu.refresh");
 
-    str_status_init = gui::language::resolve("play_menu.status.init");
-    str_status_ping = gui::language::resolve("play_menu.status.ping");
-    str_status_fail = gui::language::resolve("play_menu.status.fail");
+    str_status_init = language::resolve("play_menu.status.init");
+    str_status_ping = language::resolve("play_menu.status.ping");
+    str_status_fail = language::resolve("play_menu.status.fail");
 }
 
-static void on_bother_response(const gui::BotherResponseEvent& event)
+static void on_bother_response(const BotherResponseEvent& event)
 {
     for(auto item : servers_deque) {
         if(item->identity == event.identity) {
@@ -284,7 +283,7 @@ static void layout_server_item(ServerStatusItem* item)
             version_color = ImGui::GetColorU32(ImGuiCol_PlotHistogram);
         }
 
-        ImGui::PushFont(globals::font_unscii8, 4.0f);
+        ImGui::PushFont(globals::font_unscii8, 8.0f);
 
         std::string version_toast;
 
@@ -366,7 +365,7 @@ static void layout_server_edit(ServerStatusItem* item)
         input_itemname.clear();
         input_hostname.clear();
 
-        gui::bother::cancel(item->identity);
+        bother::cancel(item->identity);
     }
 
     ImGui::EndDisabled();
@@ -461,14 +460,14 @@ static void layout_servers_buttons(void)
             if(item->status != item_status::PINGING) {
                 if(!editing_server || item != selected_server) {
                     item->status = item_status::UNKNOWN;
-                    gui::bother::cancel(item->identity);
+                    bother::cancel(item->identity);
                 }
             }
         }
     }
 }
 
-void gui::play_menu::init(void)
+void play_menu::init(void)
 {
     if(auto file = PHYSFS_openRead(std::string(SERVERS_TXT).c_str())) {
         auto source = std::string(PHYSFS_fileLength(file), char(0x00));
@@ -513,12 +512,12 @@ void gui::play_menu::init(void)
         }
     }
 
-    globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
     globals::dispatcher.sink<LanguageSetEvent>().connect<&on_language_set>();
     globals::dispatcher.sink<BotherResponseEvent>().connect<&on_bother_response>();
 }
 
-void gui::play_menu::shutdown(void)
+void play_menu::shutdown(void)
 {
     std::ostringstream stream;
 
@@ -537,7 +536,7 @@ void gui::play_menu::shutdown(void)
     servers_deque.clear();
 }
 
-void gui::play_menu::layout(void)
+void play_menu::layout(void)
 {
     const auto viewport = ImGui::GetMainViewport();
     const auto window_start = ImVec2(viewport->Size.x * 0.05f, viewport->Size.y * 0.05f);
@@ -582,11 +581,11 @@ void gui::play_menu::layout(void)
     ImGui::End();
 }
 
-void gui::play_menu::update_late(void)
+void play_menu::update_late(void)
 {
     for(auto item : servers_deque) {
         if(item->status == item_status::UNKNOWN) {
-            gui::bother::ping(item->identity, item->hostname.c_str(), item->port);
+            bother::ping(item->identity, item->hostname.c_str(), item->port);
             item->status = item_status::PINGING;
             continue;
         }

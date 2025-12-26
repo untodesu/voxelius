@@ -11,8 +11,7 @@
 #include "shared/game_voxels.hh"
 
 // FIXME: load these from a file
-static void compute_tree_feature(unsigned int height, world::Feature& feature, const world::Voxel* log_voxel,
-    const world::Voxel* leaves_voxel)
+static void compute_tree_feature(unsigned int height, Feature& feature, const Voxel* log_voxel, const Voxel* leaves_voxel)
 {
     // Ensure the tree height is too small
     height = glm::max<unsigned int>(height, 4U);
@@ -72,7 +71,7 @@ static void compute_tree_feature(unsigned int height, world::Feature& feature, c
     }
 }
 
-world::Overworld::Overworld(std::string_view name) : Dimension(name, -30.0f)
+Overworld::Overworld(std::string_view name) : Dimension(name, -30.0f)
 {
     m_bottommost_chunk.set_limits(-64, -4);
     m_terrain_variation.set_limits(16, 256);
@@ -83,7 +82,7 @@ world::Overworld::Overworld(std::string_view name) : Dimension(name, -30.0f)
     compute_tree_feature(8U, m_feat_tree[3], game_voxels::oak_log, game_voxels::oak_leaves);
 }
 
-void world::Overworld::init(io::ConfigMap& config)
+void Overworld::init(ConfigMap& config)
 {
     m_terrain_variation.set_value(64);
     m_bottommost_chunk.set_value(-4);
@@ -92,7 +91,7 @@ void world::Overworld::init(io::ConfigMap& config)
     config.add_value("overworld.bottommost_chunk", m_bottommost_chunk);
 }
 
-void world::Overworld::init_late(std::uint64_t global_seed)
+void Overworld::init_late(std::uint64_t global_seed)
 {
     std::mt19937_64 twister(global_seed);
 
@@ -130,7 +129,7 @@ void world::Overworld::init_late(std::uint64_t global_seed)
     m_metamap.clear();
 }
 
-bool world::Overworld::generate(const chunk_pos& cpos, VoxelStorage& voxels)
+bool Overworld::generate(const chunk_pos& cpos, VoxelStorage& voxels)
 {
     if(cpos.y <= m_bottommost_chunk.get_value()) {
         // If the player asks the generator
@@ -161,7 +160,7 @@ bool world::Overworld::generate(const chunk_pos& cpos, VoxelStorage& voxels)
     return true;
 }
 
-bool world::Overworld::is_inside_cave(const voxel_pos& vpos)
+bool Overworld::is_inside_cave(const voxel_pos& vpos)
 {
     auto vpos_x = static_cast<float>(vpos.x);
     auto vpos_y = static_cast<float>(vpos.y) * 2.0f;
@@ -172,7 +171,7 @@ bool world::Overworld::is_inside_cave(const voxel_pos& vpos)
     return (noise_a > 0.95f) && (noise_b > 0.85f);
 }
 
-bool world::Overworld::is_inside_terrain(const voxel_pos& vpos)
+bool Overworld::is_inside_terrain(const voxel_pos& vpos)
 {
     auto vpos_x = static_cast<float>(vpos.x);
     auto vpos_y = static_cast<float>(vpos.y);
@@ -184,7 +183,7 @@ bool world::Overworld::is_inside_terrain(const voxel_pos& vpos)
     return noise > 0.0f;
 }
 
-const world::Overworld_Metadata& world::Overworld::get_or_create_metadata(const chunk_pos_xz& cpos)
+const Overworld_Metadata& Overworld::get_or_create_metadata(const chunk_pos_xz& cpos)
 {
     auto it = m_metamap.find(cpos);
 
@@ -249,7 +248,7 @@ const world::Overworld_Metadata& world::Overworld::get_or_create_metadata(const 
     return metadata;
 }
 
-void world::Overworld::generate_terrain(const chunk_pos& cpos, VoxelStorage& voxels)
+void Overworld::generate_terrain(const chunk_pos& cpos, VoxelStorage& voxels)
 {
     auto& metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
     auto variation = m_terrain_variation.get_value();
@@ -275,7 +274,7 @@ void world::Overworld::generate_terrain(const chunk_pos& cpos, VoxelStorage& vox
     }
 }
 
-void world::Overworld::generate_surface(const chunk_pos& cpos, VoxelStorage& voxels)
+void Overworld::generate_surface(const chunk_pos& cpos, VoxelStorage& voxels)
 {
     auto& metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
     auto variation = m_terrain_variation.get_value();
@@ -330,7 +329,7 @@ void world::Overworld::generate_surface(const chunk_pos& cpos, VoxelStorage& vox
     }
 }
 
-void world::Overworld::generate_caves(const chunk_pos& cpos, VoxelStorage& voxels)
+void Overworld::generate_caves(const chunk_pos& cpos, VoxelStorage& voxels)
 {
     auto& metadata = get_or_create_metadata(chunk_pos_xz(cpos.x, cpos.z));
     auto variation = m_terrain_variation.get_value();
@@ -352,7 +351,7 @@ void world::Overworld::generate_caves(const chunk_pos& cpos, VoxelStorage& voxel
     }
 }
 
-void world::Overworld::generate_features(const chunk_pos& cpos, VoxelStorage& voxels)
+void Overworld::generate_features(const chunk_pos& cpos, VoxelStorage& voxels)
 {
     const chunk_pos_xz tree_chunks[] = {
         chunk_pos_xz(cpos.x - 0, cpos.z - 1),

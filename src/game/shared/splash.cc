@@ -39,7 +39,7 @@ static void splash_init_filename(std::string_view filename)
         splash_random.seed(std::random_device()());
     }
     else {
-        splash_lines.push_back(std::format("{}: {}", filename, io::physfs_error()));
+        splash_lines.push_back(std::format("{}: {}", filename, physfs_error()));
         splash_random.seed(std::random_device()());
     }
 }

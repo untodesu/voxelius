@@ -78,7 +78,7 @@ bool GL_Program::setup(std::string_view vpath, std::string_view fpath)
     auto vfile = PHYSFS_openRead(vert_path.c_str());
 
     if(vfile == nullptr) {
-        spdlog::warn("gl_program: {}: {}", vpath, io::physfs_error());
+        spdlog::warn("gl_program: {}: {}", vpath, physfs_error());
         return false;
     }
 
@@ -89,7 +89,7 @@ bool GL_Program::setup(std::string_view vpath, std::string_view fpath)
     auto ffile = PHYSFS_openRead(frag_path.c_str());
 
     if(ffile == nullptr) {
-        spdlog::warn("gl_program: {}: {}", fpath, io::physfs_error());
+        spdlog::warn("gl_program: {}: {}", fpath, physfs_error());
         return false;
     }
 

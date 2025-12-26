@@ -32,24 +32,24 @@ static float texture_alpha;
 static std::uint64_t end_time;
 static std::string current_text;
 
-static void on_glfw_key(const io::GlfwKeyEvent& event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     end_time = UINT64_C(0);
 }
 
-static void on_glfw_mouse_button(const io::GlfwMouseButtonEvent& event)
+static void on_glfw_mouse_button(const GlfwMouseButtonEvent& event)
 {
     end_time = UINT64_C(0);
 }
 
-static void on_glfw_scroll(const io::GlfwScrollEvent& event)
+static void on_glfw_scroll(const GlfwScrollEvent& event)
 {
     end_time = UINT64_C(0);
 }
 
-void gui::client_splash::init(void)
+void client_splash::init(void)
 {
-    if(io::cmdline::contains("nosplash")) {
+    if(cmdline::contains("nosplash")) {
         texture = nullptr;
         texture_aspect = 0.0f;
         texture_alpha = 0.0f;
@@ -74,7 +74,7 @@ void gui::client_splash::init(void)
     }
 }
 
-void gui::client_splash::init_late(void)
+void client_splash::init_late(void)
 {
     if(!texture) {
         // We don't have to waste time
@@ -84,11 +84,11 @@ void gui::client_splash::init_late(void)
 
     end_time = utils::unix_microseconds() + DELAY_MICROSECONDS;
 
-    globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
-    globals::dispatcher.sink<io::GlfwMouseButtonEvent>().connect<&on_glfw_mouse_button>();
-    globals::dispatcher.sink<io::GlfwScrollEvent>().connect<&on_glfw_scroll>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<GlfwMouseButtonEvent>().connect<&on_glfw_mouse_button>();
+    globals::dispatcher.sink<GlfwScrollEvent>().connect<&on_glfw_scroll>();
 
-    current_text = gui::language::resolve("splash.skip_prompt");
+    current_text = language::resolve("splash.skip_prompt");
 
     while(!glfwWindowShouldClose(globals::window)) {
         const std::uint64_t curtime = utils::unix_microseconds();
@@ -100,12 +100,12 @@ void gui::client_splash::init_late(void)
 
         texture_alpha = glm::smoothstep(0.25f, 0.6f, static_cast<float>(remains) / static_cast<float>(DELAY_MICROSECONDS));
 
-        gui::client_splash::render();
+        client_splash::render();
     }
 
-    globals::dispatcher.sink<io::GlfwKeyEvent>().disconnect<&on_glfw_key>();
-    globals::dispatcher.sink<io::GlfwMouseButtonEvent>().disconnect<&on_glfw_mouse_button>();
-    globals::dispatcher.sink<io::GlfwScrollEvent>().disconnect<&on_glfw_scroll>();
+    globals::dispatcher.sink<GlfwKeyEvent>().disconnect<&on_glfw_key>();
+    globals::dispatcher.sink<GlfwMouseButtonEvent>().disconnect<&on_glfw_mouse_button>();
+    globals::dispatcher.sink<GlfwScrollEvent>().disconnect<&on_glfw_scroll>();
 
     texture = nullptr;
     texture_aspect = 0.0f;
@@ -113,7 +113,7 @@ void gui::client_splash::init_late(void)
     end_time = UINT64_C(0);
 }
 
-void gui::client_splash::render(void)
+void client_splash::render(void)
 {
     if(!texture) {
         // We don't have to waste time
@@ -152,7 +152,7 @@ void gui::client_splash::render(void)
         const ImVec2 image_pos = ImVec2(image_x, image_y);
 
         if(!current_text.empty()) {
-            ImGui::PushFont(globals::font_unscii8, 16.0f);
+            ImGui::PushFont(globals::font_unscii8, 8.0f);
             ImGui::SetCursorPos(ImVec2(16.0f, 16.0f));
             ImGui::TextDisabled("%s", current_text.c_str());
             ImGui::PopFont();

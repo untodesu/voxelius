@@ -1,7 +1,5 @@
 #pragma once
 
-namespace io
-{
 struct GlfwCursorPosEvent final {
     glm::fvec2 pos;
 };
@@ -33,4 +31,3 @@ struct GlfwScrollEvent final {
     float dx;
     float dy;
 };
-} // namespace io

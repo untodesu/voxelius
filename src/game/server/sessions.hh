@@ -1,9 +1,6 @@
 #pragma once
 
-namespace world
-{
 class Dimension;
-} // namespace world
 
 namespace config
 {
@@ -15,7 +12,7 @@ struct Session final {
     std::uint64_t client_identity;
     std::string client_username;
     entt::entity player_entity;
-    world::Dimension* dimension;
+    Dimension* dimension;
     ENetPeer* peer;
 };
 
@@ -45,8 +42,8 @@ void destroy(Session* session);
 
 namespace sessions
 {
-void broadcast(const world::Dimension* dimension, ENetPacket* packet);
-void broadcast(const world::Dimension* dimension, ENetPacket* packet, ENetPeer* except);
+void broadcast(const Dimension* dimension, ENetPacket* packet);
+void broadcast(const Dimension* dimension, ENetPacket* packet, ENetPeer* except);
 } // namespace sessions
 
 namespace sessions

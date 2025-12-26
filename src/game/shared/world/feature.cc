@@ -8,7 +8,7 @@
 
 #include "shared/coord.hh"
 
-void world::Feature::place(const voxel_pos& vpos, Dimension* dimension) const
+void Feature::place(const voxel_pos& vpos, Dimension* dimension) const
 {
     for(const auto [rpos, voxel, overwrite] : (*this)) {
         auto it_vpos = vpos + rpos;
@@ -30,7 +30,7 @@ void world::Feature::place(const voxel_pos& vpos, Dimension* dimension) const
     }
 }
 
-void world::Feature::place(const voxel_pos& vpos, const chunk_pos& cpos, Chunk& chunk) const
+void Feature::place(const voxel_pos& vpos, const chunk_pos& cpos, Chunk& chunk) const
 {
     for(const auto [rpos, voxel, overwrite] : (*this)) {
         auto it_vpos = vpos + rpos;
@@ -52,7 +52,7 @@ void world::Feature::place(const voxel_pos& vpos, const chunk_pos& cpos, Chunk& 
     }
 }
 
-void world::Feature::place(const voxel_pos& vpos, const chunk_pos& cpos, VoxelStorage& voxels) const
+void Feature::place(const voxel_pos& vpos, const chunk_pos& cpos, VoxelStorage& voxels) const
 {
     for(const auto [rpos, voxel, overwrite] : (*this)) {
         auto it_vpos = vpos + rpos;

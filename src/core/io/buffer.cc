@@ -4,43 +4,43 @@
 
 #include "core/math/constexpr.hh"
 
-io::ReadBuffer::ReadBuffer(const ReadBuffer& other)
+ReadBuffer::ReadBuffer(const ReadBuffer& other)
 {
     reset(other.data(), other.size());
 }
 
-io::ReadBuffer::ReadBuffer(const void* data, std::size_t size)
+ReadBuffer::ReadBuffer(const void* data, std::size_t size)
 {
     assert(data);
 
     reset(data, size);
 }
 
-io::ReadBuffer::ReadBuffer(const ENetPacket* packet)
+ReadBuffer::ReadBuffer(const ENetPacket* packet)
 {
     assert(packet);
 
     reset(packet);
 }
 
-io::ReadBuffer::ReadBuffer(PHYSFS_File* file)
+ReadBuffer::ReadBuffer(PHYSFS_File* file)
 {
     assert(file);
 
     reset(file);
 }
 
-std::size_t io::ReadBuffer::size(void) const
+std::size_t ReadBuffer::size(void) const
 {
     return m_vector.size();
 }
 
-const std::byte* io::ReadBuffer::data(void) const
+const std::byte* ReadBuffer::data(void) const
 {
     return m_vector.data();
 }
 
-void io::ReadBuffer::reset(const void* data, std::size_t size)
+void ReadBuffer::reset(const void* data, std::size_t size)
 {
     assert(data);
 
@@ -49,7 +49,7 @@ void io::ReadBuffer::reset(const void* data, std::size_t size)
     m_position = 0U;
 }
 
-void io::ReadBuffer::reset(const ENetPacket* packet)
+void ReadBuffer::reset(const ENetPacket* packet)
 {
     assert(packet);
 
@@ -58,7 +58,7 @@ void io::ReadBuffer::reset(const ENetPacket* packet)
     m_position = 0;
 }
 
-void io::ReadBuffer::reset(PHYSFS_File* file)
+void ReadBuffer::reset(PHYSFS_File* file)
 {
     assert(file);
 
@@ -70,7 +70,7 @@ void io::ReadBuffer::reset(PHYSFS_File* file)
 }
 
 template<>
-std::byte io::ReadBuffer::read<std::byte>(void)
+std::byte ReadBuffer::read<std::byte>(void)
 {
     if(m_position < m_vector.size()) {
         auto result = m_vector[m_position];
@@ -83,7 +83,7 @@ std::byte io::ReadBuffer::read<std::byte>(void)
 }
 
 template<>
-std::uint8_t io::ReadBuffer::read<std::uint8_t>(void)
+std::uint8_t ReadBuffer::read<std::uint8_t>(void)
 {
     if((m_position + 1U) <= m_vector.size()) {
         auto result = static_cast<std::uint8_t>(m_vector[m_position]);
@@ -96,7 +96,7 @@ std::uint8_t io::ReadBuffer::read<std::uint8_t>(void)
 }
 
 template<>
-std::uint16_t io::ReadBuffer::read<std::uint16_t>(void)
+std::uint16_t ReadBuffer::read<std::uint16_t>(void)
 {
     if((m_position + 2U) <= m_vector.size()) {
         auto result = UINT16_C(0x0000);
@@ -111,7 +111,7 @@ std::uint16_t io::ReadBuffer::read<std::uint16_t>(void)
 }
 
 template<>
-std::uint32_t io::ReadBuffer::read<std::uint32_t>(void)
+std::uint32_t ReadBuffer::read<std::uint32_t>(void)
 {
     if((m_position + 4U) <= m_vector.size()) {
         auto result = UINT32_C(0x00000000);
@@ -128,7 +128,7 @@ std::uint32_t io::ReadBuffer::read<std::uint32_t>(void)
 }
 
 template<>
-std::uint64_t io::ReadBuffer::read<std::uint64_t>(void)
+std::uint64_t ReadBuffer::read<std::uint64_t>(void)
 {
     if((m_position + 8U) <= m_vector.size()) {
         auto result = UINT64_C(0x0000000000000000);
@@ -149,37 +149,37 @@ std::uint64_t io::ReadBuffer::read<std::uint64_t>(void)
 }
 
 template<>
-float io::ReadBuffer::read<float>(void)
+float ReadBuffer::read<float>(void)
 {
     return std::bit_cast<float>(read<std::uint32_t>());
 }
 
 template<>
-std::int8_t io::ReadBuffer::read<std::int8_t>(void)
+std::int8_t ReadBuffer::read<std::int8_t>(void)
 {
     return std::bit_cast<std::int8_t>(read<std::uint8_t>());
 }
 
 template<>
-std::int16_t io::ReadBuffer::read<std::int16_t>(void)
+std::int16_t ReadBuffer::read<std::int16_t>(void)
 {
     return std::bit_cast<std::int16_t>(read<std::uint16_t>());
 }
 
 template<>
-std::int32_t io::ReadBuffer::read<std::int32_t>(void)
+std::int32_t ReadBuffer::read<std::int32_t>(void)
 {
     return std::bit_cast<std::int32_t>(read<std::uint32_t>());
 }
 
 template<>
-std::int64_t io::ReadBuffer::read<std::int64_t>(void)
+std::int64_t ReadBuffer::read<std::int64_t>(void)
 {
     return std::bit_cast<std::int64_t>(read<std::uint64_t>());
 }
 
 template<>
-std::string io::ReadBuffer::read<std::string>(void)
+std::string ReadBuffer::read<std::string>(void)
 {
     std::string result;
     result.resize(read<std::uint16_t>());
@@ -195,7 +195,7 @@ std::string io::ReadBuffer::read<std::string>(void)
     return result;
 }
 
-void io::ReadBuffer::read(void* buffer, std::size_t size)
+void ReadBuffer::read(void* buffer, std::size_t size)
 {
     auto bytes = reinterpret_cast<std::byte*>(buffer);
     auto amount_to_read = std::min(size, m_vector.size() - m_position);
@@ -207,32 +207,32 @@ void io::ReadBuffer::read(void* buffer, std::size_t size)
     m_position += size;
 }
 
-io::WriteBuffer::WriteBuffer(const WriteBuffer& other)
+WriteBuffer::WriteBuffer(const WriteBuffer& other)
 {
     m_vector = other.m_vector;
 }
 
-std::size_t io::WriteBuffer::size(void) const
+std::size_t WriteBuffer::size(void) const
 {
     return m_vector.size();
 }
 
-const std::byte* io::WriteBuffer::data(void) const
+const std::byte* WriteBuffer::data(void) const
 {
     return m_vector.data();
 }
 
-void io::WriteBuffer::reset(void)
+void WriteBuffer::reset(void)
 {
     m_vector.clear();
 }
 
-void io::WriteBuffer::write(const WriteBuffer& other)
+void WriteBuffer::write(const WriteBuffer& other)
 {
     m_vector.insert(m_vector.end(), other.m_vector.begin(), other.m_vector.end());
 }
 
-void io::WriteBuffer::write(const void* data, std::size_t size)
+void WriteBuffer::write(const void* data, std::size_t size)
 {
     assert(data);
 
@@ -241,26 +241,26 @@ void io::WriteBuffer::write(const void* data, std::size_t size)
 }
 
 template<>
-void io::WriteBuffer::write<std::byte>(const std::byte value)
+void WriteBuffer::write<std::byte>(const std::byte value)
 {
     m_vector.push_back(value);
 }
 
 template<>
-void io::WriteBuffer::write<std::uint8_t>(const std::uint8_t value)
+void WriteBuffer::write<std::uint8_t>(const std::uint8_t value)
 {
     m_vector.push_back(static_cast<std::byte>(value));
 }
 
 template<>
-void io::WriteBuffer::write<std::uint16_t>(const std::uint16_t value)
+void WriteBuffer::write<std::uint16_t>(const std::uint16_t value)
 {
     m_vector.push_back(static_cast<std::byte>(UINT16_C(0xFF) & ((value & UINT16_C(0xFF00)) >> 8U)));
     m_vector.push_back(static_cast<std::byte>(UINT16_C(0xFF) & ((value & UINT16_C(0x00FF)) >> 0U)));
 }
 
 template<>
-void io::WriteBuffer::write<std::uint32_t>(const std::uint32_t value)
+void WriteBuffer::write<std::uint32_t>(const std::uint32_t value)
 {
     m_vector.push_back(static_cast<std::byte>(UINT32_C(0xFF) & ((value & UINT32_C(0xFF000000)) >> 24U)));
     m_vector.push_back(static_cast<std::byte>(UINT32_C(0xFF) & ((value & UINT32_C(0x00FF0000)) >> 16U)));
@@ -269,7 +269,7 @@ void io::WriteBuffer::write<std::uint32_t>(const std::uint32_t value)
 }
 
 template<>
-void io::WriteBuffer::write<std::uint64_t>(const std::uint64_t value)
+void WriteBuffer::write<std::uint64_t>(const std::uint64_t value)
 {
     m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0xFF00000000000000)) >> 56U)));
     m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x00FF000000000000)) >> 48U)));
@@ -282,37 +282,37 @@ void io::WriteBuffer::write<std::uint64_t>(const std::uint64_t value)
 }
 
 template<>
-void io::WriteBuffer::write(const float value)
+void WriteBuffer::write(const float value)
 {
     write(std::bit_cast<std::uint32_t>(value));
 }
 
 template<>
-void io::WriteBuffer::write(const std::int8_t value)
+void WriteBuffer::write(const std::int8_t value)
 {
     write(std::bit_cast<std::uint8_t>(value));
 }
 
 template<>
-void io::WriteBuffer::write(const std::int16_t value)
+void WriteBuffer::write(const std::int16_t value)
 {
     write(std::bit_cast<std::uint16_t>(value));
 }
 
 template<>
-void io::WriteBuffer::write(const std::int32_t value)
+void WriteBuffer::write(const std::int32_t value)
 {
     write(std::bit_cast<std::uint32_t>(value));
 }
 
 template<>
-void io::WriteBuffer::write(const std::int64_t value)
+void WriteBuffer::write(const std::int64_t value)
 {
     write(std::bit_cast<std::uint64_t>(value));
 }
 
 template<>
-void io::WriteBuffer::write<std::string_view>(const std::string_view value)
+void WriteBuffer::write<std::string_view>(const std::string_view value)
 {
     write<std::uint16_t>(static_cast<std::uint16_t>(value.size()));
 
@@ -321,7 +321,7 @@ void io::WriteBuffer::write<std::string_view>(const std::string_view value)
     }
 }
 
-PHYSFS_File* io::WriteBuffer::to_file(const std::string& path, bool append) const
+PHYSFS_File* WriteBuffer::to_file(const std::string& path, bool append) const
 {
     PHYSFS_File* file = nullptr;
 
@@ -339,7 +339,7 @@ PHYSFS_File* io::WriteBuffer::to_file(const std::string& path, bool append) cons
     return file;
 }
 
-ENetPacket* io::WriteBuffer::to_packet(enet_uint32 flags) const
+ENetPacket* WriteBuffer::to_packet(enet_uint32 flags) const
 {
     return enet_packet_create(m_vector.data(), m_vector.size(), flags);
 }

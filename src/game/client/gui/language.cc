@@ -19,20 +19,20 @@ constexpr static std::string_view DEFAULT_LANGUAGE = "en_US";
 // system knows what language it can load and will act accordingly
 constexpr static std::string_view MANIFEST_PATH = "lang/manifest.json";
 
-static gui::LanguageManifest manifest;
-static gui::LanguageIterator current_language;
+static LanguageManifest manifest;
+static LanguageIterator current_language;
 static std::unordered_map<std::string, std::string> language_map;
-static std::unordered_map<std::string, gui::LanguageIterator> ietf_map;
+static std::unordered_map<std::string, LanguageIterator> ietf_map;
 static config::String config_language(DEFAULT_LANGUAGE);
 
-static void send_language_event(gui::LanguageIterator new_language)
+static void send_language_event(LanguageIterator new_language)
 {
-    gui::LanguageSetEvent event;
+    LanguageSetEvent event;
     event.new_language = new_language;
     globals::dispatcher.trigger(event);
 }
 
-void gui::language::init(void)
+void language::init(void)
 {
     globals::client_config.add_value("language", config_language);
 
@@ -41,7 +41,7 @@ void gui::language::init(void)
     auto file = PHYSFS_openRead(std::string(MANIFEST_PATH).c_str());
 
     if(file == nullptr) {
-        spdlog::critical("language: {}: {}", MANIFEST_PATH, io::physfs_error());
+        spdlog::critical("language: {}: {}", MANIFEST_PATH, physfs_error());
         std::terminate();
     }
 
@@ -85,19 +85,19 @@ void gui::language::init(void)
     current_language = manifest.cend();
 }
 
-void gui::language::init_late(void)
+void language::init_late(void)
 {
     auto user_language = ietf_map.find(config_language.get_value());
 
     if(user_language != ietf_map.cend()) {
-        gui::language::set(user_language->second);
+        language::set(user_language->second);
         return;
     }
 
     auto fallback = ietf_map.find(std::string(DEFAULT_LANGUAGE));
 
     if(fallback != ietf_map.cend()) {
-        gui::language::set(fallback->second);
+        language::set(fallback->second);
         return;
     }
 
@@ -106,7 +106,7 @@ void gui::language::init_late(void)
     std::terminate();
 }
 
-void gui::language::set(LanguageIterator new_language)
+void language::set(LanguageIterator new_language)
 {
     if(new_language != manifest.cend()) {
         auto path = std::format("lang/lang.{}.json", new_language->ietf);
@@ -114,7 +114,7 @@ void gui::language::set(LanguageIterator new_language)
         auto file = PHYSFS_openRead(path.c_str());
 
         if(file == nullptr) {
-            spdlog::warn("language: {}: {}", path, io::physfs_error());
+            spdlog::warn("language: {}: {}", path, physfs_error());
             send_language_event(new_language);
             return;
         }
@@ -156,12 +156,12 @@ void gui::language::set(LanguageIterator new_language)
     send_language_event(new_language);
 }
 
-gui::LanguageIterator gui::language::get_current(void)
+LanguageIterator language::get_current(void)
 {
     return current_language;
 }
 
-gui::LanguageIterator gui::language::find(std::string_view ietf)
+LanguageIterator language::find(std::string_view ietf)
 {
     const auto it = ietf_map.find(std::string(ietf));
     if(it != ietf_map.cend()) {
@@ -172,17 +172,17 @@ gui::LanguageIterator gui::language::find(std::string_view ietf)
     }
 }
 
-gui::LanguageIterator gui::language::cbegin(void)
+LanguageIterator language::cbegin(void)
 {
     return manifest.cbegin();
 }
 
-gui::LanguageIterator gui::language::cend(void)
+LanguageIterator language::cend(void)
 {
     return manifest.cend();
 }
 
-std::string_view gui::language::resolve(std::string_view key)
+std::string_view language::resolve(std::string_view key)
 {
     const auto it = language_map.find(std::string(key));
 
@@ -193,10 +193,10 @@ std::string_view gui::language::resolve(std::string_view key)
     return key;
 }
 
-std::string gui::language::resolve_gui(std::string_view key)
+std::string language::resolve_gui(std::string_view key)
 {
     // We need window tags to retain their hierarchy when a language
     // dynamically changes; ImGui allows to provide hidden unique identifiers
     // to GUI primitives that have their name change dynamically, so we're using this
-    return std::format("{}###{}", gui::language::resolve(key), key);
+    return std::format("{}###{}", language::resolve(key), key);
 }

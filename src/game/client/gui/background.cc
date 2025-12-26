@@ -12,9 +12,9 @@
 
 static resource_ptr<TextureGUI> texture;
 
-void gui::background::init(void)
+void background::init(void)
 {
-    texture = resource::load<TextureGUI>("textures/gui/background.png", TEXTURE_GUI_LOAD_VFLIP);
+    texture = resource::load<TextureGUI>("textures/gui/background.png");
 
     if(texture == nullptr) {
         spdlog::critical("background: texture load failed");
@@ -22,18 +22,14 @@ void gui::background::init(void)
     }
 }
 
-void gui::background::shutdown(void)
+void background::shutdown(void)
 {
     texture = nullptr;
 }
 
-void gui::background::layout(void)
+void background::layout(void)
 {
     auto viewport = ImGui::GetMainViewport();
     auto draw_list = ImGui::GetBackgroundDrawList();
-
-    auto scaled_width = 0.75f * static_cast<float>(globals::width / globals::gui_scale);
-    auto scaled_height = 0.75f * static_cast<float>(globals::height / globals::gui_scale);
-    auto scale_uv = ImVec2(scaled_width / static_cast<float>(texture->size.x), scaled_height / static_cast<float>(texture->size.y));
-    draw_list->AddImage(texture->handle, ImVec2(0.0f, 0.0f), viewport->Size, ImVec2(0.0f, 0.0f), scale_uv);
+    draw_list->AddImage(texture->handle, {}, viewport->Size);
 }

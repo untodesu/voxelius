@@ -13,7 +13,7 @@
 
 static resource_ptr<TextureGUI> texture;
 
-void gui::crosshair::init(void)
+void crosshair::init(void)
 {
     texture = resource::load<TextureGUI>("textures/gui/hud_crosshair.png",
         TEXTURE_GUI_LOAD_CLAMP_S | TEXTURE_GUI_LOAD_CLAMP_T | TEXTURE_GUI_LOAD_VFLIP);
@@ -24,12 +24,12 @@ void gui::crosshair::init(void)
     }
 }
 
-void gui::crosshair::shutdown(void)
+void crosshair::shutdown(void)
 {
     texture = nullptr;
 }
 
-void gui::crosshair::layout(void)
+void crosshair::layout(void)
 {
     auto viewport = ImGui::GetMainViewport();
     auto draw_list = ImGui::GetForegroundDrawList();

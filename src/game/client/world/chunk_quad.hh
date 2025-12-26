@@ -4,15 +4,10 @@
 
 #include "shared/world/voxel_registry.hh"
 
-namespace world
-{
 // [0] XXXXXXXXYYYYYYYYZZZZZZZZWWWWHHHH
 // [1] FFFFTTTTTTTTTTTAAAAA------------
 using ChunkQuad = std::array<std::uint32_t, 2>;
-} // namespace world
 
-namespace world
-{
 constexpr inline static ChunkQuad make_chunk_quad(const glm::fvec3& position, const glm::fvec2& size, VoxelFace face, std::size_t texture,
     std::size_t frames)
 {
@@ -38,4 +33,3 @@ constexpr inline static ChunkQuad make_chunk_quad(const glm::fvec3& position, co
 
     return result;
 }
-} // namespace world

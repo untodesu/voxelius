@@ -18,19 +18,19 @@
 #include "client/globals.hh"
 #include "client/session.hh"
 
-void entity::listener::update(void)
+void listener::update(void)
 {
     if(session::is_ingame()) {
-        const auto& velocity = globals::dimension->entities.get<entity::Velocity>(globals::player).value;
-        const auto& position = entity::camera::position_local;
+        const auto& velocity = globals::dimension->entities.get<Velocity>(globals::player).value;
+        const auto& position = camera::position_local;
 
         alListener3f(AL_POSITION, position.x, position.y, position.z);
         alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
 
         float orientation[6];
-        orientation[0] = entity::camera::direction.x;
-        orientation[1] = entity::camera::direction.y;
-        orientation[2] = entity::camera::direction.z;
+        orientation[0] = camera::direction.x;
+        orientation[1] = camera::direction.y;
+        orientation[2] = camera::direction.z;
         orientation[3] = DIR_UP<float>.x;
         orientation[4] = DIR_UP<float>.y;
         orientation[5] = DIR_UP<float>.z;

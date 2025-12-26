@@ -14,8 +14,8 @@
 
 #include "shared/globals.hh"
 
-static io::ReadBuffer read_buffer;
-static io::WriteBuffer write_buffer;
+static ReadBuffer read_buffer;
+static WriteBuffer write_buffer;
 
 ENetPacket* protocol::encode(const protocol::StatusRequest& packet, enet_uint32 flags)
 {
@@ -448,9 +448,9 @@ ENetPacket* protocol::utils::make_chat_message(std::string_view message, enet_ui
     return protocol::encode(packet, flags);
 }
 
-ENetPacket* protocol::utils::make_chunk_voxels(world::Dimension* dimension, entt::entity entity, enet_uint32 flags)
+ENetPacket* protocol::utils::make_chunk_voxels(Dimension* dimension, entt::entity entity, enet_uint32 flags)
 {
-    if(auto component = dimension->chunks.try_get<world::ChunkComponent>(entity)) {
+    if(auto component = dimension->chunks.try_get<ChunkComponent>(entity)) {
         protocol::ChunkVoxels packet;
         packet.chunk = component->cpos;
         packet.voxels = component->chunk->get_voxels();
@@ -460,9 +460,9 @@ ENetPacket* protocol::utils::make_chunk_voxels(world::Dimension* dimension, entt
     return nullptr;
 }
 
-ENetPacket* protocol::utils::make_entity_head(world::Dimension* dimension, entt::entity entity, enet_uint32 flags)
+ENetPacket* protocol::utils::make_entity_head(Dimension* dimension, entt::entity entity, enet_uint32 flags)
 {
-    if(auto component = dimension->entities.try_get<entity::Head>(entity)) {
+    if(auto component = dimension->entities.try_get<Head>(entity)) {
         protocol::EntityHead packet;
         packet.entity = entity;
         packet.angles = component->angles;
@@ -472,9 +472,9 @@ ENetPacket* protocol::utils::make_entity_head(world::Dimension* dimension, entt:
     return nullptr;
 }
 
-ENetPacket* protocol::utils::make_entity_transform(world::Dimension* dimension, entt::entity entity, enet_uint32 flags)
+ENetPacket* protocol::utils::make_entity_transform(Dimension* dimension, entt::entity entity, enet_uint32 flags)
 {
-    if(auto component = dimension->entities.try_get<entity::Transform>(entity)) {
+    if(auto component = dimension->entities.try_get<Transform>(entity)) {
         protocol::EntityTransform packet;
         packet.entity = entity;
         packet.chunk = component->chunk;
@@ -486,9 +486,9 @@ ENetPacket* protocol::utils::make_entity_transform(world::Dimension* dimension, 
     return nullptr;
 }
 
-ENetPacket* protocol::utils::make_entity_velocity(world::Dimension* dimension, entt::entity entity, enet_uint32 flags)
+ENetPacket* protocol::utils::make_entity_velocity(Dimension* dimension, entt::entity entity, enet_uint32 flags)
 {
-    if(auto component = dimension->entities.try_get<entity::Velocity>(entity)) {
+    if(auto component = dimension->entities.try_get<Velocity>(entity)) {
         protocol::EntityVelocity packet;
         packet.entity = entity;
         packet.value = component->value;
@@ -498,9 +498,9 @@ ENetPacket* protocol::utils::make_entity_velocity(world::Dimension* dimension, e
     return nullptr;
 }
 
-ENetPacket* protocol::utils::make_entity_player(world::Dimension* dimension, entt::entity entity, enet_uint32 flags)
+ENetPacket* protocol::utils::make_entity_player(Dimension* dimension, entt::entity entity, enet_uint32 flags)
 {
-    if(dimension->entities.any_of<entity::Player>(entity)) {
+    if(dimension->entities.any_of<Player>(entity)) {
         protocol::EntityPlayer packet;
         packet.entity = entity;
         return protocol::encode(packet, flags);
@@ -509,7 +509,7 @@ ENetPacket* protocol::utils::make_entity_player(world::Dimension* dimension, ent
     return nullptr;
 }
 
-ENetPacket* protocol::utils::make_dimension_info(const world::Dimension* dimension)
+ENetPacket* protocol::utils::make_dimension_info(const Dimension* dimension)
 {
     protocol::DimensionInfo packet;
     packet.name = dimension->get_name();

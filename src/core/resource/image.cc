@@ -36,7 +36,7 @@ static const void* image_load_func(const char* name, std::uint32_t flags)
     auto file = PHYSFS_openRead(name);
 
     if(file == nullptr) {
-        spdlog::error("image: {}: {}", name, io::physfs_error());
+        spdlog::error("image: {}: {}", name, physfs_error());
         return nullptr;
     }
 

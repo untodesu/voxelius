@@ -10,7 +10,7 @@
 
 struct AtlasPlane final {
     std::unordered_map<std::size_t, std::size_t> lookup;
-    std::vector<world::AtlasStrip> strips;
+    std::vector<AtlasStrip> strips;
     std::size_t layer_count_max;
     std::size_t layer_count;
     std::size_t plane_id;
@@ -46,7 +46,7 @@ static void plane_setup(AtlasPlane& plane)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
-static world::AtlasStrip* plane_lookup(AtlasPlane& plane, std::size_t hash_value)
+static AtlasStrip* plane_lookup(AtlasPlane& plane, std::size_t hash_value)
 {
     const auto it = plane.lookup.find(hash_value);
 
@@ -57,9 +57,9 @@ static world::AtlasStrip* plane_lookup(AtlasPlane& plane, std::size_t hash_value
     return nullptr;
 }
 
-static world::AtlasStrip* plane_new_strip(AtlasPlane& plane, const std::vector<std::string>& paths, std::size_t hash_value)
+static AtlasStrip* plane_new_strip(AtlasPlane& plane, const std::vector<std::string>& paths, std::size_t hash_value)
 {
-    world::AtlasStrip strip = {};
+    AtlasStrip strip = {};
     strip.offset = plane.layer_count;
     strip.plane = plane.plane_id;
 
@@ -86,7 +86,7 @@ static world::AtlasStrip* plane_new_strip(AtlasPlane& plane, const std::vector<s
     return &plane.strips[index];
 }
 
-void world::voxel_atlas::create(int width, int height, std::size_t count)
+void voxel_atlas::create(int width, int height, std::size_t count)
 {
     GLint max_plane_layers;
 
@@ -115,7 +115,7 @@ void world::voxel_atlas::create(int width, int height, std::size_t count)
     spdlog::debug("voxel_atlas: max_plane_layers={}", max_plane_layers);
 }
 
-void world::voxel_atlas::destroy(void)
+void voxel_atlas::destroy(void)
 {
     for(const AtlasPlane& plane : planes)
         glDeleteTextures(1, &plane.gl_texture);
@@ -124,12 +124,12 @@ void world::voxel_atlas::destroy(void)
     planes.clear();
 }
 
-std::size_t world::voxel_atlas::plane_count(void)
+std::size_t voxel_atlas::plane_count(void)
 {
     return planes.size();
 }
 
-GLuint world::voxel_atlas::plane_texture(std::size_t plane_id)
+GLuint voxel_atlas::plane_texture(std::size_t plane_id)
 {
     if(plane_id < planes.size()) {
         return planes[plane_id].gl_texture;
@@ -139,7 +139,7 @@ GLuint world::voxel_atlas::plane_texture(std::size_t plane_id)
     }
 }
 
-void world::voxel_atlas::generate_mipmaps(void)
+void voxel_atlas::generate_mipmaps(void)
 {
     for(const AtlasPlane& plane : planes) {
         glBindTexture(GL_TEXTURE_2D_ARRAY, plane.gl_texture);
@@ -147,7 +147,7 @@ void world::voxel_atlas::generate_mipmaps(void)
     }
 }
 
-world::AtlasStrip* world::voxel_atlas::find_or_load(const std::vector<std::string>& paths)
+AtlasStrip* voxel_atlas::find_or_load(const std::vector<std::string>& paths)
 {
     const std::size_t hash_value = vector_hash(paths);
 
@@ -170,7 +170,7 @@ world::AtlasStrip* world::voxel_atlas::find_or_load(const std::vector<std::strin
     return nullptr;
 }
 
-world::AtlasStrip* world::voxel_atlas::find(const std::vector<std::string>& paths)
+AtlasStrip* voxel_atlas::find(const std::vector<std::string>& paths)
 {
     const std::size_t hash_value = vector_hash(paths);
 

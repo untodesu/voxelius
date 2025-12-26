@@ -4,8 +4,6 @@
 
 struct SoundEffect;
 
-namespace entity
-{
 struct SoundEmitter final {
     resource_ptr<SoundEffect> sound;
     ALuint source;
@@ -17,4 +15,3 @@ public:
 public:
     static void update(void);
 };
-} // namespace entity

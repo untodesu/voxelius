@@ -51,7 +51,7 @@ static glm::fvec2 last_cursor;
 static void add_angles(float pitch, float yaw)
 {
     if(session::is_ingame()) {
-        auto& head = globals::dimension->entities.get<entity::Head>(globals::player);
+        auto& head = globals::dimension->entities.get<Head>(globals::player);
 
         head.angles[0] += pitch;
         head.angles[1] += yaw;
@@ -62,13 +62,13 @@ static void add_angles(float pitch, float yaw)
         // Re-assigning the previous state after the current
         // state has been already modified is certainly a way
         // to circumvent the interpolation applied to anything with a head
-        globals::dimension->entities.emplace_or_replace<entity::client::HeadPrev>(globals::player, head);
+        globals::dimension->entities.emplace_or_replace<client::HeadPrev>(globals::player, head);
     }
 }
 
-static void on_glfw_cursor_pos(const io::GlfwCursorPosEvent& event)
+static void on_glfw_cursor_pos(const GlfwCursorPosEvent& event)
 {
-    if(io::gamepad::available && io::gamepad::active.get_value()) {
+    if(gamepad::available && gamepad::active.get_value()) {
         // The player is assumed to be using
         // a gamepad instead of mouse and keyboard
         last_cursor = event.pos;
@@ -88,14 +88,14 @@ static void on_glfw_cursor_pos(const io::GlfwCursorPosEvent& event)
     last_cursor = event.pos;
 }
 
-static void on_gamepad_button(const io::GamepadButtonEvent& event)
+static void on_gamepad_button(const GamepadButtonEvent& event)
 {
     if(button_fastlook.equals(event.button)) {
         fastlook_enabled = event.action == GLFW_PRESS;
     }
 }
 
-void entity::player_look::init(void)
+void player_look::init(void)
 {
     globals::client_config.add_value("player_look.mouse.raw_input", mouse_raw_input);
     globals::client_config.add_value("player_look.mouse.sensitivity", mouse_sensitivity);
@@ -121,15 +121,15 @@ void entity::player_look::init(void)
     last_cursor.x = 0.5f * static_cast<float>(globals::width);
     last_cursor.y = 0.5f * static_cast<float>(globals::height);
 
-    globals::dispatcher.sink<io::GlfwCursorPosEvent>().connect<&on_glfw_cursor_pos>();
-    globals::dispatcher.sink<io::GamepadButtonEvent>().connect<&on_gamepad_button>();
+    globals::dispatcher.sink<GlfwCursorPosEvent>().connect<&on_glfw_cursor_pos>();
+    globals::dispatcher.sink<GamepadButtonEvent>().connect<&on_gamepad_button>();
 }
 
-void entity::player_look::update_late(void)
+void player_look::update_late(void)
 {
-    if(io::gamepad::available && io::gamepad::active.get_value() && !globals::gui_screen) {
-        auto pitch_value = axis_pitch.get_value(io::gamepad::state, io::gamepad::deadzone.get_value());
-        auto yaw_value = axis_yaw.get_value(io::gamepad::state, io::gamepad::deadzone.get_value());
+    if(gamepad::available && gamepad::active.get_value() && !globals::gui_screen) {
+        auto pitch_value = axis_pitch.get_value(gamepad::state, gamepad::deadzone.get_value());
+        auto yaw_value = axis_yaw.get_value(gamepad::state, gamepad::deadzone.get_value());
 
         if(fastlook_enabled) {
             // Fastlook allows the camera to

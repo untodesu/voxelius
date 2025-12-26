@@ -157,7 +157,7 @@ void sound::play_generic(resource_ptr<SoundEffect> sound, bool looping, float pi
 void sound::play_entity(entt::entity entity, resource_ptr<SoundEffect> sound, bool looping, float pitch)
 {
     if(globals::dimension && globals::dimension->entities.valid(entity)) {
-        if(auto emitter = globals::dimension->entities.try_get<entity::SoundEmitter>(entity)) {
+        if(auto emitter = globals::dimension->entities.try_get<SoundEmitter>(entity)) {
             alSourceRewind(emitter->source);
 
             emitter->sound = sound;

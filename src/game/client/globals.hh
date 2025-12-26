@@ -9,22 +9,16 @@ class GamepadAxis;
 class GamepadButton;
 } // namespace config
 
-namespace io
-{
 class ConfigMap;
-} // namespace io
 
 struct GLFWwindow;
 struct ImFont;
 
-namespace world
-{
 class Dimension;
-} // namespace world
 
 namespace globals
 {
-extern io::ConfigMap client_config;
+extern ConfigMap client_config;
 
 extern GLFWwindow* window;
 
@@ -53,7 +47,7 @@ extern std::size_t num_triangles;
 
 extern ENetHost* client_host;
 
-extern world::Dimension* dimension;
+extern Dimension* dimension;
 extern entt::entity player;
 
 extern ImFont* font_unscii16;

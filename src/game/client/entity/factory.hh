@@ -1,11 +1,8 @@
 #pragma once
 
-namespace world
-{
 class Dimension;
-} // namespace world
 
-namespace entity::client
+namespace client
 {
-void create_player(world::Dimension* dimension, entt::entity entity);
-} // namespace entity::client
+void create_player(Dimension* dimension, entt::entity entity);
+} // namespace client

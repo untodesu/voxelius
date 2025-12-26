@@ -1,6 +1,6 @@
 #pragma once
 
-namespace entity::interpolation
+namespace interpolation
 {
 void update(void);
-} // namespace entity::interpolation
+} // namespace interpolation

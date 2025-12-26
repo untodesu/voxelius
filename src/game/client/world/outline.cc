@@ -28,7 +28,7 @@ static GLuint vaobj;
 static GLuint cube_vbo;
 static GLuint line_vbo;
 
-void world::outline::init(void)
+void outline::init(void)
 {
     if(!program.setup("shaders/outline.vert", "shaders/outline.frag")) {
         spdlog::critical("outline: program setup failed");
@@ -90,7 +90,7 @@ void world::outline::init(void)
     glVertexAttribDivisor(0, 0);
 }
 
-void world::outline::shutdown(void)
+void outline::shutdown(void)
 {
     glDeleteVertexArrays(1, &vaobj);
     glDeleteBuffers(1, &line_vbo);
@@ -98,7 +98,7 @@ void world::outline::shutdown(void)
     program.destroy();
 }
 
-void world::outline::prepare(void)
+void outline::prepare(void)
 {
     program.set_variant_vert(WORLD_CURVATURE, client_game::world_curvature.get_value());
 
@@ -111,17 +111,17 @@ void world::outline::prepare(void)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glUseProgram(program.handle);
-    glUniformMatrix4fv(program.uniforms[u_vpmatrix].location, 1, false, glm::value_ptr(entity::camera::matrix));
-    glUniform1f(program.uniforms[u_viewdist].location, static_cast<GLfloat>(CHUNK_SIZE * entity::camera::view_distance.get_value()));
+    glUniformMatrix4fv(program.uniforms[u_vpmatrix].location, 1, false, glm::value_ptr(camera::matrix));
+    glUniform1f(program.uniforms[u_viewdist].location, static_cast<GLfloat>(CHUNK_SIZE * camera::view_distance.get_value()));
 
     glBindVertexArray(vaobj);
     glEnableVertexAttribArray(0);
     glVertexAttribDivisor(0, 0);
 }
 
-void world::outline::cube(const chunk_pos& cpos, const glm::fvec3& fpos, const glm::fvec3& size, float thickness, const glm::fvec4& color)
+void outline::cube(const chunk_pos& cpos, const glm::fvec3& fpos, const glm::fvec3& size, float thickness, const glm::fvec4& color)
 {
-    auto patch_cpos = cpos - entity::camera::position_chunk;
+    auto patch_cpos = cpos - camera::position_chunk;
 
     glLineWidth(thickness);
 
@@ -134,9 +134,9 @@ void world::outline::cube(const chunk_pos& cpos, const glm::fvec3& fpos, const g
     glDrawArrays(GL_LINES, 0, 24);
 }
 
-void world::outline::line(const chunk_pos& cpos, const glm::fvec3& fpos, const glm::fvec3& size, float thickness, const glm::fvec4& color)
+void outline::line(const chunk_pos& cpos, const glm::fvec3& fpos, const glm::fvec3& size, float thickness, const glm::fvec4& color)
 {
-    auto patch_cpos = cpos - entity::camera::position_chunk;
+    auto patch_cpos = cpos - camera::position_chunk;
 
     glLineWidth(thickness);
 

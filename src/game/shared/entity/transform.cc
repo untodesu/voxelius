@@ -6,7 +6,7 @@
 
 #include "shared/const.hh"
 
-constexpr inline static void update_component(unsigned int dim, entity::Transform& component)
+constexpr inline static void update_component(unsigned int dim, Transform& component)
 {
     if(component.local[dim] >= CHUNK_SIZE) {
         component.local[dim] -= CHUNK_SIZE;
@@ -21,9 +21,9 @@ constexpr inline static void update_component(unsigned int dim, entity::Transfor
     }
 }
 
-void entity::Transform::fixed_update(world::Dimension* dimension)
+void Transform::fixed_update(Dimension* dimension)
 {
-    auto view = dimension->entities.view<entity::Transform>();
+    auto view = dimension->entities.view<Transform>();
 
     for(auto [entity, transform] : view.each()) {
         update_component(0U, transform);

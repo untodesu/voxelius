@@ -5,8 +5,6 @@ namespace config
 class IValue;
 } // namespace config
 
-namespace io
-{
 class ConfigMap final {
 public:
     ConfigMap(void) = default;
@@ -26,4 +24,3 @@ public:
 private:
     std::unordered_map<std::string, config::IValue*> m_values;
 };
-} // namespace io

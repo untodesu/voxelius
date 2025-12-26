@@ -6,16 +6,16 @@
 
 #include "shared/world/dimension.hh"
 
-void entity::Stasis::fixed_update(world::Dimension* dimension)
+void Stasis::fixed_update(Dimension* dimension)
 {
-    auto view = dimension->entities.view<entity::Transform>();
+    auto view = dimension->entities.view<Transform>();
 
     for(auto [entity, transform] : view.each()) {
         if(dimension->find_chunk(transform.chunk)) {
-            dimension->entities.remove<entity::Stasis>(entity);
+            dimension->entities.remove<Stasis>(entity);
         }
         else {
-            dimension->entities.emplace_or_replace<entity::Stasis>(entity);
+            dimension->entities.emplace_or_replace<Stasis>(entity);
         }
     }
 }

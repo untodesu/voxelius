@@ -7,7 +7,7 @@
 
 static std::filesystem::path get_gamepath(void)
 {
-    if(auto gamepath = io::cmdline::get_cstr("gamepath")) {
+    if(auto gamepath = cmdline::get_cstr("gamepath")) {
         // Allow users and third-party launchers to override
         // content location. Perhaps this would work to allow
         // for a Minecraft-like versioning approach?
@@ -19,7 +19,7 @@ static std::filesystem::path get_gamepath(void)
 
 static std::filesystem::path get_userpath(void)
 {
-    if(auto userpath = io::cmdline::get_cstr("userpath")) {
+    if(auto userpath = cmdline::get_cstr("userpath")) {
         // Allow users and third-party launchers to override
         // user data location. Perhaps this would work to allow
         // for a Minecraft-like versioning approach?
@@ -67,10 +67,10 @@ void shared_game::init(int argc, char** argv, std::string_view logfile)
     constexpr auto default_loglevel = spdlog::level::trace;
 #endif
 
-    if(io::cmdline::contains("quiet")) {
+    if(cmdline::contains("quiet")) {
         logger->set_level(spdlog::level::warn);
     }
-    else if(io::cmdline::contains("verbose")) {
+    else if(cmdline::contains("verbose")) {
         logger->set_level(spdlog::level::trace);
     }
     else {
@@ -81,7 +81,7 @@ void shared_game::init(int argc, char** argv, std::string_view logfile)
     logger->flush();
 
     if(!PHYSFS_init(argv[0])) {
-        spdlog::critical("physfs: init failed: {}", io::physfs_error());
+        spdlog::critical("physfs: init failed: {}", physfs_error());
         std::terminate();
     }
 
@@ -96,17 +96,17 @@ void shared_game::init(int argc, char** argv, std::string_view logfile)
     std::filesystem::create_directories(userpath, ignore_error);
 
     if(!PHYSFS_mount(gamepath.string().c_str(), nullptr, false)) {
-        spdlog::critical("physfs: mount {} failed: {}", gamepath.string(), io::physfs_error());
+        spdlog::critical("physfs: mount {} failed: {}", gamepath.string(), physfs_error());
         std::terminate();
     }
 
     if(!PHYSFS_mount(userpath.string().c_str(), nullptr, false)) {
-        spdlog::critical("physfs: mount {} failed: {}", userpath.string(), io::physfs_error());
+        spdlog::critical("physfs: mount {} failed: {}", userpath.string(), physfs_error());
         std::terminate();
     }
 
     if(!PHYSFS_setWriteDir(userpath.string().c_str())) {
-        spdlog::critical("physfs: setwritedir {} failed: {}", userpath.string(), io::physfs_error());
+        spdlog::critical("physfs: setwritedir {} failed: {}", userpath.string(), physfs_error());
         std::terminate();
     }
 
@@ -121,7 +121,7 @@ void shared_game::shutdown(void)
     enet_deinitialize();
 
     if(!PHYSFS_deinit()) {
-        spdlog::critical("physfs: deinit failed: {}", io::physfs_error());
+        spdlog::critical("physfs: deinit failed: {}", physfs_error());
         std::terminate();
     }
 }

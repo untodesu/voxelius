@@ -1,7 +1,5 @@
 #pragma once
 
-namespace gui
-{
 struct BotherResponseEvent final {
     unsigned int identity;
     bool is_server_unreachable;
@@ -12,13 +10,12 @@ struct BotherResponseEvent final {
     std::uint32_t game_version_patch;
     std::string motd;
 };
-} // namespace gui
 
-namespace gui::bother
+namespace bother
 {
 void init(void);
 void shutdown(void);
 void update_late(void);
 void ping(unsigned int identity, std::string_view host, std::uint16_t port);
 void cancel(unsigned int identity);
-} // namespace gui::bother
+} // namespace bother

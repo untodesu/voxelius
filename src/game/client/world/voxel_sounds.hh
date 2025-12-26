@@ -6,14 +6,14 @@
 
 struct SoundEffect;
 
-namespace world::voxel_sounds
+namespace voxel_sounds
 {
 void init(void);
 void shutdown(void);
-} // namespace world::voxel_sounds
+} // namespace voxel_sounds
 
-namespace world::voxel_sounds
+namespace voxel_sounds
 {
 resource_ptr<SoundEffect> get_footsteps(VoxelMaterial material);
 resource_ptr<SoundEffect> get_placebreak(VoxelMaterial material);
-} // namespace world::voxel_sounds
+} // namespace voxel_sounds

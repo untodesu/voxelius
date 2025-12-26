@@ -6,14 +6,9 @@
 
 constexpr static unsigned int BIOME_VOID = 0U;
 
-namespace world
-{
 class Dimension;
 class Voxel;
-} // namespace world
 
-namespace world
-{
 class Chunk final {
 public:
     explicit Chunk(entt::entity entity, Dimension* dimension);
@@ -40,4 +35,3 @@ private:
     VoxelStorage m_voxels;
     unsigned int m_biome;
 };
-} // namespace world

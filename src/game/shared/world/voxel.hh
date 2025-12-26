@@ -4,13 +4,8 @@
 
 #include "shared/types.hh"
 
-namespace world
-{
 class Dimension;
-} // namespace world
 
-namespace world
-{
 enum VoxelRender : unsigned int {
     VRENDER_NONE = 0U, ///< The voxel is not rendered at all
     VRENDER_OPAQUE,    ///< The voxel is fully opaque
@@ -65,17 +60,11 @@ enum VoxelVisBits : unsigned int {
     VVIS_UP = 1U << VFACE_TOP,      ///< Positive Y
     VVIS_DOWN = 1U << VFACE_BOTTOM, ///< Negative Y
 };
-} // namespace world
 
-namespace world
-{
 using VoxelOnPlaceFunc = std::function<void(Dimension*, const voxel_pos&)>;
 using VoxelOnRemoveFunc = std::function<void(Dimension*, const voxel_pos&)>;
 using VoxelOnTickFunc = std::function<void(Dimension*, const voxel_pos&)>;
-} // namespace world
 
-namespace world
-{
 class Voxel {
 public:
     Voxel(void) = default;
@@ -154,10 +143,7 @@ protected:
     VoxelOnRemoveFunc m_on_remove;
     VoxelOnTickFunc m_on_tick;
 };
-} // namespace world
 
-namespace world
-{
 class VoxelBuilder final : public Voxel {
 public:
     VoxelBuilder(void) = default;
@@ -184,59 +170,58 @@ public:
 
     std::unique_ptr<Voxel> build(voxel_id id) const;
 };
-} // namespace world
 
-constexpr std::string_view world::Voxel::get_name(void) const noexcept
+constexpr std::string_view Voxel::get_name(void) const noexcept
 {
     return m_name;
 }
 
-constexpr voxel_id world::Voxel::get_id(void) const noexcept
+constexpr voxel_id Voxel::get_id(void) const noexcept
 {
     return m_id;
 }
 
-constexpr world::VoxelRender world::Voxel::get_render_mode(void) const noexcept
+constexpr VoxelRender Voxel::get_render_mode(void) const noexcept
 {
     return m_render_mode;
 }
 
-constexpr world::VoxelShape world::Voxel::get_shape(void) const noexcept
+constexpr VoxelShape Voxel::get_shape(void) const noexcept
 {
     return m_shape;
 }
 
-constexpr bool world::Voxel::is_animated(void) const noexcept
+constexpr bool Voxel::is_animated(void) const noexcept
 {
     return m_animated;
 }
 
-constexpr world::VoxelTouch world::Voxel::get_touch_type(void) const noexcept
+constexpr VoxelTouch Voxel::get_touch_type(void) const noexcept
 {
     return m_touch_type;
 }
 
-constexpr const glm::fvec3& world::Voxel::get_touch_values(void) const noexcept
+constexpr const glm::fvec3& Voxel::get_touch_values(void) const noexcept
 {
     return m_touch_values;
 }
 
-constexpr world::VoxelMaterial world::Voxel::get_surface_material(void) const noexcept
+constexpr VoxelMaterial Voxel::get_surface_material(void) const noexcept
 {
     return m_surface_material;
 }
 
-constexpr const math::AABBf& world::Voxel::get_collision(void) const noexcept
+constexpr const math::AABBf& Voxel::get_collision(void) const noexcept
 {
     return m_collision;
 }
 
-constexpr const std::vector<std::string>& world::Voxel::get_default_textures(void) const noexcept
+constexpr const std::vector<std::string>& Voxel::get_default_textures(void) const noexcept
 {
     return m_default_textures;
 }
 
-constexpr const std::vector<std::string>& world::Voxel::get_face_textures(VoxelFace face) const noexcept
+constexpr const std::vector<std::string>& Voxel::get_face_textures(VoxelFace face) const noexcept
 {
     assert(face <= m_face_textures.size());
 
@@ -247,40 +232,40 @@ constexpr const std::vector<std::string>& world::Voxel::get_face_textures(VoxelF
     return m_face_textures[face];
 }
 
-constexpr std::size_t world::Voxel::get_cached_face_offset(VoxelFace face) const noexcept
+constexpr std::size_t Voxel::get_cached_face_offset(VoxelFace face) const noexcept
 {
     assert(face <= m_cached_face_offsets.size());
 
     return m_cached_face_offsets[face];
 }
 
-constexpr std::size_t world::Voxel::get_cached_face_plane(VoxelFace face) const noexcept
+constexpr std::size_t Voxel::get_cached_face_plane(VoxelFace face) const noexcept
 {
     assert(face <= m_cached_face_planes.size());
 
     return m_cached_face_planes[face];
 }
 
-template<world::VoxelRender RenderMode>
-constexpr bool world::Voxel::is_render_mode(void) const noexcept
+template<VoxelRender RenderMode>
+constexpr bool Voxel::is_render_mode(void) const noexcept
 {
     return m_render_mode == RenderMode;
 }
 
-template<world::VoxelShape Shape>
-constexpr bool world::Voxel::is_shape(void) const noexcept
+template<VoxelShape Shape>
+constexpr bool Voxel::is_shape(void) const noexcept
 {
     return m_shape == Shape;
 }
 
-template<world::VoxelTouch TouchType>
-constexpr bool world::Voxel::is_touch_type(void) const noexcept
+template<VoxelTouch TouchType>
+constexpr bool Voxel::is_touch_type(void) const noexcept
 {
     return m_touch_type == TouchType;
 }
 
-template<world::VoxelMaterial Material>
-constexpr bool world::Voxel::is_surface_material(void) const noexcept
+template<VoxelMaterial Material>
+constexpr bool Voxel::is_surface_material(void) const noexcept
 {
     return m_surface_material == Material;
 }

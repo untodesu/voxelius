@@ -6,17 +6,17 @@
 
 #include "shared/world/voxel.hh"
 
-world::Item::Item(const Item& source, item_id id) noexcept : Item(source)
+Item::Item(const Item& source, item_id id) noexcept : Item(source)
 {
     m_id = id;
 }
 
-void world::Item::set_cached_texture(resource_ptr<TextureGUI> texture) const noexcept
+void Item::set_cached_texture(resource_ptr<TextureGUI> texture) const noexcept
 {
     m_cached_texture = std::move(texture);
 }
 
-std::uint64_t world::Item::get_checksum(std::uint64_t combine) const
+std::uint64_t Item::get_checksum(std::uint64_t combine) const
 {
     combine = math::crc64(m_name.data(), m_name.size(), combine);
     combine = math::crc64(m_texture.data(), m_texture.size(), combine);
@@ -27,29 +27,29 @@ std::uint64_t world::Item::get_checksum(std::uint64_t combine) const
     return combine;
 }
 
-world::ItemBuilder::ItemBuilder(std::string_view name)
+ItemBuilder::ItemBuilder(std::string_view name)
 {
     set_name(name);
 }
 
-void world::ItemBuilder::set_name(std::string_view name)
+void ItemBuilder::set_name(std::string_view name)
 {
     assert(name.size());
 
     m_name = name;
 }
 
-void world::ItemBuilder::set_texture(std::string_view texture)
+void ItemBuilder::set_texture(std::string_view texture)
 {
     m_texture = texture;
 }
 
-void world::ItemBuilder::set_place_voxel(const Voxel* place_voxel)
+void ItemBuilder::set_place_voxel(const Voxel* place_voxel)
 {
     m_place_voxel = place_voxel;
 }
 
-std::unique_ptr<world::Item> world::ItemBuilder::build(item_id id) const
+std::unique_ptr<Item> ItemBuilder::build(item_id id) const
 {
     return std::make_unique<Item>(*this, id);
 }

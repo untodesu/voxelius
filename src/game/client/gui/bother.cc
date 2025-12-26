@@ -28,7 +28,7 @@ static void on_status_response_packet(const protocol::StatusResponse& packet)
 
     bother_set.erase(identity);
 
-    gui::BotherResponseEvent event;
+    BotherResponseEvent event;
     event.identity = identity;
     event.is_server_unreachable = false;
     event.num_players = packet.num_players;
@@ -42,7 +42,7 @@ static void on_status_response_packet(const protocol::StatusResponse& packet)
     enet_peer_disconnect(packet.peer, protocol::CHANNEL);
 }
 
-void gui::bother::init(void)
+void bother::init(void)
 {
     bother_host = enet_host_create(nullptr, BOTHER_PEERS, 1, 0, 0);
     bother_dispatcher.clear();
@@ -51,14 +51,14 @@ void gui::bother::init(void)
     bother_dispatcher.sink<protocol::StatusResponse>().connect<&on_status_response_packet>();
 }
 
-void gui::bother::shutdown(void)
+void bother::shutdown(void)
 {
     enet_host_destroy(bother_host);
     bother_dispatcher.clear();
     bother_set.clear();
 }
 
-void gui::bother::update_late(void)
+void bother::update_late(void)
 {
     unsigned int free_peers = 0U;
 
@@ -121,7 +121,7 @@ void gui::bother::update_late(void)
     }
 }
 
-void gui::bother::ping(unsigned int identity, std::string_view host, std::uint16_t port)
+void bother::ping(unsigned int identity, std::string_view host, std::uint16_t port)
 {
     if(bother_set.count(identity)) {
         // Already in the process
@@ -143,7 +143,7 @@ void gui::bother::ping(unsigned int identity, std::string_view host, std::uint16
     bother_queue.push_back(item);
 }
 
-void gui::bother::cancel(unsigned int identity)
+void bother::cancel(unsigned int identity)
 {
     bother_set.erase(identity);
 

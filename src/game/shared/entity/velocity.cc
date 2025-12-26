@@ -9,9 +9,9 @@
 
 #include "shared/globals.hh"
 
-void entity::Velocity::fixed_update(world::Dimension* dimension)
+void Velocity::fixed_update(Dimension* dimension)
 {
-    auto group = dimension->entities.group<entity::Velocity>(entt::get<entity::Transform>, entt::exclude<entity::Stasis>);
+    auto group = dimension->entities.group<Velocity>(entt::get<Transform>, entt::exclude<Stasis>);
 
     for(auto [entity, velocity, transform] : group.each()) {
         transform.local += velocity.value * globals::fixed_frametime;

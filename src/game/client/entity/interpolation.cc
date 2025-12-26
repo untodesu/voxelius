@@ -15,8 +15,7 @@
 
 static void transform_interpolate(float alpha)
 {
-    auto group = globals::dimension->entities.group<entity::client::TransformIntr>(
-        entt::get<entity::Transform, entity::client::TransformPrev>);
+    auto group = globals::dimension->entities.group<client::TransformIntr>(entt::get<Transform, client::TransformPrev>);
 
     for(auto [entity, interp, current, previous] : group.each()) {
         interp.angles[0] = glm::mix(previous.angles[0], current.angles[0], alpha);
@@ -41,7 +40,7 @@ static void transform_interpolate(float alpha)
 
 static void head_interpolate(float alpha)
 {
-    auto group = globals::dimension->entities.group<entity::client::HeadIntr>(entt::get<entity::Head, entity::client::HeadPrev>);
+    auto group = globals::dimension->entities.group<client::HeadIntr>(entt::get<Head, client::HeadPrev>);
 
     for(auto [entity, interp, current, previous] : group.each()) {
         interp.angles[0] = glm::mix(previous.angles[0], current.angles[0], alpha);
@@ -54,7 +53,7 @@ static void head_interpolate(float alpha)
     }
 }
 
-void entity::interpolation::update(void)
+void interpolation::update(void)
 {
     if(globals::dimension) {
         auto alpha = static_cast<float>(globals::fixed_accumulator) / static_cast<float>(globals::fixed_frametime_us);

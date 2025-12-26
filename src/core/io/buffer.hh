@@ -1,5 +1,3 @@
-namespace io
-{
 class ReadBuffer final {
 public:
     ReadBuffer(void) = default;
@@ -31,10 +29,7 @@ private:
     std::vector<std::byte> m_vector;
     std::size_t m_position;
 };
-} // namespace io
 
-namespace io
-{
 class WriteBuffer final {
 public:
     WriteBuffer(void) = default;
@@ -61,27 +56,26 @@ public:
 private:
     std::vector<std::byte> m_vector;
 };
-} // namespace io
 
-constexpr void io::ReadBuffer::rewind(void)
+constexpr void ReadBuffer::rewind(void)
 {
     m_position = 0;
 }
 
-constexpr bool io::ReadBuffer::is_ended(void) const
+constexpr bool ReadBuffer::is_ended(void) const
 {
     return m_position >= m_vector.size();
 }
 
 template<typename T>
-io::ReadBuffer& io::ReadBuffer::operator>>(T& value)
+ReadBuffer& ReadBuffer::operator>>(T& value)
 {
     value = read<T>();
     return *this;
 }
 
 template<typename T>
-io::WriteBuffer& io::WriteBuffer::operator<<(const T value)
+WriteBuffer& WriteBuffer::operator<<(const T value)
 {
     write<T>(value);
     return *this;

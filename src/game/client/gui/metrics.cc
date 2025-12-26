@@ -15,7 +15,7 @@
 
 #include "client/entity/camera.hh"
 
-#include "client/gui/imdraw_ext.hh"
+#include "client/gui/imutils_text.hh"
 
 #include "client/game.hh"
 #include "client/globals.hh"
@@ -27,13 +27,13 @@ constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground |
 static std::basic_string<GLubyte> r_version;
 static std::basic_string<GLubyte> r_renderer;
 
-void gui::metrics::init(void)
+void metrics::init(void)
 {
     r_version = std::basic_string<GLubyte>(glGetString(GL_VERSION));
     r_renderer = std::basic_string<GLubyte>(glGetString(GL_RENDERER));
 }
 
-void gui::metrics::layout(void)
+void metrics::layout(void)
 {
     if(!session::is_ingame()) {
         // Sanity check; we are checking this
@@ -54,50 +54,50 @@ void gui::metrics::layout(void)
 
     // Draw version
     auto version_line = std::format("Voxelius {}", version::full);
-    gui::imdraw_ext::text_shadow(version_line, position, text_color, shadow_color, globals::font_unscii8, draw_list, font_size);
+    imutils::text_nw(draw_list, version_line, position, text_color, shadow_color, globals::font_unscii8, font_size);
     position.y += 1.5f * y_step;
 
     // Draw client-side window framerate metrics
     auto window_framerate = 1.0f / globals::window_frametime_avg;
     auto window_frametime = 1000.0f * globals::window_frametime_avg;
     auto window_fps_line = std::format("{:.02f} FPS [{:.02f} ms]", window_framerate, window_frametime);
-    gui::imdraw_ext::text_shadow(window_fps_line, position, text_color, shadow_color, globals::font_unscii8, draw_list, font_size);
+    imutils::text_nw(draw_list, window_fps_line, position, text_color, shadow_color, globals::font_unscii8, font_size);
     position.y += y_step;
 
     // Draw world rendering metrics
     auto drawcall_line = std::format("World: {} DC / {} TRI", globals::num_drawcalls, globals::num_triangles);
-    gui::imdraw_ext::text_shadow(drawcall_line, position, text_color, shadow_color, globals::font_unscii8, draw_list, font_size);
+    imutils::text_nw(draw_list, drawcall_line, position, text_color, shadow_color, globals::font_unscii8, font_size);
     position.y += y_step;
 
     // Draw OpenGL version string
     auto r_version_line = std::format("GL_VERSION: {}", reinterpret_cast<const char*>(r_version.c_str()));
-    gui::imdraw_ext::text_shadow(r_version_line, position, text_color, shadow_color, globals::font_unscii8, draw_list, font_size);
+    imutils::text_nw(draw_list, r_version_line, position, text_color, shadow_color, globals::font_unscii8, font_size);
     position.y += y_step;
 
     // Draw OpenGL renderer string
     auto r_renderer_line = std::format("GL_RENDERER: {}", reinterpret_cast<const char*>(r_renderer.c_str()));
-    gui::imdraw_ext::text_shadow(r_renderer_line, position, text_color, shadow_color, globals::font_unscii8, draw_list, font_size);
+    imutils::text_nw(draw_list, r_renderer_line, position, text_color, shadow_color, globals::font_unscii8, font_size);
     position.y += 1.5f * y_step;
 
-    const auto& head = globals::dimension->entities.get<entity::Head>(globals::player);
-    const auto& transform = globals::dimension->entities.get<entity::Transform>(globals::player);
-    const auto& velocity = globals::dimension->entities.get<entity::Velocity>(globals::player);
+    const auto& head = globals::dimension->entities.get<Head>(globals::player);
+    const auto& transform = globals::dimension->entities.get<Transform>(globals::player);
+    const auto& velocity = globals::dimension->entities.get<Velocity>(globals::player);
 
     // Draw player voxel position
     auto voxel_position = coord::to_voxel(transform.chunk, transform.local);
     auto voxel_line = std::format("voxel: [{} {} {}]", voxel_position.x, voxel_position.y, voxel_position.z);
-    gui::imdraw_ext::text_shadow(voxel_line, position, text_color, shadow_color, globals::font_unscii8, draw_list, font_size);
+    imutils::text_nw(draw_list, voxel_line, position, text_color, shadow_color, globals::font_unscii8, font_size);
     position.y += y_step;
 
     // Draw player world position
     auto world_line = std::format("world: [{} {} {}] [{:.03f} {:.03f} {:.03f}]", transform.chunk.x, transform.chunk.y, transform.chunk.z,
         transform.local.x, transform.local.y, transform.local.z);
-    gui::imdraw_ext::text_shadow(world_line, position, text_color, shadow_color, globals::font_unscii8, draw_list, font_size);
+    imutils::text_nw(draw_list, world_line, position, text_color, shadow_color, globals::font_unscii8, font_size);
     position.y += y_step;
 
     // Draw player look angles
     auto angles = glm::degrees(transform.angles + head.angles);
     auto angle_line = std::format("angle: [{: .03f} {: .03f} {: .03f}]", angles[0], angles[1], angles[2]);
-    gui::imdraw_ext::text_shadow(angle_line, position, text_color, shadow_color, globals::font_unscii8, draw_list, font_size);
+    imutils::text_nw(draw_list, angle_line, position, text_color, shadow_color, globals::font_unscii8, font_size);
     position.y += y_step;
 }

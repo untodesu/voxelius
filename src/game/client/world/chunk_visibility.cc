@@ -23,8 +23,8 @@
 // we throttle the client's ever increasing itch for new chunks
 constexpr static unsigned int MAX_CHUNKS_REQUESTS_PER_FRAME = 16U;
 
-static world::ChunkAABB current_view_box;
-static world::ChunkAABB previous_view_box;
+static ChunkAABB current_view_box;
+static ChunkAABB previous_view_box;
 static std::vector<chunk_pos> requests;
 
 static void update_requests(void)
@@ -42,16 +42,16 @@ static void update_requests(void)
             }
 
     std::sort(requests.begin(), requests.end(), [](const chunk_pos& cpos_a, const chunk_pos& cpos_b) {
-        auto da = math::distance2(cpos_a, entity::camera::position_chunk);
-        auto db = math::distance2(cpos_b, entity::camera::position_chunk);
+        auto da = math::distance2(cpos_a, camera::position_chunk);
+        auto db = math::distance2(cpos_b, camera::position_chunk);
         return da > db;
     });
 }
 
-void world::chunk_visibility::update_late(void)
+void chunk_visibility::update_late(void)
 {
-    current_view_box.min = entity::camera::position_chunk - static_cast<chunk_pos::value_type>(entity::camera::view_distance.get_value());
-    current_view_box.max = entity::camera::position_chunk + static_cast<chunk_pos::value_type>(entity::camera::view_distance.get_value());
+    current_view_box.min = camera::position_chunk - static_cast<chunk_pos::value_type>(camera::view_distance.get_value());
+    current_view_box.max = camera::position_chunk + static_cast<chunk_pos::value_type>(camera::view_distance.get_value());
 
     if(!session::is_ingame()) {
         // This makes sure the previous view box

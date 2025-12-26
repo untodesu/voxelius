@@ -47,7 +47,7 @@ static void on_glfw_cursor_enter(GLFWwindow* window, int entered)
 
 static void on_glfw_cursor_pos(GLFWwindow* window, double xpos, double ypos)
 {
-    io::GlfwCursorPosEvent event;
+    GlfwCursorPosEvent event;
     event.pos.x = static_cast<float>(xpos);
     event.pos.y = static_cast<float>(ypos);
     globals::dispatcher.trigger(event);
@@ -68,7 +68,7 @@ static void on_glfw_framebuffer_size(GLFWwindow* window, int width, int height)
     globals::height = height;
     globals::aspect = static_cast<float>(width) / static_cast<float>(height);
 
-    io::GlfwFramebufferSizeEvent fb_event;
+    GlfwFramebufferSizeEvent fb_event;
     fb_event.size.x = globals::width;
     fb_event.size.y = globals::height;
     fb_event.aspect = globals::aspect;
@@ -77,7 +77,7 @@ static void on_glfw_framebuffer_size(GLFWwindow* window, int width, int height)
 
 static void on_glfw_key(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    io::GlfwKeyEvent event;
+    GlfwKeyEvent event;
     event.key = key;
     event.scancode = scancode;
     event.action = action;
@@ -89,7 +89,7 @@ static void on_glfw_key(GLFWwindow* window, int key, int scancode, int action, i
 
 static void on_glfw_joystick(int joystick_id, int event_type)
 {
-    io::GlfwJoystickEvent event;
+    GlfwJoystickEvent event;
     event.joystick_id = joystick_id;
     event.event_type = event_type;
     globals::dispatcher.trigger(event);
@@ -102,7 +102,7 @@ static void on_glfw_monitor_event(GLFWmonitor* monitor, int event)
 
 static void on_glfw_mouse_button(GLFWwindow* window, int button, int action, int mods)
 {
-    io::GlfwMouseButtonEvent event;
+    GlfwMouseButtonEvent event;
     event.button = button;
     event.action = action;
     event.mods = mods;
@@ -113,7 +113,7 @@ static void on_glfw_mouse_button(GLFWwindow* window, int button, int action, int
 
 static void on_glfw_scroll(GLFWwindow* window, double dx, double dy)
 {
-    io::GlfwScrollEvent event;
+    GlfwScrollEvent event;
     event.dx = static_cast<float>(dx);
     event.dy = static_cast<float>(dy);
     globals::dispatcher.trigger(event);
@@ -140,17 +140,17 @@ static void on_termination_signal(int)
 
 int main(int argc, char** argv)
 {
-    io::cmdline::create(argc, argv);
+    cmdline::create(argc, argv);
 
 #if defined(_WIN32)
 #if defined(NDEBUG)
-    if(GetConsoleWindow() && !io::cmdline::contains("debug")) {
+    if(GetConsoleWindow() && !cmdline::contains("debug")) {
         // Hide the console window on release builds
         // unless explicitly specified to preserve it instead
         FreeConsole();
     }
 #else
-    if(GetConsoleWindow() && io::cmdline::contains("nodebug")) {
+    if(GetConsoleWindow() && cmdline::contains("nodebug")) {
         // Hide the console window on debug builds when
         // explicitly specified by the user to hide it
         FreeConsole();
@@ -201,7 +201,7 @@ int main(int argc, char** argv)
     }
 
     if(GLAD_GL_KHR_debug) {
-        if(!io::cmdline::contains("nodebug")) {
+        if(!cmdline::contains("nodebug")) {
             glEnable(GL_DEBUG_OUTPUT);
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
             glDebugMessageCallback(&on_opengl_message, nullptr);
@@ -261,7 +261,7 @@ int main(int argc, char** argv)
         glfwSetWindowIcon(globals::window, 1, &icon_image);
     }
 
-    if(io::cmdline::contains("nosound")) {
+    if(cmdline::contains("nosound")) {
         spdlog::warn("client: sound disabled [per command line]");
         globals::sound_dev = nullptr;
         globals::sound_ctx = nullptr;
@@ -298,7 +298,7 @@ int main(int argc, char** argv)
 
     splash::init_client();
 
-    gui::window_title::update();
+    window_title::update();
 
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
@@ -319,7 +319,7 @@ int main(int argc, char** argv)
     int vmode_width = DEFAULT_WIDTH;
     int vmode_height = DEFAULT_HEIGHT;
 
-    if(auto vmode = io::cmdline::get_cstr("mode")) {
+    if(auto vmode = cmdline::get_cstr("mode")) {
         std::sscanf(vmode, "%dx%d", &vmode_width, &vmode_height);
         vmode_height = glm::max(vmode_height, MIN_HEIGHT);
         vmode_width = glm::max(vmode_width, MIN_WIDTH);

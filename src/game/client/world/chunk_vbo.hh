@@ -1,7 +1,5 @@
 #pragma once
 
-namespace world
-{
 class ChunkVBO final {
 public:
     std::size_t size;
@@ -19,4 +17,3 @@ public:
         }
     }
 };
-} // namespace world

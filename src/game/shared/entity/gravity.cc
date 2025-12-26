@@ -9,10 +9,10 @@
 
 #include "shared/globals.hh"
 
-void entity::Gravity::fixed_update(world::Dimension* dimension)
+void Gravity::fixed_update(Dimension* dimension)
 {
     auto fixed_acceleration = globals::fixed_frametime * dimension->get_gravity();
-    auto group = dimension->entities.group<entity::Gravity>(entt::get<entity::Velocity>, entt::exclude<entity::Stasis>);
+    auto group = dimension->entities.group<Gravity>(entt::get<Velocity>, entt::exclude<Stasis>);
 
     for(auto [entity, velocity] : group.each()) {
         velocity.value.y += fixed_acceleration;

@@ -8,7 +8,7 @@
 
 #include "client/globals.hh"
 
-void gui::window_title::update(void)
+void window_title::update(void)
 {
     glfwSetWindowTitle(globals::window, std::format("Voxelius {}: {}", version::triplet, splash::get()).c_str());
 }

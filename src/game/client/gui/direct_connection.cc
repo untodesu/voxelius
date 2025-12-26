@@ -29,7 +29,7 @@ static std::string str_password;
 static std::string direct_hostname;
 static std::string direct_password;
 
-static void on_glfw_key(const io::GlfwKeyEvent& event)
+static void on_glfw_key(const GlfwKeyEvent& event)
 {
     if((event.key == GLFW_KEY_ESCAPE) && (event.action == GLFW_PRESS)) {
         if(globals::gui_screen == GUI_DIRECT_CONNECTION) {
@@ -39,14 +39,14 @@ static void on_glfw_key(const io::GlfwKeyEvent& event)
     }
 }
 
-static void on_language_set(const gui::LanguageSetEvent& event)
+static void on_language_set(const LanguageSetEvent& event)
 {
-    str_title = gui::language::resolve("direct_connection.title");
-    str_connect = gui::language::resolve_gui("direct_connection.connect");
-    str_cancel = gui::language::resolve_gui("direct_connection.cancel");
+    str_title = language::resolve("direct_connection.title");
+    str_connect = language::resolve_gui("direct_connection.connect");
+    str_cancel = language::resolve_gui("direct_connection.cancel");
 
-    str_hostname = gui::language::resolve("direct_connection.hostname");
-    str_password = gui::language::resolve("direct_connection.password");
+    str_hostname = language::resolve("direct_connection.hostname");
+    str_password = language::resolve("direct_connection.password");
 }
 
 static void connect_to_server(void)
@@ -72,13 +72,13 @@ static void connect_to_server(void)
     session::connect(parsed_hostname.c_str(), parsed_port, direct_password.c_str());
 }
 
-void gui::direct_connection::init(void)
+void direct_connection::init(void)
 {
-    globals::dispatcher.sink<io::GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
     globals::dispatcher.sink<LanguageSetEvent>().connect<&on_language_set>();
 }
 
-void gui::direct_connection::layout(void)
+void direct_connection::layout(void)
 {
     auto viewport = ImGui::GetMainViewport();
     auto window_start = ImVec2(0.25f * viewport->Size.x, 0.20f * viewport->Size.y);

@@ -27,7 +27,7 @@ static inline std::string get_option(const std::string& string)
     return std::string(string.cbegin() + i, string.cend());
 }
 
-void io::cmdline::create(int argc, char** argv)
+void cmdline::create(int argc, char** argv)
 {
     for(int idx = 1; idx < argc; ++idx) {
         std::string string = argv[idx];
@@ -57,17 +57,17 @@ void io::cmdline::create(int argc, char** argv)
     }
 }
 
-void io::cmdline::insert(std::string_view option)
+void cmdline::insert(std::string_view option)
 {
     options.insert_or_assign(std::string(option), std::string());
 }
 
-void io::cmdline::insert(std::string_view option, std::string_view argument)
+void cmdline::insert(std::string_view option, std::string_view argument)
 {
     options.insert_or_assign(std::string(option), std::string(argument));
 }
 
-std::string_view io::cmdline::get(std::string_view option, std::string_view fallback)
+std::string_view cmdline::get(std::string_view option, std::string_view fallback)
 {
     auto it = options.find(std::string(option));
 
@@ -78,7 +78,7 @@ std::string_view io::cmdline::get(std::string_view option, std::string_view fall
     return it->second;
 }
 
-const char* io::cmdline::get_cstr(std::string_view option, const char* fallback)
+const char* cmdline::get_cstr(std::string_view option, const char* fallback)
 {
     auto it = options.find(std::string(option));
 
@@ -89,7 +89,7 @@ const char* io::cmdline::get_cstr(std::string_view option, const char* fallback)
     return it->second.c_str();
 }
 
-bool io::cmdline::contains(std::string_view option)
+bool cmdline::contains(std::string_view option)
 {
     return options.count(std::string(option));
 }

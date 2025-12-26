@@ -30,7 +30,7 @@ static std::string_view get_axis_name(int axis)
     return UNKNOWN_AXIS_NAME;
 }
 
-config::GamepadAxis::GamepadAxis(void) : GamepadAxis(io::INVALID_GAMEPAD_AXIS, false)
+config::GamepadAxis::GamepadAxis(void) : GamepadAxis(INVALID_GAMEPAD_AXIS, false)
 {
 }
 
@@ -66,7 +66,7 @@ void config::GamepadAxis::set(std::string_view value)
     }
 
     m_inverted = false;
-    m_gamepad_axis = io::INVALID_GAMEPAD_AXIS;
+    m_gamepad_axis = INVALID_GAMEPAD_AXIS;
     m_name = UNKNOWN_AXIS_NAME;
     m_full_string = std::format("{}:{}", m_name, m_inverted ? 1U : 0U);
 }
