@@ -30,7 +30,6 @@ add_subdirectory(entity)
 add_subdirectory(gui)
 add_subdirectory(io)
 add_subdirectory(resource)
-add_subdirectory(sound)
 add_subdirectory(world)
 
 if(WIN32 AND MSVC)

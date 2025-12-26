@@ -21,10 +21,9 @@
 #include "client/gui/settings.hh"
 
 #include "client/io/glfw.hh"
+#include "client/io/sound.hh"
 
 #include "client/resource/sound_effect.hh"
-
-#include "client/sound/sound.hh"
 
 #include "client/game.hh"
 #include "client/globals.hh"

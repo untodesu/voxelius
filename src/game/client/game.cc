@@ -63,10 +63,9 @@
 
 #include "client/io/gamepad.hh"
 #include "client/io/glfw.hh"
+#include "client/io/sound.hh"
 
 #include "client/resource/texture_gui.hh"
-
-#include "client/sound/sound.hh"
 
 #include "client/world/chunk_mesher.hh"
 #include "client/world/chunk_renderer.hh"

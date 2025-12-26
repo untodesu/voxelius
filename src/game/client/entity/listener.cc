@@ -12,7 +12,7 @@
 
 #include "client/entity/camera.hh"
 
-#include "client/sound/sound.hh"
+#include "client/io/sound.hh"
 
 #include "client/const.hh"
 #include "client/globals.hh"

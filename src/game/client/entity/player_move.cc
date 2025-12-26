@@ -27,7 +27,7 @@
 
 #include "client/io/gamepad.hh"
 
-#include "client/sound/sound.hh"
+#include "client/io/sound.hh"
 
 #include "client/world/voxel_sounds.hh"
 

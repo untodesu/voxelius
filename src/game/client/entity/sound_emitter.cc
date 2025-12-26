@@ -15,7 +15,7 @@
 
 #include "client/entity/camera.hh"
 
-#include "client/sound/sound.hh"
+#include "client/io/sound.hh"
 
 #include "client/globals.hh"
 

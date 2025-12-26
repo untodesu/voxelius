@@ -1,6 +1,6 @@
 #include "client/pch.hh"
 
-#include "client/sound/sound.hh"
+#include "client/io/sound.hh"
 
 #include "core/config/number.hh"
 

@@ -18,7 +18,7 @@
 #include "client/gui/message_box.hh"
 #include "client/gui/window_title.hh"
 
-#include "client/sound/sound.hh"
+#include "client/io/sound.hh"
 
 #include "client/globals.hh"
 #include "client/session.hh"
