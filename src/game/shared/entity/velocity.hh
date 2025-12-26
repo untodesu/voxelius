@@ -2,7 +2,7 @@
 
 class Dimension;
 
-struct Velocity final {
+struct Velocity {
     glm::fvec3 value;
 
 public:
@@ -11,3 +11,10 @@ public:
     // NOTE: This system was previously called inertial
     static void fixed_update(Dimension* dimension);
 };
+
+namespace client
+{
+// Client-side only - interpolated and previous velocity
+struct VelocityIntr final : public Velocity {};
+struct VelocityPrev final : public Velocity {};
+} // namespace client

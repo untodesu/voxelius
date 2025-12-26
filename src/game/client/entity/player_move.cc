@@ -161,6 +161,7 @@ void player_move::fixed_update(void)
 
     // Interpolation - preserve current component states
     globals::dimension->entities.emplace_or_replace<client::TransformPrev>(globals::player, transform);
+    globals::dimension->entities.emplace_or_replace<client::VelocityPrev>(globals::player, velocity);
 
     glm::fvec3 forward, right;
     math::vectors(glm::fvec3(0.0f, head.angles[1], 0.0f), &forward, &right, nullptr);

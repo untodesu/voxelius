@@ -8,6 +8,7 @@
 
 #include "core/math/angles.hh"
 
+#include "shared/entity/grounded.hh"
 #include "shared/entity/head.hh"
 #include "shared/entity/transform.hh"
 #include "shared/entity/velocity.hh"
@@ -87,7 +88,7 @@ void camera::update(void)
 
     const auto& head = globals::dimension->entities.get<client::HeadIntr>(globals::player);
     const auto& transform = globals::dimension->entities.get<client::TransformIntr>(globals::player);
-    const auto& velocity = globals::dimension->entities.get<Velocity>(globals::player);
+    const auto& velocity = globals::dimension->entities.get<client::VelocityIntr>(globals::player);
 
     camera::angles = transform.angles + head.angles;
     camera::position_chunk = transform.chunk;
@@ -98,8 +99,7 @@ void camera::update(void)
 
     auto client_angles = camera::angles;
 
-    if(!toggles::get(TOGGLE_PM_FLIGHT)) {
-        // Apply the quake-like view rolling
+    if(!toggles::get(TOGGLE_PM_FLIGHT) && globals::dimension->entities.try_get<Grounded>(globals::player)) {
         client_angles[2] = math::radians(-camera::roll_angle.get_value() * glm::dot(velocity.value / PMOVE_MAX_SPEED_GROUND, right_vector));
     }
 

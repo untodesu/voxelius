@@ -16,7 +16,7 @@
 #include "shared/globals.hh"
 
 static int vgrid_collide(const Dimension* dimension, int d, Collision& collision, Transform& transform, Velocity& velocity,
-    VoxelMaterial& touch_surface)
+    VoxelMaterial& touch_surface, bool enable_snapping_to_grid)
 {
     auto movespeed = globals::fixed_frametime * velocity.value[d];
     auto movesign = math::sign<int>(movespeed);
@@ -135,15 +135,15 @@ static int vgrid_collide(const Dimension* dimension, int d, Collision& collision
             snap_to_closest_vbox = true;
         }
 
-        if(snap_to_closest_vbox) {
+        if(snap_to_closest_vbox && enable_snapping_to_grid) {
             auto vbox_center = 0.5f * closest_vbox.min[d] + 0.5f * closest_vbox.max[d];
             auto vbox_halfsize = 0.5f * closest_vbox.max[d] - 0.5f * closest_vbox.min[d];
 
             if(movesign < 0) {
-                transform.local[d] = vbox_center + vbox_halfsize + ref_halfsize[d] - ref_center[d] + 0.01f;
+                transform.local[d] = vbox_center + vbox_halfsize + ref_halfsize[d] - ref_center[d] + 0.01f * globals::fixed_frametime;
             }
             else {
-                transform.local[d] = vbox_center - vbox_halfsize - ref_halfsize[d] - ref_center[d] - 0.01f;
+                transform.local[d] = vbox_center - vbox_halfsize - ref_halfsize[d] - ref_center[d] - 0.01f * globals::fixed_frametime;
             }
         }
 
@@ -162,10 +162,11 @@ void Collision::fixed_update(Dimension* dimension)
 
     for(auto [entity, collision, transform, velocity] : group.each()) {
         auto surface = VMAT_UNKNOWN;
-        auto vertical_move = vgrid_collide(dimension, 1, collision, transform, velocity, surface);
+        auto vertical_move = vgrid_collide(dimension, 1, collision, transform, velocity, surface, true);
 
         if(dimension->entities.any_of<Gravity>(entity)) {
             if(vertical_move == math::sign<int>(dimension->get_gravity())) {
+                spdlog::info("grounded");
                 dimension->entities.emplace_or_replace<Grounded>(entity, Grounded { surface });
             }
             else {
@@ -179,7 +180,7 @@ void Collision::fixed_update(Dimension* dimension)
             dimension->entities.remove<Grounded>(entity);
         }
 
-        vgrid_collide(dimension, 0, collision, transform, velocity, surface);
-        vgrid_collide(dimension, 2, collision, transform, velocity, surface);
+        vgrid_collide(dimension, 0, collision, transform, velocity, surface, false);
+        vgrid_collide(dimension, 2, collision, transform, velocity, surface, false);
     }
 }

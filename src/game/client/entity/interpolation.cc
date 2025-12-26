@@ -6,6 +6,7 @@
 
 #include "shared/entity/head.hh"
 #include "shared/entity/transform.hh"
+#include "shared/entity/velocity.hh"
 
 #include "shared/world/dimension.hh"
 
@@ -53,11 +54,23 @@ static void head_interpolate(float alpha)
     }
 }
 
+static void velocity_interpolate(float alpha)
+{
+    auto group = globals::dimension->entities.group<client::VelocityIntr>(entt::get<Velocity, client::VelocityPrev>);
+
+    for(auto [entity, interp, current, previous] : group.each()) {
+        interp.value[0] = glm::mix(previous.value[0], current.value[0], alpha);
+        interp.value[1] = glm::mix(previous.value[1], current.value[1], alpha);
+        interp.value[2] = glm::mix(previous.value[2], current.value[2], alpha);
+    }
+}
+
 void interpolation::update(void)
 {
     if(globals::dimension) {
         auto alpha = static_cast<float>(globals::fixed_accumulator) / static_cast<float>(globals::fixed_frametime_us);
         transform_interpolate(alpha);
         head_interpolate(alpha);
+        velocity_interpolate(alpha);
     }
 }
