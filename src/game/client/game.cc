@@ -545,7 +545,7 @@ void client_game::update(void)
 
     auto& io = ImGui::GetIO();
     io.FontGlobalScale = scale_min;
-    globals::gui_scale = scale_min;
+    globals::gui_scale = static_cast<unsigned int>(scale_min);
 }
 
 void client_game::update_late(void)
