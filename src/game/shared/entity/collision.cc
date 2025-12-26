@@ -166,7 +166,6 @@ void Collision::fixed_update(Dimension* dimension)
 
         if(dimension->entities.any_of<Gravity>(entity)) {
             if(vertical_move == math::sign<int>(dimension->get_gravity())) {
-                spdlog::info("grounded");
                 dimension->entities.emplace_or_replace<Grounded>(entity, Grounded { surface });
             }
             else {
