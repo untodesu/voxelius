@@ -86,6 +86,8 @@
 #include "client/session.hh"
 #include "client/toggles.hh"
 
+constexpr static int PIXEL_SIZE = 2;
+
 config::Boolean client_game::streamer_mode(false);
 config::Boolean client_game::vertical_sync(true);
 config::Boolean client_game::world_curvature(true);
@@ -95,6 +97,9 @@ config::String client_game::username("player");
 bool client_game::hide_hud = false;
 
 static config::KeyBind hide_hud_toggle(GLFW_KEY_F1);
+
+static int scaled_width;
+static int scaled_height;
 
 static ImFont* load_font(std::string_view path, float size, ImFontConfig& font_config, ImVector<ImWchar>& ranges)
 {
@@ -128,11 +133,14 @@ static void on_glfw_framebuffer_size(const GlfwFramebufferSizeEvent& event)
     glGenTextures(1, &globals::world_fbo_color);
     glGenRenderbuffers(1, &globals::world_fbo_depth);
 
+    scaled_width = event.size.x / PIXEL_SIZE;
+    scaled_height = event.size.y / PIXEL_SIZE;
+
     glBindTexture(GL_TEXTURE_2D, globals::world_fbo_color);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, event.size.x, event.size.y, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, scaled_width, scaled_height, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
     glBindRenderbuffer(GL_RENDERBUFFER, globals::world_fbo_depth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, event.size.x, event.size.y);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, scaled_width, scaled_height);
 
     glBindFramebuffer(GL_FRAMEBUFFER, globals::world_fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, globals::world_fbo_color, 0);
@@ -590,7 +598,7 @@ void client_game::update_late(void)
 
 void client_game::render(void)
 {
-    glViewport(0, 0, globals::width, globals::height);
+    glViewport(0, 0, scaled_width, scaled_height);
     glBindFramebuffer(GL_FRAMEBUFFER, globals::world_fbo);
     glClearColor(skybox::fog_color.r, skybox::fog_color.g, skybox::fog_color.b, 1.000f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -611,7 +619,7 @@ void client_game::render(void)
         for(const auto [entity, collision, head, transform] : group.each()) {
             if(entity == globals::player) {
                 // Don't render ourselves
-                continue;
+                // continue;
             }
 
             glm::fvec3 forward;
@@ -636,7 +644,7 @@ void client_game::render(void)
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, globals::world_fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(0, 0, globals::width, globals::height, 0, 0, globals::width, globals::height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, scaled_width, scaled_height, 0, 0, globals::width, globals::height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
 void client_game::layout(void)

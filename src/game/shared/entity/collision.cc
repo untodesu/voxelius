@@ -15,6 +15,8 @@
 #include "shared/coord.hh"
 #include "shared/globals.hh"
 
+constexpr static float EPSILON = 0.5f;
+
 static int vgrid_collide(const Dimension* dimension, int d, Collision& collision, Transform& transform, Velocity& velocity,
     VoxelMaterial& touch_surface, bool enable_snapping_to_grid)
 {
@@ -87,7 +89,11 @@ static int vgrid_collide(const Dimension* dimension, int d, Collision& collision
                 auto vbox = voxel->get_collision().push(lpos);
                 auto vbox_center = 0.5f * vbox.min + 0.5f * vbox.max;
 
-                if(!csg_aabb.intersect(vbox)) {
+                math::AABBf clip_vbox(vbox);
+                clip_vbox.min -= EPSILON * globals::fixed_frametime;
+                clip_vbox.max += EPSILON * globals::fixed_frametime;
+
+                if(!csg_aabb.intersect(clip_vbox)) {
                     continue; // no intersection
                 }
 
@@ -140,10 +146,10 @@ static int vgrid_collide(const Dimension* dimension, int d, Collision& collision
             auto vbox_halfsize = 0.5f * closest_vbox.max[d] - 0.5f * closest_vbox.min[d];
 
             if(movesign < 0) {
-                transform.local[d] = vbox_center + vbox_halfsize + ref_halfsize[d] - ref_center[d] + 0.01f * globals::fixed_frametime;
+                transform.local[d] = vbox_center + vbox_halfsize + ref_halfsize[d] - ref_center[d] + EPSILON * globals::fixed_frametime;
             }
             else {
-                transform.local[d] = vbox_center - vbox_halfsize - ref_halfsize[d] - ref_center[d] - 0.01f * globals::fixed_frametime;
+                transform.local[d] = vbox_center - vbox_halfsize - ref_halfsize[d] - ref_center[d] - EPSILON * globals::fixed_frametime;
             }
         }
 
@@ -161,12 +167,20 @@ void Collision::fixed_update(Dimension* dimension)
     auto group = dimension->entities.group<Collision>(entt::get<Transform, Velocity>);
 
     for(auto [entity, collision, transform, velocity] : group.each()) {
-        auto surface = VMAT_UNKNOWN;
-        auto vertical_move = vgrid_collide(dimension, 1, collision, transform, velocity, surface, true);
+        auto speedvec = velocity.value;
+        auto hspeed = glm::abs(0.5f * speedvec.x + 0.5f * speedvec.z);
+        auto vspeed = glm::abs(speedvec.y);
+
+        glm::vec<3, VoxelMaterial> surface;
+
+        glm::ivec3 movesign;
+        movesign.x = vgrid_collide(dimension, 0, collision, transform, velocity, surface.x, true);
+        movesign.z = vgrid_collide(dimension, 2, collision, transform, velocity, surface.z, true);
+        movesign.y = vgrid_collide(dimension, 1, collision, transform, velocity, surface.y, true);
 
         if(dimension->entities.any_of<Gravity>(entity)) {
-            if(vertical_move == math::sign<int>(dimension->get_gravity())) {
-                dimension->entities.emplace_or_replace<Grounded>(entity, Grounded { surface });
+            if(movesign.y == math::sign<int>(dimension->get_gravity())) {
+                dimension->entities.emplace_or_replace<Grounded>(entity, Grounded { surface.y });
             }
             else {
                 dimension->entities.remove<Grounded>(entity);
@@ -178,8 +192,5 @@ void Collision::fixed_update(Dimension* dimension)
             // concept of resting on the ground (it flies around)
             dimension->entities.remove<Grounded>(entity);
         }
-
-        vgrid_collide(dimension, 0, collision, transform, velocity, surface, false);
-        vgrid_collide(dimension, 2, collision, transform, velocity, surface, false);
     }
 }

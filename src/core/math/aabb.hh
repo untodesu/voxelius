@@ -59,9 +59,9 @@ template<math::arithmetic T>
 constexpr bool math::AABB<T>::contains(const vector_type& point) const
 {
     auto result = true;
-    result = result && (point.x >= min.x) && (point.x <= max.x);
-    result = result && (point.y >= min.y) && (point.y <= max.y);
-    result = result && (point.z >= min.z) && (point.z <= max.z);
+    result = result && (point.x > min.x) && (point.x < max.x);
+    result = result && (point.y > min.y) && (point.y < max.y);
+    result = result && (point.z > min.z) && (point.z < max.z);
     return result;
 }
 
@@ -69,9 +69,9 @@ template<math::arithmetic T>
 constexpr bool math::AABB<T>::intersect(const AABB<value_type>& other_box) const
 {
     auto result = true;
-    result = result && (min.x <= other_box.max.x) && (max.x >= other_box.min.x);
-    result = result && (min.y <= other_box.max.y) && (max.y >= other_box.min.y);
-    result = result && (min.z <= other_box.max.z) && (max.z >= other_box.min.z);
+    result = result && (min.x < other_box.max.x) && (max.x > other_box.min.x);
+    result = result && (min.y < other_box.max.y) && (max.y > other_box.min.y);
+    result = result && (min.z < other_box.max.z) && (max.z > other_box.min.z);
     return result;
 }
 
