@@ -48,9 +48,9 @@ void metrics::layout(void)
     auto text_color = ImGui::GetColorU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
     auto shadow_color = ImGui::GetColorU32(ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
 
-    auto font_size = 4.0f;
+    auto font_size = 8.0f * globals::gui_scale;
     auto position = ImVec2(8.0f, 8.0f);
-    auto y_step = 1.5f * globals::gui_scale * font_size;
+    auto y_step = 1.5f * font_size;
 
     // Draw version
     auto version_line = std::format("Voxelius {}", version::full);

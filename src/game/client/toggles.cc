@@ -101,7 +101,7 @@ void toggles::init(void)
 
     toggle_infos[TOGGLE_CHUNK_AABB].description = "chunk Borders";
     toggle_infos[TOGGLE_CHUNK_AABB].glfw_keycode = GLFW_KEY_G;
-    toggle_infos[TOGGLE_CHUNK_AABB].is_enabled = false;
+    toggle_infos[TOGGLE_CHUNK_AABB].is_enabled = true;
 
     toggle_infos[TOGGLE_METRICS_UI].description = std::string_view();
     toggle_infos[TOGGLE_METRICS_UI].glfw_keycode = GLFW_KEY_V;

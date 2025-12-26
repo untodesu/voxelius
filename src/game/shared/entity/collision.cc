@@ -18,35 +18,41 @@
 static int vgrid_collide(const Dimension* dimension, int d, Collision& collision, Transform& transform, Velocity& velocity,
     VoxelMaterial& touch_surface)
 {
-    const auto move = globals::fixed_frametime * velocity.value[d];
-    const auto move_sign = math::sign<int>(move);
+    auto movespeed = globals::fixed_frametime * velocity.value[d];
+    auto movesign = math::sign<int>(movespeed);
 
-    const auto& ref_aabb = collision.aabb;
-    const auto current_aabb = ref_aabb.push(transform.local);
+    auto& ref_aabb = collision.aabb;
+    auto ref_center = 0.5f * ref_aabb.min + 0.5f * ref_aabb.max;
+    auto ref_halfsize = 0.5f * ref_aabb.max - 0.5f * ref_aabb.min;
 
-    auto next_aabb = math::AABBf(current_aabb);
-    next_aabb.min[d] += move;
-    next_aabb.max[d] += move;
+    auto curr_aabb = ref_aabb.push(transform.local);
+
+    math::AABBf next_aabb(curr_aabb);
+    next_aabb.min[d] += movespeed;
+    next_aabb.max[d] += movespeed;
+
+    auto next_center = 0.5f * next_aabb.min + 0.5f * next_aabb.max;
+
+    auto csg_aabb = curr_aabb.combine(next_aabb);
 
     local_pos lpos_min;
-    lpos_min.x = static_cast<local_pos::value_type>(glm::floor(next_aabb.min.x));
-    lpos_min.y = static_cast<local_pos::value_type>(glm::floor(next_aabb.min.y));
-    lpos_min.z = static_cast<local_pos::value_type>(glm::floor(next_aabb.min.z));
+    lpos_min.x = static_cast<local_pos::value_type>(glm::floor(csg_aabb.min.x));
+    lpos_min.y = static_cast<local_pos::value_type>(glm::floor(csg_aabb.min.y));
+    lpos_min.z = static_cast<local_pos::value_type>(glm::floor(csg_aabb.min.z));
 
     local_pos lpos_max;
-    lpos_max.x = static_cast<local_pos::value_type>(glm::ceil(next_aabb.max.x));
-    lpos_max.y = static_cast<local_pos::value_type>(glm::ceil(next_aabb.max.y));
-    lpos_max.z = static_cast<local_pos::value_type>(glm::ceil(next_aabb.max.z));
+    lpos_max.x = static_cast<local_pos::value_type>(glm::ceil(csg_aabb.max.x));
+    lpos_max.y = static_cast<local_pos::value_type>(glm::ceil(csg_aabb.max.y));
+    lpos_max.z = static_cast<local_pos::value_type>(glm::ceil(csg_aabb.max.z));
 
-    // Other axes
-    const int u = (d + 1) % 3;
-    const int v = (d + 2) % 3;
+    auto u = (d + 1) % 3;
+    auto v = (d + 2) % 3;
 
     local_pos::value_type ddir;
     local_pos::value_type dmin;
     local_pos::value_type dmax;
 
-    if(move < 0.0f) {
+    if(movespeed < 0.0f) {
         ddir = local_pos::value_type(+1);
         dmin = lpos_min[d];
         dmax = lpos_max[d];
@@ -57,13 +63,14 @@ static int vgrid_collide(const Dimension* dimension, int d, Collision& collision
         dmax = lpos_min[d];
     }
 
-    VoxelTouch latch_touch = VTOUCH_NONE;
-    glm::fvec3 latch_values = glm::fvec3(0.0f, 0.0f, 0.0f);
-    VoxelMaterial latch_surface = VMAT_UNKNOWN;
-    math::AABBf latch_vbox;
+    auto closest_dist = std::numeric_limits<float>::infinity();
+    auto closest_touch = VTOUCH_NONE;
+    auto closest_surface = VMAT_UNKNOWN;
+    auto closest_tvalues = ZERO_VEC3<float>;
+    math::AABBf closest_vbox;
 
     for(auto i = dmin; i != dmax; i += ddir) {
-        for(auto j = lpos_min[u]; j < lpos_max[u]; ++j)
+        for(auto j = lpos_min[u]; j < lpos_max[u]; ++j) {
             for(auto k = lpos_min[v]; k < lpos_max[v]; ++k) {
                 local_pos lpos;
                 lpos[d] = i;
@@ -73,79 +80,84 @@ static int vgrid_collide(const Dimension* dimension, int d, Collision& collision
                 auto vpos = coord::to_voxel(transform.chunk, lpos);
                 auto voxel = dimension->get_voxel(vpos);
 
-                if(voxel == nullptr) {
-                    // Don't collide with something
-                    // that we assume to be nothing
-                    continue;
+                if(voxel == nullptr || voxel->is_touch_type<VTOUCH_NONE>()) {
+                    continue; // non-collidable
                 }
 
-                math::AABBf vbox(voxel->get_collision().push(lpos));
+                auto vbox = voxel->get_collision().push(lpos);
+                auto vbox_center = 0.5f * vbox.min + 0.5f * vbox.max;
 
-                if(!next_aabb.intersect(vbox)) {
-                    // No intersection between the voxel
-                    // and the entity's collision hull
-                    continue;
+                if(!csg_aabb.intersect(vbox)) {
+                    continue; // no intersection
                 }
 
-                if(voxel->is_touch_type<VTOUCH_SOLID>()) {
-                    // Solid touch type makes a collision
-                    // response whenever it is encountered
-                    velocity.value[d] = 0.0f;
-                    touch_surface = voxel->get_surface_material();
-                    return move_sign;
-                }
+                auto distance = glm::abs(vbox_center[d] - next_center[d]);
 
-                // In case of other touch types, they
-                // are latched and the last ever touch
-                // type is then responded to
-                if(voxel->get_touch_type() != VTOUCH_NONE) {
-                    latch_touch = voxel->get_touch_type();
-                    latch_values = voxel->get_touch_values();
-                    latch_surface = voxel->get_surface_material();
-                    latch_vbox = vbox;
-                    continue;
+                if(distance < closest_dist) {
+                    closest_dist = distance;
+                    closest_touch = voxel->get_touch_type();
+                    closest_surface = voxel->get_surface_material();
+                    closest_tvalues = voxel->get_touch_values();
+                    closest_vbox = vbox;
                 }
             }
+        }
     }
 
-    if(latch_touch != VTOUCH_NONE) {
-        if(latch_touch == VTOUCH_BOUNCE) {
-            const auto move_distance = glm::abs(current_aabb.min[d] - next_aabb.min[d]);
-            const auto threshold = 2.0f * globals::fixed_frametime;
+    if(std::isfinite(closest_dist)) {
+        auto snap_to_closest_vbox = false;
 
-            if(move_distance > threshold) {
-                velocity.value[d] *= -latch_values[d];
+        if(closest_touch == VTOUCH_BOUNCE) {
+            auto threshold = 2.0f * static_cast<float>(globals::fixed_frametime);
+            auto travel_distance = glm::abs(curr_aabb.min[d] - next_aabb.min[d]);
+
+            if(travel_distance > threshold) {
+                velocity.value[d] = -velocity.value[d] * closest_tvalues[d];
             }
             else {
                 velocity.value[d] = 0.0f;
             }
 
-            touch_surface = latch_surface;
+            snap_to_closest_vbox = true;
+        }
+        else if(closest_touch == VTOUCH_SINK) {
+            constexpr auto threshold = 0.01f;
 
-            return move_sign;
+            if(velocity.value[d] < threshold) {
+                velocity.value[d] = 0.0f;
+            }
+            else {
+                velocity.value[d] *= closest_tvalues[d];
+            }
+        }
+        else {
+            velocity.value[d] = 0.0f;
+            snap_to_closest_vbox = true;
         }
 
-        if(latch_touch == VTOUCH_SINK) {
-            velocity.value[d] *= latch_values[d];
-            touch_surface = latch_surface;
-            return move_sign;
+        if(snap_to_closest_vbox) {
+            auto vbox_center = 0.5f * closest_vbox.min[d] + 0.5f * closest_vbox.max[d];
+            auto vbox_halfsize = 0.5f * closest_vbox.max[d] - 0.5f * closest_vbox.min[d];
+
+            if(movesign < 0) {
+                transform.local[d] = vbox_center + vbox_halfsize + ref_halfsize[d] - ref_center[d] + 0.01f;
+            }
+            else {
+                transform.local[d] = vbox_center - vbox_halfsize - ref_halfsize[d] - ref_center[d] - 0.01f;
+            }
         }
+
+        touch_surface = closest_surface;
+
+        return movesign;
     }
 
+    touch_surface = VMAT_UNKNOWN;
     return 0;
 }
 
 void Collision::fixed_update(Dimension* dimension)
 {
-    // FIXME: this isn't particularly accurate considering
-    // some voxels might be passable and some other voxels
-    // might apply some slowing factor; what I might do in the
-    // future is to add a specific value to the voxel registry
-    // entries that would specify the amount of force we apply
-    // to prevent player movement inside a specific voxel, plus
-    // we shouldn't treat all voxels as full cubes if we want
-    // to support slabs, stairs and non-full liquid voxels in the future
-
     auto group = dimension->entities.group<Collision>(entt::get<Transform, Velocity>);
 
     for(auto [entity, collision, transform, velocity] : group.each()) {
