@@ -34,8 +34,8 @@ void crosshair::layout(void)
     auto viewport = ImGui::GetMainViewport();
     auto draw_list = ImGui::GetForegroundDrawList();
 
-    auto scaled_width = glm::max<int>(texture->size.x, static_cast<int>(globals::gui_scale * texture->size.x / 2.0f));
-    auto scaled_height = glm::max<int>(texture->size.y, static_cast<int>(globals::gui_scale * texture->size.y / 2.0f));
+    auto scaled_width = glm::max<int>(static_cast<int>(1.25f * texture->size.x), static_cast<int>(globals::gui_scale * texture->size.x));
+    auto scaled_height = glm::max<int>(static_cast<int>(1.25f * texture->size.y), static_cast<int>(globals::gui_scale * texture->size.y));
     auto start = ImVec2(static_cast<int>(0.5f * viewport->Size.x) - (scaled_width / 2.0f),
         static_cast<float>(static_cast<int>(0.5f * viewport->Size.y) - (scaled_height / 2.0f)));
     auto end = ImVec2(start.x + scaled_width, start.y + scaled_height);

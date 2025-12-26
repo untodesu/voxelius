@@ -52,7 +52,7 @@ void scoreboard::layout(void)
             return;
         }
 
-        ImGui::PushFont(globals::font_unscii16, 8.0f);
+        ImGui::PushFont(globals::font_unscii16, 16.0f);
 
         const auto& padding = ImGui::GetStyle().FramePadding;
         const auto& spacing = ImGui::GetStyle().ItemSpacing;
