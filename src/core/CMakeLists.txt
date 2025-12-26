@@ -1,19 +1,19 @@
-execute_process(COMMAND git rev-parse --short=8 HEAD
-    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    OUTPUT_VARIABLE GIT_COMMIT_HASH
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-configure_file("${CMAKE_CURRENT_LIST_DIR}/version.cc.in" "${CMAKE_CURRENT_LIST_DIR}/version.cc")
-
 add_library(core STATIC
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
     "${CMAKE_CURRENT_LIST_DIR}/threading.cc"
     "${CMAKE_CURRENT_LIST_DIR}/threading.hh"
-    "${CMAKE_CURRENT_LIST_DIR}/version.cc"
     "${CMAKE_CURRENT_LIST_DIR}/version.hh")
 target_compile_features(core PUBLIC cxx_std_20)
 target_include_directories(core PUBLIC "${PROJECT_SOURCE_DIR}/src")
 target_precompile_headers(core PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
 target_link_libraries(core PUBLIC enet emhash glm physfs spdlog stb thread_pool)
+
+execute_process(COMMAND git rev-parse --short=8 HEAD
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+configure_file("${CMAKE_CURRENT_LIST_DIR}/version.cc.in" "${PROJECT_BINARY_DIR}/generated.version.cc")
+target_sources(core PRIVATE "${PROJECT_BINARY_DIR}/generated.version.cc")
 
 add_subdirectory(config)
 add_subdirectory(io)
