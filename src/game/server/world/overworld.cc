@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: overworld.cc
+// Description: Generic world dimension
+
 #include "server/pch.hh"
 
 #include "server/world/overworld.hh"

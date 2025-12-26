@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: session.hh
+// Description: Session handling
+
+#ifndef CLIENT_SESSION_HH
+#define CLIENT_SESSION_HH
 #pragma once
 
 namespace session
@@ -25,3 +32,5 @@ namespace session
 {
 bool is_ingame(void);
 } // namespace session
+
+#endif

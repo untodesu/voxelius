@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: message_box.cc
+// Description: A single message screen
+
 #include "client/pch.hh"
 
 #include "client/gui/message_box.hh"

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: dimension.cc
+// Description: A single world
+
 #include "shared/pch.hh"
 
 #include "shared/world/dimension.hh"

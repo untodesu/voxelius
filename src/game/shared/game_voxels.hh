@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: game_voxels.hh
+// Description: All the voxels in the game
+
+#ifndef SHARED_GAME_VOXELS_HH
+#define SHARED_GAME_VOXELS_HH
 #pragma once
 
 class Voxel;
@@ -21,3 +28,5 @@ namespace game_voxels
 {
 void populate(void);
 } // namespace game_voxels
+
+#endif

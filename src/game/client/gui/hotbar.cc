@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: hotbar.cc
+// Description: Hotbar rendering
+
 #include "client/pch.hh"
 
 #include "client/gui/hotbar.hh"

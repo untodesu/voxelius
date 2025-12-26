@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: game.cc
+// Description: Main game logic
+
 #include "client/pch.hh"
 
 #include "client/game.hh"
@@ -104,8 +109,8 @@ static ImFont* load_font(std::string_view path, float size, ImFontConfig& font_c
 {
     std::vector<std::byte> font;
 
-    if(!read_file(path, font)) {
-        spdlog::error("{}: utils::read_file failed", path);
+    if(!physfs::read_file(path, font)) {
+        spdlog::error("{}: utils::physfs::read_file failed", path);
         std::terminate();
     }
 

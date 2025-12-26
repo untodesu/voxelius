@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: texture_gui.cc
+// Description: GUI texture resource
+
 #include "client/pch.hh"
 
 #include "client/resource/texture_gui.hh"
@@ -12,11 +17,11 @@ static const void* texture_gui_load_func(const char* name, std::uint32_t flags)
     unsigned int image_load_flags = 0U;
 
     if(flags & TEXTURE_GUI_LOAD_VFLIP) {
-        image_load_flags |= IMAGE_LOAD_FLIP;
+        image_load_flags |= IMGFLAG_FLIP;
     }
 
     if(flags & TEXTURE_GUI_LOAD_GRAYSCALE) {
-        image_load_flags |= IMAGE_LOAD_GRAY;
+        image_load_flags |= IMGFLAG_GRAY;
     }
 
     if(auto image = resource::load<Image>(name, image_load_flags)) {

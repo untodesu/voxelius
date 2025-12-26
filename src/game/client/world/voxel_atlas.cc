@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: voxel_atlas.cc
+// Description: Multi-array-texture that acts like a spritesheet
+
 #include "client/pch.hh"
 
 #include "client/world/voxel_atlas.hh"
@@ -66,7 +71,7 @@ static AtlasStrip* plane_new_strip(AtlasPlane& plane, const std::vector<std::str
     glBindTexture(GL_TEXTURE_2D_ARRAY, plane.gl_texture);
 
     for(std::size_t i = 0; i < paths.size(); ++i) {
-        if(auto image = resource::load<Image>(paths[i].c_str(), IMAGE_LOAD_FLIP)) {
+        if(auto image = resource::load<Image>(paths[i].c_str(), IMGFLAG_FLIP)) {
             if((image->size.x != atlas_width) || (image->size.y != atlas_height)) {
                 spdlog::warn("atlas: {}: size mismatch", paths[i]);
                 continue;

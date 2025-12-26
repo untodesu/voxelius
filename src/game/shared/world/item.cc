@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: item.cc
+// Description: Item metadata
+
 #include "shared/pch.hh"
 
 #include "shared/world/item.hh"

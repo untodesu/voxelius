@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: feature.cc
+// Description: A world generation feature
+
 #include "shared/pch.hh"
 
 #include "shared/world/feature.hh"

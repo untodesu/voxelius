@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: factory.cc
+// Description: Boilerplate entity creation
+
 #include "shared/pch.hh"
 
 #include "shared/entity/factory.hh"

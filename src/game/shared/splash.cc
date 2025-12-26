@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: splash.cc
+// Description: Randomized text messages
+
 #include "shared/pch.hh"
 
 #include "shared/splash.hh"
@@ -39,7 +44,7 @@ static void splash_init_filename(std::string_view filename)
         splash_random.seed(std::random_device()());
     }
     else {
-        splash_lines.push_back(std::format("{}: {}", filename, physfs_error()));
+        splash_lines.push_back(std::format("{}: {}", filename, physfs::last_error()));
         splash_random.seed(std::random_device()());
     }
 }

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: status.cc
+// Description: Respond to client bothering
+
 #include "server/pch.hh"
 
 #include "server/status.hh"

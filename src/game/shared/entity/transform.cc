@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: transform.cc
+// Description: Transform component
+
 #include "shared/pch.hh"
 
 #include "shared/entity/transform.hh"

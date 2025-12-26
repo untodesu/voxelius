@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: angles.hh
+// Description: Angle utilities
+
+#ifndef CORE_MATH_ANGLES_HH
+#define CORE_MATH_ANGLES_HH
 #pragma once
 
 #include "core/math/constexpr.hh"
@@ -101,3 +108,5 @@ inline void math::vectors(const glm::fvec3& angles, glm::fvec3* forward, glm::fv
         up->z = nsv.x * ncv.y * pcv.z + psv.y * psv.z;
     }
 }
+
+#endif

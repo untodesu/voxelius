@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: voxel_registry.hh
+// Description: Registry for all the voxels in the game
+
+#ifndef SHARED_WORLD_VOXEL_REGISTRY_HH
+#define SHARED_WORLD_VOXEL_REGISTRY_HH
 #pragma once
 
 #include "shared/world/voxel.hh"
@@ -24,3 +31,5 @@ namespace voxel_registry
 {
 std::uint64_t get_checksum(void);
 } // namespace voxel_registry
+
+#endif

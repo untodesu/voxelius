@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: universe.hh
+// Description: Dimension handling
+
+#ifndef SERVER_WORLD_UNIVERSE_HH
+#define SERVER_WORLD_UNIVERSE_HH
 #pragma once
 
 #include "shared/types.hh"
@@ -20,3 +27,5 @@ Chunk* load_chunk(Dimension* dimension, const chunk_pos& cpos);
 void save_chunk(Dimension* dimension, const chunk_pos& cpos);
 void save_all_chunks(Dimension* dimension);
 } // namespace universe
+
+#endif

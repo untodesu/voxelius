@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: chunk_mesher.cc
+// Description: Threaded voxel mesh generation
+
 #include "client/pch.hh"
 
 #include "client/world/chunk_mesher.hh"

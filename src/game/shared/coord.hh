@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: coord.hh
+// Description: Coordinate domain change functions
+
+#ifndef SHARED_COORD_HH
+#define SHARED_COORD_HH
 #pragma once
 
 #include "shared/const.hh"
@@ -143,3 +150,5 @@ inline constexpr glm::fvec3 coord::to_fvec3(const chunk_pos& cpos, const glm::fv
         fpos.z + static_cast<float>(cpos.z << CHUNK_BITSHIFT),
     };
 }
+
+#endif

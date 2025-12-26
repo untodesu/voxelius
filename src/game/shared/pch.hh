@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: pch.hh
+// Description: Precompiled header
+
+#ifndef SHARED_PCH_HH
+#define SHARED_PCH_HH
 #pragma once
 
 #include <core/pch.hh> // inherit dependent includes from core.lib
@@ -17,3 +24,5 @@
 
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+
+#endif

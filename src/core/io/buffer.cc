@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: buffer.cc
+// Description: QDataStream-esque buffer
+
 #include "core/pch.hh"
 
 #include "core/io/buffer.hh"

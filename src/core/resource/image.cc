@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: image.cc
+// Description: Image resource
+
 #include "core/pch.hh"
 
 #include "core/resource/image.hh"
@@ -31,18 +36,18 @@ static const void* image_load_func(const char* name, std::uint32_t flags)
     callbacks.skip = &stbi_physfs_skip;
     callbacks.eof = &stbi_physfs_eof;
 
-    stbi_set_flip_vertically_on_load(bool(flags & IMAGE_LOAD_FLIP));
+    stbi_set_flip_vertically_on_load(bool(flags & IMGFLAG_FLIP));
 
     auto file = PHYSFS_openRead(name);
 
     if(file == nullptr) {
-        spdlog::error("image: {}: {}", name, physfs_error());
+        spdlog::error("image: {}: {}", name, physfs::last_error());
         return nullptr;
     }
 
     int desired_channels;
 
-    if(flags & IMAGE_LOAD_GRAY) {
+    if(flags & IMGFLAG_GRAY) {
         desired_channels = STBI_grey;
     }
     else {

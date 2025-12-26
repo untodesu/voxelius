@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: threading.hh
+// Description: Thread pool wrapper
+
+#ifndef CORE_THREADING_HH
+#define CORE_THREADING_HH
 #pragma once
 
 enum class task_status : unsigned int {
@@ -44,3 +51,5 @@ inline void threading::submit(AT&&... args)
 {
     threading::detail::submit_new(new T(args...));
 }
+
+#endif

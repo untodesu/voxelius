@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: toggles.cc
+// Description: Debug and not-so-debug toggles
+
 #include "client/pch.hh"
 
 #include "client/toggles.hh"

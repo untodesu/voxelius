@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: ray_dda.cc
+// Description: Fast voxel grid traversal with an arbitrary starting position
+
 #include "shared/pch.hh"
 
 #include "shared/world/ray_dda.hh"

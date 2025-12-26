@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: worldgen.cc
+// Description: Threaded requests for dimensions to generate chunks
+
 #include "server/pch.hh"
 
 #include "server/world/worldgen.hh"

@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: pch.hh
+// Description: Precompiled header
+
+#ifndef CLIENT_PCH_HH
+#define CLIENT_PCH_HH
 #pragma once
 
 #include <shared/pch.hh>
@@ -25,4 +32,6 @@
 
 #if defined(__unix__)
 #include <dlfcn.h>
+#endif
+
 #endif

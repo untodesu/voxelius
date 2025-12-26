@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: pch.hh
+// Description: Precompiled header
+
+#ifndef CORE_PCH_HH
+#define CORE_PCH_HH
 #pragma once
 
 #include <cinttypes>
@@ -47,3 +54,5 @@
 
 #include <stb_image.h>
 #include <stb_image_write.h>
+
+#endif

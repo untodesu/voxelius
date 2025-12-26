@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: game_items.cc
+// Description: All the items in the game
+
 #include "shared/pch.hh"
 
 #include "shared/game_items.hh"

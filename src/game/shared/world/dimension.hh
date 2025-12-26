@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: dimension.hh
+// Description: A single world
+
+#ifndef SHARED_WORLD_DIMENSION_HH
+#define SHARED_WORLD_DIMENSION_HH
 #pragma once
 
 #include "shared/const.hh"
@@ -81,3 +88,5 @@ struct VoxelSetEvent final {
     local_pos lpos;
     Chunk* chunk;
 };
+
+#endif

@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: resource.hh
+// Description: Resource management
+
+#ifndef CORE_RESOURCE_RESOURCE_HH
+#define CORE_RESOURCE_RESOURCE_HH
 #pragma once
 
 template<typename T>
@@ -51,3 +58,5 @@ resource_ptr<T> resource::find(std::string_view name)
     auto result = resource::detail::find_resource(typeid(T), name);
     return std::reinterpret_pointer_cast<const T>(result);
 }
+
+#endif

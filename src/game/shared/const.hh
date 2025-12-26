@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: const.hh
+// Description: Constants
+
+#ifndef SHARED_CONST_HH
+#define SHARED_CONST_HH
 #pragma once
 
 #include "core/math/constexpr.hh"
@@ -41,3 +48,5 @@ constexpr static glm::vec<2, T> ZERO_VEC2 = glm::vec<2, T>(0, 0);
 
 template<typename T>
 constexpr static glm::vec<3, T> ZERO_VEC3 = glm::vec<3, T>(0, 0, 0);
+
+#endif

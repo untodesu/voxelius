@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: sessions.hh
+// Description: Session handling
+
+#ifndef SERVER_SESSIONS_HH
+#define SERVER_SESSIONS_HH
 #pragma once
 
 class Dimension;
@@ -50,3 +57,5 @@ namespace sessions
 {
 void refresh_scoreboard(void);
 } // namespace sessions
+
+#endif

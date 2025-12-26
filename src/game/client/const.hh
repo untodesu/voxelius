@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: const.hh
+// Description: Constants
+
+#ifndef CLIENT_CONST_HH
+#define CLIENT_CONST_HH
 #pragma once
 
 #include "shared/const.hh"
@@ -21,3 +28,5 @@ static_assert(DEFAULT_HEIGHT >= MIN_HEIGHT);
 
 constexpr static float MIN_PITCH = 0.0625f;
 constexpr static float MAX_PITCH = 10.0f;
+
+#endif

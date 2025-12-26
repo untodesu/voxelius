@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: chat.cc
+// Description: Chat handling
+
 #include "server/pch.hh"
 
 #include "server/chat.hh"

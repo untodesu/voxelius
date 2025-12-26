@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: voxel.hh
+// Description: Voxel metadata... A metavoxel!
+
+#ifndef SHARED_WORLD_VOXEL_HH
+#define SHARED_WORLD_VOXEL_HH
 #pragma once
 
 #include "core/math/aabb.hh"
@@ -269,3 +276,5 @@ constexpr bool Voxel::is_surface_material(void) const noexcept
 {
     return m_surface_material == Material;
 }
+
+#endif

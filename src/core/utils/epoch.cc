@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: epoch.cc
+// Description: UNIX time utilities
+
 #include "core/pch.hh"
 
 #include "core/utils/epoch.hh"

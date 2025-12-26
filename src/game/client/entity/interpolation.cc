@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: interpolation.cc
+// Description: Interpolate components between server frames
+
 #include "client/pch.hh"
 
 #include "client/entity/interpolation.hh"

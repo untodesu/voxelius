@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: cmdline.cc
+// Description: Command-line arguments parser
+
 #include "core/pch.hh"
 
 #include "core/io/cmdline.hh"

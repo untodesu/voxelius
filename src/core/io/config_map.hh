@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: config_map.hh
+// Description: Config parser
+
+#ifndef CORE_IO_CONFIG_MAP_HH
+#define CORE_IO_CONFIG_MAP_HH
 #pragma once
 
 namespace config
@@ -24,3 +31,5 @@ public:
 private:
     std::unordered_map<std::string, config::IValue*> m_values;
 };
+
+#endif

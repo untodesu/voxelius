@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: player_target.cc
+// Description: Handle logic for targeting voxels
+
 #include "client/pch.hh"
 
 #include "client/world/player_target.hh"

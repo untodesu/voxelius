@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: unloader.cc
+// Description: Handle chunks that are out of view for all players
+
 #include "server/pch.hh"
 
 #include "server/world/unloader.hh"

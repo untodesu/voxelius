@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: globals.hh
+// Description: Global variables
+
+#ifndef CLIENT_GLOBALS_HH
+#define CLIENT_GLOBALS_HH
 #pragma once
 
 #include "shared/globals.hh"
@@ -63,3 +70,5 @@ extern unsigned int gui_screen;
 extern ALCdevice* sound_dev;
 extern ALCcontext* sound_ctx;
 } // namespace globals
+
+#endif

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: listener.cc
+// Description: OpenAL listener
+
 #include "client/pch.hh"
 
 #include "client/entity/listener.hh"

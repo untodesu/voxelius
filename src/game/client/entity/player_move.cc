@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: player_move.cc
+// Description: Player movement
+
 #include "client/pch.hh"
 
 #include "client/entity/player_move.hh"

@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: collision.hh
+// Description: Collision detection
+
+#ifndef SHARED_ENTITY_COLLISION_HH
+#define SHARED_ENTITY_COLLISION_HH
 #pragma once
 
 #include "core/math/aabb.hh"
@@ -13,3 +20,5 @@ public:
     // because both transform and velocity may be updated internally
     static void fixed_update(Dimension* dimension);
 };
+
+#endif

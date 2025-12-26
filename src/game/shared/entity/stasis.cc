@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: stasis.cc
+// Description: Freeze entites that are in an unloaded chunk
+
 #include "shared/pch.hh"
 
 #include "shared/entity/stasis.hh"

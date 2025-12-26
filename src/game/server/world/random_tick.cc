@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: random_tick.cc
+// Description: Voxel random ticking
+
 #include "server/pch.hh"
 
 #include "server/world/random_tick.hh"

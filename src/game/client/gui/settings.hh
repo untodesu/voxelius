@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: settings.hh
+// Description: Visual config value editing
+
+#ifndef CLIENT_GUI_SETTINGS_HH
+#define CLIENT_GUI_SETTINGS_HH
 #pragma once
 
 namespace config
@@ -88,3 +95,5 @@ namespace settings
 {
 void add_language_select(int priority, settings_location location, std::string_view name);
 } // namespace settings
+
+#endif

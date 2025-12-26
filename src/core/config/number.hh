@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: number.hh
+// Description: Arithmetic config value
+
+#ifndef CORE_CONFIG_NUMBER_HH
+#define CORE_CONFIG_NUMBER_HH
 #pragma once
 
 #include "core/config/ivalue.hh"
@@ -128,3 +135,5 @@ inline void config::Number<T>::set_limits(T min_value, T max_value)
     m_value = std::clamp(m_value, m_min_value, m_max_value);
     m_string = std::to_string(m_value);
 }
+
+#endif

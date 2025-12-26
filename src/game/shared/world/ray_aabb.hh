@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: ray_aabb.hh
+// Description: Check ray intersections against an AABB
+
+#ifndef SHARED_WORLD_RAY_AABB_HH
+#define SHARED_WORLD_RAY_AABB_HH
 #pragma once
 
 #include "core/math/aabb.hh"
@@ -28,3 +35,5 @@ constexpr const glm::fvec3& RayAABB::direction(void) const noexcept
 {
     return m_direction;
 }
+
+#endif

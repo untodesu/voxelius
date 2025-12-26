@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: version.hh
+// Description: Version information
+
+#ifndef CORE_VERSION_HH
+#define CORE_VERSION_HH
 #pragma once
 
 namespace version
@@ -18,3 +25,5 @@ namespace version
 {
 extern const std::string_view full;
 } // namespace version
+
+#endif

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: protocol.cc
+// Description: Network protocol on top of ENet
+
 #include "shared/pch.hh"
 
 #include "shared/protocol.hh"

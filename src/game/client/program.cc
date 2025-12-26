@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: program.cc
+// Description: Varied OpenGL shader program
+
 #include "client/pch.hh"
 
 #include "client/program.hh"
@@ -78,7 +83,7 @@ bool GL_Program::setup(std::string_view vpath, std::string_view fpath)
     auto vfile = PHYSFS_openRead(vert_path.c_str());
 
     if(vfile == nullptr) {
-        spdlog::warn("gl_program: {}: {}", vpath, physfs_error());
+        spdlog::warn("gl_program: {}: {}", vpath, physfs::last_error());
         return false;
     }
 
@@ -89,7 +94,7 @@ bool GL_Program::setup(std::string_view vpath, std::string_view fpath)
     auto ffile = PHYSFS_openRead(frag_path.c_str());
 
     if(ffile == nullptr) {
-        spdlog::warn("gl_program: {}: {}", fpath, physfs_error());
+        spdlog::warn("gl_program: {}: {}", fpath, physfs::last_error());
         return false;
     }
 

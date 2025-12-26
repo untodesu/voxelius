@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: bother.cc
+// Description: Bother servers with a status request
+
 #include "client/pch.hh"
 
 #include "client/gui/bother.hh"

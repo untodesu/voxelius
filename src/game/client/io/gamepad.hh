@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: gamepad.hh
+// Description: Gamepad support
+
+#ifndef CLIENT_IO_GAMEPAD_HH
+#define CLIENT_IO_GAMEPAD_HH
 #pragma once
 
 constexpr static int INVALID_GAMEPAD_AXIS = INT_MAX;
@@ -42,3 +49,5 @@ struct GamepadButtonEvent final {
     int action;
     int button;
 };
+
+#endif

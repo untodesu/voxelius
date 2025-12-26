@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: chunk_renderer.cc
+// Description: Chunk mesh rendering
+
 #include "client/pch.hh"
 
 #include "client/world/chunk_renderer.hh"

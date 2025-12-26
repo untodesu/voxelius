@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: item_registry.cc
+// Description: Registry for all the items in the game
+
 #include "shared/pch.hh"
 
 #include "shared/world/item_registry.hh"

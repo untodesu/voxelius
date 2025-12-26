@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: universe.cc
+// Description: Dimension handling
+
 #include "server/pch.hh"
 
 #include "server/world/universe.hh"
@@ -52,7 +57,7 @@ static void add_new_dimension(Dimension* dimension)
     auto dimension_dir = std::format("{}/{}", universe_name.get(), dimension->get_name());
 
     if(!PHYSFS_mkdir(dimension_dir.c_str())) {
-        spdlog::critical("universe: {}: {}", dimension_dir, physfs_error());
+        spdlog::critical("universe: {}: {}", dimension_dir, physfs::last_error());
         std::terminate();
     }
 
@@ -61,7 +66,7 @@ static void add_new_dimension(Dimension* dimension)
     metadata->zvox_dir = std::format("{}/chunk", dimension_dir);
 
     if(!PHYSFS_mkdir(metadata->zvox_dir.c_str())) {
-        spdlog::critical("universe: {}: {}", metadata->zvox_dir, physfs_error());
+        spdlog::critical("universe: {}: {}", metadata->zvox_dir, physfs::last_error());
         std::terminate();
     }
 
@@ -109,7 +114,7 @@ void universe::init_late(void)
     const auto universe_dir = std::string(universe_name.get());
 
     if(!PHYSFS_mkdir(universe_dir.c_str())) {
-        spdlog::critical("universe: {}: {}", universe_dir, physfs_error());
+        spdlog::critical("universe: {}: {}", universe_dir, physfs::last_error());
         std::terminate();
     }
 

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: game.cc
+// Description: Main game logic
+
 #include "server/pch.hh"
 
 #include "server/game.hh"

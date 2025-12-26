@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: language.hh
+// Description: Translations API
+
+#ifndef CLIENT_GUI_LANGUAGE_HH
+#define CLIENT_GUI_LANGUAGE_HH
 #pragma once
 
 struct LanguageInfo final {
@@ -37,3 +44,5 @@ namespace language
 std::string_view resolve(std::string_view key);
 std::string resolve_gui(std::string_view key);
 } // namespace language
+
+#endif

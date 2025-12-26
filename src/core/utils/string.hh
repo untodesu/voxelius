@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: string.hh
+// Description: String utilities
+
+#ifndef CORE_UTILS_STRING_HH
+#define CORE_UTILS_STRING_HH
 #pragma once
 
 namespace utils
@@ -15,3 +22,5 @@ namespace utils
 {
 std::string trim_whitespace(const std::string& string);
 } // namespace utils
+
+#endif

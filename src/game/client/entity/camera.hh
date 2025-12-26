@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: camera.hh
+// Description: Client view matrix calculations
+
+#ifndef CLIENT_ENTITY_CAMERA_HH
+#define CLIENT_ENTITY_CAMERA_HH
 #pragma once
 
 #include "shared/types.hh"
@@ -29,3 +36,5 @@ namespace camera
 void init(void);
 void update(void);
 } // namespace camera
+
+#endif

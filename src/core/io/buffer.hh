@@ -1,3 +1,12 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: buffer.hh
+// Description: QDataStream-esque buffer
+
+#ifndef CORE_IO_BUFFER_HH
+#define CORE_IO_BUFFER_HH
+#pragma once
+
 class ReadBuffer final {
 public:
     ReadBuffer(void) = default;
@@ -80,3 +89,5 @@ WriteBuffer& WriteBuffer::operator<<(const T value)
     write<T>(value);
     return *this;
 }
+
+#endif

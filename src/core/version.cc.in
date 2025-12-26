@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: version.cc.in
+// Description: Version template
+
 #include "core/pch.hh"
 
 #include "core/version.hh"

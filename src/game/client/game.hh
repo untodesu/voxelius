@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: game.hh
+// Description: Main game logic
+
+#ifndef CLIENT_GAME_HH
+#define CLIENT_GAME_HH
 #pragma once
 
 namespace config
@@ -33,3 +40,5 @@ void update_late(void);
 void render(void);
 void layout(void);
 } // namespace client_game
+
+#endif

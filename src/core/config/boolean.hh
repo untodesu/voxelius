@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: boolean.hh
+// Description: Boolean config value
+
+#ifndef CORE_CONFIG_BOOLEAN_HH
+#define CORE_CONFIG_BOOLEAN_HH
 #pragma once
 
 #include "core/config/ivalue.hh"
@@ -23,3 +30,5 @@ public:
     static bool from_string(std::string_view value);
 };
 } // namespace config
+
+#endif

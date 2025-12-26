@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: imutils_text.cc
+// Description: Text with shadow
+
 #include "client/pch.hh"
 
 #include "client/gui/imutils_text.hh"

@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: aabb.hh
+// Description: Axis-aligned bounding box
+
+#ifndef CORE_MATH_AABB_HH
+#define CORE_MATH_AABB_HH
 #pragma once
 
 #include "core/math/concepts.hh"
@@ -109,3 +116,5 @@ constexpr math::AABB<T> math::AABB<T>::push(const vector_type& vector) const
     result.max = max + vector;
     return result;
 }
+
+#endif

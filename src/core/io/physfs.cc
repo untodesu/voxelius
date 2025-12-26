@@ -1,13 +1,18 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: physfs.cc
+// Description: PhysFS utilities
+
 #include "core/pch.hh"
 
 #include "core/io/physfs.hh"
 
-bool read_file(std::string_view path, std::vector<std::byte>& buffer)
+bool physfs::read_file(std::string_view path, std::vector<std::byte>& buffer)
 {
     auto file = PHYSFS_openRead(std::string(path).c_str());
 
     if(file == nullptr) {
-        spdlog::error("physfs: {}: {}", path, physfs_error());
+        spdlog::error("physfs: {}: {}", path, physfs::last_error());
         return false;
     }
 
@@ -20,12 +25,12 @@ bool read_file(std::string_view path, std::vector<std::byte>& buffer)
     return true;
 }
 
-bool read_file(std::string_view path, std::string& buffer)
+bool physfs::read_file(std::string_view path, std::string& buffer)
 {
     auto file = PHYSFS_openRead(std::string(path).c_str());
 
     if(file == nullptr) {
-        spdlog::error("physfs: {}: {}", path, physfs_error());
+        spdlog::error("physfs: {}: {}", path, physfs::last_error());
         return false;
     }
 
@@ -38,12 +43,12 @@ bool read_file(std::string_view path, std::string& buffer)
     return true;
 }
 
-bool write_file(std::string_view path, const std::vector<std::byte>& buffer)
+bool physfs::write_file(std::string_view path, const std::vector<std::byte>& buffer)
 {
     auto file = PHYSFS_openWrite(std::string(path).c_str());
 
     if(file == nullptr) {
-        spdlog::error("physfs: {}: {}", path, physfs_error());
+        spdlog::error("physfs: {}: {}", path, physfs::last_error());
         return false;
     }
 
@@ -53,12 +58,12 @@ bool write_file(std::string_view path, const std::vector<std::byte>& buffer)
     return true;
 }
 
-bool write_file(std::string_view path, const std::string& buffer)
+bool physfs::write_file(std::string_view path, const std::string& buffer)
 {
     auto file = PHYSFS_openWrite(std::string(path).c_str());
 
     if(file == nullptr) {
-        spdlog::error("physfs: {}: {}", path, physfs_error());
+        spdlog::error("physfs: {}: {}", path, physfs::last_error());
         return false;
     }
 
@@ -68,7 +73,7 @@ bool write_file(std::string_view path, const std::string& buffer)
     return true;
 }
 
-std::string_view physfs_error(void)
+std::string_view physfs::last_error(void)
 {
     auto error_code = PHYSFS_getLastErrorCode();
     auto error_string = PHYSFS_getErrorByCode(error_code);

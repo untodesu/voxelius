@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: chunk.hh
+// Description: A single chunk of voxels
+
+#ifndef SHARED_WORLD_CHUNK_HH
+#define SHARED_WORLD_CHUNK_HH
 #pragma once
 
 #include "shared/world/voxel_storage.hh"
@@ -35,3 +42,5 @@ private:
     VoxelStorage m_voxels;
     unsigned int m_biome;
 };
+
+#endif

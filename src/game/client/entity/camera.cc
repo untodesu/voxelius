@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: camera.cc
+// Description: Client view matrix calculations
+
 #include "client/pch.hh"
 
 #include "client/entity/camera.hh"

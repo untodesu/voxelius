@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: globals.cc
+// Description: Global variables
+
 #include "client/pch.hh"
 
 #include "client/globals.hh"

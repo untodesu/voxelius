@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: receive.cc
+// Description: Handle incoming packets
+
 #include "server/pch.hh"
 
 #include "server/receive.hh"

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: config_map.cc
+// Description: Config parser
+
 #include "core/pch.hh"
 
 #include "core/io/config_map.hh"

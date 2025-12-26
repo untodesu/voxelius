@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: main.cc
+// Description: Entry point
+
 #include "server/pch.hh"
 
 #include "core/config/number.hh"

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: whitelist.cc
+// Description: Player allow-list
+
 #include "server/pch.hh"
 
 #include "server/whitelist.hh"
@@ -48,7 +53,7 @@ void whitelist::init_late(void)
     PHYSFS_File* file = PHYSFS_openRead(whitelist::filename.c_str());
 
     if(file == nullptr) {
-        spdlog::warn("whitelist: {}: {}", whitelist::filename.get(), physfs_error());
+        spdlog::warn("whitelist: {}: {}", whitelist::filename.get(), physfs::last_error());
         whitelist::enabled.set_value(false);
         return;
     }

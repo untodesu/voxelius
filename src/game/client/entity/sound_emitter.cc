@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: sound_emitter.cc
+// Description: Component for entities that make sounds
+
 #include "client/pch.hh"
 
 #include "client/entity/sound_emitter.hh"

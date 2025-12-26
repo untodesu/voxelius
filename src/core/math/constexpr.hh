@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: constexpr.hh
+// Description: Compile-time expressions
+
+#ifndef CORE_MATH_CONSTEXPR_HH
+#define CORE_MATH_CONSTEXPR_HH
 #pragma once
 
 #include "core/math/concepts.hh"
@@ -70,3 +77,5 @@ constexpr scalar math::radians(const scalar x)
 {
     return static_cast<scalar>(static_cast<double>(x) * M_PI / 180.0);
 }
+
+#endif

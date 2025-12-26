@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: voxel_storage.cc
+// Description: Storage for voxels in a chunk
+
 #include "shared/pch.hh"
 
 #include "shared/world/voxel_storage.hh"

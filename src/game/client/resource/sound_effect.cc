@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: sound_effect.cc
+// Description: Sound effect resource
+
 #include "client/pch.hh"
 
 #include "client/resource/sound_effect.hh"
@@ -35,7 +40,7 @@ static const void* sound_effect_load_func(const char* name, std::uint32_t flags)
     auto file = PHYSFS_openRead(name);
 
     if(file == nullptr) {
-        spdlog::warn("sfx: {}: {}", name, physfs_error());
+        spdlog::warn("sfx: {}: {}", name, physfs::last_error());
         return nullptr;
     }
 

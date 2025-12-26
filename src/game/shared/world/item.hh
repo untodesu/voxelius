@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: item.hh
+// Description: Item metadata
+
+#ifndef SHARED_WORLD_ITEM_HH
+#define SHARED_WORLD_ITEM_HH
 #pragma once
 
 #include "core/resource/resource.hh"
@@ -73,3 +80,5 @@ constexpr resource_ptr<TextureGUI>& Item::get_cached_texture(void) const noexcep
 {
     return m_cached_texture;
 }
+
+#endif

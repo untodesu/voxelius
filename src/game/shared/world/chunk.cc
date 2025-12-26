@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: chunk.cc
+// Description: A single chunk of voxels
+
 #include "shared/pch.hh"
 
 #include "shared/world/chunk.hh"

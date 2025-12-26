@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: language.cc
+// Description: Translations API
+
 #include "client/pch.hh"
 
 #include "client/gui/language.hh"
@@ -41,7 +46,7 @@ void language::init(void)
     auto file = PHYSFS_openRead(std::string(MANIFEST_PATH).c_str());
 
     if(file == nullptr) {
-        spdlog::critical("language: {}: {}", MANIFEST_PATH, physfs_error());
+        spdlog::critical("language: {}: {}", MANIFEST_PATH, physfs::last_error());
         std::terminate();
     }
 
@@ -114,7 +119,7 @@ void language::set(LanguageIterator new_language)
         auto file = PHYSFS_openRead(path.c_str());
 
         if(file == nullptr) {
-            spdlog::warn("language: {}: {}", path, physfs_error());
+            spdlog::warn("language: {}: {}", path, physfs::last_error());
             send_language_event(new_language);
             return;
         }

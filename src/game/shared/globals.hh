@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: globals.hh
+// Description: Global variables
+
+#ifndef SHARED_GLOBALS_HH
+#define SHARED_GLOBALS_HH
 #pragma once
 
 namespace globals
@@ -17,3 +24,5 @@ namespace globals
 {
 extern std::uint64_t curtime;
 } // namespace globals
+
+#endif

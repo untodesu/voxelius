@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: sound.hh
+// Description: Sound handling
+
+#ifndef CLIENT_IO_SOUND_HH
+#define CLIENT_IO_SOUND_HH
 #pragma once
 
 #include "core/resource/resource.hh"
@@ -41,3 +48,5 @@ void play_entity(entt::entity entity, resource_ptr<SoundEffect> sound, bool loop
 void play_player(resource_ptr<SoundEffect> sound, bool looping, float pitch);
 void play_ui(resource_ptr<SoundEffect> sound, bool looping, float pitch);
 } // namespace sound
+
+#endif

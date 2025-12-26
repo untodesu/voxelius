@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: item_registry.hh
+// Description: Registry for all the items in the game
+
+#ifndef SHARED_WORLD_ITEM_REGISTRY_HH
+#define SHARED_WORLD_ITEM_REGISTRY_HH
 #pragma once
 
 #include "shared/world/item.hh"
@@ -24,3 +31,5 @@ namespace item_registry
 {
 std::uint64_t get_checksum(void);
 } // namespace item_registry
+
+#endif

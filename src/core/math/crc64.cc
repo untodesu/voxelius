@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: crc64.cc
+// Description: Client-server synchronized CRC64
+
 #include "core/pch.hh"
 
 #include "core/math/crc64.hh"

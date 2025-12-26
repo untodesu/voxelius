@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: program.hh
+// Description: Varied OpenGL shader program
+
+#ifndef CLIENT_PROGRAM_HH
+#define CLIENT_PROGRAM_HH
 #pragma once
 
 struct GL_VariedMacro final {
@@ -32,3 +39,5 @@ public:
     bool needs_update;
     GLuint handle;
 };
+
+#endif

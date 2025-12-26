@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: voxel_sounds.cc
+// Description: Handle voxel sounds
+
 #include "client/pch.hh"
 
 #include "client/world/voxel_sounds.hh"

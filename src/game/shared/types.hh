@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: types.hh
+// Description: Type definitions
+
+#ifndef SHARED_TYPES_HH
+#define SHARED_TYPES_HH
 #pragma once
 
 using item_id = std::uint32_t;
@@ -38,3 +45,5 @@ struct std::hash<chunk_pos_xz> final {
         return value;
     }
 };
+
+#endif

@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: globals.hh
+// Description: Global variables
+
+#ifndef SERVER_GLOBALS_HH
+#define SERVER_GLOBALS_HH
 #pragma once
 
 #include "shared/globals.hh"
@@ -19,3 +26,5 @@ extern std::uint64_t tickrate_dt;
 extern Dimension* spawn_dimension;
 extern std::unordered_map<std::string, Dimension*> dimensions;
 } // namespace globals
+
+#endif

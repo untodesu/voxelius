@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: play_menu.cc
+// Description: Server and world list screen
+
 #include "client/pch.hh"
 
 #include "client/gui/play_menu.hh"

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: collision.cc
+// Description: Collision detection
+
 #include "shared/pch.hh"
 
 #include "shared/entity/collision.hh"

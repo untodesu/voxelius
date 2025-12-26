@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: resource.cc
+// Description: Resource management
+
 #include "core/pch.hh"
 
 #include "core/resource/resource.hh"

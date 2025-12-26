@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: string.cc
+// Description: String config value
+
 #include "core/pch.hh"
 
 #include "core/config/string.hh"

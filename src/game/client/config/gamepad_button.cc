@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: gamepad_button.cc
+// Description: Gamepad button config value
+
 #include "client/pch.hh"
 
 #include "client/config/gamepad_button.hh"

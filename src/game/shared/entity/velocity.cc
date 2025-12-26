@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: velocity.cc
+// Description: Velocity component
+
 #include "shared/pch.hh"
 
 #include "shared/entity/velocity.hh"

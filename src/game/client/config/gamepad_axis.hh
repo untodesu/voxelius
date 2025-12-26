@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: gamepad_axis.hh
+// Description: Gamepad axis config value
+
+#ifndef CLIENT_CONFIG_GAMEPAD_AXIS_HH
+#define CLIENT_CONFIG_GAMEPAD_AXIS_HH
 #pragma once
 
 #include "core/config/ivalue.hh"
@@ -36,3 +43,5 @@ private:
     std::string_view m_name;
 };
 } // namespace config
+
+#endif

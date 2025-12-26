@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: voxel.cc
+// Description: Voxel metadata... A metavoxel!
+
 #include "shared/pch.hh"
 
 #include "shared/world/voxel.hh"

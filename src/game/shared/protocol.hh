@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: protocol.hh
+// Description: Network protocol on top of ENet
+
+#ifndef SHARED_PROTOCOL_HH
+#define SHARED_PROTOCOL_HH
 #pragma once
 
 #include "shared/world/chunk.hh"
@@ -210,3 +217,5 @@ struct protocol::DimensionInfo final : public protocol::Base<0x0012> {
     std::string name;
     float gravity;
 };
+
+#endif

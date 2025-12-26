@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: toggles.hh
+// Description: Debug and not-so-debug toggles
+
+#ifndef CLIENT_TOGGLES_HH
+#define CLIENT_TOGGLES_HH
 #pragma once
 
 using toggle_type = unsigned int;
@@ -33,3 +40,5 @@ void init_late(void);
 bool get(toggle_type type);
 void set(toggle_type type, bool value);
 } // namespace toggles
+
+#endif

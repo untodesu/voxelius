@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: chunk_quad.hh
+// Description: Packed quad vertex format
+
+#ifndef CLIENT_WORLD_CHUNK_QUAD_HH
+#define CLIENT_WORLD_CHUNK_QUAD_HH
 #pragma once
 
 #include "core/math/constexpr.hh"
@@ -33,3 +40,5 @@ constexpr inline static ChunkQuad make_chunk_quad(const glm::fvec3& position, co
 
     return result;
 }
+
+#endif

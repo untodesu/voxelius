@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: transform.hh
+// Description: Transform component
+
+#ifndef SHARED_ENTITY_TRANSFORM_HH
+#define SHARED_ENTITY_TRANSFORM_HH
 #pragma once
 
 #include "shared/types.hh"
@@ -22,3 +29,5 @@ namespace client
 struct TransformIntr final : public Transform {};
 struct TransformPrev final : public Transform {};
 } // namespace client
+
+#endif

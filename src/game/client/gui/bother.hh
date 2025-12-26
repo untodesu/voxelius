@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: bother.hh
+// Description: Bother servers with a status request
+
+#ifndef CLIENT_GUI_BOTHER_HH
+#define CLIENT_GUI_BOTHER_HH
 #pragma once
 
 struct BotherResponseEvent final {
@@ -19,3 +26,5 @@ void update_late(void);
 void ping(unsigned int identity, std::string_view host, std::uint16_t port);
 void cancel(unsigned int identity);
 } // namespace bother
+
+#endif

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: game.cc
+// Description: Shared initialization logic
+
 #include "shared/pch.hh"
 
 #include "shared/game.hh"
@@ -81,7 +86,7 @@ void shared_game::init(int argc, char** argv, std::string_view logfile)
     logger->flush();
 
     if(!PHYSFS_init(argv[0])) {
-        spdlog::critical("physfs: init failed: {}", physfs_error());
+        spdlog::critical("physfs: init failed: {}", physfs::last_error());
         std::terminate();
     }
 
@@ -96,17 +101,17 @@ void shared_game::init(int argc, char** argv, std::string_view logfile)
     std::filesystem::create_directories(userpath, ignore_error);
 
     if(!PHYSFS_mount(gamepath.string().c_str(), nullptr, false)) {
-        spdlog::critical("physfs: mount {} failed: {}", gamepath.string(), physfs_error());
+        spdlog::critical("physfs: mount {} failed: {}", gamepath.string(), physfs::last_error());
         std::terminate();
     }
 
     if(!PHYSFS_mount(userpath.string().c_str(), nullptr, false)) {
-        spdlog::critical("physfs: mount {} failed: {}", userpath.string(), physfs_error());
+        spdlog::critical("physfs: mount {} failed: {}", userpath.string(), physfs::last_error());
         std::terminate();
     }
 
     if(!PHYSFS_setWriteDir(userpath.string().c_str())) {
-        spdlog::critical("physfs: setwritedir {} failed: {}", userpath.string(), physfs_error());
+        spdlog::critical("physfs: setwritedir {} failed: {}", userpath.string(), physfs::last_error());
         std::terminate();
     }
 
@@ -121,7 +126,7 @@ void shared_game::shutdown(void)
     enet_deinitialize();
 
     if(!PHYSFS_deinit()) {
-        spdlog::critical("physfs: deinit failed: {}", physfs_error());
+        spdlog::critical("physfs: deinit failed: {}", physfs::last_error());
         std::terminate();
     }
 }

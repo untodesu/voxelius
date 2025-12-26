@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: status_lines.cc
+// Description: Display lines of text in-game
+
 #include "client/pch.hh"
 
 #include "client/gui/status_lines.hh"

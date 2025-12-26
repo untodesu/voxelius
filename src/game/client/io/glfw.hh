@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: glfw.hh
+// Description: GLFW events passed through EnTT's signal system
+
+#ifndef CLIENT_IO_GLFW_HH
+#define CLIENT_IO_GLFW_HH
 #pragma once
 
 struct GlfwCursorPosEvent final {
@@ -31,3 +38,5 @@ struct GlfwScrollEvent final {
     float dx;
     float dy;
 };
+
+#endif

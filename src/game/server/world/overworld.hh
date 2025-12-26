@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: overworld.hh
+// Description: Generic world dimension
+
+#ifndef SERVER_WORLD_OVERWORLD_HH
+#define SERVER_WORLD_OVERWORLD_HH
 #pragma once
 
 #include "core/config/number.hh"
@@ -60,3 +67,5 @@ private:
 private:
     std::mutex m_mutex;
 };
+
+#endif

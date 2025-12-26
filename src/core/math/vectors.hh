@@ -1,10 +1,13 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: vectors.hh
+// Description: because NO ONE would POSSIBLY need integer-based distance calculations in a VOXEL game
+
+#ifndef CORE_MATH_VECTORS_HH
+#define CORE_MATH_VECTORS_HH
 #pragma once
 
 #include "core/math/concepts.hh"
-
-// core/vectors.hh - because NO ONE would POSSIBLY
-// need integer-based distance calculations in a
-// game about voxels. That would be INSANE! :D
 
 namespace math
 {
@@ -41,3 +44,5 @@ constexpr static inline const T math::distance2(const glm::vec<3, T>& vector_a, 
 {
     return math::length2(vector_a - vector_b);
 }
+
+#endif

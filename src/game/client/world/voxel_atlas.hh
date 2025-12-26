@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: voxel_atlas.hh
+// Description: Multi-array-texture that acts like a spritesheet
+
+#ifndef CLIENT_WORLD_VOXEL_ATLAS_HH
+#define CLIENT_WORLD_VOXEL_ATLAS_HH
 #pragma once
 
 struct AtlasStrip final {
@@ -23,3 +30,5 @@ namespace voxel_atlas
 AtlasStrip* find_or_load(const std::vector<std::string>& paths);
 AtlasStrip* find(const std::vector<std::string>& paths);
 } // namespace voxel_atlas
+
+#endif

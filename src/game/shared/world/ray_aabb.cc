@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: ray_aabb.cc
+// Description: Check ray intersections against an AABB
+
 #include "shared/pch.hh"
 
 #include "shared/world/ray_aabb.hh"

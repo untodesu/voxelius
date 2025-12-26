@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: session.cc
+// Description: Session handling
+
 #include "client/pch.hh"
 
 #include "client/session.hh"

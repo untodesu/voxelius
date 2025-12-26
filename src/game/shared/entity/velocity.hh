@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: velocity.hh
+// Description: Velocity component
+
+#ifndef SHARED_ENTITY_VELOCITY_HH
+#define SHARED_ENTITY_VELOCITY_HH
 #pragma once
 
 class Dimension;
@@ -18,3 +25,5 @@ namespace client
 struct VelocityIntr final : public Velocity {};
 struct VelocityPrev final : public Velocity {};
 } // namespace client
+
+#endif

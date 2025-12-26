@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright (c) 2025 Kirill Dmitrievich
+// File: status_lines.hh
+// Description: Display lines of text in-game
+
+#ifndef CLIENT_GUI_STATUS_LINES_HH
+#define CLIENT_GUI_STATUS_LINES_HH
 #pragma once
 
 constexpr static unsigned int STATUS_DEBUG = 0x0000;  // generic debug line
@@ -16,3 +23,5 @@ namespace status_lines
 void set(unsigned int line, std::string_view text, const ImVec4& color, float fadeout);
 void unset(unsigned int line);
 } // namespace status_lines
+
+#endif
