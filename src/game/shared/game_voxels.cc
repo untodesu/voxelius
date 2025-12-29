@@ -152,6 +152,6 @@ void game_voxels::populate(void)
     slime_builder.set_render_mode(VRENDER_BLEND);
     slime_builder.set_surface_material(VMAT_SLOSH);
     slime_builder.set_touch_type(VTOUCH_BOUNCE);
-    slime_builder.set_touch_values({ 0.00f, 0.60f, 0.00f });
+    slime_builder.set_touch_values({ 1.05f, 1.05f, 1.05f });
     slime = voxel_registry::register_voxel(slime_builder);
 }

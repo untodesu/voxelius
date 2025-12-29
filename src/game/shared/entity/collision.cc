@@ -20,12 +20,12 @@
 #include "shared/coord.hh"
 #include "shared/globals.hh"
 
-constexpr static float EPSILON = 0.5f;
+constexpr static float AABB_EPSILON = 1.0f / 32.0f;
 
 static int vgrid_collide(const Dimension* dimension, int d, Collision& collision, Transform& transform, Velocity& velocity,
-    VoxelMaterial& touch_surface, bool enable_snapping_to_grid)
+    VoxelMaterial& touch_surface, bool enable_snapping)
 {
-    auto movespeed = globals::fixed_frametime * velocity.value[d];
+    auto movespeed = globals::fixed_frametime * velocity.value[d] + std::copysignf(AABB_EPSILON, velocity.value[d]);
     auto movesign = math::sign<int>(movespeed);
 
     auto& ref_aabb = collision.aabb;
@@ -95,8 +95,8 @@ static int vgrid_collide(const Dimension* dimension, int d, Collision& collision
                 auto vbox_center = 0.5f * vbox.min + 0.5f * vbox.max;
 
                 math::AABBf clip_vbox(vbox);
-                clip_vbox.min -= EPSILON * globals::fixed_frametime;
-                clip_vbox.max += EPSILON * globals::fixed_frametime;
+                clip_vbox.min -= AABB_EPSILON;
+                clip_vbox.max += AABB_EPSILON;
 
                 if(!csg_aabb.intersect(clip_vbox)) {
                     continue; // no intersection
@@ -146,15 +146,15 @@ static int vgrid_collide(const Dimension* dimension, int d, Collision& collision
             snap_to_closest_vbox = true;
         }
 
-        if(snap_to_closest_vbox && enable_snapping_to_grid) {
+        if(snap_to_closest_vbox && enable_snapping) {
             auto vbox_center = 0.5f * closest_vbox.min[d] + 0.5f * closest_vbox.max[d];
             auto vbox_halfsize = 0.5f * closest_vbox.max[d] - 0.5f * closest_vbox.min[d];
 
             if(movesign < 0) {
-                transform.local[d] = vbox_center + vbox_halfsize + ref_halfsize[d] - ref_center[d] + EPSILON * globals::fixed_frametime;
+                transform.local[d] = vbox_center + vbox_halfsize + ref_halfsize[d] - ref_center[d] + AABB_EPSILON;
             }
             else {
-                transform.local[d] = vbox_center - vbox_halfsize - ref_halfsize[d] - ref_center[d] - EPSILON * globals::fixed_frametime;
+                transform.local[d] = vbox_center - vbox_halfsize - ref_halfsize[d] - ref_center[d] - AABB_EPSILON;
             }
         }
 
