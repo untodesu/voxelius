@@ -94,6 +94,7 @@ void add_gamepad_button(int priority, config::GamepadButton& value, settings_loc
 namespace settings
 {
 void add_language_select(int priority, settings_location location, std::string_view name);
+void add_video_mode_select(int priority, settings_location location, std::string_view name);
 } // namespace settings
 
 #endif

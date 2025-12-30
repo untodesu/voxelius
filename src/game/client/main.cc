@@ -19,9 +19,10 @@
 #include "shared/game.hh"
 #include "shared/splash.hh"
 
-#include "client/gui/window_title.hh"
-
-#include "client/io/glfw.hh"
+#include "client/io/gamepad.hh"
+#include "client/io/keyboard.hh"
+#include "client/io/mouse.hh"
+#include "client/io/video.hh"
 
 #include "client/resource/sound_effect.hh"
 #include "client/resource/texture_gui.hh"
@@ -35,101 +36,7 @@ extern "C" __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 extern "C" __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 #endif
 
-static void on_glfw_error(int code, const char* message)
-{
-    spdlog::error("glfw: {}", message);
-}
-
-static void on_glfw_char(GLFWwindow* window, unsigned int codepoint)
-{
-    ImGui_ImplGlfw_CharCallback(window, codepoint);
-}
-
-static void on_glfw_cursor_enter(GLFWwindow* window, int entered)
-{
-    ImGui_ImplGlfw_CursorEnterCallback(window, entered);
-}
-
-static void on_glfw_cursor_pos(GLFWwindow* window, double xpos, double ypos)
-{
-    GlfwCursorPosEvent event;
-    event.pos.x = static_cast<float>(xpos);
-    event.pos.y = static_cast<float>(ypos);
-    globals::dispatcher.trigger(event);
-
-    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
-}
-
-static void on_glfw_framebuffer_size(GLFWwindow* window, int width, int height)
-{
-    if(glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
-        // Don't do anything if the window was just
-        // iconified (minimized); as it turns out minimized
-        // windows on WIN32 seem to be forced into 0x0
-        return;
-    }
-
-    globals::width = width;
-    globals::height = height;
-    globals::aspect = static_cast<float>(width) / static_cast<float>(height);
-
-    GlfwFramebufferSizeEvent fb_event;
-    fb_event.size.x = globals::width;
-    fb_event.size.y = globals::height;
-    fb_event.aspect = globals::aspect;
-    globals::dispatcher.trigger(fb_event);
-}
-
-static void on_glfw_key(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    GlfwKeyEvent event;
-    event.key = key;
-    event.scancode = scancode;
-    event.action = action;
-    event.mods = mods;
-    globals::dispatcher.trigger(event);
-
-    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-}
-
-static void on_glfw_joystick(int joystick_id, int event_type)
-{
-    GlfwJoystickEvent event;
-    event.joystick_id = joystick_id;
-    event.event_type = event_type;
-    globals::dispatcher.trigger(event);
-}
-
-static void on_glfw_monitor_event(GLFWmonitor* monitor, int event)
-{
-    ImGui_ImplGlfw_MonitorCallback(monitor, event);
-}
-
-static void on_glfw_mouse_button(GLFWwindow* window, int button, int action, int mods)
-{
-    GlfwMouseButtonEvent event;
-    event.button = button;
-    event.action = action;
-    event.mods = mods;
-    globals::dispatcher.trigger(event);
-
-    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-}
-
-static void on_glfw_scroll(GLFWwindow* window, double dx, double dy)
-{
-    GlfwScrollEvent event;
-    event.dx = static_cast<float>(dx);
-    event.dy = static_cast<float>(dy);
-    globals::dispatcher.trigger(event);
-
-    ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
-}
-
-static void on_glfw_window_focus(GLFWwindow* window, int focused)
-{
-    ImGui_ImplGlfw_WindowFocusCallback(window, focused);
-}
+std::atomic_bool is_running;
 
 static void GLAD_API_PTR on_opengl_message(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message,
     const void* param)
@@ -140,7 +47,8 @@ static void GLAD_API_PTR on_opengl_message(GLenum source, GLenum type, GLuint id
 static void on_termination_signal(int)
 {
     spdlog::warn("client: received termination signal");
-    glfwSetWindowShouldClose(globals::window, true);
+
+    is_running = false;
 }
 
 int main(int argc, char** argv)
@@ -167,32 +75,11 @@ int main(int argc, char** argv)
 
     spdlog::info("Voxelius Client {}", version::full);
 
-    glfwSetErrorCallback(&on_glfw_error);
+    video::init();
 
-#if defined(__unix__)
-    // Wayland constantly throws random bullshit at me
-    // when I'm dealing with pretty much anything cross-platform
-    // on pretty much any kind of UNIX and Linux distribution
-    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
-#endif
-
-    if(!glfwInit()) {
-        spdlog::critical("glfw: init failed");
-        std::terminate();
-    }
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_SAMPLES, 0);
-
-    globals::window = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Client", nullptr, nullptr);
-
-    if(!globals::window) {
-        spdlog::critical("glfw: failed to open a window");
-        std::terminate();
-    }
+    keyboard::init();
+    mouse::init();
+    gamepad::init();
 
     std::signal(SIGINT, &on_termination_signal);
     std::signal(SIGTERM, &on_termination_signal);
@@ -241,31 +128,6 @@ int main(int argc, char** argv)
     ImGui_ImplGlfw_InitForOpenGL(globals::window, false);
     ImGui_ImplOpenGL3_Init(nullptr);
 
-    // The UI is scaled against a resolution defined by BASE_WIDTH and BASE_HEIGHT
-    // constants. However, UI scale of 1 doesn't look that good, so the window size is
-    // limited to a resolution that allows at least UI scale of 2 and is defined by MIN_WIDTH and MIN_HEIGHT.
-    glfwSetWindowSizeLimits(globals::window, MIN_WIDTH, MIN_HEIGHT, GLFW_DONT_CARE, GLFW_DONT_CARE);
-
-    glfwSetCharCallback(globals::window, &on_glfw_char);
-    glfwSetCursorEnterCallback(globals::window, &on_glfw_cursor_enter);
-    glfwSetCursorPosCallback(globals::window, &on_glfw_cursor_pos);
-    glfwSetFramebufferSizeCallback(globals::window, &on_glfw_framebuffer_size);
-    glfwSetKeyCallback(globals::window, &on_glfw_key);
-    glfwSetMouseButtonCallback(globals::window, &on_glfw_mouse_button);
-    glfwSetScrollCallback(globals::window, &on_glfw_scroll);
-    glfwSetWindowFocusCallback(globals::window, &on_glfw_window_focus);
-
-    glfwSetJoystickCallback(&on_glfw_joystick);
-    glfwSetMonitorCallback(&on_glfw_monitor_event);
-
-    if(auto image = resource::load<Image>("textures/gui/window_icon.png")) {
-        GLFWimage icon_image;
-        icon_image.width = image->size.x;
-        icon_image.height = image->size.y;
-        icon_image.pixels = reinterpret_cast<unsigned char*>(image->pixels);
-        glfwSetWindowIcon(globals::window, 1, &icon_image);
-    }
-
     if(cmdline::contains("nosound")) {
         spdlog::warn("client: sound disabled [per command line]");
         globals::sound_dev = nullptr;
@@ -303,7 +165,7 @@ int main(int argc, char** argv)
 
     splash::init_client();
 
-    window_title::update();
+    video::update_window_title();
 
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
@@ -334,14 +196,12 @@ int main(int argc, char** argv)
 
     client_game::init();
 
-    int wwidth, wheight;
-    glfwGetFramebufferSize(globals::window, &wwidth, &wheight);
-    on_glfw_framebuffer_size(globals::window, wwidth, wheight);
-
     threading::init();
 
     globals::client_config.load_file("client.conf");
     globals::client_config.load_cmdline();
+
+    video::init_late();
 
     client_game::init_late();
 
@@ -369,6 +229,8 @@ int main(int argc, char** argv)
         globals::num_triangles = 0;
 
         last_curtime = globals::curtime;
+
+        video::update();
 
         for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i)
             client_game::fixed_update();
@@ -402,6 +264,10 @@ int main(int argc, char** argv)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(globals::window);
+
+        video::update_late();
+
+        gamepad::update_late();
 
         for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i)
             client_game::fixed_update_late();
@@ -441,8 +307,7 @@ int main(int argc, char** argv)
         alcCloseDevice(globals::sound_dev);
     }
 
-    glfwDestroyWindow(globals::window);
-    glfwTerminate();
+    video::shutdown();
 
     globals::client_config.save_file("client.conf");
 

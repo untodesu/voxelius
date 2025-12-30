@@ -37,6 +37,4 @@ target_sources(vclient PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/splash.cc"
     "${CMAKE_CURRENT_LIST_DIR}/splash.hh"
     "${CMAKE_CURRENT_LIST_DIR}/status_lines.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/status_lines.hh"
-    "${CMAKE_CURRENT_LIST_DIR}/window_title.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/window_title.hh")
+    "${CMAKE_CURRENT_LIST_DIR}/status_lines.hh")

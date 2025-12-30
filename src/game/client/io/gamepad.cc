@@ -9,12 +9,14 @@
 
 #include "core/config/boolean.hh"
 #include "core/config/number.hh"
+
 #include "core/io/cmdline.hh"
 #include "core/io/config_map.hh"
+#include "core/io/physfs.hh"
+
 #include "core/math/constexpr.hh"
 
 #include "client/gui/settings.hh"
-#include "client/io/glfw.hh"
 
 #include "client/globals.hh"
 #include "client/toggles.hh"
@@ -48,37 +50,37 @@ static void on_toggle_disable(const ToggleDisabledEvent& event)
     }
 }
 
-static void on_glfw_joystick_event(const GlfwJoystickEvent& event)
+static void on_joystick_glfw(int joystick_id, int event_type)
 {
-    if((event.event_type == GLFW_CONNECTED) && glfwJoystickIsGamepad(event.joystick_id) && (active_gamepad_id == INVALID_GAMEPAD_ID)) {
+    if((event_type == GLFW_CONNECTED) && glfwJoystickIsGamepad(joystick_id) && (active_gamepad_id == INVALID_GAMEPAD_ID)) {
         gamepad::available = true;
 
-        active_gamepad_id = event.joystick_id;
+        active_gamepad_id = joystick_id;
 
-        for(int i = 0; i < NUM_AXES; gamepad::last_state.axes[i++] = 0.0f) {
-            // empty
+        for(int i = 0; i < NUM_AXES; ++i) {
+            gamepad::last_state.axes[i] = 0.0f;
         }
 
-        for(int i = 0; i < NUM_BUTTONS; gamepad::last_state.buttons[i++] = GLFW_RELEASE) {
-            // empty
+        for(int i = 0; i < NUM_BUTTONS; ++i) {
+            gamepad::last_state.buttons[i] = GLFW_RELEASE;
         }
 
-        spdlog::info("gamepad: detected gamepad: {}", glfwGetGamepadName(event.joystick_id));
+        spdlog::info("gamepad: detected gamepad: {}", glfwGetGamepadName(joystick_id));
 
         return;
     }
 
-    if((event.event_type == GLFW_DISCONNECTED) && (active_gamepad_id == event.joystick_id)) {
+    if((event_type == GLFW_DISCONNECTED) && (active_gamepad_id == joystick_id)) {
         gamepad::available = false;
 
         active_gamepad_id = INVALID_GAMEPAD_ID;
 
-        for(int i = 0; i < NUM_AXES; gamepad::last_state.axes[i++] = 0.0f) {
-            // empty
+        for(int i = 0; i < NUM_AXES; ++i) {
+            gamepad::last_state.axes[i] = 0.0f;
         }
 
-        for(int i = 0; i < NUM_BUTTONS; gamepad::last_state.buttons[i++] = GLFW_RELEASE) {
-            // empty
+        for(int i = 0; i < NUM_BUTTONS; ++i) {
+            gamepad::last_state.buttons[i] = GLFW_RELEASE;
         }
 
         spdlog::warn("gamepad: disconnected");
@@ -99,15 +101,12 @@ void gamepad::init(void)
     settings::add_checkbox(0, gamepad::active, settings_location::GAMEPAD, "gamepad.active", true);
     settings::add_slider(1, gamepad::deadzone, settings_location::GAMEPAD, "gamepad.deadzone", true, "%.03f");
 
-    auto mappings_path = cmdline::get_cstr("gpmap", "misc/gamecontrollerdb.txt");
-    auto mappings_file = PHYSFS_openRead(mappings_path);
+    std::string mappings_string;
+    std::string_view mappings_path(cmdline::get("gpmap", "misc/gamecontrollerdb.txt"));
 
-    if(mappings_file) {
+    if(physfs::read_file(mappings_path, mappings_string)) {
         spdlog::info("gamepad: using mappings from {}", mappings_path);
-        auto mappings_string = std::string(PHYSFS_fileLength(mappings_file), char(0x00));
-        PHYSFS_readBytes(mappings_file, mappings_string.data(), mappings_string.size());
         glfwUpdateGamepadMappings(mappings_string.c_str());
-        PHYSFS_close(mappings_file);
     }
 
     for(int joystick = 0; joystick <= GLFW_JOYSTICK_LAST; joystick += 1) {
@@ -140,7 +139,9 @@ void gamepad::init(void)
 
     globals::dispatcher.sink<ToggleEnabledEvent>().connect<&on_toggle_enable>();
     globals::dispatcher.sink<ToggleDisabledEvent>().connect<&on_toggle_disable>();
-    globals::dispatcher.sink<GlfwJoystickEvent>().connect<&on_glfw_joystick_event>();
+
+    spdlog::info("gamepad: taking over device callbacks");
+    glfwSetJoystickCallback(&on_joystick_glfw);
 }
 
 void gamepad::update_late(void)
@@ -152,21 +153,21 @@ void gamepad::update_late(void)
 
     if(glfwGetGamepadState(active_gamepad_id, &gamepad::state)) {
         for(int i = 0; i < NUM_AXES; ++i) {
-            if((glm::abs(gamepad::state.axes[i]) > GAMEPAD_AXIS_EVENT_THRESHOLD)
-                && (glm::abs(gamepad::last_state.axes[i]) <= GAMEPAD_AXIS_EVENT_THRESHOLD)) {
-                GamepadAxisEvent event;
-                event.action = GLFW_PRESS;
-                event.axis = i;
-                globals::dispatcher.enqueue(event);
+            auto is_press = true;
+            is_press = is_press && glm::abs(gamepad::state.axes[i] > GAMEPAD_AXIS_EVENT_THRESHOLD);
+            is_press = is_press && glm::abs(gamepad::last_state.axes[i] <= GAMEPAD_AXIS_EVENT_THRESHOLD);
+
+            if(is_press) {
+                globals::dispatcher.enqueue(GamepadAxisEvent(i, GLFW_PRESS));
                 continue;
             }
 
-            if((glm::abs(gamepad::state.axes[i]) <= GAMEPAD_AXIS_EVENT_THRESHOLD)
-                && (glm::abs(gamepad::last_state.axes[i]) > GAMEPAD_AXIS_EVENT_THRESHOLD)) {
-                GamepadAxisEvent event;
-                event.action = GLFW_RELEASE;
-                event.axis = i;
-                globals::dispatcher.enqueue(event);
+            auto is_release = true;
+            is_release = is_release && glm::abs(gamepad::state.axes[i]) <= GAMEPAD_AXIS_EVENT_THRESHOLD;
+            is_release = is_release && glm::abs(gamepad::last_state.axes[i]) > GAMEPAD_AXIS_EVENT_THRESHOLD;
+
+            if(is_release) {
+                globals::dispatcher.enqueue(GamepadAxisEvent(i, GLFW_RELEASE));
                 continue;
             }
         }
@@ -177,10 +178,7 @@ void gamepad::update_late(void)
                 continue;
             }
 
-            GamepadButtonEvent event;
-            event.action = gamepad::state.buttons[i];
-            event.button = i;
-            globals::dispatcher.enqueue(event);
+            globals::dispatcher.enqueue(GamepadButtonEvent(i, gamepad::state.buttons[i]));
         }
     }
 

@@ -17,7 +17,6 @@ class Unsigned;
 namespace client_game
 {
 extern config::Boolean streamer_mode;
-extern config::Boolean vertical_sync;
 extern config::Boolean world_curvature;
 extern config::Unsigned fog_mode;
 extern config::String username;

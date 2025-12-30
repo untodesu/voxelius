@@ -17,23 +17,23 @@
 #include "client/gui/hotbar.hh"
 #include "client/gui/status_lines.hh"
 
-#include "client/io/glfw.hh"
+#include "client/io/mouse.hh"
 
 #include "client/world/player_target.hh"
 
 #include "client/globals.hh"
 #include "client/session.hh"
 
-static void on_glfw_mouse_button(const GlfwMouseButtonEvent& event)
+static void on_mouse_button(const MouseButtonEvent& event)
 {
     if(!globals::gui_screen && session::is_ingame()) {
-        if((event.action == GLFW_PRESS) && player_target::voxel) {
-            if(event.button == GLFW_MOUSE_BUTTON_LEFT) {
+        if(event.is_action(GLFW_PRESS) && player_target::voxel) {
+            if(event.is_button(GLFW_MOUSE_BUTTON_LEFT)) {
                 experiments::attack();
                 return;
             }
 
-            if(event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+            if(event.is_button(GLFW_MOUSE_BUTTON_RIGHT)) {
                 experiments::interact();
                 return;
             }
@@ -43,7 +43,7 @@ static void on_glfw_mouse_button(const GlfwMouseButtonEvent& event)
 
 void experiments::init(void)
 {
-    globals::dispatcher.sink<GlfwMouseButtonEvent>().connect<&on_glfw_mouse_button>();
+    globals::dispatcher.sink<MouseButtonEvent>().connect<&on_mouse_button>();
 }
 
 void experiments::init_late(void)

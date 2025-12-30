@@ -64,11 +64,11 @@
 #include "client/gui/settings.hh"
 #include "client/gui/splash.hh"
 #include "client/gui/status_lines.hh"
-#include "client/gui/window_title.hh"
 
 #include "client/io/gamepad.hh"
-#include "client/io/glfw.hh"
+#include "client/io/keyboard.hh"
 #include "client/io/sound.hh"
+#include "client/io/video.hh"
 
 #include "client/resource/texture_gui.hh"
 
@@ -93,7 +93,6 @@
 constexpr static int PIXEL_SIZE = 2;
 
 config::Boolean client_game::streamer_mode(false);
-config::Boolean client_game::vertical_sync(true);
 config::Boolean client_game::world_curvature(true);
 config::Unsigned client_game::fog_mode(1U, 0U, 2U);
 config::String client_game::username("player");
@@ -125,7 +124,7 @@ static ImFont* load_font(std::string_view path, float size, ImFontConfig& font_c
     return font_ptr;
 }
 
-static void on_glfw_framebuffer_size(const GlfwFramebufferSizeEvent& event)
+static void on_framebuffer_size(const FramebufferSizeEvent& event)
 {
     if(globals::world_fbo) {
         glDeleteRenderbuffers(1, &globals::world_fbo_depth);
@@ -137,8 +136,8 @@ static void on_glfw_framebuffer_size(const GlfwFramebufferSizeEvent& event)
     glGenTextures(1, &globals::world_fbo_color);
     glGenRenderbuffers(1, &globals::world_fbo_depth);
 
-    scaled_width = event.size.x / PIXEL_SIZE;
-    scaled_height = event.size.y / PIXEL_SIZE;
+    scaled_width = event.wide() / PIXEL_SIZE;
+    scaled_height = event.tall() / PIXEL_SIZE;
 
     glBindTexture(GL_TEXTURE_2D, globals::world_fbo_color);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, scaled_width, scaled_height, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
@@ -159,9 +158,9 @@ static void on_glfw_framebuffer_size(const GlfwFramebufferSizeEvent& event)
     }
 }
 
-static void on_glfw_key(const GlfwKeyEvent& event)
+static void on_key(const KeyEvent& event)
 {
-    if(!globals::gui_keybind_ptr && hide_hud_toggle.equals(event.key) && (event.action == GLFW_PRESS)) {
+    if(!globals::gui_keybind_ptr && hide_hud_toggle.equals(event.keycode()) && (event.is_action(GLFW_PRESS))) {
         client_game::hide_hud = !client_game::hide_hud;
     }
 }
@@ -191,7 +190,6 @@ void client_game::init(void)
     client_splash::render();
 
     globals::client_config.add_value("game.streamer_mode", client_game::streamer_mode);
-    globals::client_config.add_value("game.vertical_sync", client_game::vertical_sync);
     globals::client_config.add_value("game.world_curvature", client_game::world_curvature);
     globals::client_config.add_value("game.fog_mode", client_game::fog_mode);
     globals::client_config.add_value("game.username", client_game::username);
@@ -200,7 +198,6 @@ void client_game::init(void)
     settings::init();
 
     settings::add_checkbox(0, client_game::streamer_mode, settings_location::VIDEO_GUI, "game.streamer_mode", true);
-    settings::add_checkbox(5, client_game::vertical_sync, settings_location::VIDEO, "game.vertical_sync", false);
     settings::add_checkbox(4, client_game::world_curvature, settings_location::VIDEO, "game.world_curvature", true);
     settings::add_stepper(3, client_game::fog_mode, settings_location::VIDEO, "game.fog_mode", false);
     settings::add_input(1, client_game::username, settings_location::GENERAL, "game.username", true, false);
@@ -351,8 +348,8 @@ void client_game::init(void)
 
     experiments::init();
 
-    globals::dispatcher.sink<GlfwFramebufferSizeEvent>().connect<&on_glfw_framebuffer_size>();
-    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<FramebufferSizeEvent>().connect<&on_framebuffer_size>();
+    globals::dispatcher.sink<KeyEvent>().connect<&on_key>();
 }
 
 void client_game::init_late(void)
@@ -428,7 +425,7 @@ void client_game::init_late(void)
 
     client_splash::init_late();
 
-    window_title::update();
+    video::update_window_title();
 }
 
 void client_game::shutdown(void)
@@ -591,13 +588,6 @@ void client_game::update_late(void)
     gamepad::update_late();
 
     chunk_visibility::update_late();
-
-    if(client_game::vertical_sync.get_value()) {
-        glfwSwapInterval(1);
-    }
-    else {
-        glfwSwapInterval(0);
-    }
 }
 
 void client_game::render(void)
