@@ -17,7 +17,7 @@
 #include "client/gui/language.hh"
 #include "client/gui/settings.hh"
 
-#include "client/io/glfw.hh"
+#include "client/io/keyboard.hh"
 
 #include "client/globals.hh"
 #include "client/toggles.hh"
@@ -29,10 +29,10 @@ static void stbi_png_physfs_callback(void* context, void* data, int size)
     PHYSFS_writeBytes(reinterpret_cast<PHYSFS_File*>(context), data, size);
 }
 
-static void on_glfw_key(const GlfwKeyEvent& event)
+static void on_key(const KeyEvent& event)
 {
     if(!globals::gui_keybind_ptr && !toggles::is_sequence_await) {
-        if(screenshot_key.equals(event.key) && (event.action == GLFW_PRESS)) {
+        if(event.is_keycode(screenshot_key.get_key()) && event.is_action(GLFW_PRESS)) {
             screenshot::take();
             return;
         }
@@ -45,7 +45,7 @@ void screenshot::init(void)
 
     settings::add_keybind(0, screenshot_key, settings_location::KEYBOARD_MISC, "key.screenshot");
 
-    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<KeyEvent>().connect<&on_key>();
 }
 
 void screenshot::take(void)

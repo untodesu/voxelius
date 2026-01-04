@@ -71,7 +71,6 @@
   "settings.value.game.key.toggle_hide_hud": "Hide/Show HUD",
   "settings.value.game.streamer_mode": "Streamer mode",
   "settings.value.game.username": "Username",
-  "settings.value.game.vertical_sync": "Vertical sync",
   "settings.value.game.world_curvature": "World curvature",
   "settings.value.gamepad.active": "Use Gamepad",
   "settings.value.gamepad.deadzone": "Deadzone",
@@ -111,6 +110,8 @@
   "settings.value.sound.volume_master": "Master volume",
   "settings.value.sound.volume_music": "Music volume",
   "settings.value.sound.volume_ui": "UI volume",
+  "settings.value.video.current_mode": "Video Mode",
+  "settings.value.video.enable_vsync": "Vertical Sync",
 
   "settings.tooltip.camera.roll_angle": "Quake-styled view roll applied with sideways moves",
   "settings.tooltip.camera.vertical_fov": "Field Of View",
@@ -123,6 +124,14 @@
   "settings.tooltip.player_look.mouse.raw_input": "Disable OS-specific mouse filtering",
   "settings.tooltip.player_look.mouse.sensitivity": "Specifies the rate at which cursor movement on 2D screen is reflected by the camera",
   "settings.tooltip.player_move.enable_speedometer": "Display horizontal speed",
+  "settings.tooltip.video.enable_vsync": "Synchronize buffer swapping with your monitor's refresh rate; this removes screen tearing but adds a noticeable input lag",
+
+  "settings.choice.video_mode.windowed": "Windowed",
+
+  "settings.popup.video_change.title": "Change video mode",
+  "settings.popup.video_change.text": "Are you sure?",
+  "settings.popup.video_change.answer.yes": "Yes",
+  "settings.popup.video_change.answer.no": "No",
 
   "connecting.cancel_button": "Cancel",
   "connecting.connecting": "Connecting",

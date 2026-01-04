@@ -18,7 +18,8 @@
 #include "client/gui/gui_screen.hh"
 #include "client/gui/language.hh"
 
-#include "client/io/glfw.hh"
+#include "client/io/keyboard.hh"
+#include "client/io/mouse.hh"
 
 #include "client/resource/texture_gui.hh"
 
@@ -37,17 +38,17 @@ static float texture_alpha;
 static std::uint64_t end_time;
 static std::string current_text;
 
-static void on_glfw_key(const GlfwKeyEvent& event)
+static void on_key(const KeyEvent& event)
 {
     end_time = UINT64_C(0);
 }
 
-static void on_glfw_mouse_button(const GlfwMouseButtonEvent& event)
+static void on_mouse_button(const MouseButtonEvent& event)
 {
     end_time = UINT64_C(0);
 }
 
-static void on_glfw_scroll(const GlfwScrollEvent& event)
+static void on_scroll(const ScrollEvent& event)
 {
     end_time = UINT64_C(0);
 }
@@ -89,9 +90,9 @@ void client_splash::init_late(void)
 
     end_time = utils::unix_microseconds() + DELAY_MICROSECONDS;
 
-    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
-    globals::dispatcher.sink<GlfwMouseButtonEvent>().connect<&on_glfw_mouse_button>();
-    globals::dispatcher.sink<GlfwScrollEvent>().connect<&on_glfw_scroll>();
+    globals::dispatcher.sink<KeyEvent>().connect<&on_key>();
+    globals::dispatcher.sink<MouseButtonEvent>().connect<&on_mouse_button>();
+    globals::dispatcher.sink<ScrollEvent>().connect<&on_scroll>();
 
     current_text = language::resolve("splash.skip_prompt");
 
@@ -108,9 +109,9 @@ void client_splash::init_late(void)
         client_splash::render();
     }
 
-    globals::dispatcher.sink<GlfwKeyEvent>().disconnect<&on_glfw_key>();
-    globals::dispatcher.sink<GlfwMouseButtonEvent>().disconnect<&on_glfw_mouse_button>();
-    globals::dispatcher.sink<GlfwScrollEvent>().disconnect<&on_glfw_scroll>();
+    globals::dispatcher.sink<KeyEvent>().disconnect<&on_key>();
+    globals::dispatcher.sink<MouseButtonEvent>().disconnect<&on_mouse_button>();
+    globals::dispatcher.sink<ScrollEvent>().disconnect<&on_scroll>();
 
     texture = nullptr;
     texture_aspect = 0.0f;

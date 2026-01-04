@@ -21,10 +21,12 @@
 
 #include "client/gui/gui_screen.hh"
 #include "client/gui/imutils_button.hh"
+#include "client/gui/imutils_popup.hh"
 #include "client/gui/language.hh"
 
 #include "client/io/gamepad.hh"
-#include "client/io/glfw.hh"
+#include "client/io/keyboard.hh"
+#include "client/io/video.hh"
 
 #include "client/const.hh"
 #include "client/globals.hh"
@@ -34,20 +36,21 @@ constexpr static unsigned int NUM_LOCATIONS = static_cast<unsigned int>(settings
 constexpr static const char* TOOLTIP_TEXT = "[?]";
 
 enum class setting_type {
-    CHECKBOX,        ///< config::Boolean
-    INPUT_INT,       ///< config::Number<int>
-    INPUT_FLOAT,     ///< config::Number<float>
-    INPUT_UINT,      ///< config::Number<unsigned int>
-    INPUT_STRING,    ///< config::String
-    SLIDER_INT,      ///< config::Number<int>
-    SLIDER_FLOAT,    ///< config::Number<float>
-    SLIDER_UINT,     ///< config::Number<unsigned int>
-    STEPPER_INT,     ///< config::Number<int>
-    STEPPER_UINT,    ///< config::Number<unsigned int>
-    KEYBIND,         ///< config::KeyBind
-    GAMEPAD_AXIS,    ///< config::GamepadAxis
-    GAMEPAD_BUTTON,  ///< config::GamepadButton
-    LANGUAGE_SELECT, ///< config::String internally
+    CHECKBOX,          ///< config::Boolean
+    INPUT_INT,         ///< config::Number<int>
+    INPUT_FLOAT,       ///< config::Number<float>
+    INPUT_UINT,        ///< config::Number<unsigned int>
+    INPUT_STRING,      ///< config::String
+    SLIDER_INT,        ///< config::Number<int>
+    SLIDER_FLOAT,      ///< config::Number<float>
+    SLIDER_UINT,       ///< config::Number<unsigned int>
+    STEPPER_INT,       ///< config::Number<int>
+    STEPPER_UINT,      ///< config::Number<unsigned int>
+    KEYBIND,           ///< config::KeyBind
+    GAMEPAD_AXIS,      ///< config::GamepadAxis
+    GAMEPAD_BUTTON,    ///< config::GamepadButton
+    LANGUAGE_SELECT,   ///< config::String internally
+    VIDEO_MODE_SELECT, ///< config::String internally
 };
 
 enum class gui_location {
@@ -223,6 +226,16 @@ public:
     virtual void layout(void) const override;
 };
 
+class SettingValue_VideoMode final : public SettingValueWID {
+public:
+    virtual ~SettingValue_VideoMode(void) override = default;
+    virtual void layout(void) const override;
+    void refresh_choices(void);
+
+    std::vector<VideoMode> choices;
+    std::vector<std::string> choice_labels;
+};
+
 static std::string str_label_movement;
 static std::string str_label_gameplay;
 static std::string str_label_miscellaneous;
@@ -242,6 +255,10 @@ static std::string str_separator_devices;
 static std::string str_checkbox_false;
 static std::string str_checkbox_true;
 
+static std::string str_popup_video_change_title;
+static std::string str_popup_video_change_text;
+static std::string str_popup_video_change_answers[2];
+
 static std::vector<std::shared_ptr<SettingValue>> values_all;
 static std::vector<std::shared_ptr<SettingValue>> values[NUM_LOCATIONS];
 
@@ -249,6 +266,8 @@ static std::string str_gamepad_axis_prefix;
 static std::string str_gamepad_button_prefix;
 static std::string str_gamepad_checkbox_tooltip;
 
+static bool should_open_video_mode_popup;
+static const VideoMode* target_video_mode;
 static gui_location selected_location;
 
 void SettingValue::layout_tooltip(void) const
@@ -542,6 +561,93 @@ void SettingValue_Language::layout(void) const
     layout_tooltip();
 }
 
+void SettingValue_VideoMode::layout(void) const
+{
+    int current_width;
+    int current_height;
+    int current_refresh_rate = GLFW_DONT_CARE;
+    bool is_fullscreen = false;
+
+    video::query_current_mode(current_width, current_height, is_fullscreen);
+
+    if(is_fullscreen) {
+        auto monitor = glfwGetWindowMonitor(globals::window);
+        auto video_mode = glfwGetVideoMode(monitor);
+        current_refresh_rate = video_mode->refreshRate;
+    }
+
+    int current_index = 0;
+
+    if(is_fullscreen) {
+        for(std::size_t i = 0; i < choices.size(); ++i) {
+            if(choices[i] == VideoMode(current_width, current_height, current_refresh_rate)) {
+                current_index = static_cast<int>(i) + 1;
+                break;
+            }
+        }
+    }
+
+    if(ImGui::BeginCombo(wid.c_str(), choice_labels[current_index].c_str())) {
+        if(ImGui::Selectable(choice_labels[0].c_str(), current_index == 0)) {
+            if(current_index != 0) {
+                should_open_video_mode_popup = true;
+                target_video_mode = nullptr;
+            }
+        }
+
+        auto current_width = INT_MIN;
+        auto current_height = INT_MIN;
+        ImVec2 dummy_size(0.0f, 0.0625f * ImGui::GetStyle().ItemSpacing.y);
+
+        for(std::size_t i = 1; i < choices.size(); ++i) {
+            const auto& mode = choices[i - 1];
+            auto mode_width = mode.wide();
+            auto mode_height = mode.tall();
+
+            if(current_width != mode_width || current_height != mode_height) {
+                ImGui::Separator();
+                ImGui::Dummy(dummy_size);
+
+                current_height = mode_height;
+                current_width = mode_width;
+            }
+
+            if(ImGui::Selectable(choice_labels[i].c_str(), current_index == static_cast<int>(i))) {
+                if(current_index != static_cast<int>(i)) {
+                    should_open_video_mode_popup = true;
+                    target_video_mode = &mode;
+                }
+            }
+        }
+
+        ImGui::EndCombo();
+    }
+
+    layout_label();
+    layout_tooltip();
+}
+
+void SettingValue_VideoMode::refresh_choices(void)
+{
+    auto& modes = video::query_fullscreen_modes();
+    unsigned int mode_index = 0U;
+
+    choices.clear();
+    choices.reserve(modes.size());
+
+    choice_labels.clear();
+    choice_labels.reserve(1 + modes.size());
+    choice_labels.push_back(std::string(language::resolve("settings.choice.video_mode.windowed")));
+
+    for(const auto& mode : modes) {
+        auto mode_string = std::format("{}x{} @ {}", mode.wide(), mode.tall(), mode.rate());
+        auto mode_label = std::format("{}###GUI::VideoMode[{}]", mode_string, mode_index);
+        choice_labels.emplace_back(std::move(mode_label));
+        choices.push_back(mode);
+        mode_index += 1U;
+    }
+}
+
 static void refresh_input_wids(void)
 {
     for(auto& value : values_all) {
@@ -560,15 +666,22 @@ static void refresh_input_wids(void)
         if(value->type == setting_type::GAMEPAD_BUTTON) {
             auto gamepad_button = std::static_pointer_cast<SettingValue_GamepadButton>(value);
             gamepad_button->refresh_wids();
+            continue;
+        }
+
+        if(value->type == setting_type::VIDEO_MODE_SELECT) {
+            auto video_mode = std::static_pointer_cast<SettingValue_VideoMode>(value);
+            video_mode->refresh_choices();
+            continue;
         }
     }
 }
 
-static void on_glfw_key(const GlfwKeyEvent& event)
+static void on_key(const KeyEvent& event)
 {
-    if((event.action == GLFW_PRESS) && (event.key != DEBUG_KEY)) {
+    if(event.is_action(GLFW_PRESS) && !event.is_keycode(DEBUG_KEY)) {
         if(globals::gui_keybind_ptr || globals::gui_gamepad_axis_ptr || globals::gui_gamepad_button_ptr) {
-            if(event.key == GLFW_KEY_ESCAPE) {
+            if(event.is_keycode(GLFW_KEY_ESCAPE)) {
                 ImGuiIO& io = ImGui::GetIO();
                 io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
@@ -582,7 +695,7 @@ static void on_glfw_key(const GlfwKeyEvent& event)
             ImGuiIO& io = ImGui::GetIO();
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-            globals::gui_keybind_ptr->set_key(event.key);
+            globals::gui_keybind_ptr->set_key(event.keycode());
             globals::gui_keybind_ptr = nullptr;
 
             refresh_input_wids();
@@ -590,7 +703,7 @@ static void on_glfw_key(const GlfwKeyEvent& event)
             return;
         }
 
-        if((event.key == GLFW_KEY_ESCAPE) && (globals::gui_screen == GUI_SETTINGS)) {
+        if(event.is_keycode(GLFW_KEY_ESCAPE) && globals::gui_screen == GUI_SETTINGS) {
             globals::gui_screen = GUI_MAIN_MENU;
             return;
         }
@@ -603,7 +716,7 @@ static void on_gamepad_axis(const GamepadAxisEvent& event)
         auto& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-        globals::gui_gamepad_axis_ptr->set_axis(event.axis);
+        globals::gui_gamepad_axis_ptr->set_axis(event.axis());
         globals::gui_gamepad_axis_ptr = nullptr;
 
         refresh_input_wids();
@@ -618,7 +731,7 @@ static void on_gamepad_button(const GamepadButtonEvent& event)
         auto& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-        globals::gui_gamepad_button_ptr->set_button(event.button);
+        globals::gui_gamepad_button_ptr->set_button(event.button());
         globals::gui_gamepad_button_ptr = nullptr;
 
         refresh_input_wids();
@@ -647,6 +760,11 @@ static void on_language_set(const LanguageSetEvent& event)
 
     str_checkbox_false = language::resolve("settings.checkbox.false");
     str_checkbox_true = language::resolve("settings.checkbox.true");
+
+    str_popup_video_change_title = language::resolve_gui("settings.popup.video_change.title");
+    str_popup_video_change_text = language::resolve("settings.popup.video_change.text");
+    str_popup_video_change_answers[0] = language::resolve_gui("settings.popup.video_change.answer.yes");
+    str_popup_video_change_answers[1] = language::resolve_gui("settings.popup.video_change.answer.no");
 
     str_gamepad_axis_prefix = language::resolve("settings.gamepad.axis");
     str_gamepad_button_prefix = language::resolve("settings.gamepad.button");
@@ -696,7 +814,11 @@ static void layout_location_selectable(const std::string& label, gui_location ta
 
 void settings::init(void)
 {
-    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
+    selected_location = gui_location::GENERAL;
+    should_open_video_mode_popup = false;
+    target_video_mode = nullptr;
+
+    globals::dispatcher.sink<KeyEvent>().connect<&on_key>();
     globals::dispatcher.sink<GamepadAxisEvent>().connect<&on_gamepad_axis>();
     globals::dispatcher.sink<GamepadButtonEvent>().connect<&on_gamepad_button>();
     globals::dispatcher.sink<LanguageSetEvent>().connect<&on_language_set>();
@@ -822,8 +944,23 @@ void settings::layout(void)
         ImGui::EndChild();
     }
 
+    if(should_open_video_mode_popup) {
+        ImGui::OpenPopup(str_popup_video_change_title.c_str());
+
+        should_open_video_mode_popup = false;
+    }
+
     ImGui::PopStyleVar(2);
     ImGui::PopFont();
+
+    if(0 == imutils::popup(str_popup_video_change_title, str_popup_video_change_text, str_popup_video_change_answers, 2, 1.0f)) {
+        if(target_video_mode) {
+            video::request_fullscreen(target_video_mode->wide(), target_video_mode->tall(), target_video_mode->rate());
+        }
+        else {
+            video::request_windowed();
+        }
+    }
 
     ImGui::End();
 }
@@ -1040,6 +1177,21 @@ void settings::add_language_select(int priority, settings_location location, std
     setting_value->name = name;
 
     setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value.get()));
+
+    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values_all.push_back(setting_value);
+}
+
+void settings::add_video_mode_select(int priority, settings_location location, std::string_view name)
+{
+    auto setting_value = std::make_shared<SettingValue_VideoMode>();
+    setting_value->type = setting_type::VIDEO_MODE_SELECT;
+    setting_value->priority = priority;
+    setting_value->has_tooltip = false;
+    setting_value->name = name;
+
+    setting_value->wid = std::format("###{}", static_cast<const void*>(setting_value.get()));
+    setting_value->refresh_choices();
 
     values[static_cast<unsigned int>(location)].push_back(setting_value);
     values_all.push_back(setting_value);

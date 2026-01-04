@@ -75,6 +75,8 @@ int main(int argc, char** argv)
 
     spdlog::info("Voxelius Client {}", version::full);
 
+    splash::init_client();
+
     video::init();
 
     keyboard::init();
@@ -163,8 +165,6 @@ int main(int argc, char** argv)
         }
     }
 
-    splash::init_client();
-
     video::update_window_title();
 
     ImGuiIO& io = ImGui::GetIO();
@@ -205,9 +205,11 @@ int main(int argc, char** argv)
 
     client_game::init_late();
 
+    is_running = true;
+
     auto last_curtime = globals::curtime;
 
-    while(!glfwWindowShouldClose(globals::window)) {
+    while(is_running) {
         globals::curtime = utils::unix_microseconds();
 
         globals::window_frametime_us = globals::curtime - last_curtime;

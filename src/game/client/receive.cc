@@ -21,9 +21,9 @@
 #include "client/gui/chat.hh"
 #include "client/gui/gui_screen.hh"
 #include "client/gui/message_box.hh"
-#include "client/gui/window_title.hh"
 
 #include "client/io/sound.hh"
+#include "client/io/video.hh"
 
 #include "client/globals.hh"
 #include "client/session.hh"
@@ -51,7 +51,7 @@ static bool synchronize_entity_id(Dimension* dimension, entt::entity entity)
     message_box::set_subtitle("protocol.entity_id_desync");
     message_box::add_button("disconnected.back", [](void) {
         globals::gui_screen = GUI_PLAY_MENU;
-        window_title::update();
+        video::update_window_title();
     });
 
     globals::gui_screen = GUI_MESSAGE_BOX;
@@ -156,7 +156,7 @@ static void on_spawn_player_packet(const protocol::SpawnPlayer& packet)
 
             client_chat::refresh_timings();
 
-            window_title::update();
+            video::update_window_title();
         }
     }
 }

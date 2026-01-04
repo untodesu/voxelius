@@ -13,7 +13,7 @@
 #include "client/gui/language.hh"
 
 #include "client/io/gamepad.hh"
-#include "client/io/glfw.hh"
+#include "client/io/keyboard.hh"
 
 #include "client/const.hh"
 #include "client/globals.hh"
@@ -54,7 +54,7 @@ static void toggle_value(ToggleInfo& info, toggle_type type)
     print_toggle_state(info);
 }
 
-static void on_glfw_key(const GlfwKeyEvent& event)
+static void on_key(const KeyEvent& event)
 {
     if(globals::gui_keybind_ptr) {
         // The UI keybind subsystem has the authority
@@ -62,22 +62,22 @@ static void on_glfw_key(const GlfwKeyEvent& event)
         return;
     }
 
-    if(event.key == DEBUG_KEY) {
-        if(event.action == GLFW_PRESS) {
+    if(event.is_keycode(DEBUG_KEY)) {
+        if(event.is_action(GLFW_PRESS)) {
             toggles::is_sequence_await = true;
             ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
             return;
         }
 
-        if(event.action == GLFW_RELEASE) {
+        if(event.is_action(GLFW_RELEASE)) {
             toggles::is_sequence_await = false;
             ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
             return;
         }
     }
 
-    if((event.action == GLFW_PRESS) && toggles::is_sequence_await) {
-        if(event.key == GLFW_KEY_L) {
+    if((event.is_action(GLFW_PRESS)) && toggles::is_sequence_await) {
+        if(event.is_keycode(GLFW_KEY_L)) {
             // This causes the language subsystem
             // to re-parse the JSON file essentially
             // causing the game to soft-reload language
@@ -86,7 +86,7 @@ static void on_glfw_key(const GlfwKeyEvent& event)
         }
 
         for(toggle_type i = 0; i < TOGGLE_COUNT; ++i) {
-            if(event.key == toggle_infos[i].glfw_keycode) {
+            if(event.is_keycode(toggle_infos[i].glfw_keycode)) {
                 toggle_value(toggle_infos[i], i);
                 return;
             }
@@ -120,7 +120,7 @@ void toggles::init(void)
     toggle_infos[TOGGLE_PM_FLIGHT].glfw_keycode = GLFW_KEY_F;
     toggle_infos[TOGGLE_PM_FLIGHT].is_enabled = false;
 
-    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<KeyEvent>().connect<&on_key>();
 }
 
 void toggles::init_late(void)

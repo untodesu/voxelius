@@ -25,7 +25,7 @@
 #include "client/gui/language.hh"
 #include "client/gui/settings.hh"
 
-#include "client/io/glfw.hh"
+#include "client/io/keyboard.hh"
 #include "client/io/sound.hh"
 
 #include "client/resource/sound_effect.hh"
@@ -109,10 +109,10 @@ static void on_chat_message_packet(const protocol::ChatMessage& packet)
     }
 }
 
-static void on_glfw_key(const GlfwKeyEvent& event)
+static void on_key(const KeyEvent& event)
 {
-    if(event.action == GLFW_PRESS) {
-        if((event.key == GLFW_KEY_ENTER) && (globals::gui_screen == GUI_CHAT)) {
+    if(event.is_action(GLFW_PRESS)) {
+        if(event.is_keycode(GLFW_KEY_ENTER) && globals::gui_screen == GUI_CHAT) {
             if(!utils::is_whitespace(chat_input)) {
                 protocol::ChatMessage packet;
                 packet.type = protocol::ChatMessage::TEXT_MESSAGE;
@@ -129,12 +129,12 @@ static void on_glfw_key(const GlfwKeyEvent& event)
             return;
         }
 
-        if((event.key == GLFW_KEY_ESCAPE) && (globals::gui_screen == GUI_CHAT)) {
+        if(event.is_keycode(GLFW_KEY_ESCAPE) && globals::gui_screen == GUI_CHAT) {
             globals::gui_screen = GUI_SCREEN_NONE;
             return;
         }
 
-        if(key_chat.equals(event.key) && !globals::gui_screen) {
+        if(key_chat.equals(event.keycode()) && !globals::gui_screen) {
             globals::gui_screen = GUI_CHAT;
             needs_focus = true;
             return;
@@ -151,7 +151,7 @@ void client_chat::init(void)
     settings::add_slider(1, history_size, settings_location::VIDEO_GUI, "chat.history_size", false);
 
     globals::dispatcher.sink<protocol::ChatMessage>().connect<&on_chat_message_packet>();
-    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<KeyEvent>().connect<&on_key>();
 
     sfx_chat_message = resource::load<SoundEffect>("sounds/ui/chat_message.wav");
 }

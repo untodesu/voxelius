@@ -23,7 +23,7 @@
 #include "client/gui/gui_screen.hh"
 #include "client/gui/language.hh"
 
-#include "client/io/glfw.hh"
+#include "client/io/keyboard.hh"
 
 #include "client/game.hh"
 #include "client/globals.hh"
@@ -170,9 +170,9 @@ static void join_selected_server(void)
     }
 }
 
-static void on_glfw_key(const GlfwKeyEvent& event)
+static void on_key(const KeyEvent& event)
 {
-    if((event.key == GLFW_KEY_ESCAPE) && (event.action == GLFW_PRESS)) {
+    if(event.is_keycode(GLFW_KEY_ESCAPE) && event.is_action(GLFW_PRESS)) {
         if(globals::gui_screen == GUI_PLAY_MENU) {
             if(editing_server) {
                 if(adding_server) {
@@ -517,7 +517,7 @@ void play_menu::init(void)
         }
     }
 
-    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<KeyEvent>().connect<&on_key>();
     globals::dispatcher.sink<LanguageSetEvent>().connect<&on_language_set>();
     globals::dispatcher.sink<BotherResponseEvent>().connect<&on_bother_response>();
 }

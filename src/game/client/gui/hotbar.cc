@@ -18,7 +18,8 @@
 #include "client/gui/settings.hh"
 #include "client/gui/status_lines.hh"
 
-#include "client/io/glfw.hh"
+#include "client/io/keyboard.hh"
+#include "client/io/mouse.hh"
 
 #include "client/resource/texture_gui.hh"
 
@@ -55,11 +56,11 @@ static void update_hotbar_item(void)
     }
 }
 
-static void on_glfw_key(const GlfwKeyEvent& event)
+static void on_key(const KeyEvent& event)
 {
-    if((event.action == GLFW_PRESS) && !globals::gui_screen) {
+    if(event.is_action(GLFW_PRESS) && !globals::gui_screen) {
         for(unsigned int i = 0U; i < HOTBAR_SIZE; ++i) {
-            if(hotbar_keys[i].equals(event.key)) {
+            if(hotbar_keys[i].equals(event.keycode())) {
                 hotbar::active_slot = i;
                 update_hotbar_item();
                 break;
@@ -68,15 +69,15 @@ static void on_glfw_key(const GlfwKeyEvent& event)
     }
 }
 
-static void on_glfw_scroll(const GlfwScrollEvent& event)
+static void on_scroll(const ScrollEvent& event)
 {
     if(!globals::gui_screen) {
-        if(event.dy < 0.0) {
+        if(event.yoffset() < 0.0) {
             hotbar::next_slot();
             return;
         }
 
-        if(event.dy > 0.0) {
+        if(event.yoffset() > 0.0) {
             hotbar::prev_slot();
             return;
         }
@@ -118,8 +119,8 @@ void hotbar::init(void)
     hotbar_background = resource::load<TextureGUI>("textures/gui/hud_hotbar.png", TEXTURE_GUI_LOAD_CLAMP_S | TEXTURE_GUI_LOAD_CLAMP_T);
     hotbar_selector = resource::load<TextureGUI>("textures/gui/hud_selector.png", TEXTURE_GUI_LOAD_CLAMP_S | TEXTURE_GUI_LOAD_CLAMP_T);
 
-    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
-    globals::dispatcher.sink<GlfwScrollEvent>().connect<&on_glfw_scroll>();
+    globals::dispatcher.sink<KeyEvent>().connect<&on_key>();
+    globals::dispatcher.sink<ScrollEvent>().connect<&on_scroll>();
 }
 
 void hotbar::shutdown(void)

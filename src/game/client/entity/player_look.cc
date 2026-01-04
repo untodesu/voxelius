@@ -25,7 +25,7 @@
 #include "client/gui/settings.hh"
 
 #include "client/io/gamepad.hh"
-#include "client/io/glfw.hh"
+#include "client/io/mouse.hh"
 
 #include "client/const.hh"
 #include "client/globals.hh"
@@ -71,32 +71,32 @@ static void add_angles(float pitch, float yaw)
     }
 }
 
-static void on_glfw_cursor_pos(const GlfwCursorPosEvent& event)
+static void on_cursor_pos(const CursorPosEvent& event)
 {
     if(gamepad::available && gamepad::active.get_value()) {
         // The player is assumed to be using
         // a gamepad instead of mouse and keyboard
-        last_cursor = event.pos;
+        last_cursor = event.position();
         return;
     }
 
     if(globals::gui_screen || !session::is_ingame()) {
         // UI is visible or we're not in-game
-        last_cursor = event.pos;
+        last_cursor = event.position();
         return;
     }
 
-    auto dx = -0.01f * static_cast<float>(mouse_sensitivity.get_value()) * math::radians(event.pos.x - last_cursor.x);
-    auto dy = -0.01f * static_cast<float>(mouse_sensitivity.get_value()) * math::radians(event.pos.y - last_cursor.y);
+    auto dx = -0.01f * static_cast<float>(mouse_sensitivity.get_value()) * math::radians(event.xpos() - last_cursor.x);
+    auto dy = -0.01f * static_cast<float>(mouse_sensitivity.get_value()) * math::radians(event.ypos() - last_cursor.y);
     add_angles(dy, dx);
 
-    last_cursor = event.pos;
+    last_cursor = event.position();
 }
 
 static void on_gamepad_button(const GamepadButtonEvent& event)
 {
-    if(button_fastlook.equals(event.button)) {
-        fastlook_enabled = event.action == GLFW_PRESS;
+    if(button_fastlook.equals(event.button())) {
+        fastlook_enabled = event.is_action(GLFW_PRESS);
     }
 }
 
@@ -126,7 +126,7 @@ void player_look::init(void)
     last_cursor.x = 0.5f * static_cast<float>(globals::width);
     last_cursor.y = 0.5f * static_cast<float>(globals::height);
 
-    globals::dispatcher.sink<GlfwCursorPosEvent>().connect<&on_glfw_cursor_pos>();
+    globals::dispatcher.sink<CursorPosEvent>().connect<&on_cursor_pos>();
     globals::dispatcher.sink<GamepadButtonEvent>().connect<&on_gamepad_button>();
 }
 

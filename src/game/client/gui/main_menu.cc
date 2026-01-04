@@ -17,9 +17,8 @@
 #include "client/gui/imutils_button.hh"
 #include "client/gui/imutils_popup.hh"
 #include "client/gui/language.hh"
-#include "client/gui/window_title.hh"
 
-#include "client/io/glfw.hh"
+#include "client/io/keyboard.hh"
 
 #include "client/resource/texture_gui.hh"
 
@@ -36,9 +35,9 @@ static std::string str_quit_popup_title;
 static std::string str_quit_popup_question;
 static std::string str_quit_popup_choices[2];
 
-static void on_glfw_key(const GlfwKeyEvent& event)
+static void on_key(const KeyEvent& event)
 {
-    if(session::is_ingame() && (event.key == GLFW_KEY_ESCAPE) && (event.action == GLFW_PRESS)) {
+    if(session::is_ingame() && event.is_keycode(GLFW_KEY_ESCAPE) && event.is_action(GLFW_PRESS)) {
         if(globals::gui_screen == GUI_SCREEN_NONE) {
             globals::gui_screen = GUI_MAIN_MENU;
             return;
@@ -67,7 +66,7 @@ static void on_language_set(const LanguageSetEvent& event)
 
 void main_menu::init(void)
 {
-    globals::dispatcher.sink<GlfwKeyEvent>().connect<&on_glfw_key>();
+    globals::dispatcher.sink<KeyEvent>().connect<&on_key>();
     globals::dispatcher.sink<LanguageSetEvent>().connect<&on_language_set>();
 }
 

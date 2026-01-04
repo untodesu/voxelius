@@ -31,7 +31,8 @@
 #include "client/gui/gui_screen.hh"
 #include "client/gui/message_box.hh"
 #include "client/gui/progress_bar.hh"
-#include "client/gui/window_title.hh"
+
+#include "client/io/video.hh"
 
 #include "client/world/chunk_visibility.hh"
 
@@ -92,7 +93,7 @@ static void on_disconnect_packet(const protocol::Disconnect& packet)
     message_box::set_subtitle(packet.reason.c_str());
     message_box::add_button("disconnected.back", [](void) {
         globals::gui_screen = GUI_PLAY_MENU;
-        window_title::update();
+        video::update_window_title();
     });
 
     globals::gui_screen = GUI_MESSAGE_BOX;
@@ -178,7 +179,7 @@ void session::invalidate(void)
         message_box::set_subtitle("enet.peer_connection_timeout");
         message_box::add_button("disconnected.back", [](void) {
             globals::gui_screen = GUI_PLAY_MENU;
-            window_title::update();
+            video::update_window_title();
         });
 
         globals::gui_screen = GUI_MESSAGE_BOX;
@@ -225,7 +226,7 @@ void session::connect(std::string_view host, std::uint16_t port, std::string_vie
         message_box::set_subtitle("enet.peer_connection_failed");
         message_box::add_button("disconnected.back", [](void) {
             globals::gui_screen = GUI_PLAY_MENU;
-            window_title::update();
+            video::update_window_title();
         });
 
         globals::gui_screen = GUI_MESSAGE_BOX;
