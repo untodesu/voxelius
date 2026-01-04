@@ -20,7 +20,7 @@
 #include "shared/coord.hh"
 #include "shared/globals.hh"
 
-constexpr static float AABB_EPSILON = 1.0f / 32.0f;
+constexpr static float AABB_EPSILON = 1.0f / 128.0f;
 
 static int vgrid_collide(const Dimension* dimension, int d, Collision& collision, Transform& transform, Velocity& velocity,
     VoxelMaterial& touch_surface, bool enable_snapping)
@@ -74,6 +74,7 @@ static int vgrid_collide(const Dimension* dimension, int d, Collision& collision
     auto closest_touch = VTOUCH_NONE;
     auto closest_surface = VMAT_UNKNOWN;
     auto closest_tvalues = ZERO_VEC3<float>;
+    auto closest_doubleclip = false;
     math::AABBf closest_vbox;
 
     for(auto i = dmin; i != dmax; i += ddir) {
@@ -109,6 +110,7 @@ static int vgrid_collide(const Dimension* dimension, int d, Collision& collision
                     closest_touch = voxel->get_touch_type();
                     closest_surface = voxel->get_surface_material();
                     closest_tvalues = voxel->get_touch_values();
+                    closest_doubleclip = csg_aabb.intersect(vbox);
                     closest_vbox = vbox;
                 }
             }
@@ -146,7 +148,7 @@ static int vgrid_collide(const Dimension* dimension, int d, Collision& collision
             snap_to_closest_vbox = true;
         }
 
-        if(snap_to_closest_vbox && enable_snapping) {
+        if(snap_to_closest_vbox && enable_snapping && closest_doubleclip) {
             auto vbox_center = 0.5f * closest_vbox.min[d] + 0.5f * closest_vbox.max[d];
             auto vbox_halfsize = 0.5f * closest_vbox.max[d] - 0.5f * closest_vbox.min[d];
 

@@ -104,7 +104,7 @@ void camera::update(void)
 
     auto client_angles = camera::angles;
 
-    if(!toggles::get(TOGGLE_PM_FLIGHT) && globals::dimension->entities.try_get<Grounded>(globals::player)) {
+    if(!toggles::get(TOGGLE_PM_FLIGHT)) {
         client_angles[2] = math::radians(-camera::roll_angle.get_value() * glm::dot(velocity.value / PMOVE_MAX_SPEED_GROUND, right_vector));
     }
 

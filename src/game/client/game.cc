@@ -613,7 +613,7 @@ void client_game::render(void)
         for(const auto [entity, collision, head, transform] : group.each()) {
             if(entity == globals::player) {
                 // Don't render ourselves
-                // continue;
+                continue;
             }
 
             glm::fvec3 forward;
