@@ -1,0 +1,15 @@
+#include "core/pch.hh"
+
+#include "core/version.hh"
+
+// clang-format off
+const unsigned version::major = ${PROJECT_VERSION_MAJOR};
+const unsigned version::minor = ${PROJECT_VERSION_MINOR};
+const unsigned version::patch = ${PROJECT_VERSION_PATCH};
+// clang-format on
+
+const std::string_view version::scm_branch = "${GIT_BRANCH}";
+const std::string_view version::scm_revision = "${GIT_COMMIT}";
+const std::string_view version::semantic = "${PROJECT_VERSION}";
+
+const std::string_view version::full = "${PROJECT_VERSION}-${GIT_BRANCH} [${GIT_COMMIT}]";

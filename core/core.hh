@@ -1,0 +1,17 @@
+#ifndef B779E645_7AC1_4250_8292_7CEC13620351
+#define B779E645_7AC1_4250_8292_7CEC13620351
+
+namespace core
+{
+const std::filesystem::path& basepath(void);
+const std::filesystem::path& gamepath(void);
+const std::filesystem::path& userpath(void);
+} // namespace core
+
+namespace core
+{
+void setup(int argc, char** argv);
+void teardown(void);
+} // namespace core
+
+#endif /* B779E645_7AC1_4250_8292_7CEC13620351 */
