@@ -121,7 +121,7 @@ void config::save(std::ostream& stream) noexcept
 {
     auto curtime = std::time(nullptr);
 
-    stream << "# QFortress " << version::semantic << " configuration file" << std::endl;
+    stream << "# Voxelius " << version::semantic << " configuration file" << std::endl;
     stream << "# Generated at: " << std::put_time(std::gmtime(&curtime), "%Y-%m-%d %H:%M:%S %z") << std::endl << std::endl;
 
     for(auto& it : map) {

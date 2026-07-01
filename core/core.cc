@@ -60,19 +60,19 @@ void core::setup(int argc, char** argv)
         // We appear to run on a system/environment that is itself
         // a Windows or pretends to be Windows; regardless, persistent
         // application data for the game is stored in %APPDATA% in this case
-        s_userpath = std::filesystem::path(windows_appdata) / "QFortress" / s_gamepath.filename();
+        s_userpath = std::filesystem::path(windows_appdata) / "Voxelius" / s_gamepath.filename();
     }
     else if(auto xdg_data_home = std::getenv("XDG_DATA_HOME")) {
         // We appear to run on a system/environment that complies
         // or tries to comply with freedesktop spec; by default XDG_DATA_HOME
         // should resolve to ${HOME}/.local/share so it's a good place for userpath
-        s_userpath = std::filesystem::path(xdg_data_home) / "qfortress" / s_gamepath.filename();
+        s_userpath = std::filesystem::path(xdg_data_home) / "voxelius" / s_gamepath.filename();
     }
     else if(auto unix_home = std::getenv("HOME")) {
         // If anything else fails, as far as I'm concerned, every UNIX system
         // defines an environment variable for user's home directory; we can
         // assume default location from freedesktop spec and put game data there
-        s_userpath = std::filesystem::path(unix_home) / ".local/share/qfortress" / s_gamepath.filename();
+        s_userpath = std::filesystem::path(unix_home) / ".local/share/voxelius" / s_gamepath.filename();
     }
     else {
         // Give up and save stuff into cwd
