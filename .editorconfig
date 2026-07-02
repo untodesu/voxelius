@@ -9,3 +9,11 @@ indent_size = 4
 
 [{GNUmakefile,GNUmakefile.*,*.mk}]
 indent_style = tab
+
+[*.lua]
+indent_style = space
+indent_size = 2
+
+[*.{json,jsonc,json5}]
+indent_style = space
+indent_size = 2

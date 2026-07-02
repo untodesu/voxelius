@@ -1,4 +1,4 @@
-# Mod manifest: `modinfo.conf`
+# Modding: mods manifest
 
 Every mod's root directory contains a `modinfo.conf` file that contains some useful information about the mod. The file uses the common configuration format used by the engine (see `core/config/map.cc`);
 

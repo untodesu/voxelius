@@ -1,4 +1,4 @@
-# Lua API: Core
+# Modding: Core API and considerations
 
 Base utilities available in every Lua state from the moment it's created — logging and script loading. Everything here lives under the `core` global table.
 
@@ -17,6 +17,10 @@ Specifies game versions. See `core/version.hh` for the C++ equivalent
 |`core.VERSION_SCM_REVISION`|SCM revision aka git commit hash|  
 |`core.VERSION_SEMANTIC`|Semantic version string|  
 |`core.VERSION`|Full build-system-defined version string|  
+
+### `core.NAMESPACE`
+
+The current mod's namespace (the `name` field from `modinfo.conf`). Used as the implicit namespace for identifiers that don't specify one — see below.
 
 ## Functions
 

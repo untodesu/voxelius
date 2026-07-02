@@ -5,7 +5,7 @@
       "from": [0, 0, 0],
       "to": [16, 8, 16],
       "faces": {
-        "top": { "texture": "top", "cullface": ["up"] },
+        "top": { "texture": "top", "cullface": [null] },
         "bottom": { "texture": "bottom", "cullface": ["down"] },
         "north": { "texture": "north", "cullface": ["north"] },
         "south": { "texture": "south", "cullface": ["south"] },

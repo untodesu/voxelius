@@ -1,10 +1,10 @@
-# Lua API: World
+# Modding: World API
 
-World is a C++ object interfaced into Lua functions that operate with blocks/voxels within a dimension. Each game can support multiple worlds, which parameters are also registered in Lua.  
+World is a C++ object interfaced into Lua as a method-call object (`world:method(...)`, `world` is implicitly passed as `self`) that operates with blocks/voxels within a dimension. Each game can support multiple worlds, which parameters are also registered in Lua.  
 
 ## Functions
 
-### `world.bget(bx, by, bz) -> integer`
+### `world:bget(bx, by, bz) -> integer`
 
 Retreive a numeric block ID from the world  
 
@@ -19,7 +19,7 @@ Retreive a numeric block ID from the world
 - Normally, a numeric block ID;  
 - If there is no block or the chunk is not present, `blocks.NULL_BLOCK` is returned;  
 
-### `world.bset(bx, by, bz, id)`
+### `world:bset(bx, by, bz, id)`
 
 Assign a block ID in the world
 
@@ -30,7 +30,7 @@ Assign a block ID in the world
 - `bz` is the world-scale block Z position;  
 - `id` is the numeric block ID; to unset the block (aka set to void), pass `blocks.NULL_BLOCK` as the value;  
 
-### `world.lget(bx, by, bz)`
+### `world:lget(bx, by, bz)`
 
 Retreive lighting information about a block position  
 
@@ -44,7 +44,7 @@ Retreive lighting information about a block position
 
 - Luminance value of the block  
 
-### `world.sget(bx, by, bz, st) -> string`
+### `world:sget(bx, by, bz, st) -> string`
 
 Retrive a blockstate at a given position  
 
@@ -59,7 +59,7 @@ Retrive a blockstate at a given position
 - Blockstate's value normally;  
 - If the block is void, has no such blockstate or the chunk is not present, `nil` is returned;  
 
-### `world.sset(bx, by, bz, st, val)`
+### `world:sset(bx, by, bz, st, val)`
 
 Assign a blockstate to a given position  
 
@@ -71,7 +71,7 @@ Assign a blockstate to a given position
 - `st` is the blockstate name;  
 - `val` is the blockstate value;  
 
-### `world.tget(bx, by, bz) -> integer`
+### `world:tget(bx, by, bz) -> integer`
 
 Retreive a biome-defined temperature base for a given block
 
@@ -90,7 +90,7 @@ Retreive a biome-defined temperature base for a given block
 
 Most biomes might not define this, if so, `298` is defined for most of them, which corresponds to 25 degrees Celcius  
 
-### `world.tsget(bx, by, bz) -> integer`
+### `world:tsget(bx, by, bz) -> integer`
 
 Retreive a biome-influenced seasonal temperature for a given block
 
@@ -109,9 +109,9 @@ Retreive a biome-influenced seasonal temperature for a given block
 
 This can be influenced by season, weather and other factors. Relatively low values (sub-zero Centigrade) can cause snow to fall when the game wants it to be raining at that specific location  
 
-### `world.sched(bx, by, bz, dt)`
+### `world:sched(bx, by, bz, dt)`
 
-Schedule a `sched_tick` call to a block, `dt` ticks from now.  
+Schedule an `on_stick` call to a block, `dt` ticks from now.  
 
 - `bx` is the world-scale block X position;  
 - `by` is the world-scale block Y position;  
