@@ -10,12 +10,17 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/gpu/shader.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/texture.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/texture.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/constant.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/frame.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/frame.hh"
     "${CMAKE_CURRENT_LIST_DIR}/game.cc"
     "${CMAKE_CURRENT_LIST_DIR}/game.hh"
     "${CMAKE_CURRENT_LIST_DIR}/globals.cc"
     "${CMAKE_CURRENT_LIST_DIR}/globals.hh"
     "${CMAKE_CURRENT_LIST_DIR}/main.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
+    "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/video.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/video.hh")
 target_compile_features(voxelius-client PUBLIC cxx_std_20)
 target_include_directories(voxelius-client PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(voxelius-client PUBLIC core shared)

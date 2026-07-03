@@ -85,6 +85,8 @@ void config::Ref<T>::bind(Map& map, std::string_view key) noexcept
     m_slot = map.find_or_create_slot(key);
     m_value = map.value_raw<T>(m_slot).value_or(m_value);
     m_generation = map.generation();
+
+    map.set_value_raw<T>(m_slot, m_value);
 }
 
 template<typename T>

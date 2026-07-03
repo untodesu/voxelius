@@ -45,7 +45,7 @@ public:
     bool save(std::string_view path) const noexcept;
 
 private:
-    std::vector<std::string> m_slots {};
+    std::vector<std::optional<std::string>> m_slots {};
     std::unordered_map<std::string, slot_type> m_index;
     std::uint64_t m_generation { 0 };
 };

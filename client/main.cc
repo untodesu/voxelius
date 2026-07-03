@@ -11,8 +11,10 @@
 #include "core/exception.hh"
 #include "core/version.hh"
 
+#include "client/frame.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
+#include "client/video.hh"
 
 static std::atomic_bool s_is_running;
 
@@ -98,7 +100,7 @@ static void wrapped_main(int argc, char** argv)
     Image::register_resource();
     // TODO: Texture2D::register_resource();
 
-    // TODO: video::init();
+    video::init();
 
     // TODO: game_ui::init();
 
@@ -107,7 +109,7 @@ static void wrapped_main(int argc, char** argv)
     globals::client_config.load("client.conf");
     globals::client_config.load("client.user.conf");
 
-    // TODO: video::init_late();
+    video::init_late();
 
     // TODO: game_ui::init_late();
 
@@ -162,25 +164,26 @@ static void wrapped_main(int argc, char** argv)
             client_game::fixed_update();
         }
 
-        // TODO: video::update();
+        video::update();
 
         client_game::update();
 
         // TODO: game_ui::update();
 
-        // if(head::prepare()) {
-        //     client_game::render();
-        //     head::layout();
-        //     game_ui::layout();
-        //     client_game::layout();
-        //     head::present();
-        // }
+        if(frame::prepare()) {
+            // TODO: client_game::render();
+            // TODO: game_ui::layout();
+
+            client_game::layout();
+
+            frame::present();
+        }
 
         for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
             client_game::fixed_update_late();
         }
 
-        // TODO: head::update_late();
+        video::update_late();
 
         client_game::update_late();
 
@@ -198,7 +201,7 @@ static void wrapped_main(int argc, char** argv)
 
     res::hard_purge();
 
-    // TODO: video::shutdown();
+    video::shutdown();
 
     globals::client_config.save("client.conf");
 

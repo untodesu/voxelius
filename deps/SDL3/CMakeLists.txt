@@ -1,7 +1,7 @@
 include(FetchContent)
 
 if(WIN32)
-    set(SDL_REQVER 3.4.0)
+    set(SDL_REQVER 3.4.12)
 
     if(MSVC)
         FetchContent_Declare(download_sdl3 URL "https://github.com/libsdl-org/SDL/releases/download/release-${SDL_REQVER}/SDL3-devel-${SDL_REQVER}-VC.zip" DOWNLOAD_EXTRACT_TIMESTAMP)

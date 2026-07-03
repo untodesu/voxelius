@@ -15,7 +15,7 @@ bool contains(std::string_view option);
 
 namespace cmdline
 {
-std::string_view value(std::string_view option);
+std::optional<std::string_view> value(std::string_view option);
 std::string_view value_or(std::string_view option, std::string_view default_value);
 } // namespace cmdline
 

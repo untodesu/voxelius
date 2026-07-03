@@ -2,6 +2,8 @@
 
 #include "client/game.hh"
 
+#include "client/globals.hh"
+
 void client_game::init(void)
 {
     // empty
@@ -39,5 +41,5 @@ void client_game::fixed_update_late(void)
 
 void client_game::layout(void)
 {
-    // empty
+    ImGui::Text("skibidi sigma %f", 1.0f / globals::window_frametime_avg);
 }

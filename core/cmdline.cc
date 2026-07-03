@@ -70,13 +70,15 @@ bool cmdline::contains(std::string_view option)
     return s_options.contains(std::string(option));
 }
 
-std::string_view cmdline::value(std::string_view option)
+std::optional<std::string_view> cmdline::value(std::string_view option)
 {
     auto iter = s_options.find(std::string(option));
 
-    assert(iter != s_options.cend());
+    if(iter == s_options.cend()) {
+        return std::nullopt;
+    }
 
-    return iter->second;
+    return std::string_view(iter->second);
 }
 
 std::string_view cmdline::value_or(std::string_view option, std::string_view default_value)
@@ -94,7 +96,9 @@ const char* cmdline::value_cstr(std::string_view option)
 {
     auto iter = s_options.find(std::string(option));
 
-    assert(iter != s_options.cend());
+    if(iter == s_options.cend()) {
+        return nullptr;
+    }
 
     return iter->second.c_str();
 }

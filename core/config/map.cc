@@ -64,17 +64,17 @@ static std::optional<Eigen::Vector<T, N>> get_vector(const config::Map* map, con
 
 std::optional<std::string_view> config::Map::raw_string(slot_type slot) const noexcept
 {
-    if(slot >= m_slots.size()) {
+    if(slot >= m_slots.size() || !m_slots[slot].has_value()) {
         return std::nullopt;
     }
 
-    return std::string_view(m_slots[slot]);
+    return std::string_view(m_slots[slot].value());
 }
 
 void config::Map::set_raw_string(slot_type slot, std::string_view value) noexcept
 {
     if(slot < m_slots.size()) {
-        m_slots[slot] = value;
+        m_slots[slot] = std::string(value);
         m_generation += 1;
     }
 }
@@ -96,7 +96,7 @@ config::slot_type config::Map::find_or_create_slot(std::string_view key) noexcep
 
     if(it == m_index.cend()) {
         auto slot = m_slots.size();
-        m_slots.emplace_back(std::string {});
+        m_slots.emplace_back(std::nullopt);
         m_index.insert_or_assign(std::string(key), slot);
 
         return slot;
@@ -149,9 +149,13 @@ void config::Map::save(std::ostream& stream) const noexcept
     stream << "# Generated on " << std::asctime(std::localtime(&curtime)) << std::endl << std::endl;
 
     for(const auto& it : m_index) {
-        stream << it.first << "=";
-        stream << m_slots[it.second];
-        stream << std::endl;
+        const auto& slot = m_slots[it.second];
+
+        if(slot.has_value()) {
+            stream << it.first << "=";
+            stream << slot.value();
+            stream << std::endl;
+        }
     }
 }
 
