@@ -5,8 +5,78 @@
 #include "core/utils/physfs.hh"
 #include "core/utils/string.hh"
 
-#include "core/concepts.hh"
 #include "core/version.hh"
+
+template<vx::arithmetic T>
+static std::optional<T> get_arithmetic(const config::Map* map, config::slot_type slot) noexcept
+{
+    const auto string = map->raw_string(slot);
+
+    if(string.has_value()) {
+        T value;
+        auto check = std::from_chars(string->data(), string->data() + string->size(), value);
+
+        if(check.ec == std::errc {}) {
+            return value;
+        }
+    }
+
+    return std::nullopt;
+}
+
+template<vx::arithmetic T, std::size_t N>
+static std::optional<Eigen::Vector<T, N>> get_vector(const config::Map* map, config::slot_type slot) noexcept
+{
+    const auto string = map->raw_string(slot);
+
+    if(string.has_value()) {
+        std::string_view sv = string.value();
+        auto bracket_op = sv.find('[');
+        auto bracket_cl = sv.find(']');
+
+        if(bracket_op == std::string_view::npos || bracket_cl == std::string_view::npos || bracket_op > bracket_cl) {
+            return std::nullopt;
+        }
+
+        std::string_view inner = sv.substr(bracket_op + 1, bracket_cl - bracket_op - 1);
+        inner = utils::trim_whitespace<char>(inner);
+
+        auto tokens = utils::tokenize(inner);
+
+        if(tokens.size() >= N) {
+            Eigen::Vector<T, N> vector;
+
+            for(std::size_t i = 0; i < N; ++i) {
+                auto check = std::from_chars(tokens[i].data(), tokens[i].data() + tokens[i].size(), vector[i]);
+
+                if(check.ec != std::errc {}) {
+                    return std::nullopt;
+                }
+            }
+
+            return vector;
+        }
+    }
+
+    return std::nullopt;
+}
+
+std::optional<std::string_view> config::Map::raw_string(slot_type slot) const noexcept
+{
+    if(slot >= m_slots.size()) {
+        return std::nullopt;
+    }
+
+    return std::string_view(m_slots[slot]);
+}
+
+void config::Map::set_raw_string(slot_type slot, std::string_view value) noexcept
+{
+    if(slot < m_slots.size()) {
+        m_slots[slot] = value;
+        m_generation += 1;
+    }
+}
 
 config::slot_type config::Map::find_slot(std::string_view key) const /* E */ noexcept
 {
@@ -66,7 +136,7 @@ void config::Map::load(std::istream& stream) noexcept
         kv_name = utils::trim_whitespace<char>(kv_name);
         kv_value = utils::trim_whitespace<char>(kv_value);
 
-        set_value<std::string_view>(kv_name, kv_value);
+        set_raw_string(find_or_create_slot(kv_name), kv_value);
     }
 }
 
@@ -107,73 +177,27 @@ bool config::Map::save(std::string_view path) const noexcept
 }
 
 template<>
-std::optional<std::string_view> config::Map::value_raw<std::string_view>(slot_type slot) const noexcept
+std::optional<std::string> config::Map::value_raw<std::string>(slot_type slot) const noexcept
 {
-    if(slot >= m_slots.size()) {
-        return std::nullopt;
-    }
-
-    return std::string_view(m_slots[slot]);
-}
-
-template<vx::arithmetic T, std::size_t N>
-static std::optional<Eigen::Vector<T, N>> get_vector(const config::Map* map, config::slot_type slot) noexcept
-{
-    const auto string = map->value_raw<std::string_view>(slot);
+    auto string = raw_string(slot);
 
     if(string.has_value()) {
-        std::string_view sv = string.value();
-        auto bracket_op = sv.find('[');
-        auto bracket_cl = sv.find(']');
-
-        if(bracket_op == std::string_view::npos || bracket_cl == std::string_view::npos || bracket_op > bracket_cl) {
-            return std::nullopt;
-        }
-
-        std::string_view inner = sv.substr(bracket_op + 1, bracket_cl - bracket_op - 1);
-        inner = utils::trim_whitespace<char>(inner);
-
-        auto tokens = utils::tokenize(inner);
-
-        if(tokens.size() >= N) {
-            Eigen::Vector<T, N> vector;
-
-            for(std::size_t i = 0; i < N; ++i) {
-                auto check = std::from_chars(tokens[i].data(), tokens[i].data() + tokens[i].size(), vector[i]);
-
-                if(check.ec != std::errc {}) {
-                    return std::nullopt;
-                }
-            }
-
-            return vector;
-        }
-    }
-
-    return std::nullopt;
-}
-
-template<vx::arithmetic T>
-static std::optional<T> get_arithmetic(const config::Map* map, config::slot_type slot) noexcept
-{
-    const auto string = map->value_raw<std::string_view>(slot);
-
-    if(string.has_value()) {
-        T value;
-        auto check = std::from_chars(string->data(), string->data() + string->size(), value);
-
-        if(check.ec == std::errc {}) {
-            return value;
-        }
+        return std::string(string.value());
     }
 
     return std::nullopt;
 }
 
 template<>
+void config::Map::set_value_raw<std::string>(slot_type slot, const std::string& value) noexcept
+{
+    set_raw_string(slot, value);
+}
+
+template<>
 std::optional<bool> config::Map::value_raw<bool>(slot_type slot) const noexcept
 {
-    auto string = value_raw<std::string_view>(slot);
+    auto string = raw_string(slot);
 
     if(string.has_value()) {
         auto is_true = false;
@@ -309,135 +333,126 @@ std::optional<Eigen::Vector4d> config::Map::value_raw<Eigen::Vector4d>(slot_type
 }
 
 template<>
-void config::Map::set_value_raw<std::string_view>(slot_type slot, const std::string_view& value) noexcept
-{
-    if(slot < m_slots.size()) {
-        m_slots[slot] = value;
-        m_generation += 1;
-    }
-}
-
-template<>
 void config::Map::set_value_raw<bool>(slot_type slot, const bool& value) noexcept
 {
     if(value) {
-        set_value_raw<std::string_view>(slot, "true");
+        set_raw_string(slot, "true");
     }
     else {
-        set_value_raw<std::string_view>(slot, "false");
+        set_raw_string(slot, "false");
     }
 }
 
 template<>
 void config::Map::set_value_raw<short>(slot_type slot, const short& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::to_string(value));
+    set_raw_string(slot, std::to_string(value));
 }
 
 template<>
 void config::Map::set_value_raw<int>(slot_type slot, const int& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::to_string(value));
+    set_raw_string(slot, std::to_string(value));
 }
 
 template<>
 void config::Map::set_value_raw<long>(slot_type slot, const long& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::to_string(value));
+    set_raw_string(slot, std::to_string(value));
 }
 
 template<>
 void config::Map::set_value_raw<long long>(slot_type slot, const long long& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::to_string(value));
+    set_raw_string(slot, std::to_string(value));
 }
 
 template<>
 void config::Map::set_value_raw<unsigned short>(slot_type slot, const unsigned short& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::to_string(value));
+    set_raw_string(slot, std::to_string(value));
 }
 
 template<>
 void config::Map::set_value_raw<unsigned int>(slot_type slot, const unsigned int& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::to_string(value));
+    set_raw_string(slot, std::to_string(value));
 }
 
 template<>
 void config::Map::set_value_raw<unsigned long>(slot_type slot, const unsigned long& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::to_string(value));
+    set_raw_string(slot, std::to_string(value));
 }
 
 template<>
 void config::Map::set_value_raw<unsigned long long>(slot_type slot, const unsigned long long& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::to_string(value));
+    set_raw_string(slot, std::to_string(value));
 }
 
 template<>
 void config::Map::set_value_raw<float>(slot_type slot, const float& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::to_string(value));
+    set_raw_string(slot, std::to_string(value));
 }
 
 template<>
 void config::Map::set_value_raw<double>(slot_type slot, const double& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::to_string(value));
+    set_raw_string(slot, std::to_string(value));
 }
 
 template<>
 void config::Map::set_value_raw<Eigen::Vector2i>(slot_type slot, const Eigen::Vector2i& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::format("[{} {}]", value.x(), value.y()));
+    set_raw_string(slot, std::format("[{} {}]", value.x(), value.y()));
 }
 
 template<>
 void config::Map::set_value_raw<Eigen::Vector3i>(slot_type slot, const Eigen::Vector3i& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::format("[{} {} {}]", value.x(), value.y(), value.z()));
+    set_raw_string(slot, std::format("[{} {} {}]", value.x(), value.y(), value.z()));
 }
 
 template<>
 void config::Map::set_value_raw<Eigen::Vector4i>(slot_type slot, const Eigen::Vector4i& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::format("[{} {} {} {}]", value.x(), value.y(), value.z(), value.w()));
+    set_raw_string(slot, std::format("[{} {} {} {}]", value.x(), value.y(), value.z(), value.w()));
 }
 
 template<>
 void config::Map::set_value_raw<Eigen::Vector2f>(slot_type slot, const Eigen::Vector2f& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::format("[{} {}]", value.x(), value.y()));
+    set_raw_string(slot, std::format("[{} {}]", value.x(), value.y()));
 }
 
 template<>
 void config::Map::set_value_raw<Eigen::Vector3f>(slot_type slot, const Eigen::Vector3f& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::format("[{} {} {}]", value.x(), value.y(), value.z()));
+    set_raw_string(slot, std::format("[{} {} {}]", value.x(), value.y(), value.z()));
 }
 
 template<>
 void config::Map::set_value_raw<Eigen::Vector4f>(slot_type slot, const Eigen::Vector4f& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::format("[{} {} {} {}]", value.x(), value.y(), value.z(), value.w()));
+    set_raw_string(slot, std::format("[{} {} {} {}]", value.x(), value.y(), value.z(), value.w()));
 }
 
 template<>
 void config::Map::set_value_raw<Eigen::Vector2d>(slot_type slot, const Eigen::Vector2d& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::format("[{} {}]", value.x(), value.y()));
+    set_raw_string(slot, std::format("[{} {}]", value.x(), value.y()));
 }
 
 template<>
 void config::Map::set_value_raw<Eigen::Vector3d>(slot_type slot, const Eigen::Vector3d& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::format("[{} {} {}]", value.x(), value.y(), value.z()));
+    set_raw_string(slot, std::format("[{} {} {}]", value.x(), value.y(), value.z()));
 }
 
 template<>
 void config::Map::set_value_raw<Eigen::Vector4d>(slot_type slot, const Eigen::Vector4d& value) noexcept
 {
-    set_value_raw<std::string_view>(slot, std::format("[{} {} {} {}]", value.x(), value.y(), value.z(), value.w()));
+    set_raw_string(slot, std::format("[{} {} {} {}]", value.x(), value.y(), value.z(), value.w()));
 }

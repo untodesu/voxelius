@@ -1,6 +1,8 @@
 #ifndef C8783E57_21EC_40A0_90FF_1576C67F77BE
 #define C8783E57_21EC_40A0_90FF_1576C67F77BE
 
+#include "core/concepts.hh"
+
 namespace config
 {
 using slot_type = std::size_t;
@@ -19,6 +21,9 @@ public:
     Map& operator=(Map&& other) noexcept = delete;
 
     constexpr std::uint64_t generation(void) const noexcept;
+
+    std::optional<std::string_view> raw_string(slot_type slot) const noexcept;
+    void set_raw_string(slot_type slot, std::string_view value) noexcept;
 
     template<typename T>
     std::optional<T> value(std::string_view key) const noexcept;
