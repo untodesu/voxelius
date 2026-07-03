@@ -35,8 +35,6 @@ add_library(core STATIC
     "${CMAKE_CURRENT_LIST_DIR}/exception.hh"
     "${CMAKE_CURRENT_LIST_DIR}/frustum.cc"
     "${CMAKE_CURRENT_LIST_DIR}/frustum.hh"
-    "${CMAKE_CURRENT_LIST_DIR}/globals.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/globals.hh"
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
     "${CMAKE_CURRENT_LIST_DIR}/version.hh")
 target_compile_features(core PUBLIC cxx_std_20)

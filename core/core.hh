@@ -3,7 +3,6 @@
 
 namespace core
 {
-const std::filesystem::path& basepath(void);
 const std::filesystem::path& gamepath(void);
 const std::filesystem::path& userpath(void);
 } // namespace core

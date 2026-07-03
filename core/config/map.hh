@@ -11,6 +11,8 @@ namespace config
 {
 class Map final {
 public:
+    Map(void) noexcept = default;
+
     Map(const Map& other) = delete;
     Map(Map&& other) noexcept = delete;
     Map& operator=(const Map& other) = delete;

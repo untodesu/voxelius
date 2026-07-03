@@ -8,60 +8,6 @@
 #include "core/concepts.hh"
 #include "core/version.hh"
 
-template<vx::arithmetic T>
-static std::optional<T> get_arithmetic(const config::Map* map, config::slot_type slot) noexcept
-{
-    const auto string = map->value_raw<std::string_view>(slot);
-
-    if(string.has_value()) {
-        T value;
-        auto check = std::from_chars(string->data(), string->data() + string->size(), value);
-
-        if(check.ec == std::errc {}) {
-            return value;
-        }
-    }
-
-    return std::nullopt;
-}
-
-template<vx::arithmetic T, std::size_t N>
-static std::optional<Eigen::Vector<T, N>> get_vector(const config::Map* map, config::slot_type slot) noexcept
-{
-    const auto string = map->value_raw<std::string_view>(slot);
-
-    if(string.has_value()) {
-        std::string_view sv = string.value();
-        auto bracket_op = sv.find('[');
-        auto bracket_cl = sv.find(']');
-
-        if(bracket_op == std::string_view::npos || bracket_cl == std::string_view::npos || bracket_op > bracket_cl) {
-            return std::nullopt;
-        }
-
-        std::string_view inner = sv.substr(bracket_op + 1, bracket_cl - bracket_op - 1);
-        inner = utils::trim_whitespace<char>(inner);
-
-        auto tokens = utils::tokenize(inner);
-
-        if(tokens.size() >= N) {
-            Eigen::Vector<T, N> vector;
-
-            for(std::size_t i = 0; i < N; ++i) {
-                auto check = std::from_chars(tokens[i].data(), tokens[i].data() + tokens[i].size(), vector[i]);
-
-                if(check.ec != std::errc {}) {
-                    return std::nullopt;
-                }
-            }
-
-            return vector;
-        }
-    }
-
-    return std::nullopt;
-}
-
 config::slot_type config::Map::find_slot(std::string_view key) const /* E */ noexcept
 {
     auto it = m_index.find(std::string(key));
@@ -168,6 +114,60 @@ std::optional<std::string_view> config::Map::value_raw<std::string_view>(slot_ty
     }
 
     return std::string_view(m_slots[slot]);
+}
+
+template<vx::arithmetic T, std::size_t N>
+static std::optional<Eigen::Vector<T, N>> get_vector(const config::Map* map, config::slot_type slot) noexcept
+{
+    const auto string = map->value_raw<std::string_view>(slot);
+
+    if(string.has_value()) {
+        std::string_view sv = string.value();
+        auto bracket_op = sv.find('[');
+        auto bracket_cl = sv.find(']');
+
+        if(bracket_op == std::string_view::npos || bracket_cl == std::string_view::npos || bracket_op > bracket_cl) {
+            return std::nullopt;
+        }
+
+        std::string_view inner = sv.substr(bracket_op + 1, bracket_cl - bracket_op - 1);
+        inner = utils::trim_whitespace<char>(inner);
+
+        auto tokens = utils::tokenize(inner);
+
+        if(tokens.size() >= N) {
+            Eigen::Vector<T, N> vector;
+
+            for(std::size_t i = 0; i < N; ++i) {
+                auto check = std::from_chars(tokens[i].data(), tokens[i].data() + tokens[i].size(), vector[i]);
+
+                if(check.ec != std::errc {}) {
+                    return std::nullopt;
+                }
+            }
+
+            return vector;
+        }
+    }
+
+    return std::nullopt;
+}
+
+template<vx::arithmetic T>
+static std::optional<T> get_arithmetic(const config::Map* map, config::slot_type slot) noexcept
+{
+    const auto string = map->value_raw<std::string_view>(slot);
+
+    if(string.has_value()) {
+        T value;
+        auto check = std::from_chars(string->data(), string->data() + string->size(), value);
+
+        if(check.ec == std::errc {}) {
+            return value;
+        }
+    }
+
+    return std::nullopt;
 }
 
 template<>

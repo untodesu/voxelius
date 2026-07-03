@@ -1,5 +1,8 @@
 add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/game.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/game.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/globals.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/globals.hh"
     "${CMAKE_CURRENT_LIST_DIR}/main.cc"
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
 target_compile_features(voxelius-client PUBLIC cxx_std_20)
