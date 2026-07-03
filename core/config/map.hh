@@ -1,8 +1,6 @@
 #ifndef C8783E57_21EC_40A0_90FF_1576C67F77BE
 #define C8783E57_21EC_40A0_90FF_1576C67F77BE
 
-#include "core/concepts.hh"
-
 namespace config
 {
 using slot_type = std::size_t;
