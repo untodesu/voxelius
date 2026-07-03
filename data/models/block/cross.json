@@ -6,11 +6,12 @@
       "to": [16, 16, 16],
       "origin": [8, 8, 8],
       "rotation": [0, 45, 0],
+      "shade": false,
       "faces": {
-        "north": { "texture": "nwse", "cullface": [null] },
-        "south": { "texture": "nwse", "cullface": [null] },
-        "west": { "texture": "nesw", "cullface": [null] },
-        "east": { "texture": "nesw", "cullface": [null] }
+        "north": { "texture": "nwse" },
+        "south": { "texture": "nwse" },
+        "west": { "texture": "nesw" },
+        "east": { "texture": "nesw" }
       }
     }
   ]
