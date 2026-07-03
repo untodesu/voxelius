@@ -43,8 +43,6 @@
 
 #include <enet/enet.h>
 
-#include <entt/entt.hpp>
-
 #include <parson.h>
 
 #include <physfs.h>

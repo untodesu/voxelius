@@ -3,4 +3,6 @@
 
 #include <core/pch.hh>
 
+#include <entt/entt.hpp>
+
 #endif /* CDD6D4DE_0D44_4AE8_B52B_5F728B619CCA */

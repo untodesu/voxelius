@@ -44,7 +44,6 @@ target_include_directories(core PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(core PUBLIC
     deps::eigen
     deps::enet
-    deps::entt
     deps::parson
     deps::physfs
     deps::stb

@@ -1,7 +1,7 @@
 #ifndef B1F3492F_30A1_43E0_BD73_F36814AF8F72
 #define B1F3492F_30A1_43E0_BD73_F36814AF8F72
 
-#include "game/shared/coord.hh"
+#include "shared/coord.hh"
 
 namespace utils
 {

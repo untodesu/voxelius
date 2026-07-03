@@ -1,0 +1,235 @@
+#include "client/pch.hh"
+
+#include "core/config/map.hh"
+
+#include "core/res/image.hh"
+#include "core/res/resource.hh"
+
+#include "core/utils/epoch.hh"
+
+#include "core/core.hh"
+#include "core/exception.hh"
+#include "core/version.hh"
+
+#include "client/game.hh"
+#include "client/globals.hh"
+
+static std::atomic_bool s_is_running;
+
+static void signal_handler(int)
+{
+    LOG_INFO("received termination signal");
+
+    s_is_running.store(false);
+}
+
+static void handle_events(void)
+{
+    thread_local SDL_Event event;
+
+    while(SDL_PollEvent(&event)) {
+        if(event.type == SDL_EVENT_QUIT) {
+            s_is_running.store(false);
+            return;
+        }
+
+        switch(event.type) {
+            case SDL_EVENT_KEY_DOWN:
+            case SDL_EVENT_KEY_UP:
+                globals::dispatcher.trigger(static_cast<const SDL_KeyboardEvent&>(event.key));
+                break;
+
+            case SDL_EVENT_MOUSE_MOTION:
+                globals::dispatcher.trigger(static_cast<const SDL_MouseMotionEvent&>(event.motion));
+                break;
+
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+                globals::dispatcher.trigger(static_cast<const SDL_MouseButtonEvent&>(event.button));
+                break;
+
+            case SDL_EVENT_MOUSE_WHEEL:
+                globals::dispatcher.trigger(static_cast<const SDL_MouseWheelEvent&>(event.wheel));
+                break;
+
+            case SDL_EVENT_WINDOW_MOVED:
+            case SDL_EVENT_WINDOW_RESIZED:
+            case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+            case SDL_EVENT_WINDOW_METAL_VIEW_RESIZED:
+            case SDL_EVENT_WINDOW_MINIMIZED:
+            case SDL_EVENT_WINDOW_MAXIMIZED:
+            case SDL_EVENT_WINDOW_RESTORED:
+            case SDL_EVENT_WINDOW_MOUSE_ENTER:
+            case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+            case SDL_EVENT_WINDOW_FOCUS_GAINED:
+            case SDL_EVENT_WINDOW_FOCUS_LOST:
+            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+            case SDL_EVENT_WINDOW_HIT_TEST:
+            case SDL_EVENT_WINDOW_ICCPROF_CHANGED:
+            case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
+            case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+            case SDL_EVENT_WINDOW_SAFE_AREA_CHANGED:
+            case SDL_EVENT_WINDOW_OCCLUDED:
+            case SDL_EVENT_WINDOW_ENTER_FULLSCREEN:
+            case SDL_EVENT_WINDOW_LEAVE_FULLSCREEN:
+            case SDL_EVENT_WINDOW_DESTROYED:
+            case SDL_EVENT_WINDOW_HDR_STATE_CHANGED:
+                globals::dispatcher.trigger(static_cast<const SDL_WindowEvent&>(event.window));
+                break;
+        }
+
+        globals::dispatcher.trigger(static_cast<const SDL_Event&>(event));
+
+        ImGui_ImplSDL3_ProcessEvent(&event);
+    }
+}
+
+static void wrapped_main(int argc, char** argv)
+{
+    core::setup(argc, argv);
+
+    LOG_INFO("engine version: {}", version::full);
+
+    std::signal(SIGINT, &signal_handler);
+    std::signal(SIGTERM, &signal_handler);
+
+    vx::throw_if_not_fmt(SDL_Init(SDL_INIT_EVENTS), "SDL_Init failed: {}", SDL_GetError());
+
+    Image::register_resource();
+    // TODO: Texture2D::register_resource();
+
+    // TODO: video::init();
+
+    // TODO: game_ui::init();
+
+    client_game::init();
+
+    globals::client_config.load("client.conf");
+    globals::client_config.load("client.user.conf");
+
+    // TODO: video::init_late();
+
+    // TODO: game_ui::init_late();
+
+    client_game::init_late();
+
+#ifndef NDEBUG
+    LOG_WARNING("debug build");
+#endif
+
+    s_is_running.store(true);
+
+    globals::fixed_frametime = 0.0f;
+    globals::fixed_frametime_avg = 0.0f;
+    globals::fixed_frametime_us = UINT64_MAX;
+    globals::fixed_framecount = 0;
+
+    globals::curtime_us = utils::epoch_microseconds();
+
+    globals::window_framecount = 0;
+    globals::window_frametime_us = 0;
+    globals::window_frametime = 0.0f;
+    globals::window_frametime_avg = 0.0f;
+
+    auto last_curtime_us = globals::curtime_us;
+
+    while(s_is_running.load()) {
+        globals::curtime_us = utils::epoch_microseconds();
+
+        globals::window_frametime_us = globals::curtime_us - last_curtime_us;
+        globals::window_frametime = 1.0e-6f * static_cast<float>(globals::window_frametime_us);
+        globals::window_frametime_avg += globals::window_frametime;
+        globals::window_frametime_avg *= 0.5f;
+
+        if(globals::fixed_frametime_us == UINT64_MAX) {
+            globals::fixed_framecount = 0;
+            globals::fixed_accumulator_us = 0;
+        }
+        else {
+            globals::fixed_accumulator_us += globals::window_frametime_us;
+            globals::fixed_framecount = globals::fixed_accumulator_us / globals::fixed_frametime_us;
+            globals::fixed_accumulator_us %= globals::fixed_frametime_us;
+        }
+
+        globals::num_draw_calls = 0;
+        globals::num_draw_vertices = 0;
+
+        last_curtime_us = globals::curtime_us;
+
+        handle_events();
+
+        for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
+            client_game::fixed_update();
+        }
+
+        // TODO: video::update();
+
+        client_game::update();
+
+        // TODO: game_ui::update();
+
+        // if(head::prepare()) {
+        //     client_game::render();
+        //     head::layout();
+        //     game_ui::layout();
+        //     client_game::layout();
+        //     head::present();
+        // }
+
+        for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
+            client_game::fixed_update_late();
+        }
+
+        // TODO: head::update_late();
+
+        client_game::update_late();
+
+        globals::window_framecount += 1;
+
+        res::soft_purge();
+    }
+
+    LOG_INFO("shutdown after {} frames", globals::window_framecount);
+    LOG_INFO("avg framerate: {:.03f} FPS ({:.03f} ms)", 1.0f / globals::window_frametime_avg, 1000.0f * globals::window_frametime_avg);
+
+    client_game::shutdown();
+
+    // TODO: game_ui::shutdown();
+
+    res::hard_purge();
+
+    // TODO: video::shutdown();
+
+    globals::client_config.save("client.conf");
+
+    core::teardown();
+}
+
+int main(int argc, char** argv)
+{
+    uulog::add_sink(&uulog::builtin::stderr_ansi);
+
+    try {
+        wrapped_main(argc, argv);
+        return EXIT_SUCCESS;
+    }
+    catch(const std::exception& ex) {
+        uulog::detail::error("unknown", 0, ex.what(), std::strlen(ex.what()));
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Engine Error", ex.what(), nullptr);
+        return EXIT_FAILURE;
+    }
+    catch(const vx::detail::Exception& ex) {
+        const auto& location = ex.location();
+        const auto file = std::filesystem::path(location.file_name()).filename().string();
+        const auto line = static_cast<unsigned long>(location.line());
+
+        uulog::detail::error(file.c_str(), line, ex.what_standard(), ex.what().size());
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Engine Error", ex.what_standard(), nullptr);
+        return EXIT_FAILURE;
+    }
+    catch(...) {
+        uulog::detail::error("unknown", 0, "Unknown exception", std::strlen("Unknown exception"));
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Engine Error", "Unknown exception", nullptr);
+        return EXIT_FAILURE;
+    }
+}

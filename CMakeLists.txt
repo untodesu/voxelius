@@ -28,8 +28,15 @@ execute_process(COMMAND git rev-parse --abbrev-ref HEAD WORKING_DIRECTORY ${PROJ
 
 add_subdirectory(core)
 add_subdirectory(deps)
-add_subdirectory(game)
-add_subdirectory(main)
+add_subdirectory(shared)
+
+if(BUILD_CLIENT)
+    add_subdirectory(client)
+endif()
+
+if(BUILD_SERVER)
+    add_subdirectory(server)
+endif()
 
 install(FILES "${PROJECT_SOURCE_DIR}/LICENSE" DESTINATION "doc/voxelius")
 

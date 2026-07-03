@@ -1,10 +1,10 @@
-#include "game/shared/pch.hh"
+#include "shared/pch.hh"
 
-#include "game/shared/utils/coord.hh"
+#include "shared/utils/coord.hh"
 
 #include "core/utils/modulo.hh"
 
-#include "game/shared/constant.hh"
+#include "shared/constant.hh"
 
 chunk_pos utils::to_chunk(const block_pos& bpos) noexcept
 {
