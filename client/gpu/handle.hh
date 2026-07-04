@@ -80,7 +80,7 @@ constexpr gpu::Handle<T, ReleaseFunc>::operator T*(void) const noexcept
 template<typename T, auto ReleaseFunc>
 constexpr bool gpu::Handle<T, ReleaseFunc>::is_valid(void) const noexcept
 {
-    return m_handle != nullptr;
+    return static_cast<bool>(m_handle);
 }
 
 template<typename T, auto ReleaseFunc>

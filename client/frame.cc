@@ -49,7 +49,7 @@ void frame::present(void)
     color_target_info.clear_color.a = 1.0f;
 
     auto render_pass = SDL_BeginGPURenderPass(globals::gpu_commands_main, &color_target_info, 1, nullptr);
-    vx::throw_if_not(render_pass != nullptr, "SDL_BeginGPURenderPass returned nullptr");
+    vx::throw_if_not(render_pass, "SDL_BeginGPURenderPass returned nullptr");
 
     ImGui_ImplSDLGPU3_RenderDrawData(draw_data, globals::gpu_commands_main, render_pass);
 

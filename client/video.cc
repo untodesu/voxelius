@@ -205,7 +205,7 @@ void video::query_current_mode(int& width, int& height, bool& fullscreen) noexce
 {
     width = globals::width;
     height = globals::height;
-    fullscreen = SDL_GetWindowFullscreenMode(globals::window) != nullptr;
+    fullscreen = static_cast<bool>(SDL_GetWindowFullscreenMode(globals::window));
 }
 
 const std::vector<SDL_DisplayMode>& video::query_fullscreen_modes(void) noexcept
