@@ -10,5 +10,6 @@ target_compile_features(shared PUBLIC cxx_std_20)
 target_include_directories(shared PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(shared PUBLIC core)
 target_link_libraries(shared PUBLIC
-    deps::entt)
+    deps::entt
+    deps::lua)
 target_precompile_headers(shared PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")

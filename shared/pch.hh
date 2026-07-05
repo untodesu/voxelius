@@ -5,4 +5,10 @@
 
 #include <entt/entt.hpp>
 
+extern "C" {
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+}
+
 #endif /* CDD6D4DE_0D44_4AE8_B52B_5F728B619CCA */
