@@ -146,7 +146,7 @@ void config::Map::save(std::ostream& stream) const noexcept
     auto curtime = std::time(nullptr);
 
     stream << "# Voxelius " << version::semantic << " configuration file" << std::endl;
-    stream << "# Generated on " << std::asctime(std::localtime(&curtime)) << std::endl << std::endl;
+    stream << "# Generated on " << std::asctime(std::localtime(&curtime)) << std::endl;
 
     for(const auto& it : m_index) {
         const auto& slot = m_slots[it.second];
@@ -254,9 +254,9 @@ std::optional<unsigned short> config::Map::value_raw<unsigned short>(slot_type s
 }
 
 template<>
-std::optional<unsigned int> config::Map::value_raw<unsigned int>(slot_type slot) const noexcept
+std::optional<unsigned> config::Map::value_raw<unsigned>(slot_type slot) const noexcept
 {
-    return get_arithmetic<unsigned int>(this, slot);
+    return get_arithmetic<unsigned>(this, slot);
 }
 
 template<>
@@ -379,7 +379,7 @@ void config::Map::set_value_raw<unsigned short>(slot_type slot, const unsigned s
 }
 
 template<>
-void config::Map::set_value_raw<unsigned int>(slot_type slot, const unsigned int& value) noexcept
+void config::Map::set_value_raw<unsigned>(slot_type slot, const unsigned& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }

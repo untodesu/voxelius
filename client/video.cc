@@ -50,14 +50,14 @@ static void pick_display(void)
         return;
     }
 
-    unsigned int monitor_index;
+    unsigned monitor_index;
     auto check = std::from_chars(monitor_arg->data(), monitor_arg->data() + monitor_arg->size(), monitor_index);
 
     if(check.ec == std::errc {}) {
         int display_count;
         auto displays = SDL_GetDisplays(&display_count);
 
-        if(monitor_index < static_cast<unsigned int>(display_count)) {
+        if(monitor_index < static_cast<unsigned>(display_count)) {
             s_display = displays[monitor_index];
         }
 

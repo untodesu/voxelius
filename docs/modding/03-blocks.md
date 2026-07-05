@@ -43,6 +43,7 @@ Defines a tool category used for block interactions
 |`blocks.TOOL_HOE`|Hoe-like tool|  
 |`blocks.TOOL_SHOVEL`|Shovel-like tool|  
 |`blocks.TOOL_HAMMER`|Hammer-like tool|  
+|`blocks.TOOL_PICK`|Pickaxe-like tool|  
 
 ### `blocks.TOUCH`
 

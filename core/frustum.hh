@@ -24,7 +24,7 @@ private:
     std::array<Eigen::Hyperplane<float, 3>, 6> m_planes;
 };
 
-constexpr const Eigen::Hyperplane<float, 3>& Frustum::plane(unsigned int index) const noexcept
+constexpr const Eigen::Hyperplane<float, 3>& Frustum::plane(unsigned index) const noexcept
 {
     assert(index < m_planes.size());
 

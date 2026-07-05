@@ -2,11 +2,28 @@
 
 #include "client/game.hh"
 
+#include "shared/identifier.hh"
+
 #include "client/globals.hh"
 
 void client_game::init(void)
 {
-    // empty
+    Identifier i;
+
+    i = Identifier::from_string("voxelius:some_identifier");
+    LOG_INFO("{}", i.full_string());
+
+    i = Identifier::from_string(":invalid_identifier");
+    LOG_INFO("{}", i.full_string());
+
+    i = Identifier::from_string("something", "default_namespace");
+    LOG_INFO("{}", i.full_string());
+
+    i = Identifier::from_string("voxelius:something", "default_namespace");
+    LOG_INFO("{}", i.full_string());
+
+    i = Identifier::from_string("builtin:cube");
+    LOG_INFO("{}", i.as_file_path("models/block", ".json"));
 }
 
 void client_game::init_late(void)

@@ -1,0 +1,9 @@
+#ifndef AC10DC15_9E3A_4C9E_B8B4_E6C5CAE5BB89
+#define AC10DC15_9E3A_4C9E_B8B4_E6C5CAE5BB89
+
+class World final {
+public:
+private:
+};
+
+#endif /* AC10DC15_9E3A_4C9E_B8B4_E6C5CAE5BB89 */
