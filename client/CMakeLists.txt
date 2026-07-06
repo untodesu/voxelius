@@ -6,8 +6,6 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/gpu/ring.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/sampler.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/sampler.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/gpu/shader.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/gpu/shader.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/texture.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/texture.hh"
     "${CMAKE_CURRENT_LIST_DIR}/res/texture2D.cc"
