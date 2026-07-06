@@ -22,9 +22,9 @@ static int stbi_physfs_eof(void* context)
     return PHYSFS_eof(reinterpret_cast<PHYSFS_File*>(context));
 }
 
-static const void* image_load_fn(const char* name, std::uint32_t flags)
+static const void* image_load_fn(const char* path, std::uint32_t flags)
 {
-    assert(name);
+    assert(path);
 
     stbi_io_callbacks callbacks;
     callbacks.read = &stbi_physfs_read;
@@ -33,10 +33,10 @@ static const void* image_load_fn(const char* name, std::uint32_t flags)
 
     stbi_set_flip_vertically_on_load(bool(flags & RESFLAG_IMG_FLIP));
 
-    auto file = PHYSFS_openRead(name);
+    auto file = PHYSFS_openRead(path);
 
     if(file == nullptr) {
-        LOG_WARNING("{}: {}", name, utils::physfs_error());
+        LOG_WARNING("{}: {}", path, utils::physfs_error());
         return nullptr;
     }
 
@@ -55,7 +55,7 @@ static const void* image_load_fn(const char* name, std::uint32_t flags)
     auto pixels = stbi_load_from_callbacks(&callbacks, file, &width, &height, &channels, desired_channels);
 
     if(pixels == nullptr) {
-        LOG_WARNING("{}: {}", name, stbi_failure_reason());
+        LOG_WARNING("{}: {}", path, stbi_failure_reason());
         return nullptr;
     }
 

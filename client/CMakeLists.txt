@@ -10,6 +10,8 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/gpu/shader.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/texture.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/texture.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/res/texture2D.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/res/texture2D.hh"
     "${CMAKE_CURRENT_LIST_DIR}/constant.hh"
     "${CMAKE_CURRENT_LIST_DIR}/frame.cc"
     "${CMAKE_CURRENT_LIST_DIR}/frame.hh"

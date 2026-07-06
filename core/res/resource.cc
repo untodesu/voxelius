@@ -34,9 +34,9 @@ void res::detail::register_loader(const std::type_info& type, load_func load_fn,
     s_loaders.insert_or_assign(type_index, std::move(loader));
 }
 
-res::handle<void> res::detail::load_resource(const std::type_info& type, std::string_view name, std::uint32_t flags)
+res::handle<void> res::detail::load_resource(const std::type_info& type, std::string_view path, std::uint32_t flags)
 {
-    std::string name_unfucked(name);
+    std::string path_unfucked(path);
     std::type_index type_index(type);
 
     auto loader = s_loaders.find(type_index);
@@ -46,19 +46,19 @@ res::handle<void> res::detail::load_resource(const std::type_info& type, std::st
         return nullptr;
     }
 
-    auto found = loader->second->resources.find(name_unfucked);
+    auto found = loader->second->resources.find(path_unfucked);
 
     if(found == loader->second->resources.cend()) {
-        auto raw = loader->second->load_fn(name_unfucked.c_str(), flags);
+        auto raw = loader->second->load_fn(path_unfucked.c_str(), flags);
 
         if(raw == nullptr) {
-            LOG_WARNING("{}<{}>: load failed", name_unfucked, type.name());
+            LOG_WARNING("{}<{}>: load failed", path_unfucked, type.name());
             return nullptr;
         }
 
         handle<void> resource(raw, [](const void* ptr) { /* empty */ });
 
-        auto loaded = loader->second->resources.insert_or_assign(name_unfucked, std::move(resource));
+        auto loaded = loader->second->resources.insert_or_assign(path_unfucked, std::move(resource));
 
         if(flags & RESFLAG_CACHE) {
             loader->second->cache.push_back(loaded.first->second);
@@ -70,9 +70,9 @@ res::handle<void> res::detail::load_resource(const std::type_info& type, std::st
     return found->second;
 }
 
-res::handle<void> res::detail::find_resource(const std::type_info& type, std::string_view name)
+res::handle<void> res::detail::find_resource(const std::type_info& type, std::string_view path)
 {
-    std::string name_unfucked(name);
+    std::string path_unfucked(path);
     std::type_index type_index(type);
 
     auto loader = s_loaders.find(type_index);
@@ -82,7 +82,7 @@ res::handle<void> res::detail::find_resource(const std::type_info& type, std::st
         return nullptr;
     }
 
-    auto found = loader->second->resources.find(name_unfucked);
+    auto found = loader->second->resources.find(path_unfucked);
 
     if(found == loader->second->resources.cend()) {
         return nullptr;
@@ -127,12 +127,12 @@ void res::hard_purge(void)
     for(auto& [type_index, loader] : s_loaders) {
         loader->cache.clear();
 
-        for(auto& [name, handle] : loader->resources) {
+        for(auto& [path, handle] : loader->resources) {
             if(handle.use_count() > 1) {
-                LOG_WARNING("zombie resource: {}<{}> use_count={}", name, loader->classname, handle.use_count());
+                LOG_WARNING("zombie resource: {}<{}> use_count={}", path, loader->classname, handle.use_count());
             }
 
-            LOG_DEBUG("releasing {}<{}>", name, loader->classname);
+            LOG_DEBUG("releasing {}<{}>", path, loader->classname);
 
             loader->free_fn(handle.get());
         }

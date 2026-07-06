@@ -11,6 +11,8 @@
 #include "core/exception.hh"
 #include "core/version.hh"
 
+#include "client/res/texture2D.hh"
+
 #include "client/frame.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
@@ -98,7 +100,7 @@ static void wrapped_main(int argc, char** argv)
     vx::throw_if_not_fmt(SDL_Init(SDL_INIT_EVENTS), "SDL_Init failed: {}", SDL_GetError());
 
     Image::register_resource();
-    // TODO: Texture2D::register_resource();
+    Texture2D::register_resource();
 
     video::init();
 

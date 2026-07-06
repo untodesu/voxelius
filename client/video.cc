@@ -91,12 +91,12 @@ static void update_present_mode(void)
     if(s_enable_vsync.value()) {
         SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
 
-        LOG_INFO("video: vsync enabled");
+        LOG_DEBUG("video: vsync enabled");
     }
     else {
         SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, s_unlocked_present_mode);
 
-        LOG_INFO("video: vsync disabled");
+        LOG_DEBUG("video: vsync disabled");
     }
 }
 
@@ -104,12 +104,10 @@ static void on_sdl_key(const SDL_KeyboardEvent& event)
 {
     if(event.type == SDL_EVENT_KEY_DOWN) {
         if(event.key == SDLK_F1) {
-            LOG_INFO("video: F1: toggling vsync to: {}", !s_enable_vsync.value());
             globals::client_config.set_value<bool>("video.enable_vsync", !s_enable_vsync.value());
         }
 
         if(event.key == SDLK_F2) {
-            LOG_INFO("video: F2: toggling vsync to: {}", !s_enable_vsync.value());
             s_enable_vsync.set_value(!s_enable_vsync.value());
         }
     }

@@ -2,28 +2,36 @@
 
 #include "client/game.hh"
 
-#include "shared/identifier.hh"
+#include "core/res/resource.hh"
+
+#include "core/identifier.hh"
+
+#include "client/res/texture2D.hh"
 
 #include "client/globals.hh"
+
+static res::handle<Texture2D> s_texture;
 
 void client_game::init(void)
 {
     Identifier i;
 
     i = Identifier::from_string("voxelius:some_identifier");
-    LOG_INFO("{}", i.full_string());
+    LOG_DEBUG("{}", i.full_string());
 
     i = Identifier::from_string(":invalid_identifier");
-    LOG_INFO("{}", i.full_string());
+    LOG_DEBUG("{} {}", i.full_string(), i.is_valid());
 
     i = Identifier::from_string("something", "default_namespace");
-    LOG_INFO("{}", i.full_string());
+    LOG_DEBUG("{} {}", i.full_string(), i.is_valid());
 
     i = Identifier::from_string("voxelius:something", "default_namespace");
-    LOG_INFO("{}", i.full_string());
+    LOG_DEBUG("{}", i.full_string());
 
     i = Identifier::from_string("builtin:cube");
-    LOG_INFO("{}", i.as_file_path("models/block", ".json"));
+    LOG_DEBUG("{}", i.as_file_path("models/block", ".json"));
+
+    s_texture = res::load<Texture2D>(Identifier::from_string("builtin:textures/trollface.png"));
 }
 
 void client_game::init_late(void)
@@ -33,7 +41,7 @@ void client_game::init_late(void)
 
 void client_game::shutdown(void)
 {
-    // empty
+    s_texture.reset();
 }
 
 void client_game::update(void)
@@ -59,4 +67,6 @@ void client_game::fixed_update_late(void)
 void client_game::layout(void)
 {
     ImGui::Text("skibidi sigma %f", 1.0f / globals::window_frametime_avg);
+
+    ImGui::Image(s_texture->imgui, ImVec2(320.0f, 240.0f));
 }

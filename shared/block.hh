@@ -1,7 +1,7 @@
 #ifndef A2FDDFDB_9022_42F0_AA77_8AD362EE4147
 #define A2FDDFDB_9022_42F0_AA77_8AD362EE4147
 
-#include "shared/identifier.hh"
+#include "core/identifier.hh"
 
 using block_render_type = unsigned;
 constexpr static block_render_type BLOCK_RENDER_NONE = std::numeric_limits<block_render_type>::max();
