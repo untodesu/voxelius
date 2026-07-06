@@ -86,6 +86,35 @@ static void cache_fullscreen_modes(void)
     SDL_free(modes);
 }
 
+static void update_present_mode(void)
+{
+    if(s_enable_vsync.value()) {
+        SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
+
+        LOG_INFO("video: vsync enabled");
+    }
+    else {
+        SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, s_unlocked_present_mode);
+
+        LOG_INFO("video: vsync disabled");
+    }
+}
+
+static void on_sdl_key(const SDL_KeyboardEvent& event)
+{
+    if(event.type == SDL_EVENT_KEY_DOWN) {
+        if(event.key == SDLK_F1) {
+            LOG_INFO("video: F1: toggling vsync to: {}", !s_enable_vsync.value());
+            globals::client_config.set_value<bool>("video.enable_vsync", !s_enable_vsync.value());
+        }
+
+        if(event.key == SDLK_F2) {
+            LOG_INFO("video: F2: toggling vsync to: {}", !s_enable_vsync.value());
+            s_enable_vsync.set_value(!s_enable_vsync.value());
+        }
+    }
+}
+
 void video::init(void)
 {
     s_last_windowed_size = Eigen::Vector2i(constant::BASE_WIDTH, constant::BASE_HEIGHT);
@@ -140,6 +169,8 @@ void video::init(void)
     update_window_title();
 
     SDL_ShowWindow(globals::window);
+
+    globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&on_sdl_key>();
 }
 
 void video::init_late(void)
@@ -187,11 +218,8 @@ void video::update(void)
 
 void video::update_late(void)
 {
-    if(s_enable_vsync) {
-        SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
-    }
-    else {
-        SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, s_unlocked_present_mode);
+    if(s_enable_vsync.dirty()) {
+        update_present_mode();
     }
 }
 
@@ -274,6 +302,7 @@ void video::request_windowed(void) noexcept
 
 void video::update_window_title(void)
 {
-    auto title = std::format("client {}", version::semantic);
+    auto title = std::format("client {}", version::full);
+
     SDL_SetWindowTitle(globals::window, title.c_str());
 }

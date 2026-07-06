@@ -14,6 +14,8 @@ public:
     const T& value(void) const noexcept;
     operator const T&(void) const noexcept;
 
+    constexpr bool dirty(void) const noexcept;
+
     void set_value(const T& value) noexcept;
     Ref<T>& operator=(const T& value) noexcept;
     Ref<T>& operator=(const Ref<T>& other) noexcept;
@@ -38,8 +40,9 @@ constexpr config::Ref<T>::Ref(T default_value) noexcept : m_value(std::move(defa
 template<typename T>
 const T& config::Ref<T>::value(void) const noexcept
 {
-    if(m_map && m_generation != m_map->generation()) {
+    if(dirty()) {
         m_value = m_map->value_raw<T>(m_slot).value_or(m_value);
+        m_generation = m_map->generation();
     }
 
     return m_value;
@@ -52,13 +55,18 @@ config::Ref<T>::operator const T&(void) const noexcept
 }
 
 template<typename T>
+constexpr bool config::Ref<T>::dirty(void) const noexcept
+{
+    return m_map && m_generation != m_map->generation();
+}
+
+template<typename T>
 void config::Ref<T>::set_value(const T& value) noexcept
 {
     m_value = value;
 
     if(m_map && m_slot != null_slot) {
         m_map->set_value_raw<T>(m_slot, value);
-        m_generation = m_map->generation();
     }
 }
 
