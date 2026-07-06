@@ -44,6 +44,38 @@ using block_id_type = std::uint32_t;
 constexpr static block_id_type BLOCK_ID_NULL = 0;
 constexpr static block_id_type BLOCK_ID_MAX = std::numeric_limits<block_id_type>::max();
 
+using block_light_type = std::uint8_t;
+constexpr static block_light_type BLOCK_LIGHT_MIN = 0x00;
+constexpr static block_light_type BLOCK_LIGHT_MAX = 0x0F;
+
+struct BlockDropItem final {
+    Identifier name;
+    unsigned count;
+};
+
+struct BlockDrop final {
+    std::vector<BlockDropItem> items;
+    std::vector<Identifier> cond_effects;
+    block_tool_type cond_tool_bits;
+};
+
+struct BlockDefinition final {
+    block_render_type render;
+
+    Identifier model_name;
+    Eigen::Vector3f model_offset;
+
+    Identifier bcoll_name;
+    Eigen::Vector3f bcoll_offset;
+
+    bool animated;
+    std::unordered_map<std::string, std::vector<Identifier>> textures;
+
+    unsigned health;
+    block_tool_type tools; // big tool mask made from drops cond_tool_bits
+};
+
+#if 0
 struct BlockDefinition final {
     block_render_type render;
 
@@ -63,5 +95,6 @@ struct BlockDefinition final {
 
     block_tag_type tags;
 };
+#endif
 
 #endif /* A2FDDFDB_9022_42F0_AA77_8AD362EE4147 */
