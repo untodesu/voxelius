@@ -9,7 +9,7 @@
 #include "shared/utils/lua.hh"
 
 #include "shared/block_registry.hh"
-#include "shared/mod.hh"
+#include "shared/mod_context.hh"
 
 class FieldHelper final {
 public:
@@ -123,7 +123,7 @@ static void parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModCo
     drop.items.clear();
     drop.items.reserve(items_count);
 
-    for(lua_Integer i = 1; i <= items_count; ++i) {
+    for(lua_Integer i = 1; i <= static_cast<lua_Integer>(items_count); ++i) {
         lua_rawgeti(L, items_idx, i);
 
         auto item_idx = lua_gettop(L);
@@ -153,7 +153,7 @@ static std::vector<BlockDrop> parse_drops(lua_State* L, int drops_idx, ModContex
     std::vector<BlockDrop> drops;
     drops.reserve(count);
 
-    for(lua_Integer i = 1; i <= count; ++i) {
+    for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
         lua_rawgeti(L, drops_idx, i);
 
         auto entry_idx = lua_gettop(L);
@@ -195,7 +195,7 @@ static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx
             std::vector<Identifier> variants;
             variants.reserve(count);
 
-            for(lua_Integer i = 1; i <= count; ++i) {
+            for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
                 lua_rawgeti(L, -1, i);
                 variants.emplace_back(Identifier::from_string(luaL_checkstring(L, -1), ctx->name_space()));
                 lua_pop(L, 1);
@@ -222,7 +222,7 @@ static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx
     }
 
     if(helper.try_push("model_offset")) {
-        patch.model_offset = utils::read_vector3f(L, lua_gettop(L));
+        patch.model_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
         lua_pop(L, 1);
     }
 
@@ -232,7 +232,7 @@ static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx
     }
 
     if(helper.try_push("bcoll_offset")) {
-        patch.bcoll_offset = utils::read_vector3f(L, lua_gettop(L));
+        patch.bcoll_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
         lua_pop(L, 1);
     }
 
@@ -292,7 +292,7 @@ static void parse_definition(const FieldHelper& helper, ModContext* ctx, BlockDe
     }
 
     if(helper.try_push("model_offset")) {
-        def.model_offset = utils::read_vector3f(helper.L, lua_gettop(helper.L));
+        def.model_offset = utils::read_vector3f(helper.L, lua_gettop(helper.L)) / 16.0f;
         lua_pop(helper.L, 1);
     }
 
@@ -302,7 +302,7 @@ static void parse_definition(const FieldHelper& helper, ModContext* ctx, BlockDe
     }
 
     if(helper.try_push("bcoll_offset")) {
-        def.bcoll_offset = utils::read_vector3f(helper.L, lua_gettop(helper.L));
+        def.bcoll_offset = utils::read_vector3f(helper.L, lua_gettop(helper.L)) / 16.0f;
         lua_pop(helper.L, 1);
     }
 
@@ -326,7 +326,7 @@ static void parse_definition(const FieldHelper& helper, ModContext* ctx, BlockDe
             std::vector<Identifier> variants;
             variants.reserve(count);
 
-            for(lua_Integer i = 1; i <= count; ++i) {
+            for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
                 lua_rawgeti(helper.L, -1, i);
                 variants.emplace_back(Identifier::from_string(luaL_checkstring(helper.L, -1), ctx->name_space()));
                 lua_pop(helper.L, 1);
@@ -381,7 +381,7 @@ static void parse_definition(const FieldHelper& helper, ModContext* ctx, BlockDe
     }
 }
 
-static void parse_state_hint(lua_State* L, int entry_idx, BlockStateDecl& decl) noexcept
+static void parse_state_hint(lua_State* L, int entry_idx, BlockStateDecl& decl, BlockFamily& family) noexcept
 {
     lua_getfield(L, entry_idx, "hint");
 
@@ -398,7 +398,7 @@ static void parse_state_hint(lua_State* L, int entry_idx, BlockStateDecl& decl) 
 
     for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
         lua_rawgeti(L, hint_idx, i);
-        decl.hint.emplace_back(luaL_checkstring(L, -1));
+        decl.hint.push_back(family.state_hash(luaL_checkstring(L, -1)));
         lua_pop(L, 1);
     }
 
@@ -419,7 +419,7 @@ static void parse_states(lua_State* L, int idx, BlockFamily& family) noexcept
         decl.default_value = family.state_hash(luaL_checkstring(L, -1));
         lua_pop(L, 1);
 
-        parse_state_hint(L, entry_idx, decl);
+        parse_state_hint(L, entry_idx, decl, family);
 
         auto key = static_cast<blockstate_key_type>(utils::crc64(state_name.data(), state_name.size()));
         family.states.insert_or_assign(key, std::move(decl));
@@ -477,7 +477,7 @@ static void parse_variants(lua_State* L, int idx, ModContext* ctx, BlockFamily& 
     family.variants.clear();
     family.variants.reserve(count);
 
-    for(lua_Integer i = 1; i <= count; ++i) {
+    for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
         lua_rawgeti(L, idx, i);
 
         auto entry_idx = lua_gettop(L);
@@ -602,12 +602,21 @@ static int api_add(lua_State* L) noexcept
     FieldHelper helper(L, def_idx, proto_idx);
     parse_definition(helper, ctx, def);
 
-    if(def.render != BLOCK_RENDER_NONE && def.model_name.is_empty()) {
+    // a block that resolves into variants is allowed to omit model_name at
+    // the top level - each variants[].overrides is expected to supply its
+    // own (eg. a slab's base registration has no sensible single model)
+    auto has_variants = helper.try_push("variants");
+
+    if(has_variants) {
+        lua_pop(L, 1);
+    }
+
+    if(!has_variants && def.render != BLOCK_RENDER_NONE && def.model_name.is_empty()) {
         return luaL_error(L, "blocks.add: [%s]: model_name is required unless render is blocks.RENDER_NONE", id.full_string().data());
     }
 
     auto block_id = ctx->register_block(id, def);
-    auto has_checked_key = false;
+    auto has_checked_key = has_variants;
 
     for(const auto& key : std::array { "states", "variants", "on_rtick", "on_stick", "on_place", "on_break", "on_interact" }) {
         if(helper.try_push(key)) {
@@ -615,8 +624,6 @@ static int api_add(lua_State* L) noexcept
             lua_pop(L, 1);
             break;
         }
-
-        lua_pop(L, 1);
     }
 
     if(has_checked_key) {
@@ -642,9 +649,6 @@ static int api_add(lua_State* L) noexcept
 
         auto family_id = ctx->register_block_family(std::move(family));
         ctx->set_block_family(block_id, family_id);
-    }
-    else {
-        lua_pop(L, 1);
     }
 
     lua_pushinteger(L, block_id);

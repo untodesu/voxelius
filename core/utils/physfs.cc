@@ -12,7 +12,11 @@ bool utils::read_file(std::string_view path, std::string& buffer)
         return false;
     }
 
-    buffer.resize(1 + PHYSFS_fileLength(file), static_cast<char>(0x00));
+    // std::string is already null-terminated via .c_str()/.data() (C++11+),
+    // so no extra byte is needed here - unlike the vector<byte> overload
+    // below, an extra byte here would end up inside source.size() and get
+    // fed to consumers (eg. luaL_loadbuffer) as a bogus trailing NUL
+    buffer.resize(PHYSFS_fileLength(file), static_cast<char>(0x00));
 
     PHYSFS_readBytes(file, buffer.data(), buffer.size());
     PHYSFS_close(file);

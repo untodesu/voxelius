@@ -1,0 +1,193 @@
+#include "shared/pch.hh"
+
+#include "shared/mod_loader.hh"
+
+#include "core/config/map.hh"
+
+#include "shared/block_registry.hh"
+
+static std::vector<ModContext> s_mods;
+
+static std::vector<ModInfo> discover_mods(void) noexcept
+{
+    std::vector<ModInfo> result;
+
+    if(auto entries = PHYSFS_enumerateFiles("/")) {
+        for(std::size_t i = 0; entries[i]; ++i) {
+            PHYSFS_Stat stat {};
+
+            if(!PHYSFS_stat(entries[i], &stat)) {
+                continue;
+            }
+
+            if(stat.filetype != PHYSFS_FILETYPE_DIRECTORY) {
+                continue;
+            }
+
+            auto modinfo_path = std::format("{}/modinfo.conf", entries[i]);
+
+            if(!PHYSFS_exists(modinfo_path.c_str())) {
+                continue;
+            }
+
+            config::Map map;
+
+            if(!map.load(modinfo_path)) {
+                LOG_ERROR("mod_loader: {}: unable to read modinfo.conf", entries[i]);
+                continue;
+            }
+
+            ModInfo info {};
+
+            if(!ModInfo::parse(map, info)) {
+                LOG_ERROR("mod_loader: {}: malformed modinfo.conf", entries[i]);
+                continue;
+            }
+
+            result.emplace_back(std::move(info));
+        }
+
+        PHYSFS_freeList(entries);
+    }
+
+    return result;
+}
+
+static std::vector<ModInfo> resolve_load_order(std::vector<ModInfo> mods) noexcept
+{
+    std::unordered_map<std::string, ModInfo*> map;
+    std::unordered_map<std::string, ModVersion> versions;
+
+    for(auto& info : mods) {
+        map.insert_or_assign(info.name, &info);
+        versions.insert_or_assign(info.name, info.version);
+    }
+
+    std::unordered_set<std::string> resolved;
+    std::unordered_set<std::string> remaining;
+
+    for(const auto& info : mods) {
+        remaining.insert(info.name);
+    }
+
+    for(const auto& info : mods) {
+        for(const auto& conflict : info.conflicts) {
+            auto it = versions.find(conflict.first);
+
+            if(it == versions.cend()) {
+                continue;
+            }
+
+            if(conflict.second == ModVersion {} || it->second <= conflict.second) {
+                LOG_ERROR("mod_loader: {}: conflicts with {}", info.name, conflict.first);
+                remaining.erase(info.name);
+                break;
+            }
+        }
+    }
+
+    std::vector<ModInfo> result;
+    result.reserve(mods.size());
+
+    auto hard_satisfied = [&](const ModInfo* info) noexcept {
+        return std::all_of(info->hard_depends.cbegin(), info->hard_depends.cend(), [&](const auto& dep) noexcept {
+            return resolved.contains(dep.first) && versions.at(dep.first) >= dep.second;
+        });
+    };
+
+    auto soft_satisfied = [&](const ModInfo* info) noexcept {
+        return std::all_of(info->soft_depends.cbegin(), info->soft_depends.cend(), [&](const auto& dep) noexcept {
+            return resolved.contains(dep.first) && versions.at(dep.first) >= dep.second;
+        });
+    };
+
+    while(remaining.size()) {
+        std::vector<std::string> ready;
+        ready.reserve(remaining.size());
+
+        for(const auto& name : remaining) {
+            const auto info = map.at(name);
+
+            if(hard_satisfied(info) && soft_satisfied(info)) {
+                ready.push_back(name);
+            }
+        }
+
+        if(ready.empty()) {
+            for(const auto& name : remaining) {
+                if(hard_satisfied(map.at(name))) {
+                    ready.push_back(name);
+                }
+            }
+        }
+
+        if(ready.empty()) {
+            break;
+        }
+
+        std::sort(ready.begin(), ready.end());
+
+        for(const auto& name : ready) {
+            result.push_back(std::move(*map.at(name)));
+            resolved.insert(name);
+            remaining.erase(name);
+        }
+    }
+
+    return result;
+}
+
+void mod_loader::init(void)
+{
+    auto mods = resolve_load_order(discover_mods());
+
+    s_mods.clear();
+    s_mods.reserve(mods.size());
+
+    std::unordered_set<std::string> failed;
+
+    for(auto& info : mods) {
+        auto blocked = std::any_of(info.hard_depends.cbegin(), info.hard_depends.cend(), [&](const auto& dep) noexcept {
+            return failed.contains(dep.first);
+        });
+
+        if(blocked) {
+            LOG_WARNING("mod_loader: {}: a hard dependency failed to load", info.name);
+            failed.insert(info.name);
+            continue;
+        }
+
+        auto name = info.name;
+        auto& ctx = s_mods.emplace_back(std::move(info));
+
+        if(!ctx.initialize()) {
+            failed.insert(name);
+            continue;
+        }
+
+        block_registry::commit(ctx);
+    }
+}
+
+void mod_loader::shutdown(void)
+{
+    s_mods.clear();
+
+    block_registry::purge();
+}
+
+std::span<const ModContext> mod_loader::all(void) noexcept
+{
+    return s_mods;
+}
+
+const ModContext* mod_loader::find(std::string_view name_space) noexcept
+{
+    for(const auto& ctx : s_mods) {
+        if(ctx.name_space() == name_space) {
+            return &ctx;
+        }
+    }
+
+    return nullptr;
+}

@@ -7,28 +7,36 @@ Every mod's root directory contains a `modinfo.conf` file that contains some use
 |Name|Required|Default|Description|  
 |----|----|----|----|  
 |`name`|yes|N/D|The mod's name/ID used for namespacing|  
-|`author`|no|N/D|Metadata: the mod's author/authors|  
-|`homepage`|no|N/D|Metadata: the mod's homepage URL|  
-|`tracker`|no|N/D|Metadata: the mod's issue tracker URL|  
-|`license`|no|`ARR`|Metadata: the mod's license as a short SPDX identifier|  
-|`display`|no|Value of `name`|Metadata: the mod's display name|  
-|`description`|no|N/D|Metadata: a short description|  
-|`depends`|no|N/D|Whitespace-separated list of mod IDs that must be in loaded state before this mod's scripts are invoked|  
+|`version`|yes|`0.0.0`|The mod's semantic version used for compatibility checks|  
+|`hard_depends`|no|N/D|Whitespace-separated list of hard dependencies|  
+|`soft_depends`|no|N/D|Whitespace-separated list of soft dependencies|  
+|`conflicts`|no|N/D|Whitespace-separated list of conflicting mods|  
+|`meta_author`|no|N/D|Metadata: the mod's author/authors|  
+|`meta_homepage`|no|N/D|Metadata: the mod's homepage URL|  
+|`meta_tracker`|no|N/D|Metadata: the mod's issue tracker URL|  
+|`meta_license`|no|`ARR`|Metadata: the mod's license as a short SPDX identifier|  
+|`display_name`|no|Value of `name`|Metadata: the mod's display name|  
+|`display_desc`|no|N/D|Metadata: a short description|  
 
-> **NOTE:** all mods implicitly depend on `builtin`  
+> **NOTE:** all mods implicitly depend on `builtin` of the version the game runtime provides (see core/version.cc)  
 
 ## Example
 
 ```ini
 name = kaboom
-depends = extratools fire
+version = 1.0.0
 
-author = untodesu
-homepage = https://untode.su/
-tracker = https://untode.su/
-license = BSD-3-Clause
-display = Ka-Boom!
-description = Adds explosive blocks to Voxelius
+hard_depends = testmod@2.5.0
+soft_depends = extratools fire@1.0.0
+conflicts = mclike_tnt@0.1.0
+
+meta_author = untodesu
+meta_homepage = https://untode.su/
+meta_tracker = https://untode.su/
+meta_license = BSD-3-Clause
+
+display_name = Ka-Boom!
+display_desc = Adds explosive blocks to Voxelius
 ```
 
 ## Load order

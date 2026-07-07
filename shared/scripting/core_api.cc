@@ -7,7 +7,7 @@
 #include "core/identifier.hh"
 #include "core/version.hh"
 
-#include "shared/mod.hh"
+#include "shared/mod_context.hh"
 
 static int api_log_common(lua_State* L) noexcept
 {
@@ -18,7 +18,7 @@ static int api_log_common(lua_State* L) noexcept
 
     auto argc = lua_gettop(L);
 
-    for(int i = 1; i < argc; ++i) {
+    for(int i = 1; i <= argc; ++i) {
         std::size_t length = 0;
         auto string = luaL_tolstring(L, i, &length);
 
@@ -35,7 +35,7 @@ static int api_log_common(lua_State* L) noexcept
 
     lua_Debug ar;
 
-    if(lua_getstack(L, 1, &ar) && lua_getinfo(L, "S1", &ar)) {
+    if(lua_getstack(L, 1, &ar) && lua_getinfo(L, "Sl", &ar)) {
         debug_file = ar.short_src;
         debug_line = std::max(0, ar.currentline);
     }

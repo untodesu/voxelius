@@ -18,11 +18,26 @@ enum class mod_status {
     SKIPPED, ///< One of the mod's dependencies has failed to load and the mod will be skipped
 };
 
+struct ModVersion final {
+    static ModVersion parse(std::string_view string) noexcept;
+    static std::string to_string(const ModVersion& version) noexcept;
+
+    unsigned major { 0 };
+    unsigned minor { 0 };
+    unsigned patch { 0 };
+
+    constexpr auto operator<=>(const ModVersion& other) const noexcept = default;
+};
+
 struct ModInfo final {
     static bool parse(const config::Map& map, ModInfo& modinfo);
 
     std::string name;
-    std::vector<std::string> depends;
+    ModVersion version;
+
+    std::vector<std::pair<std::string, ModVersion>> hard_depends;
+    std::vector<std::pair<std::string, ModVersion>> soft_depends;
+    std::vector<std::pair<std::string, ModVersion>> conflicts;
 
     std::string meta_author;   ///< Author or authors of the mod
     std::string meta_homepage; ///< Homepage or website of the mod
@@ -46,6 +61,8 @@ public:
     constexpr const ModInfo& modinfo(void) const noexcept;
     constexpr std::string_view name_space(void) const noexcept;
     constexpr mod_status status(void) const noexcept;
+
+    void set_status(mod_status status) noexcept;
 
     bool initialize(void) noexcept;
 

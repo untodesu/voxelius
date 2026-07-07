@@ -6,11 +6,12 @@
 
 #include "core/exception.hh"
 
-#include "shared/mod.hh"
+#include "shared/mod_context.hh"
 
 static std::vector<BlockDefinition> s_definitions;
 static std::vector<BlockFamily> s_families;
 static std::unordered_map<Identifier, block_id_type> s_names;
+static std::unordered_map<block_id_type, Identifier> s_reverse_names;
 
 BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverridePatch& patch) noexcept
 {
@@ -120,12 +121,17 @@ void block_registry::commit(ModContext& ctx) noexcept
         s_families.emplace_back();
     }
 
-    auto block_offset = static_cast<block_id_type>(s_definitions.size());
-    auto family_offset = static_cast<block_family_id_type>(s_families.size());
-
     auto blocks = ctx.take_blocks();
     auto families = ctx.take_block_families();
     auto names = ctx.take_block_names();
+
+    // blocks[0]/families[0] are ModContext's own reserved sentinel slots
+    // (see ModContext::register_block/register_block_family) - they exist
+    // only so a mod's local ids never collide with BLOCK_ID_NULL/
+    // BLOCK_FAMILY_ID_NULL while it's still loading, and must never become
+    // a real, enumerable entry in the global registry
+    auto block_offset = static_cast<block_id_type>(s_definitions.size()) - (blocks.empty() ? 0 : 1);
+    auto family_offset = static_cast<block_family_id_type>(s_families.size()) - (families.empty() ? 0 : 1);
 
     for(auto& def : blocks) {
         if(def.family != BLOCK_FAMILY_ID_NULL) {
@@ -149,11 +155,19 @@ void block_registry::commit(ModContext& ctx) noexcept
 
         if(!inserted) {
             LOG_WARNING("block_registry: duplicate block name: {}", name.full_string());
+            continue;
         }
+
+        s_reverse_names.insert_or_assign(global_id, name);
     }
 
-    s_definitions.insert(s_definitions.end(), std::make_move_iterator(blocks.begin()), std::make_move_iterator(blocks.end()));
-    s_families.insert(s_families.end(), std::make_move_iterator(families.begin()), std::make_move_iterator(families.end()));
+    if(!blocks.empty()) {
+        s_definitions.insert(s_definitions.end(), std::make_move_iterator(blocks.begin() + 1), std::make_move_iterator(blocks.end()));
+    }
+
+    if(!families.empty()) {
+        s_families.insert(s_families.end(), std::make_move_iterator(families.begin() + 1), std::make_move_iterator(families.end()));
+    }
 }
 
 void block_registry::purge(void) noexcept
@@ -161,6 +175,7 @@ void block_registry::purge(void) noexcept
     s_definitions.clear();
     s_families.clear();
     s_names.clear();
+    s_reverse_names.clear();
 }
 
 block_id_type block_registry::find(const Identifier& id) noexcept
@@ -169,6 +184,17 @@ block_id_type block_registry::find(const Identifier& id) noexcept
 
     if(it == s_names.cend())
         return BLOCK_ID_NULL;
+    return it->second;
+}
+
+std::optional<Identifier> block_registry::name_of(block_id_type id) noexcept
+{
+    auto it = s_reverse_names.find(id);
+
+    if(it == s_reverse_names.cend()) {
+        return std::nullopt;
+    }
+
     return it->second;
 }
 

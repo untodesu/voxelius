@@ -89,6 +89,11 @@ block_id_type find(const Identifier& id) noexcept;
 
 namespace block_registry
 {
+std::optional<Identifier> name_of(block_id_type id) noexcept;
+} // namespace block_registry
+
+namespace block_registry
+{
 const BlockDefinition* find_definition(block_id_type id) noexcept;
 const BlockDefinition* find_definition(const Identifier& id) noexcept;
 const BlockFamily* find_family(block_family_id_type id) noexcept;

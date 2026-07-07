@@ -74,6 +74,12 @@ void core::setup(int argc, char** argv)
 
     auto set_write_dir_ok = PHYSFS_setWriteDir(s_userpath.string().c_str());
     vx::throw_if_not_fmt(set_write_dir_ok, "failed to setwritedir {}: {}", s_userpath.string(), utils::physfs_error());
+
+    auto userpath_mods = s_userpath / "mods";
+    auto gamepath_mods = s_gamepath / "mods";
+
+    PHYSFS_mount(userpath_mods.string().c_str(), nullptr, true);
+    PHYSFS_mount(gamepath_mods.string().c_str(), nullptr, true);
 }
 
 void core::teardown(void)

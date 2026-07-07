@@ -11,6 +11,9 @@
 #include "core/exception.hh"
 #include "core/version.hh"
 
+#include "shared/block_registry.hh"
+#include "shared/mod_loader.hh"
+
 #include "client/res/texture2D.hh"
 
 #include "client/frame.hh"
@@ -101,6 +104,26 @@ static void wrapped_main(int argc, char** argv)
 
     Image::register_resource();
     Texture2D::register_resource();
+
+    mod_loader::init();
+
+    // test
+
+    auto definitions = block_registry::all_definitions();
+
+    LOG_INFO("block dump: {} definition(s) (including the reserved BLOCK_ID_NULL slot)", definitions.size());
+
+    for(block_id_type id = 1; id < definitions.size(); ++id) {
+        const auto& def = definitions[id];
+        auto name = block_registry::name_of(id);
+
+        LOG_INFO("block #{} ({}): render={} health={} emission={} dissipation={} touch={} tags={:#04x} family={} drops={}", id,
+            name ? name->full_string() : "unknown", static_cast<unsigned>(def.render), def.health, static_cast<unsigned>(def.emission),
+            static_cast<unsigned>(def.dissipation), static_cast<unsigned>(def.touch), static_cast<unsigned>(def.tags), def.family,
+            def.drops.size());
+    }
+
+    // test
 
     video::init();
 
@@ -204,6 +227,8 @@ static void wrapped_main(int argc, char** argv)
     res::hard_purge();
 
     video::shutdown();
+
+    mod_loader::shutdown();
 
     globals::client_config.save("client.conf");
 

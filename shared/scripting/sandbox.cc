@@ -12,7 +12,7 @@ void scripting::open_sandboxed_libs(std::shared_ptr<lua_State>& lua) noexcept
         std::make_pair(LUA_UTF8LIBNAME, &luaopen_utf8),
     };
 
-    constexpr static std::array<const char*, 5> strip_globals = {
+    constexpr static std::array strip_globals = {
         "dofile",
         "loadfile",
         "load",
@@ -27,7 +27,7 @@ void scripting::open_sandboxed_libs(std::shared_ptr<lua_State>& lua) noexcept
         lua_pop(L, 1);
     }
 
-    for(const auto name : strip_globals) {
+    for(const char* name : strip_globals) {
         lua_pushnil(L);
         lua_setglobal(L, name);
     }

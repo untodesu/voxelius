@@ -7,6 +7,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/scripting/sandbox.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/coord.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/coord.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/lua.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/lua.hh"
     "${CMAKE_CURRENT_LIST_DIR}/block_registry.cc"
     "${CMAKE_CURRENT_LIST_DIR}/block_registry.hh"
     "${CMAKE_CURRENT_LIST_DIR}/block.hh"
@@ -14,8 +16,10 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/coord.hh"
     "${CMAKE_CURRENT_LIST_DIR}/globals.cc"
     "${CMAKE_CURRENT_LIST_DIR}/globals.hh"
-    "${CMAKE_CURRENT_LIST_DIR}/mod.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/mod.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/mod_context.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/mod_context.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/mod_loader.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/mod_loader.hh"
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
 target_compile_features(shared PUBLIC cxx_std_20)
 target_include_directories(shared PUBLIC "${PROJECT_SOURCE_DIR}")
