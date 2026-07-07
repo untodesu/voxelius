@@ -40,7 +40,7 @@ static void builtin_sink_ansi(FILE* fd, uulog::Level level, const char* file, un
     std::string path_file(std::filesystem::path(file).filename().string());
     std::snprintf(location_buffer, sizeof(location_buffer), "%s:%lu", path_file.c_str(), line);
 
-    std::fprintf(fd, "%s %s %.*s\r\n", prefix_buffer, location_buffer, static_cast<int>(message_size), message);
+    std::fprintf(fd, "%s %s: %.*s\r\n", prefix_buffer, location_buffer, static_cast<int>(message_size), message);
 }
 
 static void builtin_sink_mono(FILE* fd, uulog::Level level, const char* file, unsigned long line, const char* message, std::size_t message_size)
@@ -58,7 +58,7 @@ static void builtin_sink_mono(FILE* fd, uulog::Level level, const char* file, un
     std::string path_file(std::filesystem::path(file).filename().string());
     std::snprintf(location_buffer, sizeof(location_buffer), "%s:%lu", path_file.c_str(), line);
 
-    std::fprintf(fd, "%s %s %.*s\r\n", prefix_buffer, location_buffer, static_cast<int>(message_size), message);
+    std::fprintf(fd, "%s %s: %.*s\r\n", prefix_buffer, location_buffer, static_cast<int>(message_size), message);
 }
 
 UULOG_API void uulog::builtin::stderr_ansi(Level level, const char* file, unsigned long line, const char* message, std::size_t message_size)
@@ -102,7 +102,7 @@ UULOG_API void uulog::builtin::win32_debugout(Level level, const char* file, uns
     thread_local char buffer[2048];
 
     auto level_str = uulog::detail::level_string(level);
-    std::snprintf(buffer, sizeof(buffer), "[%s] %s:%lu %.*s\r\n", level_str, file, line, static_cast<int>(message_size), message);
+    std::snprintf(buffer, sizeof(buffer), "[%s] %s:%lu: %.*s\r\n", level_str, file, line, static_cast<int>(message_size), message);
     OutputDebugStringA(buffer);
 }
 #endif

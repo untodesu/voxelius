@@ -1,19 +1,19 @@
-# Modding: Blocks API
+# Modding: blocks API
 
-Blocks are registered at init time (after that, `blocks.add` is stripped from all the Lua states in the game); this describes functions and possible values
+Mods can register new block types and access existing one using the `blocks` library provided by the engine.  
 
-## Constants
 
-### `blocks.RENDER`
+## Constants: render mode
 
 Defines a block rendering step
 
 |Name|Description|  
 |----|----|  
-|`blocks.RENDER_SOLID`|Block is rendered as opaque, cullable geometry|  
 |`blocks.RENDER_NONE`|Block is not rendered (eg. air)|  
+|`blocks.RENDER_SOLID`|Block is rendered as opaque, cullable geometry|  
+|`blocks.RENDER_ALPHA`|Block is rendered using alpha testing and blending|  
 
-### `blocks.FACE`
+## Constants: block face
 
 Defines a block face used for culling and other grid-aligned operations  
 
@@ -30,7 +30,7 @@ Defines a block face used for culling and other grid-aligned operations
 |`blocks.FACE_UP`|Same as `blocks.FACE_TOP`|  
 |`blocks.FACE_DOWN`|Same as `blocks.FACE_BOTTOM`|  
 
-### `blocks.TOOL`
+## Constants: tool conditionals
 
 Defines a tool category used for block interactions  
 
@@ -45,7 +45,7 @@ Defines a tool category used for block interactions
 |`blocks.TOOL_HAMMER`|Hammer-like tool|  
 |`blocks.TOOL_PICK`|Pickaxe-like tool|  
 
-### `blocks.TOUCH`
+## Constants: touch responses
 
 Defines a touch response for a block  
 
@@ -56,7 +56,7 @@ Defines a touch response for a block
 |`blocks.TOUCH_BOUNCE`|Movement is reflected with some attenuation. Reserved for future use (e.g. slime-like blocks), no builtin block uses it yet|  
 |`blocks.TOUCH_THROUGH`|Movement is attenuated but direction is unchanged. Reserved for future use (e.g. cobweb, liquids), no builtin block uses it yet|  
 
-### `blocks.TAG`
+## Constants: category bits
 
 Freeform grouping tags checked at runtime with `blocks.has_tag`. Any block can carry any number of tags via the `tags` registration field.
 
@@ -64,88 +64,90 @@ Freeform grouping tags checked at runtime with `blocks.has_tag`. Any block can c
 |----|----|  
 |`blocks.TAG_GAS`|Non-solid, passable block (eg. air)|  
 |`blocks.TAG_ROCK`|Stone-family block, used by tools/worldgen that care about "is this rock"|  
+|`blocks.TAG_SOIL`|A soil-type block. Stuff like dirt, mud and so on end up here|  
+|`blocks.TAG_TURF`|A turf-type block. Stuff like grass ends up here|  
+|`blocks.TAG_FOIL`|Foilage, leaves, grass, etc|  
+|`blocks.TAG_WOOD`|Wooden blocks|  
 
-### `blocks.NULL_BLOCK`
 
-Defines an empty, undefined or otherwise invalid block ID. Gameplay/gamedev-wise it can be treated as a block of void or vacuum  
+## Constant: null block
+
+The `blocks.NULL_BLOCK` constants defines an empty, undefined or otherwise invalid block ID. Gameplay/gamedev-wise it can be treated as a block of void or vacuum.  
 
 ## Functions
 
-### `blocks.get(name)`
+### Function: `blocks.get(name) -> integer`
 
 Retreive a numeric block ID from a namespaced block ID  
 
-**Arguments:**
+#### Arguments
 
 - `name` is a namespaced ID of a block, eg. `mymod:coolblockname`;  
 
-**Return value:**
+#### Return value
 
 - Numeric block ID if the game likes your input;  
 - If the block is missing or the namespace ID is malformed, `blocks.NULL_BLOCK` is returned;  
 
-### `blocks.has_tag(id, tag) -> bool`
+### Function: `blocks.has_tag(id, tag) -> boolean`
 
-Check whether a block carries a given tag.
+Check if a block has a specified tag.  
 
-**Arguments:**
+#### Arguments
 
-- `id` is a numeric block ID, as returned by `blocks.get` or passed into a handler (eg. `world:bget`'s return value);  
-- `tag` is one of the `blocks.TAG_*` constants;  
+- `name` is a namespaced ID of a block, eg. `mymod:coolblockname`;  
+- `tag` is a tag constant, eg. `blocks.TAG_SOIL`;  
 
-**Return value:**
+#### Return value
 
-- `true` if the block's `tags` list (see registration table below) contains `tag`, `false` otherwise (including for `blocks.NULL_BLOCK`);  
+- `true` if the block has the specified tag, `false` otherwise  
 
-### `blocks.add(name, def)`  
-### `blocks.add(name, prototype, def)`  
+### Function: `blocks.add(name, def) -> integer`
+### Function: `blocks.add(name, prototype, def) -> integer`
 
 Register a new block in the registry  
 
-**Arguments:**
+#### Arguments
 
 - `name` is a namespaced ID of a block, eg `mymod:coolblockname`;  
 - `def` is a table of block definitions, see below for that;  
-- `prototype` (3-argument form) is a base table of block definitions shared across a family of blocks (eg. all stone variants). `def` is merged on top of it, with `def`'s fields taking priority on conflicts — this lets a mod define common fields (`render`, `textures`, `health`, `tools`, `emission`, `dissipation`, `tags`, ...) once and only override what differs per block;  
+- `prototype` (3-argument form) is a base table of block definitions shared across a family of blocks (eg. all stone variants). `def` is merged on top of it, with `def`'s fields taking priority on conflicts;  
 
-**Notes:**
+#### Notes
+
 
 If the same block is already registered (mind you `mymod:myblock` and `joe_mod:myblock` are different blocks) in the registry, the encroaching block is renamed by rule (see below) and the game keeps loading, but the conflict is always surfaced as an **error** printed to the game console — this is never silent, since it almost always means two mods stomping on each other's namespace.
 
 **Rename rule:** on conflict, the encroaching `name` is suffixed with `~N`, where `N` is the smallest integer starting at `1` that produces a free id (e.g. `mymod:myblock~1`). This keeps loading deterministic and reproducible across runs with the same mod list/order.
 
-**WARNING:** after the game has loaded all the mods, this function is stripped from all the Lua states in the host application!!!  
-
-## Registration table
-
-### Fields
+## Block definition
 
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
-|`render`|`integer`|yes|N/D|Specify block rendering mode|  
-|`model_name`|`string`|yes, unless `render` is `blocks.RENDER_NONE`|N/D|Name of the block model (`data/models/block/<model_name>.json`)|  
-|`model_offset`|`table<integer,3>`|no|`[0, 0, 0]`|Offset (in 1/16ths of a block, same units as model element coordinates) applied to the render model. Analogous to `bcoll_offset` but for the visual geometry rather than collision|  
-|`bcoll_name`|`string`|no|N/D|Name of the collision model (`data/models/bcoll/<bcoll_name>.json`). Omit for non-collidable blocks (eg. air)|  
-|`bcoll_offset`|`table<integer,3>`|no|`[0, 0, 0]`|Offset (in 1/16ths of a block, same units as model/collision element coordinates) applied to the collision model. Used eg. by a top slab to sit flush with the top of the space|  
-|`animated`|`bool`|no|`false`|When set to `true`, arrays of textures are used as frames instead of a varied-by-position|  
-|`textures`|`table<string, string[]>`|yes, unless `render` is `blocks.RENDER_NONE`|N/D|Maps a model texture slot name (eg. `top`, `bottom`) to a list of texture variants. Any slot required by the model that isn't defined here falls back to the `default` entry|  
-|`health`|`integer`|no|`0`|Hit points; how many hits (roughly, tool/effect-dependent) it takes to break the block, zero means it breaks instantly|  
-|`tools`|`table<integer>`|no|`[]`|Preferred tools for breaking the block at full speed with full drops. Bare hands (`blocks.TOOL_NONE`) can always break any block — slower, and possibly with degraded/no drops — this list only specifies which tools get the *proper* result|  
-|`sound`|`string`|no|N/D|Specify sound set for the block|  
-|`emission`|`integer`|no|`0`|Specify light emission of the block|  
-|`dissipation`|`integer`|no|`0`|Specify the amount of light the block dissipates when passed through|  
-|`touch`|`integer`|no|`blocks.TOUCH_SOLID`|Specify the touch response of a block|  
-|`tags`|`table<integer>`|no|`[]`|List of `blocks.TAG_*` values, queryable at runtime via `blocks.has_tag`|  
-|`drops`|`table<table<...>>`|no|`[]`|Specify item drops for specific tools and conditions, see below|  
-|`states`|`table<string,table<...>>`|no|`{}`|Specify a table of blockstates. Each entry has a `default` and an optional `hint` list used only for load-time validation of `variants[].when` (see below)|  
-|`variants`|`table<table<...>>`|no|`[]`|Specify variants of the block|  
-|`on_rtick`|`function(world, bx, by, bz)`|no|N/D|Random tick handler|  
-|`on_stick`|`function(world, bx, by, bz)`|no|N/D|Scheduled tick handler, fired via `world:sched`|  
-|`on_place`|`function(world, bx, by, bz, placement) -> table\|nil`|no|N/D|Place handler, see below|  
-|`on_break`|`function(world, bx, by, bz)`|no|N/D|Break handler|  
-|`on_interact`|`function(world, bx, by, bz, actor)`|no|N/D|Interaction handler|  
+|`render`|`integer`|yes| |One of `blocks.RENDER_XXXX` constants|  
+|`textures`|`table`|depends|`{}`|Textures to attach to the block model|  
+|`animated`|`boolean`|no|`false`|When set to true, multiple textures from the `textures` value are used as animation frames instead of being positionally randomized in the world|  
+|`model_name`|`string`|depends| |Block model name for this variant|  
+|`model_offset|`float[3]`|depends|`[0,0,0]`|Offset of the resolved block model|  
+|`bcoll_name`|`string`|depends| |Block collision shape for this variant|  
+|`bcoll_offset`|`float[3]`|depends|`[0,0,0]`|Block collision offset|  
+|`health`|`integer`|no|`0`|Base amount of hit points required for the block to be broken. Varies with different effects active on the tool|  
+|`sound`|`string`|no| |Sound set to use for this block|  
+|`emission`|`integer`|no|0|Emission light value|  
+|`dissipation`|`integer`|no|15|How much light the block eats while light passes through|  
+|`touch`|`integer`|no|`blocks.TOUCH_SOLID`|Block's touch response|  
+|`touch_coeffs`|`float[3]`|no|`[0,0,0]`|Block's touch response coefficients|  
+|`tags`|`integer[]`|no|`[]`|Block tags|  
+|`states`|`table`|no|`{}`|Blockstates table|  
+|`variants`|`table`|no|`{}`|Variants table|  
+|`on_rtick`|`function`|no|`nil`|Random tick handler|  
+|`on_stick`|`function`|no|`nil`|Scheduled tick hanlder|  
+|`on_place`|`function`|no|`nil`|Placement handler, can decide whether it's ok or not to place the block there|  
+|`on_break`|`function`|no|`nil`|Break handler|  
+|`on_interact`|`function`|no|`nil`|Interaction handler|  
 
-### Drops example
+### Drops table
+
 
 ```lua
 drops = {
@@ -167,7 +169,7 @@ drops = {
 
 Entries are evaluated top to bottom; the first entry whose `when` clause matches (or that has no `when` at all) provides the drops, later entries are ignored.
 
-### State example
+### States table
 
 ```lua
 states = {
@@ -180,7 +182,8 @@ states = {
 
 Blockstate values are hashed strings — any value can be written via `world:sset`, `hint` does not restrict this at runtime. `hint` is purely a registration-time cross-check: every `when` clause across this block's `variants` is validated against the union of `hint` lists of the states it references, and any value not present in `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state simply skip validation for that state.
 
-### Variants example
+### Variants
+
 
 ```lua
 variants = {

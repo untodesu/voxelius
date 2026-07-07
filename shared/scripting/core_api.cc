@@ -42,26 +42,24 @@ static int api_log_common(lua_State* L) noexcept
 
     switch(level) {
         case uulog::Level::Info:
-            uulog::detail::info(debug_file, debug_line, message.data(), message.size());
+            LOG_INFO("{}:{}: {}", debug_file, debug_line, message);
             break;
 
         case uulog::Level::Warning:
-            uulog::detail::warning(debug_file, debug_line, message.data(), message.size());
+            LOG_WARNING("{}:{}: {}", debug_file, debug_line, message);
             break;
 
         case uulog::Level::Error:
-            uulog::detail::error(debug_file, debug_line, message.data(), message.size());
+            LOG_ERROR("{}:{}: {}", debug_file, debug_line, message);
             break;
 
         case uulog::Level::Critical:
-            uulog::detail::critical(debug_file, debug_line, message.data(), message.size());
+            LOG_CRITICAL("{}:{}: {}", debug_file, debug_line, message);
             break;
 
-#ifndef NDEBUG
         case uulog::Level::Debug:
-            uulog::detail::debug(debug_file, debug_line, message.data(), message.size());
+            LOG_DEBUG("{}:{}: {}", debug_file, debug_line, message);
             break;
-#endif
     }
 
     return 0;
@@ -87,7 +85,7 @@ static int api_do_file(lua_State* L) noexcept
         return luaL_error(L, "do_file: %s: %s", source_path.c_str(), error_message.c_str());
     }
 
-    auto chunk_name = std::format("@{}", path);
+    auto chunk_name = std::format("@{}", source_path);
     auto load_status = luaL_loadbuffer(L, source.data(), source.size(), chunk_name.c_str());
 
     if(load_status != LUA_OK) {

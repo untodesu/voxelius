@@ -1,4 +1,4 @@
-# Modding: Block models
+# Modding: block models
 
 Block models define the geometry to render a block
 

@@ -1,4 +1,4 @@
-# Modding: Block collision models
+# Modding: block collision models
 
 Collision models describe the physical shape of a block used for touch/movement response independent from its render geometry;
 

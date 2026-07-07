@@ -1,4 +1,4 @@
-# Modding: mods manifest
+# Modding: modinfo config
 
 Every mod's root directory contains a `modinfo.conf` file that contains some useful information about the mod. The file uses the common configuration format used by the engine (see `core/config/map.cc`);
 
@@ -42,7 +42,5 @@ display_desc = Adds explosive blocks to Voxelius
 ## Load order
 
 Mods are ordered by a topological sort of dependencies. Within a single "group" of mods in that list, things are loaded in an alphabetical order. Mods without dependencies (ie only depending on `builtin`) are loaded first.  
-
-> **NOTE:** dependency cycles cause the mod to fail  
 
 > **NOTE:** non-existent dependencies cause the mod to fail  
