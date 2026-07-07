@@ -167,6 +167,14 @@ void block_registry::commit(ModContext& ctx) noexcept
 
     if(!families.empty()) {
         s_families.insert(s_families.end(), std::make_move_iterator(families.begin() + 1), std::make_move_iterator(families.end()));
+
+        for(auto i = family_offset; i < s_families.size(); ++i) {
+            const auto& family = s_families[i];
+
+            for(const auto& rule : family.variants) {
+                resolve_variant(family.base_id, rule.when);
+            }
+        }
     }
 }
 
@@ -192,6 +200,12 @@ std::optional<Identifier> block_registry::name_of(block_id_type id) noexcept
     auto it = s_reverse_names.find(id);
 
     if(it == s_reverse_names.cend()) {
+        if(auto def = find_definition(id)) {
+            if(auto family = find_family(def->family)) {
+                return family->name;
+            }
+        }
+
         return std::nullopt;
     }
 
