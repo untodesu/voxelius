@@ -13,7 +13,7 @@ Every mod's root directory contains a `modinfo.conf` file that contains some use
 |`license`|no|`ARR`|Metadata: the mod's license as a short SPDX identifier|  
 |`display`|no|Value of `name`|Metadata: the mod's display name|  
 |`description`|no|N/D|Metadata: a short description|  
-|`depends`|no|N/D|Comma-separated list of mod IDs that must be in loaded state before this mod's scripts are invoked|  
+|`depends`|no|N/D|Whitespace-separated list of mod IDs that must be in loaded state before this mod's scripts are invoked|  
 
 > **NOTE:** all mods implicitly depend on `builtin`  
 
@@ -21,7 +21,7 @@ Every mod's root directory contains a `modinfo.conf` file that contains some use
 
 ```ini
 name = kaboom
-depends = extratools,fire
+depends = extratools fire
 
 author = untodesu
 homepage = https://untode.su/

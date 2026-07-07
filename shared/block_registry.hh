@@ -3,6 +3,8 @@
 
 #include "shared/block.hh"
 
+class ModContext;
+
 using blockstate_key_type = std::uint64_t;
 using blockstate_val_type = std::uint64_t;
 
@@ -14,20 +16,27 @@ struct BlockStateDecl final {
 struct BlockOverridePatch final {
     static BlockDefinition apply(BlockDefinition base, const BlockOverridePatch& patch) noexcept;
 
-    std::optional<block_render_type> render;
+    std::optional<block_render> render;
+    std::optional<std::unordered_map<std::string, std::vector<Identifier>>> textures;
+    std::optional<bool> animated;
+
     std::optional<Identifier> model_name;
     std::optional<Eigen::Vector3f> model_offset;
+
     std::optional<Identifier> bcoll_name;
     std::optional<Eigen::Vector3f> bcoll_offset;
-    std::optional<bool> animated;
-    std::optional<std::unordered_map<std::string, std::vector<Identifier>>> textures;
+
     std::optional<unsigned> health;
+
     std::optional<Identifier> sound_set;
     std::optional<block_light_type> emission;
     std::optional<block_light_type> dissipation;
-    std::optional<block_touch_type> touch;
+
+    std::optional<block_touch> touch;
     std::optional<Eigen::Vector3f> touch_coeffs;
-    std::optional<block_tag_type> tags;
+
+    std::optional<block_tag_bit> tags;
+
     std::optional<std::vector<BlockDrop>> drops;
 };
 
@@ -61,40 +70,40 @@ struct BlockFamily final {
     std::string_view state_value(blockstate_val_type value) noexcept;
 };
 
-// TODO: move ModContext elsewhere
-struct ModContext final {
-    std::string name_space;
-
-    std::vector<BlockDefinition> blocks;
-    std::vector<BlockFamily> block_families;
-    std::unordered_map<Identifier, block_id_type> block_names;
-};
-
 namespace block_registry
 {
-block_id_type find(const Identifier& id, const ModContext* ctx = nullptr) noexcept;
+std::span<const BlockDefinition> all_definitions(void) noexcept;
+std::span<const BlockFamily> all_families(void) noexcept;
 } // namespace block_registry
 
 namespace block_registry
 {
-bool has_tag_all(block_id_type id, block_tag_type tag_bits) noexcept;
-bool has_tag_any(block_id_type id, block_tag_type tag_bits) noexcept;
+void commit(ModContext& ctx) noexcept;
+void purge(void) noexcept;
+} // namespace block_registry
+
+namespace block_registry
+{
+block_id_type find(const Identifier& id) noexcept;
 } // namespace block_registry
 
 namespace block_registry
 {
 const BlockDefinition* find_definition(block_id_type id) noexcept;
-const BlockFamily* find_family(block_id_type id) noexcept;
+const BlockDefinition* find_definition(const Identifier& id) noexcept;
+const BlockFamily* find_family(block_family_id_type id) noexcept;
+const BlockFamily* find_family(const Identifier& id) noexcept;
 } // namespace block_registry
 
 namespace block_registry
 {
-block_id_type resolve_variant(block_id_type current_id, const std::unordered_map<blockstate_key_type, blockstate_val_type>& map) noexcept;
+bool has_tag_all(block_id_type id, block_tag_bit tag_bits) noexcept;
+bool has_tag_any(block_id_type id, block_tag_bit tag_bits) noexcept;
 } // namespace block_registry
 
 namespace block_registry
 {
-void commit(ModContext&& ctx) noexcept;
+block_id_type resolve_variant(block_id_type curr_id, const std::unordered_map<blockstate_key_type, blockstate_val_type>& map) noexcept;
 } // namespace block_registry
 
 #endif /* C35E197B_F82F_423A_8226_7EB5C9E7FEEC */

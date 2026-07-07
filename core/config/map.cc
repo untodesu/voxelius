@@ -9,7 +9,7 @@
 #include "core/version.hh"
 
 template<vx::arithmetic T>
-static std::optional<T> get_arithmetic(const config::Map* map, config::slot_type slot) noexcept
+static std::optional<T> get_arithmetic(const config::Map* map, config::map_slot_type slot) noexcept
 {
     const auto string = map->raw_string(slot);
 
@@ -26,7 +26,7 @@ static std::optional<T> get_arithmetic(const config::Map* map, config::slot_type
 }
 
 template<vx::arithmetic T, std::size_t N>
-static std::optional<Eigen::Vector<T, N>> get_vector(const config::Map* map, config::slot_type slot) noexcept
+static std::optional<Eigen::Vector<T, N>> get_vector(const config::Map* map, config::map_slot_type slot) noexcept
 {
     const auto string = map->raw_string(slot);
 
@@ -62,7 +62,7 @@ static std::optional<Eigen::Vector<T, N>> get_vector(const config::Map* map, con
     return std::nullopt;
 }
 
-std::optional<std::string_view> config::Map::raw_string(slot_type slot) const noexcept
+std::optional<std::string_view> config::Map::raw_string(map_slot_type slot) const noexcept
 {
     if(slot >= m_slots.size() || !m_slots[slot].has_value()) {
         return std::nullopt;
@@ -71,7 +71,7 @@ std::optional<std::string_view> config::Map::raw_string(slot_type slot) const no
     return std::string_view(m_slots[slot].value());
 }
 
-void config::Map::set_raw_string(slot_type slot, std::string_view value) noexcept
+void config::Map::set_raw_string(map_slot_type slot, std::string_view value) noexcept
 {
     if(slot < m_slots.size()) {
         m_slots[slot] = std::string(value);
@@ -79,18 +79,18 @@ void config::Map::set_raw_string(slot_type slot, std::string_view value) noexcep
     }
 }
 
-config::slot_type config::Map::find_slot(std::string_view key) const /* E */ noexcept
+config::map_slot_type config::Map::find_slot(std::string_view key) const /* E */ noexcept
 {
     auto it = m_index.find(std::string(key));
 
     if(it == m_index.cend()) {
-        return config::null_slot;
+        return config::NULL_SLOT;
     }
 
     return it->second;
 }
 
-config::slot_type config::Map::find_or_create_slot(std::string_view key) noexcept
+config::map_slot_type config::Map::find_or_create_slot(std::string_view key) noexcept
 {
     auto it = m_index.find(std::string(key));
 
@@ -182,7 +182,7 @@ bool config::Map::save(std::string_view path) const noexcept
 }
 
 template<>
-std::optional<std::string> config::Map::value_raw<std::string>(slot_type slot) const noexcept
+std::optional<std::string> config::Map::value_raw<std::string>(map_slot_type slot) const noexcept
 {
     auto string = raw_string(slot);
 
@@ -194,13 +194,13 @@ std::optional<std::string> config::Map::value_raw<std::string>(slot_type slot) c
 }
 
 template<>
-void config::Map::set_value_raw<std::string>(slot_type slot, const std::string& value) noexcept
+void config::Map::set_value_raw<std::string>(map_slot_type slot, const std::string& value) noexcept
 {
     set_raw_string(slot, value);
 }
 
 template<>
-std::optional<bool> config::Map::value_raw<bool>(slot_type slot) const noexcept
+std::optional<bool> config::Map::value_raw<bool>(map_slot_type slot) const noexcept
 {
     auto string = raw_string(slot);
 
@@ -224,121 +224,121 @@ std::optional<bool> config::Map::value_raw<bool>(slot_type slot) const noexcept
 }
 
 template<>
-std::optional<short> config::Map::value_raw<short>(slot_type slot) const noexcept
+std::optional<short> config::Map::value_raw<short>(map_slot_type slot) const noexcept
 {
     return get_arithmetic<short>(this, slot);
 }
 
 template<>
-std::optional<int> config::Map::value_raw<int>(slot_type slot) const noexcept
+std::optional<int> config::Map::value_raw<int>(map_slot_type slot) const noexcept
 {
     return get_arithmetic<int>(this, slot);
 }
 
 template<>
-std::optional<long> config::Map::value_raw<long>(slot_type slot) const noexcept
+std::optional<long> config::Map::value_raw<long>(map_slot_type slot) const noexcept
 {
     return get_arithmetic<long>(this, slot);
 }
 
 template<>
-std::optional<long long> config::Map::value_raw<long long>(slot_type slot) const noexcept
+std::optional<long long> config::Map::value_raw<long long>(map_slot_type slot) const noexcept
 {
     return get_arithmetic<long long>(this, slot);
 }
 
 template<>
-std::optional<unsigned short> config::Map::value_raw<unsigned short>(slot_type slot) const noexcept
+std::optional<unsigned short> config::Map::value_raw<unsigned short>(map_slot_type slot) const noexcept
 {
     return get_arithmetic<unsigned short>(this, slot);
 }
 
 template<>
-std::optional<unsigned> config::Map::value_raw<unsigned>(slot_type slot) const noexcept
+std::optional<unsigned> config::Map::value_raw<unsigned>(map_slot_type slot) const noexcept
 {
     return get_arithmetic<unsigned>(this, slot);
 }
 
 template<>
-std::optional<unsigned long> config::Map::value_raw<unsigned long>(slot_type slot) const noexcept
+std::optional<unsigned long> config::Map::value_raw<unsigned long>(map_slot_type slot) const noexcept
 {
     return get_arithmetic<unsigned long>(this, slot);
 }
 
 template<>
-std::optional<unsigned long long> config::Map::value_raw<unsigned long long>(slot_type slot) const noexcept
+std::optional<unsigned long long> config::Map::value_raw<unsigned long long>(map_slot_type slot) const noexcept
 {
     return get_arithmetic<unsigned long long>(this, slot);
 }
 
 template<>
-std::optional<float> config::Map::value_raw<float>(slot_type slot) const noexcept
+std::optional<float> config::Map::value_raw<float>(map_slot_type slot) const noexcept
 {
     return get_arithmetic<float>(this, slot);
 }
 
 template<>
-std::optional<double> config::Map::value_raw<double>(slot_type slot) const noexcept
+std::optional<double> config::Map::value_raw<double>(map_slot_type slot) const noexcept
 {
     return get_arithmetic<double>(this, slot);
 }
 
 template<>
-std::optional<Eigen::Vector2i> config::Map::value_raw<Eigen::Vector2i>(slot_type slot) const noexcept
+std::optional<Eigen::Vector2i> config::Map::value_raw<Eigen::Vector2i>(map_slot_type slot) const noexcept
 {
     return get_vector<int, 2>(this, slot);
 }
 
 template<>
-std::optional<Eigen::Vector3i> config::Map::value_raw<Eigen::Vector3i>(slot_type slot) const noexcept
+std::optional<Eigen::Vector3i> config::Map::value_raw<Eigen::Vector3i>(map_slot_type slot) const noexcept
 {
     return get_vector<int, 3>(this, slot);
 }
 
 template<>
-std::optional<Eigen::Vector4i> config::Map::value_raw<Eigen::Vector4i>(slot_type slot) const noexcept
+std::optional<Eigen::Vector4i> config::Map::value_raw<Eigen::Vector4i>(map_slot_type slot) const noexcept
 {
     return get_vector<int, 4>(this, slot);
 }
 
 template<>
-std::optional<Eigen::Vector2f> config::Map::value_raw<Eigen::Vector2f>(slot_type slot) const noexcept
+std::optional<Eigen::Vector2f> config::Map::value_raw<Eigen::Vector2f>(map_slot_type slot) const noexcept
 {
     return get_vector<float, 2>(this, slot);
 }
 
 template<>
-std::optional<Eigen::Vector3f> config::Map::value_raw<Eigen::Vector3f>(slot_type slot) const noexcept
+std::optional<Eigen::Vector3f> config::Map::value_raw<Eigen::Vector3f>(map_slot_type slot) const noexcept
 {
     return get_vector<float, 3>(this, slot);
 }
 
 template<>
-std::optional<Eigen::Vector4f> config::Map::value_raw<Eigen::Vector4f>(slot_type slot) const noexcept
+std::optional<Eigen::Vector4f> config::Map::value_raw<Eigen::Vector4f>(map_slot_type slot) const noexcept
 {
     return get_vector<float, 4>(this, slot);
 }
 
 template<>
-std::optional<Eigen::Vector2d> config::Map::value_raw<Eigen::Vector2d>(slot_type slot) const noexcept
+std::optional<Eigen::Vector2d> config::Map::value_raw<Eigen::Vector2d>(map_slot_type slot) const noexcept
 {
     return get_vector<double, 2>(this, slot);
 }
 
 template<>
-std::optional<Eigen::Vector3d> config::Map::value_raw<Eigen::Vector3d>(slot_type slot) const noexcept
+std::optional<Eigen::Vector3d> config::Map::value_raw<Eigen::Vector3d>(map_slot_type slot) const noexcept
 {
     return get_vector<double, 3>(this, slot);
 }
 
 template<>
-std::optional<Eigen::Vector4d> config::Map::value_raw<Eigen::Vector4d>(slot_type slot) const noexcept
+std::optional<Eigen::Vector4d> config::Map::value_raw<Eigen::Vector4d>(map_slot_type slot) const noexcept
 {
     return get_vector<double, 4>(this, slot);
 }
 
 template<>
-void config::Map::set_value_raw<bool>(slot_type slot, const bool& value) noexcept
+void config::Map::set_value_raw<bool>(map_slot_type slot, const bool& value) noexcept
 {
     if(value) {
         set_raw_string(slot, "true");
@@ -349,115 +349,115 @@ void config::Map::set_value_raw<bool>(slot_type slot, const bool& value) noexcep
 }
 
 template<>
-void config::Map::set_value_raw<short>(slot_type slot, const short& value) noexcept
+void config::Map::set_value_raw<short>(map_slot_type slot, const short& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }
 
 template<>
-void config::Map::set_value_raw<int>(slot_type slot, const int& value) noexcept
+void config::Map::set_value_raw<int>(map_slot_type slot, const int& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }
 
 template<>
-void config::Map::set_value_raw<long>(slot_type slot, const long& value) noexcept
+void config::Map::set_value_raw<long>(map_slot_type slot, const long& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }
 
 template<>
-void config::Map::set_value_raw<long long>(slot_type slot, const long long& value) noexcept
+void config::Map::set_value_raw<long long>(map_slot_type slot, const long long& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }
 
 template<>
-void config::Map::set_value_raw<unsigned short>(slot_type slot, const unsigned short& value) noexcept
+void config::Map::set_value_raw<unsigned short>(map_slot_type slot, const unsigned short& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }
 
 template<>
-void config::Map::set_value_raw<unsigned>(slot_type slot, const unsigned& value) noexcept
+void config::Map::set_value_raw<unsigned>(map_slot_type slot, const unsigned& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }
 
 template<>
-void config::Map::set_value_raw<unsigned long>(slot_type slot, const unsigned long& value) noexcept
+void config::Map::set_value_raw<unsigned long>(map_slot_type slot, const unsigned long& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }
 
 template<>
-void config::Map::set_value_raw<unsigned long long>(slot_type slot, const unsigned long long& value) noexcept
+void config::Map::set_value_raw<unsigned long long>(map_slot_type slot, const unsigned long long& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }
 
 template<>
-void config::Map::set_value_raw<float>(slot_type slot, const float& value) noexcept
+void config::Map::set_value_raw<float>(map_slot_type slot, const float& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }
 
 template<>
-void config::Map::set_value_raw<double>(slot_type slot, const double& value) noexcept
+void config::Map::set_value_raw<double>(map_slot_type slot, const double& value) noexcept
 {
     set_raw_string(slot, std::to_string(value));
 }
 
 template<>
-void config::Map::set_value_raw<Eigen::Vector2i>(slot_type slot, const Eigen::Vector2i& value) noexcept
+void config::Map::set_value_raw<Eigen::Vector2i>(map_slot_type slot, const Eigen::Vector2i& value) noexcept
 {
     set_raw_string(slot, std::format("[{} {}]", value.x(), value.y()));
 }
 
 template<>
-void config::Map::set_value_raw<Eigen::Vector3i>(slot_type slot, const Eigen::Vector3i& value) noexcept
+void config::Map::set_value_raw<Eigen::Vector3i>(map_slot_type slot, const Eigen::Vector3i& value) noexcept
 {
     set_raw_string(slot, std::format("[{} {} {}]", value.x(), value.y(), value.z()));
 }
 
 template<>
-void config::Map::set_value_raw<Eigen::Vector4i>(slot_type slot, const Eigen::Vector4i& value) noexcept
+void config::Map::set_value_raw<Eigen::Vector4i>(map_slot_type slot, const Eigen::Vector4i& value) noexcept
 {
     set_raw_string(slot, std::format("[{} {} {} {}]", value.x(), value.y(), value.z(), value.w()));
 }
 
 template<>
-void config::Map::set_value_raw<Eigen::Vector2f>(slot_type slot, const Eigen::Vector2f& value) noexcept
+void config::Map::set_value_raw<Eigen::Vector2f>(map_slot_type slot, const Eigen::Vector2f& value) noexcept
 {
     set_raw_string(slot, std::format("[{} {}]", value.x(), value.y()));
 }
 
 template<>
-void config::Map::set_value_raw<Eigen::Vector3f>(slot_type slot, const Eigen::Vector3f& value) noexcept
+void config::Map::set_value_raw<Eigen::Vector3f>(map_slot_type slot, const Eigen::Vector3f& value) noexcept
 {
     set_raw_string(slot, std::format("[{} {} {}]", value.x(), value.y(), value.z()));
 }
 
 template<>
-void config::Map::set_value_raw<Eigen::Vector4f>(slot_type slot, const Eigen::Vector4f& value) noexcept
+void config::Map::set_value_raw<Eigen::Vector4f>(map_slot_type slot, const Eigen::Vector4f& value) noexcept
 {
     set_raw_string(slot, std::format("[{} {} {} {}]", value.x(), value.y(), value.z(), value.w()));
 }
 
 template<>
-void config::Map::set_value_raw<Eigen::Vector2d>(slot_type slot, const Eigen::Vector2d& value) noexcept
+void config::Map::set_value_raw<Eigen::Vector2d>(map_slot_type slot, const Eigen::Vector2d& value) noexcept
 {
     set_raw_string(slot, std::format("[{} {}]", value.x(), value.y()));
 }
 
 template<>
-void config::Map::set_value_raw<Eigen::Vector3d>(slot_type slot, const Eigen::Vector3d& value) noexcept
+void config::Map::set_value_raw<Eigen::Vector3d>(map_slot_type slot, const Eigen::Vector3d& value) noexcept
 {
     set_raw_string(slot, std::format("[{} {} {}]", value.x(), value.y(), value.z()));
 }
 
 template<>
-void config::Map::set_value_raw<Eigen::Vector4d>(slot_type slot, const Eigen::Vector4d& value) noexcept
+void config::Map::set_value_raw<Eigen::Vector4d>(map_slot_type slot, const Eigen::Vector4d& value) noexcept
 {
     set_raw_string(slot, std::format("[{} {} {} {}]", value.x(), value.y(), value.z(), value.w()));
 }

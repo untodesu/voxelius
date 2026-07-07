@@ -26,7 +26,7 @@ public:
 private:
     mutable T m_value {};
     mutable std::uint64_t m_generation { UINT64_MAX };
-    slot_type m_slot { null_slot };
+    map_slot_type m_slot { NULL_SLOT };
     Map* m_map { nullptr };
 };
 } // namespace config
@@ -65,7 +65,7 @@ void config::Ref<T>::set_value(const T& value) noexcept
 {
     m_value = value;
 
-    if(m_map && m_slot != null_slot) {
+    if(m_map && m_slot != NULL_SLOT) {
         m_map->set_value_raw<T>(m_slot, value);
     }
 }
@@ -100,7 +100,7 @@ void config::Ref<T>::bind(Map& map, std::string_view key) noexcept
 template<typename T>
 void config::Ref<T>::commit(void) noexcept
 {
-    if(m_map && m_slot != null_slot) {
+    if(m_map && m_slot != NULL_SLOT) {
         m_map->set_value_raw<T>(m_slot, m_value);
         m_generation = m_map->generation();
     }
