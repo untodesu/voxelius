@@ -10,6 +10,7 @@
 #include "core/exception.hh"
 #include "core/identifier.hh"
 
+#include "shared/scripting/blocks_api.hh"
 #include "shared/scripting/core_api.hh"
 #include "shared/scripting/sandbox.hh"
 
@@ -23,9 +24,11 @@ bool ModInfo::parse(const config::Map& map, ModInfo& modinfo)
     }
 
     modinfo.name = std::move(name.value());
-
     modinfo.depends.clear();
-    modinfo.depends.emplace_back(BUILTIN_MOD_NAME);
+
+    if(modinfo.name.compare(BUILTIN_MOD_NAME)) {
+        modinfo.depends.emplace_back(BUILTIN_MOD_NAME);
+    }
 
     auto depends = map.value<std::string>("depends").value_or(std::string {});
 
@@ -67,6 +70,7 @@ bool ModContext::initialize(void) noexcept
 
     scripting::open_sandboxed_libs(m_lua_state);
     scripting::open_core_api(m_lua_state, this);
+    scripting::open_blocks_api(m_lua_state, this);
 
     auto entry = Identifier::from_parts(name_space(), "init.lua");
     auto entry_path = entry.as_file_path("scripts", {});
@@ -111,6 +115,12 @@ block_id_type ModContext::find_block(const Identifier& name) const noexcept
 
 block_id_type ModContext::register_block(const Identifier& name, BlockDefinition def) noexcept
 {
+    if(m_blocks.empty()) {
+        // reserve index 0 so a local id can never collide with BLOCK_ID_NULL
+        // while this context is still staging (ie. before block_registry::commit)
+        m_blocks.emplace_back();
+    }
+
     auto id = static_cast<block_id_type>(m_blocks.size());
 
     m_blocks.push_back(std::move(def));
@@ -121,11 +131,26 @@ block_id_type ModContext::register_block(const Identifier& name, BlockDefinition
 
 block_family_id_type ModContext::register_block_family(BlockFamily family) noexcept
 {
+    if(m_block_families.empty()) {
+        // same reservation as register_block(), but for BLOCK_FAMILY_ID_NULL
+        m_block_families.emplace_back();
+    }
+
     auto id = static_cast<block_family_id_type>(m_block_families.size());
 
     m_block_families.push_back(std::move(family));
 
     return id;
+}
+
+bool ModContext::set_block_family(block_id_type id, block_family_id_type family) noexcept
+{
+    if(id == BLOCK_ID_NULL || id >= m_blocks.size()) {
+        return false;
+    }
+
+    m_blocks[id].family = family;
+    return true;
 }
 
 std::vector<BlockDefinition> ModContext::take_blocks(void) noexcept

@@ -12,6 +12,76 @@ static std::vector<BlockDefinition> s_definitions;
 static std::vector<BlockFamily> s_families;
 static std::unordered_map<Identifier, block_id_type> s_names;
 
+BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverridePatch& patch) noexcept
+{
+    if(patch.render) {
+        base.render = *patch.render;
+    }
+
+    if(patch.textures) {
+        base.textures = *patch.textures;
+    }
+
+    if(patch.animated) {
+        base.animated = *patch.animated;
+    }
+
+    if(patch.model_name) {
+        base.model_name = *patch.model_name;
+    }
+
+    if(patch.model_offset) {
+        base.model_offset = *patch.model_offset;
+    }
+
+    if(patch.bcoll_name) {
+        base.bcoll_name = *patch.bcoll_name;
+    }
+
+    if(patch.bcoll_offset) {
+        base.bcoll_offset = *patch.bcoll_offset;
+    }
+
+    if(patch.health) {
+        base.health = *patch.health;
+    }
+
+    if(patch.sound_set) {
+        base.sound_set = *patch.sound_set;
+    }
+
+    if(patch.emission) {
+        base.emission = *patch.emission;
+    }
+
+    if(patch.dissipation) {
+        base.dissipation = *patch.dissipation;
+    }
+
+    if(patch.touch) {
+        base.touch = *patch.touch;
+    }
+
+    if(patch.touch_coeffs) {
+        base.touch_coeffs = *patch.touch_coeffs;
+    }
+
+    if(patch.tags) {
+        base.tags = *patch.tags;
+    }
+
+    if(patch.drops) {
+        base.drops = *patch.drops;
+        base.tools = BLOCK_TOOL_NONE;
+
+        for(const auto& drop : base.drops) {
+            base.tools = static_cast<block_tool_bit>(base.tools | drop.cond_tool_bits);
+        }
+    }
+
+    return base;
+}
+
 blockstate_val_type BlockFamily::state_hash(std::string_view string) noexcept
 {
     auto hash = static_cast<blockstate_val_type>(utils::crc64(string.data(), string.size()));
