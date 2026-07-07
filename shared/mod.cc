@@ -23,7 +23,9 @@ bool ModInfo::parse(const config::Map& map, ModInfo& modinfo)
     }
 
     modinfo.name = std::move(name.value());
+
     modinfo.depends.clear();
+    modinfo.depends.emplace_back(BUILTIN_MOD_NAME);
 
     auto depends = map.value<std::string>("depends").value_or(std::string {});
 

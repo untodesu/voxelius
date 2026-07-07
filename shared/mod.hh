@@ -8,6 +8,8 @@ namespace config
 class Map;
 } // namespace config
 
+constexpr static std::string_view BUILTIN_MOD_NAME = "builtin";
+
 enum class mod_status {
     PENDING, ///< The mod is pending to be loaded
     LOADING, ///< The mod is currently being loaded

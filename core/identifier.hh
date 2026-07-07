@@ -16,6 +16,8 @@ public:
     constexpr bool is_empty(void) const noexcept;
     constexpr bool is_valid(void) const noexcept;
 
+    constexpr bool operator==(const Identifier& other) const noexcept;
+
     std::string as_file_path(std::string_view extension) const noexcept;
     std::string as_file_path(std::string_view subdirectory, std::string_view extension) const noexcept;
 
@@ -55,6 +57,11 @@ constexpr bool Identifier::is_empty(void) const noexcept
 constexpr bool Identifier::is_valid(void) const noexcept
 {
     return static_cast<bool>(m_full_string.size());
+}
+
+constexpr bool Identifier::operator==(const Identifier& other) const noexcept
+{
+    return m_full_string == other.m_full_string;
 }
 
 #endif /* BD32E72C_9089_4DD8_8319_597C0A144E8D */
