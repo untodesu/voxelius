@@ -73,28 +73,19 @@ struct BlockDefinition final {
 
     unsigned health;
     block_tool_type tools; // big tool mask made from drops cond_tool_bits
-};
 
-#if 0
-struct BlockDefinition final {
-    block_render_type render;
-
-    Identifier model_name;
-    Eigen::Vector3f model_offset;
-
-    Identifier bcoll_name;
-    Eigen::Vector3f bcoll_offset;
-
-    bool animated;
-
-    unsigned health;
-    block_tool_type tools;
+    Identifier sound_set;
+    block_light_type emission;
+    block_light_type dissipation;
 
     block_touch_type touch;
-    Eigen::Vector3f touch_ks;
+    Eigen::Vector3f touch_coeffs;
 
     block_tag_type tags;
+
+    std::vector<BlockDrop> drops;
+
+    block_id_type family_id;
 };
-#endif
 
 #endif /* A2FDDFDB_9022_42F0_AA77_8AD362EE4147 */
