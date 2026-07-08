@@ -27,6 +27,6 @@ Most of the time, files in that system are accessed using namespaced identifiers
 |Identifier|Resolved path|Notes|  
 |----|----|----|  
 |`builtin:scripts/init.lua`|`data/builtin/scripts/init.lua`| |  
-|`builtin:block/stone01.png`|`data/builtin/textures/block/stone01.png|The subdirectory can be omitted if C++ code decides to pass it instead, so the identifiers in stuff like block definitions are much shorter to read|  
-|`builtin:cube`|`data/builtin/models/block/cube.json|Same here|  
+|`builtin:block/stone01.png`|`data/builtin/textures/block/stone01.png`|The subdirectory can be omitted if C++ code decides to pass it instead, so the identifiers in stuff like block definitions are much shorter to read|  
+|`builtin:cube`|`data/builtin/models/block/cube.json`|Same here|  
 |`coolmod:init.lua`|`mods/coolmod/scripts/init.lua`|Whatever custom content there is|  
