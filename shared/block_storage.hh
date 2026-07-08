@@ -10,6 +10,20 @@ class WriteBuffer;
 
 class BlockStorage final {
 public:
+    static void serialize(const BlockStorage& storage, WriteBuffer& buffer) noexcept;
+    static void deserialize(BlockStorage& storage, ReadBuffer& buffer) noexcept;
+
+    block_id_type get(std::size_t index) const noexcept;
+    block_id_type get(const local_pos& pos) const noexcept;
+
+    void set(std::size_t index, block_id_type id) noexcept;
+    void set(const local_pos& pos, block_id_type id) noexcept;
+
+    void optimize(void) noexcept;
+
+    std::size_t size(void) const noexcept;
+
+private:
     using array8_type = std::array<std::uint8_t, constant::CHUNK_VOLUME>;
     using array16_type = std::array<std::uint16_t, constant::CHUNK_VOLUME>;
     using palette_type = std::vector<std::pair<block_id_type, std::uint16_t>>;
@@ -30,20 +44,6 @@ public:
 
     using variant_type = std::variant<Uniform, Palette8, Palette16>;
 
-    static void serialize(const BlockStorage& storage, WriteBuffer& buffer) noexcept;
-    static void deserialize(BlockStorage& storage, ReadBuffer& buffer) noexcept;
-
-    block_id_type get(std::size_t index) const noexcept;
-    block_id_type get(const local_pos& pos) const noexcept;
-
-    void set(std::size_t index, block_id_type id) noexcept;
-    void set(const local_pos& pos, block_id_type id) noexcept;
-
-    void optimize(void) noexcept;
-
-    std::size_t size(void) const noexcept;
-
-private:
     static void serialize(const Uniform* uniform, WriteBuffer& buffer) noexcept;
     static void serialize(const Palette8* p8, WriteBuffer& buffer) noexcept;
     static void serialize(const Palette16* p16, WriteBuffer& buffer) noexcept;
