@@ -13,6 +13,8 @@
 #include "shared/block_registry.hh"
 #include "shared/block_storage.hh"
 #include "shared/coord.hh"
+#include "shared/mod_loader.hh"
+#include "shared/utils/lua.hh"
 #include "shared/world.hh"
 
 #include "client/res/texture2D.hh"
@@ -152,6 +154,73 @@ static void test_world(void)
     LOG_INFO("test_world: OK");
 }
 
+static void test_scripting_world(void)
+{
+    auto mod = mod_loader::find(BUILTIN_MOD_NAME);
+
+    if(!mod || !mod->lua_state()) {
+        LOG_WARNING("test_scripting_world: builtin mod not loaded, skipping");
+        return;
+    }
+
+    const chunk_pos cpos(0, 0, 0);
+
+    world::create_chunk(cpos);
+
+    static constexpr const char* SCRIPT = R"lua(
+        print("test_scripting_world: begin")
+
+        local bx, by, bz = 1, 2, 3
+        local slab = assert(blocks.get("builtin:stone_slab"), "builtin:stone_slab missing")
+        print("test_scripting_world: builtin:stone_slab id =", slab)
+
+        assert(world.get_block(bx, by, bz) == blocks.NULL_BLOCK, "fresh chunk should read back as void")
+        print("test_scripting_world: fresh block is void, OK")
+
+        world.set_block(bx, by, bz, slab)
+        assert(world.get_block(bx, by, bz) == slab, "set_block/get_block readback mismatch")
+        print("test_scripting_world: set_block/get_block roundtrip, OK")
+
+        assert(world.get_state(bx, by, bz, "orientation") == "bottom", "expected default orientation 'bottom'")
+        print("test_scripting_world: default orientation is 'bottom', OK")
+
+        world.set_state(bx, by, bz, "orientation", "top")
+        assert(world.get_state(bx, by, bz, "orientation") == "top", "set_state/get_state readback mismatch")
+        print("test_scripting_world: set_state/get_state roundtrip, OK")
+
+        assert(world.get_state(bx, by, bz, "no_such_state") == nil, "unknown state should read back as nil")
+        print("test_scripting_world: unknown state reads back as nil, OK")
+
+        world.set_block(bx, by, bz, blocks.NULL_BLOCK)
+        assert(world.get_block(bx, by, bz) == blocks.NULL_BLOCK, "set_block(NULL_BLOCK) should clear the block")
+        print("test_scripting_world: set_block(NULL_BLOCK) clears the block, OK")
+
+        print("test_scripting_world: end")
+    )lua";
+
+    auto L = mod->lua_state().get();
+
+    auto load_status = luaL_loadstring(L, SCRIPT);
+
+    if(load_status != LUA_OK) {
+        auto message = lua_tostring(L, -1);
+        world::remove_chunk(cpos);
+        throw vx::runtime_error("test_scripting_world: {}", message);
+    }
+
+    auto pcall_status = lua_pcall(L, 0, 0, 0);
+
+    if(pcall_status != LUA_OK) {
+        auto message = lua_tostring(L, -1);
+        world::remove_chunk(cpos);
+        throw vx::runtime_error("test_scripting_world: {}", message);
+    }
+
+    world::remove_chunk(cpos);
+
+    LOG_INFO("test_scripting_world: OK");
+}
+
 void client_game::init(void)
 {
     Identifier i;
@@ -178,6 +247,7 @@ void client_game::init_late(void)
 {
     test_block_storage();
     test_world();
+    test_scripting_world();
 }
 
 void client_game::shutdown(void)

@@ -124,10 +124,10 @@ blocks.add("stone_slab", stone_prototype, {
 
     if placement.tblock == blocks.get("stone_slab") then
       if placement.tface == blocks.FACE_TOP then
-        world.sset(placement.tx, placement.ty, placement.tz, "orientation", "double")
+        world.set_state(placement.tx, placement.ty, placement.tz, "orientation", "double")
         return nil
       elseif placement.tface == blocks.FACE_BOTTOM then
-        world.sset(placement.tx, placement.ty, placement.tz, "orientation", "double")
+        world.set_state(placement.tx, placement.ty, placement.tz, "orientation", "double")
         return nil
       end
     end

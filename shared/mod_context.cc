@@ -14,6 +14,7 @@
 #include "shared/scripting/blocks_library.hh"
 #include "shared/scripting/core_library.hh"
 #include "shared/scripting/lua_libraries.hh"
+#include "shared/scripting/world_library.hh"
 
 ModVersion ModVersion::parse(std::string_view string) noexcept
 {
@@ -132,10 +133,11 @@ bool ModContext::initialize(void) noexcept
     }
 
     m_lua_state = std::shared_ptr<lua_State>(L, &lua_close);
-
     scripting::open_lua_libraries(m_lua_state, this);
-    scripting::open_core_library(m_lua_state, this);
+
     scripting::open_blocks_library(m_lua_state, this);
+    scripting::open_core_library(m_lua_state, this);
+    scripting::open_world_library(m_lua_state, this);
 
     auto entry = Identifier::from_parts(name_space(), "init.lua");
     auto entry_path = entry.as_file_path("scripts", {});

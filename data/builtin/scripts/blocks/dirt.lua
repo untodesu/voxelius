@@ -32,8 +32,8 @@ blocks.add("dirt", {
   },
 
   on_rtick = function(bx, by, bz)
-    local above = world.bget(bx, by + 1, bz)
-    local light = world.lget(bx, by + 1, bz)
+    local above = world.get_block(bx, by + 1, bz)
+    local light = world.get_light(bx, by + 1, bz)
 
     if not blocks.has_tag(above, blocks.TAG_GAS) or light < 9 then
       return
@@ -44,7 +44,7 @@ blocks.add("dirt", {
 
     for dx = -1, 1 do
       for dz = -1, 1 do
-        if grass_id == world.bget(bx + dx, by, bz + dz) then
+        if grass_id == world.get_block(bx + dx, by, bz + dz) then
           has_grass = true
           break
         end
@@ -56,7 +56,7 @@ blocks.add("dirt", {
     end
 
     if has_grass then
-      world.bset(bx, by, bz, grass_id)
+      world.set_block(bx, by, bz, grass_id)
     end
   end
 })
