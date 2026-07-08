@@ -178,18 +178,19 @@ std::optional<std::string_view> world::get_state(const chunk_pos& cpos, const lo
         return std::nullopt; // this family has no such state
     }
 
-    auto id_it = family->states_of_id.find(id);
+    auto id_it = family->id_states.find(id);
 
-    if(id_it != family->states_of_id.cend()) {
-        auto val_it = id_it->second.find(key);
-
-        if(val_it != id_it->second.cend()) {
-            return family->state_value(val_it->second);
-        }
+    if(id_it == family->id_states.cend()) {
+        return family->state_value(decl_it->second.default_value);
     }
 
-    // id was never resolved with this state set explicitly - fall back to the declared default
-    return family->state_value(decl_it->second.default_value);
+    auto val_it = id_it->second.find(key);
+
+    if(val_it == id_it->second.cend()) {
+        return family->state_value(decl_it->second.default_value);
+    }
+
+    return family->state_value(val_it->second);
 }
 
 std::optional<std::string_view> world::get_state(const block_pos& pos, std::string_view state) noexcept
@@ -220,9 +221,9 @@ bool world::set_state(const chunk_pos& cpos, const local_pos& lpos, std::string_
     }
 
     emhash8::HashMap<blockstate_key_type, blockstate_val_type> map;
-    auto id_it = family->states_of_id.find(id);
+    auto id_it = family->id_states.find(id);
 
-    if(id_it == family->states_of_id.cend()) {
+    if(id_it == family->id_states.cend()) {
         for(const auto& [decl_key, decl] : family->states) {
             map.try_emplace(decl_key, decl.default_value);
         }

@@ -70,8 +70,8 @@ struct BlockFamily final {
     BlockCallback on_break;
     BlockCallback on_interact;
 
-    emhash8::HashMap<std::uint64_t, block_id_type> resolved_states; // cache of resolved states
-    emhash8::HashMap<block_id_type, emhash8::HashMap<blockstate_key_type, blockstate_val_type>> states_of_id; // reverse of resolved_states
+    emhash8::HashMap<std::uint64_t, block_id_type> resolved_states;
+    emhash8::HashMap<block_id_type, emhash8::HashMap<blockstate_key_type, blockstate_val_type>> id_states;
 
     blockstate_val_type state_hash(std::string_view string) noexcept;
     std::string_view state_value(blockstate_val_type value) noexcept;

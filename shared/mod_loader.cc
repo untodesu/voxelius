@@ -20,31 +20,29 @@ static std::vector<ModInfo> discover_mods(void) noexcept
                 continue;
             }
 
-            if(stat.filetype != PHYSFS_FILETYPE_DIRECTORY) {
-                continue;
+            if(stat.filetype == PHYSFS_FILETYPE_DIRECTORY) {
+                auto modinfo_path = std::format("{}/modinfo.conf", entries[i]);
+
+                if(!PHYSFS_exists(modinfo_path.c_str())) {
+                    continue;
+                }
+
+                config::Map map;
+
+                if(!map.load(modinfo_path)) {
+                    LOG_ERROR("mod_loader: {}: unable to read modinfo.conf", entries[i]);
+                    continue;
+                }
+
+                ModInfo info {};
+
+                if(!ModInfo::parse(map, info)) {
+                    LOG_ERROR("mod_loader: {}: malformed modinfo.conf", entries[i]);
+                    continue;
+                }
+
+                result.emplace_back(std::move(info));
             }
-
-            auto modinfo_path = std::format("{}/modinfo.conf", entries[i]);
-
-            if(!PHYSFS_exists(modinfo_path.c_str())) {
-                continue;
-            }
-
-            config::Map map;
-
-            if(!map.load(modinfo_path)) {
-                LOG_ERROR("mod_loader: {}: unable to read modinfo.conf", entries[i]);
-                continue;
-            }
-
-            ModInfo info {};
-
-            if(!ModInfo::parse(map, info)) {
-                LOG_ERROR("mod_loader: {}: malformed modinfo.conf", entries[i]);
-                continue;
-            }
-
-            result.emplace_back(std::move(info));
         }
 
         PHYSFS_freeList(entries);

@@ -143,13 +143,13 @@ void block_registry::commit(ModContext& ctx) noexcept
     }
 
     for(auto& def : blocks) {
-        if(def.family != BLOCK_FAMILY_ID_NULL) {
+        if(def.family) {
             def.family += family_offset;
         }
     }
 
     for(auto& family : families) {
-        if(family.base_id != BLOCK_ID_NULL) {
+        if(family.base_id) {
             family.base_id += block_offset;
         }
 
@@ -160,11 +160,11 @@ void block_registry::commit(ModContext& ctx) noexcept
         if(block_offset) {
             emhash8::HashMap<block_id_type, emhash8::HashMap<blockstate_key_type, blockstate_val_type>> rebased;
 
-            for(auto& [id, map] : family.states_of_id) {
+            for(auto& [id, map] : family.id_states) {
                 rebased.try_emplace(id + block_offset, std::move(map));
             }
 
-            family.states_of_id = std::move(rebased);
+            family.id_states = std::move(rebased);
         }
     }
 
@@ -325,10 +325,17 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id,
         for(const auto& it : rule.when) {
             auto jt = map.find(it.first);
 
-            if(jt == map.cend() || jt->second != it.second) {
+            if(jt == map.cend()) {
                 matches = false;
                 break;
             }
+
+            if(jt->second == it.second) {
+                continue;
+            }
+
+            matches = false;
+            break;
         }
 
         if(matches) {
@@ -340,8 +347,8 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id,
     resolved.family = def->family;
 
     auto new_id = static_cast<block_id_type>(s_definitions.size());
-    family.resolved_states.try_emplace(hash, new_id);
-    family.states_of_id.try_emplace(new_id, map);
+    family.resolved_states.insert_or_assign(std::uint64_t(hash), block_id_type(new_id));
+    family.id_states.insert_or_assign(block_id_type(new_id), emhash8::HashMap(map));
     s_definitions.push_back(std::move(resolved));
 
     return new_id;

@@ -181,8 +181,6 @@ block_id_type ModContext::find_block(const Identifier& name) const noexcept
 block_id_type ModContext::register_block(const Identifier& name, BlockDefinition def) noexcept
 {
     if(m_blocks.empty()) {
-        // reserve index 0 so a local id can never collide with BLOCK_ID_NULL
-        // while this context is still staging (ie. before block_registry::commit)
         m_blocks.emplace_back();
     }
 
@@ -197,7 +195,6 @@ block_id_type ModContext::register_block(const Identifier& name, BlockDefinition
 block_family_id_type ModContext::register_block_family(BlockFamily family) noexcept
 {
     if(m_block_families.empty()) {
-        // same reservation as register_block(), but for BLOCK_FAMILY_ID_NULL
         m_block_families.emplace_back();
     }
 
