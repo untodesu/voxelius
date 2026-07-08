@@ -5,6 +5,8 @@
 
 class Chunk final {
 public:
+    explicit Chunk(entt::entity entity) noexcept;
+
     static void serialize(const Chunk& chunk, WriteBuffer& buffer) noexcept;
     static void deserialize(Chunk& chunk, ReadBuffer& buffer) noexcept;
 

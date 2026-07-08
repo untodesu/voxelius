@@ -4,6 +4,11 @@
 
 #include "core/buffer.hh"
 
+Chunk::Chunk(entt::entity entity) noexcept : m_entity(entity)
+{
+    // empty
+}
+
 static void serialize_schedule(const std::multimap<std::uint64_t, std::size_t>& schedule, WriteBuffer& buffer) noexcept
 {
     buffer.write<std::uint32_t>(static_cast<std::uint32_t>(schedule.size()));

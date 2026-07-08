@@ -2,99 +2,238 @@
 
 #include "shared/world.hh"
 
+#include "shared/utils/coord.hh"
+
+#include "shared/globals.hh"
+
 emhash8::HashMap<chunk_pos, std::shared_ptr<Chunk>> world::chunks;
 entt::registry world::basic_entities;
 entt::registry world::chunk_entities;
-std::uint64_t world::current_tick;
+std::uint64_t world::current_tick = 0;
+
+ChunkCreateEvent::ChunkCreateEvent(const chunk_pos& pos, const std::shared_ptr<Chunk>& chunk) noexcept : m_chunk(chunk), m_pos(pos)
+{
+    // empty
+}
+
+ChunkRemoveEvent::ChunkRemoveEvent(const chunk_pos& pos, const std::shared_ptr<const Chunk>& chunk) noexcept : m_chunk(chunk), m_pos(pos)
+{
+    // empty
+}
+
+ChunkUpdateEvent::ChunkUpdateEvent(const chunk_pos& pos, const std::shared_ptr<Chunk>& chunk) noexcept : m_chunk(chunk), m_pos(pos)
+{
+    // empty
+}
+
+BlockUpdateEvent::BlockUpdateEvent(const block_pos& pos, block_id_type id, const std::shared_ptr<Chunk>& chunk) noexcept
+    : m_chunk(chunk), m_id(id), m_bpos(pos), m_cpos(utils::to_chunk(pos)), m_lpos(utils::to_local(pos))
+{
+    // empty
+}
 
 std::shared_ptr<Chunk> world::create_chunk(const chunk_pos& pos) noexcept
 {
+    auto it = chunks.find(pos);
+
+    if(it == chunks.cend()) {
+        auto entity = chunk_entities.create();
+        auto chunk = std::make_shared<Chunk>(entity);
+
+        auto& component = chunk_entities.emplace<ChunkComponent>(entity);
+        component.position = pos;
+        component.ptr = chunk;
+
+        chunks.insert_or_assign(chunk_pos(pos), std::shared_ptr(chunk));
+
+        globals::dispatcher.trigger(ChunkCreateEvent(pos, chunk));
+
+        return chunk;
+    }
+
+    return it->second;
 }
 
 std::shared_ptr<Chunk> world::find_chunk(const chunk_pos& pos) noexcept
 {
+    auto it = chunks.find(pos);
+
+    if(it == chunks.cend()) {
+        return nullptr;
+    }
+
+    return it->second;
 }
 
 std::shared_ptr<Chunk> world::find_chunk(entt::entity entity) noexcept
 {
+    if(chunk_entities.valid(entity)) {
+        auto& component = chunk_entities.get<ChunkComponent>(entity);
+        return component.ptr;
+    }
+
+    return nullptr;
 }
 
 void world::remove_chunk(const std::shared_ptr<const Chunk>& chunk) noexcept
 {
+    if(chunk) {
+        remove_chunk(chunk->entity());
+    }
 }
 
 void world::remove_chunk(const chunk_pos& pos) noexcept
 {
+    auto it = chunks.find(pos);
+
+    if(it == chunks.cend()) {
+        return;
+    }
+
+    globals::dispatcher.trigger(ChunkRemoveEvent(pos, it->second));
+
+    chunk_entities.destroy(it->second->entity());
+    chunks.erase(it);
 }
 
 void world::remove_chunk(entt::entity entity) noexcept
 {
+    if(chunk_entities.valid(entity)) {
+        const auto& component = chunk_entities.get<ChunkComponent>(entity);
+
+        globals::dispatcher.trigger(ChunkRemoveEvent(component.position, component.ptr));
+
+        chunks.erase(component.position);
+        chunk_entities.destroy(entity);
+    }
 }
 
 block_id_type world::get_block(const chunk_pos& cpos, const local_pos& lpos) noexcept
 {
+    if(auto chunk = find_chunk(cpos)) {
+        return chunk->get_block(lpos);
+    }
+
+    return BLOCK_ID_NULL;
 }
 
 block_id_type world::get_block(const block_pos& pos) noexcept
 {
+    auto cpos = utils::to_chunk(pos);
+    auto lpos = utils::to_local(pos);
+    return get_block(cpos, lpos);
 }
 
 bool world::set_block(const chunk_pos& cpos, const local_pos& lpos, block_id_type id) noexcept
 {
+    if(auto chunk = find_chunk(cpos)) {
+        chunk->set_block(lpos, id);
+
+        globals::dispatcher.trigger(BlockUpdateEvent(utils::to_block(cpos, lpos), id, chunk));
+
+        return true;
+    }
+
+    return false;
 }
 
 bool world::set_block(const block_pos& pos, block_id_type id) noexcept
 {
+    auto cpos = utils::to_chunk(pos);
+    auto lpos = utils::to_local(pos);
+    return set_block(cpos, lpos, id);
 }
 
 block_light_type world::get_light(const chunk_pos& cpos, const local_pos& lpos) noexcept
 {
+    return BLOCK_LIGHT_MIN; // TODO: lightmaps
 }
 
 block_light_type world::get_light(const block_pos& pos) noexcept
 {
+    auto cpos = utils::to_chunk(pos);
+    auto lpos = utils::to_local(pos);
+    return get_light(cpos, lpos);
 }
 
 std::optional<std::string_view> world::get_state(const chunk_pos& cpos, const local_pos& lpos, std::string_view state) noexcept
 {
+    return std::nullopt; // TODO
 }
 
 std::optional<std::string_view> world::get_state(const block_pos& pos, std::string_view state) noexcept
 {
+    auto cpos = utils::to_chunk(pos);
+    auto lpos = utils::to_local(pos);
+    return get_state(cpos, lpos, state);
 }
 
 bool world::set_state(const chunk_pos& cpos, const local_pos& lpos, std::string_view state, std::string_view value) noexcept
 {
+    return false; // TODO
 }
 
 bool world::set_state(const block_pos& pos, std::string_view state, std::string_view value) noexcept
 {
+    auto cpos = utils::to_chunk(pos);
+    auto lpos = utils::to_local(pos);
+    return set_state(cpos, lpos, state, value);
 }
 
 std::int32_t world::get_temperature_base(const chunk_pos& cpos, const local_pos& lpos) noexcept
 {
+    return 298; // TODO
 }
 
 std::int32_t world::get_temperature_base(const block_pos& pos) noexcept
 {
+    auto cpos = utils::to_chunk(pos);
+    auto lpos = utils::to_local(pos);
+    return get_temperature_base(cpos, lpos);
 }
 
 std::int32_t world::get_temperature(const chunk_pos& cpos, const local_pos& lpos) noexcept
 {
+    return 298; // TODO
 }
 
 std::int32_t world::get_temperature(const block_pos& pos) noexcept
 {
+    auto cpos = utils::to_chunk(pos);
+    auto lpos = utils::to_local(pos);
+    return get_temperature(cpos, lpos);
 }
 
 void world::schedule(const chunk_pos& cpos, const local_pos& lpos, std::uint64_t deadline) noexcept
 {
+    if(auto chunk = find_chunk(cpos)) {
+        auto index = utils::to_index(lpos);
+
+        chunk->schedule(index, deadline);
+    }
 }
 
 void world::schedule(const block_pos& pos, std::uint64_t deadline) noexcept
 {
+    auto cpos = utils::to_chunk(pos);
+    auto lpos = utils::to_local(pos);
+    schedule(cpos, lpos, deadline);
 }
 
 void world::fixed_update(void) noexcept
 {
+    std::vector<std::size_t> due;
+
+    chunk_entities.view<ChunkComponent>().each([&](ChunkComponent& component) {
+        due.clear();
+
+        component.ptr->pop_due(current_tick, due);
+
+        for(auto index : due) {
+            // TODO: dispatch on_stick for component.ptr->get_block(index) here
+            // once there's a generic "call BlockCallback" helper
+        }
+    });
+
+    current_tick += 1;
 }
