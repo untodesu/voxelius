@@ -44,6 +44,14 @@ public:
     std::size_t size(void) const noexcept;
 
 private:
+    static void serialize(const Uniform* uniform, WriteBuffer& buffer) noexcept;
+    static void serialize(const Palette8* p8, WriteBuffer& buffer) noexcept;
+    static void serialize(const Palette16* p16, WriteBuffer& buffer) noexcept;
+
+    static void deserialize(Uniform& uniform, ReadBuffer& buffer) noexcept;
+    static void deserialize(Palette8& p8, ReadBuffer& buffer) noexcept;
+    static void deserialize(Palette16& p16, ReadBuffer& buffer) noexcept;
+
     static std::optional<std::size_t> find_slot(const palette_type& palette, block_id_type id) noexcept;
     static std::size_t add_slot(palette_type& palette, block_id_type id) noexcept;
 
