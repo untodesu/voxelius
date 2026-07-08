@@ -156,6 +156,16 @@ void block_registry::commit(ModContext& ctx) noexcept
         for(auto& [hash, id] : family.resolved_states) {
             id += block_offset;
         }
+
+        if(block_offset) {
+            emhash8::HashMap<block_id_type, emhash8::HashMap<blockstate_key_type, blockstate_val_type>> rebased;
+
+            for(auto& [id, map] : family.states_of_id) {
+                rebased.try_emplace(id + block_offset, std::move(map));
+            }
+
+            family.states_of_id = std::move(rebased);
+        }
     }
 
     for(const auto& [name, local_id] : names) {
@@ -233,19 +243,28 @@ const BlockDefinition* block_registry::find_definition(const Identifier& id) noe
     return find_definition(find(id));
 }
 
-const BlockFamily* block_registry::find_family(block_family_id_type id) noexcept
+BlockFamily* block_registry::find_family(block_family_id_type id) noexcept
 {
     if(id == BLOCK_FAMILY_ID_NULL || id >= s_families.size())
         return nullptr;
     return &s_families[id];
 }
 
-const BlockFamily* block_registry::find_family(const Identifier& id) noexcept
+BlockFamily* block_registry::find_family(const Identifier& id) noexcept
 {
-    for(const auto& family : s_families) {
+    for(auto& family : s_families) {
         if(family.name == id) {
             return &family;
         }
+    }
+
+    return nullptr;
+}
+
+BlockFamily* block_registry::find_family_of(block_id_type id) noexcept
+{
+    if(auto def = find_definition(id)) {
+        return find_family(def->family);
     }
 
     return nullptr;
@@ -322,6 +341,7 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id,
 
     auto new_id = static_cast<block_id_type>(s_definitions.size());
     family.resolved_states.try_emplace(hash, new_id);
+    family.states_of_id.try_emplace(new_id, map);
     s_definitions.push_back(std::move(resolved));
 
     return new_id;

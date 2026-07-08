@@ -2,6 +2,7 @@
 
 #include "shared/world.hh"
 
+#include "shared/block_registry.hh"
 #include "shared/utils/coord.hh"
 
 #include "shared/globals.hh"
@@ -158,7 +159,37 @@ block_light_type world::get_light(const block_pos& pos) noexcept
 
 std::optional<std::string_view> world::get_state(const chunk_pos& cpos, const local_pos& lpos, std::string_view state) noexcept
 {
-    return std::nullopt; // TODO
+    auto id = get_block(cpos, lpos);
+
+    if(id == BLOCK_ID_NULL) {
+        return std::nullopt;
+    }
+
+    auto family = block_registry::find_family_of(id);
+
+    if(family == nullptr) {
+        return std::nullopt;
+    }
+
+    auto key = family->state_hash(state);
+    auto decl_it = family->states.find(key);
+
+    if(decl_it == family->states.cend()) {
+        return std::nullopt; // this family has no such state
+    }
+
+    auto id_it = family->states_of_id.find(id);
+
+    if(id_it != family->states_of_id.cend()) {
+        auto val_it = id_it->second.find(key);
+
+        if(val_it != id_it->second.cend()) {
+            return family->state_value(val_it->second);
+        }
+    }
+
+    // id was never resolved with this state set explicitly - fall back to the declared default
+    return family->state_value(decl_it->second.default_value);
 }
 
 std::optional<std::string_view> world::get_state(const block_pos& pos, std::string_view state) noexcept
@@ -170,7 +201,41 @@ std::optional<std::string_view> world::get_state(const block_pos& pos, std::stri
 
 bool world::set_state(const chunk_pos& cpos, const local_pos& lpos, std::string_view state, std::string_view value) noexcept
 {
-    return false; // TODO
+    auto id = get_block(cpos, lpos);
+
+    if(id == BLOCK_ID_NULL) {
+        return false;
+    }
+
+    auto family = block_registry::find_family_of(id);
+
+    if(family == nullptr) {
+        return false;
+    }
+
+    auto key = family->state_hash(state);
+
+    if(0 == family->states.count(key)) {
+        return false;
+    }
+
+    emhash8::HashMap<blockstate_key_type, blockstate_val_type> map;
+    auto id_it = family->states_of_id.find(id);
+
+    if(id_it == family->states_of_id.cend()) {
+        for(const auto& [decl_key, decl] : family->states) {
+            map.try_emplace(decl_key, decl.default_value);
+        }
+    }
+    else {
+        map = id_it->second;
+    }
+
+    map.insert_or_assign(key, family->state_hash(value));
+
+    auto new_id = block_registry::resolve_variant(family->base_id, map);
+
+    return set_block(cpos, lpos, new_id);
 }
 
 bool world::set_state(const block_pos& pos, std::string_view state, std::string_view value) noexcept

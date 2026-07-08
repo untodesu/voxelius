@@ -71,6 +71,7 @@ struct BlockFamily final {
     BlockCallback on_interact;
 
     emhash8::HashMap<std::uint64_t, block_id_type> resolved_states; // cache of resolved states
+    emhash8::HashMap<block_id_type, emhash8::HashMap<blockstate_key_type, blockstate_val_type>> states_of_id; // reverse of resolved_states
 
     blockstate_val_type state_hash(std::string_view string) noexcept;
     std::string_view state_value(blockstate_val_type value) noexcept;
@@ -102,8 +103,9 @@ namespace block_registry
 {
 const BlockDefinition* find_definition(block_id_type id) noexcept;
 const BlockDefinition* find_definition(const Identifier& id) noexcept;
-const BlockFamily* find_family(block_family_id_type id) noexcept;
-const BlockFamily* find_family(const Identifier& id) noexcept;
+BlockFamily* find_family(block_family_id_type id) noexcept;
+BlockFamily* find_family(const Identifier& id) noexcept;
+BlockFamily* find_family_of(block_id_type id) noexcept;
 } // namespace block_registry
 
 namespace block_registry
