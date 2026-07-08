@@ -3,8 +3,9 @@
 
 namespace core
 {
-const std::filesystem::path& gamepath(void);
-const std::filesystem::path& userpath(void);
+const std::filesystem::path& gamepath(void) noexcept;
+const std::filesystem::path& userpath(void) noexcept;
+const std::filesystem::path& modspath(void) noexcept;
 } // namespace core
 
 namespace core

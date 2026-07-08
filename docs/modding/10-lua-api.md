@@ -18,13 +18,13 @@ Voxelius's runtime provides common Lua APIs:
 |----|----|  
 |`loadfile`|Sandbox breaking|  
 |`load`|Sandbox breaking|  
-|`require`|TODO|  
 
 ## Replaced globals
 
 |Global|Overriden behaviour|  
 |----|----|  
 |`dofile`|Treats the input path as a namespaced identifier with the `scripts` subdirectory implicitly defined|  
+|`require`|Same as `dofile`, named differently for clarity|  
 |`print`|Alias to uuLog's `LOG_INFO` macro|  
 
 ## Error handling

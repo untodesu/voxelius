@@ -9,15 +9,21 @@
 
 static std::filesystem::path s_gamepath;
 static std::filesystem::path s_userpath;
+static std::filesystem::path s_modspath;
 
-const std::filesystem::path& core::gamepath(void)
+const std::filesystem::path& core::gamepath(void) noexcept
 {
     return s_gamepath;
 }
 
-const std::filesystem::path& core::userpath(void)
+const std::filesystem::path& core::userpath(void) noexcept
 {
     return s_userpath;
+}
+
+const std::filesystem::path& core::modspath(void) noexcept
+{
+    return s_modspath;
 }
 
 void core::setup(int argc, char** argv)
@@ -31,6 +37,7 @@ void core::setup(int argc, char** argv)
     vx::throw_if<vx::runtime_error>(enet_init_fail, "failed to initialize enet");
 
     s_gamepath = std::filesystem::absolute(cmdline::value_or("gamepath", "data"));
+    s_modspath = std::filesystem::absolute(cmdline::value_or("modspath", "mods"));
 
     if(auto value = cmdline::value_or_cstr("user", nullptr)) {
         // If there is a third-party launcher that supports
@@ -65,6 +72,7 @@ void core::setup(int argc, char** argv)
     LOG_DEBUG("userpath set to {}", s_userpath.string());
 
     std::filesystem::create_directories(s_userpath);
+    std::filesystem::create_directories(s_modspath);
 
     auto mount_gamepath_ok = PHYSFS_mount(s_gamepath.string().c_str(), nullptr, false);
     vx::throw_if_not_fmt(mount_gamepath_ok, "failed to mount {}: {}", s_gamepath.string(), utils::physfs_error());
@@ -72,14 +80,11 @@ void core::setup(int argc, char** argv)
     auto mount_userpath_ok = PHYSFS_mount(s_userpath.string().c_str(), nullptr, false);
     vx::throw_if_not_fmt(mount_userpath_ok, "failed to mount {}: {}", s_userpath.string(), utils::physfs_error());
 
+    auto mount_modspath_ok = PHYSFS_mount(s_modspath.string().c_str(), nullptr, true);
+    vx::throw_if_not_fmt(mount_modspath_ok, "failed to mount {}: {}", s_modspath.string(), utils::physfs_error());
+
     auto set_write_dir_ok = PHYSFS_setWriteDir(s_userpath.string().c_str());
     vx::throw_if_not_fmt(set_write_dir_ok, "failed to setwritedir {}: {}", s_userpath.string(), utils::physfs_error());
-
-    auto userpath_mods = s_userpath / "mods";
-    auto gamepath_mods = s_gamepath / "mods";
-
-    PHYSFS_mount(userpath_mods.string().c_str(), nullptr, true);
-    PHYSFS_mount(gamepath_mods.string().c_str(), nullptr, true);
 }
 
 void core::teardown(void)

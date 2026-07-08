@@ -125,13 +125,22 @@ void block_registry::commit(ModContext& ctx) noexcept
     auto families = ctx.take_block_families();
     auto names = ctx.take_block_names();
 
-    // blocks[0]/families[0] are ModContext's own reserved sentinel slots
-    // (see ModContext::register_block/register_block_family) - they exist
-    // only so a mod's local ids never collide with BLOCK_ID_NULL/
-    // BLOCK_FAMILY_ID_NULL while it's still loading, and must never become
-    // a real, enumerable entry in the global registry
-    auto block_offset = static_cast<block_id_type>(s_definitions.size()) - (blocks.empty() ? 0 : 1);
-    auto family_offset = static_cast<block_family_id_type>(s_families.size()) - (families.empty() ? 0 : 1);
+    block_id_type block_offset;
+    block_family_id_type family_offset;
+
+    if(blocks.empty()) {
+        block_offset = static_cast<block_id_type>(s_definitions.size());
+    }
+    else {
+        block_offset = static_cast<block_id_type>(s_definitions.size()) - 1;
+    }
+
+    if(families.empty()) {
+        family_offset = static_cast<block_family_id_type>(s_families.size());
+    }
+    else {
+        family_offset = static_cast<block_family_id_type>(s_families.size()) - 1;
+    }
 
     for(auto& def : blocks) {
         if(def.family != BLOCK_FAMILY_ID_NULL) {

@@ -3,9 +3,14 @@
 
 class ModContext;
 
+namespace config
+{
+class Map;
+} // namespace config
+
 namespace scripting
 {
-void open_core_api(std::shared_ptr<lua_State>& lua, const ModContext* mod_ctx) noexcept;
+void open_core_library(std::shared_ptr<lua_State>& lua, const ModContext* ctx, config::Map* config) noexcept;
 } // namespace scripting
 
 #endif /* BB6F90F5_2B9B_42F8_AFD4_9C59A03AA430 */

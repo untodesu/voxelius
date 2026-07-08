@@ -36,6 +36,8 @@ public:
     map_slot_type find_slot(std::string_view key) const noexcept;
     map_slot_type find_or_create_slot(std::string_view key) noexcept;
 
+    bool contains(std::string_view key) const noexcept;
+
     void purge(void) noexcept;
 
     void load(std::istream& stream) noexcept;

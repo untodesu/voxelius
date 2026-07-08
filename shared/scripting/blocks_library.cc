@@ -1,6 +1,6 @@
 #include "shared/pch.hh"
 
-#include "shared/scripting/blocks_api.hh"
+#include "shared/scripting/blocks_library.hh"
 
 #include "core/utils/crc64.hh"
 
@@ -11,9 +11,9 @@
 #include "shared/block_registry.hh"
 #include "shared/mod_context.hh"
 
-class FieldHelper final {
+class BlockDefReader final {
 public:
-    explicit FieldHelper(lua_State* L, int def_idx, int proto_idx) noexcept;
+    explicit BlockDefReader(lua_State* L, int def_idx, int proto_idx) noexcept;
     bool try_push(const char* key) const noexcept;
 
 public:
@@ -22,14 +22,14 @@ public:
     int proto_idx;
 };
 
-FieldHelper::FieldHelper(lua_State* L, int def_idx, int proto_idx) noexcept : L(L), def_idx(def_idx), proto_idx(proto_idx)
+BlockDefReader::BlockDefReader(lua_State* L, int def_idx, int proto_idx) noexcept : L(L), def_idx(def_idx), proto_idx(proto_idx)
 {
     assert(L);
     assert(def_idx > 0);
     assert(proto_idx >= 0);
 }
 
-bool FieldHelper::try_push(const char* key) const noexcept
+bool BlockDefReader::try_push(const char* key) const noexcept
 {
     lua_getfield(L, def_idx, key);
 
@@ -175,14 +175,14 @@ static std::vector<BlockDrop> parse_drops(lua_State* L, int drops_idx, ModContex
 static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx) noexcept
 {
     BlockOverridePatch patch {};
-    FieldHelper helper(L, idx, 0);
+    BlockDefReader reader(L, idx, 0);
 
-    if(helper.try_push("render")) {
+    if(reader.try_push("render")) {
         patch.render = static_cast<block_render>(luaL_checkinteger(L, -1));
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("textures")) {
+    if(reader.try_push("textures")) {
         std::unordered_map<std::string, std::vector<Identifier>> textures;
         auto textures_idx = lua_gettop(L);
 
@@ -211,67 +211,67 @@ static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("animated")) {
+    if(reader.try_push("animated")) {
         patch.animated = static_cast<bool>(lua_toboolean(L, -1));
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("model_name")) {
+    if(reader.try_push("model_name")) {
         patch.model_name = Identifier::from_string(luaL_checkstring(L, -1), ctx->name_space());
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("model_offset")) {
+    if(reader.try_push("model_offset")) {
         patch.model_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("bcoll_name")) {
+    if(reader.try_push("bcoll_name")) {
         patch.bcoll_name = Identifier::from_string(luaL_checkstring(L, -1), ctx->name_space());
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("bcoll_offset")) {
+    if(reader.try_push("bcoll_offset")) {
         patch.bcoll_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("health")) {
+    if(reader.try_push("health")) {
         patch.health = static_cast<unsigned>(luaL_checkinteger(L, -1));
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("sound")) {
+    if(reader.try_push("sound")) {
         patch.sound_set = Identifier::from_string(luaL_checkstring(L, -1), ctx->name_space());
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("emission")) {
+    if(reader.try_push("emission")) {
         patch.emission = static_cast<block_light_type>(luaL_checkinteger(L, -1));
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("dissipation")) {
+    if(reader.try_push("dissipation")) {
         patch.dissipation = static_cast<block_light_type>(luaL_checkinteger(L, -1));
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("touch")) {
+    if(reader.try_push("touch")) {
         patch.touch = static_cast<block_touch>(luaL_checkinteger(L, -1));
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("touch_coeffs")) {
+    if(reader.try_push("touch_coeffs")) {
         patch.touch_coeffs = utils::read_vector3f(L, lua_gettop(L));
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("tags")) {
+    if(reader.try_push("tags")) {
         patch.tags = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
         lua_pop(L, 1);
     }
 
-    if(helper.try_push("drops")) {
+    if(reader.try_push("drops")) {
         patch.drops = parse_drops(L, lua_gettop(L), ctx);
         lua_pop(L, 1);
     }
@@ -279,105 +279,105 @@ static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx
     return patch;
 }
 
-static void parse_definition(const FieldHelper& helper, ModContext* ctx, BlockDefinition& def) noexcept
+static void parse_definition(const BlockDefReader& reader, ModContext* ctx, BlockDefinition& def) noexcept
 {
-    if(helper.try_push("render")) {
-        def.render = static_cast<block_render>(luaL_checkinteger(helper.L, -1));
-        lua_pop(helper.L, 1);
+    if(reader.try_push("render")) {
+        def.render = static_cast<block_render>(luaL_checkinteger(reader.L, -1));
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("model_name")) {
-        def.model_name = Identifier::from_string(luaL_checkstring(helper.L, -1), ctx->name_space());
-        lua_pop(helper.L, 1);
+    if(reader.try_push("model_name")) {
+        def.model_name = Identifier::from_string(luaL_checkstring(reader.L, -1), ctx->name_space());
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("model_offset")) {
-        def.model_offset = utils::read_vector3f(helper.L, lua_gettop(helper.L)) / 16.0f;
-        lua_pop(helper.L, 1);
+    if(reader.try_push("model_offset")) {
+        def.model_offset = utils::read_vector3f(reader.L, lua_gettop(reader.L)) / 16.0f;
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("bcoll_name")) {
-        def.bcoll_name = Identifier::from_string(luaL_checkstring(helper.L, -1), ctx->name_space());
-        lua_pop(helper.L, 1);
+    if(reader.try_push("bcoll_name")) {
+        def.bcoll_name = Identifier::from_string(luaL_checkstring(reader.L, -1), ctx->name_space());
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("bcoll_offset")) {
-        def.bcoll_offset = utils::read_vector3f(helper.L, lua_gettop(helper.L)) / 16.0f;
-        lua_pop(helper.L, 1);
+    if(reader.try_push("bcoll_offset")) {
+        def.bcoll_offset = utils::read_vector3f(reader.L, lua_gettop(reader.L)) / 16.0f;
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("animated")) {
-        def.animated = static_cast<bool>(lua_toboolean(helper.L, -1));
-        lua_pop(helper.L, 1);
+    if(reader.try_push("animated")) {
+        def.animated = static_cast<bool>(lua_toboolean(reader.L, -1));
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("textures")) {
-        auto textures_idx = lua_gettop(helper.L);
+    if(reader.try_push("textures")) {
+        auto textures_idx = lua_gettop(reader.L);
 
         def.textures.clear();
-        def.textures.reserve(lua_rawlen(helper.L, textures_idx));
+        def.textures.reserve(lua_rawlen(reader.L, textures_idx));
 
-        lua_pushnil(helper.L);
+        lua_pushnil(reader.L);
 
-        while(lua_next(helper.L, textures_idx)) {
-            auto slot = std::string(luaL_checkstring(helper.L, -2));
-            auto count = lua_rawlen(helper.L, -1);
+        while(lua_next(reader.L, textures_idx)) {
+            auto slot = std::string(luaL_checkstring(reader.L, -2));
+            auto count = lua_rawlen(reader.L, -1);
 
             std::vector<Identifier> variants;
             variants.reserve(count);
 
             for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
-                lua_rawgeti(helper.L, -1, i);
-                variants.emplace_back(Identifier::from_string(luaL_checkstring(helper.L, -1), ctx->name_space()));
-                lua_pop(helper.L, 1);
+                lua_rawgeti(reader.L, -1, i);
+                variants.emplace_back(Identifier::from_string(luaL_checkstring(reader.L, -1), ctx->name_space()));
+                lua_pop(reader.L, 1);
             }
 
             def.textures.insert_or_assign(std::move(slot), std::move(variants));
 
-            lua_pop(helper.L, 1);
+            lua_pop(reader.L, 1);
         }
 
-        lua_pop(helper.L, 1);
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("health")) {
-        def.health = static_cast<unsigned>(luaL_checkinteger(helper.L, -1));
-        lua_pop(helper.L, 1);
+    if(reader.try_push("health")) {
+        def.health = static_cast<unsigned>(luaL_checkinteger(reader.L, -1));
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("sound")) {
-        def.sound_set = Identifier::from_string(luaL_checkstring(helper.L, -1), ctx->name_space());
-        lua_pop(helper.L, 1);
+    if(reader.try_push("sound")) {
+        def.sound_set = Identifier::from_string(luaL_checkstring(reader.L, -1), ctx->name_space());
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("emission")) {
-        def.emission = static_cast<block_light_type>(luaL_checkinteger(helper.L, -1));
-        lua_pop(helper.L, 1);
+    if(reader.try_push("emission")) {
+        def.emission = static_cast<block_light_type>(luaL_checkinteger(reader.L, -1));
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("dissipation")) {
-        def.dissipation = static_cast<block_light_type>(luaL_checkinteger(helper.L, -1));
-        lua_pop(helper.L, 1);
+    if(reader.try_push("dissipation")) {
+        def.dissipation = static_cast<block_light_type>(luaL_checkinteger(reader.L, -1));
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("touch")) {
-        def.touch = static_cast<block_touch>(luaL_checkinteger(helper.L, -1));
-        lua_pop(helper.L, 1);
+    if(reader.try_push("touch")) {
+        def.touch = static_cast<block_touch>(luaL_checkinteger(reader.L, -1));
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("touch_coeffs")) {
-        def.touch_coeffs = utils::read_vector3f(helper.L, lua_gettop(helper.L));
-        lua_pop(helper.L, 1);
+    if(reader.try_push("touch_coeffs")) {
+        def.touch_coeffs = utils::read_vector3f(reader.L, lua_gettop(reader.L));
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("tags")) {
-        def.tags = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(helper.L, lua_gettop(helper.L)));
-        lua_pop(helper.L, 1);
+    if(reader.try_push("tags")) {
+        def.tags = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(reader.L, lua_gettop(reader.L)));
+        lua_pop(reader.L, 1);
     }
 
-    if(helper.try_push("drops")) {
-        def.drops = parse_drops(helper.L, lua_gettop(helper.L), ctx);
-        lua_pop(helper.L, 1);
+    if(reader.try_push("drops")) {
+        def.drops = parse_drops(reader.L, lua_gettop(reader.L), ctx);
+        lua_pop(reader.L, 1);
     }
 }
 
@@ -599,13 +599,13 @@ static int api_add(lua_State* L) noexcept
     def.tags = static_cast<block_tag_bit>(0);
     def.family = BLOCK_FAMILY_ID_NULL;
 
-    FieldHelper helper(L, def_idx, proto_idx);
-    parse_definition(helper, ctx, def);
+    BlockDefReader reader(L, def_idx, proto_idx);
+    parse_definition(reader, ctx, def);
 
     // a block that resolves into variants is allowed to omit model_name at
     // the top level - each variants[].overrides is expected to supply its
     // own (eg. a slab's base registration has no sensible single model)
-    auto has_variants = helper.try_push("variants");
+    auto has_variants = reader.try_push("variants");
 
     if(has_variants) {
         lua_pop(L, 1);
@@ -619,7 +619,7 @@ static int api_add(lua_State* L) noexcept
     auto has_checked_key = has_variants;
 
     for(const auto& key : std::array { "states", "variants", "on_rtick", "on_stick", "on_place", "on_break", "on_interact" }) {
-        if(helper.try_push(key)) {
+        if(reader.try_push(key)) {
             has_checked_key = true;
             lua_pop(L, 1);
             break;
@@ -631,12 +631,12 @@ static int api_add(lua_State* L) noexcept
         family.name = id;
         family.base_id = block_id;
 
-        if(helper.try_push("states")) {
+        if(reader.try_push("states")) {
             parse_states(L, lua_gettop(L), family);
             lua_pop(L, 1);
         }
 
-        if(helper.try_push("variants")) {
+        if(reader.try_push("variants")) {
             parse_variants(L, lua_gettop(L), ctx, family);
             lua_pop(L, 1);
         }
@@ -655,10 +655,10 @@ static int api_add(lua_State* L) noexcept
     return 1;
 }
 
-void scripting::open_blocks_api(std::shared_ptr<lua_State>& lua, ModContext* mod_ctx) noexcept
+void scripting::open_blocks_library(std::shared_ptr<lua_State>& lua, ModContext* ctx) noexcept
 {
     assert(lua);
-    assert(mod_ctx);
+    assert(ctx);
 
     auto L = lua.get();
 
@@ -730,14 +730,14 @@ void scripting::open_blocks_api(std::shared_ptr<lua_State>& lua, ModContext* mod
     lua_pushinteger(L, BLOCK_ID_NULL);
     lua_setfield(L, -2, "NULL_BLOCK");
 
-    lua_pushlightuserdata(L, mod_ctx);
+    lua_pushlightuserdata(L, ctx);
     lua_pushcclosure(L, &api_get, 1);
     lua_setfield(L, -2, "get");
 
     lua_pushcfunction(L, &api_has_tag);
     lua_setfield(L, -2, "has_tag");
 
-    lua_pushlightuserdata(L, mod_ctx);
+    lua_pushlightuserdata(L, ctx);
     lua_pushcclosure(L, &api_add, 1);
     lua_setfield(L, -2, "add");
 

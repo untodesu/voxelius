@@ -1,37 +1,24 @@
 # Modding: block models
 
-Block models define the geometry to render a block
+Block models define the visible geometry of a block
 
-> **NOTE:** texture _names_ are not part of the model. A model only declares which texture slots it needs (eg. `top`, `side`, etc.); the actual texture files are supplied per-block via `textures` field during registration  
+> **NOTE:** textures _names_ are not part of the model. The model only declares named slots that it needs (eg. `top`, `north`, `nwse`, etc); the actual texture files are supplied per-block using `textures` field during registration  
+
+> **NOTE:** if the slot is missing, `default` slot is used instead
 
 ## Top-level fields
 
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
-|`parent`|`string`|no|N/D|Name of an another block model to inherit|  
-|`textures`|`string[]`|depends|`[]`|List of texture slots the model requires|  
-|`elements`|`object[]`|depends|`[]`|List of cuboids that make the model up|  
+|`textures`|`string[]`|yes|N/D|List of texture slot names|  
+|`elements`|`object[]`|yes|N/D|List of cuboids that make the model|  
 
-## Model inheritance
+## Cuboid object
 
-Examples of a model that inherits a cube and modifies it slightly:
+|Field|Type|Required|Default|Description|  
+|----|----|----|----|----|  
+|`from`|`number[3]`|yes|N/D|Cuboid start
 
-```json
-{
-  "parent": "builtin:cube",
-  "elements": [
-    {
-      "from": [0, 8, 0],
-      "to": [16, 16, 16],
-      "faces": {
-        "north": { "cullface": [null] }
-      }
-    },
-  ]
-}
-```
-
-> **NOTE:** fields on the child model shadow the parent's if defined; this means the example model will have `elements` consist of a single cuboid starting at `[0 8 0]` and ending at `[16 16 16]`  
 
 ## Cuboid object
 

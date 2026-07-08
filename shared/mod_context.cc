@@ -139,7 +139,7 @@ bool ModContext::initialize(void) noexcept
 
     auto entry = Identifier::from_parts(name_space(), "init.lua");
     auto entry_path = entry.as_file_path("scripts", {});
-    auto chunk_name = std::format("@{}:init.lua", name_space());
+    auto chunk_name = std::format("@{}", entry_path);
 
     std::string source;
 

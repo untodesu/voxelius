@@ -105,6 +105,11 @@ config::map_slot_type config::Map::find_or_create_slot(std::string_view key) noe
     return it->second;
 }
 
+bool config::Map::contains(std::string_view key) const noexcept
+{
+    return m_index.contains(std::string(key));
+}
+
 void config::Map::purge(void) noexcept
 {
     m_slots.clear();
