@@ -48,7 +48,7 @@ public:
 
 private:
     std::vector<std::optional<std::string>> m_slots {};
-    std::unordered_map<std::string, map_slot_type> m_index;
+    emhash8::HashMap<std::string, map_slot_type> m_index;
     std::uint64_t m_generation { 0 };
 };
 } // namespace config

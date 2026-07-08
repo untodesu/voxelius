@@ -16,8 +16,10 @@ struct BlockStateDecl final {
 struct BlockOverridePatch final {
     static BlockDefinition apply(BlockDefinition base, const BlockOverridePatch& patch) noexcept;
 
+    BlockOverridePatch(void) noexcept = default;
+
     std::optional<block_render> render;
-    std::optional<std::unordered_map<std::string, std::vector<Identifier>>> textures;
+    std::optional<emhash8::HashMap<std::string, std::vector<Identifier>>> textures;
     std::optional<bool> animated;
 
     std::optional<Identifier> model_name;
@@ -41,7 +43,9 @@ struct BlockOverridePatch final {
 };
 
 struct BlockVariantRule final {
-    std::unordered_map<blockstate_key_type, blockstate_val_type> when;
+    BlockVariantRule(void) noexcept = default;
+
+    emhash8::HashMap<blockstate_key_type, blockstate_val_type> when;
     BlockOverridePatch overrides;
 };
 
@@ -51,11 +55,13 @@ struct BlockCallback final {
 };
 
 struct BlockFamily final {
+    BlockFamily(void) noexcept = default;
+
     Identifier name;
     block_id_type base_id;
 
-    std::unordered_map<blockstate_key_type, BlockStateDecl> states;
-    std::unordered_map<blockstate_val_type, std::string> state_values;
+    emhash8::HashMap<blockstate_key_type, BlockStateDecl> states;
+    emhash8::HashMap<blockstate_val_type, std::string> state_values;
     std::vector<BlockVariantRule> variants;
 
     BlockCallback on_rtick;
@@ -64,7 +70,7 @@ struct BlockFamily final {
     BlockCallback on_break;
     BlockCallback on_interact;
 
-    std::unordered_map<std::uint64_t, block_id_type> resolved_states; // cache of resolved states
+    emhash8::HashMap<std::uint64_t, block_id_type> resolved_states; // cache of resolved states
 
     blockstate_val_type state_hash(std::string_view string) noexcept;
     std::string_view state_value(blockstate_val_type value) noexcept;
@@ -108,7 +114,7 @@ bool has_tag_any(block_id_type id, block_tag_bit tag_bits) noexcept;
 
 namespace block_registry
 {
-block_id_type resolve_variant(block_id_type curr_id, const std::unordered_map<blockstate_key_type, blockstate_val_type>& map) noexcept;
+block_id_type resolve_variant(block_id_type curr_id, const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map) noexcept;
 } // namespace block_registry
 
 #endif /* C35E197B_F82F_423A_8226_7EB5C9E7FEEC */

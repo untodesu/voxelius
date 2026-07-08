@@ -6,7 +6,7 @@
 // a bunch of OPTION_PREFIX'es inside and never end with one
 constexpr static char OPTION_PREFIX = '-';
 
-static std::unordered_map<std::string, std::string> s_options;
+static emhash8::HashMap<std::string, std::string> s_options;
 
 static bool is_option_argv(std::string_view argv_string)
 {

@@ -6,14 +6,14 @@ struct Loader final {
     res::load_func load_fn;
     res::free_func free_fn;
 
-    std::unordered_map<std::string, res::handle<void>> resources;
+    emhash8::HashMap<std::string, res::handle<void>> resources;
 
     std::vector<res::handle<void>> cache;
 
     std::string classname;
 };
 
-static std::unordered_map<std::type_index, std::unique_ptr<Loader>> s_loaders;
+static emhash8::HashMap<std::type_index, std::unique_ptr<Loader>> s_loaders;
 
 void res::detail::register_loader(const std::type_info& type, load_func load_fn, free_func free_fn)
 {

@@ -97,7 +97,7 @@ config::map_slot_type config::Map::find_or_create_slot(std::string_view key) noe
     if(it == m_index.cend()) {
         auto slot = m_slots.size();
         m_slots.emplace_back(std::nullopt);
-        m_index.insert_or_assign(std::string(key), slot);
+        m_index.try_emplace(std::string(key), slot);
 
         return slot;
     }

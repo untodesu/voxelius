@@ -189,7 +189,7 @@ block_id_type ModContext::register_block(const Identifier& name, BlockDefinition
     auto id = static_cast<block_id_type>(m_blocks.size());
 
     m_blocks.push_back(std::move(def));
-    m_block_names.insert_or_assign(name, id);
+    m_block_names.try_emplace(name, id);
 
     return id;
 }
@@ -228,7 +228,7 @@ std::vector<BlockFamily> ModContext::take_block_families(void) noexcept
     return std::move(m_block_families);
 }
 
-std::unordered_map<Identifier, block_id_type> ModContext::take_block_names(void) noexcept
+emhash8::HashMap<Identifier, block_id_type> ModContext::take_block_names(void) noexcept
 {
     return std::move(m_block_names);
 }

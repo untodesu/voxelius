@@ -41,6 +41,8 @@
 
 #include <BS_thread_pool.hpp>
 
+#include <emhash/hash_table8.hpp>
+
 #include <enet/enet.h>
 
 #include <parson.h>

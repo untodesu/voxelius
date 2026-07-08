@@ -43,6 +43,7 @@ target_compile_features(core PUBLIC cxx_std_20)
 target_include_directories(core PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(core PUBLIC
     deps::eigen
+    deps::emhash
     deps::enet
     deps::parson
     deps::physfs

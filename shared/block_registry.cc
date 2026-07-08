@@ -10,8 +10,8 @@
 
 static std::vector<BlockDefinition> s_definitions;
 static std::vector<BlockFamily> s_families;
-static std::unordered_map<Identifier, block_id_type> s_names;
-static std::unordered_map<block_id_type, Identifier> s_reverse_names;
+static emhash8::HashMap<Identifier, block_id_type> s_names;
+static emhash8::HashMap<block_id_type, Identifier> s_reverse_names;
 
 BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverridePatch& patch) noexcept
 {
@@ -167,7 +167,7 @@ void block_registry::commit(ModContext& ctx) noexcept
             continue;
         }
 
-        s_reverse_names.insert_or_assign(global_id, name);
+        s_reverse_names.try_emplace(global_id, name);
     }
 
     if(!blocks.empty()) {
@@ -270,7 +270,7 @@ bool block_registry::has_tag_any(block_id_type id, block_tag_bit tag_bits) noexc
 }
 
 block_id_type block_registry::resolve_variant(block_id_type curr_id,
-    const std::unordered_map<blockstate_key_type, blockstate_val_type>& map) noexcept
+    const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map) noexcept
 {
     auto def = find_definition(curr_id);
 
@@ -321,7 +321,7 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id,
     resolved.family = def->family;
 
     auto new_id = static_cast<block_id_type>(s_definitions.size());
-    family.resolved_states.insert_or_assign(hash, new_id);
+    family.resolved_states.try_emplace(hash, new_id);
     s_definitions.push_back(std::move(resolved));
 
     return new_id;

@@ -1,4 +1,5 @@
 add_subdirectory(eigen)
+add_subdirectory(emhash)
 add_subdirectory(enet)
 add_subdirectory(entt)
 add_subdirectory(imgui)

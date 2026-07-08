@@ -266,7 +266,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("textures")) {
-        std::unordered_map<std::string, std::vector<Identifier>> textures;
+        emhash8::HashMap<std::string, std::vector<Identifier>> textures;
         auto textures_idx = lua_gettop(L);
 
         lua_pushnil(L);
@@ -496,7 +496,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         auto textures_idx = lua_gettop(L);
 
         def.textures.clear();
-        def.textures.reserve(lua_rawlen(L, textures_idx));
 
         lua_pushnil(L);
 
@@ -726,7 +725,7 @@ static bool parse_variant_when(lua_State* L, int entry_idx, BlockVariantRule& ru
         auto key = static_cast<blockstate_key_type>(utils::crc64(state_name.data(), state_name.size()));
         auto value = family.state_hash(value_str.value());
 
-        rule.when.insert_or_assign(key, value);
+        rule.when.try_emplace(key, value);
 
         lua_pop(L, 1);
     }

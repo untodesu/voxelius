@@ -69,8 +69,10 @@ struct BlockDrop final {
 };
 
 struct BlockDefinition final {
+    BlockDefinition(void) noexcept = default;
+
     block_render render;
-    std::unordered_map<std::string, std::vector<Identifier>> textures;
+    emhash8::HashMap<std::string, std::vector<Identifier>> textures;
     bool animated;
 
     Identifier model_name;

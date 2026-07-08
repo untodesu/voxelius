@@ -81,7 +81,7 @@ public:
 
     std::vector<BlockDefinition> take_blocks(void) noexcept;
     std::vector<BlockFamily> take_block_families(void) noexcept;
-    std::unordered_map<Identifier, block_id_type> take_block_names(void) noexcept;
+    emhash8::HashMap<Identifier, block_id_type> take_block_names(void) noexcept;
 
 private:
     ModInfo m_modinfo;
@@ -90,7 +90,7 @@ private:
 
     std::vector<BlockDefinition> m_blocks;
     std::vector<BlockFamily> m_block_families;
-    std::unordered_map<Identifier, block_id_type> m_block_names;
+    emhash8::HashMap<Identifier, block_id_type> m_block_names;
 };
 
 constexpr const ModInfo& ModContext::modinfo(void) const noexcept

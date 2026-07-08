@@ -11,6 +11,7 @@
                 "${workspaceFolder}/build/windows-x32/_deps/download_sdl3-src/include",
                 "${workspaceFolder}/build/windows-x64/_deps/download_sdl3-src/include",
                 "${workspaceFolder}/deps/eigen/include",
+                "${workspaceFolder}/deps/emhash/include",
                 "${workspaceFolder}/deps/enet/include",
                 "${workspaceFolder}/deps/entt/include",
                 "${workspaceFolder}/deps/imgui/include",
