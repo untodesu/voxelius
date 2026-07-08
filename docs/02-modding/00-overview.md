@@ -1,4 +1,6 @@
-# Modding: introduction
+# Modding: overview
+
+Starting with the project's 17th rewrite (this is a joke, though it's like the fourth rewrite in the game's history dating back to 2021), Voxelius _the game_ builds on top of Voxelius _the engine_, which provides a bunch of Lua hooks to define blocks and other stuff that enhances core gameplay
 
 ## Namespaced identifiers
 
@@ -30,3 +32,8 @@ Most of the time, files in that system are accessed using namespaced identifiers
 |`builtin:block/stone01.png`|`data/builtin/textures/block/stone01.png`|The subdirectory can be omitted if C++ code decides to pass it instead, so the identifiers in stuff like block definitions are much shorter to read|  
 |`builtin:cube`|`data/builtin/models/block/cube.json`|Same here|  
 |`coolmod:init.lua`|`mods/coolmod/scripts/init.lua`|Whatever custom content there is|  
+
+## Error handling
+
+The mod's root script, `modname/scripts/init.lua` can handle errors itself, though if an error propagates out of it (into the initializing `lua_pcall`), the mod will be considered as a load fail.  
+

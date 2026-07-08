@@ -1,0 +1,49 @@
+site_name: Voxelius
+site_url: https://voxelius.codeberg.page/voxelius
+repo_url: https://codeberg.org/voxelius/voxelius
+repo_name: voxelius/voxelius
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        name: Switch to dark mode
+        icon: material/weather-night
+      primary: black
+      accent: black
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        name: Switch to light mode
+        icon: material/weather-sunny
+      primary: black
+      accent: black
+  favicon: favicon.ico
+  logo: favicon.png
+
+nav:
+  - Home: index.md
+  - Overview:
+    - History: 00-overview/00-history.md
+    - Features: 00-overview/01-features.md
+    - Architecture: 00-overview/02-architecture.md
+    - Source Code: 00-overview/03-source-code.md
+  - Development:
+    - Requirements: 01-development/00-requirements.md
+    - Build Guide: 01-development/01-build-guide.md
+    - Coding Style: 01-development/02-coding-style.md
+    - Contributing: 01-development/03-contributing.md
+  - Modding:
+    - Overview: 02-modding/00-overview.md
+    - Mod metadata: 02-modding/01-modinfo.md
+    - API Reference:
+      - Lua libraries: 02-modding/10-lua-libraries.md
+      - Core library: 02-modding/11-core-library.md
+      - Blocks library: 02-modding/12-blocks-library.md
+      - World library: 02-modding/13-world-library.md
+    - File formats:
+      - Block models: 02-modding/20-block-models.md
+      - Block collisions: 02-modding/21-block-collisions.md
+

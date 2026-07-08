@@ -1,4 +1,4 @@
-# Modding: core API
+# Modding: core library
 
 The engine provides limited access to its subsystems and constants using `core` library.
 
@@ -18,4 +18,4 @@ Specifies the game/engine version. See `core/version.hh` for the C++ equivalent.
 
 ## Current namespace
 
-As mentioned in [00-introduction](00-introduction.md), namespaced identifiers can have the namespace omitted and be replaced with a default value. That value for mods is also contained in the `core.NAMESPACE` constant.  
+As mentioned in the [overview](00-overview.md), namespaced identifiers can have the namespace omitted and be replaced with a default value. That value for mods is also contained in the `core.NAMESPACE` constant.  

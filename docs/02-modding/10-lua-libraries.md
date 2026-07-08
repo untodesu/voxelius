@@ -1,6 +1,4 @@
-# Modding: Lua API
-
-## Core libraries
+# Modding: lua libraries
 
 Voxelius's runtime provides common Lua APIs:  
 
@@ -26,7 +24,3 @@ Voxelius's runtime provides common Lua APIs:
 |`dofile`|Treats the input path as a namespaced identifier with the `scripts` subdirectory implicitly defined|  
 |`require`|Same as `dofile`, named differently for clarity|  
 |`print`|Alias to uuLog's `LOG_INFO` macro|  
-
-## Error handling
-
-The mod's root script, `modname/scripts/init.lua` can handle errors itself, though if an error propagates out of it (into the initializing `lua_pcall`), the mod will be considered as a load fail.  

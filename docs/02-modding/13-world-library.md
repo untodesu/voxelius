@@ -1,4 +1,4 @@
-# Modding: world API
+# Modding: world library
 
 Mods can access blocks in the world using the `world` library
 

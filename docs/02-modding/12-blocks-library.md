@@ -1,7 +1,6 @@
-# Modding: blocks API
+# Modding: blocks library
 
 Mods can register new block types and access existing one using the `blocks` library provided by the engine.  
-
 
 ## Constants: render mode
 
@@ -16,8 +15,6 @@ Defines a block rendering step
 ## Constants: block face
 
 Defines a block face used for culling and other grid-aligned operations  
-
-> **TIP:** blockstates are hashed when getting parsed by runtime host, so literally anything can be passed there, including these values!! So instead of typing a string every time, you can use these to define a block orientation  
 
 |Name|Description|  
 |----|----|  
@@ -128,9 +125,11 @@ If the same block is already registered (mind you `mymod:myblock` and `joe_mod:m
 |`textures`|`table`|depends|`{}`|Textures to attach to the block model|  
 |`animated`|`boolean`|no|`false`|When set to true, multiple textures from the `textures` value are used as animation frames instead of being positionally randomized in the world|  
 |`model_name`|`string`|depends| |Block model name for this variant|  
-|`model_offset|`float[3]`|depends|`[0,0,0]`|Offset of the resolved block model|  
+|`model_offset`|`float[3]`|depends|`[0,0,0]`|Offset of the resolved block model|  
+|`model_facing`|`integer`|no|`blocks.FACE_NORTH`|One of the `blocks.FACE_XXXX` constants. Says which way the model's own north face should end up pointing; rotates the whole resolved block model|  
 |`bcoll_name`|`string`|depends| |Block collision shape for this variant|  
 |`bcoll_offset`|`float[3]`|depends|`[0,0,0]`|Block collision offset|  
+|`bcoll_facing`|`integer`|no|`blocks.FACE_NORTH`|One of the `blocks.FACE_XXXX` constants. Rotates the whole resolved collision shape the same way `model_facing` rotates the model; set independently since collision doesn't have to follow the visual, though it usually should|  
 |`health`|`integer`|no|`0`|Base amount of hit points required for the block to be broken. Varies with different effects active on the tool|  
 |`sound`|`string`|no| |Sound set to use for this block|  
 |`emission`|`integer`|no|0|Emission light value|  
@@ -145,6 +144,19 @@ If the same block is already registered (mind you `mymod:myblock` and `joe_mod:m
 |`on_place`|`function`|no|`nil`|Placement handler, can decide whether it's ok or not to place the block there|  
 |`on_break`|`function`|no|`nil`|Break handler|  
 |`on_interact`|`function`|no|`nil`|Interaction handler|  
+
+### Facing rotation
+
+The `model_facing` and `bcoll_facing` fields each map to one, uniquely-determined 90-degree-step rotation of the whole resolved model/collision shape (never a combination/roll of multiple axes):
+
+|Value|Rotation applied|Axis held fixed|  
+|----|----|----|  
+|`blocks.FACE_NORTH`|none (identity)| |  
+|`blocks.FACE_SOUTH`|180 degrees around the vertical (Y) axis|top/bottom unchanged|  
+|`blocks.FACE_EAST`|90 degrees around the vertical (Y) axis|top/bottom unchanged|  
+|`blocks.FACE_WEST`|-90 degrees around the vertical (Y) axis|top/bottom unchanged|  
+|`blocks.FACE_TOP`|-90 degrees around the east/west (X) axis|east/west unchanged|  
+|`blocks.FACE_BOTTOM`|90 degrees around the east/west (X) axis|east/west unchanged|  
 
 ### Drops table
 
