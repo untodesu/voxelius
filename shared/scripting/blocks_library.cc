@@ -53,13 +53,50 @@ bool BlockDefReader::try_push(const char* key) const noexcept
     return true;
 }
 
-static void parse_drop_effects(lua_State* L, int when_idx, BlockDrop& drop, ModContext* ctx) noexcept
+static std::optional<std::string_view> require_string(lua_State* L, int idx) noexcept
+{
+    auto type = lua_type(L, idx);
+
+    if(type == LUA_TSTRING || type == LUA_TNUMBER) {
+        std::size_t length = 0;
+        auto value = lua_tolstring(L, idx, &length);
+        return std::string_view(value, length);
+    }
+
+    lua_pushfstring(L, "expected a string, got %s", lua_typename(L, type));
+
+    return std::nullopt;
+}
+
+static std::optional<lua_Integer> require_integer(lua_State* L, int idx) noexcept
+{
+    int is_num = 0;
+    auto value = lua_tointegerx(L, idx, &is_num);
+
+    if(is_num) {
+        return value;
+    }
+
+    lua_pushfstring(L, "expected an integer, got %s", lua_typename(L, lua_type(L, idx)));
+
+    return std::nullopt;
+}
+
+static std::optional<lua_Integer> opt_integer(lua_State* L, int idx, lua_Integer default_value) noexcept
+{
+    if(lua_isnoneornil(L, idx))
+        return default_value;
+    return require_integer(L, idx);
+}
+
+static bool parse_drop_effects(lua_State* L, int when_idx, BlockDrop& drop, ModContext* ctx) noexcept
 {
     lua_getfield(L, when_idx, "effects");
 
     if(lua_isnil(L, -1)) {
         lua_pop(L, 1);
-        return;
+
+        return true;
     }
 
     auto effects_idx = lua_gettop(L);
@@ -70,11 +107,21 @@ static void parse_drop_effects(lua_State* L, int when_idx, BlockDrop& drop, ModC
 
     for(lua_Integer i = 1; i <= static_cast<lua_Integer>(effects_count); ++i) {
         lua_rawgeti(L, effects_idx, i);
-        drop.cond_effects.emplace_back(Identifier::from_string(luaL_checkstring(L, -1), ctx->name_space()));
+
+        auto value = require_string(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        drop.cond_effects.emplace_back(Identifier::from_string(value.value(), ctx->name_space()));
+
         lua_pop(L, 1);
     }
 
     lua_pop(L, 1);
+
+    return true;
 }
 
 static void parse_drop_tools(lua_State* L, int when_idx, BlockDrop& drop) noexcept
@@ -91,30 +138,37 @@ static void parse_drop_tools(lua_State* L, int when_idx, BlockDrop& drop) noexce
     lua_pop(L, 1);
 }
 
-static void parse_drop_when(lua_State* L, int entry_idx, BlockDrop& drop, ModContext* ctx) noexcept
+static bool parse_drop_when(lua_State* L, int entry_idx, BlockDrop& drop, ModContext* ctx) noexcept
 {
     lua_getfield(L, entry_idx, "when");
 
     if(lua_isnil(L, -1)) {
         lua_pop(L, 1);
-        return;
+
+        return true;
     }
 
     auto when_idx = lua_gettop(L);
 
-    parse_drop_effects(L, when_idx, drop, ctx);
+    if(!parse_drop_effects(L, when_idx, drop, ctx)) {
+        return false;
+    }
+
     parse_drop_tools(L, when_idx, drop);
 
     lua_pop(L, 1);
+
+    return true;
 }
 
-static void parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModContext* ctx) noexcept
+static bool parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModContext* ctx) noexcept
 {
     lua_getfield(L, entry_idx, "items");
 
     if(lua_isnil(L, -1)) {
         lua_pop(L, 1);
-        return;
+
+        return true;
     }
 
     auto items_idx = lua_gettop(L);
@@ -131,11 +185,27 @@ static void parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModCo
         BlockDropItem item {};
 
         lua_getfield(L, item_idx, "name");
-        item.name = Identifier::from_string(luaL_checkstring(L, -1), ctx->name_space());
+
+        auto name = require_string(L, -1);
+
+        if(!name.has_value()) {
+            return false;
+        }
+
+        item.name = Identifier::from_string(name.value(), ctx->name_space());
+
         lua_pop(L, 1);
 
         lua_getfield(L, item_idx, "count");
-        item.count = static_cast<unsigned>(luaL_optinteger(L, -1, 1));
+
+        auto count = opt_integer(L, -1, 1);
+
+        if(!count.has_value()) {
+            return false;
+        }
+
+        item.count = static_cast<unsigned>(count.value());
+
         lua_pop(L, 1);
 
         drop.items.push_back(std::move(item));
@@ -144,14 +214,16 @@ static void parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModCo
     }
 
     lua_pop(L, 1);
+
+    return true;
 }
 
-static std::vector<BlockDrop> parse_drops(lua_State* L, int drops_idx, ModContext* ctx) noexcept
+static bool parse_drops(lua_State* L, int drops_idx, ModContext* ctx, std::vector<BlockDrop>& out) noexcept
 {
     auto count = lua_rawlen(L, drops_idx);
 
-    std::vector<BlockDrop> drops;
-    drops.reserve(count);
+    out.clear();
+    out.reserve(count);
 
     for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
         lua_rawgeti(L, drops_idx, i);
@@ -161,24 +233,35 @@ static std::vector<BlockDrop> parse_drops(lua_State* L, int drops_idx, ModContex
         BlockDrop drop {};
         drop.cond_tool_bits = BLOCK_TOOL_NONE;
 
-        parse_drop_when(L, entry_idx, drop, ctx);
-        parse_drop_items(L, entry_idx, drop, ctx);
+        if(!parse_drop_when(L, entry_idx, drop, ctx)) {
+            return false;
+        }
 
-        drops.push_back(std::move(drop));
+        if(!parse_drop_items(L, entry_idx, drop, ctx)) {
+            return false;
+        }
+
+        out.push_back(std::move(drop));
 
         lua_pop(L, 1);
     }
 
-    return drops;
+    return true;
 }
 
-static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx) noexcept
+static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverridePatch& patch) noexcept
 {
-    BlockOverridePatch patch {};
     BlockDefReader reader(L, idx, 0);
 
     if(reader.try_push("render")) {
-        patch.render = static_cast<block_render>(luaL_checkinteger(L, -1));
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.render = static_cast<block_render>(value.value());
+
         lua_pop(L, 1);
     }
 
@@ -189,7 +272,13 @@ static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx
         lua_pushnil(L);
 
         while(lua_next(L, textures_idx)) {
-            auto slot = std::string(luaL_checkstring(L, -2));
+            auto slot_name = require_string(L, -2);
+
+            if(!slot_name.has_value()) {
+                return false;
+            }
+
+            auto slot = std::string(slot_name.value());
             auto count = lua_rawlen(L, -1);
 
             std::vector<Identifier> variants;
@@ -197,7 +286,15 @@ static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx
 
             for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
                 lua_rawgeti(L, -1, i);
-                variants.emplace_back(Identifier::from_string(luaL_checkstring(L, -1), ctx->name_space()));
+
+                auto variant_name = require_string(L, -1);
+
+                if(!variant_name.has_value()) {
+                    return false;
+                }
+
+                variants.emplace_back(Identifier::from_string(variant_name.value(), ctx->name_space()));
+
                 lua_pop(L, 1);
             }
 
@@ -213,51 +310,102 @@ static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx
 
     if(reader.try_push("animated")) {
         patch.animated = static_cast<bool>(lua_toboolean(L, -1));
+
         lua_pop(L, 1);
     }
 
     if(reader.try_push("model_name")) {
-        patch.model_name = Identifier::from_string(luaL_checkstring(L, -1), ctx->name_space());
+        auto value = require_string(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.model_name = Identifier::from_string(value.value(), ctx->name_space());
+
         lua_pop(L, 1);
     }
 
     if(reader.try_push("model_offset")) {
         patch.model_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
+
         lua_pop(L, 1);
     }
 
     if(reader.try_push("bcoll_name")) {
-        patch.bcoll_name = Identifier::from_string(luaL_checkstring(L, -1), ctx->name_space());
+        auto value = require_string(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.bcoll_name = Identifier::from_string(value.value(), ctx->name_space());
+
         lua_pop(L, 1);
     }
 
     if(reader.try_push("bcoll_offset")) {
         patch.bcoll_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
+
         lua_pop(L, 1);
     }
 
     if(reader.try_push("health")) {
-        patch.health = static_cast<unsigned>(luaL_checkinteger(L, -1));
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.health = static_cast<unsigned>(value.value());
+
         lua_pop(L, 1);
     }
 
     if(reader.try_push("sound")) {
-        patch.sound_set = Identifier::from_string(luaL_checkstring(L, -1), ctx->name_space());
+        auto value = require_string(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.sound_set = Identifier::from_string(value.value(), ctx->name_space());
+
         lua_pop(L, 1);
     }
 
     if(reader.try_push("emission")) {
-        patch.emission = static_cast<block_light_type>(luaL_checkinteger(L, -1));
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.emission = static_cast<block_light_type>(value.value());
+
         lua_pop(L, 1);
     }
 
     if(reader.try_push("dissipation")) {
-        patch.dissipation = static_cast<block_light_type>(luaL_checkinteger(L, -1));
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.dissipation = static_cast<block_light_type>(value.value());
+
         lua_pop(L, 1);
     }
 
     if(reader.try_push("touch")) {
-        patch.touch = static_cast<block_touch>(luaL_checkinteger(L, -1));
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.touch = static_cast<block_touch>(value.value());
         lua_pop(L, 1);
     }
 
@@ -272,122 +420,212 @@ static BlockOverridePatch parse_overrides(lua_State* L, int idx, ModContext* ctx
     }
 
     if(reader.try_push("drops")) {
-        patch.drops = parse_drops(L, lua_gettop(L), ctx);
+        std::vector<BlockDrop> drops;
+
+        if(!parse_drops(L, lua_gettop(L), ctx, drops)) {
+            return false;
+        }
+
+        patch.drops = std::move(drops);
+
         lua_pop(L, 1);
     }
 
-    return patch;
+    return true;
 }
 
-static void parse_definition(const BlockDefReader& reader, ModContext* ctx, BlockDefinition& def) noexcept
+static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, BlockDefinition& def) noexcept
 {
+    auto L = reader.L;
+
     if(reader.try_push("render")) {
-        def.render = static_cast<block_render>(luaL_checkinteger(reader.L, -1));
-        lua_pop(reader.L, 1);
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.render = static_cast<block_render>(value.value());
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("model_name")) {
-        def.model_name = Identifier::from_string(luaL_checkstring(reader.L, -1), ctx->name_space());
-        lua_pop(reader.L, 1);
+        auto value = require_string(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.model_name = Identifier::from_string(value.value(), ctx->name_space());
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("model_offset")) {
-        def.model_offset = utils::read_vector3f(reader.L, lua_gettop(reader.L)) / 16.0f;
-        lua_pop(reader.L, 1);
+        def.model_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("bcoll_name")) {
-        def.bcoll_name = Identifier::from_string(luaL_checkstring(reader.L, -1), ctx->name_space());
-        lua_pop(reader.L, 1);
+        auto value = require_string(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.bcoll_name = Identifier::from_string(value.value(), ctx->name_space());
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("bcoll_offset")) {
-        def.bcoll_offset = utils::read_vector3f(reader.L, lua_gettop(reader.L)) / 16.0f;
-        lua_pop(reader.L, 1);
+        def.bcoll_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("animated")) {
-        def.animated = static_cast<bool>(lua_toboolean(reader.L, -1));
-        lua_pop(reader.L, 1);
+        def.animated = static_cast<bool>(lua_toboolean(L, -1));
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("textures")) {
-        auto textures_idx = lua_gettop(reader.L);
+        auto textures_idx = lua_gettop(L);
 
         def.textures.clear();
-        def.textures.reserve(lua_rawlen(reader.L, textures_idx));
+        def.textures.reserve(lua_rawlen(L, textures_idx));
 
-        lua_pushnil(reader.L);
+        lua_pushnil(L);
 
-        while(lua_next(reader.L, textures_idx)) {
-            auto slot = std::string(luaL_checkstring(reader.L, -2));
-            auto count = lua_rawlen(reader.L, -1);
+        while(lua_next(L, textures_idx)) {
+            auto slot_name = require_string(L, -2);
+
+            if(!slot_name.has_value()) {
+                return false;
+            }
+
+            auto slot = std::string(slot_name.value());
+            auto count = lua_rawlen(L, -1);
 
             std::vector<Identifier> variants;
             variants.reserve(count);
 
             for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
-                lua_rawgeti(reader.L, -1, i);
-                variants.emplace_back(Identifier::from_string(luaL_checkstring(reader.L, -1), ctx->name_space()));
-                lua_pop(reader.L, 1);
+                lua_rawgeti(L, -1, i);
+
+                auto variant_name = require_string(L, -1);
+
+                if(!variant_name.has_value()) {
+                    return false;
+                }
+
+                variants.emplace_back(Identifier::from_string(variant_name.value(), ctx->name_space()));
+
+                lua_pop(L, 1);
             }
 
             def.textures.insert_or_assign(std::move(slot), std::move(variants));
 
-            lua_pop(reader.L, 1);
+            lua_pop(L, 1);
         }
 
-        lua_pop(reader.L, 1);
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("health")) {
-        def.health = static_cast<unsigned>(luaL_checkinteger(reader.L, -1));
-        lua_pop(reader.L, 1);
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.health = static_cast<unsigned>(value.value());
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("sound")) {
-        def.sound_set = Identifier::from_string(luaL_checkstring(reader.L, -1), ctx->name_space());
-        lua_pop(reader.L, 1);
+        auto value = require_string(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.sound_set = Identifier::from_string(value.value(), ctx->name_space());
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("emission")) {
-        def.emission = static_cast<block_light_type>(luaL_checkinteger(reader.L, -1));
-        lua_pop(reader.L, 1);
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.emission = static_cast<block_light_type>(value.value());
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("dissipation")) {
-        def.dissipation = static_cast<block_light_type>(luaL_checkinteger(reader.L, -1));
-        lua_pop(reader.L, 1);
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.dissipation = static_cast<block_light_type>(value.value());
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("touch")) {
-        def.touch = static_cast<block_touch>(luaL_checkinteger(reader.L, -1));
-        lua_pop(reader.L, 1);
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.touch = static_cast<block_touch>(value.value());
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("touch_coeffs")) {
-        def.touch_coeffs = utils::read_vector3f(reader.L, lua_gettop(reader.L));
-        lua_pop(reader.L, 1);
+        def.touch_coeffs = utils::read_vector3f(L, lua_gettop(L));
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("tags")) {
-        def.tags = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(reader.L, lua_gettop(reader.L)));
-        lua_pop(reader.L, 1);
+        def.tags = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
+
+        lua_pop(L, 1);
     }
 
     if(reader.try_push("drops")) {
-        def.drops = parse_drops(reader.L, lua_gettop(reader.L), ctx);
-        lua_pop(reader.L, 1);
+        if(!parse_drops(L, lua_gettop(L), ctx, def.drops)) {
+            return false;
+        }
+
+        lua_pop(L, 1);
     }
+
+    return true;
 }
 
-static void parse_state_hint(lua_State* L, int entry_idx, BlockStateDecl& decl, BlockFamily& family) noexcept
+static bool parse_state_hint(lua_State* L, int entry_idx, BlockStateDecl& decl, BlockFamily& family) noexcept
 {
     lua_getfield(L, entry_idx, "hint");
 
     if(lua_isnil(L, -1)) {
         lua_pop(L, 1);
-        return;
+
+        return true;
     }
 
     auto hint_idx = lua_gettop(L);
@@ -398,43 +636,72 @@ static void parse_state_hint(lua_State* L, int entry_idx, BlockStateDecl& decl, 
 
     for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
         lua_rawgeti(L, hint_idx, i);
-        decl.hint.push_back(family.state_hash(luaL_checkstring(L, -1)));
+
+        auto value = require_string(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        decl.hint.push_back(family.state_hash(value.value()));
+
         lua_pop(L, 1);
     }
 
     lua_pop(L, 1);
+
+    return true;
 }
 
-static void parse_states(lua_State* L, int idx, BlockFamily& family) noexcept
+static bool parse_states(lua_State* L, int idx, BlockFamily& family) noexcept
 {
     lua_pushnil(L);
 
     while(lua_next(L, idx)) {
-        auto state_name = std::string(luaL_checkstring(L, -2));
+        auto state_name_str = require_string(L, -2);
+
+        if(!state_name_str.has_value()) {
+            return false;
+        }
+
+        auto state_name = std::string(state_name_str.value());
         auto entry_idx = lua_gettop(L);
 
         BlockStateDecl decl {};
 
         lua_getfield(L, entry_idx, "default");
-        decl.default_value = family.state_hash(luaL_checkstring(L, -1));
+
+        auto default_value = require_string(L, -1);
+
+        if(!default_value.has_value()) {
+            return false;
+        }
+
+        decl.default_value = family.state_hash(default_value.value());
+
         lua_pop(L, 1);
 
-        parse_state_hint(L, entry_idx, decl, family);
+        if(!parse_state_hint(L, entry_idx, decl, family)) {
+            return false;
+        }
 
         auto key = static_cast<blockstate_key_type>(utils::crc64(state_name.data(), state_name.size()));
         family.states.insert_or_assign(key, std::move(decl));
 
         lua_pop(L, 1);
     }
+
+    return true;
 }
 
-static void parse_variant_when(lua_State* L, int entry_idx, BlockVariantRule& rule, BlockFamily& family) noexcept
+static bool parse_variant_when(lua_State* L, int entry_idx, BlockVariantRule& rule, BlockFamily& family) noexcept
 {
     lua_getfield(L, entry_idx, "when");
 
     if(lua_isnil(L, -1)) {
         lua_pop(L, 1);
-        return;
+
+        return true;
     }
 
     auto when_idx = lua_gettop(L);
@@ -442,11 +709,22 @@ static void parse_variant_when(lua_State* L, int entry_idx, BlockVariantRule& ru
     lua_pushnil(L);
 
     while(lua_next(L, when_idx)) {
-        auto state_name = std::string(luaL_checkstring(L, -2));
-        auto value_str = luaL_checkstring(L, -1);
+        auto state_name_str = require_string(L, -2);
+
+        if(!state_name_str.has_value()) {
+            return false;
+        }
+
+        auto state_name = std::string(state_name_str.value());
+
+        auto value_str = require_string(L, -1);
+
+        if(!value_str.has_value()) {
+            return false;
+        }
 
         auto key = static_cast<blockstate_key_type>(utils::crc64(state_name.data(), state_name.size()));
-        auto value = family.state_hash(value_str);
+        auto value = family.state_hash(value_str.value());
 
         rule.when.insert_or_assign(key, value);
 
@@ -454,23 +732,30 @@ static void parse_variant_when(lua_State* L, int entry_idx, BlockVariantRule& ru
     }
 
     lua_pop(L, 1);
+
+    return true;
 }
 
-static void parse_variant_overrides(lua_State* L, int entry_idx, BlockVariantRule& rule, ModContext* ctx) noexcept
+static bool parse_variant_overrides(lua_State* L, int entry_idx, BlockVariantRule& rule, ModContext* ctx) noexcept
 {
     lua_getfield(L, entry_idx, "overrides");
 
     if(lua_isnil(L, -1)) {
         lua_pop(L, 1);
-        return;
+
+        return true;
     }
 
-    rule.overrides = parse_overrides(L, lua_gettop(L), ctx);
+    if(!parse_overrides(L, lua_gettop(L), ctx, rule.overrides)) {
+        return false;
+    }
 
     lua_pop(L, 1);
+
+    return true;
 }
 
-static void parse_variants(lua_State* L, int idx, ModContext* ctx, BlockFamily& family) noexcept
+static bool parse_variants(lua_State* L, int idx, ModContext* ctx, BlockFamily& family) noexcept
 {
     auto count = lua_rawlen(L, idx);
 
@@ -483,13 +768,21 @@ static void parse_variants(lua_State* L, int idx, ModContext* ctx, BlockFamily& 
         auto entry_idx = lua_gettop(L);
 
         BlockVariantRule rule {};
-        parse_variant_when(L, entry_idx, rule, family);
-        parse_variant_overrides(L, entry_idx, rule, ctx);
+
+        if(!parse_variant_when(L, entry_idx, rule, family)) {
+            return false;
+        }
+
+        if(!parse_variant_overrides(L, entry_idx, rule, ctx)) {
+            return false;
+        }
 
         family.variants.push_back(std::move(rule));
 
         lua_pop(L, 1);
     }
+
+    return true;
 }
 
 static BlockCallback parse_callback(lua_State* L, int table_idx, const char* key, ModContext* ctx) noexcept
@@ -560,29 +853,14 @@ static int api_has_tag(lua_State* L) noexcept
     return 1;
 }
 
-static int api_add(lua_State* L) noexcept
+static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int def_idx, int proto_idx, block_id_type& out_block_id) noexcept
 {
-    auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
-
-    auto argc = lua_gettop(L);
-    auto raw_name = luaL_checkstring(L, 1);
-
-    int proto_idx = 0;
-    int def_idx = 2;
-
-    if(argc >= 3) {
-        proto_idx = 2;
-        def_idx = 3;
-
-        luaL_checktype(L, proto_idx, LUA_TTABLE);
-    }
-
-    luaL_checktype(L, def_idx, LUA_TTABLE);
-
     auto id = Identifier::from_string(raw_name, ctx->name_space());
 
     if(!id.is_valid()) {
-        return luaL_error(L, "blocks.add: malformed name: %s", raw_name);
+        lua_pushfstring(L, "blocks.add: malformed name: %s", raw_name);
+
+        return false;
     }
 
     id = make_unique_id(id, ctx);
@@ -600,7 +878,10 @@ static int api_add(lua_State* L) noexcept
     def.family = BLOCK_FAMILY_ID_NULL;
 
     BlockDefReader reader(L, def_idx, proto_idx);
-    parse_definition(reader, ctx, def);
+
+    if(!parse_definition(reader, ctx, def)) {
+        return false;
+    }
 
     // a block that resolves into variants is allowed to omit model_name at
     // the top level - each variants[].overrides is expected to supply its
@@ -612,7 +893,8 @@ static int api_add(lua_State* L) noexcept
     }
 
     if(!has_variants && def.render != BLOCK_RENDER_NONE && def.model_name.is_empty()) {
-        return luaL_error(L, "blocks.add: [%s]: model_name is required unless render is blocks.RENDER_NONE", id.full_string().data());
+        lua_pushfstring(L, "blocks.add: [%s]: model_name is required unless render is blocks.RENDER_NONE", id.full_string().data());
+        return false;
     }
 
     auto block_id = ctx->register_block(id, def);
@@ -632,13 +914,21 @@ static int api_add(lua_State* L) noexcept
         family.base_id = block_id;
 
         if(reader.try_push("states")) {
-            parse_states(L, lua_gettop(L), family);
+            auto states_ok = parse_states(L, lua_gettop(L), family);
             lua_pop(L, 1);
+
+            if(!states_ok) {
+                return false;
+            }
         }
 
         if(reader.try_push("variants")) {
-            parse_variants(L, lua_gettop(L), ctx, family);
+            auto variants_ok = parse_variants(L, lua_gettop(L), ctx, family);
             lua_pop(L, 1);
+
+            if(!variants_ok) {
+                return false;
+            }
         }
 
         family.on_rtick = parse_callback(L, def_idx, "on_rtick", ctx);
@@ -649,6 +939,35 @@ static int api_add(lua_State* L) noexcept
 
         auto family_id = ctx->register_block_family(std::move(family));
         ctx->set_block_family(block_id, family_id);
+    }
+
+    out_block_id = block_id;
+    return true;
+}
+
+static int api_add(lua_State* L) noexcept
+{
+    auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
+
+    auto argc = lua_gettop(L);
+    auto raw_name = luaL_checkstring(L, 1);
+
+    int proto_idx = 0;
+    int def_idx = 2;
+
+    if(argc >= 3) {
+        proto_idx = 2;
+        def_idx = 3;
+
+        luaL_checktype(L, proto_idx, LUA_TTABLE);
+    }
+
+    luaL_checktype(L, def_idx, LUA_TTABLE);
+
+    block_id_type block_id = BLOCK_ID_NULL;
+
+    if(!add_block(L, ctx, raw_name, def_idx, proto_idx, block_id)) {
+        return lua_error(L);
     }
 
     lua_pushinteger(L, block_id);

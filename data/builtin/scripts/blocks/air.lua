@@ -1,4 +1,4 @@
-core.log_info("lol")
+print("lol")
 
 blocks.add("air", {
     render = blocks.RENDER_NONE,
