@@ -13,6 +13,56 @@ static std::vector<BlockFamily> s_families;
 static emhash8::HashMap<Identifier, block_id_type> s_names;
 static emhash8::HashMap<block_id_type, Identifier> s_reverse_names;
 
+static std::uint64_t hash_state_map(const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map) noexcept
+{
+    std::vector<std::pair<blockstate_key_type, blockstate_val_type>> sorted(map.cbegin(), map.cend());
+    std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) noexcept {
+        return a.first < b.first;
+    });
+
+    std::uint64_t hash = 0;
+
+    for(const auto& it : sorted) {
+        hash = utils::crc64(&it.first, sizeof(it.first), hash);
+        hash = utils::crc64(&it.second, sizeof(it.second), hash);
+    }
+
+    return hash;
+}
+
+static BlockDefinition apply_matching_variant(const BlockDefinition& base_def, const BlockFamily& family,
+    const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map) noexcept
+{
+    BlockDefinition resolved = base_def;
+
+    for(const auto& rule : family.variants) {
+        auto matches = true;
+
+        for(const auto& it : rule.when) {
+            auto jt = map.find(it.first);
+
+            if(jt == map.cend()) {
+                matches = false;
+                break;
+            }
+
+            if(jt->second == it.second) {
+                continue;
+            }
+
+            matches = false;
+            break;
+        }
+
+        if(matches) {
+            resolved = BlockOverridePatch::apply(base_def, rule.overrides);
+            break;
+        }
+    }
+
+    return resolved;
+}
+
 BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverridePatch& patch) noexcept
 {
     if(patch.render) {
@@ -188,7 +238,28 @@ void block_registry::commit(ModContext& ctx) noexcept
         s_families.insert(s_families.end(), std::make_move_iterator(families.begin() + 1), std::make_move_iterator(families.end()));
 
         for(auto i = family_offset; i < s_families.size(); ++i) {
-            const auto& family = s_families[i];
+            auto& family = s_families[i];
+
+            // base_id starts out as the raw, un-resolved definition passed to
+            // blocks.add; fold it into the default-state variant in place so it
+            // doesn't stick around as a dead extra id that nothing ever places
+            if(family.states.size()) {
+                emhash8::HashMap<blockstate_key_type, blockstate_val_type> default_map;
+
+                for(const auto& [key, decl] : family.states) {
+                    default_map.try_emplace(key, decl.default_value);
+                }
+
+                if(auto base_def = find_definition(family.base_id)) {
+                    auto resolved = apply_matching_variant(*base_def, family, default_map);
+                    resolved.family = i;
+                    s_definitions[family.base_id] = std::move(resolved);
+                }
+
+                family.resolved_states.insert_or_assign(hash_state_map(default_map), block_id_type(family.base_id));
+
+                family.id_states.insert_or_assign(block_id_type(family.base_id), std::move(default_map));
+            }
 
             for(const auto& rule : family.variants) {
                 resolve_variant(family.base_id, rule.when);
@@ -298,18 +369,7 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id,
     }
 
     auto& family = s_families[def->family];
-
-    std::vector<std::pair<blockstate_key_type, blockstate_val_type>> sorted(map.cbegin(), map.cend());
-    std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) noexcept {
-        return a.first < b.first;
-    });
-
-    std::uint64_t hash = 0;
-
-    for(const auto& it : sorted) {
-        hash = utils::crc64(&it.first, sizeof(it.first), hash);
-        hash = utils::crc64(&it.second, sizeof(it.second), hash);
-    }
+    auto hash = hash_state_map(map);
 
     if(family.resolved_states.contains(hash)) {
         return family.resolved_states.at(hash);
@@ -317,33 +377,8 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id,
 
     auto base_def = find_definition(family.base_id);
     vx::throw_if_fmt(base_def == nullptr, "block_registry: {}: invalid base_id: {}", family.name.full_string(), family.base_id);
-    BlockDefinition resolved = base_def[0];
 
-    for(const auto& rule : family.variants) {
-        auto matches = true;
-
-        for(const auto& it : rule.when) {
-            auto jt = map.find(it.first);
-
-            if(jt == map.cend()) {
-                matches = false;
-                break;
-            }
-
-            if(jt->second == it.second) {
-                continue;
-            }
-
-            matches = false;
-            break;
-        }
-
-        if(matches) {
-            resolved = BlockOverridePatch::apply(base_def[0], rule.overrides);
-            break;
-        }
-    }
-
+    BlockDefinition resolved = apply_matching_variant(*base_def, family, map);
     resolved.family = def->family;
 
     auto new_id = static_cast<block_id_type>(s_definitions.size());
