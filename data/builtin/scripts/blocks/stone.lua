@@ -116,7 +116,7 @@ blocks.add("stone_slab", stone_prototype, {
     }
   },
 
-  on_place = function(world, bx, by, bz, placement)
+  on_place = function(bx, by, bz, placement)
     -- If placing on top/bottom of an another slab,
     -- make it a double slab; blocking a placement event
     -- defines a nil return value, otherwise an empty table
@@ -124,10 +124,10 @@ blocks.add("stone_slab", stone_prototype, {
 
     if placement.tblock == blocks.get("stone_slab") then
       if placement.tface == blocks.FACE_TOP then
-        world:sset(placement.tx, placement.ty, placement.tz, "orientation", "double")
+        world.sset(placement.tx, placement.ty, placement.tz, "orientation", "double")
         return nil
       elseif placement.tface == blocks.FACE_BOTTOM then
-        world:sset(placement.tx, placement.ty, placement.tz, "orientation", "double")
+        world.sset(placement.tx, placement.ty, placement.tz, "orientation", "double")
         return nil
       end
     end

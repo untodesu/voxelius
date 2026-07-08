@@ -14,6 +14,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/block_registry.hh"
     "${CMAKE_CURRENT_LIST_DIR}/block_storage.cc"
     "${CMAKE_CURRENT_LIST_DIR}/block_storage.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/chunk.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/chunk.hh"
     "${CMAKE_CURRENT_LIST_DIR}/constant.hh"
     "${CMAKE_CURRENT_LIST_DIR}/coord.hh"
     "${CMAKE_CURRENT_LIST_DIR}/globals.cc"

@@ -180,7 +180,7 @@ states = {
 }
 ```
 
-Blockstate values are hashed strings — any value can be written via `world:sset`, `hint` does not restrict this at runtime. `hint` is purely a registration-time cross-check: every `when` clause across this block's `variants` is validated against the union of `hint` lists of the states it references, and any value not present in `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state simply skip validation for that state.
+Blockstate values are hashed strings — any value can be written via `world.sset`, `hint` does not restrict this at runtime. `hint` is purely a registration-time cross-check: every `when` clause across this block's `variants` is validated against the union of `hint` lists of the states it references, and any value not present in `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state simply skip validation for that state.
 
 ### Variants
 
@@ -204,7 +204,7 @@ variants = {
 ### `on_place` handler
 
 ```lua
-on_place = function(world, bx, by, bz, placement)
+on_place = function(bx, by, bz, placement)
   -- placement.tblock is the block ID of the block placement was targeted against
   -- placement.tface is one of blocks.FACE_* — the face of that block that was clicked
   -- placement.tx, placement.ty, placement.tz are that target block's coordinates
