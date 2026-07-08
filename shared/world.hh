@@ -3,6 +3,56 @@
 
 #include "shared/chunk.hh"
 
+class ChunkCreateEvent final {
+public:
+    explicit ChunkCreateEvent(const chunk_pos& pos, const std::shared_ptr<Chunk>& chunk) noexcept;
+    constexpr const std::shared_ptr<Chunk>& chunk(void) const noexcept;
+    constexpr const chunk_pos& pos(void) const noexcept;
+
+private:
+    std::shared_ptr<Chunk> m_chunk;
+    chunk_pos m_pos;
+};
+
+class ChunkRemoveEvent final {
+public:
+    explicit ChunkRemoveEvent(const chunk_pos& pos, const std::shared_ptr<const Chunk>& chunk) noexcept;
+    constexpr const std::shared_ptr<const Chunk>& chunk(void) const noexcept;
+    constexpr const chunk_pos& pos(void) const noexcept;
+
+private:
+    std::shared_ptr<const Chunk> m_chunk;
+    chunk_pos m_pos;
+};
+
+class ChunkUpdateEvent final {
+public:
+    explicit ChunkUpdateEvent(const chunk_pos& pos, const std::shared_ptr<Chunk>& chunk) noexcept;
+    constexpr const std::shared_ptr<Chunk>& chunk(void) const noexcept;
+    constexpr const chunk_pos& pos(void) const noexcept;
+
+private:
+    std::shared_ptr<Chunk> m_chunk;
+    chunk_pos m_pos;
+};
+
+class BlockUpdateEvent final {
+public:
+    explicit BlockUpdateEvent(const block_pos& pos, block_id_type id, const std::shared_ptr<Chunk>& chunk) noexcept;
+    constexpr const std::shared_ptr<Chunk>& chunk(void) const noexcept;
+    constexpr const block_pos& bpos(void) const noexcept;
+    constexpr const chunk_pos& cpos(void) const noexcept;
+    constexpr const local_pos& lpos(void) const noexcept;
+    constexpr block_id_type id(void) const noexcept;
+
+private:
+    std::shared_ptr<Chunk> m_chunk;
+    block_id_type m_id;
+    block_pos m_bpos;
+    chunk_pos m_cpos;
+    local_pos m_lpos;
+};
+
 namespace world
 {
 extern emhash8::HashMap<chunk_pos, std::shared_ptr<Chunk>> chunks;
@@ -77,5 +127,60 @@ namespace world
 {
 void fixed_update(void) noexcept;
 } // namespace world
+
+constexpr const std::shared_ptr<Chunk>& ChunkCreateEvent::chunk(void) const noexcept
+{
+    return m_chunk;
+}
+
+constexpr const chunk_pos& ChunkCreateEvent::pos(void) const noexcept
+{
+    return m_pos;
+}
+
+constexpr const std::shared_ptr<const Chunk>& ChunkRemoveEvent::chunk(void) const noexcept
+{
+    return m_chunk;
+}
+
+constexpr const chunk_pos& ChunkRemoveEvent::pos(void) const noexcept
+{
+    return m_pos;
+}
+
+constexpr const std::shared_ptr<Chunk>& ChunkUpdateEvent::chunk(void) const noexcept
+{
+    return m_chunk;
+}
+
+constexpr const chunk_pos& ChunkUpdateEvent::pos(void) const noexcept
+{
+    return m_pos;
+}
+
+constexpr const std::shared_ptr<Chunk>& BlockUpdateEvent::chunk(void) const noexcept
+{
+    return m_chunk;
+}
+
+constexpr block_id_type BlockUpdateEvent::id(void) const noexcept
+{
+    return m_id;
+}
+
+constexpr const block_pos& BlockUpdateEvent::bpos(void) const noexcept
+{
+    return m_bpos;
+}
+
+constexpr const chunk_pos& BlockUpdateEvent::cpos(void) const noexcept
+{
+    return m_cpos;
+}
+
+constexpr const local_pos& BlockUpdateEvent::lpos(void) const noexcept
+{
+    return m_lpos;
+}
 
 #endif /* AC10DC15_9E3A_4C9E_B8B4_E6C5CAE5BB89 */
