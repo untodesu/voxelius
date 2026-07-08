@@ -24,7 +24,9 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/mod_context.hh"
     "${CMAKE_CURRENT_LIST_DIR}/mod_loader.cc"
     "${CMAKE_CURRENT_LIST_DIR}/mod_loader.hh"
-    "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
+    "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/world.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/world.hh")
 target_compile_features(shared PUBLIC cxx_std_20)
 target_include_directories(shared PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(shared PUBLIC core)

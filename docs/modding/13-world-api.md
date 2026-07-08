@@ -4,7 +4,7 @@ Mods can access blocks in the world using the `world` library
 
 ## Functions
 
-### Function: `world.bget(bx, by, bz) -> integer`
+### Function: `world.get_block(bx, by, bz) -> integer`
 
 Retreive a numeric block ID from the world  
 
@@ -19,7 +19,7 @@ Retreive a numeric block ID from the world
 - Normally, a numeric block ID;  
 - If there is no block or the chunk is not present, `blocks.NULL_BLOCK` is returned;  
 
-### Function: `world.bset(bx, by, bz, id)`
+### Function: `world.set_block(bx, by, bz, id)`
 
 Assign a block ID in the world
 
@@ -30,7 +30,7 @@ Assign a block ID in the world
 - `bz` is the world-scale block Z position;  
 - `id` is the numeric block ID; to unset the block (aka set to void), pass `blocks.NULL_BLOCK` as the value;  
 
-### Function: `world.lget(bx, by, bz) -> integer`
+### Function: `world.get_light(bx, by, bz) -> integer`
 
 Retreive lighting information about a block position  
 
@@ -44,7 +44,7 @@ Retreive lighting information about a block position
 
 - Luminance value of the block  
 
-### Function: `world.sget(bx, by, bz, st) -> string`
+### Function: `world.get_state(bx, by, bz, st) -> string`
 
 Retrive a blockstate at a given position  
 
@@ -59,7 +59,7 @@ Retrive a blockstate at a given position
 - Blockstate's value normally;  
 - If the block is void, has no such blockstate or the chunk is not present, `nil` is returned;  
 
-### Function: `world.sset(bx, by, bz, st, val)`
+### Function: `world.set_state(bx, by, bz, st, val)`
 
 Assign a blockstate to a given position  
 
@@ -71,7 +71,7 @@ Assign a blockstate to a given position
 - `st` is the blockstate name;  
 - `val` is the blockstate value;  
 
-### Function: `world.tget(bx, by, bz) -> integer`
+### Function: `world.get_temperature_base(bx, by, bz) -> integer`
 
 Retreive a biome-defined temperature base for a given block
 
@@ -90,7 +90,7 @@ Retreive a biome-defined temperature base for a given block
 
 Most biomes might not define this, if so, `298` is defined for most of them, which corresponds to 25 degrees Celcius  
 
-### Function: `world.tsget(bx, by, bz) -> integer`
+### Function: `world.get_temperature(bx, by, bz) -> integer`
 
 Retreive a biome-influenced seasonal temperature for a given block
 
@@ -109,7 +109,7 @@ Retreive a biome-influenced seasonal temperature for a given block
 
 This can be influenced by season, weather and other factors. Relatively low values (sub-zero Centigrade) can cause snow to fall when the game wants it to be raining at that specific location  
 
-### Function: `world.sched(bx, by, bz, dt)`
+### Function: `world.schedule(bx, by, bz, dt)`
 
 Schedule an `on_stick` call to a block, `dt` ticks from now.  
 
