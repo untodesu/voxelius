@@ -24,9 +24,11 @@ struct BlockOverridePatch final {
 
     std::optional<Identifier> model_name;
     std::optional<Eigen::Vector3f> model_offset;
+    std::optional<block_face> model_facing;
 
     std::optional<Identifier> bcoll_name;
     std::optional<Eigen::Vector3f> bcoll_offset;
+    std::optional<block_face> bcoll_facing;
 
     std::optional<unsigned> health;
 

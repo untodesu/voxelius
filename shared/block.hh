@@ -77,9 +77,11 @@ struct BlockDefinition final {
 
     Identifier model_name;
     Eigen::Vector3f model_offset;
+    block_face model_facing;
 
     Identifier bcoll_name;
     Eigen::Vector3f bcoll_offset;
+    block_face bcoll_facing;
 
     unsigned health;
     block_tool_bit tools; // big tool mask made from drops cond_tool_bits

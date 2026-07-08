@@ -85,12 +85,20 @@ BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverr
         base.model_offset = *patch.model_offset;
     }
 
+    if(patch.model_facing) {
+        base.model_facing = *patch.model_facing;
+    }
+
     if(patch.bcoll_name) {
         base.bcoll_name = *patch.bcoll_name;
     }
 
     if(patch.bcoll_offset) {
         base.bcoll_offset = *patch.bcoll_offset;
+    }
+
+    if(patch.bcoll_facing) {
+        base.bcoll_facing = *patch.bcoll_facing;
     }
 
     if(patch.health) {

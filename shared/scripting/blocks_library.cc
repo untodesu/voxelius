@@ -332,6 +332,18 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         lua_pop(L, 1);
     }
 
+    if(reader.try_push("model_facing")) {
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.model_facing = static_cast<block_face>(value.value());
+
+        lua_pop(L, 1);
+    }
+
     if(reader.try_push("bcoll_name")) {
         auto value = require_string(L, -1);
 
@@ -346,6 +358,18 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
 
     if(reader.try_push("bcoll_offset")) {
         patch.bcoll_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
+
+        lua_pop(L, 1);
+    }
+
+    if(reader.try_push("bcoll_facing")) {
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.bcoll_facing = static_cast<block_face>(value.value());
 
         lua_pop(L, 1);
     }
@@ -468,6 +492,18 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         lua_pop(L, 1);
     }
 
+    if(reader.try_push("model_facing")) {
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.model_facing = static_cast<block_face>(value.value());
+
+        lua_pop(L, 1);
+    }
+
     if(reader.try_push("bcoll_name")) {
         auto value = require_string(L, -1);
 
@@ -482,6 +518,18 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
 
     if(reader.try_push("bcoll_offset")) {
         def.bcoll_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
+
+        lua_pop(L, 1);
+    }
+
+    if(reader.try_push("bcoll_facing")) {
+        auto value = require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.bcoll_facing = static_cast<block_face>(value.value());
 
         lua_pop(L, 1);
     }
@@ -865,15 +913,27 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
     id = make_unique_id(id, ctx);
 
     BlockDefinition def {};
+
     def.render = BLOCK_RENDER_NONE;
     def.animated = false;
+
+    def.model_offset.setZero();
+    def.model_facing = BLOCK_FACE_NORTH;
+
+    def.bcoll_offset.setZero();
+    def.bcoll_facing = BLOCK_FACE_NORTH;
+
     def.health = 0;
     def.tools = BLOCK_TOOL_NONE;
+
     def.emission = BLOCK_LIGHT_MIN;
     def.dissipation = BLOCK_LIGHT_MIN;
+
     def.touch = BLOCK_TOUCH_SOLID;
-    def.touch_coeffs = Eigen::Vector3f::Ones();
+    def.touch_coeffs.setOnes();
+
     def.tags = static_cast<block_tag_bit>(0);
+
     def.family = BLOCK_FAMILY_ID_NULL;
 
     BlockDefReader reader(L, def_idx, proto_idx);
