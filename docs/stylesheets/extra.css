@@ -1,0 +1,14 @@
+.md-typeset table:not([class]) {
+  width: 100%;
+  display: table;
+}
+
+.md-typeset table:not([class]) code {
+  white-space: nowrap;
+}
+
+.md-nav--secondary .md-nav__link {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

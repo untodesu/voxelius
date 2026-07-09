@@ -39,6 +39,9 @@ theme:
   favicon: favicon.ico
   logo: favicon.png
 
+extra_css:
+  - stylesheets/extra.css
+
 nav:
   - Home: index.md
   - Overview:
