@@ -112,9 +112,6 @@ Register a new block in the registry
 
 #### Notes
 
-
-If the same block is already registered (mind you `mymod:myblock` and `joe_mod:myblock` are different blocks) in the registry, the encroaching block is renamed by rule (see below) and the game keeps loading, but the conflict is always surfaced as an **error** printed to the game console — this is never silent, since it almost always means two mods stomping on each other's namespace.
-
 **Rename rule:** on conflict, the encroaching `name` is suffixed with `~N`, where `N` is the smallest integer starting at `1` that produces a free id (e.g. `mymod:myblock~1`). This keeps loading deterministic and reproducible across runs with the same mod list/order.
 
 ## Block definition
@@ -192,10 +189,9 @@ states = {
 }
 ```
 
-Blockstate values are hashed strings — any value can be written via `world.sset`, `hint` does not restrict this at runtime. `hint` is purely a registration-time cross-check: every `when` clause across this block's `variants` is validated against the union of `hint` lists of the states it references, and any value not present in `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state simply skip validation for that state.
+Blockstate values are hashed strings - any value can be written via `world.sset`, `hint` does not restrict this at runtime. `hint` is purely a registration-time cross-check: every `when` clause across this block's `variants` is validated against the union of `hint` lists of the states it references, and any value not present in `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state simply skip validation for that state.
 
 ### Variants
-
 
 ```lua
 variants = {
@@ -217,15 +213,16 @@ variants = {
 
 ```lua
 on_place = function(bx, by, bz, placement)
-  -- placement.tblock is the block ID of the block placement was targeted against
-  -- placement.tface is one of blocks.FACE_* — the face of that block that was clicked
-  -- placement.tx, placement.ty, placement.tz are that target block's coordinates
+  -- placement.tblock is the targeted block ID
+  -- placement.tface is the targeted block face
+  -- placement.tx, placement.ty, placement.tz are target coordinates
 
   if condition_to_reject then
     return nil -- blocks the placement entirely
   end
 
-  return { <state_name> = "<state_value>", ... } -- permits placement with these initial states
+  -- permits placement with these initial states
+  return { <state_name> = "<state_value>", ... }
 end
 ```
 
