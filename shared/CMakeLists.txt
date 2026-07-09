@@ -1,4 +1,6 @@
 add_library(shared STATIC
+    "${CMAKE_CURRENT_LIST_DIR}/res/block_model.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/res/block_model.hh"
     "${CMAKE_CURRENT_LIST_DIR}/scripting/blocks_library.cc"
     "${CMAKE_CURRENT_LIST_DIR}/scripting/blocks_library.hh"
     "${CMAKE_CURRENT_LIST_DIR}/scripting/core_library.cc"

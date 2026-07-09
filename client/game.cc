@@ -8,13 +8,15 @@
 #include "core/exception.hh"
 #include "core/identifier.hh"
 
+#include "shared/res/block_model.hh"
+
 #include "shared/utils/coord.hh"
+#include "shared/utils/lua.hh"
 
 #include "shared/block_registry.hh"
 #include "shared/block_storage.hh"
 #include "shared/coord.hh"
 #include "shared/mod_loader.hh"
-#include "shared/utils/lua.hh"
 #include "shared/world.hh"
 
 #include "client/res/texture2D.hh"
@@ -154,6 +156,100 @@ static void test_world(void)
     LOG_INFO("test_world: OK");
 }
 
+static const char* block_face_name(block_face face) noexcept
+{
+    switch(face) {
+        case BLOCK_FACE_NORTH:
+            return "north";
+        case BLOCK_FACE_SOUTH:
+            return "south";
+        case BLOCK_FACE_EAST:
+            return "east";
+        case BLOCK_FACE_WEST:
+            return "west";
+        case BLOCK_FACE_TOP:
+            return "top";
+        case BLOCK_FACE_BOTTOM:
+            return "bottom";
+        default:
+            return "unknown";
+    }
+}
+
+static void dump_block_model(const Identifier& id, const BlockModel& model)
+{
+    LOG_DEBUG("block model dump: {}", id.full_string());
+    LOG_DEBUG("  textures: {}", model.texture_slots.size());
+
+    for(const auto& slot : model.texture_slots) {
+        LOG_DEBUG("    - {}", slot);
+    }
+
+    LOG_DEBUG("  elements: {}", model.elements.size());
+
+    for(std::size_t i = 0; i < model.elements.size(); ++i) {
+        const auto& element = model.elements[i];
+
+        LOG_DEBUG("    [{}] from=({}, {}, {}) to=({}, {}, {})", i, element.from.x(), element.from.y(), element.from.z(), element.to.x(),
+            element.to.y(), element.to.z());
+        LOG_DEBUG("    [{}] origin=({}, {}, {}) rotation=({}, {}, {}) rescale={} shade={}", i, element.rotation_origin.x(),
+            element.rotation_origin.y(), element.rotation_origin.z(), element.rotation_angles.x(), element.rotation_angles.y(),
+            element.rotation_angles.z(), element.rescale, element.shade);
+
+        for(std::size_t j = 0; j < element.faces.size(); ++j) {
+            const auto& face = element.faces[j];
+
+            if(!face.has_value()) {
+                continue;
+            }
+
+            LOG_DEBUG("    [{}] face {}: texture={} uv_rotation={} cullface={} tint={}", i, block_face_name(static_cast<block_face>(j)),
+                face->texture_slot, face->uv_rotation, face->cull_face.has_value() ? block_face_name(face->cull_face.value()) : "none",
+                face->tint_index.has_value() ? std::to_string(face->tint_index.value()) : "none");
+        }
+    }
+}
+
+static void test_block_model(void)
+{
+    auto id = Identifier::from_string("builtin:cube");
+    auto model = res::load<BlockModel>(id, "models/block", ".json");
+
+    if(model == nullptr) {
+        LOG_WARNING("test_block_model: builtin:cube failed to load, skipping");
+        return;
+    }
+
+    dump_block_model(id, *model);
+
+    vx::throw_if_not_fmt(model->texture_slots.size() == 6, "test_block_model: expected 6 texture slots, got {}",
+        model->texture_slots.size());
+    vx::throw_if_not_fmt(model->elements.size() == 1, "test_block_model: expected 1 element, got {}", model->elements.size());
+
+    const auto& element = model->elements.front();
+
+    vx::throw_if_not_fmt(element.from == Eigen::Vector3f::Zero(), "test_block_model: expected from = [0, 0, 0]");
+    vx::throw_if_not_fmt(element.to == Eigen::Vector3f::Ones(), "test_block_model: expected to = [1, 1, 1]");
+    vx::throw_if_not_fmt(element.rescale, "test_block_model: rescale should default to true");
+    vx::throw_if_not_fmt(element.shade, "test_block_model: shade should default to true");
+
+    for(auto i = 0; i < 6; ++i) {
+        vx::throw_if_not_fmt(element.faces[i].has_value(), "test_block_model: face {} should be present", i);
+    }
+
+    vx::throw_if_not_fmt(element.faces[BLOCK_FACE_TOP]->texture_slot == "top", "test_block_model: top face texture slot mismatch");
+    vx::throw_if_not_fmt(element.faces[BLOCK_FACE_TOP]->cull_face == BLOCK_FACE_BOTTOM,
+        "test_block_model: top face should cullface bottom");
+
+    // this model shouldn't stick around in the resource cache: it wasn't loaded with RESFLAG_CACHE
+    model.reset();
+    res::soft_purge(true);
+    vx::throw_if_not_fmt(res::find<BlockModel>(id, "models/block", ".json") == nullptr,
+        "test_block_model: model should be gone after soft_purge");
+
+    LOG_INFO("test_block_model: OK");
+}
+
 static void test_scripting_world(void)
 {
     auto mod = mod_loader::find(BUILTIN_MOD_NAME);
@@ -246,6 +342,7 @@ void client_game::init(void)
 void client_game::init_late(void)
 {
     test_block_storage();
+    test_block_model();
     test_world();
     test_scripting_world();
 }

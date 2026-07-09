@@ -20,21 +20,11 @@ bool utils::parse_json(const JSON_Value* value, Eigen::Vector<T, N>& vector) noe
     for(std::size_t i = 0; i < N; ++i) {
         const auto element = json_array_get_value(array, i);
 
-        if(element == nullptr) {
+        if(element == nullptr || json_value_get_type(element) != JSONNumber) {
             return false;
         }
 
-        const auto string = json_value_get_string(element);
-
-        if(string == nullptr) {
-            return false;
-        }
-
-        const auto check = std::from_chars(string, string + std::strlen(string), vector[i]);
-
-        if(check.ec != std::errc()) {
-            return false;
-        }
+        vector[i] = static_cast<T>(json_value_get_number(element));
     }
 
     return true;
