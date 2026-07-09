@@ -2,6 +2,7 @@ site_name: Voxelius
 site_url: https://voxelius.codeberg.page/voxelius
 repo_url: https://codeberg.org/voxelius/voxelius
 repo_name: voxelius/voxelius
+# use_directory_urls: false
 
 plugins:
   - search:
