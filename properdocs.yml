@@ -3,6 +3,22 @@ site_url: https://voxelius.codeberg.page/voxelius
 repo_url: https://codeberg.org/voxelius/voxelius
 repo_name: voxelius/voxelius
 
+plugins:
+  - search:
+  - minify:
+      minify_html: true
+  - mkdocs-video:
+  - glightbox:
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite:
+  - pymdownx.snippets:
+  - pymdownx.superfences:
+
 theme:
   name: material
   palette:

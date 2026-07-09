@@ -8,11 +8,11 @@ Because I had nothing else to do during lockdown and lecture times at University
 
 What came out of it was a simple 2D engine that used Box2D for physics, was capable of playing .xm modules (without streaming) and had the world be rendered in literally four draw-calls...
 
-[![YouTube: engine test](https://i.ytimg.com/vi/8dSXFb5Ddl8/sddefault.jpg)](https://youtu.be/8dSXFb5Ddl8)  
+![type:video](https://youtube.com/embed/8dSXFb5Ddl8)  
 
-[![YouTube: scrolling background](https://i.ytimg.com/vi/DWlU3V57ZPM/sddefault.jpg)](https://youtu.be/DWlU3V57ZPM)  
+![type:video](https://youtube.com/embed/DWlU3V57ZPM)  
 
-[![simplescreenrecorder-2021-06-23_14.14.01.mp4](https://i.ytimg.com/vi/tH-v37svsaU/sddefault.jpg)](https://youtu.be/tH-v37svsaU)  
+![type:video](https://youtube.com/embed/tH-v37svsaU)  
 
 ## 2021: voxelius historic
 
@@ -33,6 +33,8 @@ Eventually, stuff like greedy meshing, shadows and a rudimentary networking was 
 
 ![00-history.img-03.jpg](00-history.img-03.jpg)  
 ![00-history.img-04.jpg](00-history.img-04.jpg)  
+
+![type:video](https://youtube.com/embed/VHvfsX4B0iI)  
 
 ## 2022-2023: voxelius modern
 
@@ -57,9 +59,13 @@ Lots of major strides have been made in this period of time, including voxel int
 ![00-history.img-14.png](00-history.img-14.png)  
 ![00-history.img-15.png](00-history.img-15.png)  
 
+![type:video](https://youtube.com/embed/8HGzm0d7EdQ)  
+
 ## 2026: QFengine and SDL3_GPU
 
 I became interested in SDL3's GPU API that abstracts away from Vulkan, Metal and D3D12 and acts as a lower-level OpenGL, and the project that actually grew out of it was my attempt at a quake-like engine (I'm willing to get back to it later) that looks like this:  
+
+![type:video](https://youtube.com/embed/g003FId_8BI)  
 
 ![00-history.img-16.jpg](00-history.img-16.jpg)  
 ![00-history.img-17.jpg](00-history.img-17.jpg)  

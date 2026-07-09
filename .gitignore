@@ -12,6 +12,8 @@
 /output/*
 /mods/
 /mods/*
+/site/
+/site/*
 
 ## Ignore generated files and everything else
 ## that would be emitted by running the game
