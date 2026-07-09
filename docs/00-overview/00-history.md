@@ -16,7 +16,7 @@ What came out of it was a simple 2D engine that used Box2D for physics, was capa
 
 ## 2021: voxelius historic
 
-At this point I got my voxel itch again (and if you know me, I readlly started to get interested in voxels in about late 2020) and decided to strip the source code from 2D rendering and start from scratch.  
+At this point I got my voxel itch again (and if you know me, I really started to get interested in voxels in about late 2020) and decided to strip the source code from 2D rendering and start from scratch.  
 
 I first defined some structures and made a basic rendering implementation that only drew colored voxels with a specific color assigned to each side of it, here's the image:  
 
