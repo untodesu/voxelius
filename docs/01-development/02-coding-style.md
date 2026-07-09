@@ -34,30 +34,61 @@ Notable settings:
 
 ## Brace newlines
 
-TODO
+- Functions, methods and namespaces open their brace on a new line  
 
+- Classes, structs, enums, unions, control statements and lambdas keep the brace on the same line  
+
+- Stuff like `else` and `catch` go on a new line after the closing brace. Honestly I don't understand why having two opposite braces and a keyword on the same line is remotely considered readable  
+
+Example:  
+
+```cpp
+namespace vx
+{
+void setup(void);
+void teardown(void);
+} // namespace vx
+
+void vx::setup(void)
+{
+    // empty
+}
+
+void vx::teardown(void)
+{
+    Type name {};
+    name.do_something();
+
+    if(name.valid()) {
+        // ...
+    }
+    else {
+        // ...
+    }
+}
+```
 
 ## Styling considerations
 
-- Classes and structures are to be marked `final` unless they're explicitly designed as a base;  
+- Classes and structures are to be marked `final` unless they're explicitly designed as a base  
 
-- Functions and methods that take zero arguments spell it out in C-style - a `void` keyword is placed inside parentheses;  
+- Functions and methods that take zero arguments spell it out in C-style - a `void` keyword is placed inside parentheses  
 
-- Compile-time (`constexpr`) function bodies are to be placed inside the header they're declared in, just after all the declarations;  
+- Compile-time (`constexpr`) function bodies are to be placed inside the header they're declared in, just after all the declarations  
 
-- C++ headers have the `.hh` extension and C++ sources have the `.cc` extension;  
+- C++ headers have the `.hh` extension and C++ sources have the `.cc` extension  
 
-- Profanity inside source code is allowed because I own the code and I can comment whatever the fuck I please inside of it;  
+- Profanity inside source code is allowed because I own the code and I can comment whatever the fuck I please inside of it  
 
-- Use the standard `assert` for debug-time checks and `vx::throw_if_xxxx` for cases the game should crash if something goes wrong;  
+- Use the standard `assert` for debug-time checks and `vx::throw_if_xxxx` for cases the game should crash if something goes wrong  
 
 ## Include guards
 
-- Every header uses an ifndef-block with a random GUID-style token with dashes replaced with underscores;  
+- Every header uses an ifndef-block with a random GUID-style token with dashes replaced with underscores  
 
-- No `#pragma once`;  
+- No `#pragma once`  
 
-- The ifndef block terminates with a block comment with the same GUID;  
+- The ifndef block terminates with a block comment with the same GUID  
 
 Example:  
 
@@ -96,13 +127,13 @@ using runtime_error = detail::TaggedException<struct runtime_error_tag>;
 
 ## Include grouping
 
-- Each engine module has its own precompiled header, it is included first for every compiled source;  
+- Each engine module has its own precompiled header, it is included first for every compiled source  
 
-- Includes are sorted in dependency order (eg. `core`, then `shared`, then `client`);  
+- Includes are sorted in dependency order (eg. `core`, then `shared`, then `client`)  
 
-- Inside a group, includes are split by subdirectory. Subdirectory blocks go first;  
+- Inside a group, includes are split by subdirectory. Subdirectory blocks go first  
 
-- Includes within a group are sorted alphabetically via clang-format;  
+- Includes within a group are sorted alphabetically via clang-format  
 
 Example:
 
@@ -133,11 +164,11 @@ Example:
 
 ## Comments
 
-- Plain C++ comments (except for include guards);  
+- Plain C++ comments (except for include guards)  
 
-- Comments are to be used sparingly and only to explain non-obvious stuff, maybe express a frustration with something, just read what exists right now, show-dont-tell;  
+- Comments are to be used sparingly and only to explain non-obvious stuff, maybe express a frustration with something, just read what exists right now, show-dont-tell  
 
-- Empty function/method bodies are to be marked with an `// empty` comment;  
+- Empty function/method bodies are to be marked with an `// empty` comment  
 
 Example 1:  
 
@@ -156,3 +187,7 @@ Example 2:
 // to even release the old handle mid-frame
 reset();
 ```
+
+## See also
+
+- [Clang-format is good enough](https://untode.su/posts/2026-02-16-clang-format/)  
