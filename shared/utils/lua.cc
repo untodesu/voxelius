@@ -2,12 +2,6 @@
 
 #include "shared/utils/lua.hh"
 
-// NOTE: uses lua_tonumber/lua_tointeger (never errors) rather than the luaL_opt*/luaL_check*
-// equivalents, because these are called from deep inside blocks_library.cc's parsing call
-// chain while BlockDefinition/BlockDrop/etc (non-trivial destructors) are alive on the C++
-// stack; luaL_error()/lua_error() longjmp past those frames, which is UB. A malformed
-// numeric field silently reads as 0 instead of aborting the whole parse.
-
 Eigen::Vector2f utils::read_vector2f(lua_State* L, int idx) noexcept
 {
     Eigen::Vector2f result = Eigen::Vector2f::Zero();

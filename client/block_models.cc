@@ -167,13 +167,10 @@ static void make_face_geometry(const Eigen::Vector3f& from, const Eigen::Vector3
 static void apply_face_uv(const BlockModel_Face& face, BakedBlockModel_Quad& quad) noexcept
 {
     if(face.uv.has_value()) {
-        // FIXME: parser doesn't divide this by 16!!!
-        auto rect = face.uv.value() / 16.0f;
-
-        quad.uvs[0] = Eigen::Vector2f(rect.x(), rect.y());
-        quad.uvs[1] = Eigen::Vector2f(rect.z(), rect.y());
-        quad.uvs[2] = Eigen::Vector2f(rect.z(), rect.w());
-        quad.uvs[3] = Eigen::Vector2f(rect.x(), rect.w());
+        quad.uvs[0] = Eigen::Vector2f(face.uv->x(), face.uv->y());
+        quad.uvs[1] = Eigen::Vector2f(face.uv->z(), face.uv->y());
+        quad.uvs[2] = Eigen::Vector2f(face.uv->z(), face.uv->w());
+        quad.uvs[3] = Eigen::Vector2f(face.uv->x(), face.uv->w());
     }
 
     auto steps = static_cast<std::ptrdiff_t>(face.uv_rotation / 90);
