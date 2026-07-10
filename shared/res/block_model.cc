@@ -8,8 +8,8 @@
 #include "core/utils/physfs.hh"
 
 constexpr static float ROTATION_STEP = 15.0f;
-constexpr static float ROTATION_MIN = 0.0f;
-constexpr static float ROTATION_MAX = 90.0f;
+constexpr static float ROTATION_MIN = -180.0f;
+constexpr static float ROTATION_MAX = +180.0f;
 
 static float snap_rotation(float degrees) noexcept
 {

@@ -207,8 +207,9 @@ static void dump_block_model(const Identifier& id, const BlockModel& model)
                 continue;
             }
 
-            LOG_DEBUG("    [{}] face {}: texture={} uv_rotation={} cullface={} tint={} world_locked={}", i, block_face_name(static_cast<block_face>(j)),
-                face->texture_slot, face->uv_rotation, face->cull_face.has_value() ? block_face_name(face->cull_face.value()) : "none",
+            LOG_DEBUG("    [{}] face {}: texture={} uv_rotation={} cullface={} tint={} world_locked={}", i,
+                block_face_name(static_cast<block_face>(j)), face->texture_slot, face->uv_rotation,
+                face->cull_face.has_value() ? block_face_name(face->cull_face.value()) : "none",
                 face->tint_index.has_value() ? std::to_string(face->tint_index.value()) : "none", face->world_locked);
         }
     }
@@ -278,8 +279,8 @@ static void write_obj_quads(std::ofstream& file, std::size_t& vertex_base, const
     vertex_base += quads.size() * 4;
 }
 
-static void dump_baked_block_model_obj(std::ofstream& file, std::size_t& vertex_base, const std::string& label, const BakedBlockModel& baked,
-    const Eigen::Vector3f& offset)
+static void dump_baked_block_model_obj(std::ofstream& file, std::size_t& vertex_base, const std::string& label,
+    const BakedBlockModel& baked, const Eigen::Vector3f& offset)
 {
     write_obj_quads(file, vertex_base, label + "_unculled", baked.unculled_quads, offset);
 
@@ -378,8 +379,8 @@ static void test_block_models(void)
             state_str += family->state_value(value);
         }
 
-        dump_baked_block_model(
-            std::format("{} (id={}) states=[{}]", label, id, state_str), id, obj_file_ptr, &obj_vertex_base, &obj_x_cursor);
+        dump_baked_block_model(std::format("{} (id={}) states=[{}]", label, id, state_str), id, obj_file_ptr, &obj_vertex_base,
+            &obj_x_cursor);
     }
 
     if(obj_file.is_open()) {

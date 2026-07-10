@@ -27,7 +27,7 @@ Block models define the visible geometry of a block
 |`from`|`number[3]`|yes|N/D|Cuboid start in 1/16ths of a block|  
 |`to`|`number[3]`|yes|N/D|Cuboid end in 1/16ths of a block|  
 |`origin`|`number[3]`|no|`[0, 0, 0]`|If `rotation` is set, pivot point in 1/16ths of a block|  
-|`rotation`|`number[3]`|no|`[0, 0, 0]`|Euler rotation in degrees about X, Y and Z axes. Each axis is clamped to `[0, 90]` and snapped to the nearest multiple of 15 degrees|  
+|`rotation`|`number[3]`|no|`[0, 0, 0]`|Euler rotation in degrees about X, Y and Z axes. Each axis is clamped to `[-180, 180]` and snapped to the nearest multiple of 15 degrees|  
 |`rescale`|`bool`|no|`true`|Whether the model should be forced into block bounds|  
 |`shade`|`bool`|no|`true`|Whether a basic fake-light shading is applied to the cuboid|  
 |`faces`|`object`|yes|N/D|Per-direction face definitions|  
