@@ -286,7 +286,7 @@ void block_atlas::init(void)
 void block_atlas::init_late(void)
 {
     for(const auto& def : block_registry::all_definitions()) {
-        if(def.model_name.is_empty()) {
+        if(def.is_stem || def.model_name.is_empty()) {
             continue;
         }
 
@@ -298,27 +298,14 @@ void block_atlas::init_late(void)
         }
 
         for(const auto& slot : model->texture_slots) {
-            auto it = def.textures.find(slot);
+            auto frames = def.resolve_texture_slot(slot);
 
-            // TODO: this slot->textures resolution (including the
-            // "default" fallback) will be needed again, identically,
-            // by model-bake once it exists; pull both into a shared
-            // resolve_slot_textures(def, slot) instead of duplicating
-            // the fallback rule in two places that could drift apart
-            if(it == def.textures.cend() || it->second.empty()) {
-                it = def.textures.find("default");
-            }
-
-            if(it == def.textures.cend() || it->second.empty()) {
+            if(!frames.has_value()) {
                 LOG_WARNING("block_atlas: {}: missing texture for slot '{}'", def.model_name.full_string(), slot);
                 continue;
             }
 
-            // load() takes a mutable span; copy out of the registry's
-            // storage so we're not handing out a non-const view into it
-            std::vector<Identifier> frames(it->second.cbegin(), it->second.cend());
-
-            if(nullptr == block_atlas::load(frames)) {
+            if(nullptr == block_atlas::load(frames.value())) {
                 LOG_WARNING("block_atlas: {}: failed to load atlas strip for slot '{}'", def.model_name.full_string(), slot);
             }
         }

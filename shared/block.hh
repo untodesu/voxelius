@@ -71,6 +71,8 @@ struct BlockDrop final {
 struct BlockDefinition final {
     BlockDefinition(void) noexcept = default;
 
+    std::optional<std::span<const Identifier>> resolve_texture_slot(std::string_view slot) const noexcept;
+
     block_render render;
     emhash8::HashMap<std::string, std::vector<Identifier>> textures;
     bool animated;
@@ -98,6 +100,11 @@ struct BlockDefinition final {
     std::vector<BlockDrop> drops;
 
     block_family_id_type family;
+
+    // Set on a family's pristine, un-patched base definition, kept
+    // around purely as a resolution anchor for variant overrides --
+    // never placeable in the world, mesher/atlas/model-bake must skip these
+    bool is_stem;
 };
 
 #endif /* A2FDDFDB_9022_42F0_AA77_8AD362EE4147 */

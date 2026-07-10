@@ -20,6 +20,7 @@
 #include "client/res/texture2D.hh"
 
 #include "client/block_atlas.hh"
+#include "client/block_models.hh"
 
 #include "client/frame.hh"
 #include "client/game.hh"
@@ -151,6 +152,7 @@ static void wrapped_main(int argc, char** argv)
     // committed block_registry (from mod_loader::init()), both of
     // which are guaranteed by this point
     block_atlas::init_late();
+    block_models::init_late();
 
     client_game::init_late();
 
@@ -234,6 +236,7 @@ static void wrapped_main(int argc, char** argv)
     LOG_INFO("shutdown after {} frames", globals::window_framecount);
     LOG_INFO("avg framerate: {:.03f} FPS ({:.03f} ms)", 1.0f / globals::window_frametime_avg, 1000.0f * globals::window_frametime_avg);
 
+    block_models::shutdown();
     block_atlas::shutdown();
 
     client_game::shutdown();

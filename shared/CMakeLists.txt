@@ -15,6 +15,7 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/utils/coord.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/lua.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/lua.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/block.cc"
     "${CMAKE_CURRENT_LIST_DIR}/block.hh"
     "${CMAKE_CURRENT_LIST_DIR}/block_registry.cc"
     "${CMAKE_CURRENT_LIST_DIR}/block_registry.hh"

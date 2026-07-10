@@ -12,6 +12,8 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/res/texture2D.hh"
     "${CMAKE_CURRENT_LIST_DIR}/block_atlas.cc"
     "${CMAKE_CURRENT_LIST_DIR}/block_atlas.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/block_models.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/block_models.hh"
     "${CMAKE_CURRENT_LIST_DIR}/constant.hh"
     "${CMAKE_CURRENT_LIST_DIR}/frame.cc"
     "${CMAKE_CURRENT_LIST_DIR}/frame.hh"

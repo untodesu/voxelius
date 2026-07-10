@@ -935,6 +935,7 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
     def.tags = static_cast<block_tag_bit>(0);
 
     def.family = BLOCK_FAMILY_ID_NULL;
+    def.is_stem = false;
 
     BlockDefReader reader(L, def_idx, proto_idx);
 
@@ -971,6 +972,7 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
         BlockFamily family {};
         family.name = id;
         family.base_id = block_id;
+        family.stem_id = BLOCK_ID_NULL;
 
         if(reader.try_push("states")) {
             auto states_ok = parse_states(L, lua_gettop(L), family);

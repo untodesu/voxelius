@@ -19,6 +19,8 @@
 #include "shared/mod_loader.hh"
 #include "shared/world.hh"
 
+#include "client/block_models.hh"
+
 #include "client/res/texture2D.hh"
 
 #include "client/globals.hh"
@@ -250,6 +252,85 @@ static void test_block_model(void)
     LOG_INFO("test_block_model: OK");
 }
 
+static void dump_baked_block_model(const std::string& label, block_id_type id)
+{
+    auto baked = block_models::find(id);
+
+    if(baked == nullptr) {
+        LOG_WARNING("test_block_models: {}: no baked model", label);
+        return;
+    }
+
+    std::size_t total = baked->unculled_quads.size();
+
+    LOG_DEBUG("test_block_models: {}", label);
+    LOG_DEBUG("  unculled_quads: {}", baked->unculled_quads.size());
+
+    const BakedBlockModel_Quad* sample = baked->unculled_quads.empty() ? nullptr : &baked->unculled_quads.front();
+
+    for(auto face : { BLOCK_FACE_NORTH, BLOCK_FACE_SOUTH, BLOCK_FACE_EAST, BLOCK_FACE_WEST, BLOCK_FACE_TOP, BLOCK_FACE_BOTTOM }) {
+        total += baked->face_quads[face].size();
+
+        LOG_DEBUG("  face_quads[{}]: {} fully_covered={}", block_face_name(face), baked->face_quads[face].size(),
+            baked->fully_covered[face]);
+
+        if(sample == nullptr && !baked->face_quads[face].empty()) {
+            sample = &baked->face_quads[face].front();
+        }
+    }
+
+    vx::throw_if_not_fmt(total != 0, "test_block_models: {}: baked model has zero quads", label);
+
+    LOG_DEBUG("  sample quad: pos0=({}, {}, {}) uv0=({}, {}) packed_normal={:#010x} frame_base={} frame_count={} tint={} shade={}",
+        sample->positions[0].x(), sample->positions[0].y(), sample->positions[0].z(), sample->uvs[0].x(), sample->uvs[0].y(),
+        sample->packed_normal, sample->frame_base, sample->frame_count, sample->tint_index, sample->shade);
+}
+
+static void test_block_models(void)
+{
+    constexpr std::array names = { "builtin:dirt", "builtin:grass", "builtin:stone", "builtin:stone_slab" };
+
+    for(const char* name : names) {
+        auto base_id = block_registry::find(Identifier::from_string(name));
+
+        if(base_id == BLOCK_ID_NULL) {
+            LOG_WARNING("test_block_models: {}: not registered, skipping", name);
+            continue;
+        }
+
+        auto family = block_registry::find_family_of(base_id);
+
+        if(family == nullptr) {
+            dump_baked_block_model(std::format("{} (id={})", name, base_id), base_id);
+            continue;
+        }
+
+        std::vector<block_id_type> ids;
+
+        for(const auto& [id, states] : family->id_states) {
+            ids.push_back(id);
+        }
+
+        std::sort(ids.begin(), ids.end());
+
+        for(auto id : ids) {
+            std::string state_str;
+
+            for(const auto& [key, value] : family->id_states.at(id)) {
+                if(!state_str.empty()) {
+                    state_str += ",";
+                }
+
+                state_str += family->state_value(value);
+            }
+
+            dump_baked_block_model(std::format("{} (id={}) states=[{}]", name, id, state_str), id);
+        }
+    }
+
+    LOG_INFO("test_block_models: OK");
+}
+
 static void test_scripting_world(void)
 {
     auto mod = mod_loader::find(BUILTIN_MOD_NAME);
@@ -343,6 +424,7 @@ void client_game::init_late(void)
 {
     test_block_storage();
     test_block_model();
+    test_block_models();
     test_world();
     test_scripting_world();
 }

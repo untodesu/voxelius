@@ -238,19 +238,25 @@ void block_registry::commit(ModContext& ctx) noexcept
         s_reverse_names.try_emplace(global_id, name);
     }
 
-    if(!blocks.empty()) {
+    if(blocks.size()) {
         s_definitions.insert(s_definitions.end(), std::make_move_iterator(blocks.begin() + 1), std::make_move_iterator(blocks.end()));
     }
 
-    if(!families.empty()) {
+    if(families.size()) {
         s_families.insert(s_families.end(), std::make_move_iterator(families.begin() + 1), std::make_move_iterator(families.end()));
 
         for(auto i = family_offset; i < s_families.size(); ++i) {
             auto& family = s_families[i];
 
-            // base_id starts out as the raw, un-resolved definition passed to
-            // blocks.add; fold it into the default-state variant in place so it
-            // doesn't stick around as a dead extra id that nothing ever places
+            if(auto base_def = find_definition(family.base_id)) {
+                BlockDefinition stem = BlockDefinition(*base_def);
+                stem.is_stem = true;
+
+                family.stem_id = static_cast<block_id_type>(s_definitions.size());
+
+                s_definitions.emplace_back(std::move(stem));
+            }
+
             if(family.states.size()) {
                 emhash8::HashMap<blockstate_key_type, blockstate_val_type> default_map;
 
@@ -258,9 +264,11 @@ void block_registry::commit(ModContext& ctx) noexcept
                     default_map.try_emplace(key, decl.default_value);
                 }
 
-                if(auto base_def = find_definition(family.base_id)) {
-                    auto resolved = apply_matching_variant(*base_def, family, default_map);
+                if(auto stem_def = find_definition(family.stem_id)) {
+                    auto resolved = apply_matching_variant(*stem_def, family, default_map);
+                    resolved.is_stem = false;
                     resolved.family = i;
+
                     s_definitions[family.base_id] = std::move(resolved);
                 }
 
@@ -383,11 +391,12 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id,
         return family.resolved_states.at(hash);
     }
 
-    auto base_def = find_definition(family.base_id);
-    vx::throw_if_fmt(base_def == nullptr, "block_registry: {}: invalid base_id: {}", family.name.full_string(), family.base_id);
+    auto stem_def = find_definition(family.stem_id);
+    vx::throw_if_fmt(stem_def == nullptr, "block_registry: {}: invalid stem_id: {}", family.name.full_string(), family.stem_id);
 
-    BlockDefinition resolved = apply_matching_variant(*base_def, family, map);
+    BlockDefinition resolved = apply_matching_variant(*stem_def, family, map);
     resolved.family = def->family;
+    resolved.is_stem = false;
 
     auto new_id = static_cast<block_id_type>(s_definitions.size());
     family.resolved_states.insert_or_assign(std::uint64_t(hash), block_id_type(new_id));

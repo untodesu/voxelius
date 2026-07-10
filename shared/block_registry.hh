@@ -61,6 +61,7 @@ struct BlockFamily final {
 
     Identifier name;
     block_id_type base_id;
+    block_id_type stem_id;
 
     emhash8::HashMap<blockstate_key_type, BlockStateDecl> states;
     emhash8::HashMap<blockstate_val_type, std::string> state_values;
