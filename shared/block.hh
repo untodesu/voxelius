@@ -101,9 +101,6 @@ struct BlockDefinition final {
 
     block_family_id_type family;
 
-    // Set on a family's pristine, un-patched base definition, kept
-    // around purely as a resolution anchor for variant overrides --
-    // never placeable in the world, mesher/atlas/model-bake must skip these
     bool is_stem;
 };
 

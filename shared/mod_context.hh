@@ -76,7 +76,7 @@ public:
 
     // patches a block registered earlier in this same loading pass to
     // point at the family that was, in turn, only registerable after
-    // the block itself (family.base_id needs the block's local id first)
+    // the block itself (family.stem_id needs the block's local id first)
     bool set_block_family(block_id_type id, block_family_id_type family) noexcept;
 
     std::vector<BlockDefinition> take_blocks(void) noexcept;

@@ -887,6 +887,31 @@ static int api_get(lua_State* L) noexcept
         local_id = block_registry::find(id);
     }
 
+    if(auto family = block_registry::find_family_of(local_id)) {
+        local_id = family->default_variant;
+    }
+
+    lua_pushinteger(L, local_id);
+    return 1;
+}
+
+static int api_get_stem(lua_State* L) noexcept
+{
+    auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
+    auto raw_name = luaL_checkstring(L, 1);
+    auto id = Identifier::from_string(raw_name, ctx->name_space());
+
+    if(!id.is_valid()) {
+        lua_pushinteger(L, BLOCK_ID_NULL);
+        return 1;
+    }
+
+    auto local_id = ctx->find_block(id);
+
+    if(local_id == BLOCK_ID_NULL) {
+        local_id = block_registry::find(id);
+    }
+
     lua_pushinteger(L, local_id);
     return 1;
 }
@@ -957,10 +982,15 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
         return false;
     }
 
-    auto block_id = ctx->register_block(id, def);
     auto has_checked_key = has_variants;
+    auto has_states = reader.try_push("states");
 
-    for(const auto& key : std::array { "states", "variants", "on_rtick", "on_stick", "on_place", "on_break", "on_interact" }) {
+    if(has_states) {
+        has_checked_key = true;
+        lua_pop(L, 1);
+    }
+
+    for(const auto& key : std::array { "variants", "on_rtick", "on_stick", "on_place", "on_break", "on_interact" }) {
         if(reader.try_push(key)) {
             has_checked_key = true;
             lua_pop(L, 1);
@@ -968,11 +998,15 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
         }
     }
 
+    def.is_stem = has_states;
+
+    auto block_id = ctx->register_block(id, def);
+
     if(has_checked_key) {
         BlockFamily family {};
         family.name = id;
-        family.base_id = block_id;
-        family.stem_id = BLOCK_ID_NULL;
+        family.stem_id = block_id;
+        family.default_variant = BLOCK_ID_NULL;
 
         if(reader.try_push("states")) {
             auto states_ok = parse_states(L, lua_gettop(L), family);
@@ -1113,6 +1147,10 @@ void scripting::open_blocks_library(std::shared_ptr<lua_State>& lua, ModContext*
     lua_pushlightuserdata(L, ctx);
     lua_pushcclosure(L, &api_get, 1);
     lua_setfield(L, -2, "get");
+
+    lua_pushlightuserdata(L, ctx);
+    lua_pushcclosure(L, &api_get_stem, 1);
+    lua_setfield(L, -2, "get_stem");
 
     lua_pushcfunction(L, &api_has_tag);
     lua_setfield(L, -2, "has_tag");

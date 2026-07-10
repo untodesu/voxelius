@@ -207,8 +207,12 @@ void block_registry::commit(ModContext& ctx) noexcept
     }
 
     for(auto& family : families) {
-        if(family.base_id) {
-            family.base_id += block_offset;
+        if(family.stem_id) {
+            family.stem_id += block_offset;
+        }
+
+        if(family.default_variant) {
+            family.default_variant += block_offset;
         }
 
         for(auto& [hash, id] : family.resolved_states) {
@@ -248,14 +252,7 @@ void block_registry::commit(ModContext& ctx) noexcept
         for(auto i = family_offset; i < s_families.size(); ++i) {
             auto& family = s_families[i];
 
-            if(auto base_def = find_definition(family.base_id)) {
-                BlockDefinition stem = BlockDefinition(*base_def);
-                stem.is_stem = true;
-
-                family.stem_id = static_cast<block_id_type>(s_definitions.size());
-
-                s_definitions.emplace_back(std::move(stem));
-            }
+            family.default_variant = family.stem_id;
 
             if(family.states.size()) {
                 emhash8::HashMap<blockstate_key_type, blockstate_val_type> default_map;
@@ -269,16 +266,17 @@ void block_registry::commit(ModContext& ctx) noexcept
                     resolved.is_stem = false;
                     resolved.family = i;
 
-                    s_definitions[family.base_id] = std::move(resolved);
+                    auto default_id = static_cast<block_id_type>(s_definitions.size());
+                    s_definitions.emplace_back(std::move(resolved));
+
+                    family.default_variant = default_id;
+                    family.resolved_states.insert_or_assign(hash_state_map(default_map), block_id_type(default_id));
+                    family.id_states.insert_or_assign(block_id_type(default_id), std::move(default_map));
                 }
-
-                family.resolved_states.insert_or_assign(hash_state_map(default_map), block_id_type(family.base_id));
-
-                family.id_states.insert_or_assign(block_id_type(family.base_id), std::move(default_map));
             }
 
             for(const auto& rule : family.variants) {
-                resolve_variant(family.base_id, rule.when);
+                resolve_variant(family.stem_id, rule.when);
             }
         }
     }

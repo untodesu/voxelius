@@ -75,7 +75,9 @@ The `blocks.NULL_BLOCK` constants defines an empty, undefined or otherwise inval
 
 ### Function: `blocks.get(name) -> integer`
 
-Retreive a numeric block ID from a namespaced block ID  
+Retreive a numeric block ID from a namespaced block ID, suitable for placement (eg. via `world.set_block`).  
+
+For a block registered with `states`, this is the resolved default-state variant, not the block's raw registration entry -- see `blocks.get_stem` for that.  
 
 #### Arguments
 
@@ -84,6 +86,19 @@ Retreive a numeric block ID from a namespaced block ID
 #### Return value
 
 - Numeric block ID if the game likes your input  
+- If the block is missing or the namespace ID is malformed, `blocks.NULL_BLOCK` is returned  
+
+### Function: `blocks.get_stem(name) -> integer`
+
+Retreive a block family's stem ID
+
+#### Arguments
+
+- `name` is a namespaced ID of a block, eg. `mymod:coolblockname`  
+
+#### Return value
+
+- Numeric stem block ID if the game likes your input  
 - If the block is missing or the namespace ID is malformed, `blocks.NULL_BLOCK` is returned  
 
 ### Function: `blocks.has_tag(id, tag) -> boolean`

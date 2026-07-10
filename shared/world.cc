@@ -234,7 +234,7 @@ bool world::set_state(const chunk_pos& cpos, const local_pos& lpos, std::string_
 
     map.insert_or_assign(key, family->state_hash(value));
 
-    auto new_id = block_registry::resolve_variant(family->base_id, map);
+    auto new_id = block_registry::resolve_variant(family->stem_id, map);
 
     return set_block(cpos, lpos, new_id);
 }

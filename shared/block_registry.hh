@@ -60,8 +60,8 @@ struct BlockFamily final {
     BlockFamily(void) noexcept = default;
 
     Identifier name;
-    block_id_type base_id;
     block_id_type stem_id;
+    block_id_type default_variant;
 
     emhash8::HashMap<blockstate_key_type, BlockStateDecl> states;
     emhash8::HashMap<blockstate_val_type, std::string> state_values;
