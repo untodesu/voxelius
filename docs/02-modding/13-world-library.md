@@ -19,7 +19,7 @@ Retreive a numeric block ID from the world
 - Normally, a numeric block ID  
 - If there is no block or the chunk is not present, `blocks.NULL_BLOCK` is returned  
 
-### Function: `world.set_block(bx, by, bz, id)`
+### Function: `world.set_block(bx, by, bz, id) -> boolean`
 
 Assign a block ID in the world
 
@@ -29,6 +29,10 @@ Assign a block ID in the world
 - `by` is the world-scale block Y position  
 - `bz` is the world-scale block Z position  
 - `id` is the numeric block ID; to unset the block (aka set to void), pass `blocks.NULL_BLOCK` as the value  
+
+#### Return value
+
+- `true` if the block was set, `false` otherwise (eg. the chunk is not present)  
 
 ### Function: `world.get_light(bx, by, bz) -> integer`
 
@@ -59,7 +63,7 @@ Retrive a blockstate at a given position
 - Blockstate's value normally  
 - If the block is void, has no such blockstate or the chunk is not present, `nil` is returned  
 
-### Function: `world.set_state(bx, by, bz, st, val)`
+### Function: `world.set_state(bx, by, bz, st, val) -> boolean`
 
 Assign a blockstate to a given position  
 
@@ -70,6 +74,10 @@ Assign a blockstate to a given position
 - `bz` is the world-scale block Z position  
 - `st` is the blockstate name  
 - `val` is the blockstate value  
+
+#### Return value
+
+- `true` if the blockstate was set, `false` otherwise (eg. the block is void or has no such blockstate)  
 
 ### Function: `world.get_temperature_base(bx, by, bz) -> integer`
 

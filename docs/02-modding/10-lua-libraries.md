@@ -16,6 +16,7 @@ Voxelius's runtime provides common Lua APIs:
 |----|----|  
 |`loadfile`|Sandbox breaking|  
 |`load`|Sandbox breaking|  
+|`collectgarbage`|Sandbox breaking|  
 
 ## Replaced globals
 
