@@ -47,9 +47,12 @@ nav:
   - Home: index.md
   - Overview:
     - History: 00-overview/00-history.md
-    - Features: 00-overview/01-features.md
-    - Architecture: 00-overview/02-architecture.md
-    - Source Code: 00-overview/03-source-code.md
+    - Features: 00-overview/10-features.md
+    - Architecture:
+      - General: 00-overview/20-general.md
+      - Rendering: 00-overview/21-rendering.md
+      - Network: 00-overview/22-network.md
+    - Source Code: 00-overview/30-source-code.md
   - Development:
     - Requirements: 01-development/00-requirements.md
     - Build Guide: 01-development/01-build-guide.md

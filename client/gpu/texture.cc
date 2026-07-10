@@ -75,7 +75,8 @@ gpu::Texture gpu::Texture::create_array(Uint32 width, Uint32 height, Uint32 laye
     return create(info);
 }
 
-void gpu::Texture::write_streamed(SDL_GPUCopyPass* copy_pass, std::span<const std::byte> data, Uint32 layer, Uint32 mip_level)
+void gpu::Texture::write_streamed(SDL_GPUCopyPass* copy_pass, std::span<const std::byte> data, Uint32 layer, Uint32 mip_level, Uint32 x,
+    Uint32 y, Uint32 width, Uint32 height)
 {
     SDL_GPUTransferBufferCreateInfo transfer_info {};
     transfer_info.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
@@ -99,8 +100,10 @@ void gpu::Texture::write_streamed(SDL_GPUCopyPass* copy_pass, std::span<const st
     dst_region.texture = m_handle;
     dst_region.mip_level = mip_level;
     dst_region.layer = layer;
-    dst_region.w = m_width;
-    dst_region.h = m_height;
+    dst_region.x = x;
+    dst_region.y = y;
+    dst_region.w = width ? width : m_width;
+    dst_region.h = height ? height : m_height;
     dst_region.d = 1;
 
     SDL_UploadToGPUTexture(copy_pass, &src_info, &dst_region, false);
@@ -108,7 +111,8 @@ void gpu::Texture::write_streamed(SDL_GPUCopyPass* copy_pass, std::span<const st
     SDL_ReleaseGPUTransferBuffer(m_device, tbuf);
 }
 
-void gpu::Texture::write_blocking(std::span<const std::byte> data, Uint32 layer, Uint32 mip_level)
+void gpu::Texture::write_blocking(std::span<const std::byte> data, Uint32 layer, Uint32 mip_level, Uint32 x, Uint32 y, Uint32 width,
+    Uint32 height)
 {
     auto cmds = SDL_AcquireGPUCommandBuffer(m_device);
     vx::throw_if_fmt(cmds == nullptr, "SDL_AcquireGPUCommandBuffer failed: {}", SDL_GetError());
@@ -116,7 +120,7 @@ void gpu::Texture::write_blocking(std::span<const std::byte> data, Uint32 layer,
     auto pass = SDL_BeginGPUCopyPass(cmds);
     vx::throw_if(pass == nullptr, "SDL_BeginGPUCopyPass returned null!");
 
-    write_streamed(pass, data, layer, mip_level);
+    write_streamed(pass, data, layer, mip_level, x, y, width, height);
 
     SDL_EndGPUCopyPass(pass);
 

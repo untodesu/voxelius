@@ -10,10 +10,10 @@ local stone_prototype = {
 
   textures = {
     default = {
-      "stone01.png",
-      "stone02.png",
-      "stone03.png",
-      "stone04.png",
+      "stone_01.png",
+      "stone_02.png",
+      "stone_03.png",
+      "stone_04.png",
     }
   },
 
@@ -65,7 +65,8 @@ blocks.add("stone_slab", stone_prototype, {
     {
       when = { orientation = "top" },
       overrides = {
-        model_name = "slab_top",
+        model_name = "slab",
+        model_facing = blocks.FACE_SOUTH,
         bcoll_offset = { 0, 8, 0 },
         health = 2,
         drops = {
@@ -83,7 +84,8 @@ blocks.add("stone_slab", stone_prototype, {
     {
       when = { orientation = "bottom" },
       overrides = {
-        model_name = "slab_bottom",
+        model_name = "slab",
+        model_facing = blocks.FACE_NORTH,
         health = 2,
         drops = {
           {

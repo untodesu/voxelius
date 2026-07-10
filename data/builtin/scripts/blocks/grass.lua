@@ -4,20 +4,18 @@ blocks.add("grass", {
 
   textures = {
     top = {
-      "grass_top01.png",
-      "grass_top02.png",
+      "grass_01.png",
+      "grass_02.png",
     },
     bottom = {
-      "dirt01.png",
-      "dirt02.png",
-      "dirt03.png",
-      "dirt04.png",
+      "dirt_01.png",
+      "dirt_02.png",
+      "dirt_03.png",
+      "dirt_04.png",
     },
     default = {
-      "grass_side01.png",
-      "grass_side02.png",
-      "grass_side03.png",
-      "grass_side04.png",
+      "grass_side_01.png",
+      "grass_side_02.png",
     }
   },
 

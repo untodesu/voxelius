@@ -1,5 +1,5 @@
 {
-  "parent": "builtin:cube",
+  "textures": ["north", "south", "west", "east", "top", "bottom"],
   "elements": [
     {
         "from": [0, 8, 0],

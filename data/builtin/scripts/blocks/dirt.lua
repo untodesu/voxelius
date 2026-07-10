@@ -4,10 +4,10 @@ blocks.add("dirt", {
 
   textures = {
     default = {
-      "dirt01.png",
-      "dirt02.png",
-      "dirt03.png",
-      "dirt04.png",
+      "dirt_01.png",
+      "dirt_02.png",
+      "dirt_03.png",
+      "dirt_04.png",
     }
   },
 

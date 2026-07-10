@@ -25,8 +25,11 @@ public:
     constexpr Uint32 height(void) const noexcept;
     constexpr SDL_GPUTextureFormat format(void) const noexcept;
 
-    void write_streamed(SDL_GPUCopyPass* copy_pass, std::span<const std::byte> data, Uint32 layer = 0, Uint32 mip_level = 0);
-    void write_blocking(std::span<const std::byte> data, Uint32 layer = 0, Uint32 mip_level = 0);
+    // width/height default to 0, meaning "the whole texture from (x, y)"
+    void write_streamed(SDL_GPUCopyPass* copy_pass, std::span<const std::byte> data, Uint32 layer = 0, Uint32 mip_level = 0, Uint32 x = 0,
+        Uint32 y = 0, Uint32 width = 0, Uint32 height = 0);
+    void write_blocking(std::span<const std::byte> data, Uint32 layer = 0, Uint32 mip_level = 0, Uint32 x = 0, Uint32 y = 0,
+        Uint32 width = 0, Uint32 height = 0);
     void generate_mipmaps_blocking(void) const;
 
 private:
