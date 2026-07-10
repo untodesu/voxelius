@@ -139,6 +139,12 @@ static bool parse_face(BlockModel_Face& face, const JSON_Object* object)
         face.tint_index = static_cast<unsigned>(raw);
     }
 
+    face.world_locked = false;
+
+    if(json_object_has_value(object, "world_locked")) {
+        face.world_locked = json_object_get_boolean(object, "world_locked");
+    }
+
     return true;
 }
 

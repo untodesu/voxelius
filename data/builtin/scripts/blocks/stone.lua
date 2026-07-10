@@ -66,6 +66,7 @@ blocks.add("stone_slab", stone_prototype, {
       when = { orientation = "top" },
       overrides = {
         model_name = "slab",
+        model_facing = blocks.FACE_TOP,
         bcoll_offset = { 0, 8, 0 },
         health = 2,
         drops = {
@@ -84,7 +85,7 @@ blocks.add("stone_slab", stone_prototype, {
       when = { orientation = "bottom" },
       overrides = {
         model_name = "slab",
-        model_offset = { 0, -8, 0 },
+        model_facing = blocks.FACE_BOTTOM,
         health = 2,
         drops = {
           {

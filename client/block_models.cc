@@ -252,17 +252,25 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def) n
             }
 
             auto& face_def = element.faces[face].value();
-            auto frames = def.resolve_texture_slot(face_def.texture_slot);
+            auto rotated_face = rotate_face(face, def.model_facing);
+
+            auto texture_face = &face_def;
+
+            if(face_def.world_locked && element.faces[rotated_face].has_value()) {
+                texture_face = &element.faces[rotated_face].value();
+            }
+
+            auto frames = def.resolve_texture_slot(texture_face->texture_slot);
 
             if(!frames.has_value()) {
-                LOG_WARNING("block_models: {}: {}: missing textures", def.model_name.full_string(), face_def.texture_slot);
+                LOG_WARNING("block_models: {}: {}: missing textures", def.model_name.full_string(), texture_face->texture_slot);
                 continue;
             }
 
             auto strip = block_atlas::find(frames.value());
 
             if(strip == nullptr) {
-                LOG_WARNING("block_models: {}: {}: atlas strip not found", def.model_name.full_string(), face_def.texture_slot);
+                LOG_WARNING("block_models: {}: {}: atlas strip not found", def.model_name.full_string(), texture_face->texture_slot);
                 continue;
             }
 
@@ -284,14 +292,6 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def) n
             quad.packed_normal = pack_normal_2_10_10_10(facing_rot * (element_rot * face_normal(face)));
 
             if(face_def.cull_face.has_value()) {
-                // The neighbour to check is always the quad's own (rotated)
-                // facing direction -- cull_face's value is just a cullability
-                // gate here, not a bucket key (this model's data convention
-                // stores it as the OPPOSITE direction, e.g. south quads are
-                // declared with cullface=north, which would bucket the quad
-                // under the wrong neighbour check if used directly)
-                auto rotated_face = rotate_face(face, def.model_facing);
-
                 baked->face_quads[rotated_face].push_back(quad);
 
                 if(is_covering(element, face)) {

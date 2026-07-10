@@ -9,6 +9,7 @@ struct BlockModel_Face final {
     unsigned uv_rotation;
     std::optional<block_face> cull_face;
     std::optional<unsigned> tint_index;
+    bool world_locked;
 };
 
 struct BlockModel_Element final {

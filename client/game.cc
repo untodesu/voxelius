@@ -205,9 +205,9 @@ static void dump_block_model(const Identifier& id, const BlockModel& model)
                 continue;
             }
 
-            LOG_DEBUG("    [{}] face {}: texture={} uv_rotation={} cullface={} tint={}", i, block_face_name(static_cast<block_face>(j)),
+            LOG_DEBUG("    [{}] face {}: texture={} uv_rotation={} cullface={} tint={} world_locked={}", i, block_face_name(static_cast<block_face>(j)),
                 face->texture_slot, face->uv_rotation, face->cull_face.has_value() ? block_face_name(face->cull_face.value()) : "none",
-                face->tint_index.has_value() ? std::to_string(face->tint_index.value()) : "none");
+                face->tint_index.has_value() ? std::to_string(face->tint_index.value()) : "none", face->world_locked);
         }
     }
 }
@@ -288,44 +288,43 @@ static void dump_baked_block_model(const std::string& label, block_id_type id)
 
 static void test_block_models(void)
 {
-    constexpr std::array names = { "builtin:dirt", "builtin:grass", "builtin:stone", "builtin:stone_slab" };
+    auto definitions = block_registry::all_definitions();
 
-    for(const char* name : names) {
-        auto base_id = block_registry::find(Identifier::from_string(name));
+    for(block_id_type id = 1; id < definitions.size(); ++id) {
+        const auto& def = definitions[id];
 
-        if(base_id == BLOCK_ID_NULL) {
-            LOG_WARNING("test_block_models: {}: not registered, skipping", name);
+        if(def.is_stem || def.model_name.is_empty()) {
             continue;
         }
 
-        auto family = block_registry::find_family_of(base_id);
+        auto name = block_registry::name_of(id);
+        auto label = name.has_value() ? name->full_string() : std::string("?");
+
+        auto family = block_registry::find_family_of(id);
 
         if(family == nullptr) {
-            dump_baked_block_model(std::format("{} (id={})", name, base_id), base_id);
+            dump_baked_block_model(std::format("{} (id={})", label, id), id);
             continue;
         }
 
-        std::vector<block_id_type> ids;
+        auto it = family->id_states.find(id);
 
-        for(const auto& [id, states] : family->id_states) {
-            ids.push_back(id);
+        if(it == family->id_states.cend()) {
+            dump_baked_block_model(std::format("{} (id={})", label, id), id);
+            continue;
         }
 
-        std::sort(ids.begin(), ids.end());
+        std::string state_str;
 
-        for(auto id : ids) {
-            std::string state_str;
-
-            for(const auto& [key, value] : family->id_states.at(id)) {
-                if(!state_str.empty()) {
-                    state_str += ",";
-                }
-
-                state_str += family->state_value(value);
+        for(const auto& [key, value] : it->second) {
+            if(!state_str.empty()) {
+                state_str += ",";
             }
 
-            dump_baked_block_model(std::format("{} (id={}) states=[{}]", name, id, state_str), id);
+            state_str += family->state_value(value);
         }
+
+        dump_baked_block_model(std::format("{} (id={}) states=[{}]", label, id, state_str), id);
     }
 
     LOG_INFO("test_block_models: OK");

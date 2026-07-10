@@ -41,6 +41,7 @@ Block models define the visible geometry of a block
 |`uv_rotation`|`number`|no|0|UV rotation, either 0, 90, 180 or 270|  
 |`cullface`|`string`|no|N/D|The face is skipped if the neighbouring block in that direction has a face that's marked as opaque to touch|  
 |`tint`|`integer`|no|N/D|Tint group index used by climate and biomes|  
+|`world_locked`|`bool`|no|`false`|Samples the texture slot of whichever face ends up on this side after `model_facing`, instead of this face's own slot|  
 
 ## Example
 

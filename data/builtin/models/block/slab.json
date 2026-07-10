@@ -2,15 +2,38 @@
   "textures": ["north", "south", "west", "east", "top", "bottom"],
   "elements": [
     {
-        "from": [0, 8, 0],
+        "from": [0, 0, 8],
         "to": [16, 16, 16],
         "faces": {
-            "top": { "texture": "top", "cullface": "bottom" },
-            "bottom": { "texture": "bottom" },
-            "north": { "texture": "north", "cullface": "south" },
-            "south": { "texture": "south", "cullface": "north" },
-            "west": { "texture": "west", "cullface": "east" },
-            "east": { "texture": "east", "cullface": "west" }
+            "north": {
+              "texture": "north",
+              "cullface": "south",
+              "world_locked": true
+            },
+            "south": {
+              "texture": "south",
+              "world_locked": true
+            },
+            "east": {
+              "texture": "east",
+              "cullface": "west",
+              "world_locked": true
+            },
+            "west": {
+              "texture": "west",
+              "cullface": "east",
+              "world_locked": true
+            },
+            "bottom": {
+              "texture": "bottom",
+              "cullface": "top",
+              "world_locked": true
+            },
+            "top": {
+              "texture": "top",
+              "cullface": "bottom",
+              "world_locked": true
+            }
         }
     }
   ]
