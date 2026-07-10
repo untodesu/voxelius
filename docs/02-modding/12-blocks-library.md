@@ -79,12 +79,12 @@ Retreive a numeric block ID from a namespaced block ID
 
 #### Arguments
 
-- `name` is a namespaced ID of a block, eg. `mymod:coolblockname`;  
+- `name` is a namespaced ID of a block, eg. `mymod:coolblockname`  
 
 #### Return value
 
-- Numeric block ID if the game likes your input;  
-- If the block is missing or the namespace ID is malformed, `blocks.NULL_BLOCK` is returned;  
+- Numeric block ID if the game likes your input  
+- If the block is missing or the namespace ID is malformed, `blocks.NULL_BLOCK` is returned  
 
 ### Function: `blocks.has_tag(id, tag) -> boolean`
 
@@ -92,8 +92,8 @@ Check if a block has a specified tag.
 
 #### Arguments
 
-- `name` is a namespaced ID of a block, eg. `mymod:coolblockname`;  
-- `tag` is a tag constant, eg. `blocks.TAG_SOIL`;  
+- `name` is a namespaced ID of a block, eg. `mymod:coolblockname`  
+- `tag` is a tag constant, eg. `blocks.TAG_SOIL`  
 
 #### Return value
 
@@ -106,9 +106,9 @@ Register a new block in the registry
 
 #### Arguments
 
-- `name` is a namespaced ID of a block, eg `mymod:coolblockname`;  
-- `def` is a table of block definitions, see below for that;  
-- `prototype` (3-argument form) is a base table of block definitions shared across a family of blocks (eg. all stone variants). `def` is merged on top of it, with `def`'s fields taking priority on conflicts;  
+- `name` is a namespaced ID of a block, eg `mymod:coolblockname`  
+- `def` is a table of block definitions, see below for that  
+- `prototype` (3-argument form) is a base table of block definitions shared across a family of blocks (eg. all stone variants). `def` is merged on top of it, with `def`'s fields taking priority on conflicts  
 
 #### Notes
 

@@ -10,14 +10,14 @@ Retreive a numeric block ID from the world
 
 #### Arguments  
 
-- `bx` is the world-scale block X position;  
-- `by` is the world-scale block Y position;  
-- `bz` is the world-scale block Z position;  
+- `bx` is the world-scale block X position  
+- `by` is the world-scale block Y position  
+- `bz` is the world-scale block Z position  
 
 #### Return value
 
-- Normally, a numeric block ID;  
-- If there is no block or the chunk is not present, `blocks.NULL_BLOCK` is returned;  
+- Normally, a numeric block ID  
+- If there is no block or the chunk is not present, `blocks.NULL_BLOCK` is returned  
 
 ### Function: `world.set_block(bx, by, bz, id)`
 
@@ -25,10 +25,10 @@ Assign a block ID in the world
 
 #### Arguments  
 
-- `bx` is the world-scale block X position;  
-- `by` is the world-scale block Y position;  
-- `bz` is the world-scale block Z position;  
-- `id` is the numeric block ID; to unset the block (aka set to void), pass `blocks.NULL_BLOCK` as the value;  
+- `bx` is the world-scale block X position  
+- `by` is the world-scale block Y position  
+- `bz` is the world-scale block Z position  
+- `id` is the numeric block ID; to unset the block (aka set to void), pass `blocks.NULL_BLOCK` as the value  
 
 ### Function: `world.get_light(bx, by, bz) -> integer`
 
@@ -36,9 +36,9 @@ Retreive lighting information about a block position
 
 #### Arguments  
 
-- `bx` is the world-scale block X position;  
-- `by` is the world-scale block Y position;  
-- `bz` is the world-scale block Z position;  
+- `bx` is the world-scale block X position  
+- `by` is the world-scale block Y position  
+- `bz` is the world-scale block Z position  
 
 #### Return value
 
@@ -50,14 +50,14 @@ Retrive a blockstate at a given position
 
 #### Arguments  
 
-- `bx` is the world-scale block X position;  
-- `by` is the world-scale block Y position;  
-- `bz` is the world-scale block Z position;  
+- `bx` is the world-scale block X position  
+- `by` is the world-scale block Y position  
+- `bz` is the world-scale block Z position  
 
 #### Return value
 
-- Blockstate's value normally;  
-- If the block is void, has no such blockstate or the chunk is not present, `nil` is returned;  
+- Blockstate's value normally  
+- If the block is void, has no such blockstate or the chunk is not present, `nil` is returned  
 
 ### Function: `world.set_state(bx, by, bz, st, val)`
 
@@ -65,11 +65,11 @@ Assign a blockstate to a given position
 
 #### Arguments  
 
-- `bx` is the world-scale block X position;  
-- `by` is the world-scale block Y position;  
-- `bz` is the world-scale block Z position;  
-- `st` is the blockstate name;  
-- `val` is the blockstate value;  
+- `bx` is the world-scale block X position  
+- `by` is the world-scale block Y position  
+- `bz` is the world-scale block Z position  
+- `st` is the blockstate name  
+- `val` is the blockstate value  
 
 ### Function: `world.get_temperature_base(bx, by, bz) -> integer`
 
@@ -77,9 +77,9 @@ Retreive a biome-defined temperature base for a given block
 
 #### Arguments  
 
-- `bx` is the world-scale block X position;  
-- `by` is the world-scale block Y position;  
-- `bz` is the world-scale block Z position;  
+- `bx` is the world-scale block X position  
+- `by` is the world-scale block Y position  
+- `bz` is the world-scale block Z position  
 
 #### Return value
 
@@ -96,9 +96,9 @@ Retreive a biome-influenced seasonal temperature for a given block
 
 #### Arguments  
 
-- `bx` is the world-scale block X position;  
-- `by` is the world-scale block Y position;  
-- `bz` is the world-scale block Z position;  
+- `bx` is the world-scale block X position  
+- `by` is the world-scale block Y position  
+- `bz` is the world-scale block Z position  
 
 #### Return value
 
@@ -113,7 +113,7 @@ This can be influenced by season, weather and other factors. Relatively low valu
 
 Schedule an `on_stick` call to a block, `dt` ticks from now.  
 
-- `bx` is the world-scale block X position;  
-- `by` is the world-scale block Y position;  
-- `bz` is the world-scale block Z position;  
-- `dt` is the tick delay for the callback;  
+- `bx` is the world-scale block X position  
+- `by` is the world-scale block Y position  
+- `bz` is the world-scale block Z position  
+- `dt` is the tick delay for the callback  

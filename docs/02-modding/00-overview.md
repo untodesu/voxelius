@@ -1,6 +1,6 @@
 # Modding: overview
 
-Starting with the project's 17th rewrite (this is a joke, though it's like the fourth rewrite in the game's history dating back to 2021), Voxelius _the game_ builds on top of Voxelius _the engine_, which provides a bunch of Lua hooks to define blocks and other stuff that enhances core gameplay
+Starting with the project's 17th rewrite (this is a joke, though it's like the third major rewrite in the game's history dating back to 2021), Voxelius _the game_ builds on top of Voxelius _the engine_, which provides a bunch of Lua hooks to define blocks and other stuff that enhances core gameplay
 
 ## Namespaced identifiers
 
@@ -11,6 +11,15 @@ Voxelius's engine uses _namespaced identifiers_ akin to what Minecraft uses. A n
 ```
 
 Namespace can be optional. When omitted in a mod's scripts, it defaults to the mod's namespace, otherwise it uses `builtin` (the quote-unquote "mod" ID associated with the base Voxelius game) for the namespace.  
+
+Valid characters in both namespace and identifier include:
+
+- Latin alphabet: `A-Z` and `a-z` ASCII range;  
+- Numeric values: `0-9` ASCII range;  
+- Underscore: `_` ASCII character;  
+- Tilde: `~` ASCII character. Not recommended for general use, see below;  
+
+During initialization, if the engine sees fully duplicate entries in a registry (eg. `mymod:myblock` is registered twice), it will append `~N` to the end and will try until it hits 10000 renames at which point I am not promising any defined behaviour...  
 
 ## Filesystem
 
@@ -36,4 +45,3 @@ Most of the time, files in that system are accessed using namespaced identifiers
 ## Error handling
 
 The mod's root script, `modname/scripts/init.lua` can handle errors itself, though if an error propagates out of it (into the initializing `lua_pcall`), the mod will be considered as a load fail.  
-
