@@ -203,7 +203,7 @@ static void build_atlas(void)
     SDL_WaitForGPUFences(globals::gpu_device, true, &fence, 1);
     SDL_ReleaseGPUFence(globals::gpu_device, fence);
 
-    LOG_INFO("block_atlas: packed {} frames into {} layer(s) of a {}x{} atlas", rects.size(), num_layers, LAYER_SIZE, LAYER_SIZE);
+    LOG_INFO("packed {} frames into {} layer(s) of a {}x{} atlas", rects.size(), num_layers, LAYER_SIZE, LAYER_SIZE);
 
     s_pending.clear();
     s_pending.shrink_to_fit();
@@ -228,7 +228,7 @@ const AtlasStrip* block_atlas::load(std::span<const Identifier> textures) noexce
             auto image = res::load<Image>(id, "textures/block", RESFLAG_IMG_FLIP);
 
             if(image == nullptr) {
-                LOG_WARNING("block_atlas: {}: failed to load image", id.full_string());
+                LOG_WARNING("{}: failed to load image", id.full_string());
                 continue;
             }
 
@@ -293,7 +293,7 @@ void block_atlas::init_late(void)
         auto model = res::load<BlockModel>(def.model_name, "models/block", ".json");
 
         if(model == nullptr) {
-            LOG_WARNING("block_atlas: {}: failed to load block model", def.model_name.full_string());
+            LOG_WARNING("{}: failed to load block model", def.model_name.full_string());
             continue;
         }
 
@@ -301,12 +301,12 @@ void block_atlas::init_late(void)
             auto frames = def.resolve_texture_slot(slot);
 
             if(!frames.has_value()) {
-                LOG_WARNING("block_atlas: {}: missing texture for slot '{}'", def.model_name.full_string(), slot);
+                LOG_WARNING("{}: missing texture for slot '{}'", def.model_name.full_string(), slot);
                 continue;
             }
 
             if(nullptr == block_atlas::load(frames.value())) {
-                LOG_WARNING("block_atlas: {}: failed to load atlas strip for slot '{}'", def.model_name.full_string(), slot);
+                LOG_WARNING("{}: failed to load atlas strip for slot '{}'", def.model_name.full_string(), slot);
             }
         }
     }

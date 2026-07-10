@@ -34,7 +34,7 @@ static void test_block_storage(void)
     auto definitions = block_registry::all_definitions();
 
     if(definitions.size() < 3) {
-        LOG_WARNING("test_block_storage: not enough block definitions loaded, skipping");
+        LOG_WARNING("not enough block definitions loaded, skipping");
         return;
     }
 
@@ -100,7 +100,7 @@ static void test_block_storage(void)
     vx::throw_if_not_fmt(storage.get(constant::CHUNK_VOLUME - 1) == BLOCK_ID_NULL,
         "test_block_storage: optimize() corrupted untouched tail");
 
-    LOG_INFO("test_block_storage: OK");
+    LOG_INFO("OK");
 }
 
 static void test_world(void)
@@ -108,7 +108,7 @@ static void test_world(void)
     auto slab_id = block_registry::find(Identifier::from_string("builtin:stone_slab"));
 
     if(slab_id == BLOCK_ID_NULL) {
-        LOG_WARNING("test_world: builtin:stone_slab not found, skipping");
+        LOG_WARNING("builtin:stone_slab not found, skipping");
         return;
     }
 
@@ -157,7 +157,7 @@ static void test_world(void)
     world::remove_chunk(cpos);
     vx::throw_if_not_fmt(world::find_chunk(cpos) == nullptr, "test_world: chunk should be gone after remove_chunk");
 
-    LOG_INFO("test_world: OK");
+    LOG_INFO("OK");
 }
 
 static const char* block_face_name(block_face face) noexcept
@@ -221,7 +221,7 @@ static void test_block_model(void)
     auto model = res::load<BlockModel>(id, "models/block", ".json");
 
     if(model == nullptr) {
-        LOG_WARNING("test_block_model: builtin:cube failed to load, skipping");
+        LOG_WARNING("builtin:cube failed to load, skipping");
         return;
     }
 
@@ -252,7 +252,7 @@ static void test_block_model(void)
     vx::throw_if_not_fmt(res::find<BlockModel>(id, "models/block", ".json") == nullptr,
         "test_block_model: model should be gone after soft_purge");
 
-    LOG_INFO("test_block_model: OK");
+    LOG_INFO("OK");
 }
 
 static void write_obj_quads(std::ofstream& file, std::size_t& vertex_base, const std::string& label,
@@ -295,7 +295,7 @@ static void dump_baked_block_model(const std::string& label, block_id_type id, s
     auto baked = block_models::find(id);
 
     if(baked == nullptr) {
-        LOG_WARNING("test_block_models: {}: no baked model", label);
+        LOG_WARNING("{}: no baked model", label);
         return;
     }
 
@@ -307,7 +307,7 @@ static void dump_baked_block_model(const std::string& label, block_id_type id, s
 
     std::size_t total = baked->unculled_quads.size();
 
-    LOG_DEBUG("test_block_models: {}", label);
+    LOG_DEBUG("{}", label);
     LOG_DEBUG("  unculled_quads: {}", baked->unculled_quads.size());
 
     const BakedBlockModel_Quad* sample = baked->unculled_quads.empty() ? nullptr : &baked->unculled_quads.front();
@@ -340,7 +340,7 @@ static void test_block_models(void)
     float obj_x_cursor = 0.0f;
 
     if(!obj_file.is_open()) {
-        LOG_WARNING("test_block_models: failed to open block_models_dump.obj for writing");
+        LOG_WARNING("failed to open block_models_dump.obj for writing");
     }
 
     auto* obj_file_ptr = obj_file.is_open() ? &obj_file : nullptr;
@@ -384,10 +384,10 @@ static void test_block_models(void)
     }
 
     if(obj_file.is_open()) {
-        LOG_INFO("test_block_models: wrote block_models_dump.obj");
+        LOG_INFO("wrote block_models_dump.obj");
     }
 
-    LOG_INFO("test_block_models: OK");
+    LOG_INFO("OK");
 }
 
 static void test_scripting_world(void)
@@ -395,7 +395,7 @@ static void test_scripting_world(void)
     auto mod = mod_loader::find(BUILTIN_MOD_NAME);
 
     if(!mod || !mod->lua_state()) {
-        LOG_WARNING("test_scripting_world: builtin mod not loaded, skipping");
+        LOG_WARNING("builtin mod not loaded, skipping");
         return;
     }
 
@@ -454,7 +454,7 @@ static void test_scripting_world(void)
 
     world::remove_chunk(cpos);
 
-    LOG_INFO("test_scripting_world: OK");
+    LOG_INFO("OK");
 }
 
 void client_game::init(void)

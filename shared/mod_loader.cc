@@ -30,14 +30,14 @@ static std::vector<ModInfo> discover_mods(void) noexcept
                 config::Map map;
 
                 if(!map.load(modinfo_path)) {
-                    LOG_ERROR("mod_loader: {}: unable to read modinfo.conf", entries[i]);
+                    LOG_ERROR("{}: unable to read modinfo.conf", entries[i]);
                     continue;
                 }
 
                 ModInfo info {};
 
                 if(!ModInfo::parse(map, info)) {
-                    LOG_ERROR("mod_loader: {}: malformed modinfo.conf", entries[i]);
+                    LOG_ERROR("{}: malformed modinfo.conf", entries[i]);
                     continue;
                 }
 
@@ -77,7 +77,7 @@ static std::vector<ModInfo> resolve_load_order(std::vector<ModInfo> mods) noexce
             }
 
             if(conflict.second == ModVersion {} || it->second <= conflict.second) {
-                LOG_ERROR("mod_loader: {}: conflicts with {}", info.name, conflict.first);
+                LOG_ERROR("{}: conflicts with {}", info.name, conflict.first);
                 remaining.erase(info.name);
                 break;
             }
@@ -150,7 +150,7 @@ void mod_loader::init(void)
         });
 
         if(blocked) {
-            LOG_WARNING("mod_loader: {}: a hard dependency failed to load", info.name);
+            LOG_WARNING("{}: a hard dependency failed to load", info.name);
             failed.insert(info.name);
             continue;
         }

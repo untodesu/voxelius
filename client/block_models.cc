@@ -230,7 +230,7 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def) n
     auto model = res::load<BlockModel>(def.model_name, "models/block", ".json");
 
     if(model == nullptr) {
-        LOG_WARNING("block_models: {}: load failed", def.model_name.full_string());
+        LOG_WARNING("{}: load failed", def.model_name.full_string());
         return nullptr;
     }
 
@@ -260,14 +260,14 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def) n
             auto frames = def.resolve_texture_slot(texture_face->texture_slot);
 
             if(!frames.has_value()) {
-                LOG_WARNING("block_models: {}: {}: missing textures", def.model_name.full_string(), texture_face->texture_slot);
+                LOG_WARNING("{}: {}: missing textures", def.model_name.full_string(), texture_face->texture_slot);
                 continue;
             }
 
             auto strip = block_atlas::find(frames.value());
 
             if(strip == nullptr) {
-                LOG_WARNING("block_models: {}: {}: atlas strip not found", def.model_name.full_string(), texture_face->texture_slot);
+                LOG_WARNING("{}: {}: atlas strip not found", def.model_name.full_string(), texture_face->texture_slot);
                 continue;
             }
 

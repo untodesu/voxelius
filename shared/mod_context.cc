@@ -53,7 +53,7 @@ bool ModInfo::parse(const config::Map& map, ModInfo& modinfo)
     auto name = map.value<std::string>("name");
 
     if(!name.has_value() || name->empty()) {
-        LOG_ERROR("modinfo: missing required field 'name'");
+        LOG_ERROR("missing required field 'name'");
         return false;
     }
 

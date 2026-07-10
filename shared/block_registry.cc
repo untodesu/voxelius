@@ -235,7 +235,7 @@ void block_registry::commit(ModContext& ctx) noexcept
         auto [it, inserted] = s_names.try_emplace(name, global_id);
 
         if(!inserted) {
-            LOG_WARNING("block_registry: duplicate block name: {}", name.full_string());
+            LOG_WARNING("duplicate block name: {}", name.full_string());
             continue;
         }
 

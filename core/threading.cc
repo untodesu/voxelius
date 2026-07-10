@@ -58,7 +58,7 @@ void threading::init(void)
         }
     }
 
-    LOG_INFO("threading: using {} threads for pooling tasks", thread_pool_size);
+    LOG_INFO("using {} threads for pooling tasks", thread_pool_size);
 
     s_threads = std::make_unique<BS::light_thread_pool>(thread_pool_size);
     s_deque.clear();

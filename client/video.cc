@@ -91,12 +91,12 @@ static void update_present_mode(void)
     if(s_enable_vsync.value()) {
         SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
 
-        LOG_DEBUG("video: vsync enabled");
+        LOG_DEBUG("vsync enabled");
     }
     else {
         SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, s_unlocked_present_mode);
 
-        LOG_DEBUG("video: vsync disabled");
+        LOG_DEBUG("vsync disabled");
     }
 }
 
@@ -272,7 +272,7 @@ void video::request_fullscreen(int width, int height, int rate) noexcept
 
     s_current_mode.set_value(std::format("{}:{}:{}", best_mode.w, best_mode.h, static_cast<int>(best_mode.refresh_rate)));
 
-    LOG_DEBUG("video: set mode to: {}x{} ({} Hz)", best_mode.w, best_mode.h, static_cast<int>(best_mode.refresh_rate));
+    LOG_DEBUG("set mode to: {}x{} ({} Hz)", best_mode.w, best_mode.h, static_cast<int>(best_mode.refresh_rate));
 }
 
 void video::request_windowed(int width, int height) noexcept
@@ -290,7 +290,7 @@ void video::request_windowed(int width, int height) noexcept
 
     s_current_mode.set_value("windowed");
 
-    LOG_DEBUG("video: set mode to: windowed {}x{}", width, height);
+    LOG_DEBUG("set mode to: windowed {}x{}", width, height);
 }
 
 void video::request_windowed(void) noexcept
