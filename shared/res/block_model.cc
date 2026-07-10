@@ -102,10 +102,9 @@ static bool parse_face(BlockModel_Face& face, const JSON_Object* object)
             return false;
         }
 
-        face.uv = uv;
+        face.uv = uv / 16.0f;
     }
 
-    face.uv /= 16.0f;
     face.uv_rotation = 0;
 
     if(json_object_has_value(object, "uv_rotation")) {

@@ -1,5 +1,7 @@
 #include "client/pch.hh"
 
+#include <fstream>
+
 #include "client/game.hh"
 
 #include "core/res/resource.hh"
@@ -252,13 +254,54 @@ static void test_block_model(void)
     LOG_INFO("test_block_model: OK");
 }
 
-static void dump_baked_block_model(const std::string& label, block_id_type id)
+static void write_obj_quads(std::ofstream& file, std::size_t& vertex_base, const std::string& label,
+    const std::vector<BakedBlockModel_Quad>& quads, const Eigen::Vector3f& offset)
+{
+    if(quads.empty()) {
+        return;
+    }
+
+    file << "o " << label << "\n";
+
+    for(const auto& quad : quads) {
+        for(const auto& position : quad.positions) {
+            auto p = position + offset;
+            file << "v " << p.x() << ' ' << p.y() << ' ' << p.z() << "\n";
+        }
+    }
+
+    for(std::size_t i = 0; i < quads.size(); ++i) {
+        auto base = vertex_base + i * 4 + 1; // OBJ indices are 1-based
+        file << "f " << base << ' ' << (base + 1) << ' ' << (base + 2) << ' ' << (base + 3) << "\n";
+    }
+
+    vertex_base += quads.size() * 4;
+}
+
+static void dump_baked_block_model_obj(std::ofstream& file, std::size_t& vertex_base, const std::string& label, const BakedBlockModel& baked,
+    const Eigen::Vector3f& offset)
+{
+    write_obj_quads(file, vertex_base, label + "_unculled", baked.unculled_quads, offset);
+
+    for(auto face : { BLOCK_FACE_NORTH, BLOCK_FACE_SOUTH, BLOCK_FACE_EAST, BLOCK_FACE_WEST, BLOCK_FACE_TOP, BLOCK_FACE_BOTTOM }) {
+        write_obj_quads(file, vertex_base, label + "_" + block_face_name(face), baked.face_quads[face], offset);
+    }
+}
+
+static void dump_baked_block_model(const std::string& label, block_id_type id, std::ofstream* obj_file = nullptr,
+    std::size_t* obj_vertex_base = nullptr, float* obj_x_cursor = nullptr)
 {
     auto baked = block_models::find(id);
 
     if(baked == nullptr) {
         LOG_WARNING("test_block_models: {}: no baked model", label);
         return;
+    }
+
+    if(obj_file != nullptr) {
+        Eigen::Vector3f offset(*obj_x_cursor, 0.0f, 0.0f);
+        dump_baked_block_model_obj(*obj_file, *obj_vertex_base, label, *baked, offset);
+        *obj_x_cursor += 2.0f;
     }
 
     std::size_t total = baked->unculled_quads.size();
@@ -290,6 +333,17 @@ static void test_block_models(void)
 {
     auto definitions = block_registry::all_definitions();
 
+    // dumped for eyeballing model geometry by hand; no textures, just positions
+    std::ofstream obj_file("block_models_dump.obj");
+    std::size_t obj_vertex_base = 0;
+    float obj_x_cursor = 0.0f;
+
+    if(!obj_file.is_open()) {
+        LOG_WARNING("test_block_models: failed to open block_models_dump.obj for writing");
+    }
+
+    auto* obj_file_ptr = obj_file.is_open() ? &obj_file : nullptr;
+
     for(block_id_type id = 1; id < definitions.size(); ++id) {
         const auto& def = definitions[id];
 
@@ -303,14 +357,14 @@ static void test_block_models(void)
         auto family = block_registry::find_family_of(id);
 
         if(family == nullptr) {
-            dump_baked_block_model(std::format("{} (id={})", label, id), id);
+            dump_baked_block_model(std::format("{} (id={})", label, id), id, obj_file_ptr, &obj_vertex_base, &obj_x_cursor);
             continue;
         }
 
         auto it = family->id_states.find(id);
 
         if(it == family->id_states.cend()) {
-            dump_baked_block_model(std::format("{} (id={})", label, id), id);
+            dump_baked_block_model(std::format("{} (id={})", label, id), id, obj_file_ptr, &obj_vertex_base, &obj_x_cursor);
             continue;
         }
 
@@ -324,7 +378,12 @@ static void test_block_models(void)
             state_str += family->state_value(value);
         }
 
-        dump_baked_block_model(std::format("{} (id={}) states=[{}]", label, id, state_str), id);
+        dump_baked_block_model(
+            std::format("{} (id={}) states=[{}]", label, id, state_str), id, obj_file_ptr, &obj_vertex_base, &obj_x_cursor);
+    }
+
+    if(obj_file.is_open()) {
+        LOG_INFO("test_block_models: wrote block_models_dump.obj");
     }
 
     LOG_INFO("test_block_models: OK");
