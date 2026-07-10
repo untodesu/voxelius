@@ -17,11 +17,10 @@ chunk_pos utils::to_chunk(const block_pos& bpos) noexcept
 
 local_pos utils::to_local(const block_pos& bpos) noexcept
 {
-    constexpr auto CHUNK_SIZE = static_cast<block_pos::value_type>(constant::CHUNK_SIZE);
     local_pos lpos;
-    lpos.x() = static_cast<local_pos::value_type>(utils::mod_signed<block_pos::value_type>(bpos.x(), CHUNK_SIZE));
-    lpos.y() = static_cast<local_pos::value_type>(utils::mod_signed<block_pos::value_type>(bpos.y(), CHUNK_SIZE));
-    lpos.z() = static_cast<local_pos::value_type>(utils::mod_signed<block_pos::value_type>(bpos.z(), CHUNK_SIZE));
+    lpos.x() = static_cast<local_pos::value_type>(utils::mod_signed<block_pos::value_type>(bpos.x(), constant::CHUNK_SIZE));
+    lpos.y() = static_cast<local_pos::value_type>(utils::mod_signed<block_pos::value_type>(bpos.y(), constant::CHUNK_SIZE));
+    lpos.z() = static_cast<local_pos::value_type>(utils::mod_signed<block_pos::value_type>(bpos.z(), constant::CHUNK_SIZE));
     return lpos;
 }
 
@@ -92,4 +91,13 @@ Eigen::Vector3f utils::to_fvec(const chunk_pos& cpos, const Eigen::Vector3f& off
     rpos.y() = offset.y() + static_cast<float>(cpos.y() << constant::CHUNK_SIZE_LOG2);
     rpos.z() = offset.z() + static_cast<float>(cpos.z() << constant::CHUNK_SIZE_LOG2);
     return rpos;
+}
+
+local_pos utils::wrap_local(const local_pos& lpos) noexcept
+{
+    local_pos result;
+    result.x() = static_cast<local_pos::value_type>(utils::mod_signed<local_pos::value_type>(lpos.x(), constant::CHUNK_SIZE));
+    result.y() = static_cast<local_pos::value_type>(utils::mod_signed<local_pos::value_type>(lpos.y(), constant::CHUNK_SIZE));
+    result.z() = static_cast<local_pos::value_type>(utils::mod_signed<local_pos::value_type>(lpos.z(), constant::CHUNK_SIZE));
+    return result;
 }

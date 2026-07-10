@@ -38,4 +38,9 @@ Eigen::Vector3f to_fvec(const chunk_pos& cpos) noexcept;
 Eigen::Vector3f to_fvec(const chunk_pos& cpos, const Eigen::Vector3f& offset) noexcept;
 } // namespace utils
 
+namespace utils
+{
+local_pos wrap_local(const local_pos& lpos) noexcept;
+} // namespace utils
+
 #endif /* B1F3492F_30A1_43E0_BD73_F36814AF8F72 */

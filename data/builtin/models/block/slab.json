@@ -7,11 +7,11 @@
         "faces": {
             "north": {
               "texture": "north",
-              "cullface": "south",
               "world_locked": true
             },
             "south": {
               "texture": "south",
+              "cullface": "north",
               "world_locked": true
             },
             "east": {

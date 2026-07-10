@@ -26,8 +26,8 @@ constexpr static std::array FACE_ROTATIONS = {
     std::array { BLOCK_FACE_SOUTH, BLOCK_FACE_NORTH, BLOCK_FACE_WEST, BLOCK_FACE_EAST, BLOCK_FACE_TOP, BLOCK_FACE_BOTTOM },
     std::array { BLOCK_FACE_EAST, BLOCK_FACE_WEST, BLOCK_FACE_SOUTH, BLOCK_FACE_NORTH, BLOCK_FACE_TOP, BLOCK_FACE_BOTTOM },
     std::array { BLOCK_FACE_WEST, BLOCK_FACE_EAST, BLOCK_FACE_NORTH, BLOCK_FACE_SOUTH, BLOCK_FACE_TOP, BLOCK_FACE_BOTTOM },
-    std::array { BLOCK_FACE_TOP, BLOCK_FACE_BOTTOM, BLOCK_FACE_EAST, BLOCK_FACE_WEST, BLOCK_FACE_SOUTH, BLOCK_FACE_NORTH },
     std::array { BLOCK_FACE_BOTTOM, BLOCK_FACE_TOP, BLOCK_FACE_EAST, BLOCK_FACE_WEST, BLOCK_FACE_NORTH, BLOCK_FACE_SOUTH },
+    std::array { BLOCK_FACE_TOP, BLOCK_FACE_BOTTOM, BLOCK_FACE_EAST, BLOCK_FACE_WEST, BLOCK_FACE_SOUTH, BLOCK_FACE_NORTH },
 };
 
 static std::vector<std::unique_ptr<BakedBlockModel>> s_models;
@@ -186,31 +186,37 @@ static bool is_covering(const BlockModel_Element& element, block_face face) noex
         case BLOCK_FACE_NORTH:
             result = result && element.from.x() <= 0.0f && element.to.x() >= 1.0f;
             result = result && element.from.y() <= 0.0f && element.to.y() >= 1.0f;
+            result = result && element.from.z() <= 0.0f;
             break;
 
         case BLOCK_FACE_SOUTH:
             result = result && element.from.x() <= 0.0f && element.to.x() >= 1.0f;
             result = result && element.from.y() <= 0.0f && element.to.y() >= 1.0f;
+            result = result && element.to.z() >= 1.0f;
             break;
 
         case BLOCK_FACE_EAST:
             result = result && element.from.z() <= 0.0f && element.to.z() >= 1.0f;
             result = result && element.from.y() <= 0.0f && element.to.y() >= 1.0f;
+            result = result && element.to.x() >= 1.0f;
             break;
 
         case BLOCK_FACE_WEST:
             result = result && element.from.z() <= 0.0f && element.to.z() >= 1.0f;
             result = result && element.from.y() <= 0.0f && element.to.y() >= 1.0f;
+            result = result && element.from.x() <= 0.0f;
             break;
 
         case BLOCK_FACE_TOP:
             result = result && element.from.x() <= 0.0f && element.to.x() >= 1.0f;
             result = result && element.from.z() <= 0.0f && element.to.z() >= 1.0f;
+            result = result && element.to.y() >= 1.0f;
             break;
 
         case BLOCK_FACE_BOTTOM:
             result = result && element.from.x() <= 0.0f && element.to.x() >= 1.0f;
             result = result && element.from.z() <= 0.0f && element.to.z() >= 1.0f;
+            result = result && element.from.y() <= 0.0f;
             break;
 
         default:

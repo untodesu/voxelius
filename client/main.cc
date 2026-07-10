@@ -22,6 +22,7 @@
 
 #include "client/block_atlas.hh"
 #include "client/block_models.hh"
+#include "client/chunk_mesher.hh"
 
 #include "client/frame.hh"
 #include "client/game.hh"
@@ -155,6 +156,8 @@ static void wrapped_main(int argc, char** argv)
     block_atlas::init_late();
     block_models::init_late();
 
+    chunk_mesher::init();
+
     client_game::init_late();
 
 #ifndef NDEBUG
@@ -209,6 +212,8 @@ static void wrapped_main(int argc, char** argv)
         video::update();
 
         client_game::update();
+
+        chunk_mesher::update();
 
         // TODO: game_ui::update();
 

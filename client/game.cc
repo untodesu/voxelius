@@ -9,6 +9,7 @@
 #include "core/buffer.hh"
 #include "core/exception.hh"
 #include "core/identifier.hh"
+#include "core/threading.hh"
 
 #include "shared/res/block_model.hh"
 
@@ -22,6 +23,8 @@
 #include "shared/world.hh"
 
 #include "client/block_models.hh"
+#include "client/chunk_mesh.hh"
+#include "client/chunk_mesher.hh"
 
 #include "client/res/texture2D.hh"
 
@@ -390,6 +393,125 @@ static void test_block_models(void)
     LOG_INFO("OK");
 }
 
+static void write_chunk_mesh_obj_vertices(std::ofstream& file, std::size_t& vertex_base, const std::string& label,
+    const std::vector<ChunkMesh_Vertex>& vertices, const Eigen::Vector3f& offset)
+{
+    if(vertices.empty()) {
+        return;
+    }
+
+    file << "o " << label << "\n";
+
+    for(const auto& vertex : vertices) {
+        auto p = ChunkMesh_Vertex::unpack_position(vertex.position) / 16.0f + offset;
+        file << "v " << p.x() << ' ' << p.y() << ' ' << p.z() << "\n";
+    }
+
+    for(std::size_t i = 0; i < vertices.size() / 4; ++i) {
+        auto base = vertex_base + i * 4 + 1; // OBJ indices are 1-based
+        file << "f " << base << ' ' << (base + 1) << ' ' << (base + 2) << ' ' << (base + 3) << "\n";
+    }
+
+    vertex_base += vertices.size();
+}
+
+static void test_chunk_mesher(void)
+{
+    auto stone_id = block_registry::find(Identifier::from_string("builtin:stone"));
+    auto slab_id = block_registry::find(Identifier::from_string("builtin:stone_slab"));
+    auto vtest_id = block_registry::find(Identifier::from_string("builtin:vtest"));
+
+    if(stone_id == BLOCK_ID_NULL || slab_id == BLOCK_ID_NULL || vtest_id == BLOCK_ID_NULL) {
+        LOG_WARNING("builtin:stone/stone_slab/vtest not found, skipping");
+        return;
+    }
+
+    const chunk_pos cpos(1000, 1000, 1000);
+    world::create_chunk(cpos);
+
+    // a little patch of terrain: a solid stone floor (lots of internally culled
+    // faces between neighboring stone blocks), topped with a mix of slabs (partial
+    // cuboids resting on the floor) and vtest "grass" tufts (a cross model with no
+    // cullface at all, always in unculled_quads)
+    constexpr std::int32_t SIZE = 6;
+
+    for(std::int32_t x = 0; x < SIZE; x += 1) {
+        for(std::int32_t z = 0; z < SIZE; z += 1) {
+            world::set_block(cpos, local_pos(x, 0, z), stone_id);
+
+            if((x + z) % 3 == 1) {
+                world::set_block(cpos, local_pos(x, 1, z), vtest_id);
+                continue;
+            }
+
+            // everywhere else: a slab, with orientation varied across bottom/top/double
+            const auto slab_bpos = utils::to_block(cpos, local_pos(x, 1, z));
+            world::set_block(slab_bpos, slab_id);
+
+            switch((x * SIZE + z) % 3) {
+                case 0:
+                    // "bottom" is the default, nothing to do
+                    break;
+
+                case 1:
+                    world::set_state(slab_bpos, "orientation", "top");
+                    break;
+
+                default:
+                    world::set_state(slab_bpos, "orientation", "double");
+                    break;
+            }
+        }
+    }
+
+    for(std::int32_t y = 2; y < 30; ++y) {
+        world::set_block(cpos, local_pos(0, y, 0), slab_id);
+        world::set_state(utils::to_block(cpos, local_pos(0, y, 0)), "orientation", "top");
+    }
+
+    world::set_block(cpos, local_pos(0, 30, 0), slab_id);
+    world::set_state(utils::to_block(cpos, local_pos(1, 30, 0)), "orientation", "bottom");
+
+    world::set_block(cpos, local_pos(0, 31, 0), slab_id);
+    world::set_state(utils::to_block(cpos, local_pos(0, 31, 0)), "orientation", "double");
+
+    chunk_mesher::update();
+
+    auto entity = world::find_chunk(cpos)->entity();
+
+    for(int i = 0; (i < 1000) && !world::chunk_entities.all_of<ChunkMeshComponent>(entity); ++i) {
+        threading::update();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    vx::throw_if_not_fmt(world::chunk_entities.all_of<ChunkMeshComponent>(entity), "test_chunk_mesher: mesh never finalized");
+
+    auto& mesh = world::chunk_entities.get<ChunkMeshComponent>(entity);
+
+    vx::throw_if_not_fmt(!mesh.opaque_vertices.empty(), "test_chunk_mesher: expected opaque geometry");
+    vx::throw_if_not_fmt(mesh.blend_vertices.empty(),
+        "test_chunk_mesher: nothing placed here is BLOCK_RENDER_ALPHA, expected no blend geometry");
+    vx::throw_if_not_fmt((mesh.opaque_vertices.size() % 4) == 0, "test_chunk_mesher: vertex count should be a multiple of 4 (quads)");
+
+    LOG_INFO("test_chunk_mesher: {} opaque quads, {} blend quads", mesh.opaque_vertices.size() / 4, mesh.blend_vertices.size() / 4);
+
+    std::ofstream obj_file("chunk_mesh_dump.obj");
+
+    if(obj_file.is_open()) {
+        std::size_t vertex_base = 0;
+        write_chunk_mesh_obj_vertices(obj_file, vertex_base, "opaque", mesh.opaque_vertices, Eigen::Vector3f::Zero());
+        write_chunk_mesh_obj_vertices(obj_file, vertex_base, "blend", mesh.blend_vertices, Eigen::Vector3f::Zero());
+        LOG_INFO("wrote chunk_mesh_dump.obj");
+    }
+    else {
+        LOG_WARNING("failed to open chunk_mesh_dump.obj for writing");
+    }
+
+    world::remove_chunk(cpos);
+
+    LOG_INFO("OK");
+}
+
 static void test_scripting_world(void)
 {
     auto mod = mod_loader::find(BUILTIN_MOD_NAME);
@@ -485,6 +607,7 @@ void client_game::init_late(void)
     test_block_model();
     test_block_models();
     test_world();
+    test_chunk_mesher();
     test_scripting_world();
 }
 
