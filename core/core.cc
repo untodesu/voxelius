@@ -6,6 +6,7 @@
 
 #include "core/cmdline.hh"
 #include "core/exception.hh"
+#include "core/threading.hh"
 
 static std::filesystem::path s_gamepath;
 static std::filesystem::path s_userpath;
@@ -85,10 +86,14 @@ void core::setup(int argc, char** argv)
 
     auto set_write_dir_ok = PHYSFS_setWriteDir(s_userpath.string().c_str());
     vx::throw_if_not_fmt(set_write_dir_ok, "failed to setwritedir {}: {}", s_userpath.string(), utils::physfs_error());
+
+    threading::init();
 }
 
 void core::teardown(void)
 {
+    threading::shutdown();
+
     enet_deinitialize();
 
     auto physfs_deinit_ok = PHYSFS_deinit();

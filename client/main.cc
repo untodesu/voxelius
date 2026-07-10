@@ -9,6 +9,7 @@
 
 #include "core/core.hh"
 #include "core/exception.hh"
+#include "core/threading.hh"
 #include "core/version.hh"
 
 #include "shared/res/block_collision.hh"
@@ -228,7 +229,11 @@ static void wrapped_main(int argc, char** argv)
 
         client_game::update_late();
 
+        threading::update();
+
         globals::window_framecount += 1;
+
+        globals::dispatcher.update();
 
         res::soft_purge();
     }
