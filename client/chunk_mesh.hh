@@ -13,7 +13,7 @@ struct ChunkMesh_Vertex final {
     std::uint32_t frame_base;
     std::uint32_t frame_count;
     std::uint32_t tint_index;
-    std::uint32_t shade;
+    float shade; ///< pre-baked fake-lighting multiplier, 1.0 if the model's own `shade` flag is off
 };
 
 struct ChunkMeshComponent final {

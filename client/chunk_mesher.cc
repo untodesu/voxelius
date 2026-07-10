@@ -26,6 +26,34 @@ constexpr static std::array ALL_FACES = {
     BLOCK_FACE_BOTTOM,
 };
 
+// Fake-lighting multiplier per dominant normal axis, ported from the old
+// chunk_quad.vert.glsl `shades[]` table (indexed there by facing, here by normal)
+static float shade_factor(std::uint32_t packed_normal) noexcept
+{
+    auto unpack10 = [](std::uint32_t bits) noexcept -> float {
+        auto signed_bits = static_cast<std::int32_t>(bits << 22) >> 22; // sign-extend a 10-bit field
+        return static_cast<float>(signed_bits) / 511.0f;
+    };
+
+    auto nx = unpack10(packed_normal & 0x3FFU);
+    auto ny = unpack10((packed_normal >> 10U) & 0x3FFU);
+    auto nz = unpack10((packed_normal >> 20U) & 0x3FFU);
+
+    auto ax = std::abs(nx);
+    auto ay = std::abs(ny);
+    auto az = std::abs(nz);
+
+    if((ay >= ax) && (ay >= az)) {
+        return (ny >= 0.0f) ? 1.0f : 0.4f; // top : bottom
+    }
+
+    if(ax >= az) {
+        return 0.6f; // east/west
+    }
+
+    return 0.8f; // north/south
+}
+
 class MeshingTask final : public Task {
 public:
     explicit MeshingTask(entt::entity entity, const chunk_pos& cpos);
@@ -200,6 +228,8 @@ void MeshingTask::emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const
     auto block_origin = lpos.cast<float>() * 16.0f;
 
     for(auto& quad : quads) {
+        auto shade = quad.shade ? shade_factor(quad.packed_normal) : 1.0f;
+
         for(std::size_t i = 0; i < quad.positions.size(); ++i) {
             ChunkMesh_Vertex vertex {};
             vertex.position = ChunkMesh_Vertex::pack_position(block_origin + quad.positions[i] * 16.0f);
@@ -209,7 +239,7 @@ void MeshingTask::emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const
             vertex.frame_base = static_cast<std::uint32_t>(quad.frame_base);
             vertex.frame_count = static_cast<std::uint32_t>(quad.frame_count);
             vertex.tint_index = quad.tint_index;
-            vertex.shade = quad.shade;
+            vertex.shade = shade;
             out.push_back(vertex);
         }
     }
