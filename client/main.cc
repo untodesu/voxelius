@@ -11,6 +11,7 @@
 #include "core/exception.hh"
 #include "core/version.hh"
 
+#include "shared/res/block_collision.hh"
 #include "shared/res/block_model.hh"
 
 #include "shared/block_registry.hh"
@@ -105,6 +106,7 @@ static void wrapped_main(int argc, char** argv)
     vx::throw_if_not_fmt(SDL_Init(SDL_INIT_EVENTS), "SDL_Init failed: {}", SDL_GetError());
 
     Image::register_resource();
+    BlockCollision::register_resource();
     BlockModel::register_resource();
     Texture2D::register_resource();
 
