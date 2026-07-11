@@ -23,6 +23,7 @@ namespace globals
 {
 extern SDL_GPUCommandBuffer* gpu_commands_main;
 extern SDL_GPUTexture* gpu_swapchain;
+extern SDL_GPUTexture* gpu_depth_stencil;
 } // namespace globals
 
 namespace globals
@@ -45,6 +46,11 @@ namespace globals
 {
 extern std::size_t num_draw_calls;
 extern std::size_t num_draw_vertices;
+} // namespace globals
+
+namespace globals
+{
+extern entt::entity player;
 } // namespace globals
 
 #endif /* D618E26B_01F4_4D5C_A249_6D2B49637425 */

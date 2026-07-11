@@ -130,12 +130,16 @@ void video::init(void)
 
     SDL_SetWindowMinimumSize(globals::window, constant::BASE_WIDTH, constant::BASE_HEIGHT);
 
-    globals::gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, false, nullptr);
-    vx::throw_if_not_fmt(globals::gpu_device, "SDL_CreateGPUDevice failed: {}", SDL_GetError());
+    globals::dispatcher.sink<SDL_WindowEvent>().connect<&on_sdl_window_event>();
+    globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&on_sdl_key>();
 
-    auto claimed = SDL_ClaimWindowForGPUDevice(globals::gpu_device, globals::window);
-    vx::throw_if_not_fmt(claimed, "SDL_ClaimWindowForGPUDevice failed: {}", SDL_GetError());
+    update_window_title();
+}
 
+void video::init_late(void)
+{
+    // Needs globals::gpu_device, created by head::init() which runs
+    // between video::init() and this
     if(SDL_WindowSupportsGPUPresentMode(globals::gpu_device, globals::window, SDL_GPU_PRESENTMODE_MAILBOX)) {
         s_unlocked_present_mode = SDL_GPU_PRESENTMODE_MAILBOX;
     }
@@ -146,49 +150,26 @@ void video::init(void)
         s_unlocked_present_mode = SDL_GPU_PRESENTMODE_VSYNC;
     }
 
-    globals::dispatcher.sink<SDL_WindowEvent>().connect<&on_sdl_window_event>();
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-
-    auto imgui_platform_ok = ImGui_ImplSDL3_InitForSDLGPU(globals::window);
-    vx::throw_if_not(imgui_platform_ok, "ImGui_ImplSDL3_InitForSDLGPU failed");
-
-    ImGui_ImplSDLGPU3_InitInfo imgui_gpu_info {};
-    imgui_gpu_info.Device = globals::gpu_device;
-    imgui_gpu_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(globals::gpu_device, globals::window);
-
-    auto imgui_renderer_ok = ImGui_ImplSDLGPU3_Init(&imgui_gpu_info);
-    vx::throw_if_not(imgui_renderer_ok, "ImGui_ImplSDLGPU3_Init failed");
-
-    ImGui::GetIO().IniFilename = nullptr;
-
-    update_window_title();
-
-    SDL_ShowWindow(globals::window);
-
-    globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&on_sdl_key>();
-}
-
-void video::init_late(void)
-{
     const std::string& mode = s_current_mode.value();
 
     if(mode == "windowed") {
         video::request_windowed(s_last_windowed_size.x(), s_last_windowed_size.y());
-        return;
+    }
+    else {
+        int target_width;
+        int target_height;
+        int target_rate;
+
+        if(3 == std::sscanf(mode.c_str(), "%d:%d:%d", &target_width, &target_height, &target_rate)) {
+            video::request_fullscreen(target_width, target_height, target_rate);
+        }
     }
 
-    int target_width;
-    int target_height;
-    int target_rate;
-
-    if(3 == std::sscanf(mode.c_str(), "%d:%d:%d", &target_width, &target_height, &target_rate)) {
-        video::request_fullscreen(target_width, target_height, target_rate);
-        return;
-    }
-
+    // request_windowed()/request_fullscreen() only resize the actual SDL
+    // window; globals::width/height/aspect are otherwise only ever updated
+    // by the SDL_EVENT_WINDOW_RESIZED handler, which needs the event queue
+    // pumped (main loop's handle_events()) - not yet the case this early in
+    // startup, so query the real size directly instead of relying on that
     int width;
     int height;
     SDL_GetWindowSizeInPixels(globals::window, &width, &height);
@@ -200,12 +181,6 @@ void video::init_late(void)
 
 void video::shutdown(void)
 {
-    ImGui_ImplSDLGPU3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
-
-    SDL_ReleaseWindowFromGPUDevice(globals::gpu_device, globals::window);
-    SDL_DestroyGPUDevice(globals::gpu_device);
     SDL_DestroyWindow(globals::window);
 }
 

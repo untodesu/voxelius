@@ -225,7 +225,7 @@ const AtlasStrip* block_atlas::load(std::span<const Identifier> textures) noexce
         std::size_t frame_count = 0;
 
         for(const auto& id : textures) {
-            auto image = res::load<Image>(id, "textures/block", RESFLAG_IMG_FLIP);
+            auto image = res::load<Image>(id, "textures/block");
 
             if(image == nullptr) {
                 LOG_WARNING("{}: failed to load image", id.full_string());

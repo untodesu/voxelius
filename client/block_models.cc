@@ -164,59 +164,135 @@ static void make_face_geometry(const Eigen::Vector3f& from, const Eigen::Vector3
     quad.uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
 }
 
-static void apply_face_uv(const BlockModel_Face& face, BakedBlockModel_Quad& quad) noexcept
+static void face_uv_extent(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, Eigen::Vector4f& out_uv) noexcept
 {
-    if(face.uv.has_value()) {
-        quad.uvs[0] = Eigen::Vector2f(face.uv->x(), face.uv->y());
-        quad.uvs[1] = Eigen::Vector2f(face.uv->z(), face.uv->y());
-        quad.uvs[2] = Eigen::Vector2f(face.uv->z(), face.uv->w());
-        quad.uvs[3] = Eigen::Vector2f(face.uv->x(), face.uv->w());
+    switch(face) {
+        case BLOCK_FACE_NORTH:
+            out_uv = Eigen::Vector4f(from.x(), to.y(), to.x(), from.y());
+            break;
+
+        case BLOCK_FACE_SOUTH:
+            out_uv = Eigen::Vector4f(to.x(), to.y(), from.x(), from.y());
+            break;
+
+        case BLOCK_FACE_EAST:
+            out_uv = Eigen::Vector4f(from.z(), to.y(), to.z(), from.y());
+            break;
+
+        case BLOCK_FACE_WEST:
+            out_uv = Eigen::Vector4f(to.z(), to.y(), from.z(), from.y());
+            break;
+
+        case BLOCK_FACE_TOP:
+            out_uv = Eigen::Vector4f(from.z(), from.x(), to.z(), to.x());
+            break;
+
+        case BLOCK_FACE_BOTTOM:
+            out_uv = Eigen::Vector4f(to.z(), from.x(), from.z(), to.x());
+            break;
+    }
+}
+
+static void apply_face_uv(const BlockModel_Face* face, const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face_type,
+    bool rescale, BakedBlockModel_Quad& quad) noexcept
+{
+    if(face->uv.has_value()) {
+        quad.uvs[0] = Eigen::Vector2f(face->uv->x(), face->uv->y());
+        quad.uvs[1] = Eigen::Vector2f(face->uv->z(), face->uv->y());
+        quad.uvs[2] = Eigen::Vector2f(face->uv->z(), face->uv->w());
+        quad.uvs[3] = Eigen::Vector2f(face->uv->x(), face->uv->w());
+    }
+    else if(!rescale) {
+        Eigen::Vector4f uv;
+        face_uv_extent(from, to, face_type, uv);
+        quad.uvs[0] = Eigen::Vector2f(uv.x(), uv.y());
+        quad.uvs[1] = Eigen::Vector2f(uv.z(), uv.y());
+        quad.uvs[2] = Eigen::Vector2f(uv.z(), uv.w());
+        quad.uvs[3] = Eigen::Vector2f(uv.x(), uv.w());
     }
 
-    auto steps = static_cast<std::ptrdiff_t>(face.uv_rotation / 90);
+    auto steps = static_cast<std::ptrdiff_t>(face->uv_rotation / 90);
 
     std::rotate(quad.uvs.begin(), quad.uvs.begin() + steps, quad.uvs.end());
 }
 
-static bool is_covering(const BlockModel_Element& element, block_face face) noexcept
+static void rotate_aabb(const Eigen::Matrix3f& rot, const Eigen::Vector3f& center, const Eigen::Vector3f& from, const Eigen::Vector3f& to,
+    Eigen::Vector3f& out_from, Eigen::Vector3f& out_to) noexcept
+{
+    constexpr static auto CORNERS = 8;
+
+    out_from = Eigen::Vector3f::Constant(std::numeric_limits<float>::max());
+    out_to = Eigen::Vector3f::Constant(std::numeric_limits<float>::lowest());
+
+    for(int i = 0; i < CORNERS; ++i) {
+        Eigen::Vector3f corner;
+
+        if(i & 1) {
+            corner.x() = to.x();
+        }
+        else {
+            corner.x() = from.x();
+        }
+
+        if(i & 2) {
+            corner.y() = to.y();
+        }
+        else {
+            corner.y() = from.y();
+        }
+
+        if(i & 4) {
+            corner.z() = to.z();
+        }
+        else {
+            corner.z() = from.z();
+        }
+
+        Eigen::Vector3f rotated = center + rot * (corner - center);
+        out_from = out_from.cwiseMin(rotated);
+        out_to = out_to.cwiseMax(rotated);
+    }
+}
+
+static bool is_covering(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, bool axis_aligned) noexcept
 {
     auto result = true;
 
     switch(face) {
         case BLOCK_FACE_NORTH:
-            result = result && element.from.x() <= 0.0f && element.to.x() >= 1.0f;
-            result = result && element.from.y() <= 0.0f && element.to.y() >= 1.0f;
-            result = result && element.from.z() <= 0.0f;
+            result = result && from.x() <= 0.0f && to.x() >= 1.0f;
+            result = result && from.y() <= 0.0f && to.y() >= 1.0f;
+            result = result && from.z() <= 0.0f;
             break;
 
         case BLOCK_FACE_SOUTH:
-            result = result && element.from.x() <= 0.0f && element.to.x() >= 1.0f;
-            result = result && element.from.y() <= 0.0f && element.to.y() >= 1.0f;
-            result = result && element.to.z() >= 1.0f;
+            result = result && from.x() <= 0.0f && to.x() >= 1.0f;
+            result = result && from.y() <= 0.0f && to.y() >= 1.0f;
+            result = result && to.z() >= 1.0f;
             break;
 
         case BLOCK_FACE_EAST:
-            result = result && element.from.z() <= 0.0f && element.to.z() >= 1.0f;
-            result = result && element.from.y() <= 0.0f && element.to.y() >= 1.0f;
-            result = result && element.to.x() >= 1.0f;
+            result = result && from.z() <= 0.0f && to.z() >= 1.0f;
+            result = result && from.y() <= 0.0f && to.y() >= 1.0f;
+            result = result && to.x() >= 1.0f;
             break;
 
         case BLOCK_FACE_WEST:
-            result = result && element.from.z() <= 0.0f && element.to.z() >= 1.0f;
-            result = result && element.from.y() <= 0.0f && element.to.y() >= 1.0f;
-            result = result && element.from.x() <= 0.0f;
+            result = result && from.z() <= 0.0f && to.z() >= 1.0f;
+            result = result && from.y() <= 0.0f && to.y() >= 1.0f;
+            result = result && from.x() <= 0.0f;
             break;
 
         case BLOCK_FACE_TOP:
-            result = result && element.from.x() <= 0.0f && element.to.x() >= 1.0f;
-            result = result && element.from.z() <= 0.0f && element.to.z() >= 1.0f;
-            result = result && element.to.y() >= 1.0f;
+            result = result && from.x() <= 0.0f && to.x() >= 1.0f;
+            result = result && from.z() <= 0.0f && to.z() >= 1.0f;
+            result = result && to.y() >= 1.0f;
             break;
 
         case BLOCK_FACE_BOTTOM:
-            result = result && element.from.x() <= 0.0f && element.to.x() >= 1.0f;
-            result = result && element.from.z() <= 0.0f && element.to.z() >= 1.0f;
-            result = result && element.from.y() <= 0.0f;
+            result = result && from.x() <= 0.0f && to.x() >= 1.0f;
+            result = result && from.z() <= 0.0f && to.z() >= 1.0f;
+            result = result && from.y() <= 0.0f;
             break;
 
         default:
@@ -224,7 +300,7 @@ static bool is_covering(const BlockModel_Element& element, block_face face) noex
             break;
     }
 
-    return result && element.rotation_angles.isZero();
+    return result && axis_aligned;
 }
 
 static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def) noexcept
@@ -278,17 +354,27 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def) n
             }
 
             BakedBlockModel_Quad quad {};
-            make_face_geometry(element.from, element.to, face, quad);
-            apply_face_uv(face_def, quad);
+
+            Eigen::Vector3f used_from = element.from;
+            Eigen::Vector3f used_to = element.to;
+            auto used_face = face;
+
+            if(def.model_facing != BLOCK_FACE_NORTH) {
+                rotate_aabb(facing_rot, center, element.from, element.to, used_from, used_to);
+                used_face = rotated_face;
+            }
+
+            make_face_geometry(used_from, used_to, used_face, quad);
+            apply_face_uv(texture_face, used_from, used_to, used_face, element.rescale, quad);
 
             quad.frame_base = strip->frame_base;
             quad.frame_count = strip->frame_count;
             quad.tint_index = face_def.tint_index.value_or(0);
+            quad.animated = def.animated;
             quad.shade = element.shade;
 
             for(auto& position : quad.positions) {
                 position = element_rot * (position - element.rotation_origin) + element.rotation_origin;
-                position = facing_rot * (position - center) + center;
                 position += def.model_offset;
             }
 
@@ -297,7 +383,7 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def) n
             if(face_def.cull_face.has_value()) {
                 baked->face_quads[rotated_face].push_back(quad);
 
-                if(is_covering(element, face)) {
+                if(is_covering(element.from, element.to, face, element.rotation_angles.isZero())) {
                     baked->fully_covered[rotated_face] = true;
                 }
             }

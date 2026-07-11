@@ -286,6 +286,14 @@ void world::schedule(const block_pos& pos, std::uint64_t deadline) noexcept
     schedule(cpos, lpos, deadline);
 }
 
+void world::shutdown(void) noexcept
+{
+    chunks.clear();
+    chunk_entities.clear();
+    basic_entities.clear();
+    current_tick = 0;
+}
+
 void world::fixed_update(void) noexcept
 {
     std::vector<std::size_t> due;

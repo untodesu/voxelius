@@ -11,6 +11,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/scripting/lua_libraries.hh"
     "${CMAKE_CURRENT_LIST_DIR}/scripting/world_library.cc"
     "${CMAKE_CURRENT_LIST_DIR}/scripting/world_library.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/chunk.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/chunk.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/coord.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/coord.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/lua.cc"

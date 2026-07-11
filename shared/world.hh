@@ -125,6 +125,7 @@ void schedule(const block_pos& pos, std::uint64_t deadline) noexcept;
 
 namespace world
 {
+void shutdown(void) noexcept;
 void fixed_update(void) noexcept;
 } // namespace world
 

@@ -17,6 +17,7 @@
 
 #include "shared/block_registry.hh"
 #include "shared/mod_loader.hh"
+#include "shared/world.hh"
 
 #include "client/res/texture2D.hh"
 
@@ -24,9 +25,10 @@
 #include "client/block_models.hh"
 #include "client/chunk_mesher.hh"
 
-#include "client/frame.hh"
+#include "client/camera.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
+#include "client/head.hh"
 #include "client/video.hh"
 
 static std::atomic_bool s_is_running;
@@ -136,6 +138,8 @@ static void wrapped_main(int argc, char** argv)
     // test
 
     video::init();
+    head::init();
+    camera::init();
 
     // TODO: game_ui::init();
 
@@ -147,10 +151,11 @@ static void wrapped_main(int argc, char** argv)
     globals::client_config.load("client.user.conf");
 
     video::init_late();
+    head::init_late();
 
     // TODO: game_ui::init_late();
 
-    // Needs both globals::gpu_device (from video::init()) and a
+    // Needs both globals::gpu_device (from head::init()) and a
     // committed block_registry (from mod_loader::init()), both of
     // which are guaranteed by this point
     block_atlas::init_late();
@@ -215,15 +220,18 @@ static void wrapped_main(int argc, char** argv)
 
         chunk_mesher::update();
 
+        camera::update();
+
         // TODO: game_ui::update();
 
-        if(frame::prepare()) {
-            // TODO: client_game::render();
+        if(head::prepare()) {
+            head::render();
+
             // TODO: game_ui::layout();
 
             client_game::layout();
 
-            frame::present();
+            head::present();
         }
 
         for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
@@ -246,6 +254,8 @@ static void wrapped_main(int argc, char** argv)
     LOG_INFO("shutdown after {} frames", globals::window_framecount);
     LOG_INFO("avg framerate: {:.03f} FPS ({:.03f} ms)", 1.0f / globals::window_frametime_avg, 1000.0f * globals::window_frametime_avg);
 
+    world::shutdown();
+
     block_models::shutdown();
     block_atlas::shutdown();
 
@@ -255,6 +265,7 @@ static void wrapped_main(int argc, char** argv)
 
     res::hard_purge();
 
+    head::shutdown();
     video::shutdown();
 
     mod_loader::shutdown();

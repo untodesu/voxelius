@@ -4,6 +4,8 @@
 
 #include "core/threading.hh"
 
+#include "core/utils/crc64.hh"
+
 #include "shared/utils/coord.hh"
 
 #include "shared/block_registry.hh"
@@ -26,34 +28,6 @@ constexpr static std::array ALL_FACES = {
     BLOCK_FACE_BOTTOM,
 };
 
-// Fake-lighting multiplier per dominant normal axis, ported from the old
-// chunk_quad.vert.glsl `shades[]` table (indexed there by facing, here by normal)
-static float shade_factor(std::uint32_t packed_normal) noexcept
-{
-    auto unpack10 = [](std::uint32_t bits) noexcept -> float {
-        auto signed_bits = static_cast<std::int32_t>(bits << 22) >> 22; // sign-extend a 10-bit field
-        return static_cast<float>(signed_bits) / 511.0f;
-    };
-
-    auto nx = unpack10(packed_normal & 0x3FFU);
-    auto ny = unpack10((packed_normal >> 10U) & 0x3FFU);
-    auto nz = unpack10((packed_normal >> 20U) & 0x3FFU);
-
-    auto ax = std::abs(nx);
-    auto ay = std::abs(ny);
-    auto az = std::abs(nz);
-
-    if((ay >= ax) && (ay >= az)) {
-        return (ny >= 0.0f) ? 1.0f : 0.4f; // top : bottom
-    }
-
-    if(ax >= az) {
-        return 0.6f; // east/west
-    }
-
-    return 0.8f; // north/south
-}
-
 class MeshingTask final : public Task {
 public:
     explicit MeshingTask(entt::entity entity, const chunk_pos& cpos);
@@ -63,7 +37,8 @@ public:
 
 private:
     bool is_culled(const local_pos& lpos, block_face face, block_render self_render) const noexcept;
-    void emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos) const noexcept;
+    void emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos,
+        std::uint64_t entropy) const noexcept;
     void mesh_block(const local_pos& lpos, block_id_type id) noexcept;
 
     std::array<BlockStorage, 7> m_cache;
@@ -123,6 +98,37 @@ static chunk_pos face_delta(block_face face) noexcept
     return chunk_pos::Zero();
 }
 
+static float shade_factor(std::uint32_t packed_normal, bool enable) noexcept
+{
+    if(enable) {
+        auto nx = static_cast<float>((static_cast<std::int32_t>(packed_normal & 0x3FFU) << 22) >> 22) / 511.0f;
+        auto ny = static_cast<float>((static_cast<std::int32_t>((packed_normal >> 10U) & 0x3FFU) << 22) >> 22) / 511.0f;
+        auto nz = static_cast<float>((static_cast<std::int32_t>((packed_normal >> 20U) & 0x3FFU) << 22) >> 22) / 511.0f;
+
+        auto ax = std::abs(nx);
+        auto ay = std::abs(ny);
+        auto az = std::abs(nz);
+
+        if(ay >= ax && ay >= az) {
+            if(ny >= 0.0f) {
+                return 1.0f;
+            }
+            else {
+                return 0.4f;
+            }
+        }
+
+        if(ax >= az) {
+            return 0.6f;
+        }
+
+        return 0.8f;
+    }
+    else {
+        return 1.0f;
+    }
+}
+
 static bool is_neighbour(const local_pos& lpos) noexcept
 {
     auto result = false;
@@ -172,19 +178,38 @@ void MeshingTask::process(void) noexcept
     }
 }
 
+static void build_indices(std::size_t vertex_count, std::vector<std::uint32_t>& out)
+{
+    out.clear();
+    out.reserve((vertex_count / 4) * 6);
+
+    for(std::uint32_t idx = 0; idx < vertex_count; idx += 4) {
+        out.push_back(idx + 0);
+        out.push_back(idx + 1);
+        out.push_back(idx + 2);
+        out.push_back(idx + 0);
+        out.push_back(idx + 2);
+        out.push_back(idx + 3);
+    }
+}
+
 void MeshingTask::finalize(void) noexcept
 {
     if(world::chunk_entities.valid(m_entity)) {
         if(m_opaque.empty() && m_alpha.empty()) {
             world::chunk_entities.remove<ChunkMeshComponent>(m_entity);
+            world::chunk_entities.remove<ChunkMeshUploadDirtyComponent>(m_entity);
             return;
         }
 
-        auto& component = world::chunk_entities.emplace_or_replace<ChunkMeshComponent>(m_entity);
-        component.opaque_vertices = std::move(m_opaque);
-        component.blend_vertices = std::move(m_alpha);
+        auto& component = world::chunk_entities.get_or_emplace<ChunkMeshComponent>(m_entity);
+        component.opaque.vertices = std::move(m_opaque);
+        component.alpha.vertices = std::move(m_alpha);
 
-        // GPU buffer upload belongs to the rendering pass, not yet wired up here
+        build_indices(component.opaque.vertices.size(), component.opaque.indices);
+        build_indices(component.alpha.vertices.size(), component.alpha.indices);
+
+        world::chunk_entities.emplace_or_replace<ChunkMeshUploadDirtyComponent>(m_entity);
     }
 }
 
@@ -222,13 +247,20 @@ bool MeshingTask::is_culled(const local_pos& lpos, block_face face, block_render
     return neighbour_baked->fully_covered[opposite_face(face)];
 }
 
-void MeshingTask::emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads,
-    const local_pos& lpos) const noexcept
+void MeshingTask::emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos,
+    std::uint64_t entropy) const noexcept
 {
     auto block_origin = lpos.cast<float>() * 16.0f;
 
     for(auto& quad : quads) {
-        auto shade = quad.shade ? shade_factor(quad.packed_normal) : 1.0f;
+        auto shade = shade_factor(quad.packed_normal, quad.shade);
+        auto frame_count = quad.frame_count;
+        auto frame_base = quad.frame_base;
+
+        if(!quad.animated && frame_count > 0) {
+            frame_base += entropy % frame_count;
+            frame_count = 1;
+        }
 
         for(std::size_t i = 0; i < quad.positions.size(); ++i) {
             ChunkMesh_Vertex vertex {};
@@ -236,8 +268,8 @@ void MeshingTask::emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const
             vertex.normal = quad.packed_normal;
             vertex.uv[0] = quad.uvs[i].x();
             vertex.uv[1] = quad.uvs[i].y();
-            vertex.frame_base = static_cast<std::uint32_t>(quad.frame_base);
-            vertex.frame_count = static_cast<std::uint32_t>(quad.frame_count);
+            vertex.frame_base = static_cast<std::uint32_t>(frame_base);
+            vertex.frame_count = static_cast<std::uint32_t>(frame_count);
             vertex.tint_index = quad.tint_index;
             vertex.shade = shade;
             out.push_back(vertex);
@@ -266,26 +298,30 @@ void MeshingTask::mesh_block(const local_pos& lpos, block_id_type id) noexcept
         fully_enclosed = fully_enclosed && culled[face];
     }
 
+    auto bpos = utils::to_block(m_cpos, lpos);
+    auto entropy_src = bpos.x() * bpos.y() * bpos.z();
+    auto entropy = utils::crc64(&entropy_src, sizeof(entropy_src));
+
     if(def->render == BLOCK_RENDER_ALPHA) {
         if(!fully_enclosed) {
-            emit_quads(m_alpha, baked->unculled_quads, lpos);
+            emit_quads(m_alpha, baked->unculled_quads, lpos, entropy);
         }
 
         for(auto face : ALL_FACES) {
             if(culled[face])
                 continue;
-            emit_quads(m_alpha, baked->face_quads[face], lpos);
+            emit_quads(m_alpha, baked->face_quads[face], lpos, entropy);
         }
     }
     else {
         if(!fully_enclosed) {
-            emit_quads(m_opaque, baked->unculled_quads, lpos);
+            emit_quads(m_opaque, baked->unculled_quads, lpos, entropy);
         }
 
         for(auto face : ALL_FACES) {
             if(culled[face])
                 continue;
-            emit_quads(m_opaque, baked->face_quads[face], lpos);
+            emit_quads(m_opaque, baked->face_quads[face], lpos, entropy);
         }
     }
 }
@@ -318,6 +354,7 @@ static void on_chunk_remove(const ChunkRemoveEvent& event) noexcept
 
     if(world::chunk_entities.valid(entity)) {
         world::chunk_entities.remove<ChunkMeshDirtyComponent>(entity);
+        world::chunk_entities.remove<ChunkMeshUploadDirtyComponent>(entity);
         world::chunk_entities.remove<ChunkMeshComponent>(entity);
     }
 }

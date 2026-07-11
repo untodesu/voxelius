@@ -11,6 +11,7 @@ SDL_GPUDevice* globals::gpu_device;
 
 SDL_GPUCommandBuffer* globals::gpu_commands_main;
 SDL_GPUTexture* globals::gpu_swapchain;
+SDL_GPUTexture* globals::gpu_depth_stencil;
 
 int globals::width;
 int globals::height;
@@ -24,3 +25,5 @@ float globals::window_frametime_avg;
 
 std::size_t globals::num_draw_calls;
 std::size_t globals::num_draw_vertices;
+
+entt::entity globals::player;

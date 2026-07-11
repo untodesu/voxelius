@@ -1,3 +1,5 @@
+include("${PROJECT_SOURCE_DIR}/cmake/embed-cxx-spv.cmake")
+
 add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/gpu/buffer.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/buffer.hh"
@@ -14,17 +16,21 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/block_atlas.hh"
     "${CMAKE_CURRENT_LIST_DIR}/block_models.cc"
     "${CMAKE_CURRENT_LIST_DIR}/block_models.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/camera.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/camera.hh"
     "${CMAKE_CURRENT_LIST_DIR}/chunk_mesh.cc"
     "${CMAKE_CURRENT_LIST_DIR}/chunk_mesh.hh"
     "${CMAKE_CURRENT_LIST_DIR}/chunk_mesher.cc"
     "${CMAKE_CURRENT_LIST_DIR}/chunk_mesher.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/chunk_renderer.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/chunk_renderer.hh"
     "${CMAKE_CURRENT_LIST_DIR}/constant.hh"
-    "${CMAKE_CURRENT_LIST_DIR}/frame.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/frame.hh"
     "${CMAKE_CURRENT_LIST_DIR}/game.cc"
     "${CMAKE_CURRENT_LIST_DIR}/game.hh"
     "${CMAKE_CURRENT_LIST_DIR}/globals.cc"
     "${CMAKE_CURRENT_LIST_DIR}/globals.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/head.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/head.hh"
     "${CMAKE_CURRENT_LIST_DIR}/main.cc"
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
     "${CMAKE_CURRENT_LIST_DIR}/video.cc"
@@ -38,3 +44,6 @@ target_link_libraries(voxelius-client PUBLIC
     deps::imgui-backend-sdlgpu3
     deps::SDL3)
 target_precompile_headers(voxelius-client PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
+
+compile_spirv_shader(voxelius-client "${CMAKE_CURRENT_LIST_DIR}/hlsl/chunk.vert.hlsl")
+compile_spirv_shader(voxelius-client "${CMAKE_CURRENT_LIST_DIR}/hlsl/chunk.frag.hlsl")

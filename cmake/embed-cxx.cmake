@@ -1,3 +1,5 @@
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
 function(embed_cxx_binary target_name input_path cxx_identifier)
     get_filename_component(input_name "${input_path}" NAME)
     set(cxxres_path "${PROJECT_BINARY_DIR}/${target_name}.generated.${input_name}.cc")

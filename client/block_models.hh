@@ -10,6 +10,7 @@ struct BakedBlockModel_Quad final {
     std::size_t frame_base;
     std::size_t frame_count;
     unsigned tint_index;
+    bool animated;
     bool shade;
 };
 
