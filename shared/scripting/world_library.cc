@@ -3,7 +3,6 @@
 #include "shared/scripting/world_library.hh"
 
 #include "shared/utils/lua.hh"
-
 #include "shared/world.hh"
 
 static int api_get_block(lua_State* L)

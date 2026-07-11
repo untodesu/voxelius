@@ -2,15 +2,15 @@
 
 #include "client/video.hh"
 
+#include "core/cmdline.hh"
 #include "core/config/map.hh"
 #include "core/config/ref.hh"
-
-#include "core/cmdline.hh"
 #include "core/exception.hh"
 #include "core/version.hh"
 
 #include "client/constant.hh"
 #include "client/globals.hh"
+#include "client/gui/settings.hh"
 
 static Eigen::Vector2i s_last_windowed_size;
 static config::Ref<bool> s_enable_vsync { true };
@@ -84,6 +84,14 @@ static void cache_fullscreen_modes(void)
     }
 
     SDL_free(modes);
+
+    std::sort(s_fullscreen_modes.begin(), s_fullscreen_modes.end(), [](const SDL_DisplayMode& a, const SDL_DisplayMode& b) {
+        if(a.w == b.w && a.h == b.h)
+            return a.refresh_rate < b.refresh_rate;
+        if(a.w == b.w)
+            return a.h < b.h;
+        return a.w < b.w;
+    });
 }
 
 static void update_present_mode(void)
@@ -124,6 +132,9 @@ void video::init(void)
 
     pick_display();
     cache_fullscreen_modes();
+
+    settings::video_mode(0, settings_location::VIDEO, "video.current_mode", false);
+    settings::checkbox(1, settings_location::VIDEO, "video.enable_vsync", true);
 
     globals::window = SDL_CreateWindow("client", constant::BASE_WIDTH, constant::BASE_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
     vx::throw_if_not_fmt(globals::window, "SDL_CreateWindow failed: {}", SDL_GetError());
@@ -207,6 +218,16 @@ void video::query_current_mode(int& width, int& height, bool& fullscreen)
     width = globals::width;
     height = globals::height;
     fullscreen = static_cast<bool>(SDL_GetWindowFullscreenMode(globals::window));
+}
+
+void video::query_current_mode(int& width, int& height, int& rate, bool& fullscreen)
+{
+    width = globals::width;
+    height = globals::height;
+
+    auto mode = SDL_GetWindowFullscreenMode(globals::window);
+    rate = mode ? static_cast<int>(mode->refresh_rate) : 0;
+    fullscreen = static_cast<bool>(mode);
 }
 
 const std::vector<SDL_DisplayMode>& video::query_fullscreen_modes(void)

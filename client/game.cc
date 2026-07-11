@@ -5,23 +5,20 @@
 #include "core/identifier.hh"
 #include "core/utils/angles.hh"
 
-#include "shared/utils/coord.hh"
-
 #include "shared/block_registry.hh"
 #include "shared/coord.hh"
 #include "shared/transform.hh"
+#include "shared/utils/coord.hh"
 #include "shared/velocity.hh"
 #include "shared/world.hh"
 
-#include "client/gui/gui.hh"
-
-#include "client/utils/entity.hh"
-
 #include "client/camera.hh"
 #include "client/globals.hh"
+#include "client/gui/gui.hh"
 #include "client/interpolation.hh"
 #include "client/player_look.hh"
 #include "client/player_move.hh"
+#include "client/utils/entity.hh"
 
 static void generate_debug_terrain(void)
 {

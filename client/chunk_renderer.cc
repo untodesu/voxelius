@@ -5,21 +5,19 @@
 #include "core/camera.hh"
 #include "core/exception.hh"
 
-#include "shared/utils/chunk.hh"
-#include "shared/utils/coord.hh"
-
 #include "shared/chunk.hh"
 #include "shared/constant.hh"
+#include "shared/utils/chunk.hh"
+#include "shared/utils/coord.hh"
 #include "shared/world.hh"
-
-#include "client/gpu/buffer.hh"
-#include "client/gpu/sampler.hh"
-#include "client/gpu/texture.hh"
 
 #include "client/block_atlas.hh"
 #include "client/camera.hh"
 #include "client/chunk_mesh.hh"
 #include "client/globals.hh"
+#include "client/gpu/buffer.hh"
+#include "client/gpu/sampler.hh"
+#include "client/gpu/texture.hh"
 
 // Compiled from hlsl/chunk.vert.hlsl
 extern const std::uint8_t spirv_chunk_vert[];

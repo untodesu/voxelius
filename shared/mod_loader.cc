@@ -3,7 +3,6 @@
 #include "shared/mod_loader.hh"
 
 #include "core/config/map.hh"
-
 #include "core/exception.hh"
 
 #include "shared/block_registry.hh"

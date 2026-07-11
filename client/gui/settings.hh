@@ -30,33 +30,34 @@ void layout(void);
 
 namespace settings
 {
-void checkbox(int priority, std::string_view key, bool tooltip);
+void checkbox(int priority, settings_location location, std::string_view key, bool tooltip);
 } // namespace settings
 
 namespace settings
 {
 template<vx::arithmetic T>
-void input_arithmetic(int priority, std::string_view key, T min, T max, bool tooltip, std::string_view fmt = {});
-void input_string(int priority, std::string_view key, bool tooltip, bool allow_whitespace);
+void input_arithmetic(int priority, settings_location location, std::string_view key, T min, T max, bool tooltip,
+    std::string_view fmt = {});
+void input_string(int priority, settings_location location, std::string_view key, bool tooltip, bool allow_whitespace);
 } // namespace settings
 
 namespace settings
 {
 template<vx::arithmetic T>
-void slider(int priority, std::string_view key, T min, T max, bool tooltip, std::string_view fmt = {});
+void slider(int priority, settings_location location, std::string_view key, T min, T max, bool tooltip, std::string_view fmt = {});
 } // namespace settings
 
 namespace settings
 {
 template<std::integral T>
-void stepper(int priority, std::string_view key, T min, T max, T step, bool tooltip);
+void stepper(int priority, settings_location location, std::string_view key, T min, T max, T step, bool tooltip);
 } // namespace settings
 
 namespace settings
 {
-void keybind(int priority, std::string_view key, bool tooltip);
-void language(int priority, std::string_view key, bool tooltip);
-void video_mode(int priority, std::string_view key, bool tooltip);
+void keybind(int priority, settings_location location, std::string_view key, bool tooltip);
+void language(int priority, settings_location location, std::string_view key, bool tooltip);
+void video_mode(int priority, settings_location location, std::string_view key, bool tooltip);
 } // namespace settings
 
 #endif /* B785A84D_AF42_43DC_A513_BF3003C221DD */

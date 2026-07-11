@@ -4,16 +4,15 @@
 
 #include "core/config/map.hh"
 #include "core/config/ref.hh"
-
-#include "core/utils/physfs.hh"
-
 #include "core/exception.hh"
+#include "core/utils/physfs.hh"
 
 #include "shared/mod_context.hh"
 #include "shared/mod_loader.hh"
 
 #include "client/constant.hh"
 #include "client/globals.hh"
+#include "client/gui/settings.hh"
 
 constexpr static std::string_view DEFAULT_LANGUAGE = "english";
 
@@ -72,6 +71,8 @@ void language::init(void)
     auto manifest_path = std::format("{}/lang/manifest.json", constant::BUILTIN_NAME_SPACE);
 
     s_config_language.bind(globals::client_config, "language");
+
+    settings::language(0, settings_location::GENERAL, "language", false);
 
     std::string source;
     auto read_ok = utils::read_file(manifest_path, source);

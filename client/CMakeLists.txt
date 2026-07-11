@@ -11,6 +11,8 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/gui/language.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gui/main_menu.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gui/main_menu.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/settings.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/settings.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gui/style.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gui/style.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/buffer.cc"

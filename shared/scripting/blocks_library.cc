@@ -2,14 +2,12 @@
 
 #include "shared/scripting/blocks_library.hh"
 
-#include "core/utils/crc64.hh"
-
 #include "core/identifier.hh"
-
-#include "shared/utils/lua.hh"
+#include "core/utils/crc64.hh"
 
 #include "shared/block_registry.hh"
 #include "shared/mod_context.hh"
+#include "shared/utils/lua.hh"
 
 class BlockDefReader final {
 public:

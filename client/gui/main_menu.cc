@@ -6,13 +6,11 @@
 
 #include "shared/world.hh"
 
-#include "client/utils/imgui.hh"
-
+#include "client/globals.hh"
 #include "client/gui/fonts.hh"
 #include "client/gui/gui.hh"
 #include "client/gui/language.hh"
-
-#include "client/globals.hh"
+#include "client/utils/imgui.hh"
 
 static std::string str_button_play;
 static std::string str_button_resume;

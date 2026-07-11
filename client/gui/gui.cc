@@ -4,14 +4,14 @@
 
 #include "shared/world.hh"
 
+#include "client/constant.hh"
+#include "client/globals.hh"
 #include "client/gui/background.hh"
 #include "client/gui/fonts.hh"
 #include "client/gui/language.hh"
 #include "client/gui/main_menu.hh"
+#include "client/gui/settings.hh"
 #include "client/gui/style.hh"
-
-#include "client/constant.hh"
-#include "client/globals.hh"
 
 gui_screen gui::screen = GUI_SCREEN_NONE;
 unsigned gui::scale = 1U;
@@ -26,17 +26,21 @@ void gui::init(void)
     background::init();
 
     main_menu::init();
+    settings::init();
 }
 
 void gui::init_late(void)
 {
     language::init_late();
 
+    settings::init_late();
+
     gui::screen = GUI_MAIN_MENU;
 }
 
 void gui::shutdown(void)
 {
+    settings::shutdown();
     main_menu::shutdown();
 
     background::shutdown();
@@ -69,7 +73,7 @@ void gui::layout(void)
                 break;
 
             case GUI_SETTINGS:
-                // TODO: settings::layout();
+                settings::layout();
                 break;
 
             case GUI_PROGRESS:

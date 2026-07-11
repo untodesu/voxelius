@@ -14,6 +14,7 @@ namespace video
 {
 void query_current_mode(int& width, int& height);
 void query_current_mode(int& width, int& height, bool& fullscreen);
+void query_current_mode(int& width, int& height, int& rate, bool& fullscreen);
 const std::vector<SDL_DisplayMode>& query_fullscreen_modes(void);
 } // namespace video
 

@@ -2,21 +2,16 @@
 
 #include "client/block_atlas.hh"
 
-#include <stb_rect_pack.h>
-
 #include "client/gpu/buffer.hh"
 #include "client/gpu/texture.hh"
 
+#include "core/exception.hh"
 #include "core/res/image.hh"
 #include "core/res/resource.hh"
-
 #include "core/utils/crc64.hh"
 
-#include "core/exception.hh"
-
-#include "shared/res/block_model.hh"
-
 #include "shared/block_registry.hh"
+#include "shared/res/block_model.hh"
 
 #include "client/globals.hh"
 

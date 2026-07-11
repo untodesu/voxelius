@@ -3,9 +3,8 @@
 #include "shared/world.hh"
 
 #include "shared/block_registry.hh"
-#include "shared/utils/coord.hh"
-
 #include "shared/globals.hh"
+#include "shared/utils/coord.hh"
 
 emhash8::HashMap<chunk_pos, std::shared_ptr<Chunk>> world::chunks;
 entt::registry world::basic_entities;

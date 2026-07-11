@@ -2,9 +2,8 @@
 
 #include "shared/block_registry.hh"
 
-#include "core/utils/crc64.hh"
-
 #include "core/exception.hh"
+#include "core/utils/crc64.hh"
 
 #include "shared/mod_context.hh"
 

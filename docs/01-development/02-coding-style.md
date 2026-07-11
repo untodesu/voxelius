@@ -131,8 +131,6 @@ using runtime_error = detail::TaggedException<struct runtime_error_tag>;
 
 - Includes are sorted in dependency order (eg. `core`, then `shared`, then `client`)  
 
-- Inside a group, includes are split by subdirectory. Subdirectory blocks go first  
-
 - Includes within a group are sorted alphabetically via clang-format  
 
 Example:

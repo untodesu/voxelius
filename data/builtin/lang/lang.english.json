@@ -8,5 +8,44 @@
   "main_menu.quit_popup.title": "Quit Game",
   "main_menu.quit_popup.question": "Are you sure?",
   "main_menu.quit_popup.choice.yes": "Yes",
-  "main_menu.quit_popup.choice.no": "No"
+  "main_menu.quit_popup.choice.no": "No",
+
+  "settings.location.general": "General",
+  "settings.location.video": "Graphics",
+  "settings.location.audio": "Audio",
+  "settings.location.keyboard": "Keyboard",
+  "settings.location.mouse": "Mouse",
+  "settings.location.gamepad": "Gamepad",
+
+  "settings.label.multiplayer": "Multiplayer",
+  "settings.label.movement": "Movement",
+  "settings.label.gameplay": "Gameplay",
+  "settings.label.miscellaneous": "Miscellaneous",
+  "settings.label.gui": "GUI",
+  "settings.label.world": "World",
+  "settings.label.levels": "Levels",
+
+  "settings.separator.settings": "Settings",
+  "settings.separator.devices": "Devices",
+  
+  "settings.checkbox.false": "OFF",
+  "settings.checkbox.true": "ON",
+  
+  "settings.value.camera.vertical_fov": "FOV",
+  "settings.value.camera.view_distance": "View distance",
+  "settings.value.language": "Language",
+  "settings.value.player_look.mouse.sensitivity": "Sensitivity",
+  "settings.value.video.current_mode": "Video mode",
+  "settings.value.video.enable_vsync": "V-Sync",
+
+  "settings.tooltip.camera.vertical_fov": "Field Of View",
+  "settings.tooltip.player_look.mouse.sensitivity": "Specifies the rate at which cursor movement on 2D screen is reflected by the camera",
+  "settings.tooltip.video.enable_vsync": "Synchronize buffer swapping with your monitor's refresh rate; this removes screen tearing but adds a noticeable input lag",
+
+  "settings.choice.video_mode.windowed": "Windowed",
+
+  "settings.popup.video_change.title": "Change video mode",
+  "settings.popup.video_change.text": "Are you sure?",
+  "settings.popup.video_change.answer.yes": "Yes",
+  "settings.popup.video_change.answer.no": "No"
 }

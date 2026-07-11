@@ -2,9 +2,8 @@
 
 #include "client/gui/fonts.hh"
 
-#include "core/utils/physfs.hh"
-
 #include "core/exception.hh"
+#include "core/utils/physfs.hh"
 
 #include "client/constant.hh"
 

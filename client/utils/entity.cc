@@ -2,10 +2,9 @@
 
 #include "client/utils/entity.hh"
 
-#include "shared/utils/entity.hh"
-
 #include "shared/head.hh"
 #include "shared/transform.hh"
+#include "shared/utils/entity.hh"
 #include "shared/velocity.hh"
 #include "shared/world.hh"
 

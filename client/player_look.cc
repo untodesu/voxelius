@@ -4,16 +4,14 @@
 
 #include "core/config/map.hh"
 #include "core/config/ref.hh"
-
 #include "core/utils/angles.hh"
 
 #include "shared/head.hh"
 #include "shared/world.hh"
 
-#include "client/gui/gui.hh"
-
 #include "client/constant.hh"
 #include "client/globals.hh"
+#include "client/gui/gui.hh"
 
 constexpr static float PITCH_MIN = -1.0f * utils::radians(90.0f);
 constexpr static float PITCH_MAX = +1.0f * utils::radians(90.0f);

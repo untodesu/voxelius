@@ -3,7 +3,6 @@
 #include "shared/res/block_collision.hh"
 
 #include "core/res/resource.hh"
-
 #include "core/utils/json.hh"
 #include "core/utils/physfs.hh"
 

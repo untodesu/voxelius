@@ -3,7 +3,6 @@
 #include "core/res/image.hh"
 
 #include "core/res/resource.hh"
-
 #include "core/utils/physfs.hh"
 
 static int stbi_physfs_read(void* context, char* data, int size)

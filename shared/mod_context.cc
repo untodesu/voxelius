@@ -3,20 +3,17 @@
 #include "shared/mod_context.hh"
 
 #include "core/config/map.hh"
-
-#include "core/utils/physfs.hh"
-#include "core/utils/string.hh"
-
 #include "core/exception.hh"
 #include "core/identifier.hh"
+#include "core/utils/physfs.hh"
+#include "core/utils/string.hh"
 #include "core/version.hh"
 
+#include "shared/constant.hh"
 #include "shared/scripting/blocks_library.hh"
 #include "shared/scripting/core_library.hh"
 #include "shared/scripting/lua_libraries.hh"
 #include "shared/scripting/world_library.hh"
-
-#include "shared/constant.hh"
 
 ModVersion ModVersion::parse(std::string_view string)
 {

@@ -2,9 +2,8 @@
 
 #include "shared/scripting/lua_libraries.hh"
 
-#include "core/utils/physfs.hh"
-
 #include "core/identifier.hh"
+#include "core/utils/physfs.hh"
 
 #include "shared/mod_context.hh"
 

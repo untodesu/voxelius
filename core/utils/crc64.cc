@@ -1,6 +1,7 @@
 #include "core/pch.hh"
 
 #include "core/utils/crc64.hh"
+
 // The lookup table for CRC64 checksum; this lookup
 // table is generated using ECMA-182 compilant parameters:
 // - Polynomial: `0x42F0E1EBA9EA3693`

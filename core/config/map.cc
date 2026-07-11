@@ -2,10 +2,9 @@
 
 #include "core/config/map.hh"
 
+#include "core/concepts.hh"
 #include "core/utils/physfs.hh"
 #include "core/utils/string.hh"
-
-#include "core/concepts.hh"
 #include "core/version.hh"
 
 template<vx::arithmetic T>

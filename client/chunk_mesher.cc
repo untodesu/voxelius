@@ -3,10 +3,7 @@
 #include "client/chunk_mesher.hh"
 
 #include "core/threading.hh"
-
 #include "core/utils/crc64.hh"
-
-#include "shared/utils/coord.hh"
 
 #include "shared/block_registry.hh"
 #include "shared/block_storage.hh"
@@ -14,6 +11,7 @@
 #include "shared/constant.hh"
 #include "shared/coord.hh"
 #include "shared/globals.hh"
+#include "shared/utils/coord.hh"
 #include "shared/world.hh"
 
 #include "client/block_models.hh"

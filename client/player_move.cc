@@ -2,19 +2,17 @@
 
 #include "client/player_move.hh"
 
-#include "core/config/ref.hh"
-
 #include "core/camera.hh"
+#include "core/config/ref.hh"
 
 #include "shared/head.hh"
 #include "shared/transform.hh"
 #include "shared/velocity.hh"
 #include "shared/world.hh"
 
-#include "client/gui/gui.hh"
-
 #include "client/camera.hh"
 #include "client/globals.hh"
+#include "client/gui/gui.hh"
 
 constexpr static float SPEED = 16.0f;
 

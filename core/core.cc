@@ -2,11 +2,10 @@
 
 #include "core/core.hh"
 
-#include "core/utils/physfs.hh"
-
 #include "core/cmdline.hh"
 #include "core/exception.hh"
 #include "core/threading.hh"
+#include "core/utils/physfs.hh"
 
 static std::filesystem::path s_gamepath;
 static std::filesystem::path s_userpath;

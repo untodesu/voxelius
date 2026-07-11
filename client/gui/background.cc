@@ -2,14 +2,12 @@
 
 #include "client/gui/background.hh"
 
-#include "core/res/resource.hh"
-
 #include "core/exception.hh"
 #include "core/identifier.hh"
-
-#include "client/res/texture2D.hh"
+#include "core/res/resource.hh"
 
 #include "client/constant.hh"
+#include "client/res/texture2D.hh"
 
 constexpr static std::string_view TEXTURE_PATH = "textures/gui/background.png";
 

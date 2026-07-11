@@ -2,10 +2,9 @@
 
 #include "client/interpolation.hh"
 
-#include "shared/utils/coord.hh"
-
 #include "shared/head.hh"
 #include "shared/transform.hh"
+#include "shared/utils/coord.hh"
 #include "shared/velocity.hh"
 #include "shared/world.hh"
 

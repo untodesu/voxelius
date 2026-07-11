@@ -3,12 +3,10 @@
 #include "client/block_models.hh"
 
 #include "core/res/resource.hh"
-
 #include "core/utils/angles.hh"
 
-#include "shared/res/block_model.hh"
-
 #include "shared/block_registry.hh"
+#include "shared/res/block_model.hh"
 
 #include "client/block_atlas.hh"
 

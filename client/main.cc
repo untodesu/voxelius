@@ -1,27 +1,19 @@
 #include "client/pch.hh"
 
 #include "core/config/map.hh"
-
-#include "core/res/image.hh"
-#include "core/res/resource.hh"
-
-#include "core/utils/epoch.hh"
-
 #include "core/core.hh"
 #include "core/exception.hh"
+#include "core/res/image.hh"
+#include "core/res/resource.hh"
 #include "core/threading.hh"
+#include "core/utils/epoch.hh"
 #include "core/version.hh"
-
-#include "shared/res/block_collision.hh"
-#include "shared/res/block_model.hh"
 
 #include "shared/block_registry.hh"
 #include "shared/mod_loader.hh"
+#include "shared/res/block_collision.hh"
+#include "shared/res/block_model.hh"
 #include "shared/world.hh"
-
-#include "client/gui/gui.hh"
-
-#include "client/res/texture2D.hh"
 
 #include "client/block_atlas.hh"
 #include "client/block_models.hh"
@@ -29,7 +21,9 @@
 #include "client/chunk_mesher.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
+#include "client/gui/gui.hh"
 #include "client/head.hh"
+#include "client/res/texture2D.hh"
 #include "client/video.hh"
 
 static std::atomic_bool s_is_running;
