@@ -62,7 +62,7 @@ static const void* image_load_fn(const char* path, std::uint32_t flags)
     auto image = new Image;
     image->width = width;
     image->height = height;
-    image->channels = channels;
+    image->channels = desired_channels;
     image->pixels = pixels;
 
     return image;

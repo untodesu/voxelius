@@ -3,6 +3,7 @@
 #include "client/head.hh"
 
 #include "core/camera.hh"
+#include "core/cmdline.hh"
 #include "core/exception.hh"
 
 #include "client/chunk_renderer.hh"
@@ -37,7 +38,8 @@ static void on_window_resized(const SDL_WindowEvent& event)
 
 void head::init(void)
 {
-    globals::gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, false, nullptr);
+    auto debug_mode = cmdline::contains("gpu-debug");
+    globals::gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, debug_mode, nullptr);
     vx::throw_if_not_fmt(globals::gpu_device, "SDL_CreateGPUDevice failed: {}", SDL_GetError());
 
     auto claimed = SDL_ClaimWindowForGPUDevice(globals::gpu_device, globals::window);
@@ -118,7 +120,7 @@ void head::render(void)
     auto copy_pass = SDL_BeginGPUCopyPass(globals::gpu_commands_main);
     vx::throw_if_not(copy_pass, "SDL_BeginGPUCopyPass returned nullptr");
 
-    chunk_renderer::upload(copy_pass);
+    // chunk_renderer::upload(copy_pass);
 
     SDL_EndGPUCopyPass(copy_pass);
 
@@ -145,7 +147,7 @@ void head::render(void)
     auto render_pass = SDL_BeginGPURenderPass(globals::gpu_commands_main, &color_target_info, 1, &depth_target_info);
     vx::throw_if_not(render_pass, "SDL_BeginGPURenderPass returned nullptr");
 
-    chunk_renderer::render(render_pass);
+    // chunk_renderer::render(render_pass);
 
     SDL_EndGPURenderPass(render_pass);
 }

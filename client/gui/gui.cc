@@ -2,6 +2,9 @@
 
 #include "client/gui/gui.hh"
 
+#include "shared/world.hh"
+
+#include "client/gui/background.hh"
 #include "client/gui/fonts.hh"
 #include "client/gui/language.hh"
 #include "client/gui/style.hh"
@@ -18,6 +21,8 @@ void gui::init(void)
     detail::load_fonts();
 
     language::init();
+
+    background::init();
 }
 
 void gui::init_late(void)
@@ -27,12 +32,52 @@ void gui::init_late(void)
 
 void gui::shutdown(void)
 {
-    // empty
+    background::shutdown();
 }
 
 void gui::layout(void)
 {
-    // empty
+    if(!world::basic_entities.valid(globals::player)) {
+        background::layout();
+    }
+
+    if(gui::screen) {
+        if(world::basic_entities.valid(globals::player) && gui::screen != GUI_CHAT) {
+            auto width_float = static_cast<float>(globals::width);
+            auto height_float = static_cast<float>(globals::height);
+            auto darken = ImGui::GetColorU32(ImVec4(0.00f, 0.00f, 0.00f, 0.75f));
+            auto darker = ImGui::GetColorU32(ImVec4(0.00f, 0.00f, 0.00f, 0.95f));
+            auto draw_list = ImGui::GetBackgroundDrawList();
+
+            draw_list->AddRectFilledMultiColor({}, { width_float, height_float }, darker, darken, darken, darker);
+        }
+
+        switch(gui::screen) {
+            case GUI_MAIN_MENU:
+                // TODO: main_menu::layout();
+                break;
+
+            case GUI_PLAY_MENU:
+                // TODO: play_menu::layout();
+                break;
+
+            case GUI_SETTINGS:
+                // TODO: settings::layout();
+                break;
+
+            case GUI_PROGRESS:
+                // TODO: progress::layout();
+                break;
+
+            case GUI_MESSAGE:
+                // TODO: message::layout();
+                break;
+
+            case GUI_CONNECT:
+                // TODO: connect::layout();
+                break;
+        }
+    }
 }
 
 void gui::update_scale(void)
