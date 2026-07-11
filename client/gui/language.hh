@@ -47,8 +47,8 @@ language_iterator_type const_end(void);
 
 namespace language
 {
-std::string_view translate(std::string_view key);
-std::string translate_imgui(std::string_view key);
+std::string_view resolve(std::string_view key);
+std::string resolve_gui(std::string_view key);
 } // namespace language
 
 constexpr std::string_view LanguageInfo::endonym(void) const

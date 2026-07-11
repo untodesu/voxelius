@@ -1,2 +1,12 @@
 {
+  "main_menu.button.play": "Play Game",
+  "main_menu.button.resume": "Resume",
+  "main_menu.button.settings": "Settings",
+  "main_menu.button.disconnect": "Disconnect",
+  "main_menu.button.quit": "Quit",
+
+  "main_menu.quit_popup.title": "Quit Game",
+  "main_menu.quit_popup.question": "Are you sure?",
+  "main_menu.quit_popup.choice.yes": "Yes",
+  "main_menu.quit_popup.choice.no": "No"
 }

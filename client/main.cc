@@ -220,11 +220,9 @@ static void wrapped_main(int argc, char** argv)
 
         camera::update();
 
-        // TODO: game_ui::update();
+        gui::update_scale();
 
         if(head::prepare()) {
-            gui::update_scale();
-
             head::render();
 
             gui::layout();
@@ -241,6 +239,8 @@ static void wrapped_main(int argc, char** argv)
         video::update_late();
 
         client_game::update_late();
+
+        gui::update_late();
 
         threading::update();
 

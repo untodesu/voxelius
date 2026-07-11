@@ -23,6 +23,7 @@ namespace gui
 void init(void);
 void init_late(void);
 void shutdown(void);
+void update_late(void);
 void layout(void);
 } // namespace gui
 

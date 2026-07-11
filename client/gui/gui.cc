@@ -7,6 +7,7 @@
 #include "client/gui/background.hh"
 #include "client/gui/fonts.hh"
 #include "client/gui/language.hh"
+#include "client/gui/main_menu.hh"
 #include "client/gui/style.hh"
 
 #include "client/constant.hh"
@@ -23,16 +24,38 @@ void gui::init(void)
     language::init();
 
     background::init();
+
+    main_menu::init();
 }
 
 void gui::init_late(void)
 {
     language::init_late();
+
+    gui::screen = GUI_MAIN_MENU;
 }
 
 void gui::shutdown(void)
 {
+    main_menu::shutdown();
+
     background::shutdown();
+}
+
+void gui::update_late(void)
+{
+    auto& io = ImGui::GetIO();
+
+    if(gui::screen) {
+        io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+        io.ConfigFlags &= ~ImGuiConfigFlags_NoKeyboard;
+        SDL_SetWindowRelativeMouseMode(globals::window, false);
+    }
+    else {
+        io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+        io.ConfigFlags |= ImGuiConfigFlags_NoKeyboard;
+        SDL_SetWindowRelativeMouseMode(globals::window, true);
+    }
 }
 
 void gui::layout(void)
@@ -54,7 +77,7 @@ void gui::layout(void)
 
         switch(gui::screen) {
             case GUI_MAIN_MENU:
-                // TODO: main_menu::layout();
+                main_menu::layout();
                 break;
 
             case GUI_PLAY_MENU:
@@ -86,7 +109,7 @@ void gui::update_scale(void)
     SDL_GetWindowSize(globals::window, &width, &height);
 
     auto scale_x = std::max(1.0f, std::floor(static_cast<float>(width) / static_cast<float>(constant::BASE_WIDTH)));
-    auto scale_y = std::max(1.0f, std::floor(static_cast<float>(height) / static_cast<float>(constant::BASE_WIDTH)));
+    auto scale_y = std::max(1.0f, std::floor(static_cast<float>(height) / static_cast<float>(constant::BASE_HEIGHT)));
     auto scale_min = std::min(scale_x, scale_y);
 
     auto& io = ImGui::GetIO();

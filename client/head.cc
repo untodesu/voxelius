@@ -120,7 +120,7 @@ void head::render(void)
     auto copy_pass = SDL_BeginGPUCopyPass(globals::gpu_commands_main);
     vx::throw_if_not(copy_pass, "SDL_BeginGPUCopyPass returned nullptr");
 
-    // chunk_renderer::upload(copy_pass);
+    chunk_renderer::upload(copy_pass);
 
     SDL_EndGPUCopyPass(copy_pass);
 
@@ -147,7 +147,7 @@ void head::render(void)
     auto render_pass = SDL_BeginGPURenderPass(globals::gpu_commands_main, &color_target_info, 1, &depth_target_info);
     vx::throw_if_not(render_pass, "SDL_BeginGPURenderPass returned nullptr");
 
-    // chunk_renderer::render(render_pass);
+    chunk_renderer::render(render_pass);
 
     SDL_EndGPURenderPass(render_pass);
 }

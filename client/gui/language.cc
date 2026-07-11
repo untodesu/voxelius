@@ -166,7 +166,7 @@ language_iterator_type language::const_end(void)
     return s_manifest.cend();
 }
 
-std::string_view language::translate(std::string_view key)
+std::string_view language::resolve(std::string_view key)
 {
     const auto it = s_translations.find(std::string(key));
 
@@ -178,10 +178,10 @@ std::string_view language::translate(std::string_view key)
     }
 }
 
-std::string language::translate_imgui(std::string_view key)
+std::string language::resolve_gui(std::string_view key)
 {
     // We need window tags to retain their hierarchy when a language
     // dynamically changes; ImGui allows to provide hidden unique identifiers
     // to GUI primitives that have their name change dynamically, so we're using this
-    return std::format("{}###{}", translate(key), key);
+    return std::format("{}###{}", language::resolve(key), key);
 }
