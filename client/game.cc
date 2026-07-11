@@ -10,6 +10,10 @@
 #include "shared/block_registry.hh"
 #include "shared/constant.hh"
 #include "shared/coord.hh"
+#include "shared/head.hh"
+#include "shared/player.hh"
+#include "shared/transform.hh"
+#include "shared/velocity.hh"
 #include "shared/world.hh"
 
 #include "client/camera.hh"

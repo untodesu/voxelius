@@ -6,7 +6,7 @@
 
 #include "shared/constant.hh"
 
-chunk_pos utils::to_chunk(const block_pos& bpos) noexcept
+chunk_pos utils::to_chunk(const block_pos& bpos)
 {
     chunk_pos cpos;
     cpos.x() = static_cast<chunk_pos::value_type>(bpos.x() >> constant::CHUNK_SIZE_LOG2);
@@ -15,7 +15,7 @@ chunk_pos utils::to_chunk(const block_pos& bpos) noexcept
     return cpos;
 }
 
-local_pos utils::to_local(const block_pos& bpos) noexcept
+local_pos utils::to_local(const block_pos& bpos)
 {
     local_pos lpos;
     lpos.x() = static_cast<local_pos::value_type>(utils::mod_signed<block_pos::value_type>(bpos.x(), constant::CHUNK_SIZE));
@@ -24,7 +24,7 @@ local_pos utils::to_local(const block_pos& bpos) noexcept
     return lpos;
 }
 
-local_pos utils::to_local(std::size_t index) noexcept
+local_pos utils::to_local(std::size_t index)
 {
     local_pos lpos;
     lpos.x() = static_cast<local_pos::value_type>(index % constant::CHUNK_SIZE);
@@ -33,7 +33,7 @@ local_pos utils::to_local(std::size_t index) noexcept
     return lpos;
 }
 
-block_pos utils::to_block(const chunk_pos& cpos, const local_pos& lpos) noexcept
+block_pos utils::to_block(const chunk_pos& cpos, const local_pos& lpos)
 {
     block_pos bpos;
     bpos.x() = static_cast<block_pos::value_type>(lpos.x()) + (static_cast<block_pos::value_type>(cpos.x()) << constant::CHUNK_SIZE_LOG2);
@@ -42,12 +42,12 @@ block_pos utils::to_block(const chunk_pos& cpos, const local_pos& lpos) noexcept
     return bpos;
 }
 
-std::size_t utils::to_index(const local_pos& lpos) noexcept
+std::size_t utils::to_index(const local_pos& lpos)
 {
     return static_cast<std::size_t>((lpos.y() * constant::CHUNK_SIZE + lpos.z()) * constant::CHUNK_SIZE + lpos.x());
 }
 
-Eigen::Vector3f utils::to_relative(const chunk_pos& pivot_cpos, const chunk_pos& cpos, const Eigen::Vector3f& fvec) noexcept
+Eigen::Vector3f utils::to_relative(const chunk_pos& pivot_cpos, const chunk_pos& cpos, const Eigen::Vector3f& fvec)
 {
     Eigen::Vector3f rpos;
     rpos.x() = static_cast<float>((cpos.x() - pivot_cpos.x()) << constant::CHUNK_SIZE_LOG2) + fvec.x();
@@ -56,7 +56,7 @@ Eigen::Vector3f utils::to_relative(const chunk_pos& pivot_cpos, const chunk_pos&
     return rpos;
 }
 
-Eigen::Vector3f utils::to_relative(const chunk_pos& pivot_cpos, const Eigen::Vector3f& pivot_fvec, const chunk_pos& cpos) noexcept
+Eigen::Vector3f utils::to_relative(const chunk_pos& pivot_cpos, const Eigen::Vector3f& pivot_fvec, const chunk_pos& cpos)
 {
     Eigen::Vector3f rpos;
     rpos.x() = static_cast<float>((cpos.x() - pivot_cpos.x()) << constant::CHUNK_SIZE_LOG2) - pivot_fvec.x();
@@ -66,7 +66,7 @@ Eigen::Vector3f utils::to_relative(const chunk_pos& pivot_cpos, const Eigen::Vec
 }
 
 Eigen::Vector3f utils::to_relative(const chunk_pos& pivot_cpos, const Eigen::Vector3f& pivot_fvec, const chunk_pos& cpos,
-    const Eigen::Vector3f& fvec) noexcept
+    const Eigen::Vector3f& fvec)
 {
     Eigen::Vector3f rpos;
     rpos.x() = static_cast<float>((cpos.x() - pivot_cpos.x()) << constant::CHUNK_SIZE_LOG2) + (fvec.x() - pivot_fvec.x());
@@ -75,7 +75,7 @@ Eigen::Vector3f utils::to_relative(const chunk_pos& pivot_cpos, const Eigen::Vec
     return rpos;
 }
 
-Eigen::Vector3f utils::to_fvec(const chunk_pos& cpos) noexcept
+Eigen::Vector3f utils::to_fvec(const chunk_pos& cpos)
 {
     Eigen::Vector3f rpos;
     rpos.x() = static_cast<float>(cpos.x() << constant::CHUNK_SIZE_LOG2);
@@ -84,7 +84,7 @@ Eigen::Vector3f utils::to_fvec(const chunk_pos& cpos) noexcept
     return rpos;
 }
 
-Eigen::Vector3f utils::to_fvec(const chunk_pos& cpos, const Eigen::Vector3f& offset) noexcept
+Eigen::Vector3f utils::to_fvec(const chunk_pos& cpos, const Eigen::Vector3f& offset)
 {
     Eigen::Vector3f rpos;
     rpos.x() = offset.x() + static_cast<float>(cpos.x() << constant::CHUNK_SIZE_LOG2);
@@ -93,7 +93,7 @@ Eigen::Vector3f utils::to_fvec(const chunk_pos& cpos, const Eigen::Vector3f& off
     return rpos;
 }
 
-local_pos utils::wrap_local(const local_pos& lpos) noexcept
+local_pos utils::wrap_local(const local_pos& lpos)
 {
     local_pos result;
     result.x() = static_cast<local_pos::value_type>(utils::mod_signed<local_pos::value_type>(lpos.x(), constant::CHUNK_SIZE));

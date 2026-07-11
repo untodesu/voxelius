@@ -34,8 +34,8 @@ extern chunk_pos chunk;
 
 namespace camera
 {
-void init(void) noexcept;
-void update(void) noexcept;
+void init(void);
+void update(void);
 } // namespace camera
 
 #endif /* F8834F01_219B_4D3A_86E7_91FA52B4F625 */

@@ -12,16 +12,16 @@ void update_late(void);
 
 namespace video
 {
-void query_current_mode(int& width, int& height) noexcept;
-void query_current_mode(int& width, int& height, bool& fullscreen) noexcept;
-const std::vector<SDL_DisplayMode>& query_fullscreen_modes(void) noexcept;
+void query_current_mode(int& width, int& height);
+void query_current_mode(int& width, int& height, bool& fullscreen);
+const std::vector<SDL_DisplayMode>& query_fullscreen_modes(void);
 } // namespace video
 
 namespace video
 {
-void request_fullscreen(int width, int height, int rate) noexcept;
-void request_windowed(int width, int height) noexcept;
-void request_windowed(void) noexcept;
+void request_fullscreen(int width, int height, int rate);
+void request_windowed(int width, int height);
+void request_windowed(void);
 } // namespace video
 
 namespace video

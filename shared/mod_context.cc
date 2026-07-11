@@ -16,7 +16,9 @@
 #include "shared/scripting/lua_libraries.hh"
 #include "shared/scripting/world_library.hh"
 
-ModVersion ModVersion::parse(std::string_view string) noexcept
+#include "shared/constant.hh"
+
+ModVersion ModVersion::parse(std::string_view string)
 {
     ModVersion version {};
     std::string string_unfucked = std::string(string);
@@ -29,12 +31,12 @@ ModVersion ModVersion::parse(std::string_view string) noexcept
     return {};
 }
 
-std::string ModVersion::to_string(const ModVersion& version) noexcept
+std::string ModVersion::to_string(const ModVersion& version)
 {
     return std::format("{}.{}.{}", version.major, version.minor, version.patch);
 }
 
-static std::pair<std::string, ModVersion> parse_mod_entry(std::string_view entry) noexcept
+static std::pair<std::string, ModVersion> parse_mod_entry(std::string_view entry)
 {
     auto separator = entry.find('@');
 
@@ -67,7 +69,7 @@ bool ModInfo::parse(const config::Map& map, ModInfo& modinfo)
     builtin_version.minor = version::minor;
     builtin_version.patch = version::patch;
 
-    if(0 == modinfo.name.compare(BUILTIN_MOD_NAME)) {
+    if(0 == modinfo.name.compare(constant::BUILTIN_NAME_SPACE)) {
         // Builtin modinfo.conf omits the version field
         // and instead uses whatever the runtime provides
         modinfo.version = builtin_version;
@@ -76,7 +78,7 @@ bool ModInfo::parse(const config::Map& map, ModInfo& modinfo)
         modinfo.version = ModVersion::parse(map.value<std::string>("version").value_or(std::string {}));
 
         // Any non-builtin mod implicitly hard-depends on builtin of the current runtime version
-        modinfo.hard_depends.emplace_back(BUILTIN_MOD_NAME, builtin_version);
+        modinfo.hard_depends.emplace_back(constant::BUILTIN_NAME_SPACE, builtin_version);
     }
 
     auto hard_depends = map.value<std::string>("hard_depends").value_or(std::string {});
@@ -108,17 +110,17 @@ bool ModInfo::parse(const config::Map& map, ModInfo& modinfo)
     return true;
 }
 
-ModContext::ModContext(ModInfo modinfo) noexcept : m_modinfo(std::move(modinfo)), m_status(mod_status::PENDING), m_lua_state(nullptr)
+ModContext::ModContext(ModInfo modinfo) : m_modinfo(std::move(modinfo)), m_status(mod_status::PENDING), m_lua_state(nullptr)
 {
     // empty
 }
 
-void ModContext::set_status(mod_status status) noexcept
+void ModContext::set_status(mod_status status)
 {
     m_status = status;
 }
 
-bool ModContext::initialize(void) noexcept
+bool ModContext::initialize(void)
 {
     assert(m_status == mod_status::PENDING);
 
@@ -171,7 +173,7 @@ bool ModContext::initialize(void) noexcept
     return true;
 }
 
-block_id_type ModContext::find_block(const Identifier& name) const noexcept
+block_id_type ModContext::find_block(const Identifier& name) const
 {
     auto it = m_block_names.find(name);
 
@@ -180,7 +182,7 @@ block_id_type ModContext::find_block(const Identifier& name) const noexcept
     return it->second;
 }
 
-block_id_type ModContext::register_block(const Identifier& name, BlockDefinition def) noexcept
+block_id_type ModContext::register_block(const Identifier& name, BlockDefinition def)
 {
     if(m_blocks.empty()) {
         m_blocks.emplace_back();
@@ -194,7 +196,7 @@ block_id_type ModContext::register_block(const Identifier& name, BlockDefinition
     return id;
 }
 
-block_family_id_type ModContext::register_block_family(BlockFamily family) noexcept
+block_family_id_type ModContext::register_block_family(BlockFamily family)
 {
     if(m_block_families.empty()) {
         m_block_families.emplace_back();
@@ -207,7 +209,7 @@ block_family_id_type ModContext::register_block_family(BlockFamily family) noexc
     return id;
 }
 
-bool ModContext::set_block_family(block_id_type id, block_family_id_type family) noexcept
+bool ModContext::set_block_family(block_id_type id, block_family_id_type family)
 {
     if(id == BLOCK_ID_NULL || id >= m_blocks.size()) {
         return false;
@@ -217,17 +219,17 @@ bool ModContext::set_block_family(block_id_type id, block_family_id_type family)
     return true;
 }
 
-std::vector<BlockDefinition> ModContext::take_blocks(void) noexcept
+std::vector<BlockDefinition> ModContext::take_blocks(void)
 {
     return std::move(m_blocks);
 }
 
-std::vector<BlockFamily> ModContext::take_block_families(void) noexcept
+std::vector<BlockFamily> ModContext::take_block_families(void)
 {
     return std::move(m_block_families);
 }
 
-emhash8::HashMap<Identifier, block_id_type> ModContext::take_block_names(void) noexcept
+emhash8::HashMap<Identifier, block_id_type> ModContext::take_block_names(void)
 {
     return std::move(m_block_names);
 }

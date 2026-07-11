@@ -4,7 +4,7 @@
 
 #include "client/globals.hh"
 
-gpu::Sampler gpu::Sampler::create(const SDL_GPUSamplerCreateInfo& info) noexcept
+gpu::Sampler gpu::Sampler::create(const SDL_GPUSamplerCreateInfo& info)
 {
     auto handle = SDL_CreateGPUSampler(globals::gpu_device, &info);
 
@@ -16,8 +16,7 @@ gpu::Sampler gpu::Sampler::create(const SDL_GPUSamplerCreateInfo& info) noexcept
     return Sampler(globals::gpu_device, handle);
 }
 
-gpu::Sampler gpu::Sampler::create(SDL_GPUFilter filter, SDL_GPUSamplerMipmapMode mipmap_mode,
-    SDL_GPUSamplerAddressMode address_mode) noexcept
+gpu::Sampler gpu::Sampler::create(SDL_GPUFilter filter, SDL_GPUSamplerMipmapMode mipmap_mode, SDL_GPUSamplerAddressMode address_mode)
 {
     SDL_GPUSamplerCreateInfo info {};
     info.min_filter = filter;

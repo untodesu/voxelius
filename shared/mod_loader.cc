@@ -4,11 +4,14 @@
 
 #include "core/config/map.hh"
 
+#include "core/exception.hh"
+
 #include "shared/block_registry.hh"
+#include "shared/constant.hh"
 
 static std::vector<ModContext> s_mods;
 
-static std::vector<ModInfo> discover_mods(void) noexcept
+static std::vector<ModInfo> discover_mods(void)
 {
     std::vector<ModInfo> result;
 
@@ -51,7 +54,7 @@ static std::vector<ModInfo> discover_mods(void) noexcept
     return result;
 }
 
-static std::vector<ModInfo> resolve_load_order(std::vector<ModInfo> mods) noexcept
+static std::vector<ModInfo> resolve_load_order(std::vector<ModInfo> mods)
 {
     emhash8::HashMap<std::string, ModInfo*> map;
     emhash8::HashMap<std::string, ModVersion> versions;
@@ -87,14 +90,14 @@ static std::vector<ModInfo> resolve_load_order(std::vector<ModInfo> mods) noexce
     std::vector<ModInfo> result;
     result.reserve(mods.size());
 
-    auto hard_satisfied = [&](const ModInfo* info) noexcept {
-        return std::all_of(info->hard_depends.cbegin(), info->hard_depends.cend(), [&](const auto& dep) noexcept {
+    auto hard_satisfied = [&](const ModInfo* info) {
+        return std::all_of(info->hard_depends.cbegin(), info->hard_depends.cend(), [&](const auto& dep) {
             return resolved.contains(dep.first) && versions.at(dep.first) >= dep.second;
         });
     };
 
-    auto soft_satisfied = [&](const ModInfo* info) noexcept {
-        return std::all_of(info->soft_depends.cbegin(), info->soft_depends.cend(), [&](const auto& dep) noexcept {
+    auto soft_satisfied = [&](const ModInfo* info) {
+        return std::all_of(info->soft_depends.cbegin(), info->soft_depends.cend(), [&](const auto& dep) {
             return resolved.contains(dep.first) && versions.at(dep.first) >= dep.second;
         });
     };
@@ -145,7 +148,7 @@ void mod_loader::init(void)
     std::unordered_set<std::string> failed;
 
     for(auto& info : mods) {
-        auto blocked = std::any_of(info.hard_depends.cbegin(), info.hard_depends.cend(), [&](const auto& dep) noexcept {
+        auto blocked = std::any_of(info.hard_depends.cbegin(), info.hard_depends.cend(), [&](const auto& dep) {
             return failed.contains(dep.first);
         });
 
@@ -159,6 +162,7 @@ void mod_loader::init(void)
         auto& ctx = s_mods.emplace_back(std::move(info));
 
         if(!ctx.initialize()) {
+            vx::throw_if(name == constant::BUILTIN_NAME_SPACE, "you have met a terrible fate, haven't you?");
             failed.insert(name);
             continue;
         }
@@ -174,12 +178,12 @@ void mod_loader::shutdown(void)
     block_registry::purge();
 }
 
-std::span<const ModContext> mod_loader::all(void) noexcept
+std::span<const ModContext> mod_loader::all(void)
 {
     return s_mods;
 }
 
-const ModContext* mod_loader::find(std::string_view name_space) noexcept
+const ModContext* mod_loader::find(std::string_view name_space)
 {
     for(const auto& ctx : s_mods) {
         if(ctx.name_space() == name_space) {

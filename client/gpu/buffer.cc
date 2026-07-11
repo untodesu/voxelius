@@ -6,7 +6,7 @@
 
 #include "client/globals.hh"
 
-gpu::Buffer gpu::Buffer::create(const SDL_GPUBufferCreateInfo& info) noexcept
+gpu::Buffer gpu::Buffer::create(const SDL_GPUBufferCreateInfo& info)
 {
     auto handle = SDL_CreateGPUBuffer(globals::gpu_device, &info);
 
@@ -18,7 +18,7 @@ gpu::Buffer gpu::Buffer::create(const SDL_GPUBufferCreateInfo& info) noexcept
     return Buffer(globals::gpu_device, handle, info.size, info.usage);
 }
 
-gpu::Buffer gpu::Buffer::create(std::size_t capacity, SDL_GPUBufferUsageFlags usage) noexcept
+gpu::Buffer gpu::Buffer::create(std::size_t capacity, SDL_GPUBufferUsageFlags usage)
 {
     SDL_GPUBufferCreateInfo info {};
     info.size = static_cast<Uint32>(capacity);
@@ -102,7 +102,7 @@ void gpu::Buffer::ensure_capacity(std::size_t required)
     }
 }
 
-gpu::Buffer::Buffer(SDL_GPUDevice* device, SDL_GPUBuffer* handle, std::size_t capacity, SDL_GPUBufferUsageFlags usage) noexcept
+gpu::Buffer::Buffer(SDL_GPUDevice* device, SDL_GPUBuffer* handle, std::size_t capacity, SDL_GPUBufferUsageFlags usage)
     : Handle(device, handle), m_usage(usage), m_capacity(capacity), m_size(0)
 {
     // empty

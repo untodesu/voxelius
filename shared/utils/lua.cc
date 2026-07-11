@@ -2,7 +2,7 @@
 
 #include "shared/utils/lua.hh"
 
-Eigen::Vector2f utils::read_vector2f(lua_State* L, int idx) noexcept
+Eigen::Vector2f utils::read_vector2f(lua_State* L, int idx)
 {
     Eigen::Vector2f result = Eigen::Vector2f::Zero();
 
@@ -17,7 +17,7 @@ Eigen::Vector2f utils::read_vector2f(lua_State* L, int idx) noexcept
     return result;
 }
 
-Eigen::Vector3f utils::read_vector3f(lua_State* L, int idx) noexcept
+Eigen::Vector3f utils::read_vector3f(lua_State* L, int idx)
 {
     Eigen::Vector3f result = Eigen::Vector3f::Zero();
 
@@ -35,7 +35,7 @@ Eigen::Vector3f utils::read_vector3f(lua_State* L, int idx) noexcept
     return result;
 }
 
-Eigen::Vector4f utils::read_vector4f(lua_State* L, int idx) noexcept
+Eigen::Vector4f utils::read_vector4f(lua_State* L, int idx)
 {
     Eigen::Vector4f result = Eigen::Vector4f::Zero();
 
@@ -57,7 +57,7 @@ Eigen::Vector4f utils::read_vector4f(lua_State* L, int idx) noexcept
 }
 
 template<std::unsigned_integral T>
-T utils::read_bitmask(lua_State* L, int idx) noexcept
+T utils::read_bitmask(lua_State* L, int idx)
 {
     T mask = static_cast<T>(0);
     auto count = lua_rawlen(L, idx);
@@ -71,8 +71,8 @@ T utils::read_bitmask(lua_State* L, int idx) noexcept
     return mask;
 }
 
-template unsigned char utils::read_bitmask<unsigned char>(lua_State* L, int idx) noexcept;
-template unsigned short utils::read_bitmask<unsigned short>(lua_State* L, int idx) noexcept;
-template unsigned utils::read_bitmask<unsigned>(lua_State* L, int idx) noexcept;
-template unsigned long utils::read_bitmask<unsigned long>(lua_State* L, int idx) noexcept;
-template unsigned long long utils::read_bitmask<unsigned long long>(lua_State* L, int idx) noexcept;
+template unsigned char utils::read_bitmask<unsigned char>(lua_State* L, int idx);
+template unsigned short utils::read_bitmask<unsigned short>(lua_State* L, int idx);
+template unsigned utils::read_bitmask<unsigned>(lua_State* L, int idx);
+template unsigned long utils::read_bitmask<unsigned long>(lua_State* L, int idx);
+template unsigned long long utils::read_bitmask<unsigned long long>(lua_State* L, int idx);

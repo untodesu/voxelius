@@ -196,25 +196,25 @@ void video::update_late(void)
     }
 }
 
-void video::query_current_mode(int& width, int& height) noexcept
+void video::query_current_mode(int& width, int& height)
 {
     width = globals::width;
     height = globals::height;
 }
 
-void video::query_current_mode(int& width, int& height, bool& fullscreen) noexcept
+void video::query_current_mode(int& width, int& height, bool& fullscreen)
 {
     width = globals::width;
     height = globals::height;
     fullscreen = static_cast<bool>(SDL_GetWindowFullscreenMode(globals::window));
 }
 
-const std::vector<SDL_DisplayMode>& video::query_fullscreen_modes(void) noexcept
+const std::vector<SDL_DisplayMode>& video::query_fullscreen_modes(void)
 {
     return s_fullscreen_modes;
 }
 
-void video::request_fullscreen(int width, int height, int rate) noexcept
+void video::request_fullscreen(int width, int height, int rate)
 {
     assert(width >= constant::BASE_WIDTH);
     assert(height >= constant::BASE_HEIGHT);
@@ -250,7 +250,7 @@ void video::request_fullscreen(int width, int height, int rate) noexcept
     LOG_DEBUG("set mode to: {}x{} ({} Hz)", best_mode.w, best_mode.h, static_cast<int>(best_mode.refresh_rate));
 }
 
-void video::request_windowed(int width, int height) noexcept
+void video::request_windowed(int width, int height)
 {
     SDL_SetWindowFullscreen(globals::window, false);
     SDL_SetWindowSize(globals::window, width, height);
@@ -268,7 +268,7 @@ void video::request_windowed(int width, int height) noexcept
     LOG_DEBUG("set mode to: windowed {}x{}", width, height);
 }
 
-void video::request_windowed(void) noexcept
+void video::request_windowed(void)
 {
     video::request_windowed(s_last_windowed_size.x(), s_last_windowed_size.y());
 }

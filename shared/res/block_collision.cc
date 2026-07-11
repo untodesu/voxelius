@@ -7,7 +7,7 @@
 #include "core/utils/json.hh"
 #include "core/utils/physfs.hh"
 
-static bool parse_aabb(Eigen::AlignedBox3f& aabb, const JSON_Object* object) noexcept
+static bool parse_aabb(Eigen::AlignedBox3f& aabb, const JSON_Object* object)
 {
     if(object == nullptr) {
         return false;
@@ -65,12 +65,12 @@ static const void* block_collision_load_fn(const char* path, std::uint32_t flags
     return new BlockCollision(std::move(collision));
 }
 
-static void block_collision_free_fn(const void* resource) noexcept
+static void block_collision_free_fn(const void* resource)
 {
     delete static_cast<const BlockCollision*>(resource);
 }
 
-void BlockCollision::register_resource(void) noexcept
+void BlockCollision::register_resource(void)
 {
     res::register_loader<BlockCollision>(&block_collision_load_fn, &block_collision_free_fn);
 }

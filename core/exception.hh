@@ -22,13 +22,13 @@ namespace vx::detail
 class Exception {
 public:
     template<typename... Args>
-    explicit Exception(FormatWithLocation<typename std::type_identity<Args>::type...> fmt, Args&&... args) noexcept;
-    explicit Exception(std::string_view what, std::source_location location = std::source_location::current()) noexcept;
-    virtual ~Exception(void) noexcept = default;
+    explicit Exception(FormatWithLocation<typename std::type_identity<Args>::type...> fmt, Args&&... args);
+    explicit Exception(std::string_view what, std::source_location location = std::source_location::current());
+    virtual ~Exception(void) = default;
 
-    constexpr std::string_view what(void) const noexcept;
-    constexpr const char* what_standard(void) const noexcept;
-    constexpr const std::source_location& location(void) const noexcept;
+    constexpr std::string_view what(void) const;
+    constexpr const char* what_standard(void) const;
+    constexpr const std::source_location& location(void) const;
 
 private:
     std::string m_what;
@@ -83,23 +83,23 @@ void throw_if_not_fmt(bool condition, detail::FormatWithLocation<typename std::t
 } // namespace vx
 
 template<typename... Args>
-vx::detail::Exception::Exception(detail::FormatWithLocation<typename std::type_identity<Args>::type...> fmt, Args&&... args) noexcept
+vx::detail::Exception::Exception(detail::FormatWithLocation<typename std::type_identity<Args>::type...> fmt, Args&&... args)
     : m_what(std::vformat(fmt.value.get(), std::make_format_args(args...))), m_location(std::move(fmt.location))
 {
     // empty
 }
 
-constexpr std::string_view vx::detail::Exception::what(void) const noexcept
+constexpr std::string_view vx::detail::Exception::what(void) const
 {
     return m_what;
 }
 
-constexpr const char* vx::detail::Exception::what_standard(void) const noexcept
+constexpr const char* vx::detail::Exception::what_standard(void) const
 {
     return m_what.c_str();
 }
 
-constexpr const std::source_location& vx::detail::Exception::location(void) const noexcept
+constexpr const std::source_location& vx::detail::Exception::location(void) const
 {
     return m_location;
 }

@@ -24,7 +24,7 @@ struct BlockModel_Element final {
 };
 
 struct BlockModel final {
-    static void register_resource(void) noexcept;
+    static void register_resource(void);
 
     std::vector<std::string> texture_slots;
     std::vector<BlockModel_Element> elements;

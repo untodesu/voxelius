@@ -36,8 +36,8 @@ void res::detail::register_loader(const std::type_info& type, load_func load_fn,
 
 res::handle<void> res::detail::load_resource(const std::type_info& type, std::string_view path, std::uint32_t flags)
 {
-    std::string path_unfucked(path);
-    std::type_index type_index(type);
+    auto full_path = std::string(path);
+    auto type_index = std::type_index(type);
 
     auto loader = s_loaders.find(type_index);
 
@@ -46,19 +46,19 @@ res::handle<void> res::detail::load_resource(const std::type_info& type, std::st
         return nullptr;
     }
 
-    auto found = loader->second->resources.find(path_unfucked);
+    auto found = loader->second->resources.find(full_path);
 
     if(found == loader->second->resources.cend()) {
-        auto raw = loader->second->load_fn(path_unfucked.c_str(), flags);
+        auto raw = loader->second->load_fn(full_path.c_str(), flags);
 
         if(raw == nullptr) {
-            LOG_WARNING("{}<{}>: load failed", path_unfucked, type.name());
+            LOG_WARNING("{}<{}>: load failed", full_path, type.name());
             return nullptr;
         }
 
         handle<void> resource(raw, [](const void* ptr) { /* empty */ });
 
-        auto loaded = loader->second->resources.insert_or_assign(path_unfucked, std::move(resource));
+        auto loaded = loader->second->resources.insert_or_assign(full_path, std::move(resource));
 
         if(flags & RESFLAG_CACHE) {
             loader->second->cache.push_back(loaded.first->second);
@@ -72,8 +72,8 @@ res::handle<void> res::detail::load_resource(const std::type_info& type, std::st
 
 res::handle<void> res::detail::find_resource(const std::type_info& type, std::string_view path)
 {
-    std::string path_unfucked(path);
-    std::type_index type_index(type);
+    auto full_path = std::string(path);
+    auto type_index = std::type_index(type);
 
     auto loader = s_loaders.find(type_index);
 
@@ -82,7 +82,7 @@ res::handle<void> res::detail::find_resource(const std::type_info& type, std::st
         return nullptr;
     }
 
-    auto found = loader->second->resources.find(path_unfucked);
+    auto found = loader->second->resources.find(full_path);
 
     if(found == loader->second->resources.cend()) {
         return nullptr;

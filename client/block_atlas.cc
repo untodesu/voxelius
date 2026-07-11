@@ -33,7 +33,7 @@ static std::deque<AtlasStrip> s_strips;
 static emhash8::HashMap<std::uint64_t, AtlasStrip*> s_lookup;
 static std::vector<res::handle<Image>> s_pending;
 
-static std::uint64_t span_hash(std::span<const Identifier> textures) noexcept
+static std::uint64_t span_hash(std::span<const Identifier> textures)
 {
     std::uint64_t hash = 0;
 
@@ -211,7 +211,7 @@ static void build_atlas(void)
     s_compiled = true;
 }
 
-const AtlasStrip* block_atlas::load(std::span<const Identifier> textures) noexcept
+const AtlasStrip* block_atlas::load(std::span<const Identifier> textures)
 {
     if(textures.empty() || s_compiled) {
         return nullptr;
@@ -254,7 +254,7 @@ const AtlasStrip* block_atlas::load(std::span<const Identifier> textures) noexce
     return it->second;
 }
 
-const AtlasStrip* block_atlas::find(std::span<const Identifier> textures) noexcept
+const AtlasStrip* block_atlas::find(std::span<const Identifier> textures)
 {
     if(textures.empty()) {
         return nullptr;

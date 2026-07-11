@@ -2,12 +2,12 @@
 
 #include "core/utils/raycast.hh"
 
-utils::detail::ray_type utils::unproject_ray(const Eigen::Matrix4f& inverse_view_projection) noexcept
+utils::detail::ray_type utils::unproject_ray(const Eigen::Matrix4f& inverse_view_projection)
 {
     return unproject_ray(inverse_view_projection, Eigen::Vector2f::Zero());
 }
 
-utils::detail::ray_type utils::unproject_ray(const Eigen::Matrix4f& inverse_view_projection, const Eigen::Vector2f& cursor_ndc) noexcept
+utils::detail::ray_type utils::unproject_ray(const Eigen::Matrix4f& inverse_view_projection, const Eigen::Vector2f& cursor_ndc)
 {
     Eigen::Vector4f plane_near(cursor_ndc.x(), cursor_ndc.y(), -1.0f, 1.0f);
     Eigen::Vector4f plane_far(cursor_ndc.x(), cursor_ndc.y(), 1.0f, 1.0f);
@@ -23,7 +23,7 @@ utils::detail::ray_type utils::unproject_ray(const Eigen::Matrix4f& inverse_view
     return std::make_pair(origin, direction);
 }
 
-bool utils::raycast_aabb(const detail::ray_type& ray, const Eigen::AlignedBox3f& aabb, utils::RaycastResult& result) noexcept
+bool utils::raycast_aabb(const detail::ray_type& ray, const Eigen::AlignedBox3f& aabb, utils::RaycastResult& result)
 {
     Eigen::Vector3f inverse_direction(ray.second.cwiseInverse());
     Eigen::Vector3f alpha_min((aabb.min() - ray.first).cwiseProduct(inverse_direction));
@@ -44,7 +44,7 @@ bool utils::raycast_aabb(const detail::ray_type& ray, const Eigen::AlignedBox3f&
 }
 
 bool utils::raycast_triangle(const detail::ray_type& ray, const detail::tri_type& triangle, bool pick_backfaces,
-    utils::RaycastResult& result) noexcept
+    utils::RaycastResult& result)
 {
     constexpr static float epsilon = 10.0f * std::numeric_limits<float>::epsilon();
 
@@ -95,7 +95,7 @@ bool utils::raycast_triangle(const detail::ray_type& ray, const detail::tri_type
     return false; // intersection point is behind the ray origin
 }
 
-bool utils::raycast_plane(const detail::ray_type& ray, const Eigen::Hyperplane<float, 3>& plane, utils::RaycastResult& result) noexcept
+bool utils::raycast_plane(const detail::ray_type& ray, const Eigen::Hyperplane<float, 3>& plane, utils::RaycastResult& result)
 {
     Eigen::Vector3f normal = plane.normal();
     auto denominator = normal.dot(ray.second);

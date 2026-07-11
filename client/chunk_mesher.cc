@@ -31,15 +31,15 @@ constexpr static std::array ALL_FACES = {
 class MeshingTask final : public Task {
 public:
     explicit MeshingTask(entt::entity entity, const chunk_pos& cpos);
-    virtual ~MeshingTask(void) noexcept override = default;
-    virtual void process(void) noexcept override;
-    virtual void finalize(void) noexcept override;
+    virtual ~MeshingTask(void) override = default;
+    virtual void process(void) override;
+    virtual void finalize(void) override;
 
 private:
-    bool is_culled(const local_pos& lpos, block_face face, block_render self_render) const noexcept;
+    bool is_culled(const local_pos& lpos, block_face face, block_render self_render) const;
     void emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos,
-        std::uint64_t entropy) const noexcept;
-    void mesh_block(const local_pos& lpos, block_id_type id) noexcept;
+        std::uint64_t entropy) const;
+    void mesh_block(const local_pos& lpos, block_id_type id);
 
     std::array<BlockStorage, 7> m_cache;
     std::vector<ChunkMesh_Vertex> m_opaque;
@@ -48,7 +48,7 @@ private:
     chunk_pos m_cpos;
 };
 
-constexpr static block_face opposite_face(block_face face) noexcept
+constexpr static block_face opposite_face(block_face face)
 {
     switch(face) {
         case BLOCK_FACE_NORTH:
@@ -73,7 +73,7 @@ constexpr static block_face opposite_face(block_face face) noexcept
     return BLOCK_FACE_NORTH;
 }
 
-static chunk_pos face_delta(block_face face) noexcept
+static chunk_pos face_delta(block_face face)
 {
     switch(face) {
         case BLOCK_FACE_NORTH:
@@ -98,7 +98,7 @@ static chunk_pos face_delta(block_face face) noexcept
     return chunk_pos::Zero();
 }
 
-static float shade_factor(std::uint32_t packed_normal, bool enable) noexcept
+static float shade_factor(std::uint32_t packed_normal, bool enable)
 {
     if(enable) {
         auto nx = static_cast<float>((static_cast<std::int32_t>(packed_normal & 0x3FFU) << 22) >> 22) / 511.0f;
@@ -129,7 +129,7 @@ static float shade_factor(std::uint32_t packed_normal, bool enable) noexcept
     }
 }
 
-static bool is_neighbour(const local_pos& lpos) noexcept
+static bool is_neighbour(const local_pos& lpos)
 {
     auto result = false;
     result = result || lpos.x() < 0 || lpos.x() >= constant::CHUNK_SIZE;
@@ -138,12 +138,12 @@ static bool is_neighbour(const local_pos& lpos) noexcept
     return result;
 }
 
-static void mark_dirty(entt::entity entity) noexcept
+static void mark_dirty(entt::entity entity)
 {
     world::chunk_entities.emplace_or_replace<ChunkMeshDirtyComponent>(entity);
 }
 
-static void mark_dirty(const chunk_pos& cpos) noexcept
+static void mark_dirty(const chunk_pos& cpos)
 {
     if(auto chunk = world::find_chunk(cpos)) {
         mark_dirty(chunk->entity());
@@ -165,7 +165,7 @@ MeshingTask::MeshingTask(entt::entity entity, const chunk_pos& cpos) : m_entity(
     }
 }
 
-void MeshingTask::process(void) noexcept
+void MeshingTask::process(void)
 {
     for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
         if(status.load(std::memory_order_relaxed) == task_status::CANCELLED) {
@@ -193,7 +193,7 @@ static void build_indices(std::size_t vertex_count, std::vector<std::uint32_t>& 
     }
 }
 
-void MeshingTask::finalize(void) noexcept
+void MeshingTask::finalize(void)
 {
     if(world::chunk_entities.valid(m_entity)) {
         if(m_opaque.empty() && m_alpha.empty()) {
@@ -213,7 +213,7 @@ void MeshingTask::finalize(void) noexcept
     }
 }
 
-bool MeshingTask::is_culled(const local_pos& lpos, block_face face, block_render self_render) const noexcept
+bool MeshingTask::is_culled(const local_pos& lpos, block_face face, block_render self_render) const
 {
     auto neighbour_lpos = lpos + face_delta(face);
     auto query_lpos = neighbour_lpos.eval();
@@ -248,7 +248,7 @@ bool MeshingTask::is_culled(const local_pos& lpos, block_face face, block_render
 }
 
 void MeshingTask::emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos,
-    std::uint64_t entropy) const noexcept
+    std::uint64_t entropy) const
 {
     auto block_origin = lpos.cast<float>() * 16.0f;
 
@@ -277,7 +277,7 @@ void MeshingTask::emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const
     }
 }
 
-void MeshingTask::mesh_block(const local_pos& lpos, block_id_type id) noexcept
+void MeshingTask::mesh_block(const local_pos& lpos, block_id_type id)
 {
     if(id == BLOCK_ID_NULL) {
         return;
@@ -326,28 +326,28 @@ void MeshingTask::mesh_block(const local_pos& lpos, block_id_type id) noexcept
     }
 }
 
-static void mark_neighbors_dirty(const chunk_pos& cpos) noexcept
+static void mark_neighbors_dirty(const chunk_pos& cpos)
 {
     for(auto face : ALL_FACES) {
         mark_dirty(cpos + face_delta(face));
     }
 }
 
-static void on_chunk_create(const ChunkCreateEvent& event) noexcept
+static void on_chunk_create(const ChunkCreateEvent& event)
 {
     auto chunk = event.chunk();
     mark_dirty(chunk->entity());
     mark_neighbors_dirty(event.pos());
 }
 
-static void on_chunk_update(const ChunkUpdateEvent& event) noexcept
+static void on_chunk_update(const ChunkUpdateEvent& event)
 {
     auto chunk = event.chunk();
     mark_dirty(chunk->entity());
     mark_neighbors_dirty(event.pos());
 }
 
-static void on_chunk_remove(const ChunkRemoveEvent& event) noexcept
+static void on_chunk_remove(const ChunkRemoveEvent& event)
 {
     auto chunk = event.chunk();
     auto entity = chunk->entity();
@@ -359,7 +359,7 @@ static void on_chunk_remove(const ChunkRemoveEvent& event) noexcept
     }
 }
 
-static void on_block_update(const BlockUpdateEvent& event) noexcept
+static void on_block_update(const BlockUpdateEvent& event)
 {
     auto chunk = event.chunk();
     mark_dirty(chunk->entity());

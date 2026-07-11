@@ -19,13 +19,14 @@
 #include "shared/mod_loader.hh"
 #include "shared/world.hh"
 
+#include "client/gui/gui.hh"
+
 #include "client/res/texture2D.hh"
 
 #include "client/block_atlas.hh"
 #include "client/block_models.hh"
-#include "client/chunk_mesher.hh"
-
 #include "client/camera.hh"
+#include "client/chunk_mesher.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
 #include "client/head.hh"
@@ -141,7 +142,7 @@ static void wrapped_main(int argc, char** argv)
     head::init();
     camera::init();
 
-    // TODO: game_ui::init();
+    gui::init();
 
     block_atlas::init();
 
@@ -153,11 +154,8 @@ static void wrapped_main(int argc, char** argv)
     video::init_late();
     head::init_late();
 
-    // TODO: game_ui::init_late();
+    gui::init_late();
 
-    // Needs both globals::gpu_device (from head::init()) and a
-    // committed block_registry (from mod_loader::init()), both of
-    // which are guaranteed by this point
     block_atlas::init_late();
     block_models::init_late();
 
@@ -225,9 +223,11 @@ static void wrapped_main(int argc, char** argv)
         // TODO: game_ui::update();
 
         if(head::prepare()) {
+            gui::update_scale();
+
             head::render();
 
-            // TODO: game_ui::layout();
+            gui::layout();
 
             client_game::layout();
 
@@ -258,6 +258,8 @@ static void wrapped_main(int argc, char** argv)
 
     block_models::shutdown();
     block_atlas::shutdown();
+
+    gui::shutdown();
 
     client_game::shutdown();
 

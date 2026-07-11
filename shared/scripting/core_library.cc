@@ -6,7 +6,7 @@
 
 #include "shared/mod_context.hh"
 
-void scripting::open_core_library(std::shared_ptr<lua_State>& lua, const ModContext* ctx) noexcept
+void scripting::open_core_library(std::shared_ptr<lua_State>& lua, const ModContext* ctx)
 {
     assert(lua);
     assert(ctx);

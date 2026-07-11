@@ -15,6 +15,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/utils/chunk.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/coord.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/coord.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/entity.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/entity.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/lua.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/lua.hh"
     "${CMAKE_CURRENT_LIST_DIR}/block.cc"
@@ -34,6 +36,13 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/mod_loader.cc"
     "${CMAKE_CURRENT_LIST_DIR}/mod_loader.hh"
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/player.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/stasis.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/stasis.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/transform.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/transform.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/velocity.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/velocity.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world.hh")
 target_compile_features(shared PUBLIC cxx_std_20)

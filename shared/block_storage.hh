@@ -10,18 +10,18 @@ class WriteBuffer;
 
 class BlockStorage final {
 public:
-    static void serialize(const BlockStorage& storage, WriteBuffer& buffer) noexcept;
-    static void deserialize(BlockStorage& storage, ReadBuffer& buffer) noexcept;
+    static void serialize(const BlockStorage& storage, WriteBuffer& buffer);
+    static void deserialize(BlockStorage& storage, ReadBuffer& buffer);
 
-    block_id_type get(std::size_t index) const noexcept;
-    block_id_type get(const local_pos& pos) const noexcept;
+    block_id_type get(std::size_t index) const;
+    block_id_type get(const local_pos& pos) const;
 
-    void set(std::size_t index, block_id_type id) noexcept;
-    void set(const local_pos& pos, block_id_type id) noexcept;
+    void set(std::size_t index, block_id_type id);
+    void set(const local_pos& pos, block_id_type id);
 
-    void optimize(void) noexcept;
+    void optimize(void);
 
-    std::size_t size(void) const noexcept;
+    std::size_t size(void) const;
 
 private:
     using array8_type = std::array<std::uint8_t, constant::CHUNK_VOLUME>;
@@ -44,22 +44,22 @@ private:
 
     using variant_type = std::variant<Uniform, Palette8, Palette16>;
 
-    static void serialize(const Uniform* uniform, WriteBuffer& buffer) noexcept;
-    static void serialize(const Palette8* p8, WriteBuffer& buffer) noexcept;
-    static void serialize(const Palette16* p16, WriteBuffer& buffer) noexcept;
+    static void serialize(const Uniform* uniform, WriteBuffer& buffer);
+    static void serialize(const Palette8* p8, WriteBuffer& buffer);
+    static void serialize(const Palette16* p16, WriteBuffer& buffer);
 
-    static void deserialize(Uniform& uniform, ReadBuffer& buffer) noexcept;
-    static void deserialize(Palette8& p8, ReadBuffer& buffer) noexcept;
-    static void deserialize(Palette16& p16, ReadBuffer& buffer) noexcept;
+    static void deserialize(Uniform& uniform, ReadBuffer& buffer);
+    static void deserialize(Palette8& p8, ReadBuffer& buffer);
+    static void deserialize(Palette16& p16, ReadBuffer& buffer);
 
-    static std::optional<std::size_t> find_slot(const palette_type& palette, block_id_type id) noexcept;
-    static std::size_t add_slot(palette_type& palette, block_id_type id) noexcept;
+    static std::optional<std::size_t> find_slot(const palette_type& palette, block_id_type id);
+    static std::size_t add_slot(palette_type& palette, block_id_type id);
 
-    static void promote(Palette8& dest, const Uniform& src) noexcept;
-    static void promote(Palette16& dest, const Palette8& src) noexcept;
+    static void promote(Palette8& dest, const Uniform& src);
+    static void promote(Palette16& dest, const Palette8& src);
 
-    static void optimize(Palette8& p8, variant_type& dest) noexcept;
-    static void optimize(Palette16& p16, variant_type& dest) noexcept;
+    static void optimize(Palette8& p8, variant_type& dest);
+    static void optimize(Palette16& p16, variant_type& dest);
 
 private:
     variant_type m_variant { Uniform { BLOCK_ID_NULL } };

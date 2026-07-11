@@ -173,7 +173,7 @@ Example:
 Example 1:  
 
 ```cpp
-explicit Exception(std::string_view what, std::source_location location = std::source_location::current()) noexcept
+explicit Exception(std::string_view what, std::source_location location = std::source_location::current())
 {
   // empty
 }

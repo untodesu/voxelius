@@ -43,7 +43,7 @@ static SDL_GPUGraphicsPipeline* s_pipeline_alpha;
 static gpu::Sampler s_atlas_sampler;
 
 static SDL_GPUGraphicsPipeline* create_pipeline(SDL_GPUShader* vert, SDL_GPUShader* frag, SDL_GPUTextureFormat swapchain_format, bool blend,
-    bool depth_write) noexcept
+    bool depth_write)
 {
     SDL_GPUVertexBufferDescription vertex_buffer_desc {};
     vertex_buffer_desc.slot = 0;

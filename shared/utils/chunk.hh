@@ -5,7 +5,7 @@
 
 namespace utils
 {
-Eigen::AlignedBox3f bounds(const chunk_pos& pos) noexcept;
+Eigen::AlignedBox3f bounds(const chunk_pos& pos);
 } // namespace utils
 
 #endif /* C9932409_A53A_424A_96C1_DAF4717CAFAC */

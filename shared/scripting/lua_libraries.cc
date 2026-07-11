@@ -8,7 +8,7 @@
 
 #include "shared/mod_context.hh"
 
-static bool run_script(lua_State* L, const ModContext* ctx, std::string_view path) noexcept
+static bool run_script(lua_State* L, const ModContext* ctx, std::string_view path)
 {
     auto identifier = Identifier::from_string(path, ctx->name_space());
 
@@ -31,7 +31,7 @@ static bool run_script(lua_State* L, const ModContext* ctx, std::string_view pat
     return load_status == LUA_OK;
 }
 
-static int api_override_dofile(lua_State* L) noexcept
+static int api_override_dofile(lua_State* L)
 {
     auto raw_path = luaL_checkstring(L, 1);
     auto path = std::string_view(raw_path, std::strlen(raw_path));
@@ -46,7 +46,7 @@ static int api_override_dofile(lua_State* L) noexcept
     return lua_gettop(L) - 1;
 }
 
-static int api_override_print(lua_State* L) noexcept
+static int api_override_print(lua_State* L)
 {
     std::string message;
     message.reserve(512);
@@ -78,7 +78,7 @@ static int api_override_print(lua_State* L) noexcept
     return 0;
 }
 
-void scripting::open_lua_libraries(std::shared_ptr<lua_State>& lua, const ModContext* ctx) noexcept
+void scripting::open_lua_libraries(std::shared_ptr<lua_State>& lua, const ModContext* ctx)
 {
     assert(lua);
     assert(ctx);

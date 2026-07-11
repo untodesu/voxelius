@@ -6,7 +6,7 @@
 
 #include "client/globals.hh"
 
-static Uint32 resolve_mip_levels(int num_levels, Uint32 width, Uint32 height) noexcept
+static Uint32 resolve_mip_levels(int num_levels, Uint32 width, Uint32 height)
 {
     if(num_levels >= 0) {
         return static_cast<Uint32>(num_levels);
@@ -16,7 +16,7 @@ static Uint32 resolve_mip_levels(int num_levels, Uint32 width, Uint32 height) no
     return static_cast<Uint32>(std::bit_width(largest));
 }
 
-gpu::Texture gpu::Texture::create(const SDL_GPUTextureCreateInfo& info) noexcept
+gpu::Texture gpu::Texture::create(const SDL_GPUTextureCreateInfo& info)
 {
     auto handle = SDL_CreateGPUTexture(globals::gpu_device, &info);
 
@@ -29,7 +29,7 @@ gpu::Texture gpu::Texture::create(const SDL_GPUTextureCreateInfo& info) noexcept
 }
 
 gpu::Texture gpu::Texture::create_2D(Uint32 width, Uint32 height, SDL_GPUTextureFormat format, SDL_GPUTextureUsageFlags usage,
-    int num_levels) noexcept
+    int num_levels)
 {
     SDL_GPUTextureCreateInfo info {};
     info.type = SDL_GPU_TEXTURETYPE_2D;
@@ -44,7 +44,7 @@ gpu::Texture gpu::Texture::create_2D(Uint32 width, Uint32 height, SDL_GPUTexture
     return create(info);
 }
 
-gpu::Texture gpu::Texture::create_cube(Uint32 size, SDL_GPUTextureFormat format, SDL_GPUTextureUsageFlags usage, int num_levels) noexcept
+gpu::Texture gpu::Texture::create_cube(Uint32 size, SDL_GPUTextureFormat format, SDL_GPUTextureUsageFlags usage, int num_levels)
 {
     SDL_GPUTextureCreateInfo info {};
     info.type = SDL_GPU_TEXTURETYPE_CUBE;
@@ -60,7 +60,7 @@ gpu::Texture gpu::Texture::create_cube(Uint32 size, SDL_GPUTextureFormat format,
 }
 
 gpu::Texture gpu::Texture::create_array(Uint32 width, Uint32 height, Uint32 layers, SDL_GPUTextureFormat format,
-    SDL_GPUTextureUsageFlags usage, int num_levels) noexcept
+    SDL_GPUTextureUsageFlags usage, int num_levels)
 {
     SDL_GPUTextureCreateInfo info {};
     info.type = SDL_GPU_TEXTURETYPE_2D_ARRAY;
@@ -141,7 +141,7 @@ void gpu::Texture::generate_mipmaps_blocking(void) const
     SDL_ReleaseGPUFence(m_device, fence);
 }
 
-gpu::Texture::Texture(SDL_GPUDevice* device, SDL_GPUTexture* handle, Uint32 width, Uint32 height, SDL_GPUTextureFormat format) noexcept
+gpu::Texture::Texture(SDL_GPUDevice* device, SDL_GPUTexture* handle, Uint32 width, Uint32 height, SDL_GPUTextureFormat format)
     : Handle(device, handle), m_width(width), m_height(height), m_format(format)
 {
     // empty

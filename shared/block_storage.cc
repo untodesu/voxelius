@@ -10,7 +10,7 @@ constexpr static std::uint32_t TAG_UNIFORM = 0x85787370;   // UNIF
 constexpr static std::uint32_t TAG_PALETTE8 = 0x80657666;  // PALB
 constexpr static std::uint32_t TAG_PALETTE16 = 0x80657687; // PALW
 
-void BlockStorage::serialize(const BlockStorage& storage, WriteBuffer& buffer) noexcept
+void BlockStorage::serialize(const BlockStorage& storage, WriteBuffer& buffer)
 {
     if(const auto uniform = std::get_if<Uniform>(&storage.m_variant)) {
         buffer.write<std::uint32_t>(TAG_UNIFORM);
@@ -31,7 +31,7 @@ void BlockStorage::serialize(const BlockStorage& storage, WriteBuffer& buffer) n
     }
 }
 
-void BlockStorage::deserialize(BlockStorage& storage, ReadBuffer& buffer) noexcept
+void BlockStorage::deserialize(BlockStorage& storage, ReadBuffer& buffer)
 {
     const auto tag = buffer.read<std::uint32_t>();
 
@@ -57,12 +57,12 @@ void BlockStorage::deserialize(BlockStorage& storage, ReadBuffer& buffer) noexce
     }
 }
 
-void BlockStorage::serialize(const Uniform* uniform, WriteBuffer& buffer) noexcept
+void BlockStorage::serialize(const Uniform* uniform, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(uniform->filler);
 }
 
-void BlockStorage::serialize(const Palette8* p8, WriteBuffer& buffer) noexcept
+void BlockStorage::serialize(const Palette8* p8, WriteBuffer& buffer)
 {
     buffer.write<std::uint16_t>(static_cast<std::uint16_t>(p8->palette.size()));
 
@@ -76,7 +76,7 @@ void BlockStorage::serialize(const Palette8* p8, WriteBuffer& buffer) noexcept
     }
 }
 
-void BlockStorage::serialize(const Palette16* p16, WriteBuffer& buffer) noexcept
+void BlockStorage::serialize(const Palette16* p16, WriteBuffer& buffer)
 {
     buffer.write<std::uint16_t>(static_cast<std::uint16_t>(p16->palette.size()));
 
@@ -90,12 +90,12 @@ void BlockStorage::serialize(const Palette16* p16, WriteBuffer& buffer) noexcept
     }
 }
 
-void BlockStorage::deserialize(Uniform& uniform, ReadBuffer& buffer) noexcept
+void BlockStorage::deserialize(Uniform& uniform, ReadBuffer& buffer)
 {
     uniform.filler = buffer.read<std::uint32_t>();
 }
 
-void BlockStorage::deserialize(Palette8& p8, ReadBuffer& buffer) noexcept
+void BlockStorage::deserialize(Palette8& p8, ReadBuffer& buffer)
 {
     p8.palette.resize(buffer.read<std::uint16_t>());
 
@@ -115,7 +115,7 @@ void BlockStorage::deserialize(Palette8& p8, ReadBuffer& buffer) noexcept
     }
 }
 
-void BlockStorage::deserialize(Palette16& p16, ReadBuffer& buffer) noexcept
+void BlockStorage::deserialize(Palette16& p16, ReadBuffer& buffer)
 {
     p16.palette.resize(buffer.read<std::uint16_t>());
 
@@ -135,7 +135,7 @@ void BlockStorage::deserialize(Palette16& p16, ReadBuffer& buffer) noexcept
     }
 }
 
-std::optional<std::size_t> BlockStorage::find_slot(const palette_type& palette, block_id_type id) noexcept
+std::optional<std::size_t> BlockStorage::find_slot(const palette_type& palette, block_id_type id)
 {
     for(std::size_t i = 0; i < palette.size(); ++i) {
         if(palette[i].first == id) {
@@ -146,21 +146,21 @@ std::optional<std::size_t> BlockStorage::find_slot(const palette_type& palette, 
     return std::nullopt;
 }
 
-std::size_t BlockStorage::add_slot(palette_type& palette, block_id_type id) noexcept
+std::size_t BlockStorage::add_slot(palette_type& palette, block_id_type id)
 {
     auto slot = palette.size();
     palette.emplace_back(id, UINT16_C(0));
     return slot;
 }
 
-void BlockStorage::promote(Palette8& dest, const Uniform& src) noexcept
+void BlockStorage::promote(Palette8& dest, const Uniform& src)
 {
     dest.indices.fill(0);
     dest.palette.clear();
     dest.palette.emplace_back(src.filler, static_cast<std::uint16_t>(constant::CHUNK_VOLUME));
 }
 
-void BlockStorage::promote(Palette16& dest, const Palette8& src) noexcept
+void BlockStorage::promote(Palette16& dest, const Palette8& src)
 {
     dest.palette = src.palette;
 
@@ -169,7 +169,7 @@ void BlockStorage::promote(Palette16& dest, const Palette8& src) noexcept
     }
 }
 
-void BlockStorage::optimize(Palette8& p8, variant_type& dest) noexcept
+void BlockStorage::optimize(Palette8& p8, variant_type& dest)
 {
     palette_type compact;
     std::vector<std::uint8_t> remap;
@@ -199,7 +199,7 @@ void BlockStorage::optimize(Palette8& p8, variant_type& dest) noexcept
     p8.palette = std::move(compact);
 }
 
-void BlockStorage::optimize(Palette16& p16, variant_type& dest) noexcept
+void BlockStorage::optimize(Palette16& p16, variant_type& dest)
 {
     palette_type compact;
     std::vector<std::uint16_t> remap;
@@ -240,7 +240,7 @@ void BlockStorage::optimize(Palette16& p16, variant_type& dest) noexcept
     }
 }
 
-block_id_type BlockStorage::get(std::size_t index) const noexcept
+block_id_type BlockStorage::get(std::size_t index) const
 {
     if(index >= constant::CHUNK_VOLUME) {
         return BLOCK_ID_NULL;
@@ -261,12 +261,12 @@ block_id_type BlockStorage::get(std::size_t index) const noexcept
     return BLOCK_ID_NULL;
 }
 
-block_id_type BlockStorage::get(const local_pos& pos) const noexcept
+block_id_type BlockStorage::get(const local_pos& pos) const
 {
     return get(utils::to_index(pos));
 }
 
-void BlockStorage::set(std::size_t index, block_id_type id) noexcept
+void BlockStorage::set(std::size_t index, block_id_type id)
 {
     if(index >= constant::CHUNK_VOLUME) {
         return;
@@ -320,12 +320,12 @@ void BlockStorage::set(std::size_t index, block_id_type id) noexcept
     }
 }
 
-void BlockStorage::set(const local_pos& pos, block_id_type id) noexcept
+void BlockStorage::set(const local_pos& pos, block_id_type id)
 {
     set(utils::to_index(pos), id);
 }
 
-void BlockStorage::optimize(void) noexcept
+void BlockStorage::optimize(void)
 {
     if(auto p8 = std::get_if<Palette8>(&m_variant)) {
         optimize(*p8, m_variant);
@@ -338,7 +338,7 @@ void BlockStorage::optimize(void) noexcept
     }
 }
 
-std::size_t BlockStorage::size(void) const noexcept
+std::size_t BlockStorage::size(void) const
 {
     if(std::holds_alternative<Uniform>(m_variant)) {
         return sizeof(Uniform);

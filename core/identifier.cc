@@ -5,12 +5,12 @@
 #include "core/utils/crc64.hh"
 #include "core/utils/string.hh"
 
-Identifier Identifier::from_string(std::string_view string) noexcept
+Identifier Identifier::from_string(std::string_view string)
 {
     return from_string(string, {});
 }
 
-Identifier Identifier::from_string(std::string_view string, std::string_view implicit_name_space) noexcept
+Identifier Identifier::from_string(std::string_view string, std::string_view implicit_name_space)
 {
     auto trimmed = utils::trim_whitespace<char>(string);
 
@@ -47,7 +47,7 @@ Identifier Identifier::from_string(std::string_view string, std::string_view imp
     return Identifier(std::move(full_string), std::move(name_space), std::move(value));
 }
 
-Identifier Identifier::from_parts(std::string_view name_space, std::string_view value) noexcept
+Identifier Identifier::from_parts(std::string_view name_space, std::string_view value)
 {
     if(name_space.empty()) {
         return Identifier(std::string(value), std::string {}, std::string(value));
@@ -57,7 +57,7 @@ Identifier Identifier::from_parts(std::string_view name_space, std::string_view 
     }
 }
 
-std::string Identifier::as_file_path(std::string_view extension) const noexcept
+std::string Identifier::as_file_path(std::string_view extension) const
 {
     if(m_name_space.empty()) {
         return std::format("{}{}", m_value, extension);
@@ -67,7 +67,7 @@ std::string Identifier::as_file_path(std::string_view extension) const noexcept
     }
 }
 
-std::string Identifier::as_file_path(std::string_view subdirectory, std::string_view extension) const noexcept
+std::string Identifier::as_file_path(std::string_view subdirectory, std::string_view extension) const
 {
     if(m_name_space.empty()) {
         return std::format("{}/{}{}", subdirectory, m_value, extension);
@@ -83,7 +83,7 @@ Identifier::Identifier(std::string full_string, std::string name_space, std::str
     // empty
 }
 
-std::size_t std::hash<Identifier>::operator()(const Identifier& id) const noexcept
+std::size_t std::hash<Identifier>::operator()(const Identifier& id) const
 {
     return static_cast<std::size_t>(utils::crc64(std::span(id.full_string())));
 }

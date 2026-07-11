@@ -2,7 +2,7 @@
 
 #include "client/gpu/ring.hh"
 
-gpu::Ring gpu::Ring::create(std::size_t capacity, SDL_GPUBufferUsageFlags usage, std::size_t backing) noexcept
+gpu::Ring gpu::Ring::create(std::size_t capacity, SDL_GPUBufferUsageFlags usage, std::size_t backing)
 {
     assert(backing > 0);
 
@@ -23,7 +23,7 @@ SDL_GPUBuffer* gpu::Ring::write_streamed(SDL_GPUCopyPass* copy_pass, std::span<c
     return buffer.get();
 }
 
-void gpu::Ring::update_late(void) noexcept
+void gpu::Ring::update_late(void)
 {
     m_current_frame += 1;
     m_current_frame %= m_buffers.size();

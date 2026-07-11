@@ -13,18 +13,18 @@ public:
     explicit Frustum(void);
     explicit Frustum(const Eigen::Matrix4f& matrix);
 
-    constexpr const Eigen::Hyperplane<float, 3>& plane(unsigned index) const noexcept;
-    void set_plane(unsigned index, Eigen::Hyperplane<float, 3> plane) noexcept;
-    void set_matrix(const Eigen::Matrix4f& matrix) noexcept;
+    constexpr const Eigen::Hyperplane<float, 3>& plane(unsigned index) const;
+    void set_plane(unsigned index, Eigen::Hyperplane<float, 3> plane);
+    void set_matrix(const Eigen::Matrix4f& matrix);
 
-    bool contains(const Eigen::Vector3f& point) const noexcept;
-    bool intersects(const Eigen::AlignedBox3f& aabb) const noexcept;
+    bool contains(const Eigen::Vector3f& point) const;
+    bool intersects(const Eigen::AlignedBox3f& aabb) const;
 
 private:
     std::array<Eigen::Hyperplane<float, 3>, 6> m_planes;
 };
 
-constexpr const Eigen::Hyperplane<float, 3>& Frustum::plane(unsigned index) const noexcept
+constexpr const Eigen::Hyperplane<float, 3>& Frustum::plane(unsigned index) const
 {
     assert(index < m_planes.size());
 

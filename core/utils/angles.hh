@@ -3,42 +3,42 @@
 
 namespace utils
 {
-float wrap_angle_360(float angle_rad) noexcept;
-float wrap_angle_180(float angle_rad) noexcept;
+float wrap_angle_360(float angle_rad);
+float wrap_angle_180(float angle_rad);
 } // namespace utils
 
 namespace utils
 {
-constexpr float radians(float degrees) noexcept;
-constexpr float degrees(float radians) noexcept;
+constexpr float radians(float degrees);
+constexpr float degrees(float radians);
 } // namespace utils
 
 namespace utils
 {
 template<typename T, std::size_t N>
-constexpr Eigen::Vector<T, N> radians(const Eigen::Vector<T, N>& degrees) noexcept;
+constexpr Eigen::Vector<T, N> radians(const Eigen::Vector<T, N>& degrees);
 template<typename T, std::size_t N>
-constexpr Eigen::Vector<T, N> degrees(const Eigen::Vector<T, N>& radians) noexcept;
+constexpr Eigen::Vector<T, N> degrees(const Eigen::Vector<T, N>& radians);
 } // namespace utils
 
-constexpr float utils::radians(float degrees) noexcept
+constexpr float utils::radians(float degrees)
 {
     return degrees * std::numbers::pi_v<float> / 180.0f;
 }
 
-constexpr float utils::degrees(float radians) noexcept
+constexpr float utils::degrees(float radians)
 {
     return radians * 180.0f / std::numbers::pi_v<float>;
 }
 
 template<typename T, std::size_t N>
-constexpr Eigen::Vector<T, N> utils::radians(const Eigen::Vector<T, N>& degrees) noexcept
+constexpr Eigen::Vector<T, N> utils::radians(const Eigen::Vector<T, N>& degrees)
 {
     return degrees * static_cast<T>(std::numbers::pi_v<float> / 180.0f);
 }
 
 template<typename T, std::size_t N>
-constexpr Eigen::Vector<T, N> utils::degrees(const Eigen::Vector<T, N>& radians) noexcept
+constexpr Eigen::Vector<T, N> utils::degrees(const Eigen::Vector<T, N>& radians)
 {
     return radians * static_cast<T>(180.0f / std::numbers::pi_v<float>);
 }

@@ -8,8 +8,6 @@ namespace config
 class Map;
 } // namespace config
 
-constexpr static std::string_view BUILTIN_MOD_NAME = "builtin";
-
 enum class mod_status {
     PENDING, ///< The mod is pending to be loaded
     LOADING, ///< The mod is currently being loaded
@@ -19,14 +17,14 @@ enum class mod_status {
 };
 
 struct ModVersion final {
-    static ModVersion parse(std::string_view string) noexcept;
-    static std::string to_string(const ModVersion& version) noexcept;
+    static ModVersion parse(std::string_view string);
+    static std::string to_string(const ModVersion& version);
 
     unsigned major { 0 };
     unsigned minor { 0 };
     unsigned patch { 0 };
 
-    constexpr auto operator<=>(const ModVersion& other) const noexcept = default;
+    constexpr auto operator<=>(const ModVersion& other) const = default;
 };
 
 struct ModInfo final {
@@ -50,38 +48,38 @@ struct ModInfo final {
 
 class ModContext final {
 public:
-    explicit ModContext(ModInfo modinfo) noexcept;
+    explicit ModContext(ModInfo modinfo);
 
     ModContext(const ModContext& other) = delete;
     ModContext& operator=(const ModContext& other) = delete;
 
-    ModContext(ModContext&& other) noexcept = default;
-    ModContext& operator=(ModContext&& other) noexcept = default;
+    ModContext(ModContext&& other) = default;
+    ModContext& operator=(ModContext&& other) = default;
 
-    constexpr const ModInfo& modinfo(void) const noexcept;
-    constexpr std::string_view name_space(void) const noexcept;
-    constexpr mod_status status(void) const noexcept;
+    constexpr const ModInfo& modinfo(void) const;
+    constexpr std::string_view name_space(void) const;
+    constexpr mod_status status(void) const;
 
-    void set_status(mod_status status) noexcept;
+    void set_status(mod_status status);
 
-    bool initialize(void) noexcept;
+    bool initialize(void);
 
     // non-owning: callers that need to keep a mod's Lua state alive past
     // ModContext's own lifetime (eg. BlockCallback) should copy this
-    const std::shared_ptr<lua_State>& lua_state(void) const noexcept;
+    const std::shared_ptr<lua_State>& lua_state(void) const;
 
-    block_id_type find_block(const Identifier& name) const noexcept;
-    block_id_type register_block(const Identifier& name, BlockDefinition def) noexcept;
-    block_family_id_type register_block_family(BlockFamily family) noexcept;
+    block_id_type find_block(const Identifier& name) const;
+    block_id_type register_block(const Identifier& name, BlockDefinition def);
+    block_family_id_type register_block_family(BlockFamily family);
 
     // patches a block registered earlier in this same loading pass to
     // point at the family that was, in turn, only registerable after
     // the block itself (family.stem_id needs the block's local id first)
-    bool set_block_family(block_id_type id, block_family_id_type family) noexcept;
+    bool set_block_family(block_id_type id, block_family_id_type family);
 
-    std::vector<BlockDefinition> take_blocks(void) noexcept;
-    std::vector<BlockFamily> take_block_families(void) noexcept;
-    emhash8::HashMap<Identifier, block_id_type> take_block_names(void) noexcept;
+    std::vector<BlockDefinition> take_blocks(void);
+    std::vector<BlockFamily> take_block_families(void);
+    emhash8::HashMap<Identifier, block_id_type> take_block_names(void);
 
 private:
     ModInfo m_modinfo;
@@ -93,22 +91,22 @@ private:
     emhash8::HashMap<Identifier, block_id_type> m_block_names;
 };
 
-constexpr const ModInfo& ModContext::modinfo(void) const noexcept
+constexpr const ModInfo& ModContext::modinfo(void) const
 {
     return m_modinfo;
 }
 
-constexpr std::string_view ModContext::name_space(void) const noexcept
+constexpr std::string_view ModContext::name_space(void) const
 {
     return m_modinfo.name;
 }
 
-constexpr mod_status ModContext::status(void) const noexcept
+constexpr mod_status ModContext::status(void) const
 {
     return m_status;
 }
 
-inline const std::shared_ptr<lua_State>& ModContext::lua_state(void) const noexcept
+inline const std::shared_ptr<lua_State>& ModContext::lua_state(void) const
 {
     return m_lua_state;
 }

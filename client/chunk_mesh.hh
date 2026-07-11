@@ -4,8 +4,8 @@
 #include "client/gpu/buffer.hh"
 
 struct ChunkMesh_Vertex final {
-    static std::uint32_t pack_position(const Eigen::Vector3f& position_16ths) noexcept;
-    static Eigen::Vector3f unpack_position(std::uint32_t position) noexcept;
+    static std::uint32_t pack_position(const Eigen::Vector3f& position_16ths);
+    static Eigen::Vector3f unpack_position(std::uint32_t position);
 
     std::uint32_t position;
     std::uint32_t normal;

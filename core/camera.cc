@@ -2,27 +2,27 @@
 
 #include "core/camera.hh"
 
-Eigen::Vector3f Camera::position(void) const noexcept
+Eigen::Vector3f Camera::position(void) const
 {
     return -m_view.block<3, 3>(0, 0).transpose() * m_view.block<3, 1>(0, 3);
 }
 
-Eigen::Vector3f Camera::forward_vector(void) const noexcept
+Eigen::Vector3f Camera::forward_vector(void) const
 {
     return -m_view.row(2).head<3>();
 }
 
-Eigen::Vector3f Camera::right_vector(void) const noexcept
+Eigen::Vector3f Camera::right_vector(void) const
 {
     return m_view.row(0).head<3>();
 }
 
-Eigen::Vector3f Camera::up_vector(void) const noexcept
+Eigen::Vector3f Camera::up_vector(void) const
 {
     return m_view.row(1).head<3>();
 }
 
-Eigen::Quaternionf Camera::orientation(void) const noexcept
+Eigen::Quaternionf Camera::orientation(void) const
 {
     Eigen::Matrix3f rotation;
     rotation.col(0) = right_vector();
@@ -32,7 +32,7 @@ Eigen::Quaternionf Camera::orientation(void) const noexcept
     return Eigen::Quaternionf(rotation).normalized();
 }
 
-Eigen::Vector3f Camera::angles(void) const noexcept
+Eigen::Vector3f Camera::angles(void) const
 {
     Eigen::Matrix3f rotation;
     rotation.col(0) = right_vector();
@@ -42,7 +42,7 @@ Eigen::Vector3f Camera::angles(void) const noexcept
     return rotation.canonicalEulerAngles(0, 1, 2); // pitch, yaw, roll
 }
 
-void Camera::set_orthographic(float left, float right, float bottom, float top, float z_near, float z_far) noexcept
+void Camera::set_orthographic(float left, float right, float bottom, float top, float z_near, float z_far)
 {
     assert(std::isfinite(left));
     assert(std::isfinite(right));
@@ -63,7 +63,7 @@ void Camera::set_orthographic(float left, float right, float bottom, float top, 
     m_view_projection.setConstant(std::numeric_limits<float>::quiet_NaN());
 }
 
-void Camera::set_perspective(float fov_y, float aspect_ratio, float z_near, float z_far) noexcept
+void Camera::set_perspective(float fov_y, float aspect_ratio, float z_near, float z_far)
 {
     assert(std::isfinite(fov_y));
     assert(std::isfinite(aspect_ratio));
@@ -83,7 +83,7 @@ void Camera::set_perspective(float fov_y, float aspect_ratio, float z_near, floa
     m_view_projection.setConstant(std::numeric_limits<float>::quiet_NaN());
 }
 
-void Camera::set_view(const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation) noexcept
+void Camera::set_view(const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation)
 {
     assert(position.allFinite());
     assert(orientation.coeffs().allFinite());
@@ -105,7 +105,7 @@ void Camera::set_view(const Eigen::Vector3f& position, const Eigen::Quaternionf&
     m_view_projection.setConstant(std::numeric_limits<float>::quiet_NaN());
 }
 
-void Camera::set_view(const Eigen::Vector3f& position, const Eigen::Vector3f& angles) noexcept
+void Camera::set_view(const Eigen::Vector3f& position, const Eigen::Vector3f& angles)
 {
     assert(position.allFinite());
     assert(angles.allFinite());
@@ -117,12 +117,12 @@ void Camera::set_view(const Eigen::Vector3f& position, const Eigen::Vector3f& an
     set_view(position, Eigen::Quaternionf(yaw * pitch * roll));
 }
 
-void Camera::set_look(const Eigen::Vector3f& position, const Eigen::Vector3f& target) noexcept
+void Camera::set_look(const Eigen::Vector3f& position, const Eigen::Vector3f& target)
 {
     set_look(position, target, Eigen::Vector3f::UnitY());
 }
 
-void Camera::set_look(const Eigen::Vector3f& position, const Eigen::Vector3f& target, const Eigen::Vector3f& up) noexcept
+void Camera::set_look(const Eigen::Vector3f& position, const Eigen::Vector3f& target, const Eigen::Vector3f& up)
 {
     assert(position.allFinite());
     assert(target.allFinite());
@@ -152,7 +152,7 @@ void Camera::set_look(const Eigen::Vector3f& position, const Eigen::Vector3f& ta
     m_view_projection.setConstant(std::numeric_limits<float>::quiet_NaN());
 }
 
-void Camera::update(void) noexcept
+void Camera::update(void)
 {
     if(m_view_projection.hasNaN()) {
         m_view_projection = m_projection * m_view;

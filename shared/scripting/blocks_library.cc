@@ -13,8 +13,8 @@
 
 class BlockDefReader final {
 public:
-    explicit BlockDefReader(lua_State* L, int def_idx, int proto_idx) noexcept;
-    bool try_push(const char* key) const noexcept;
+    explicit BlockDefReader(lua_State* L, int def_idx, int proto_idx);
+    bool try_push(const char* key) const;
 
 public:
     lua_State* L;
@@ -22,14 +22,14 @@ public:
     int proto_idx;
 };
 
-BlockDefReader::BlockDefReader(lua_State* L, int def_idx, int proto_idx) noexcept : L(L), def_idx(def_idx), proto_idx(proto_idx)
+BlockDefReader::BlockDefReader(lua_State* L, int def_idx, int proto_idx) : L(L), def_idx(def_idx), proto_idx(proto_idx)
 {
     assert(L);
     assert(def_idx > 0);
     assert(proto_idx >= 0);
 }
 
-bool BlockDefReader::try_push(const char* key) const noexcept
+bool BlockDefReader::try_push(const char* key) const
 {
     lua_getfield(L, def_idx, key);
 
@@ -53,7 +53,7 @@ bool BlockDefReader::try_push(const char* key) const noexcept
     return true;
 }
 
-static std::optional<std::string_view> require_string(lua_State* L, int idx) noexcept
+static std::optional<std::string_view> require_string(lua_State* L, int idx)
 {
     auto type = lua_type(L, idx);
 
@@ -68,7 +68,7 @@ static std::optional<std::string_view> require_string(lua_State* L, int idx) noe
     return std::nullopt;
 }
 
-static std::optional<lua_Integer> require_integer(lua_State* L, int idx) noexcept
+static std::optional<lua_Integer> require_integer(lua_State* L, int idx)
 {
     int is_num = 0;
     auto value = lua_tointegerx(L, idx, &is_num);
@@ -82,14 +82,14 @@ static std::optional<lua_Integer> require_integer(lua_State* L, int idx) noexcep
     return std::nullopt;
 }
 
-static std::optional<lua_Integer> opt_integer(lua_State* L, int idx, lua_Integer default_value) noexcept
+static std::optional<lua_Integer> opt_integer(lua_State* L, int idx, lua_Integer default_value)
 {
     if(lua_isnoneornil(L, idx))
         return default_value;
     return require_integer(L, idx);
 }
 
-static bool parse_drop_effects(lua_State* L, int when_idx, BlockDrop& drop, ModContext* ctx) noexcept
+static bool parse_drop_effects(lua_State* L, int when_idx, BlockDrop& drop, ModContext* ctx)
 {
     lua_getfield(L, when_idx, "effects");
 
@@ -124,7 +124,7 @@ static bool parse_drop_effects(lua_State* L, int when_idx, BlockDrop& drop, ModC
     return true;
 }
 
-static void parse_drop_tools(lua_State* L, int when_idx, BlockDrop& drop) noexcept
+static void parse_drop_tools(lua_State* L, int when_idx, BlockDrop& drop)
 {
     lua_getfield(L, when_idx, "tools");
 
@@ -138,7 +138,7 @@ static void parse_drop_tools(lua_State* L, int when_idx, BlockDrop& drop) noexce
     lua_pop(L, 1);
 }
 
-static bool parse_drop_when(lua_State* L, int entry_idx, BlockDrop& drop, ModContext* ctx) noexcept
+static bool parse_drop_when(lua_State* L, int entry_idx, BlockDrop& drop, ModContext* ctx)
 {
     lua_getfield(L, entry_idx, "when");
 
@@ -161,7 +161,7 @@ static bool parse_drop_when(lua_State* L, int entry_idx, BlockDrop& drop, ModCon
     return true;
 }
 
-static bool parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModContext* ctx) noexcept
+static bool parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModContext* ctx)
 {
     lua_getfield(L, entry_idx, "items");
 
@@ -218,7 +218,7 @@ static bool parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModCo
     return true;
 }
 
-static bool parse_drops(lua_State* L, int drops_idx, ModContext* ctx, std::vector<BlockDrop>& out) noexcept
+static bool parse_drops(lua_State* L, int drops_idx, ModContext* ctx, std::vector<BlockDrop>& out)
 {
     auto count = lua_rawlen(L, drops_idx);
 
@@ -249,7 +249,7 @@ static bool parse_drops(lua_State* L, int drops_idx, ModContext* ctx, std::vecto
     return true;
 }
 
-static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverridePatch& patch) noexcept
+static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverridePatch& patch)
 {
     BlockDefReader reader(L, idx, 0);
 
@@ -458,7 +458,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     return true;
 }
 
-static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, BlockDefinition& def) noexcept
+static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, BlockDefinition& def)
 {
     auto L = reader.L;
 
@@ -665,7 +665,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     return true;
 }
 
-static bool parse_state_hint(lua_State* L, int entry_idx, BlockStateDecl& decl, BlockFamily& family) noexcept
+static bool parse_state_hint(lua_State* L, int entry_idx, BlockStateDecl& decl, BlockFamily& family)
 {
     lua_getfield(L, entry_idx, "hint");
 
@@ -700,7 +700,7 @@ static bool parse_state_hint(lua_State* L, int entry_idx, BlockStateDecl& decl, 
     return true;
 }
 
-static bool parse_states(lua_State* L, int idx, BlockFamily& family) noexcept
+static bool parse_states(lua_State* L, int idx, BlockFamily& family)
 {
     lua_pushnil(L);
 
@@ -741,7 +741,7 @@ static bool parse_states(lua_State* L, int idx, BlockFamily& family) noexcept
     return true;
 }
 
-static bool parse_variant_when(lua_State* L, int entry_idx, BlockVariantRule& rule, BlockFamily& family) noexcept
+static bool parse_variant_when(lua_State* L, int entry_idx, BlockVariantRule& rule, BlockFamily& family)
 {
     lua_getfield(L, entry_idx, "when");
 
@@ -783,7 +783,7 @@ static bool parse_variant_when(lua_State* L, int entry_idx, BlockVariantRule& ru
     return true;
 }
 
-static bool parse_variant_overrides(lua_State* L, int entry_idx, BlockVariantRule& rule, ModContext* ctx) noexcept
+static bool parse_variant_overrides(lua_State* L, int entry_idx, BlockVariantRule& rule, ModContext* ctx)
 {
     lua_getfield(L, entry_idx, "overrides");
 
@@ -802,7 +802,7 @@ static bool parse_variant_overrides(lua_State* L, int entry_idx, BlockVariantRul
     return true;
 }
 
-static bool parse_variants(lua_State* L, int idx, ModContext* ctx, BlockFamily& family) noexcept
+static bool parse_variants(lua_State* L, int idx, ModContext* ctx, BlockFamily& family)
 {
     auto count = lua_rawlen(L, idx);
 
@@ -832,7 +832,7 @@ static bool parse_variants(lua_State* L, int idx, ModContext* ctx, BlockFamily& 
     return true;
 }
 
-static BlockCallback parse_callback(lua_State* L, int table_idx, const char* key, ModContext* ctx) noexcept
+static BlockCallback parse_callback(lua_State* L, int table_idx, const char* key, ModContext* ctx)
 {
     lua_getfield(L, table_idx, key);
 
@@ -847,9 +847,9 @@ static BlockCallback parse_callback(lua_State* L, int table_idx, const char* key
     return {};
 }
 
-static Identifier make_unique_id(const Identifier& id, const ModContext* ctx) noexcept
+static Identifier make_unique_id(const Identifier& id, const ModContext* ctx)
 {
-    auto is_free = [&](const Identifier& candidate) noexcept {
+    auto is_free = [&](const Identifier& candidate) {
         return ctx->find_block(candidate) == BLOCK_ID_NULL && block_registry::find(candidate) == BLOCK_ID_NULL;
     };
 
@@ -870,7 +870,7 @@ static Identifier make_unique_id(const Identifier& id, const ModContext* ctx) no
     return id;
 }
 
-static int api_get(lua_State* L) noexcept
+static int api_get(lua_State* L)
 {
     auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
     auto raw_name = luaL_checkstring(L, 1);
@@ -895,7 +895,7 @@ static int api_get(lua_State* L) noexcept
     return 1;
 }
 
-static int api_get_stem(lua_State* L) noexcept
+static int api_get_stem(lua_State* L)
 {
     auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
     auto raw_name = luaL_checkstring(L, 1);
@@ -916,7 +916,7 @@ static int api_get_stem(lua_State* L) noexcept
     return 1;
 }
 
-static int api_has_tag(lua_State* L) noexcept
+static int api_has_tag(lua_State* L)
 {
     auto id = static_cast<block_id_type>(luaL_checkinteger(L, 1));
     auto tag = static_cast<block_tag_bit>(luaL_checkinteger(L, 2));
@@ -925,7 +925,7 @@ static int api_has_tag(lua_State* L) noexcept
     return 1;
 }
 
-static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int def_idx, int proto_idx, block_id_type& out_block_id) noexcept
+static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int def_idx, int proto_idx, block_id_type& out_block_id)
 {
     auto id = Identifier::from_string(raw_name, ctx->name_space());
 
@@ -1040,7 +1040,7 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
     return true;
 }
 
-static int api_add(lua_State* L) noexcept
+static int api_add(lua_State* L)
 {
     auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
 
@@ -1069,7 +1069,7 @@ static int api_add(lua_State* L) noexcept
     return 1;
 }
 
-void scripting::open_blocks_library(std::shared_ptr<lua_State>& lua, ModContext* ctx) noexcept
+void scripting::open_blocks_library(std::shared_ptr<lua_State>& lua, ModContext* ctx)
 {
     assert(lua);
     assert(ctx);

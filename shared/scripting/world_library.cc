@@ -6,7 +6,7 @@
 
 #include "shared/world.hh"
 
-static int api_get_block(lua_State* L) noexcept
+static int api_get_block(lua_State* L)
 {
     block_pos pos = block_pos::Zero();
     pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
@@ -19,7 +19,7 @@ static int api_get_block(lua_State* L) noexcept
     return 1;
 }
 
-static int api_set_block(lua_State* L) noexcept
+static int api_set_block(lua_State* L)
 {
     block_pos pos = block_pos::Zero();
     pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
@@ -33,7 +33,7 @@ static int api_set_block(lua_State* L) noexcept
     return 1;
 }
 
-static int api_get_light(lua_State* L) noexcept
+static int api_get_light(lua_State* L)
 {
     block_pos pos = block_pos::Zero();
     pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
@@ -46,7 +46,7 @@ static int api_get_light(lua_State* L) noexcept
     return 1;
 }
 
-static int api_get_state(lua_State* L) noexcept
+static int api_get_state(lua_State* L)
 {
     block_pos pos = block_pos::Zero();
     pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
@@ -66,7 +66,7 @@ static int api_get_state(lua_State* L) noexcept
     }
 }
 
-static int api_set_state(lua_State* L) noexcept
+static int api_set_state(lua_State* L)
 {
     block_pos pos = block_pos::Zero();
     pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
@@ -82,7 +82,7 @@ static int api_set_state(lua_State* L) noexcept
     return 1;
 }
 
-static int api_get_temperature_base(lua_State* L) noexcept
+static int api_get_temperature_base(lua_State* L)
 {
     block_pos pos = block_pos::Zero();
     pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
@@ -95,7 +95,7 @@ static int api_get_temperature_base(lua_State* L) noexcept
     return 1;
 }
 
-static int api_get_temperature(lua_State* L) noexcept
+static int api_get_temperature(lua_State* L)
 {
     block_pos pos = block_pos::Zero();
     pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
@@ -108,7 +108,7 @@ static int api_get_temperature(lua_State* L) noexcept
     return 1;
 }
 
-static int api_schedule(lua_State* L) noexcept
+static int api_schedule(lua_State* L)
 {
     block_pos pos = block_pos::Zero();
     pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
@@ -122,7 +122,7 @@ static int api_schedule(lua_State* L) noexcept
     return 0;
 }
 
-void scripting::open_world_library(std::shared_ptr<lua_State>& lua, const ModContext* ctx) noexcept
+void scripting::open_world_library(std::shared_ptr<lua_State>& lua, const ModContext* ctx)
 {
     assert(lua);
     assert(ctx);

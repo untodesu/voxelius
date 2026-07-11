@@ -1,0 +1,51 @@
+#include "client/pch.hh"
+
+#include "client/gui/fonts.hh"
+
+#include "core/utils/physfs.hh"
+
+#include "core/exception.hh"
+
+#include "client/constant.hh"
+
+ImFont* gui::font_unscii16;
+ImFont* gui::font_unscii8;
+
+static std::vector<std::byte> s_unscii16_data;
+static std::vector<std::byte> s_unscii8_data;
+
+static ImVector<ImWchar> s_glyph_ranges;
+static ImFontConfig s_font_config;
+
+static ImFont* load_font(std::string_view path, float size, std::vector<std::byte>& font_data, ImGuiIO& io)
+{
+    assert(!s_font_config.FontDataOwnedByAtlas); // sanyaty check
+
+    auto load_ok = utils::read_file(path, font_data);
+    vx::throw_if_not_fmt(load_ok, "{}: read failed", path);
+
+    auto data_size = static_cast<int>(font_data.size());
+    auto font = io.Fonts->AddFontFromMemoryTTF(font_data.data(), data_size, size, &s_font_config, s_glyph_ranges.Data);
+    vx::throw_if_not_fmt(font, "{}: load failed", path);
+
+    return font;
+}
+
+void gui::detail::load_fonts(void)
+{
+    auto& io = ImGui::GetIO();
+
+    ImFontGlyphRangesBuilder builder;
+    builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
+    builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());
+    builder.BuildRanges(&s_glyph_ranges);
+
+    s_font_config = {};
+    s_font_config.FontDataOwnedByAtlas = false;
+
+    auto unscii16_path = std::format("{}/fonts/unscii-16.ttf", constant::BUILTIN_NAME_SPACE);
+    auto unscii8_path = std::format("{}/fonts/unscii-8.ttf", constant::BUILTIN_NAME_SPACE);
+
+    gui::font_unscii16 = load_font(unscii16_path, 16.0f, s_unscii16_data, io);
+    gui::font_unscii8 = load_font(unscii8_path, 8.0f, s_unscii8_data, io);
+}

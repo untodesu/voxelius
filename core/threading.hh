@@ -10,9 +10,9 @@ enum class task_status {
 
 class Task {
 public:
-    virtual ~Task(void) noexcept = default;
-    virtual void process(void) noexcept = 0;
-    virtual void finalize(void) noexcept = 0;
+    virtual ~Task(void) = default;
+    virtual void process(void) = 0;
+    virtual void finalize(void) = 0;
 
     std::atomic<task_status> status;
     std::future<void> future;

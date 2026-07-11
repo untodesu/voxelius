@@ -4,7 +4,7 @@
 
 constexpr static auto TAU = 2.0f * std::numbers::pi_v<float>;
 
-float utils::wrap_angle_360(float angle_rad) noexcept
+float utils::wrap_angle_360(float angle_rad)
 {
     angle_rad = std::fmod(angle_rad, TAU);
 
@@ -15,7 +15,7 @@ float utils::wrap_angle_360(float angle_rad) noexcept
     return angle_rad;
 }
 
-float utils::wrap_angle_180(float angle_rad) noexcept
+float utils::wrap_angle_180(float angle_rad)
 {
     angle_rad = std::fmod(angle_rad + std::numbers::pi_v<float>, TAU);
 

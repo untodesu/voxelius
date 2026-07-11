@@ -12,17 +12,17 @@ static std::filesystem::path s_gamepath;
 static std::filesystem::path s_userpath;
 static std::filesystem::path s_modspath;
 
-const std::filesystem::path& core::gamepath(void) noexcept
+const std::filesystem::path& core::gamepath(void)
 {
     return s_gamepath;
 }
 
-const std::filesystem::path& core::userpath(void) noexcept
+const std::filesystem::path& core::userpath(void)
 {
     return s_userpath;
 }
 
-const std::filesystem::path& core::modspath(void) noexcept
+const std::filesystem::path& core::modspath(void)
 {
     return s_modspath;
 }

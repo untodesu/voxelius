@@ -5,23 +5,23 @@
 
 class Chunk final {
 public:
-    explicit Chunk(entt::entity entity) noexcept;
+    explicit Chunk(entt::entity entity);
 
-    static void serialize(const Chunk& chunk, WriteBuffer& buffer) noexcept;
-    static void deserialize(Chunk& chunk, ReadBuffer& buffer) noexcept;
+    static void serialize(const Chunk& chunk, WriteBuffer& buffer);
+    static void deserialize(Chunk& chunk, ReadBuffer& buffer);
 
-    block_id_type get_block(std::size_t index) const noexcept;
-    block_id_type get_block(const local_pos& pos) const noexcept;
+    block_id_type get_block(std::size_t index) const;
+    block_id_type get_block(const local_pos& pos) const;
 
-    void set_block(std::size_t index, block_id_type id) noexcept;
-    void set_block(const local_pos& pos, block_id_type id) noexcept;
+    void set_block(std::size_t index, block_id_type id);
+    void set_block(const local_pos& pos, block_id_type id);
 
-    constexpr entt::entity entity(void) const noexcept;
-    constexpr const BlockStorage& blocks(void) const noexcept;
-    void set_blocks(BlockStorage blocks) noexcept;
+    constexpr entt::entity entity(void) const;
+    constexpr const BlockStorage& blocks(void) const;
+    void set_blocks(BlockStorage blocks);
 
-    void schedule(std::size_t index, std::uint64_t deadline) noexcept;
-    void pop_due(std::uint64_t now, std::vector<std::size_t>& out) noexcept;
+    void schedule(std::size_t index, std::uint64_t deadline);
+    void pop_due(std::uint64_t now, std::vector<std::size_t>& out);
 
 private:
     entt::entity m_entity;
@@ -34,12 +34,12 @@ struct ChunkComponent final {
     chunk_pos position;
 };
 
-constexpr entt::entity Chunk::entity(void) const noexcept
+constexpr entt::entity Chunk::entity(void) const
 {
     return m_entity;
 }
 
-constexpr const BlockStorage& Chunk::blocks(void) const noexcept
+constexpr const BlockStorage& Chunk::blocks(void) const
 {
     return m_blocks;
 }

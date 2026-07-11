@@ -13,10 +13,10 @@ static std::vector<BlockFamily> s_families;
 static emhash8::HashMap<Identifier, block_id_type> s_names;
 static emhash8::HashMap<block_id_type, Identifier> s_reverse_names;
 
-static std::uint64_t hash_state_map(const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map) noexcept
+static std::uint64_t hash_state_map(const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map)
 {
     std::vector<std::pair<blockstate_key_type, blockstate_val_type>> sorted(map.cbegin(), map.cend());
-    std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) noexcept {
+    std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
         return a.first < b.first;
     });
 
@@ -31,7 +31,7 @@ static std::uint64_t hash_state_map(const emhash8::HashMap<blockstate_key_type, 
 }
 
 static BlockDefinition apply_matching_variant(const BlockDefinition& base_def, const BlockFamily& family,
-    const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map) noexcept
+    const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map)
 {
     BlockDefinition resolved = base_def;
 
@@ -63,7 +63,7 @@ static BlockDefinition apply_matching_variant(const BlockDefinition& base_def, c
     return resolved;
 }
 
-BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverridePatch& patch) noexcept
+BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverridePatch& patch)
 {
     if(patch.render) {
         base.render = *patch.render;
@@ -141,14 +141,14 @@ BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverr
     return base;
 }
 
-blockstate_val_type BlockFamily::state_hash(std::string_view string) noexcept
+blockstate_val_type BlockFamily::state_hash(std::string_view string)
 {
     auto hash = static_cast<blockstate_val_type>(utils::crc64(string.data(), string.size()));
     state_values.insert_or_assign(hash, std::string(string));
     return hash;
 }
 
-std::string_view BlockFamily::state_value(blockstate_val_type value) noexcept
+std::string_view BlockFamily::state_value(blockstate_val_type value)
 {
     auto it = state_values.find(value);
 
@@ -159,17 +159,17 @@ std::string_view BlockFamily::state_value(blockstate_val_type value) noexcept
     return it->second;
 }
 
-std::span<const BlockDefinition> block_registry::all_definitions(void) noexcept
+std::span<const BlockDefinition> block_registry::all_definitions(void)
 {
     return s_definitions;
 }
 
-std::span<const BlockFamily> block_registry::all_families(void) noexcept
+std::span<const BlockFamily> block_registry::all_families(void)
 {
     return s_families;
 }
 
-void block_registry::commit(ModContext& ctx) noexcept
+void block_registry::commit(ModContext& ctx)
 {
     if(s_definitions.empty()) {
         s_definitions.emplace_back();
@@ -282,7 +282,7 @@ void block_registry::commit(ModContext& ctx) noexcept
     }
 }
 
-void block_registry::purge(void) noexcept
+void block_registry::purge(void)
 {
     s_definitions.clear();
     s_families.clear();
@@ -290,7 +290,7 @@ void block_registry::purge(void) noexcept
     s_reverse_names.clear();
 }
 
-block_id_type block_registry::find(const Identifier& id) noexcept
+block_id_type block_registry::find(const Identifier& id)
 {
     auto it = s_names.find(id);
 
@@ -299,7 +299,7 @@ block_id_type block_registry::find(const Identifier& id) noexcept
     return it->second;
 }
 
-std::optional<Identifier> block_registry::name_of(block_id_type id) noexcept
+std::optional<Identifier> block_registry::name_of(block_id_type id)
 {
     auto it = s_reverse_names.find(id);
 
@@ -316,26 +316,26 @@ std::optional<Identifier> block_registry::name_of(block_id_type id) noexcept
     return it->second;
 }
 
-const BlockDefinition* block_registry::find_definition(block_id_type id) noexcept
+const BlockDefinition* block_registry::find_definition(block_id_type id)
 {
     if(id == BLOCK_ID_NULL || id >= s_definitions.size())
         return nullptr;
     return &s_definitions[id];
 }
 
-const BlockDefinition* block_registry::find_definition(const Identifier& id) noexcept
+const BlockDefinition* block_registry::find_definition(const Identifier& id)
 {
     return find_definition(find(id));
 }
 
-BlockFamily* block_registry::find_family(block_family_id_type id) noexcept
+BlockFamily* block_registry::find_family(block_family_id_type id)
 {
     if(id == BLOCK_FAMILY_ID_NULL || id >= s_families.size())
         return nullptr;
     return &s_families[id];
 }
 
-BlockFamily* block_registry::find_family(const Identifier& id) noexcept
+BlockFamily* block_registry::find_family(const Identifier& id)
 {
     for(auto& family : s_families) {
         if(family.name == id) {
@@ -346,7 +346,7 @@ BlockFamily* block_registry::find_family(const Identifier& id) noexcept
     return nullptr;
 }
 
-BlockFamily* block_registry::find_family_of(block_id_type id) noexcept
+BlockFamily* block_registry::find_family_of(block_id_type id)
 {
     if(auto def = find_definition(id)) {
         return find_family(def->family);
@@ -355,7 +355,7 @@ BlockFamily* block_registry::find_family_of(block_id_type id) noexcept
     return nullptr;
 }
 
-bool block_registry::has_tag_all(block_id_type id, block_tag_bit tag_bits) noexcept
+bool block_registry::has_tag_all(block_id_type id, block_tag_bit tag_bits)
 {
     if(const auto def = find_definition(id)) {
         return tag_bits == (def->tags & tag_bits);
@@ -364,7 +364,7 @@ bool block_registry::has_tag_all(block_id_type id, block_tag_bit tag_bits) noexc
     return false;
 }
 
-bool block_registry::has_tag_any(block_id_type id, block_tag_bit tag_bits) noexcept
+bool block_registry::has_tag_any(block_id_type id, block_tag_bit tag_bits)
 {
     if(const auto def = find_definition(id)) {
         return static_cast<bool>(def->tags & tag_bits);
@@ -373,8 +373,7 @@ bool block_registry::has_tag_any(block_id_type id, block_tag_bit tag_bits) noexc
     return false;
 }
 
-block_id_type block_registry::resolve_variant(block_id_type curr_id,
-    const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map) noexcept
+block_id_type block_registry::resolve_variant(block_id_type curr_id, const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map)
 {
     auto def = find_definition(curr_id);
 

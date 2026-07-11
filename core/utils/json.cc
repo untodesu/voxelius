@@ -3,7 +3,7 @@
 #include "core/utils/json.hh"
 
 template<vx::arithmetic T, std::size_t N>
-bool utils::parse_json(const JSON_Value* value, Eigen::Vector<T, N>& vector) noexcept
+bool utils::parse_json(const JSON_Value* value, Eigen::Vector<T, N>& vector)
 {
     vector.setZero();
 
@@ -31,7 +31,7 @@ bool utils::parse_json(const JSON_Value* value, Eigen::Vector<T, N>& vector) noe
 }
 
 template<vx::arithmetic T, std::size_t N>
-bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<T, N>& vector) noexcept
+bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<T, N>& vector)
 {
     const auto value = json_object_get_value(object, name.data());
 
@@ -42,18 +42,18 @@ bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::
     return parse_json(value, vector);
 }
 
-template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<int, 2>& vector) noexcept;
-template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<int, 3>& vector) noexcept;
-template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<int, 4>& vector) noexcept;
+template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<int, 2>& vector);
+template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<int, 3>& vector);
+template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<int, 4>& vector);
 
-template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<float, 2>& vector) noexcept;
-template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<float, 3>& vector) noexcept;
-template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<float, 4>& vector) noexcept;
+template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<float, 2>& vector);
+template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<float, 3>& vector);
+template bool utils::parse_json(const JSON_Value* value, Eigen::Vector<float, 4>& vector);
 
-template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<int, 2>& vector) noexcept;
-template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<int, 3>& vector) noexcept;
-template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<int, 4>& vector) noexcept;
+template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<int, 2>& vector);
+template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<int, 3>& vector);
+template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<int, 4>& vector);
 
-template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<float, 2>& vector) noexcept;
-template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<float, 3>& vector) noexcept;
-template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<float, 4>& vector) noexcept;
+template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<float, 2>& vector);
+template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<float, 3>& vector);
+template bool utils::parse_json(const JSON_Object* object, std::string_view name, Eigen::Vector<float, 4>& vector);

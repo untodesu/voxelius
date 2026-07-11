@@ -19,7 +19,7 @@ Frustum::Frustum(const Eigen::Matrix4f& matrix)
     set_matrix(matrix);
 }
 
-void Frustum::set_plane(unsigned index, Eigen::Hyperplane<float, 3> plane) noexcept
+void Frustum::set_plane(unsigned index, Eigen::Hyperplane<float, 3> plane)
 {
     assert(index < m_planes.size());
     assert(plane.coeffs().allFinite());
@@ -27,7 +27,7 @@ void Frustum::set_plane(unsigned index, Eigen::Hyperplane<float, 3> plane) noexc
     m_planes[index] = std::move(plane);
 }
 
-void Frustum::set_matrix(const Eigen::Matrix4f& matrix) noexcept
+void Frustum::set_matrix(const Eigen::Matrix4f& matrix)
 {
     assert(matrix.allFinite());
 
@@ -44,7 +44,7 @@ void Frustum::set_matrix(const Eigen::Matrix4f& matrix) noexcept
     m_planes[PLN_BK] = extract_hyperplane(row3 - row2);
 }
 
-bool Frustum::contains(const Eigen::Vector3f& point) const noexcept
+bool Frustum::contains(const Eigen::Vector3f& point) const
 {
     for(const auto& hyperplane : m_planes) {
         if(hyperplane.signedDistance(point) < 0.0f) {
@@ -55,7 +55,7 @@ bool Frustum::contains(const Eigen::Vector3f& point) const noexcept
     return true;
 }
 
-bool Frustum::intersects(const Eigen::AlignedBox3f& aabb) const noexcept
+bool Frustum::intersects(const Eigen::AlignedBox3f& aabb) const
 {
     Eigen::Vector3f center(aabb.center());
     Eigen::Vector3f extent(0.5f * aabb.sizes());

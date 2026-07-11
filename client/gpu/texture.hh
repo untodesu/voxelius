@@ -11,19 +11,18 @@ constexpr static int MIP_LEVELS_AUTO = -1;
 
 class Texture final : public Handle<SDL_GPUTexture, SDL_ReleaseGPUTexture> {
 public:
-    Texture(void) noexcept = default;
+    Texture(void) = default;
 
-    static Texture create(const SDL_GPUTextureCreateInfo& info) noexcept;
+    static Texture create(const SDL_GPUTextureCreateInfo& info);
     static Texture create_2D(Uint32 width, Uint32 height, SDL_GPUTextureFormat format, SDL_GPUTextureUsageFlags usage,
-        int num_levels = MIP_LEVELS_AUTO) noexcept;
-    static Texture create_cube(Uint32 size, SDL_GPUTextureFormat format, SDL_GPUTextureUsageFlags usage,
-        int num_levels = MIP_LEVELS_AUTO) noexcept;
+        int num_levels = MIP_LEVELS_AUTO);
+    static Texture create_cube(Uint32 size, SDL_GPUTextureFormat format, SDL_GPUTextureUsageFlags usage, int num_levels = MIP_LEVELS_AUTO);
     static Texture create_array(Uint32 width, Uint32 height, Uint32 layers, SDL_GPUTextureFormat format, SDL_GPUTextureUsageFlags usage,
-        int num_levels = MIP_LEVELS_AUTO) noexcept;
+        int num_levels = MIP_LEVELS_AUTO);
 
-    constexpr Uint32 width(void) const noexcept;
-    constexpr Uint32 height(void) const noexcept;
-    constexpr SDL_GPUTextureFormat format(void) const noexcept;
+    constexpr Uint32 width(void) const;
+    constexpr Uint32 height(void) const;
+    constexpr SDL_GPUTextureFormat format(void) const;
 
     // width/height default to 0, meaning "the whole texture from (x, y)"
     void write_streamed(SDL_GPUCopyPass* copy_pass, std::span<const std::byte> data, Uint32 layer = 0, Uint32 mip_level = 0, Uint32 x = 0,
@@ -33,7 +32,7 @@ public:
     void generate_mipmaps_blocking(void) const;
 
 private:
-    explicit Texture(SDL_GPUDevice* device, SDL_GPUTexture* handle, Uint32 width, Uint32 height, SDL_GPUTextureFormat format) noexcept;
+    explicit Texture(SDL_GPUDevice* device, SDL_GPUTexture* handle, Uint32 width, Uint32 height, SDL_GPUTextureFormat format);
 
     Uint32 m_width { 0 };
     Uint32 m_height { 0 };
@@ -41,17 +40,17 @@ private:
 };
 } // namespace gpu
 
-constexpr Uint32 gpu::Texture::width(void) const noexcept
+constexpr Uint32 gpu::Texture::width(void) const
 {
     return m_width;
 }
 
-constexpr Uint32 gpu::Texture::height(void) const noexcept
+constexpr Uint32 gpu::Texture::height(void) const
 {
     return m_height;
 }
 
-constexpr SDL_GPUTextureFormat gpu::Texture::format(void) const noexcept
+constexpr SDL_GPUTextureFormat gpu::Texture::format(void) const
 {
     return m_format;
 }

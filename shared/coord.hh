@@ -11,7 +11,7 @@ using local_pos_xz = Eigen::Vector<std::int32_t, 2>;
 
 template<>
 struct std::hash<chunk_pos> final {
-    constexpr inline std::size_t operator()(const chunk_pos& pos) const noexcept
+    constexpr inline std::size_t operator()(const chunk_pos& pos) const
     {
         std::size_t value = 0;
         value ^= pos.x() * 73856093;
@@ -23,7 +23,7 @@ struct std::hash<chunk_pos> final {
 
 template<>
 struct std::hash<chunk_pos_xz> final {
-    constexpr inline std::size_t operator()(const chunk_pos_xz& pos) const noexcept
+    constexpr inline std::size_t operator()(const chunk_pos_xz& pos) const
     {
         std::size_t value = 0;
         value ^= pos.x() * 73856093;

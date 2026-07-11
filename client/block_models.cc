@@ -32,7 +32,7 @@ constexpr static std::array FACE_ROTATIONS = {
 
 static std::vector<std::unique_ptr<BakedBlockModel>> s_models;
 
-static Eigen::Vector3f face_normal(block_face face) noexcept
+static Eigen::Vector3f face_normal(block_face face)
 {
     switch(face) {
         case BLOCK_FACE_NORTH:
@@ -57,12 +57,12 @@ static Eigen::Vector3f face_normal(block_face face) noexcept
     return Eigen::Vector3f::Zero();
 }
 
-static block_face rotate_face(block_face face, block_face facing) noexcept
+static block_face rotate_face(block_face face, block_face facing)
 {
     return FACE_ROTATIONS[facing][face];
 }
 
-static Eigen::Matrix3f facing_rotation(block_face facing) noexcept
+static Eigen::Matrix3f facing_rotation(block_face facing)
 {
     constexpr auto pi = std::numbers::pi_v<float>;
 
@@ -86,7 +86,7 @@ static Eigen::Matrix3f facing_rotation(block_face facing) noexcept
     return Eigen::Matrix3f::Identity();
 }
 
-static Eigen::Matrix3f element_rotation(const Eigen::Vector3f& angles) noexcept
+static Eigen::Matrix3f element_rotation(const Eigen::Vector3f& angles)
 {
     auto radians = utils::radians(angles);
 
@@ -97,7 +97,7 @@ static Eigen::Matrix3f element_rotation(const Eigen::Vector3f& angles) noexcept
     return (rz * ry * rx).toRotationMatrix();
 }
 
-static std::uint32_t pack_normal_2_10_10_10(const Eigen::Vector3f& normal) noexcept
+static std::uint32_t pack_normal_2_10_10_10(const Eigen::Vector3f& normal)
 {
     auto snx = static_cast<std::int32_t>(std::clamp(normal.x() * 511.0f, -511.0f, 511.0f));
     auto sny = static_cast<std::int32_t>(std::clamp(normal.y() * 511.0f, -511.0f, 511.0f));
@@ -110,7 +110,7 @@ static std::uint32_t pack_normal_2_10_10_10(const Eigen::Vector3f& normal) noexc
     return (nz << 20) | (ny << 10) | nx;
 }
 
-static void make_face_geometry(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, BakedBlockModel_Quad& quad) noexcept
+static void make_face_geometry(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, BakedBlockModel_Quad& quad)
 {
     quad.positions.fill(Eigen::Vector3f::Zero());
 
@@ -164,7 +164,7 @@ static void make_face_geometry(const Eigen::Vector3f& from, const Eigen::Vector3
     quad.uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
 }
 
-static void face_uv_extent(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, Eigen::Vector4f& out_uv) noexcept
+static void face_uv_extent(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, Eigen::Vector4f& out_uv)
 {
     switch(face) {
         case BLOCK_FACE_NORTH:
@@ -194,7 +194,7 @@ static void face_uv_extent(const Eigen::Vector3f& from, const Eigen::Vector3f& t
 }
 
 static void apply_face_uv(const BlockModel_Face* face, const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face_type,
-    bool rescale, BakedBlockModel_Quad& quad) noexcept
+    bool rescale, BakedBlockModel_Quad& quad)
 {
     if(face->uv.has_value()) {
         quad.uvs[0] = Eigen::Vector2f(face->uv->x(), face->uv->y());
@@ -217,7 +217,7 @@ static void apply_face_uv(const BlockModel_Face* face, const Eigen::Vector3f& fr
 }
 
 static void rotate_aabb(const Eigen::Matrix3f& rot, const Eigen::Vector3f& center, const Eigen::Vector3f& from, const Eigen::Vector3f& to,
-    Eigen::Vector3f& out_from, Eigen::Vector3f& out_to) noexcept
+    Eigen::Vector3f& out_from, Eigen::Vector3f& out_to)
 {
     constexpr static auto CORNERS = 8;
 
@@ -254,7 +254,7 @@ static void rotate_aabb(const Eigen::Matrix3f& rot, const Eigen::Vector3f& cente
     }
 }
 
-static bool is_covering(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, bool axis_aligned) noexcept
+static bool is_covering(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, bool axis_aligned)
 {
     auto result = true;
 
@@ -303,7 +303,7 @@ static bool is_covering(const Eigen::Vector3f& from, const Eigen::Vector3f& to, 
     return result && axis_aligned;
 }
 
-static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def) noexcept
+static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
 {
     if(def.is_stem || def.model_name.is_empty()) {
         return nullptr;
@@ -413,7 +413,7 @@ void block_models::shutdown(void)
     s_models.clear();
 }
 
-const BakedBlockModel* block_models::find(block_id_type id) noexcept
+const BakedBlockModel* block_models::find(block_id_type id)
 {
     if(id == BLOCK_ID_NULL || id >= s_models.size()) {
         return nullptr;

@@ -5,6 +5,11 @@
 
 namespace constant
 {
+constexpr static std::string_view BUILTIN_NAME_SPACE = "builtin";
+} // namespace constant
+
+namespace constant
+{
 constexpr static std::size_t CHUNK_SIZE = 32;
 constexpr static std::size_t CHUNK_AREA = CHUNK_SIZE * CHUNK_SIZE;
 constexpr static std::size_t CHUNK_VOLUME = CHUNK_AREA * CHUNK_SIZE;

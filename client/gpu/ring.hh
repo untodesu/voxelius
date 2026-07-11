@@ -7,15 +7,15 @@ namespace gpu
 {
 class Ring final {
 public:
-    Ring(void) noexcept = default;
+    Ring(void) = default;
 
-    static Ring create(std::size_t capacity, SDL_GPUBufferUsageFlags usage, std::size_t backing = 2) noexcept;
+    static Ring create(std::size_t capacity, SDL_GPUBufferUsageFlags usage, std::size_t backing = 2);
 
     SDL_GPUBuffer* write_streamed(SDL_GPUCopyPass* copy_pass, std::span<const std::byte> data);
 
-    void update_late(void) noexcept;
+    void update_late(void);
 
-    constexpr std::size_t backing(void) const noexcept;
+    constexpr std::size_t backing(void) const;
 
 private:
     std::vector<Buffer> m_buffers;
@@ -23,7 +23,7 @@ private:
 };
 } // namespace gpu
 
-constexpr std::size_t gpu::Ring::backing(void) const noexcept
+constexpr std::size_t gpu::Ring::backing(void) const
 {
     return m_buffers.size();
 }

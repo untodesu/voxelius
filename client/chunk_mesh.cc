@@ -2,7 +2,7 @@
 
 #include "client/chunk_mesh.hh"
 
-std::uint32_t ChunkMesh_Vertex::pack_position(const Eigen::Vector3f& position_16ths) noexcept
+std::uint32_t ChunkMesh_Vertex::pack_position(const Eigen::Vector3f& position_16ths)
 {
     auto biased_x = INT32_C(16) + static_cast<std::int32_t>(position_16ths.x());
     auto biased_y = INT32_C(16) + static_cast<std::int32_t>(position_16ths.y());
@@ -20,7 +20,7 @@ std::uint32_t ChunkMesh_Vertex::pack_position(const Eigen::Vector3f& position_16
     return result;
 }
 
-Eigen::Vector3f ChunkMesh_Vertex::unpack_position(std::uint32_t position) noexcept
+Eigen::Vector3f ChunkMesh_Vertex::unpack_position(std::uint32_t position)
 {
     auto x = static_cast<float>(static_cast<std::int32_t>(position & 0x3FFU) - INT32_C(16));
     auto y = static_cast<float>(static_cast<std::int32_t>((position >> 10U) & 0x3FFU) - INT32_C(16));

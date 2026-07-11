@@ -2,7 +2,7 @@
 
 #include "shared/block.hh"
 
-std::optional<std::span<const Identifier>> BlockDefinition::resolve_texture_slot(std::string_view slot) const noexcept
+std::optional<std::span<const Identifier>> BlockDefinition::resolve_texture_slot(std::string_view slot) const
 {
     auto it = textures.find(std::string(slot));
 

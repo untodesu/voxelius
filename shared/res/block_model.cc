@@ -11,14 +11,14 @@ constexpr static float ROTATION_STEP = 15.0f;
 constexpr static float ROTATION_MIN = -180.0f;
 constexpr static float ROTATION_MAX = +180.0f;
 
-static float snap_rotation(float degrees) noexcept
+static float snap_rotation(float degrees)
 {
     auto clamped = std::clamp(degrees, ROTATION_MIN, ROTATION_MAX);
 
     return std::round(clamped / ROTATION_STEP) * ROTATION_STEP;
 }
 
-static bool parse_block_face_name(const char* name, block_face& face) noexcept
+static bool parse_block_face_name(const char* name, block_face& face)
 {
     if(name == nullptr) {
         return false;
@@ -298,7 +298,7 @@ static void block_model_free_fn(const void* data)
     delete reinterpret_cast<const BlockModel*>(data);
 }
 
-void BlockModel::register_resource(void) noexcept
+void BlockModel::register_resource(void)
 {
     res::register_loader<BlockModel>(&block_model_load_fn, &block_model_free_fn);
 }

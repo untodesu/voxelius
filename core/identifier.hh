@@ -3,23 +3,23 @@
 
 class Identifier final {
 public:
-    static Identifier from_string(std::string_view string) noexcept;
-    static Identifier from_string(std::string_view string, std::string_view implicit_name_space) noexcept;
-    static Identifier from_parts(std::string_view name_space, std::string_view value) noexcept;
+    static Identifier from_string(std::string_view string);
+    static Identifier from_string(std::string_view string, std::string_view implicit_name_space);
+    static Identifier from_parts(std::string_view name_space, std::string_view value);
 
-    Identifier(void) noexcept = default;
+    Identifier(void) = default;
 
-    constexpr std::string_view full_string(void) const noexcept;
-    constexpr std::string_view name_space(void) const noexcept;
-    constexpr std::string_view value(void) const noexcept;
+    constexpr std::string_view full_string(void) const;
+    constexpr std::string_view name_space(void) const;
+    constexpr std::string_view value(void) const;
 
-    constexpr bool is_empty(void) const noexcept;
-    constexpr bool is_valid(void) const noexcept;
+    constexpr bool is_empty(void) const;
+    constexpr bool is_valid(void) const;
 
-    constexpr bool operator==(const Identifier& other) const noexcept;
+    constexpr bool operator==(const Identifier& other) const;
 
-    std::string as_file_path(std::string_view extension) const noexcept;
-    std::string as_file_path(std::string_view subdirectory, std::string_view extension) const noexcept;
+    std::string as_file_path(std::string_view extension) const;
+    std::string as_file_path(std::string_view subdirectory, std::string_view extension) const;
 
 private:
     explicit Identifier(std::string full_string, std::string name_space, std::string value);
@@ -31,35 +31,35 @@ private:
 
 template<>
 struct std::hash<Identifier> final {
-    std::size_t operator()(const Identifier& id) const noexcept;
+    std::size_t operator()(const Identifier& id) const;
 };
 
-constexpr std::string_view Identifier::full_string(void) const noexcept
+constexpr std::string_view Identifier::full_string(void) const
 {
     return m_full_string;
 }
 
-constexpr std::string_view Identifier::name_space(void) const noexcept
+constexpr std::string_view Identifier::name_space(void) const
 {
     return m_name_space;
 }
 
-constexpr std::string_view Identifier::value(void) const noexcept
+constexpr std::string_view Identifier::value(void) const
 {
     return m_value;
 }
 
-constexpr bool Identifier::is_empty(void) const noexcept
+constexpr bool Identifier::is_empty(void) const
 {
     return m_full_string.empty();
 }
 
-constexpr bool Identifier::is_valid(void) const noexcept
+constexpr bool Identifier::is_valid(void) const
 {
     return static_cast<bool>(m_full_string.size());
 }
 
-constexpr bool Identifier::operator==(const Identifier& other) const noexcept
+constexpr bool Identifier::operator==(const Identifier& other) const
 {
     return m_full_string == other.m_full_string;
 }

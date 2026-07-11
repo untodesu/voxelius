@@ -51,7 +51,7 @@ constexpr static const std::uint64_t crc_table[256] = { 0x0000000000000000, 0x42
     0xCF8B0890283E370C, 0x8D7BE97B81D4019F, 0x4A6ACB477BEA5A2A, 0x089A2AACD2006CB9, 0x14DEA25F3AF9026D, 0x562E43B4931334FE,
     0x913F6188692D6F4B, 0xD3CF8063C0C759D8, 0x5DEDC41A34BBEEB2, 0x1F1D25F19D51D821, 0xD80C07CD676F8394, 0x9AFCE626CE85B507 };
 
-std::uint64_t utils::crc64(const void* buffer, std::size_t size, std::uint64_t combine) noexcept
+std::uint64_t utils::crc64(const void* buffer, std::size_t size, std::uint64_t combine)
 {
     auto data = reinterpret_cast<const std::uint8_t*>(buffer);
     for(std::size_t i = 0; i < size; ++i)
@@ -59,7 +59,7 @@ std::uint64_t utils::crc64(const void* buffer, std::size_t size, std::uint64_t c
     return combine;
 }
 
-std::uint64_t utils::crc64(std::span<const std::byte> buffer, std::uint64_t combine) noexcept
+std::uint64_t utils::crc64(std::span<const std::byte> buffer, std::uint64_t combine)
 {
     return crc64(buffer.data(), buffer.size(), combine);
 }

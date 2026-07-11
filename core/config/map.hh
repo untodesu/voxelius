@@ -11,40 +11,40 @@ namespace config
 {
 class Map final {
 public:
-    Map(void) noexcept = default;
+    Map(void) = default;
 
     Map(const Map& other) = delete;
-    Map(Map&& other) noexcept = delete;
+    Map(Map&& other) = delete;
     Map& operator=(const Map& other) = delete;
-    Map& operator=(Map&& other) noexcept = delete;
+    Map& operator=(Map&& other) = delete;
 
-    constexpr std::uint64_t generation(void) const noexcept;
+    constexpr std::uint64_t generation(void) const;
 
-    std::optional<std::string_view> raw_string(map_slot_type slot) const noexcept;
-    void set_raw_string(map_slot_type slot, std::string_view value) noexcept;
-
-    template<typename T>
-    std::optional<T> value(std::string_view key) const noexcept;
-    template<typename T>
-    void set_value(std::string_view key, const T& value) noexcept;
+    std::optional<std::string_view> raw_string(map_slot_type slot) const;
+    void set_raw_string(map_slot_type slot, std::string_view value);
 
     template<typename T>
-    std::optional<T> value_raw(map_slot_type slot) const noexcept;
+    std::optional<T> value(std::string_view key) const;
     template<typename T>
-    void set_value_raw(map_slot_type slot, const T& value) noexcept;
+    void set_value(std::string_view key, const T& value);
 
-    map_slot_type find_slot(std::string_view key) const noexcept;
-    map_slot_type find_or_create_slot(std::string_view key) noexcept;
+    template<typename T>
+    std::optional<T> value_raw(map_slot_type slot) const;
+    template<typename T>
+    void set_value_raw(map_slot_type slot, const T& value);
 
-    bool contains(std::string_view key) const noexcept;
+    map_slot_type find_slot(std::string_view key) const;
+    map_slot_type find_or_create_slot(std::string_view key);
 
-    void purge(void) noexcept;
+    bool contains(std::string_view key) const;
 
-    void load(std::istream& stream) noexcept;
-    void save(std::ostream& stream) const noexcept;
+    void purge(void);
 
-    bool load(std::string_view path) noexcept;
-    bool save(std::string_view path) const noexcept;
+    void load(std::istream& stream);
+    void save(std::ostream& stream) const;
+
+    bool load(std::string_view path);
+    bool save(std::string_view path) const;
 
 private:
     std::vector<std::optional<std::string>> m_slots {};
@@ -53,13 +53,13 @@ private:
 };
 } // namespace config
 
-constexpr std::uint64_t config::Map::generation(void) const noexcept
+constexpr std::uint64_t config::Map::generation(void) const
 {
     return m_generation;
 }
 
 template<typename T>
-std::optional<T> config::Map::value(std::string_view key) const noexcept
+std::optional<T> config::Map::value(std::string_view key) const
 {
     auto slot = find_slot(key);
 
@@ -71,7 +71,7 @@ std::optional<T> config::Map::value(std::string_view key) const noexcept
 }
 
 template<typename T>
-void config::Map::set_value(std::string_view key, const T& value) noexcept
+void config::Map::set_value(std::string_view key, const T& value)
 {
     auto slot = find_or_create_slot(key);
 

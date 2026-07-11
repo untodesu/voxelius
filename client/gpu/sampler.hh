@@ -7,10 +7,10 @@ namespace gpu
 {
 class Sampler final : public Handle<SDL_GPUSampler, SDL_ReleaseGPUSampler> {
 public:
-    Sampler(void) noexcept = default;
+    Sampler(void) = default;
 
-    static Sampler create(const SDL_GPUSamplerCreateInfo& info) noexcept;
-    static Sampler create(SDL_GPUFilter filter, SDL_GPUSamplerMipmapMode mipmap_mode, SDL_GPUSamplerAddressMode address_mode) noexcept;
+    static Sampler create(const SDL_GPUSamplerCreateInfo& info);
+    static Sampler create(SDL_GPUFilter filter, SDL_GPUSamplerMipmapMode mipmap_mode, SDL_GPUSamplerAddressMode address_mode);
 
 private:
     using Handle::Handle;

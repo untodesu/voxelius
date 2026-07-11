@@ -1,6 +1,14 @@
 include("${PROJECT_SOURCE_DIR}/cmake/embed-cxx-spv.cmake")
 
 add_executable(voxelius-client
+    "${CMAKE_CURRENT_LIST_DIR}/gui/fonts.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/fonts.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/gui.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/gui.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/language.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/language.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/style.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/style.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/buffer.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/buffer.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gpu/handle.hh"
@@ -12,6 +20,8 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/gpu/texture.hh"
     "${CMAKE_CURRENT_LIST_DIR}/res/texture2D.cc"
     "${CMAKE_CURRENT_LIST_DIR}/res/texture2D.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/entity.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/entity.hh"
     "${CMAKE_CURRENT_LIST_DIR}/block_atlas.cc"
     "${CMAKE_CURRENT_LIST_DIR}/block_atlas.hh"
     "${CMAKE_CURRENT_LIST_DIR}/block_models.cc"

@@ -23,7 +23,7 @@ Eigen::Vector3f camera::up;
 Eigen::Vector3f camera::local;
 chunk_pos camera::chunk;
 
-static void reset_camera(void) noexcept
+static void reset_camera(void)
 {
     camera::angles.setZero();
     camera::forward = Eigen::Vector3f::UnitZ();
@@ -33,7 +33,7 @@ static void reset_camera(void) noexcept
     camera::chunk.setZero();
 }
 
-void camera::init(void) noexcept
+void camera::init(void)
 {
     vertical_fov.bind(globals::client_config, "camera.vertical_fov");
     view_distance.bind(globals::client_config, "camera.view_distance");
@@ -41,7 +41,7 @@ void camera::init(void) noexcept
     reset_camera();
 }
 
-void camera::update(void) noexcept
+void camera::update(void)
 {
     // TODO: pull stuff from the client entity
 

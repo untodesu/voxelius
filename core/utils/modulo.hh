@@ -4,11 +4,11 @@
 namespace utils
 {
 template<std::integral T>
-constexpr T mod_signed(T value, T modulus) noexcept;
+constexpr T mod_signed(T value, T modulus);
 } // namespace utils
 
 template<std::integral T>
-constexpr T utils::mod_signed(T value, T modulus) noexcept
+constexpr T utils::mod_signed(T value, T modulus)
 {
     auto result = static_cast<T>(value % modulus);
     if(result < static_cast<T>(0))

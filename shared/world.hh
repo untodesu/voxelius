@@ -5,9 +5,9 @@
 
 class ChunkCreateEvent final {
 public:
-    explicit ChunkCreateEvent(const chunk_pos& pos, const std::shared_ptr<Chunk>& chunk) noexcept;
-    constexpr const std::shared_ptr<Chunk>& chunk(void) const noexcept;
-    constexpr const chunk_pos& pos(void) const noexcept;
+    explicit ChunkCreateEvent(const chunk_pos& pos, const std::shared_ptr<Chunk>& chunk);
+    constexpr const std::shared_ptr<Chunk>& chunk(void) const;
+    constexpr const chunk_pos& pos(void) const;
 
 private:
     std::shared_ptr<Chunk> m_chunk;
@@ -16,9 +16,9 @@ private:
 
 class ChunkRemoveEvent final {
 public:
-    explicit ChunkRemoveEvent(const chunk_pos& pos, const std::shared_ptr<const Chunk>& chunk) noexcept;
-    constexpr const std::shared_ptr<const Chunk>& chunk(void) const noexcept;
-    constexpr const chunk_pos& pos(void) const noexcept;
+    explicit ChunkRemoveEvent(const chunk_pos& pos, const std::shared_ptr<const Chunk>& chunk);
+    constexpr const std::shared_ptr<const Chunk>& chunk(void) const;
+    constexpr const chunk_pos& pos(void) const;
 
 private:
     std::shared_ptr<const Chunk> m_chunk;
@@ -27,9 +27,9 @@ private:
 
 class ChunkUpdateEvent final {
 public:
-    explicit ChunkUpdateEvent(const chunk_pos& pos, const std::shared_ptr<Chunk>& chunk) noexcept;
-    constexpr const std::shared_ptr<Chunk>& chunk(void) const noexcept;
-    constexpr const chunk_pos& pos(void) const noexcept;
+    explicit ChunkUpdateEvent(const chunk_pos& pos, const std::shared_ptr<Chunk>& chunk);
+    constexpr const std::shared_ptr<Chunk>& chunk(void) const;
+    constexpr const chunk_pos& pos(void) const;
 
 private:
     std::shared_ptr<Chunk> m_chunk;
@@ -38,12 +38,12 @@ private:
 
 class BlockUpdateEvent final {
 public:
-    explicit BlockUpdateEvent(const block_pos& pos, block_id_type id, const std::shared_ptr<Chunk>& chunk) noexcept;
-    constexpr const std::shared_ptr<Chunk>& chunk(void) const noexcept;
-    constexpr const block_pos& bpos(void) const noexcept;
-    constexpr const chunk_pos& cpos(void) const noexcept;
-    constexpr const local_pos& lpos(void) const noexcept;
-    constexpr block_id_type id(void) const noexcept;
+    explicit BlockUpdateEvent(const block_pos& pos, block_id_type id, const std::shared_ptr<Chunk>& chunk);
+    constexpr const std::shared_ptr<Chunk>& chunk(void) const;
+    constexpr const block_pos& bpos(void) const;
+    constexpr const chunk_pos& cpos(void) const;
+    constexpr const local_pos& lpos(void) const;
+    constexpr block_id_type id(void) const;
 
 private:
     std::shared_ptr<Chunk> m_chunk;
@@ -63,123 +63,123 @@ extern std::uint64_t current_tick;
 
 namespace world
 {
-std::shared_ptr<Chunk> create_chunk(const chunk_pos& pos) noexcept;
-std::shared_ptr<Chunk> find_chunk(const chunk_pos& pos) noexcept;
-std::shared_ptr<Chunk> find_chunk(entt::entity entity) noexcept;
+std::shared_ptr<Chunk> create_chunk(const chunk_pos& pos);
+std::shared_ptr<Chunk> find_chunk(const chunk_pos& pos);
+std::shared_ptr<Chunk> find_chunk(entt::entity entity);
 } // namespace world
 
 namespace world
 {
-void remove_chunk(const std::shared_ptr<const Chunk>& chunk) noexcept;
-void remove_chunk(const chunk_pos& pos) noexcept;
-void remove_chunk(entt::entity entity) noexcept;
+void remove_chunk(const std::shared_ptr<const Chunk>& chunk);
+void remove_chunk(const chunk_pos& pos);
+void remove_chunk(entt::entity entity);
 } // namespace world
 
 namespace world
 {
-block_id_type get_block(const chunk_pos& cpos, const local_pos& lpos) noexcept;
-block_id_type get_block(const block_pos& pos) noexcept;
+block_id_type get_block(const chunk_pos& cpos, const local_pos& lpos);
+block_id_type get_block(const block_pos& pos);
 } // namespace world
 
 namespace world
 {
-bool set_block(const chunk_pos& cpos, const local_pos& lpos, block_id_type id) noexcept;
-bool set_block(const block_pos& pos, block_id_type id) noexcept;
+bool set_block(const chunk_pos& cpos, const local_pos& lpos, block_id_type id);
+bool set_block(const block_pos& pos, block_id_type id);
 } // namespace world
 
 namespace world
 {
-block_light_type get_light(const chunk_pos& cpos, const local_pos& lpos) noexcept;
-block_light_type get_light(const block_pos& pos) noexcept;
+block_light_type get_light(const chunk_pos& cpos, const local_pos& lpos);
+block_light_type get_light(const block_pos& pos);
 } // namespace world
 
 namespace world
 {
-std::optional<std::string_view> get_state(const chunk_pos& cpos, const local_pos& lpos, std::string_view state) noexcept;
-std::optional<std::string_view> get_state(const block_pos& pos, std::string_view state) noexcept;
+std::optional<std::string_view> get_state(const chunk_pos& cpos, const local_pos& lpos, std::string_view state);
+std::optional<std::string_view> get_state(const block_pos& pos, std::string_view state);
 } // namespace world
 
 namespace world
 {
-bool set_state(const chunk_pos& cpos, const local_pos& lpos, std::string_view state, std::string_view value) noexcept;
-bool set_state(const block_pos& pos, std::string_view state, std::string_view value) noexcept;
+bool set_state(const chunk_pos& cpos, const local_pos& lpos, std::string_view state, std::string_view value);
+bool set_state(const block_pos& pos, std::string_view state, std::string_view value);
 } // namespace world
 
 namespace world
 {
-std::int32_t get_temperature_base(const chunk_pos& cpos, const local_pos& lpos) noexcept;
-std::int32_t get_temperature_base(const block_pos& pos) noexcept;
+std::int32_t get_temperature_base(const chunk_pos& cpos, const local_pos& lpos);
+std::int32_t get_temperature_base(const block_pos& pos);
 } // namespace world
 
 namespace world
 {
-std::int32_t get_temperature(const chunk_pos& cpos, const local_pos& lpos) noexcept;
-std::int32_t get_temperature(const block_pos& pos) noexcept;
+std::int32_t get_temperature(const chunk_pos& cpos, const local_pos& lpos);
+std::int32_t get_temperature(const block_pos& pos);
 } // namespace world
 
 namespace world
 {
-void schedule(const chunk_pos& cpos, const local_pos& lpos, std::uint64_t deadline) noexcept;
-void schedule(const block_pos& pos, std::uint64_t deadline) noexcept;
+void schedule(const chunk_pos& cpos, const local_pos& lpos, std::uint64_t deadline);
+void schedule(const block_pos& pos, std::uint64_t deadline);
 } // namespace world
 
 namespace world
 {
-void shutdown(void) noexcept;
-void fixed_update(void) noexcept;
+void shutdown(void);
+void fixed_update(void);
 } // namespace world
 
-constexpr const std::shared_ptr<Chunk>& ChunkCreateEvent::chunk(void) const noexcept
+constexpr const std::shared_ptr<Chunk>& ChunkCreateEvent::chunk(void) const
 {
     return m_chunk;
 }
 
-constexpr const chunk_pos& ChunkCreateEvent::pos(void) const noexcept
+constexpr const chunk_pos& ChunkCreateEvent::pos(void) const
 {
     return m_pos;
 }
 
-constexpr const std::shared_ptr<const Chunk>& ChunkRemoveEvent::chunk(void) const noexcept
+constexpr const std::shared_ptr<const Chunk>& ChunkRemoveEvent::chunk(void) const
 {
     return m_chunk;
 }
 
-constexpr const chunk_pos& ChunkRemoveEvent::pos(void) const noexcept
+constexpr const chunk_pos& ChunkRemoveEvent::pos(void) const
 {
     return m_pos;
 }
 
-constexpr const std::shared_ptr<Chunk>& ChunkUpdateEvent::chunk(void) const noexcept
+constexpr const std::shared_ptr<Chunk>& ChunkUpdateEvent::chunk(void) const
 {
     return m_chunk;
 }
 
-constexpr const chunk_pos& ChunkUpdateEvent::pos(void) const noexcept
+constexpr const chunk_pos& ChunkUpdateEvent::pos(void) const
 {
     return m_pos;
 }
 
-constexpr const std::shared_ptr<Chunk>& BlockUpdateEvent::chunk(void) const noexcept
+constexpr const std::shared_ptr<Chunk>& BlockUpdateEvent::chunk(void) const
 {
     return m_chunk;
 }
 
-constexpr block_id_type BlockUpdateEvent::id(void) const noexcept
+constexpr block_id_type BlockUpdateEvent::id(void) const
 {
     return m_id;
 }
 
-constexpr const block_pos& BlockUpdateEvent::bpos(void) const noexcept
+constexpr const block_pos& BlockUpdateEvent::bpos(void) const
 {
     return m_bpos;
 }
 
-constexpr const chunk_pos& BlockUpdateEvent::cpos(void) const noexcept
+constexpr const chunk_pos& BlockUpdateEvent::cpos(void) const
 {
     return m_cpos;
 }
 
-constexpr const local_pos& BlockUpdateEvent::lpos(void) const noexcept
+constexpr const local_pos& BlockUpdateEvent::lpos(void) const
 {
     return m_lpos;
 }

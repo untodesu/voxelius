@@ -34,8 +34,8 @@ extern std::vector<AtlasFrame> cpu_frames;
 
 namespace block_atlas
 {
-const AtlasStrip* load(std::span<const Identifier> textures) noexcept;
-const AtlasStrip* find(std::span<const Identifier> textures) noexcept;
+const AtlasStrip* load(std::span<const Identifier> textures);
+const AtlasStrip* find(std::span<const Identifier> textures);
 } // namespace block_atlas
 
 namespace block_atlas

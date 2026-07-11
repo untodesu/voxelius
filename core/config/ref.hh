@@ -8,20 +8,20 @@ namespace config
 template<typename T>
 class Ref final {
 public:
-    constexpr Ref(void) noexcept = default;
-    constexpr Ref(T default_value) noexcept;
+    constexpr Ref(void) = default;
+    constexpr Ref(T default_value);
 
-    const T& value(void) const noexcept;
-    operator const T&(void) const noexcept;
+    const T& value(void) const;
+    operator const T&(void) const;
 
-    constexpr bool dirty(void) const noexcept;
+    constexpr bool dirty(void) const;
 
-    void set_value(const T& value) noexcept;
-    Ref<T>& operator=(const T& value) noexcept;
-    Ref<T>& operator=(const Ref<T>& other) noexcept;
+    void set_value(const T& value);
+    Ref<T>& operator=(const T& value);
+    Ref<T>& operator=(const Ref<T>& other);
 
-    void bind(Map& map, std::string_view key) noexcept;
-    void commit(void) noexcept;
+    void bind(Map& map, std::string_view key);
+    void commit(void);
 
 private:
     mutable T m_value {};
@@ -32,13 +32,13 @@ private:
 } // namespace config
 
 template<typename T>
-constexpr config::Ref<T>::Ref(T default_value) noexcept : m_value(std::move(default_value))
+constexpr config::Ref<T>::Ref(T default_value) : m_value(std::move(default_value))
 {
     // empty
 }
 
 template<typename T>
-const T& config::Ref<T>::value(void) const noexcept
+const T& config::Ref<T>::value(void) const
 {
     if(dirty()) {
         m_value = m_map->value_raw<T>(m_slot).value_or(m_value);
@@ -49,19 +49,19 @@ const T& config::Ref<T>::value(void) const noexcept
 }
 
 template<typename T>
-config::Ref<T>::operator const T&(void) const noexcept
+config::Ref<T>::operator const T&(void) const
 {
     return value();
 }
 
 template<typename T>
-constexpr bool config::Ref<T>::dirty(void) const noexcept
+constexpr bool config::Ref<T>::dirty(void) const
 {
     return m_map && m_generation != m_map->generation();
 }
 
 template<typename T>
-void config::Ref<T>::set_value(const T& value) noexcept
+void config::Ref<T>::set_value(const T& value)
 {
     m_value = value;
 
@@ -71,7 +71,7 @@ void config::Ref<T>::set_value(const T& value) noexcept
 }
 
 template<typename T>
-config::Ref<T>& config::Ref<T>::operator=(const T& value) noexcept
+config::Ref<T>& config::Ref<T>::operator=(const T& value)
 {
     set_value(value);
 
@@ -79,7 +79,7 @@ config::Ref<T>& config::Ref<T>::operator=(const T& value) noexcept
 }
 
 template<typename T>
-config::Ref<T>& config::Ref<T>::operator=(const Ref<T>& other) noexcept
+config::Ref<T>& config::Ref<T>::operator=(const Ref<T>& other)
 {
     set_value(other.value());
 
@@ -87,7 +87,7 @@ config::Ref<T>& config::Ref<T>::operator=(const Ref<T>& other) noexcept
 }
 
 template<typename T>
-void config::Ref<T>::bind(Map& map, std::string_view key) noexcept
+void config::Ref<T>::bind(Map& map, std::string_view key)
 {
     m_map = &map;
     m_slot = map.find_or_create_slot(key);
@@ -98,7 +98,7 @@ void config::Ref<T>::bind(Map& map, std::string_view key) noexcept
 }
 
 template<typename T>
-void config::Ref<T>::commit(void) noexcept
+void config::Ref<T>::commit(void)
 {
     if(m_map && m_slot != NULL_SLOT) {
         m_map->set_value_raw<T>(m_slot, m_value);
