@@ -47,8 +47,14 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/globals.hh"
     "${CMAKE_CURRENT_LIST_DIR}/head.cc"
     "${CMAKE_CURRENT_LIST_DIR}/head.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/interpolation.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/interpolation.hh"
     "${CMAKE_CURRENT_LIST_DIR}/main.cc"
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/player_look.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/player_look.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/player_move.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/player_move.hh"
     "${CMAKE_CURRENT_LIST_DIR}/video.cc"
     "${CMAKE_CURRENT_LIST_DIR}/video.hh")
 target_compile_features(voxelius-client PUBLIC cxx_std_20)

@@ -8,6 +8,10 @@
 
 #include "core/camera.hh"
 
+#include "shared/head.hh"
+#include "shared/transform.hh"
+#include "shared/world.hh"
+
 #include "client/constant.hh"
 #include "client/globals.hh"
 
@@ -43,16 +47,26 @@ void camera::init(void)
 
 void camera::update(void)
 {
-    // TODO: pull stuff from the client entity
+    if(world::basic_entities.valid(globals::player)) {
+        const auto& head = world::basic_entities.get<Head_Intr>(globals::player);
+        const auto& transform = world::basic_entities.get<Transform_Intr>(globals::player);
 
-    auto z_near = 0.01f;
-    auto z_far = 1.25f * static_cast<float>(constant::CHUNK_SIZE * view_distance.value());
+        camera::angles = head.angles;
+        camera::chunk = transform.chunk;
+        camera::local = transform.local + head.offset;
 
-    instance.set_perspective(utils::radians(vertical_fov.value()), globals::aspect, z_near, z_far);
-    instance.set_view(camera::local, camera::angles);
-    instance.update();
+        auto z_near = 0.01f;
+        auto z_far = 1.25f * static_cast<float>(constant::CHUNK_SIZE * view_distance.value());
 
-    forward = instance.forward_vector();
-    right = instance.right_vector();
-    up = instance.up_vector();
+        instance.set_perspective(utils::radians(vertical_fov.value()), globals::aspect, z_near, z_far);
+        instance.set_view(camera::local, camera::angles);
+        instance.update();
+
+        forward = instance.forward_vector();
+        right = instance.right_vector();
+        up = instance.up_vector();
+    }
+    else {
+        reset_camera();
+    }
 }

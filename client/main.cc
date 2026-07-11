@@ -183,6 +183,10 @@ static void wrapped_main(int argc, char** argv)
 
     auto last_curtime_us = globals::curtime_us;
 
+    // STUB: enable fixed steps at 20 FPS
+    globals::fixed_frametime_us = 50000;
+    globals::fixed_frametime = 1.0e-6f * static_cast<float>(globals::fixed_frametime_us);
+
     while(s_is_running.load()) {
         globals::curtime_us = utils::epoch_microseconds();
 
@@ -239,8 +243,6 @@ static void wrapped_main(int argc, char** argv)
         video::update_late();
 
         client_game::update_late();
-
-        gui::update_late();
 
         threading::update();
 

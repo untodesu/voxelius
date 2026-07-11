@@ -13,5 +13,8 @@ void Velocity::fixed_update(void)
 
     for(auto [entity, velocity, transform] : view.each()) {
         transform.local += velocity.value * globals::fixed_frametime;
+
+        LOG_INFO("{} {} {} // {} {} {}", velocity.value.x(), velocity.value.y(), velocity.value.z(), transform.local.x(),
+            transform.local.y(), transform.local.z());
     }
 }

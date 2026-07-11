@@ -9,30 +9,19 @@
 
 #include "shared/block_registry.hh"
 #include "shared/coord.hh"
+#include "shared/transform.hh"
+#include "shared/velocity.hh"
 #include "shared/world.hh"
 
 #include "client/gui/gui.hh"
 
+#include "client/utils/entity.hh"
+
 #include "client/camera.hh"
 #include "client/globals.hh"
-
-constexpr static float CAM_SENSITIVITY = 0.125f;
-constexpr static float CAM_SPEED = 6.0f;
-
-constexpr static float MIN_PITCH = utils::radians(-90.0f);
-constexpr static float MAX_PITCH = utils::radians(90.0f);
-
-static void on_mouse_motion(const SDL_MouseMotionEvent& event)
-{
-    if(gui::screen) {
-        return;
-    }
-
-    auto sensitivity = utils::radians(CAM_SENSITIVITY);
-
-    camera::angles.x() = std::clamp(camera::angles.x() - sensitivity * event.yrel, MIN_PITCH, MAX_PITCH);
-    camera::angles.y() -= sensitivity * event.xrel;
-}
+#include "client/interpolation.hh"
+#include "client/player_look.hh"
+#include "client/player_move.hh"
 
 static void generate_debug_terrain(void)
 {
@@ -75,20 +64,15 @@ static void generate_debug_terrain(void)
 
 void client_game::init(void)
 {
-    globals::dispatcher.sink<SDL_MouseMotionEvent>().connect<&on_mouse_motion>();
+    player_look::init();
+    player_move::init();
 }
 
 void client_game::init_late(void)
 {
-    globals::player = world::basic_entities.create(); // STUB STUB STUB
+    globals::player = utils::spawn_player_client({ -8, 24, -8 });
 
     generate_debug_terrain();
-
-    // start the camera near the debug terrain patch at chunk_pos(0,0,0),
-    // or there's nothing in view
-    camera::chunk = chunk_pos(0, 0, 0);
-    camera::local = Eigen::Vector3f(-8.0f, 24.0f, -8.0f);
-    camera::angles = Eigen::Vector3f(utils::radians(-90.0f), utils::radians(45.0f), 0.0f);
 
     gui::screen = GUI_SCREEN_NONE;
 }
@@ -100,47 +84,23 @@ void client_game::shutdown(void)
 
 void client_game::update(void)
 {
-    if(gui::screen) {
-        return;
-    }
-
-    Eigen::Vector3f wishdir(Eigen::Vector3f::Zero());
-
-    const auto keys = SDL_GetKeyboardState(nullptr);
-
-    if(keys[SDL_SCANCODE_W]) {
-        wishdir += camera::forward;
-    }
-
-    if(keys[SDL_SCANCODE_S]) {
-        wishdir -= camera::forward;
-    }
-
-    if(keys[SDL_SCANCODE_A]) {
-        wishdir -= camera::right;
-    }
-
-    if(keys[SDL_SCANCODE_D]) {
-        wishdir += camera::right;
-    }
-
-    if(keys[SDL_SCANCODE_SPACE]) {
-        wishdir += camera::up;
-    }
-
-    if(wishdir.squaredNorm()) {
-        camera::local += globals::window_frametime * CAM_SPEED * wishdir.normalized();
-    }
+    interpolation::update();
 }
 
 void client_game::update_late(void)
 {
-    // empty
+    player_look::update_late();
+    player_move::update_late();
 }
 
 void client_game::fixed_update(void)
 {
-    // empty
+    player_move::fixed_update();
+
+    Transform::fixed_update();
+    Velocity::fixed_update();
+
+    world::fixed_update();
 }
 
 void client_game::fixed_update_late(void)

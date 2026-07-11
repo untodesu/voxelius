@@ -42,22 +42,6 @@ void gui::shutdown(void)
     background::shutdown();
 }
 
-void gui::update_late(void)
-{
-    auto& io = ImGui::GetIO();
-
-    if(gui::screen) {
-        io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-        io.ConfigFlags &= ~ImGuiConfigFlags_NoKeyboard;
-        SDL_SetWindowRelativeMouseMode(globals::window, false);
-    }
-    else {
-        io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
-        io.ConfigFlags |= ImGuiConfigFlags_NoKeyboard;
-        SDL_SetWindowRelativeMouseMode(globals::window, true);
-    }
-}
-
 void gui::layout(void)
 {
     if(!world::basic_entities.valid(globals::player)) {
