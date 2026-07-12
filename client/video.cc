@@ -10,7 +10,7 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-#include "client/gui/settings.hh"
+#include "client/settings.hh"
 
 static Eigen::Vector2i s_last_windowed_size;
 static config::Ref<bool> s_enable_vsync { true };
@@ -98,13 +98,9 @@ static void update_present_mode(void)
 {
     if(s_enable_vsync.value()) {
         SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
-
-        LOG_DEBUG("vsync enabled");
     }
     else {
         SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, s_unlocked_present_mode);
-
-        LOG_DEBUG("vsync disabled");
     }
 }
 

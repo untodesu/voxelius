@@ -1,8 +1,8 @@
 #include "client/pch.hh"
 
-#include "client/gui/style.hh"
+#include "client/style.hh"
 
-void gui::detail::apply_style(void)
+void style::apply(void)
 {
     ImGui::StyleColorsDark();
 

@@ -1,25 +1,25 @@
 #include "client/pch.hh"
 
-#include "client/gui/gui.hh"
+#include "client/gui.hh"
 
 #include "shared/world.hh"
 
+#include "client/background.hh"
 #include "client/constant.hh"
+#include "client/fonts.hh"
 #include "client/globals.hh"
-#include "client/gui/background.hh"
-#include "client/gui/fonts.hh"
-#include "client/gui/language.hh"
-#include "client/gui/main_menu.hh"
-#include "client/gui/settings.hh"
-#include "client/gui/style.hh"
+#include "client/language.hh"
+#include "client/main_menu.hh"
+#include "client/settings.hh"
+#include "client/style.hh"
 
 gui_screen gui::screen = GUI_SCREEN_NONE;
 unsigned gui::scale = 1U;
 
 void gui::init(void)
 {
-    detail::apply_style();
-    detail::load_fonts();
+    style::apply();
+    fonts::load();
 
     language::init();
 
@@ -48,21 +48,9 @@ void gui::shutdown(void)
 
 void gui::layout(void)
 {
-    if(!world::basic_entities.valid(globals::player)) {
-        background::layout();
-    }
+    background::layout();
 
     if(gui::screen) {
-        if(world::basic_entities.valid(globals::player) && gui::screen != GUI_CHAT) {
-            auto width_float = static_cast<float>(globals::width);
-            auto height_float = static_cast<float>(globals::height);
-            auto darken = ImGui::GetColorU32(ImVec4(0.00f, 0.00f, 0.00f, 0.75f));
-            auto darker = ImGui::GetColorU32(ImVec4(0.00f, 0.00f, 0.00f, 0.95f));
-            auto draw_list = ImGui::GetBackgroundDrawList();
-
-            draw_list->AddRectFilledMultiColor({}, { width_float, height_float }, darker, darken, darken, darker);
-        }
-
         switch(gui::screen) {
             case GUI_MAIN_MENU:
                 main_menu::layout();

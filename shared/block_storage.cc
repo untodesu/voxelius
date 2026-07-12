@@ -325,6 +325,13 @@ void BlockStorage::set(const local_pos& pos, block_id_type id)
     set(utils::to_index(pos), id);
 }
 
+void BlockStorage::fill(block_id_type id)
+{
+    Uniform uniform {};
+    uniform.filler = id;
+    m_variant = std::move(uniform);
+}
+
 void BlockStorage::optimize(void)
 {
     if(auto p8 = std::get_if<Palette8>(&m_variant)) {

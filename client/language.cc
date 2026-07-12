@@ -1,6 +1,6 @@
 #include "client/pch.hh"
 
-#include "client/gui/language.hh"
+#include "client/language.hh"
 
 #include "core/config/map.hh"
 #include "core/config/ref.hh"
@@ -12,7 +12,7 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-#include "client/gui/settings.hh"
+#include "client/settings.hh"
 
 constexpr static std::string_view DEFAULT_LANGUAGE = "english";
 

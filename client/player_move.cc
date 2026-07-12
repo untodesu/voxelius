@@ -12,7 +12,7 @@
 
 #include "client/camera.hh"
 #include "client/globals.hh"
-#include "client/gui/gui.hh"
+#include "client/gui.hh"
 
 constexpr static float SPEED = 16.0f;
 

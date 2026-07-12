@@ -21,7 +21,7 @@
 #include "client/chunk_mesher.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
-#include "client/gui/gui.hh"
+#include "client/gui.hh"
 #include "client/head.hh"
 #include "client/res/texture2D.hh"
 #include "client/video.hh"

@@ -1,15 +1,15 @@
 #include "client/pch.hh"
 
-#include "client/gui/main_menu.hh"
+#include "client/main_menu.hh"
 
 #include "core/res/resource.hh"
 
 #include "shared/world.hh"
 
+#include "client/fonts.hh"
 #include "client/globals.hh"
-#include "client/gui/fonts.hh"
-#include "client/gui/gui.hh"
-#include "client/gui/language.hh"
+#include "client/gui.hh"
+#include "client/language.hh"
 #include "client/utils/imgui.hh"
 
 static std::string str_button_play;
@@ -82,7 +82,7 @@ void main_menu::layout(void)
         return;
     }
 
-    ImGui::PushFont(gui::font_unscii16, 16.0f);
+    ImGui::PushFont(fonts::unscii16, 16.0f);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.000f, 0.000f, 0.000f, 0.000f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.500f, 0.500f, 0.500f, 0.125f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.500f, 0.500f, 0.500f, 0.500f));

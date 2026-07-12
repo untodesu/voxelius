@@ -14,7 +14,7 @@
 
 #include "client/camera.hh"
 #include "client/globals.hh"
-#include "client/gui/gui.hh"
+#include "client/gui.hh"
 #include "client/interpolation.hh"
 #include "client/player_look.hh"
 #include "client/player_move.hh"

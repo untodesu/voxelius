@@ -12,7 +12,7 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-#include "client/gui/settings.hh"
+#include "client/settings.hh"
 
 config::Ref<float> camera::vertical_fov { 70.0f };
 config::Ref<unsigned> camera::view_distance { 8 };

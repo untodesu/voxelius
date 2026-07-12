@@ -18,6 +18,7 @@ public:
 
     void set(std::size_t index, block_id_type id);
     void set(const local_pos& pos, block_id_type id);
+    void fill(block_id_type id);
 
     void optimize(void);
 

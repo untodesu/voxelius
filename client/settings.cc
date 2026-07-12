@@ -1,14 +1,14 @@
 #include "client/pch.hh"
 
-#include "client/gui/settings.hh"
+#include "client/settings.hh"
 
 #include "core/config/map.hh"
 #include "core/config/ref.hh"
 
+#include "client/fonts.hh"
 #include "client/globals.hh"
-#include "client/gui/fonts.hh"
-#include "client/gui/gui.hh"
-#include "client/gui/language.hh"
+#include "client/gui.hh"
+#include "client/language.hh"
 #include "client/utils/imgui.hh"
 #include "client/video.hh"
 
@@ -619,7 +619,7 @@ void settings::layout(void)
     ImGui::SetNextWindowPos(window_start);
     ImGui::SetNextWindowSize(window_size);
 
-    ImGui::PushFont(gui::font_unscii16, 16.0f);
+    ImGui::PushFont(fonts::unscii16, 16.0f);
     ImGui::PushStyleVarX(ImGuiStyleVar_FramePadding, 8.0f * gui::scale);
     ImGui::PushStyleVarY(ImGuiStyleVar_FramePadding, 3.2f * gui::scale);
 

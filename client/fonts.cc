@@ -1,14 +1,14 @@
 #include "client/pch.hh"
 
-#include "client/gui/fonts.hh"
+#include "client/fonts.hh"
 
 #include "core/exception.hh"
 #include "core/utils/physfs.hh"
 
 #include "client/constant.hh"
 
-ImFont* gui::font_unscii16;
-ImFont* gui::font_unscii8;
+ImFont* fonts::unscii16;
+ImFont* fonts::unscii8;
 
 static std::vector<std::byte> s_unscii16_data;
 static std::vector<std::byte> s_unscii8_data;
@@ -30,7 +30,7 @@ static ImFont* load_font(std::string_view path, float size, std::vector<std::byt
     return font;
 }
 
-void gui::detail::load_fonts(void)
+void fonts::load(void)
 {
     auto& io = ImGui::GetIO();
 
@@ -45,6 +45,6 @@ void gui::detail::load_fonts(void)
     auto unscii16_path = std::format("{}/fonts/unscii-16.ttf", constant::BUILTIN_NAME_SPACE);
     auto unscii8_path = std::format("{}/fonts/unscii-8.ttf", constant::BUILTIN_NAME_SPACE);
 
-    gui::font_unscii16 = load_font(unscii16_path, 16.0f, s_unscii16_data, io);
-    gui::font_unscii8 = load_font(unscii8_path, 8.0f, s_unscii8_data, io);
+    fonts::unscii16 = load_font(unscii16_path, 16.0f, s_unscii16_data, io);
+    fonts::unscii8 = load_font(unscii8_path, 8.0f, s_unscii8_data, io);
 }

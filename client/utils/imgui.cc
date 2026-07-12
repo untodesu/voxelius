@@ -2,8 +2,8 @@
 
 #include "client/utils/imgui.hh"
 
-#include "client/gui/fonts.hh"
-#include "client/gui/gui.hh"
+#include "client/fonts.hh"
+#include "client/gui.hh"
 
 void utils::text_nw(ImDrawList* list, std::string_view text, const ImVec2& pos, ImU32 color, ImU32 shadow, ImFont* font)
 {
@@ -53,7 +53,7 @@ std::optional<int> utils::popup(const std::string& title, const std::string& que
 
     std::optional<int> result = std::nullopt;
 
-    ImGui::PushFont(gui::font_unscii16, gui::font_unscii16->LegacySize);
+    ImGui::PushFont(fonts::unscii16, fonts::unscii16->LegacySize);
 
     if(ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
         const auto viewport = ImGui::GetMainViewport();
