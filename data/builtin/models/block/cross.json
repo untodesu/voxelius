@@ -6,7 +6,6 @@
       "to": [16, 16, 8],
       "origin": [8, 8, 8],
       "rotation": [0, 45, 0],
-      "shade": false,
       "faces": {
         "north": {
           "texture": "nwse"
@@ -21,7 +20,6 @@
       "to": [8, 16, 16],
       "origin": [8, 8, 8],
       "rotation": [0, 45, 0],
-      "shade": false,
       "faces": {
         "east": {
           "texture": "nesw"

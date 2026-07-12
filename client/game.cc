@@ -105,13 +105,12 @@ static void generate_debug_terrain(void)
                     auto chance_1 = std::uniform_int_distribution<std::int32_t>(0, 100)(rng);
                     auto chance_2 = std::uniform_int_distribution<std::int32_t>(0, 100)(rng);
 
-                    if(vtest_id != BLOCK_ID_NULL && top + 1 < SIZE && (x * SIZE + z) % 14 == 0 && chance_1 < 15) {
-                        if(chance_2 < 50) {
-                            chunk->set_block(local_pos(x, top + 1, z), chip_id);
-                        }
-                        else {
-                            chunk->set_block(local_pos(x, top + 1, z), vtest_id);
-                        }
+                    if(vtest_id && top + 1 < SIZE && chance_1 < 50) {
+                        chunk->set_block(local_pos(x, top + 1, z), vtest_id);
+                    }
+
+                    if(chip_id != BLOCK_ID_NULL && top + 1 < SIZE && chance_2 == 1) {
+                        chunk->set_block(local_pos(x, top + 1, z), chip_id);
                     }
                 }
             }

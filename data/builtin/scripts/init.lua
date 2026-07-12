@@ -7,14 +7,15 @@ dofile("blocks/grass.lua")
 dofile("blocks/stone.lua")
 
 blocks.add("vtest", {
-    render = blocks.RENDER_SOLID,
-    animated = true,
+    render = blocks.RENDER_ALPHA,
+--  animated = true,
     textures = {
         default = {
-            "vtest_F1.png",
-            "vtest_F2.png",
-            "vtest_F3.png",
-            "vtest_F4.png",
+--          "vtest_F1.png",
+--          "vtest_F2.png",
+--          "vtest_F3.png",
+--          "vtest_F4.png",
+            "bush.png",
         }
     },
 
