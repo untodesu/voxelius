@@ -6,6 +6,7 @@
 #include "core/utils/angles.hh"
 
 #include "shared/block_registry.hh"
+#include "shared/constant.hh"
 #include "shared/coord.hh"
 #include "shared/transform.hh"
 #include "shared/utils/coord.hh"
@@ -20,40 +21,72 @@
 #include "client/player_move.hh"
 #include "client/utils/entity.hh"
 
+#include <fastnoiselite.h>
+
 static void generate_debug_terrain(void)
 {
     auto stone_id = block_registry::find(Identifier::from_string("builtin:stone"));
     auto slab_id = block_registry::find(Identifier::from_string("builtin:stone_slab"));
+    auto dirt_id = block_registry::find(Identifier::from_string("builtin:dirt"));
+    auto grass_id = block_registry::find(Identifier::from_string("builtin:grass"));
 
-    if(stone_id == BLOCK_ID_NULL || slab_id == BLOCK_ID_NULL) {
-        LOG_WARNING("builtin:stone/stone_slab not found, skipping debug terrain");
+    if(stone_id == BLOCK_ID_NULL || slab_id == BLOCK_ID_NULL || dirt_id == BLOCK_ID_NULL || grass_id == BLOCK_ID_NULL) {
+        LOG_WARNING("builtin:stone/stone_slab/dirt/grass not found, skipping debug terrain");
         return;
     }
 
-    const chunk_pos cpos(0, 0, 0);
-    world::create_chunk(cpos);
+    block_id_type slab_bottom_id = slab_id;
 
-    constexpr std::int32_t SIZE = 32;
+    if(auto* family = block_registry::find_family_of(slab_id)) {
+        const auto orientation_key = family->state_hash("orientation");
 
-    for(std::int32_t x = 0; x < SIZE; x += 1) {
-        for(std::int32_t z = 0; z < SIZE; z += 1) {
-            world::set_block(cpos, local_pos(x, 0, z), stone_id);
+        emhash8::HashMap<blockstate_key_type, blockstate_val_type> bottom_map;
+        bottom_map.try_emplace(orientation_key, family->state_hash("bottom"));
+        slab_bottom_id = block_registry::resolve_variant(slab_id, bottom_map);
+    }
 
-            const auto slab_bpos = utils::to_block(cpos, local_pos(x, 1, z));
-            world::set_block(slab_bpos, slab_id);
+    fnl_state noise = fnlCreateState();
+    noise.noise_type = FNL_NOISE_OPENSIMPLEX2;
+    noise.fractal_type = FNL_FRACTAL_FBM;
+    noise.frequency = 0.02f;
+    noise.octaves = 4;
+    noise.lacunarity = 2.0f;
+    noise.gain = 0.5f;
 
-            switch((x * SIZE + z) % 3) {
-                case 0:
-                    // "bottom" is the default, nothing to do
-                    break;
+    constexpr std::int32_t CHUNK_RADIUS = 16;
+    constexpr std::int32_t SIZE = static_cast<std::int32_t>(constant::CHUNK_SIZE);
+    constexpr std::int32_t BASE_HEIGHT = 24;
+    constexpr std::int32_t AMPLITUDE = 12;
+    constexpr std::int32_t DIRT_DEPTH = 4;
 
-                case 1:
-                    world::set_state(slab_bpos, "orientation", "top");
-                    break;
+    for(std::int32_t cx = -CHUNK_RADIUS; cx <= CHUNK_RADIUS; cx += 1) {
+        for(std::int32_t cz = -CHUNK_RADIUS; cz <= CHUNK_RADIUS; cz += 1) {
+            const chunk_pos cpos(cx, 0, cz);
+            auto chunk = world::create_chunk(cpos);
 
-                default:
-                    world::set_state(slab_bpos, "orientation", "double");
-                    break;
+            for(std::int32_t x = 0; x < SIZE; x += 1) {
+                for(std::int32_t z = 0; z < SIZE; z += 1) {
+                    const float wx = static_cast<float>(cx * SIZE + x);
+                    const float wz = static_cast<float>(cz * SIZE + z);
+                    const float sample = fnlGetNoise2D(&noise, wx, wz);
+
+                    const std::int32_t height = BASE_HEIGHT + static_cast<std::int32_t>(sample * static_cast<float>(AMPLITUDE));
+                    const std::int32_t top = std::clamp(height, 1, SIZE - 2);
+                    const std::int32_t dirt_start = std::max(top - DIRT_DEPTH, 0);
+
+                    for(std::int32_t y = 0; y < dirt_start; y += 1)
+                        chunk->set_block(local_pos(x, y, z), stone_id);
+
+                    for(std::int32_t y = dirt_start; y < top; y += 1)
+                        chunk->set_block(local_pos(x, y, z), dirt_id);
+
+                    if((x * SIZE + z) % 37 == 0) {
+                        chunk->set_block(local_pos(x, top, z), slab_bottom_id);
+                    }
+                    else {
+                        chunk->set_block(local_pos(x, top, z), grass_id);
+                    }
+                }
             }
         }
     }

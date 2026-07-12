@@ -71,3 +71,5 @@ target_precompile_headers(voxelius-client PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch
 
 compile_spirv_shader(voxelius-client "${CMAKE_CURRENT_LIST_DIR}/hlsl/chunk.vert.hlsl")
 compile_spirv_shader(voxelius-client "${CMAKE_CURRENT_LIST_DIR}/hlsl/chunk.frag.hlsl")
+
+target_link_libraries(voxelius-client PUBLIC deps::FNL) # temporary
