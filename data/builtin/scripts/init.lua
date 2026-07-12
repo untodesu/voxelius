@@ -20,3 +20,22 @@ blocks.add("vtest", {
 
     model_name = "cross",
 })
+
+blocks.add("chip", {
+    render = blocks.RENDER_SOLID,
+    animated = true,
+    textures = {
+        default = {
+            "chip_F1.png",
+            "chip_F2.png",
+            "chip_F3.png",
+            "chip_F4.png",
+            "chip_F5.png",
+            "chip_F6.png",
+            "chip_F7.png",
+            "chip_F8.png",
+        }
+    },
+
+    model_name = "cube",
+})

@@ -19,6 +19,8 @@
 #include "client/gpu/sampler.hh"
 #include "client/gpu/texture.hh"
 
+constexpr static Uint32 VERTEX_COUNT = 6;
+
 // Compiled from hlsl/chunk.vert.hlsl
 extern const std::uint8_t spirv_chunk_vert[];
 extern const std::size_t spirv_chunk_vert_size;
@@ -41,21 +43,19 @@ static SDL_GPUGraphicsPipeline* s_pipeline_alpha;
 static gpu::Sampler s_atlas_sampler;
 
 static SDL_GPUGraphicsPipeline* create_pipeline(SDL_GPUShader* vert, SDL_GPUShader* frag, SDL_GPUTextureFormat swapchain_format, bool blend,
-    bool depth_write)
+    bool depth_write, SDL_GPUCompareOp depth_compare, bool color_target_enabled)
 {
     SDL_GPUVertexBufferDescription vertex_buffer_desc {};
     vertex_buffer_desc.slot = 0;
-    vertex_buffer_desc.pitch = sizeof(ChunkMesh_Vertex);
-    vertex_buffer_desc.input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX;
+    vertex_buffer_desc.pitch = sizeof(ChunkMesh_Quad);
+    vertex_buffer_desc.input_rate = SDL_GPU_VERTEXINPUTRATE_INSTANCE;
 
-    std::array<SDL_GPUVertexAttribute, 7> attributes {};
-    attributes[0] = { 0, 0, SDL_GPU_VERTEXELEMENTFORMAT_UINT, static_cast<Uint32>(offsetof(ChunkMesh_Vertex, position)) };
-    attributes[1] = { 1, 0, SDL_GPU_VERTEXELEMENTFORMAT_UINT, static_cast<Uint32>(offsetof(ChunkMesh_Vertex, normal)) };
-    attributes[2] = { 2, 0, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, static_cast<Uint32>(offsetof(ChunkMesh_Vertex, uv)) };
-    attributes[3] = { 3, 0, SDL_GPU_VERTEXELEMENTFORMAT_UINT, static_cast<Uint32>(offsetof(ChunkMesh_Vertex, frame_base)) };
-    attributes[4] = { 4, 0, SDL_GPU_VERTEXELEMENTFORMAT_UINT, static_cast<Uint32>(offsetof(ChunkMesh_Vertex, frame_count)) };
-    attributes[5] = { 5, 0, SDL_GPU_VERTEXELEMENTFORMAT_UINT, static_cast<Uint32>(offsetof(ChunkMesh_Vertex, tint_index)) };
-    attributes[6] = { 6, 0, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT, static_cast<Uint32>(offsetof(ChunkMesh_Vertex, shade)) };
+    std::array<SDL_GPUVertexAttribute, 5> attributes {};
+    attributes[0] = { 0, 0, SDL_GPU_VERTEXELEMENTFORMAT_UINT, static_cast<Uint32>(offsetof(ChunkMesh_Quad, data_origin)) };
+    attributes[1] = { 1, 0, SDL_GPU_VERTEXELEMENTFORMAT_UINT, static_cast<Uint32>(offsetof(ChunkMesh_Quad, data_edge_u)) };
+    attributes[2] = { 2, 0, SDL_GPU_VERTEXELEMENTFORMAT_UINT, static_cast<Uint32>(offsetof(ChunkMesh_Quad, data_edge_v)) };
+    attributes[3] = { 3, 0, SDL_GPU_VERTEXELEMENTFORMAT_UINT, static_cast<Uint32>(offsetof(ChunkMesh_Quad, data_uv)) };
+    attributes[4] = { 4, 0, SDL_GPU_VERTEXELEMENTFORMAT_UINT, static_cast<Uint32>(offsetof(ChunkMesh_Quad, data_texture)) };
 
     SDL_GPUColorTargetDescription color_target {};
     color_target.format = swapchain_format;
@@ -87,14 +87,54 @@ static SDL_GPUGraphicsPipeline* create_pipeline(SDL_GPUShader* vert, SDL_GPUShad
 
     info.depth_stencil_state.enable_depth_test = true;
     info.depth_stencil_state.enable_depth_write = depth_write;
-    info.depth_stencil_state.compare_op = SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
+    info.depth_stencil_state.compare_op = depth_compare;
 
-    info.target_info.num_color_targets = 1;
+    info.target_info.num_color_targets = color_target_enabled ? 1 : 0;
     info.target_info.color_target_descriptions = &color_target;
     info.target_info.has_depth_stencil_target = true;
     info.target_info.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT;
 
     return SDL_CreateGPUGraphicsPipeline(globals::gpu_device, &info);
+}
+
+static void upload_part(SDL_GPUCopyPass* copy_pass, ChunkMesh_Part& part)
+{
+    if(part.quads.empty()) {
+        part.quad_buffer = gpu::Buffer();
+        part.quad_count = 0;
+        return;
+    }
+
+    auto bytes = std::as_bytes(std::span(part.quads));
+    part.quad_buffer = gpu::Buffer::create(bytes.size(), SDL_GPU_BUFFERUSAGE_VERTEX);
+    part.quad_buffer.write_streamed(copy_pass, bytes);
+    part.quad_count = static_cast<std::uint32_t>(part.quads.size());
+
+    // FIXME: might not want to clear these for blendable blocks
+    part.quads.clear();
+    part.quads.shrink_to_fit();
+}
+
+static void draw_part(SDL_GPURenderPass* render_pass, const Chunk_Component& chunk, const ChunkMesh_Part& part)
+{
+    Uniforms_PerChunk per_chunk {};
+    per_chunk.world_position = utils::to_fvec(chunk.position - camera::chunk);
+    SDL_PushGPUVertexUniformData(globals::gpu_commands_main, 1, &per_chunk, sizeof(per_chunk));
+
+    SDL_GPUBufferBinding vbo_binding {};
+    vbo_binding.buffer = part.quad_buffer.get();
+    vbo_binding.offset = 0;
+
+    SDL_BindGPUVertexBuffers(render_pass, 0, &vbo_binding, 1);
+    SDL_DrawGPUPrimitives(render_pass, VERTEX_COUNT, part.quad_count, 0, 0);
+}
+
+static float chunk_distance_sq(entt::entity entity)
+{
+    const auto& chunk = world::chunk_entities.get<Chunk_Component>(entity);
+    Eigen::Vector3f position = utils::to_fvec(chunk.position - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
+    Eigen::Vector3f delta = position - camera::local;
+    return delta.squaredNorm();
 }
 
 void chunk_renderer::init(void)
@@ -106,6 +146,7 @@ void chunk_renderer::init(void)
     vert_info.format = SDL_GPU_SHADERFORMAT_SPIRV;
     vert_info.stage = SDL_GPU_SHADERSTAGE_VERTEX;
     vert_info.num_uniform_buffers = 2;
+    vert_info.num_storage_buffers = 1;
 
     SDL_GPUShaderCreateInfo frag_info {};
     frag_info.code_size = spirv_chunk_frag_size;
@@ -122,8 +163,9 @@ void chunk_renderer::init(void)
     vx::throw_if_not_fmt(vert, "chunk_renderer: failed to create vertex shader: {}", SDL_GetError());
     vx::throw_if_not_fmt(frag, "chunk_renderer: failed to create fragment shader: {}", SDL_GetError());
 
-    s_pipeline_opaque = create_pipeline(vert, frag, SDL_GetGPUSwapchainTextureFormat(globals::gpu_device, globals::window), false, true);
-    s_pipeline_alpha = create_pipeline(vert, frag, SDL_GetGPUSwapchainTextureFormat(globals::gpu_device, globals::window), true, false);
+    auto swapchain_format = SDL_GetGPUSwapchainTextureFormat(globals::gpu_device, globals::window);
+    s_pipeline_opaque = create_pipeline(vert, frag, swapchain_format, false, true, SDL_GPU_COMPAREOP_LESS_OR_EQUAL, true);
+    s_pipeline_alpha = create_pipeline(vert, frag, swapchain_format, true, false, SDL_GPU_COMPAREOP_LESS_OR_EQUAL, true);
 
     SDL_ReleaseGPUShader(globals::gpu_device, frag);
     SDL_ReleaseGPUShader(globals::gpu_device, vert);
@@ -148,44 +190,21 @@ void chunk_renderer::shutdown(void)
 
 void chunk_renderer::upload(SDL_GPUCopyPass* copy_pass)
 {
-    auto view = world::chunk_entities.view<ChunkMeshUploadDirtyComponent, ChunkMeshComponent>();
+    auto view = world::chunk_entities.view<ChunkMesh_UploadMarker, ChunkMesh>();
 
     for(auto [entity, mesh] : view.each()) {
-        world::chunk_entities.remove<ChunkMeshUploadDirtyComponent>(entity);
-
-        if(mesh.opaque.vertices.empty()) {
-            mesh.opaque.vertex_buffer = gpu::Buffer();
-            mesh.opaque.index_buffer = gpu::Buffer();
-        }
-        else {
-            auto vertex_bytes = std::as_bytes(std::span(mesh.opaque.vertices));
-            mesh.opaque.vertex_buffer = gpu::Buffer::create(vertex_bytes.size(), SDL_GPU_BUFFERUSAGE_VERTEX);
-            mesh.opaque.vertex_buffer.write_streamed(copy_pass, vertex_bytes);
-
-            auto index_bytes = std::as_bytes(std::span(mesh.opaque.indices));
-            mesh.opaque.index_buffer = gpu::Buffer::create(index_bytes.size(), SDL_GPU_BUFFERUSAGE_INDEX);
-            mesh.opaque.index_buffer.write_streamed(copy_pass, index_bytes);
-        }
-
-        if(mesh.alpha.vertices.empty()) {
-            mesh.alpha.vertex_buffer = gpu::Buffer();
-            mesh.alpha.index_buffer = gpu::Buffer();
-        }
-        else {
-            auto vertex_bytes = std::as_bytes(std::span(mesh.alpha.vertices));
-            mesh.alpha.vertex_buffer = gpu::Buffer::create(vertex_bytes.size(), SDL_GPU_BUFFERUSAGE_VERTEX);
-            mesh.alpha.vertex_buffer.write_streamed(copy_pass, vertex_bytes);
-
-            auto index_bytes = std::as_bytes(std::span(mesh.alpha.indices));
-            mesh.alpha.index_buffer = gpu::Buffer::create(index_bytes.size(), SDL_GPU_BUFFERUSAGE_INDEX);
-            mesh.alpha.index_buffer.write_streamed(copy_pass, index_bytes);
-        }
+        world::chunk_entities.remove<ChunkMesh_UploadMarker>(entity);
+        upload_part(copy_pass, mesh.opaque);
+        upload_part(copy_pass, mesh.alpha);
     }
 }
 
 void chunk_renderer::render(SDL_GPURenderPass* render_pass)
 {
-    if(block_atlas::texture == nullptr || block_atlas::gpu_frames == nullptr) {
+    static std::vector<entt::entity> opaque_chunks;
+    static std::vector<entt::entity> alpha_chunks;
+
+    if(block_atlas::texture == nullptr || block_atlas::gpu_frames == nullptr || block_atlas::gpu_strips == nullptr) {
         return;
     }
 
@@ -194,53 +213,64 @@ void chunk_renderer::render(SDL_GPURenderPass* render_pass)
     texture_binding[0].sampler = s_atlas_sampler.get();
 
     auto storage_buffer = block_atlas::gpu_frames->get();
-    auto view = world::chunk_entities.view<ChunkComponent, ChunkMeshComponent>();
+    auto strip_buffer = block_atlas::gpu_strips->get();
+    auto view = world::chunk_entities.view<Chunk_Component, ChunkMesh>();
 
     Uniforms_PerFrame per_frame {};
     per_frame.view_projection = camera::instance.view_projection();
-    per_frame.animation_timer = static_cast<std::uint32_t>(globals::window_framecount); // FIXME: use a slower fixed frame counter
-
-    SDL_BindGPUGraphicsPipeline(render_pass, s_pipeline_opaque);
-    SDL_PushGPUVertexUniformData(globals::gpu_commands_main, 0, &per_frame, sizeof(per_frame));
-    SDL_BindGPUFragmentSamplers(render_pass, 0, texture_binding.data(), static_cast<Uint32>(texture_binding.size()));
-    SDL_BindGPUFragmentStorageBuffers(render_pass, 0, &storage_buffer, 1);
+    per_frame.animation_timer = static_cast<std::uint32_t>(world::current_tick);
 
     const auto& frustum = camera::instance.frustum();
 
+    auto chunk_distance2 = [&](entt::entity entity) {
+        auto& chunk = world::chunk_entities.get<Chunk_Component>(entity);
+        auto position = utils::to_fvec(chunk.position - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
+        return (position - camera::local).eval().squaredNorm();
+    };
+
+    opaque_chunks.clear();
+    opaque_chunks.reserve(view.size_hint());
+
     for(const auto [entity, chunk, mesh] : view.each()) {
-        if(!mesh.opaque.vertex_buffer.is_valid()) {
-            continue;
+        auto visible = true;
+        visible = visible && mesh.opaque.quad_buffer.is_valid();
+        visible = visible && frustum.intersects(utils::bounds(chunk.position - camera::chunk));
+
+        if(visible) {
+            opaque_chunks.push_back(entity);
         }
-
-        if(!frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
-            continue;
-        }
-
-        Uniforms_PerChunk per_chunk {};
-        per_chunk.world_position = utils::to_fvec(chunk.position - camera::chunk);
-        SDL_PushGPUVertexUniformData(globals::gpu_commands_main, 1, &per_chunk, sizeof(per_chunk));
-
-        SDL_GPUBufferBinding vbo_binding {};
-        vbo_binding.buffer = mesh.opaque.vertex_buffer.get();
-        vbo_binding.offset = 0;
-
-        SDL_GPUBufferBinding ibo_binding {};
-        ibo_binding.buffer = mesh.opaque.index_buffer.get();
-        ibo_binding.offset = 0;
-
-        SDL_BindGPUVertexBuffers(render_pass, 0, &vbo_binding, 1);
-        SDL_BindGPUIndexBuffer(render_pass, &ibo_binding, SDL_GPU_INDEXELEMENTSIZE_32BIT);
-
-        SDL_DrawGPUIndexedPrimitives(render_pass, static_cast<Uint32>(mesh.opaque.indices.size()), 1, 0, 0, 0);
-
-        globals::num_draw_calls += 1;
-        globals::num_draw_vertices += mesh.opaque.vertices.size();
     }
 
-    std::vector<entt::entity> alpha_chunks;
+    std::sort(opaque_chunks.begin(), opaque_chunks.end(), [&](entt::entity a, entt::entity b) {
+        auto dist_a = chunk_distance_sq(a);
+        auto dist_b = chunk_distance_sq(b);
+        return dist_a < dist_b;
+    });
+
+    SDL_BindGPUGraphicsPipeline(render_pass, s_pipeline_opaque);
+    SDL_PushGPUVertexUniformData(globals::gpu_commands_main, 0, &per_frame, sizeof(per_frame));
+    SDL_BindGPUVertexStorageBuffers(render_pass, 0, &strip_buffer, 1);
+    SDL_BindGPUFragmentSamplers(render_pass, 0, texture_binding.data(), static_cast<Uint32>(texture_binding.size()));
+    SDL_BindGPUFragmentStorageBuffers(render_pass, 0, &storage_buffer, 1);
+
+    for(auto entity : opaque_chunks) {
+        const auto& mesh = world::chunk_entities.get<ChunkMesh>(entity);
+
+        draw_part(render_pass, world::chunk_entities.get<Chunk_Component>(entity), mesh.opaque);
+
+        globals::num_draw_calls += 1;
+        globals::num_draw_vertices += mesh.opaque.quad_count * VERTEX_COUNT;
+    }
+
+    alpha_chunks.clear();
+    alpha_chunks.reserve(view.size_hint());
 
     for(const auto [entity, chunk, mesh] : view.each()) {
-        if(mesh.alpha.vertex_buffer.is_valid()) {
+        auto visible = true;
+        visible = visible && mesh.alpha.quad_buffer.is_valid();
+        visible = visible && frustum.intersects(utils::bounds(chunk.position - camera::chunk));
+
+        if(visible) {
             alpha_chunks.push_back(entity);
         }
     }
@@ -250,50 +280,23 @@ void chunk_renderer::render(SDL_GPURenderPass* render_pass)
     }
 
     std::sort(alpha_chunks.begin(), alpha_chunks.end(), [&](entt::entity a, entt::entity b) {
-        auto& ca = world::chunk_entities.get<ChunkComponent>(a);
-        auto& cb = world::chunk_entities.get<ChunkComponent>(b);
-
-        auto pa = utils::to_fvec(ca.position - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
-        auto pb = utils::to_fvec(cb.position - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
-
-        auto va = (pa - camera::local).eval();
-        auto vb = (pb - camera::local).eval();
-
-        return va.squaredNorm() > vb.squaredNorm();
+        auto a_dist = chunk_distance_sq(a);
+        auto b_dist = chunk_distance_sq(b);
+        return a_dist > b_dist;
     });
 
     SDL_BindGPUGraphicsPipeline(render_pass, s_pipeline_alpha);
     SDL_PushGPUVertexUniformData(globals::gpu_commands_main, 0, &per_frame, sizeof(per_frame));
+    SDL_BindGPUVertexStorageBuffers(render_pass, 0, &strip_buffer, 1);
     SDL_BindGPUFragmentSamplers(render_pass, 0, texture_binding.data(), static_cast<Uint32>(texture_binding.size()));
     SDL_BindGPUFragmentStorageBuffers(render_pass, 0, &storage_buffer, 1);
 
     for(auto entity : alpha_chunks) {
-        auto& chunk = world::chunk_entities.get<ChunkComponent>(entity);
-        auto& mesh = world::chunk_entities.get<ChunkMeshComponent>(entity);
+        const auto& mesh = world::chunk_entities.get<ChunkMesh>(entity);
 
-        if(!frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
-            continue;
-        }
-
-        Uniforms_PerChunk per_chunk {};
-        per_chunk.world_position = utils::to_fvec(chunk.position - camera::chunk);
-
-        SDL_PushGPUVertexUniformData(globals::gpu_commands_main, 1, &per_chunk, sizeof(per_chunk));
-
-        SDL_GPUBufferBinding vbo_binding {};
-        vbo_binding.buffer = mesh.alpha.vertex_buffer.get();
-        vbo_binding.offset = 0;
-
-        SDL_GPUBufferBinding ibo_binding {};
-        ibo_binding.buffer = mesh.alpha.index_buffer.get();
-        ibo_binding.offset = 0;
-
-        SDL_BindGPUVertexBuffers(render_pass, 0, &vbo_binding, 1);
-        SDL_BindGPUIndexBuffer(render_pass, &ibo_binding, SDL_GPU_INDEXELEMENTSIZE_32BIT);
-
-        SDL_DrawGPUIndexedPrimitives(render_pass, static_cast<Uint32>(mesh.alpha.indices.size()), 1, 0, 0, 0);
+        draw_part(render_pass, world::chunk_entities.get<Chunk_Component>(entity), mesh.alpha);
 
         globals::num_draw_calls += 1;
-        globals::num_draw_vertices += mesh.alpha.vertices.size();
+        globals::num_draw_vertices += mesh.alpha.quad_count * VERTEX_COUNT;
     }
 }

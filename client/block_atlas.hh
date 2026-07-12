@@ -23,12 +23,21 @@ static_assert(0x10 == offsetof(AtlasFrame, layer));
 struct AtlasStrip final {
     std::size_t frame_base;
     std::size_t frame_count;
+    std::size_t index;
 };
+
+struct AtlasStrip_GPU final {
+    std::uint32_t frame_base;
+    std::uint32_t frame_count;
+};
+
+static_assert(0x08 == sizeof(AtlasStrip_GPU));
 
 namespace block_atlas
 {
 extern std::unique_ptr<gpu::Texture> texture;
 extern std::unique_ptr<gpu::Buffer> gpu_frames;
+extern std::unique_ptr<gpu::Buffer> gpu_strips;
 extern std::vector<AtlasFrame> cpu_frames;
 } // namespace block_atlas
 

@@ -16,6 +16,8 @@
 #include "client/block_models.hh"
 #include "client/chunk_mesh.hh"
 
+constexpr static std::size_t THROTTLE_COUNT = 32;
+
 constexpr static std::array ALL_FACES = {
     BLOCK_FACE_NORTH,
     BLOCK_FACE_SOUTH,
@@ -34,13 +36,13 @@ public:
 
 private:
     bool is_culled(const local_pos& lpos, block_face face, block_render self_render) const;
-    void emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos,
+    void emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos,
         std::uint64_t entropy) const;
     void mesh_block(const local_pos& lpos, block_id_type id);
 
     std::array<BlockStorage, 7> m_cache;
-    std::vector<ChunkMesh_Vertex> m_opaque;
-    std::vector<ChunkMesh_Vertex> m_alpha;
+    std::vector<ChunkMesh_Quad> m_opaque;
+    std::vector<ChunkMesh_Quad> m_alpha;
     entt::entity m_entity;
     chunk_pos m_cpos;
 };
@@ -95,37 +97,6 @@ static chunk_pos face_delta(block_face face)
     return chunk_pos::Zero();
 }
 
-static float shade_factor(std::uint32_t packed_normal, bool enable)
-{
-    if(enable) {
-        auto nx = static_cast<float>((static_cast<std::int32_t>(packed_normal & 0x3FFU) << 22) >> 22) / 511.0f;
-        auto ny = static_cast<float>((static_cast<std::int32_t>((packed_normal >> 10U) & 0x3FFU) << 22) >> 22) / 511.0f;
-        auto nz = static_cast<float>((static_cast<std::int32_t>((packed_normal >> 20U) & 0x3FFU) << 22) >> 22) / 511.0f;
-
-        auto ax = std::abs(nx);
-        auto ay = std::abs(ny);
-        auto az = std::abs(nz);
-
-        if(ay >= ax && ay >= az) {
-            if(ny >= 0.0f) {
-                return 1.0f;
-            }
-            else {
-                return 0.4f;
-            }
-        }
-
-        if(ax >= az) {
-            return 0.6f;
-        }
-
-        return 0.8f;
-    }
-    else {
-        return 1.0f;
-    }
-}
-
 static bool is_neighbour(const local_pos& lpos)
 {
     auto result = false;
@@ -137,7 +108,7 @@ static bool is_neighbour(const local_pos& lpos)
 
 static void mark_dirty(entt::entity entity)
 {
-    world::chunk_entities.emplace_or_replace<ChunkMeshDirtyComponent>(entity);
+    world::chunk_entities.emplace_or_replace<ChunkMesh_DirtyMarker>(entity);
 }
 
 static void mark_dirty(const chunk_pos& cpos)
@@ -175,38 +146,23 @@ void MeshingTask::process(void)
     }
 }
 
-static void build_indices(std::size_t vertex_count, std::vector<std::uint32_t>& out)
-{
-    out.clear();
-    out.reserve((vertex_count / 4) * 6);
-
-    for(std::uint32_t idx = 0; idx < vertex_count; idx += 4) {
-        out.push_back(idx + 0);
-        out.push_back(idx + 1);
-        out.push_back(idx + 2);
-        out.push_back(idx + 0);
-        out.push_back(idx + 2);
-        out.push_back(idx + 3);
-    }
-}
-
 void MeshingTask::finalize(void)
 {
     if(world::chunk_entities.valid(m_entity)) {
         if(m_opaque.empty() && m_alpha.empty()) {
-            world::chunk_entities.remove<ChunkMeshComponent>(m_entity);
-            world::chunk_entities.remove<ChunkMeshUploadDirtyComponent>(m_entity);
+            world::chunk_entities.remove<ChunkMesh>(m_entity);
+            world::chunk_entities.remove<ChunkMesh_UploadMarker>(m_entity);
             return;
         }
 
-        auto& component = world::chunk_entities.get_or_emplace<ChunkMeshComponent>(m_entity);
-        component.opaque.vertices = std::move(m_opaque);
-        component.alpha.vertices = std::move(m_alpha);
+        auto& component = world::chunk_entities.get_or_emplace<ChunkMesh>(m_entity);
+        component.opaque.quads = std::move(m_opaque);
+        component.alpha.quads = std::move(m_alpha);
 
-        build_indices(component.opaque.vertices.size(), component.opaque.indices);
-        build_indices(component.alpha.vertices.size(), component.alpha.indices);
+        component.opaque.quad_count = static_cast<std::uint32_t>(component.opaque.quads.size());
+        component.alpha.quad_count = static_cast<std::uint32_t>(component.alpha.quads.size());
 
-        world::chunk_entities.emplace_or_replace<ChunkMeshUploadDirtyComponent>(m_entity);
+        world::chunk_entities.emplace_or_replace<ChunkMesh_UploadMarker>(m_entity);
     }
 }
 
@@ -244,33 +200,50 @@ bool MeshingTask::is_culled(const local_pos& lpos, block_face face, block_render
     return neighbour_baked->fully_covered[opposite_face(face)];
 }
 
-void MeshingTask::emit_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos,
+void MeshingTask::emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos,
     std::uint64_t entropy) const
 {
     auto block_origin = lpos.cast<float>() * 16.0f;
 
-    for(auto& quad : quads) {
-        auto shade = shade_factor(quad.packed_normal, quad.shade);
-        auto frame_count = quad.frame_count;
-        auto frame_base = quad.frame_base;
+    for(const auto& quad : quads) {
+        std::uint32_t frame_offset = 0;
 
-        if(!quad.animated && frame_count > 0) {
-            frame_base += entropy % frame_count;
-            frame_count = 1;
+        if(quad.frame_count > 0 && !quad.animated) {
+            frame_offset = static_cast<std::uint32_t>(entropy % quad.frame_count);
         }
 
-        for(std::size_t i = 0; i < quad.positions.size(); ++i) {
-            ChunkMesh_Vertex vertex {};
-            vertex.position = ChunkMesh_Vertex::pack_position(block_origin + quad.positions[i] * 16.0f);
-            vertex.normal = quad.packed_normal;
-            vertex.uv[0] = quad.uvs[i].x();
-            vertex.uv[1] = quad.uvs[i].y();
-            vertex.frame_base = static_cast<std::uint32_t>(frame_base);
-            vertex.frame_count = static_cast<std::uint32_t>(frame_count);
-            vertex.tint_index = quad.tint_index;
-            vertex.shade = shade;
-            out.push_back(vertex);
+        Eigen::Vector3f p0 = block_origin + quad.positions[0] * 16.0f;
+        Eigen::Vector3f p1 = block_origin + quad.positions[1] * 16.0f;
+        Eigen::Vector3f p3 = block_origin + quad.positions[3] * 16.0f;
+
+        const auto& c0 = quad.uvs[0];
+        const auto& c2 = quad.uvs[2];
+
+        auto dist_c0 = std::abs(quad.uvs[1].x() - c0.x());
+        auto dist_c2 = std::abs(quad.uvs[1].x() - c2.x());
+        auto uv_orient_flag = dist_c0 < dist_c2;
+
+        ChunkMesh_Quad out_quad {};
+        out_quad.data_origin = ChunkMesh_Quad::pack_position(p0);
+        out_quad.data_edge_u = ChunkMesh_Quad::pack_offset(p1 - p0);
+        out_quad.data_edge_v = ChunkMesh_Quad::pack_offset(p3 - p0);
+
+        if(quad.shade) {
+            out_quad.data_origin |= ChunkMesh_Quad::SHADE_BIT;
         }
+
+        if(uv_orient_flag) {
+            out_quad.data_origin |= ChunkMesh_Quad::UV_ORIENT_BIT;
+        }
+
+        if(quad.animated) {
+            out_quad.data_edge_u |= ChunkMesh_Quad::ANIMATED_BIT;
+        }
+
+        out_quad.data_uv = ChunkMesh_Quad::pack_uv(c0, c2);
+        out_quad.data_texture = ChunkMesh_Quad::pack_texture(quad.texture_index, frame_offset, quad.tint_index);
+
+        out.push_back(out_quad);
     }
 }
 
@@ -371,9 +344,9 @@ static void on_chunk_remove(const ChunkRemoveEvent& event)
     auto entity = chunk->entity();
 
     if(world::chunk_entities.valid(entity)) {
-        world::chunk_entities.remove<ChunkMeshDirtyComponent>(entity);
-        world::chunk_entities.remove<ChunkMeshUploadDirtyComponent>(entity);
-        world::chunk_entities.remove<ChunkMeshComponent>(entity);
+        world::chunk_entities.remove<ChunkMesh_DirtyMarker>(entity);
+        world::chunk_entities.remove<ChunkMesh_UploadMarker>(entity);
+        world::chunk_entities.remove<ChunkMesh>(entity);
     }
 }
 
@@ -394,15 +367,16 @@ void chunk_mesher::init(void)
 
 void chunk_mesher::update(void)
 {
-    auto group = world::chunk_entities.group<ChunkMeshDirtyComponent>(entt::get<ChunkComponent>);
+    auto group = world::chunk_entities.group<ChunkMesh_DirtyMarker>(entt::get<Chunk_Component>);
     auto count = 0;
 
     for(const auto [entity, chunk] : group.each()) {
-        world::chunk_entities.remove<ChunkMeshDirtyComponent>(entity);
+        world::chunk_entities.remove<ChunkMesh_DirtyMarker>(entity);
         threading::submit<MeshingTask>(entity, chunk.position);
+
         count += 1;
 
-        if(count >= 16) {
+        if(count >= THROTTLE_COUNT) {
             break;
         }
     }

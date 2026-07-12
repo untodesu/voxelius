@@ -42,7 +42,7 @@ void camera::init(void)
     view_distance.bind(globals::client_config, "camera.view_distance");
 
     settings::slider<float>(1, settings_location::GENERAL, "camera.vertical_fov", 45.0f, 110.0f, true, "%.0f");
-    settings::slider<unsigned>(0, settings_location::VIDEO, "camera.view_distance", 1, 16, false);
+    settings::slider<unsigned>(0, settings_location::VIDEO, "camera.view_distance", 1, 32, false);
 
     reset_camera();
 }

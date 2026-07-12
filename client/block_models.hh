@@ -7,7 +7,7 @@ struct BakedBlockModel_Quad final {
     std::array<Eigen::Vector3f, 4> positions;
     std::array<Eigen::Vector2f, 4> uvs;
     std::uint32_t packed_normal;
-    std::size_t frame_base;
+    std::uint32_t texture_index;
     std::size_t frame_count;
     unsigned tint_index;
     bool animated;

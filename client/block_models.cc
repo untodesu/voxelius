@@ -365,7 +365,7 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
             make_face_geometry(used_from, used_to, used_face, quad);
             apply_face_uv(texture_face, used_from, used_to, used_face, element.rescale, quad);
 
-            quad.frame_base = strip->frame_base;
+            quad.texture_index = static_cast<std::uint32_t>(strip->index);
             quad.frame_count = strip->frame_count;
             quad.tint_index = face_def.tint_index.value_or(0);
             quad.animated = def.animated;

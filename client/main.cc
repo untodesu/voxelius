@@ -190,6 +190,8 @@ static void wrapped_main(int argc, char** argv)
 
         for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
             client_game::fixed_update();
+
+            world::current_tick += 1;
         }
 
         video::update();

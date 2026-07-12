@@ -35,6 +35,19 @@ static void generate_debug_terrain(void)
         return;
     }
 
+    // Animated cross voxel; scattered on the surface below to exercise the
+    // per-quad animation path. Missing vtest just skips the decoration.
+    auto vtest_id = block_registry::find(Identifier::from_string("builtin:vtest"));
+    auto chip_id = block_registry::find(Identifier::from_string("builtin:chip"));
+
+    if(vtest_id == BLOCK_ID_NULL) {
+        LOG_WARNING("builtin:vtest not found, skipping animated voxels");
+    }
+
+    if(chip_id == BLOCK_ID_NULL) {
+        LOG_WARNING("builtin:chip not found, skipping animated voxels");
+    }
+
     block_id_type slab_bottom_id = slab_id;
 
     if(auto* family = block_registry::find_family_of(slab_id)) {
@@ -55,9 +68,11 @@ static void generate_debug_terrain(void)
 
     constexpr std::int32_t CHUNK_RADIUS = 64;
     constexpr std::int32_t SIZE = static_cast<std::int32_t>(constant::CHUNK_SIZE);
-    constexpr std::int32_t BASE_HEIGHT = 24;
-    constexpr std::int32_t AMPLITUDE = 12;
+    constexpr std::int32_t BASE_HEIGHT = 8;
+    constexpr std::int32_t AMPLITUDE = 5;
     constexpr std::int32_t DIRT_DEPTH = 4;
+
+    std::mt19937_64 rng(std::random_device {}());
 
     for(std::int32_t cx = -CHUNK_RADIUS; cx <= CHUNK_RADIUS; cx += 1) {
         for(std::int32_t cz = -CHUNK_RADIUS; cz <= CHUNK_RADIUS; cz += 1) {
@@ -85,6 +100,18 @@ static void generate_debug_terrain(void)
                     }
                     else {
                         chunk->set_block(local_pos(x, top, z), grass_id);
+                    }
+
+                    auto chance_1 = std::uniform_int_distribution<std::int32_t>(0, 100)(rng);
+                    auto chance_2 = std::uniform_int_distribution<std::int32_t>(0, 100)(rng);
+
+                    if(vtest_id != BLOCK_ID_NULL && top + 1 < SIZE && (x * SIZE + z) % 14 == 0 && chance_1 < 15) {
+                        if(chance_2 < 50) {
+                            chunk->set_block(local_pos(x, top + 1, z), chip_id);
+                        }
+                        else {
+                            chunk->set_block(local_pos(x, top + 1, z), vtest_id);
+                        }
                     }
                 }
             }

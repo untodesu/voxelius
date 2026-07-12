@@ -2,28 +2,48 @@
 
 #include "client/chunk_mesh.hh"
 
-std::uint32_t ChunkMesh_Vertex::pack_position(const Eigen::Vector3f& position_16ths)
+static std::uint32_t pack_10_10_10(const Eigen::Vector3f& value_16ths, std::int32_t bias)
 {
-    auto biased_x = INT32_C(16) + static_cast<std::int32_t>(position_16ths.x());
-    auto biased_y = INT32_C(16) + static_cast<std::int32_t>(position_16ths.y());
-    auto biased_z = INT32_C(16) + static_cast<std::int32_t>(position_16ths.z());
+    auto bx = bias + static_cast<std::int32_t>(std::lround(value_16ths.x()));
+    auto by = bias + static_cast<std::int32_t>(std::lround(value_16ths.y()));
+    auto bz = bias + static_cast<std::int32_t>(std::lround(value_16ths.z()));
 
-    std::array<std::uint32_t, 3> packed_axes {};
-    packed_axes[0] = static_cast<std::uint32_t>(std::clamp(biased_x, INT32_C(0), INT32_C(1023)));
-    packed_axes[1] = static_cast<std::uint32_t>(std::clamp(biased_y, INT32_C(0), INT32_C(1023)));
-    packed_axes[2] = static_cast<std::uint32_t>(std::clamp(biased_z, INT32_C(0), INT32_C(1023)));
+    auto px = static_cast<std::uint32_t>(std::clamp(bx, INT32_C(0), INT32_C(1023)));
+    auto py = static_cast<std::uint32_t>(std::clamp(by, INT32_C(0), INT32_C(1023)));
+    auto pz = static_cast<std::uint32_t>(std::clamp(bz, INT32_C(0), INT32_C(1023)));
 
+    return px | (py << 10U) | (pz << 20U);
+}
+
+std::uint32_t ChunkMesh_Quad::pack_position(const Eigen::Vector3f& position_16ths)
+{
+    return pack_10_10_10(position_16ths, INT32_C(16));
+}
+
+std::uint32_t ChunkMesh_Quad::pack_offset(const Eigen::Vector3f& offset_16ths)
+{
+    return pack_10_10_10(offset_16ths, INT32_C(512));
+}
+
+static std::uint32_t unorm8(float value)
+{
+    return static_cast<std::uint32_t>(std::lround(std::clamp(value, 0.0f, 1.0f) * 255.0f)) & 0xFFU;
+}
+
+std::uint32_t ChunkMesh_Quad::pack_uv(const Eigen::Vector2f& c0, const Eigen::Vector2f& c2)
+{
     std::uint32_t result = 0;
-    result |= packed_axes[0];
-    result |= packed_axes[1] << 10U;
-    result |= packed_axes[2] << 20U;
+    result |= unorm8(c0.x()) << 0U;
+    result |= unorm8(c0.y()) << 8U;
+    result |= unorm8(c2.x()) << 16U;
+    result |= unorm8(c2.y()) << 24U;
     return result;
 }
 
-Eigen::Vector3f ChunkMesh_Vertex::unpack_position(std::uint32_t position)
+std::uint32_t ChunkMesh_Quad::pack_texture(std::uint32_t texture_index, std::uint32_t frame_offset, std::uint32_t tint_index)
 {
-    auto x = static_cast<float>(static_cast<std::int32_t>(position & 0x3FFU) - INT32_C(16));
-    auto y = static_cast<float>(static_cast<std::int32_t>((position >> 10U) & 0x3FFU) - INT32_C(16));
-    auto z = static_cast<float>(static_cast<std::int32_t>((position >> 20U) & 0x3FFU) - INT32_C(16));
-    return Eigen::Vector3f(x, y, z);
+    std::uint32_t result = texture_index & 0xFFFFU;
+    result |= (frame_offset & 0xFFU) << 16U;
+    result |= (tint_index & 0xFFU) << 24U;
+    return result;
 }

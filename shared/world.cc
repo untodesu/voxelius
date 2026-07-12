@@ -40,7 +40,7 @@ std::shared_ptr<Chunk> world::create_chunk(const chunk_pos& pos)
         auto entity = chunk_entities.create();
         auto chunk = std::make_shared<Chunk>(entity);
 
-        auto& component = chunk_entities.emplace<ChunkComponent>(entity);
+        auto& component = chunk_entities.emplace<Chunk_Component>(entity);
         component.position = pos;
         component.ptr = chunk;
 
@@ -68,7 +68,7 @@ std::shared_ptr<Chunk> world::find_chunk(const chunk_pos& pos)
 std::shared_ptr<Chunk> world::find_chunk(entt::entity entity)
 {
     if(chunk_entities.valid(entity)) {
-        auto& component = chunk_entities.get<ChunkComponent>(entity);
+        auto& component = chunk_entities.get<Chunk_Component>(entity);
         return component.ptr;
     }
 
@@ -99,7 +99,7 @@ void world::remove_chunk(const chunk_pos& pos)
 void world::remove_chunk(entt::entity entity)
 {
     if(chunk_entities.valid(entity)) {
-        const auto& component = chunk_entities.get<ChunkComponent>(entity);
+        const auto& component = chunk_entities.get<Chunk_Component>(entity);
 
         globals::dispatcher.trigger(ChunkRemoveEvent(component.position, component.ptr));
 
@@ -297,7 +297,7 @@ void world::fixed_update(void)
 {
     std::vector<std::size_t> due;
 
-    chunk_entities.view<ChunkComponent>().each([&](ChunkComponent& component) {
+    chunk_entities.view<Chunk_Component>().each([&](Chunk_Component& component) {
         due.clear();
 
         component.ptr->pop_due(current_tick, due);

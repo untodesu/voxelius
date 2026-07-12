@@ -29,7 +29,7 @@ private:
     std::multimap<std::uint64_t, std::size_t> m_scheduled;
 };
 
-struct ChunkComponent final {
+struct Chunk_Component final {
     std::shared_ptr<Chunk> ptr;
     chunk_pos position;
 };
