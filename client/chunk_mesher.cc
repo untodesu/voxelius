@@ -3,7 +3,6 @@
 #include "client/chunk_mesher.hh"
 
 #include "core/threading.hh"
-#include "core/utils/crc64.hh"
 
 #include "shared/block_registry.hh"
 #include "shared/block_storage.hh"
@@ -296,9 +295,21 @@ void MeshingTask::mesh_block(const local_pos& lpos, block_id_type id)
         fully_enclosed = fully_enclosed && culled[face];
     }
 
+    std::uint64_t entropy;
+
     auto bpos = utils::to_block(m_cpos, lpos);
-    auto entropy_src = bpos.x() * bpos.y() * bpos.z();
-    auto entropy = utils::crc64(&entropy_src, sizeof(entropy_src));
+    entropy = static_cast<std::uint64_t>(bpos.x()) * UINT64_C(0x9E3779B97F4A7C15);
+    entropy ^= static_cast<std::uint64_t>(bpos.y()) * UINT64_C(0xC2B2AE3D27D4EB4F);
+    entropy ^= static_cast<std::uint64_t>(bpos.z()) * UINT64_C(0x165667B19E3779F9);
+
+    // Just a simple-ish hash for a single 64-bit value; before that
+    // we were using CRC64 which is kind of an overkill for a mesher
+    // https://zimbry.blogspot.com/2011/09/better-bit-mixing-improving-on.html
+    entropy ^= entropy >> 33;
+    entropy *= UINT64_C(0xFF51AFD7ED558CCD);
+    entropy ^= entropy >> 33;
+    entropy *= UINT64_C(0xC4CEB9FE1A85EC53);
+    entropy ^= entropy >> 33;
 
     if(def->render == BLOCK_RENDER_ALPHA) {
         if(!fully_enclosed) {
@@ -328,6 +339,15 @@ static void mark_neighbors_dirty(const chunk_pos& cpos)
 {
     for(auto face : ALL_FACES) {
         mark_dirty(cpos + face_delta(face));
+    }
+}
+
+static void mark_border_neighbors_dirty(const chunk_pos& cpos, const local_pos& lpos)
+{
+    for(auto face : ALL_FACES) {
+        if(is_neighbour((lpos + face_delta(face)).eval())) {
+            mark_dirty(cpos + face_delta(face));
+        }
     }
 }
 
@@ -361,7 +381,7 @@ static void on_block_update(const BlockUpdateEvent& event)
 {
     auto chunk = event.chunk();
     mark_dirty(chunk->entity());
-    mark_neighbors_dirty(event.cpos());
+    mark_border_neighbors_dirty(event.cpos(), event.lpos());
 }
 
 void chunk_mesher::init(void)

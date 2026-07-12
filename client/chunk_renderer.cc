@@ -212,12 +212,12 @@ void chunk_renderer::render(SDL_GPURenderPass* render_pass)
             continue;
         }
 
-        // if(!frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
-        //     continue;
-        // }
+        if(!frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
+            continue;
+        }
 
         Uniforms_PerChunk per_chunk {};
-        per_chunk.world_position = utils::to_fvec(chunk.position - camera::chunk);
+        per_chunk.world_position = utils::to_fvec(chunk.position - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
         SDL_PushGPUVertexUniformData(globals::gpu_commands_main, 1, &per_chunk, sizeof(per_chunk));
 
         SDL_GPUBufferBinding vbo_binding {};
@@ -271,9 +271,9 @@ void chunk_renderer::render(SDL_GPURenderPass* render_pass)
         auto& chunk = world::chunk_entities.get<ChunkComponent>(entity);
         auto& mesh = world::chunk_entities.get<ChunkMeshComponent>(entity);
 
-        // if(!frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
-        //     continue;
-        // }
+        if(!frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
+            continue;
+        }
 
         Uniforms_PerChunk per_chunk {};
         per_chunk.world_position = utils::to_fvec(chunk.position - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);

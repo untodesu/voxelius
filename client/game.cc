@@ -53,7 +53,7 @@ static void generate_debug_terrain(void)
     noise.lacunarity = 2.0f;
     noise.gain = 0.5f;
 
-    constexpr std::int32_t CHUNK_RADIUS = 16;
+    constexpr std::int32_t CHUNK_RADIUS = 64;
     constexpr std::int32_t SIZE = static_cast<std::int32_t>(constant::CHUNK_SIZE);
     constexpr std::int32_t BASE_HEIGHT = 24;
     constexpr std::int32_t AMPLITUDE = 12;
