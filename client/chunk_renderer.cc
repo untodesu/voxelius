@@ -217,7 +217,7 @@ void chunk_renderer::render(SDL_GPURenderPass* render_pass)
         }
 
         Uniforms_PerChunk per_chunk {};
-        per_chunk.world_position = utils::to_fvec(chunk.position - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
+        per_chunk.world_position = utils::to_fvec(chunk.position - camera::chunk);
         SDL_PushGPUVertexUniformData(globals::gpu_commands_main, 1, &per_chunk, sizeof(per_chunk));
 
         SDL_GPUBufferBinding vbo_binding {};
@@ -276,7 +276,7 @@ void chunk_renderer::render(SDL_GPURenderPass* render_pass)
         }
 
         Uniforms_PerChunk per_chunk {};
-        per_chunk.world_position = utils::to_fvec(chunk.position - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
+        per_chunk.world_position = utils::to_fvec(chunk.position - camera::chunk);
 
         SDL_PushGPUVertexUniformData(globals::gpu_commands_main, 1, &per_chunk, sizeof(per_chunk));
 

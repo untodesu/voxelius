@@ -395,9 +395,15 @@ void chunk_mesher::init(void)
 void chunk_mesher::update(void)
 {
     auto group = world::chunk_entities.group<ChunkMeshDirtyComponent>(entt::get<ChunkComponent>);
+    auto count = 0;
 
     for(const auto [entity, chunk] : group.each()) {
         world::chunk_entities.remove<ChunkMeshDirtyComponent>(entity);
         threading::submit<MeshingTask>(entity, chunk.position);
+        count += 1;
+
+        if(count >= 16) {
+            break;
+        }
     }
 }
