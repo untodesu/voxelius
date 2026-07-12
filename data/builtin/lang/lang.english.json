@@ -10,6 +10,10 @@
   "main_menu.quit_popup.choice.yes": "Yes",
   "main_menu.quit_popup.choice.no": "No",
 
+  "main_menu.mods_popup.title": "Mod warning",
+  "main_menu.mods_popup.message": "One or more mods failed to load",
+  "main_menu.mods_popup.choice.ok": "OK",
+
   "settings.location.general": "General",
   "settings.location.video": "Graphics",
   "settings.location.audio": "Audio",

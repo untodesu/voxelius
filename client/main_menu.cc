@@ -4,6 +4,8 @@
 
 #include "core/res/resource.hh"
 
+#include "shared/mod_context.hh"
+#include "shared/mod_loader.hh"
 #include "shared/world.hh"
 
 #include "client/fonts.hh"
@@ -21,6 +23,10 @@ static std::string str_button_quit;
 static std::string str_quit_popup_title;
 static std::string str_quit_popup_question;
 static std::array<std::string, 2> str_quit_popup_choices;
+
+static std::string str_mods_popup_title;
+static std::string str_mods_popup_message;
+static std::string str_mods_popup_choice_ok;
 
 static void on_keyboard_event(const SDL_KeyboardEvent& event)
 {
@@ -49,6 +55,10 @@ static void on_language_update_event(const LanguageUpdateEvent& event)
     str_quit_popup_question = language::resolve("main_menu.quit_popup.question");
     str_quit_popup_choices[0] = language::resolve_gui("main_menu.quit_popup.choice.yes");
     str_quit_popup_choices[1] = language::resolve_gui("main_menu.quit_popup.choice.no");
+
+    str_mods_popup_title = language::resolve_gui("main_menu.mods_popup.title");
+    str_mods_popup_message = language::resolve("main_menu.mods_popup.message");
+    str_mods_popup_choice_ok = language::resolve_gui("main_menu.mods_popup.choice.ok");
 }
 
 void main_menu::init(void)
@@ -140,6 +150,14 @@ void main_menu::layout(void)
         // which handler latches an internal flag in the main loop
         std::raise(SIGINT);
     }
+
+    if(globals::window_framecount == 0) {
+        if(std::ranges::any_of(mod_loader::all(), std::bind_front(std::equal_to {}, mod_status::FAILED), &ModContext::status)) {
+            ImGui::OpenPopup(str_mods_popup_title.c_str());
+        }
+    }
+
+    utils::popup(str_mods_popup_title, str_mods_popup_message, std::span(&str_mods_popup_choice_ok, 1));
 
     ImGui::End();
 }

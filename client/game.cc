@@ -70,8 +70,6 @@ void client_game::init_late(void)
     globals::player = utils::spawn_player_client({ -8, 24, -8 });
 
     generate_debug_terrain();
-
-    gui::screen = GUI_SCREEN_NONE;
 }
 
 void client_game::shutdown(void)

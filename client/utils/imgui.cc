@@ -59,18 +59,17 @@ std::optional<int> utils::popup(const std::string& title, const std::string& que
         const auto viewport = ImGui::GetMainViewport();
         const auto& viewport_size = viewport->Size;
 
-        ImVec2 popup_size(ImGui::GetWindowSize());
-        ImVec2 popup_pos(viewport_size.x * 0.5f - popup_size.x * 0.5f, viewport_size.y * 0.5f - popup_size.y * 0.5f);
+        auto& style = ImGui::GetStyle();
+        auto& spacing = style.ItemSpacing;
 
-        ImGui::PushTextWrapPos(popup_size.x);
+        float content_width = ImGui::CalcItemWidth();
+        ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + content_width);
         ImGui::TextUnformatted(question.c_str());
         ImGui::PopTextWrapPos();
 
         ImGui::NewLine();
 
-        auto& style = ImGui::GetStyle();
-        auto& spacing = style.ItemSpacing;
-        ImVec2 button_size(0.5f * (ImGui::CalcItemWidth() - spacing.x), 0.0f);
+        ImVec2 button_size(0.5f * (content_width - spacing.x), 0.0f);
 
         for(std::size_t i = 0; i < choices.size(); ++i) {
             if(ImGui::Button(choices[i].c_str(), button_size)) {
@@ -86,6 +85,8 @@ std::optional<int> utils::popup(const std::string& title, const std::string& que
             }
         }
 
+        ImVec2 popup_size(ImGui::GetWindowSize());
+        ImVec2 popup_pos(viewport_size.x * 0.5f - popup_size.x * 0.5f, viewport_size.y * 0.5f - popup_size.y * 0.5f);
         ImGui::SetWindowPos(popup_pos, ImGuiCond_Always);
 
         ImGui::EndPopup();
