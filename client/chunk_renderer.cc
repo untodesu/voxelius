@@ -218,7 +218,7 @@ void chunk_renderer::render(SDL_GPURenderPass* render_pass)
 
     Uniforms_PerFrame per_frame {};
     per_frame.view_projection = camera::instance.view_projection();
-    per_frame.animation_timer = static_cast<std::uint32_t>(world::current_tick >> 1);
+    per_frame.animation_timer = static_cast<std::uint32_t>(world::current_tick >> 2);
 
     const auto& frustum = camera::instance.frustum();
 
