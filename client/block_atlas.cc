@@ -22,7 +22,6 @@ constexpr static int ATLAS_PADDING = 1;
 std::unique_ptr<gpu::Texture> block_atlas::texture;
 std::unique_ptr<gpu::Buffer> block_atlas::gpu_frames;
 std::unique_ptr<gpu::Buffer> block_atlas::gpu_strips;
-std::vector<AtlasFrame> block_atlas::cpu_frames;
 
 static bool s_compiled = false;
 static std::deque<AtlasStrip> s_strips;
@@ -152,23 +151,25 @@ static void build_atlas(void)
     vx::throw_if_not_fmt(texture.is_valid(), "block_atlas: failed to create a {}x{}x{} atlas texture", LAYER_SIZE, LAYER_SIZE, num_layers);
 
     block_atlas::texture = std::make_unique<gpu::Texture>(std::move(texture));
-    block_atlas::cpu_frames.resize(s_pending.size());
+
+    std::vector<AtlasFrame_GPU> gpu_frames;
+    gpu_frames.reserve(s_pending.size());
 
     for(std::size_t i = 0; i < rects.size(); ++i) {
         const auto& rect = rects[i];
         const auto& image = s_pending.at(rect.id);
 
-        AtlasFrame frame {};
+        AtlasFrame_GPU frame {};
         frame.layer = layers[rect.id];
         frame.uv_min.x() = static_cast<float>(rect.x + ATLAS_PADDING) / static_cast<float>(LAYER_SIZE);
         frame.uv_min.y() = static_cast<float>(rect.y + ATLAS_PADDING) / static_cast<float>(LAYER_SIZE);
         frame.uv_max.x() = static_cast<float>(rect.x + ATLAS_PADDING + image->width) / static_cast<float>(LAYER_SIZE);
         frame.uv_max.y() = static_cast<float>(rect.y + ATLAS_PADDING + image->height) / static_cast<float>(LAYER_SIZE);
 
-        block_atlas::cpu_frames[rect.id] = std::move(frame);
+        gpu_frames.emplace_back(std::move(frame));
     }
 
-    auto frame_bytes = std::as_bytes(std::span(block_atlas::cpu_frames));
+    auto frame_bytes = std::as_bytes(std::span(gpu_frames));
     auto frame_buffer = gpu::Buffer::create(frame_bytes.size(), SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ);
     vx::throw_if_not_fmt(frame_buffer.is_valid(), "block_atlas: failed to create a {} byte frame table buffer", frame_bytes.size());
 
@@ -289,7 +290,6 @@ void block_atlas::init(void)
     texture.reset();
     gpu_frames.reset();
     gpu_strips.reset();
-    cpu_frames.clear();
 
     s_strips.clear();
     s_lookup.clear();
@@ -334,7 +334,6 @@ void block_atlas::shutdown(void)
     texture.reset();
     gpu_frames.reset();
     gpu_strips.reset();
-    cpu_frames.clear();
 
     s_strips.clear();
     s_lookup.clear();
