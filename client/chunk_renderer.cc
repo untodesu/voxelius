@@ -222,12 +222,6 @@ void chunk_renderer::render(SDL_GPURenderPass* render_pass)
 
     const auto& frustum = camera::instance.frustum();
 
-    auto chunk_distance2 = [&](entt::entity entity) {
-        auto& chunk = world::chunk_entities.get<Chunk_Component>(entity);
-        auto position = utils::to_fvec(chunk.position - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
-        return (position - camera::local).eval().squaredNorm();
-    };
-
     opaque_chunks.clear();
     opaque_chunks.reserve(view.size_hint());
 
