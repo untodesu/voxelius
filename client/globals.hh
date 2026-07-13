@@ -16,14 +16,7 @@ extern config::Map client_config;
 namespace globals
 {
 extern SDL_Window* window;
-extern SDL_GPUDevice* gpu_device;
-} // namespace globals
-
-namespace globals
-{
-extern SDL_GPUCommandBuffer* gpu_commands_main;
-extern SDL_GPUTexture* gpu_swapchain;
-extern SDL_GPUTexture* gpu_depth_stencil;
+extern SDL_GLContext gl_context;
 } // namespace globals
 
 namespace globals

@@ -2,9 +2,6 @@
 
 #include "client/block_atlas.hh"
 
-#include "client/gpu/buffer.hh"
-#include "client/gpu/texture.hh"
-
 #include "core/exception.hh"
 #include "core/res/image.hh"
 #include "core/res/resource.hh"
@@ -19,9 +16,11 @@ constexpr static int LAYER_SIZE = 4096;
 constexpr static int LAYER_CAP = 256;
 constexpr static int ATLAS_PADDING = 1;
 
-std::unique_ptr<gpu::Texture> block_atlas::texture;
-std::unique_ptr<gpu::Buffer> block_atlas::gpu_frames;
-std::unique_ptr<gpu::Buffer> block_atlas::gpu_strips;
+GLuint block_atlas::texture;
+GLuint block_atlas::vbo_frames;
+GLuint block_atlas::tbo_frames;
+GLuint block_atlas::vbo_strips;
+GLuint block_atlas::tbo_strips;
 
 static bool s_compiled = false;
 static std::deque<AtlasStrip> s_strips;
@@ -146,76 +145,71 @@ static void build_atlas(void)
     std::vector<std::uint32_t> layers;
     auto num_layers = pack_layers(rects, layers);
 
-    auto texture = gpu::Texture::create_array(LAYER_SIZE, LAYER_SIZE, num_layers, SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
-        SDL_GPU_TEXTUREUSAGE_SAMPLER, 1);
-    vx::throw_if_not_fmt(texture.is_valid(), "block_atlas: failed to create a {}x{}x{} atlas texture", LAYER_SIZE, LAYER_SIZE, num_layers);
+    glGenTextures(1, &block_atlas::texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, LAYER_SIZE, LAYER_SIZE, num_layers, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
-    block_atlas::texture = std::make_unique<gpu::Texture>(std::move(texture));
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    std::vector<AtlasFrame_GPU> gpu_frames;
-    gpu_frames.reserve(s_pending.size());
+    std::vector<AtlasFrame_GL> gl_frames;
+    gl_frames.reserve(s_pending.size());
 
     for(std::size_t i = 0; i < rects.size(); ++i) {
         const auto& rect = rects[i];
         const auto& image = s_pending.at(rect.id);
 
-        AtlasFrame_GPU frame {};
+        AtlasFrame_GL frame {};
         frame.layer = layers[rect.id];
         frame.uv_min.x() = static_cast<float>(rect.x + ATLAS_PADDING) / static_cast<float>(LAYER_SIZE);
         frame.uv_min.y() = static_cast<float>(rect.y + ATLAS_PADDING) / static_cast<float>(LAYER_SIZE);
         frame.uv_max.x() = static_cast<float>(rect.x + ATLAS_PADDING + image->width) / static_cast<float>(LAYER_SIZE);
         frame.uv_max.y() = static_cast<float>(rect.y + ATLAS_PADDING + image->height) / static_cast<float>(LAYER_SIZE);
 
-        gpu_frames.emplace_back(std::move(frame));
+        gl_frames.emplace_back(std::move(frame));
     }
 
-    auto frame_bytes = std::as_bytes(std::span(gpu_frames));
-    auto frame_buffer = gpu::Buffer::create(frame_bytes.size(), SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ);
-    vx::throw_if_not_fmt(frame_buffer.is_valid(), "block_atlas: failed to create a {} byte frame table buffer", frame_bytes.size());
+    glGenBuffers(1, &block_atlas::vbo_frames);
+    glBindBuffer(GL_TEXTURE_BUFFER, block_atlas::vbo_frames);
+    glBufferData(GL_TEXTURE_BUFFER, gl_frames.size() * sizeof(AtlasFrame_GL), gl_frames.data(), GL_STATIC_DRAW);
 
-    block_atlas::gpu_frames = std::make_unique<gpu::Buffer>(std::move(frame_buffer));
+    glGenTextures(1, &block_atlas::tbo_frames);
+    glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_frames);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, block_atlas::vbo_frames);
 
-    std::vector<AtlasStrip_GPU> gpu_strips;
-    gpu_strips.reserve(s_strips.size());
+    std::vector<AtlasStrip_GL> gl_strips;
+    gl_strips.reserve(s_strips.size());
 
-    for(const auto& cpu_strip : s_strips) {
-        AtlasStrip_GPU gpu_strip {};
-        gpu_strip.frame_base = static_cast<std::uint32_t>(cpu_strip.frame_base);
-        gpu_strip.frame_count = static_cast<std::uint32_t>(cpu_strip.frame_count);
-        gpu_strips.emplace_back(std::move(gpu_strip));
+    for(const auto& strip : s_strips) {
+        AtlasStrip_GL gl_strip {};
+        gl_strip.frame_base = static_cast<std::uint32_t>(strip.frame_base);
+        gl_strip.frame_count = static_cast<std::uint32_t>(strip.frame_count);
+        gl_strips.emplace_back(std::move(gl_strip));
     }
 
-    auto strip_bytes = std::as_bytes(std::span(gpu_strips));
-    auto strip_buffer = gpu::Buffer::create(strip_bytes.size(), SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ);
-    vx::throw_if_not_fmt(strip_buffer.is_valid(), "block_atlas: failed to create a {} byte strip table buffer", strip_bytes.size());
+    glGenBuffers(1, &block_atlas::vbo_strips);
+    glBindBuffer(GL_TEXTURE_BUFFER, block_atlas::vbo_strips);
+    glBufferData(GL_TEXTURE_BUFFER, gl_strips.size() * sizeof(AtlasStrip_GL), gl_strips.data(), GL_STATIC_DRAW);
 
-    block_atlas::gpu_strips = std::make_unique<gpu::Buffer>(std::move(strip_buffer));
+    glGenTextures(1, &block_atlas::tbo_strips);
+    glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_strips);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32UI, block_atlas::vbo_strips);
 
-    auto cmds = SDL_AcquireGPUCommandBuffer(globals::gpu_device);
-    vx::throw_if_fmt(cmds == nullptr, "SDL_AcquireGPUCommandBuffer failed: {}", SDL_GetError());
-
-    auto pass = SDL_BeginGPUCopyPass(cmds);
-    vx::throw_if(pass == nullptr, "SDL_BeginGPUCopyPass returned null!");
+    glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);
 
     for(const auto& rect : rects) {
         const auto& image = s_pending.at(rect.id);
 
         auto padded = extrude(image, ATLAS_PADDING);
-        auto pw = static_cast<Uint32>(image->width + ATLAS_PADDING * 2);
-        auto ph = static_cast<Uint32>(image->height + ATLAS_PADDING * 2);
-        auto layer = layers[rect.id];
+        auto padded_wide = static_cast<GLsizei>(image->width + ATLAS_PADDING + ATLAS_PADDING);
+        auto padded_tall = static_cast<GLsizei>(image->height + ATLAS_PADDING + ATLAS_PADDING);
+        auto layer = static_cast<GLint>(layers.at(rect.id));
 
-        block_atlas::texture->write_streamed(pass, padded, layer, 0, static_cast<Uint32>(rect.x), static_cast<Uint32>(rect.y), pw, ph);
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, static_cast<GLint>(rect.x), static_cast<GLint>(rect.y), layer, padded_wide, padded_tall, 1,
+            GL_RGBA, GL_UNSIGNED_BYTE, padded.data());
     }
-
-    block_atlas::gpu_frames->write_streamed(pass, frame_bytes);
-    block_atlas::gpu_strips->write_streamed(pass, strip_bytes);
-
-    SDL_EndGPUCopyPass(pass);
-
-    auto fence = SDL_SubmitGPUCommandBufferAndAcquireFence(cmds);
-    SDL_WaitForGPUFences(globals::gpu_device, true, &fence, 1);
-    SDL_ReleaseGPUFence(globals::gpu_device, fence);
 
     LOG_INFO("packed {} frames into {} layer(s) of a {}x{} atlas", rects.size(), num_layers, LAYER_SIZE, LAYER_SIZE);
 
@@ -287,9 +281,11 @@ const AtlasStrip* block_atlas::find(std::span<const Identifier> textures)
 
 void block_atlas::init(void)
 {
-    texture.reset();
-    gpu_frames.reset();
-    gpu_strips.reset();
+    texture = 0;
+    tbo_frames = 0;
+    vbo_frames = 0;
+    tbo_strips = 0;
+    vbo_strips = 0;
 
     s_strips.clear();
     s_lookup.clear();
@@ -331,9 +327,11 @@ void block_atlas::init_late(void)
 
 void block_atlas::shutdown(void)
 {
-    texture.reset();
-    gpu_frames.reset();
-    gpu_strips.reset();
+    glDeleteBuffers(1, &vbo_strips);
+    glDeleteTextures(1, &tbo_strips);
+    glDeleteBuffers(1, &vbo_frames);
+    glDeleteTextures(1, &tbo_frames);
+    glDeleteTextures(1, &texture);
 
     s_strips.clear();
     s_lookup.clear();

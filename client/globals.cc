@@ -7,11 +7,7 @@
 config::Map globals::client_config;
 
 SDL_Window* globals::window;
-SDL_GPUDevice* globals::gpu_device;
-
-SDL_GPUCommandBuffer* globals::gpu_commands_main;
-SDL_GPUTexture* globals::gpu_swapchain;
-SDL_GPUTexture* globals::gpu_depth_stencil;
+SDL_GLContext globals::gl_context;
 
 int globals::width;
 int globals::height;

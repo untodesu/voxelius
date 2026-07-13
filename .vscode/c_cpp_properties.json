@@ -15,6 +15,7 @@
                 "${workspaceFolder}/deps/enet/include",
                 "${workspaceFolder}/deps/entt/include",
                 "${workspaceFolder}/deps/fastnoiselite/include",
+                "${workspaceFolder}/deps/glad/include",
                 "${workspaceFolder}/deps/imgui/include",
                 "${workspaceFolder}/deps/lua/include",
                 "${workspaceFolder}/deps/parson/include",

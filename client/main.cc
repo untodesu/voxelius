@@ -13,6 +13,7 @@
 #include "shared/mod_loader.hh"
 #include "shared/res/block_collision.hh"
 #include "shared/res/block_model.hh"
+#include "shared/splash.hh"
 #include "shared/world.hh"
 
 #include "client/block_atlas.hh"
@@ -113,6 +114,8 @@ static void wrapped_main(int argc, char** argv)
     Texture2D::register_resource();
 
     mod_loader::init();
+
+    splash::init(SPLASH_CLIENT);
 
     video::init();
     head::init();
@@ -233,6 +236,7 @@ static void wrapped_main(int argc, char** argv)
 
     LOG_INFO("shutdown after {} frames", globals::window_framecount);
     LOG_INFO("avg framerate: {:.03f} FPS ({:.03f} ms)", 1.0f / globals::window_frametime_avg, 1000.0f * globals::window_frametime_avg);
+    LOG_INFO("last frame I drew {} vertices ({} draw calls)", globals::num_draw_vertices, globals::num_draw_calls);
 
     world::shutdown();
 

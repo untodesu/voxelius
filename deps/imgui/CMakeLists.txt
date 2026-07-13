@@ -21,13 +21,13 @@ add_library(deps_imgui_sdl3 STATIC
 target_link_libraries(deps_imgui_sdl3 PUBLIC deps_imgui)
 target_link_libraries(deps_imgui_sdl3 PUBLIC deps_SDL3)
 
-add_library(deps_imgui_sdlgpu3 STATIC
-    "${CMAKE_CURRENT_LIST_DIR}/include/imgui_impl_sdlgpu3.h"
-    "${CMAKE_CURRENT_LIST_DIR}/include/imgui_impl_sdlgpu3_shaders.h"
-    "${CMAKE_CURRENT_LIST_DIR}/src/imgui_impl_sdlgpu3.cpp")
-target_link_libraries(deps_imgui_sdlgpu3 PUBLIC deps_imgui)
-target_link_libraries(deps_imgui_sdlgpu3 PUBLIC deps_SDL3)
+add_library(deps_imgui_opengl3 STATIC
+    "${CMAKE_CURRENT_LIST_DIR}/include/imgui_impl_opengl3.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/imgui_impl_opengl3_loader.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/imgui_impl_opengl3.cpp")
+target_link_libraries(deps_imgui_opengl3 PUBLIC deps_imgui)
+target_link_libraries(deps_imgui_opengl3 PUBLIC deps_glad)
 
 add_library(deps::imgui ALIAS deps_imgui)
 add_library(deps::imgui-backend-sdl3 ALIAS deps_imgui_sdl3)
-add_library(deps::imgui-backend-sdlgpu3 ALIAS deps_imgui_sdlgpu3)
+add_library(deps::imgui-backend-opengl3 ALIAS deps_imgui_opengl3)

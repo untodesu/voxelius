@@ -3,42 +3,40 @@
 
 #include "core/identifier.hh"
 
-namespace gpu
-{
-class Buffer;
-class Texture;
-} // namespace gpu
-
 struct AtlasStrip final {
     std::size_t frame_base;
     std::size_t frame_count;
     std::size_t index;
 };
 
-struct AtlasFrame_GPU final {
+struct AtlasFrame_GL final {
     Eigen::Vector2f uv_min;
     Eigen::Vector2f uv_max;
     std::uint32_t layer;
-    std::uint32_t resv;
+    std::uint32_t reserved_1;
+    std::uint32_t reserved_2;
+    std::uint32_t reserved_3;
 };
 
-static_assert(0x18 == sizeof(AtlasFrame_GPU));
-static_assert(0x08 == offsetof(AtlasFrame_GPU, uv_max));
-static_assert(0x10 == offsetof(AtlasFrame_GPU, layer));
+static_assert(0x20 == sizeof(AtlasFrame_GL));
+static_assert(0x08 == offsetof(AtlasFrame_GL, uv_max));
+static_assert(0x10 == offsetof(AtlasFrame_GL, layer));
 
-struct AtlasStrip_GPU final {
+struct AtlasStrip_GL final {
     std::uint32_t frame_base;
     std::uint32_t frame_count;
 };
 
-static_assert(0x08 == sizeof(AtlasStrip_GPU));
-static_assert(0x04 == offsetof(AtlasStrip_GPU, frame_count));
+static_assert(0x08 == sizeof(AtlasStrip_GL));
+static_assert(0x04 == offsetof(AtlasStrip_GL, frame_count));
 
 namespace block_atlas
 {
-extern std::unique_ptr<gpu::Texture> texture;
-extern std::unique_ptr<gpu::Buffer> gpu_frames;
-extern std::unique_ptr<gpu::Buffer> gpu_strips;
+extern GLuint texture;
+extern GLuint vbo_frames;
+extern GLuint tbo_frames;
+extern GLuint vbo_strips;
+extern GLuint tbo_strips;
 } // namespace block_atlas
 
 namespace block_atlas

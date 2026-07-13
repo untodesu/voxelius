@@ -17,6 +17,8 @@ template<vx::char_type T>
 std::basic_string_view<T> remove_comments(std::basic_string_view<T> string);
 template<vx::char_type T>
 std::vector<std::basic_string_view<T>> tokenize(std::basic_string_view<T> string);
+template<vx::char_type T>
+std::basic_string<T> join(const std::vector<std::basic_string<T>>& parts, std::basic_string_view<T> separator);
 } // namespace utils
 
 #endif /* EFFFA75C_5420_47E3_B0E0_5E7CB636F7E3 */

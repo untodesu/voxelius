@@ -8,6 +8,8 @@
 #include "core/exception.hh"
 #include "core/version.hh"
 
+#include "shared/splash.hh"
+
 #include "client/constant.hh"
 #include "client/globals.hh"
 #include "client/settings.hh"
@@ -97,10 +99,10 @@ static void cache_fullscreen_modes(void)
 static void update_present_mode(void)
 {
     if(s_enable_vsync.value()) {
-        SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
+        SDL_GL_SetSwapInterval(1);
     }
     else {
-        SDL_SetGPUSwapchainParameters(globals::gpu_device, globals::window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, s_unlocked_present_mode);
+        SDL_GL_SetSwapInterval(0);
     }
 }
 
@@ -126,13 +128,21 @@ void video::init(void)
 
     vx::throw_if_not_fmt(SDL_InitSubSystem(SDL_INIT_VIDEO), "SDL_InitSubSystem for video failed: {}", SDL_GetError());
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);  // FIXME: use an actual framebuffer
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8); // FIXME: use an actual framebuffer
+
     pick_display();
     cache_fullscreen_modes();
 
     settings::video_mode(0, settings_location::VIDEO, "video.current_mode", false);
     settings::checkbox(1, settings_location::VIDEO, "video.enable_vsync", true);
 
-    globals::window = SDL_CreateWindow("client", constant::BASE_WIDTH, constant::BASE_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
+    globals::window = SDL_CreateWindow("client", constant::BASE_WIDTH, constant::BASE_HEIGHT,
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
     vx::throw_if_not_fmt(globals::window, "SDL_CreateWindow failed: {}", SDL_GetError());
 
     SDL_SetWindowMinimumSize(globals::window, constant::BASE_WIDTH, constant::BASE_HEIGHT);
@@ -145,17 +155,7 @@ void video::init(void)
 
 void video::init_late(void)
 {
-    // Needs globals::gpu_device, created by head::init() which runs
-    // between video::init() and this
-    if(SDL_WindowSupportsGPUPresentMode(globals::gpu_device, globals::window, SDL_GPU_PRESENTMODE_MAILBOX)) {
-        s_unlocked_present_mode = SDL_GPU_PRESENTMODE_MAILBOX;
-    }
-    else if(SDL_WindowSupportsGPUPresentMode(globals::gpu_device, globals::window, SDL_GPU_PRESENTMODE_IMMEDIATE)) {
-        s_unlocked_present_mode = SDL_GPU_PRESENTMODE_IMMEDIATE;
-    }
-    else {
-        s_unlocked_present_mode = SDL_GPU_PRESENTMODE_VSYNC;
-    }
+    update_present_mode();
 
     const std::string& mode = s_current_mode.value();
 
@@ -172,11 +172,6 @@ void video::init_late(void)
         }
     }
 
-    // request_windowed()/request_fullscreen() only resize the actual SDL
-    // window; globals::width/height/aspect are otherwise only ever updated
-    // by the SDL_EVENT_WINDOW_RESIZED handler, which needs the event queue
-    // pumped (main loop's handle_events()) - not yet the case this early in
-    // startup, so query the real size directly instead of relying on that
     int width;
     int height;
     SDL_GetWindowSizeInPixels(globals::window, &width, &height);
@@ -292,7 +287,7 @@ void video::request_windowed(void)
 
 void video::update_window_title(void)
 {
-    auto title = std::format("client {}", version::full);
+    auto title = std::format("Voxelius {}: {}", version::full, splash::get());
 
     SDL_SetWindowTitle(globals::window, title.c_str());
 }

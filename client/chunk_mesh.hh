@@ -1,8 +1,6 @@
 #ifndef AD0ACA2E_153B_4EC9_A474_9E7B117A757C
 #define AD0ACA2E_153B_4EC9_A474_9E7B117A757C
 
-#include "client/gpu/buffer.hh"
-
 struct ChunkMesh_Quad final {
     static constexpr std::uint32_t SHADE_BIT = 1U << 30U;
     static constexpr std::uint32_t UV_ORIENT_BIT = 1U << 31U;
@@ -21,9 +19,10 @@ struct ChunkMesh_Quad final {
 };
 
 struct ChunkMesh_Part final {
+    virtual ~ChunkMesh_Part(void) noexcept;
     std::vector<ChunkMesh_Quad> quads; // FIXME: might not want to clear these for blendable blocks
-    std::uint32_t quad_count { 0 };
-    gpu::Buffer quad_buffer;
+    std::uint32_t count { 0 };
+    GLuint vbo { 0 };
 };
 
 struct ChunkMesh final {
@@ -32,6 +31,5 @@ struct ChunkMesh final {
 };
 
 struct ChunkMesh_DirtyMarker final {};
-struct ChunkMesh_UploadMarker final {};
 
 #endif /* AD0ACA2E_153B_4EC9_A474_9E7B117A757C */

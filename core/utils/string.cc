@@ -119,6 +119,40 @@ std::vector<std::basic_string_view<T>> utils::tokenize(std::basic_string_view<T>
     return tokens;
 }
 
+template<vx::char_type T>
+std::basic_string<T> utils::join(const std::vector<std::basic_string<T>>& parts, std::basic_string_view<T> separator)
+{
+    if(parts.empty()) {
+        return {};
+    }
+
+    auto total_length = separator.size() * parts.size() - parts.size();
+
+    for(const auto& part : parts) {
+        total_length += part.size();
+    }
+
+    std::basic_string<T> result;
+    result.reserve(total_length);
+
+    auto it = parts.cbegin();
+    result.append(*it);
+    it = std::next(it);
+
+    while(true) {
+        if(it == parts.cend()) {
+            break;
+        }
+
+        result.append(separator);
+        result.append(*it);
+
+        it = std::next(it);
+    }
+
+    return result;
+}
+
 template bool utils::is_whitespace<char>(std::basic_string_view<char> string);
 template bool utils::is_whitespace<wchar_t>(std::basic_string_view<wchar_t> string);
 template bool utils::is_whitespace<char8_t>(std::basic_string_view<char8_t> string);
@@ -154,3 +188,14 @@ template std::vector<std::basic_string_view<wchar_t>> utils::tokenize<wchar_t>(s
 template std::vector<std::basic_string_view<char8_t>> utils::tokenize<char8_t>(std::basic_string_view<char8_t> string);
 template std::vector<std::basic_string_view<char16_t>> utils::tokenize<char16_t>(std::basic_string_view<char16_t> string);
 template std::vector<std::basic_string_view<char32_t>> utils::tokenize<char32_t>(std::basic_string_view<char32_t> string);
+
+template std::basic_string<char> utils::join<char>(const std::vector<std::basic_string<char>>& parts,
+    std::basic_string_view<char> separator);
+template std::basic_string<wchar_t> utils::join<wchar_t>(const std::vector<std::basic_string<wchar_t>>& parts,
+    std::basic_string_view<wchar_t> separator);
+template std::basic_string<char8_t> utils::join<char8_t>(const std::vector<std::basic_string<char8_t>>& parts,
+    std::basic_string_view<char8_t> separator);
+template std::basic_string<char16_t> utils::join<char16_t>(const std::vector<std::basic_string<char16_t>>& parts,
+    std::basic_string_view<char16_t> separator);
+template std::basic_string<char32_t> utils::join<char32_t>(const std::vector<std::basic_string<char32_t>>& parts,
+    std::basic_string_view<char32_t> separator);

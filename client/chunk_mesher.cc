@@ -118,6 +118,24 @@ static void mark_dirty(const chunk_pos& cpos)
     }
 }
 
+static void sync_part(ChunkMesh_Part& part)
+{
+    if(part.quads.empty()) {
+        if(part.vbo) {
+            glDeleteBuffers(1, &part.vbo);
+        }
+
+        part.count = 0;
+        part.vbo = 0;
+        return;
+    }
+
+    if(part.vbo == 0)
+        glGenBuffers(1, &part.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, part.vbo);
+    glBufferData(GL_ARRAY_BUFFER, std::span(part.quads).size_bytes(), part.quads.data(), GL_STATIC_DRAW);
+}
+
 MeshingTask::MeshingTask(entt::entity entity, const chunk_pos& cpos) : m_entity(entity), m_cpos(cpos)
 {
     if(auto chunk = world::find_chunk(cpos)) {
@@ -151,18 +169,26 @@ void MeshingTask::finalize(void)
     if(world::chunk_entities.valid(m_entity)) {
         if(m_opaque.empty() && m_alpha.empty()) {
             world::chunk_entities.remove<ChunkMesh>(m_entity);
-            world::chunk_entities.remove<ChunkMesh_UploadMarker>(m_entity);
             return;
         }
 
         auto& component = world::chunk_entities.get_or_emplace<ChunkMesh>(m_entity);
+
         component.opaque.quads = std::move(m_opaque);
+        component.opaque.count = static_cast<std::uint32_t>(component.opaque.quads.size());
+        sync_part(component.opaque);
+
         component.alpha.quads = std::move(m_alpha);
+        component.alpha.count = static_cast<std::uint32_t>(component.alpha.quads.size());
+        sync_part(component.alpha);
 
-        component.opaque.quad_count = static_cast<std::uint32_t>(component.opaque.quads.size());
-        component.alpha.quad_count = static_cast<std::uint32_t>(component.alpha.quads.size());
+        // Opaque quads won't get depth-sorted
+        // at runtime so there's no point in keeping
+        // them persistent in the system memory
+        component.opaque.quads.clear();
+        component.opaque.quads.shrink_to_fit();
 
-        world::chunk_entities.emplace_or_replace<ChunkMesh_UploadMarker>(m_entity);
+        world::chunk_entities.patch<ChunkMesh>(m_entity);
     }
 }
 
@@ -345,7 +371,6 @@ static void on_chunk_remove(const ChunkRemoveEvent& event)
 
     if(world::chunk_entities.valid(entity)) {
         world::chunk_entities.remove<ChunkMesh_DirtyMarker>(entity);
-        world::chunk_entities.remove<ChunkMesh_UploadMarker>(entity);
         world::chunk_entities.remove<ChunkMesh>(entity);
     }
 }

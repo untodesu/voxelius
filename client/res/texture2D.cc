@@ -26,34 +26,36 @@ static const void* texture2D_load_fn(const char* path, std::uint32_t flags)
         return nullptr;
     }
 
-    SDL_GPUTextureFormat format;
+    GLenum format_internal;
+    GLenum format_source;
 
     if(flags & RESFLAG_TEX_GRAY) {
-        format = SDL_GPU_TEXTUREFORMAT_R8_UNORM;
+        format_internal = GL_R8;
+        format_source = GL_RED;
     }
     else {
-        format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+        format_internal = GL_RGBA8;
+        format_source = GL_RGBA;
     }
 
-    auto gpu = gpu::Texture::create_2D(image->width, image->height, format, SDL_GPU_TEXTUREUSAGE_SAMPLER);
+    GLuint handle;
+    glGenTextures(1, &handle);
+    glBindTexture(GL_TEXTURE_2D, handle);
 
-    if(!gpu.is_valid()) {
-        LOG_WARNING("{}: failed to create GPU texture", path);
-        return nullptr;
-    }
-
-    gpu.write_blocking(std::as_bytes(std::span(image->pixels, static_cast<std::size_t>(image->width * image->height * image->channels))));
+    glTexImage2D(GL_TEXTURE_2D, 0, format_internal, image->width, image->height, 0, format_source, GL_UNSIGNED_BYTE, image->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
     auto texture = new Texture2D;
-    texture->gpu = std::move(gpu);
-    texture->imgui = reinterpret_cast<ImTextureID>(texture->gpu.get());
-
+    texture->handle = handle;
+    texture->imgui = static_cast<ImTextureID>(texture->handle);
     return texture;
 }
 
 static void texture2D_free_fn(const void* resource)
 {
-    delete reinterpret_cast<const Texture2D*>(resource);
+    auto texture = reinterpret_cast<const Texture2D*>(resource);
+    glDeleteTextures(1, &texture->handle);
+    delete texture;
 }
 
 void Texture2D::register_resource(void)

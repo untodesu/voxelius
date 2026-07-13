@@ -37,6 +37,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/mod_loader.hh"
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
     "${CMAKE_CURRENT_LIST_DIR}/player.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/splash.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/splash.hh"
     "${CMAKE_CURRENT_LIST_DIR}/stasis.cc"
     "${CMAKE_CURRENT_LIST_DIR}/stasis.hh"
     "${CMAKE_CURRENT_LIST_DIR}/transform.cc"

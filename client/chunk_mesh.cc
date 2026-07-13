@@ -15,6 +15,22 @@ static std::uint32_t pack_10_10_10(const Eigen::Vector3f& value_16ths, std::int3
     return px | (py << 10U) | (pz << 20U);
 }
 
+static std::uint32_t unorm8(float value)
+{
+    return static_cast<std::uint32_t>(std::lround(std::clamp(value, 0.0f, 1.0f) * 255.0f)) & 0xFFU;
+}
+
+ChunkMesh_Part::~ChunkMesh_Part(void)
+{
+    if(vbo) {
+        // The ChunkMesh_Part structure is meant to be a part
+        // of the ChunkMesh component within the EnTT registry...
+        // When the registry is cleaned or a chunk is removed, components
+        // are expected to be safely disposed of so we need a destructor
+        glDeleteBuffers(1, &vbo);
+    }
+}
+
 std::uint32_t ChunkMesh_Quad::pack_position(const Eigen::Vector3f& position_16ths)
 {
     return pack_10_10_10(position_16ths, INT32_C(16));
@@ -23,11 +39,6 @@ std::uint32_t ChunkMesh_Quad::pack_position(const Eigen::Vector3f& position_16th
 std::uint32_t ChunkMesh_Quad::pack_offset(const Eigen::Vector3f& offset_16ths)
 {
     return pack_10_10_10(offset_16ths, INT32_C(512));
-}
-
-static std::uint32_t unorm8(float value)
-{
-    return static_cast<std::uint32_t>(std::lround(std::clamp(value, 0.0f, 1.0f) * 255.0f)) & 0xFFU;
 }
 
 std::uint32_t ChunkMesh_Quad::pack_uv(const Eigen::Vector2f& c0, const Eigen::Vector2f& c2)

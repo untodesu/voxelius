@@ -14,7 +14,7 @@
 #include "client/globals.hh"
 #include "client/gui.hh"
 
-constexpr static float SPEED = 16.0f;
+constexpr static float SPEED = 256.0f;
 
 void player_move::init(void)
 {
