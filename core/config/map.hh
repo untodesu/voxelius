@@ -18,8 +18,6 @@ public:
     Map& operator=(const Map& other) = delete;
     Map& operator=(Map&& other) = delete;
 
-    constexpr std::uint64_t generation(void) const;
-
     std::optional<std::string_view> raw_string(map_slot_type slot) const;
     void set_raw_string(map_slot_type slot, std::string_view value);
 
@@ -32,6 +30,8 @@ public:
     std::optional<T> value_raw(map_slot_type slot) const;
     template<typename T>
     void set_value_raw(map_slot_type slot, const T& value);
+
+    std::uint64_t generation(map_slot_type slot) const;
 
     map_slot_type find_slot(std::string_view key) const;
     map_slot_type find_or_create_slot(std::string_view key);
@@ -47,16 +47,11 @@ public:
     bool save(std::string_view path) const;
 
 private:
+    std::vector<std::uint64_t> m_generations {};
     std::vector<std::optional<std::string>> m_slots {};
     emhash8::HashMap<std::string, map_slot_type> m_index;
-    std::uint64_t m_generation { 0 };
 };
 } // namespace config
-
-constexpr std::uint64_t config::Map::generation(void) const
-{
-    return m_generation;
-}
 
 template<typename T>
 std::optional<T> config::Map::value(std::string_view key) const

@@ -73,8 +73,8 @@ std::optional<std::string_view> config::Map::raw_string(map_slot_type slot) cons
 void config::Map::set_raw_string(map_slot_type slot, std::string_view value)
 {
     if(slot < m_slots.size()) {
+        m_generations[slot] += 1;
         m_slots[slot] = std::string(value);
-        m_generation += 1;
     }
 }
 
@@ -96,6 +96,7 @@ config::map_slot_type config::Map::find_or_create_slot(std::string_view key)
     if(it == m_index.cend()) {
         auto slot = m_slots.size();
         m_slots.emplace_back(std::nullopt);
+        m_generations.emplace_back(0);
         m_index.try_emplace(std::string(key), slot);
 
         return slot;
@@ -112,7 +113,17 @@ bool config::Map::contains(std::string_view key) const
 void config::Map::purge(void)
 {
     m_slots.clear();
+    m_generations.clear();
     m_index.clear();
+}
+
+std::uint64_t config::Map::generation(map_slot_type slot) const
+{
+    if(slot >= m_generations.size()) {
+        return 0;
+    }
+
+    return m_generations[slot];
 }
 
 void config::Map::load(std::istream& stream)

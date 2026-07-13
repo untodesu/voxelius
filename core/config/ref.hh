@@ -42,7 +42,7 @@ const T& config::Ref<T>::value(void) const
 {
     if(dirty()) {
         m_value = m_map->value_raw<T>(m_slot).value_or(m_value);
-        m_generation = m_map->generation();
+        m_generation = m_map->generation(m_slot);
     }
 
     return m_value;
@@ -57,7 +57,11 @@ config::Ref<T>::operator const T&(void) const
 template<typename T>
 constexpr bool config::Ref<T>::dirty(void) const
 {
-    return m_map && m_generation != m_map->generation();
+    if(m_map == nullptr || m_generation == m_map->generation(m_slot)) {
+        return false;
+    }
+
+    return true;
 }
 
 template<typename T>
@@ -92,7 +96,7 @@ void config::Ref<T>::bind(Map& map, std::string_view key)
     m_map = &map;
     m_slot = map.find_or_create_slot(key);
     m_value = map.value_raw<T>(m_slot).value_or(m_value);
-    m_generation = map.generation();
+    m_generation = map.generation(m_slot);
 
     map.set_value_raw<T>(m_slot, m_value);
 }
@@ -102,7 +106,7 @@ void config::Ref<T>::commit(void)
 {
     if(m_map && m_slot != NULL_SLOT) {
         m_map->set_value_raw<T>(m_slot, m_value);
-        m_generation = m_map->generation();
+        m_generation = m_map->generation(m_slot);
     }
 }
 

@@ -12,6 +12,7 @@
 #include "client/constant.hh"
 #include "client/globals.hh"
 #include "client/gui.hh"
+#include "client/settings.hh"
 
 constexpr static float PITCH_MIN = -1.0f * utils::radians(90.0f);
 constexpr static float PITCH_MAX = +1.0f * utils::radians(90.0f);
@@ -49,6 +50,8 @@ static void on_mouse_motion(const SDL_MouseMotionEvent& event)
 void player_look::init(void)
 {
     s_sensitivity.bind(globals::client_config, "player_look.sensitivity");
+
+    settings::slider(0, settings_location::MOUSE, "player_look.sensitivity", 25, 100, true);
 
     globals::dispatcher.sink<SDL_MouseMotionEvent>().connect<&on_mouse_motion>();
 }
