@@ -80,7 +80,7 @@ static ChunkPos face_delta(block_face face)
 
 class BlockCache final {
 public:
-    constexpr static std::int16_t PADDING = 1;
+    constexpr static std::int16_t PADDING = 2;
     constexpr static std::int16_t CHUNK_SIZE_I16 = static_cast<std::int16_t>(constant::CHUNK_SIZE);
 
     constexpr static std::size_t SIZE = constant::CHUNK_SIZE + 2 * PADDING;
@@ -179,10 +179,13 @@ public:
     virtual void finalize(void) override;
 
 private:
-    bool is_culled(const LocalPos& lpos, block_face face, block_render self_render) const;
+    std::uint32_t calculate_ao(const LocalPos& lpos, block_face face, const Eigen::Vector3f& vertex) const noexcept;
+
+    bool is_culled(const LocalPos& lpos, block_face face, block_render self_render) const noexcept;
+    bool is_occluder(const LocalPos& lpos, block_face exposed_face) const noexcept;
 
     void emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
-        std::uint64_t entropy) const;
+        std::uint64_t entropy, std::optional<block_face> face) const;
     void mesh_block(const LocalPos& lpos, block_id_type id);
 
     BlockCache m_cache;
@@ -257,7 +260,47 @@ void MeshingTask::finalize(void)
     }
 }
 
-bool MeshingTask::is_culled(const LocalPos& lpos, block_face face, block_render self_render) const
+std::uint32_t MeshingTask::calculate_ao(const LocalPos& lpos, block_face face, const Eigen::Vector3f& vertex) const noexcept
+{
+    auto delta = face_delta(face);
+    int nx = lpos.x() + delta.x();
+    int ny = lpos.y() + delta.y();
+    int nz = lpos.z() + delta.z();
+
+    int dx = vertex.x() > 0.5f ? 1 : -1;
+    int dy = vertex.y() > 0.5f ? 1 : -1;
+    int dz = vertex.z() > 0.5f ? 1 : -1;
+
+    int s1x = nx, s1y = ny, s1z = nz;
+    int s2x = nx, s2y = ny, s2z = nz;
+
+    if(delta.x()) {
+        s1y += dy;
+        s2z += dz;
+    }
+    else if(delta.y()) {
+        s1x += dx;
+        s2z += dz;
+    }
+    else {
+        s1x += dx;
+        s2y += dy;
+    }
+
+    int cx = s1x + s2x - nx;
+    int cy = s1y + s2y - ny;
+    int cz = s1z + s2z - nz;
+
+    bool oc_s1 = is_occluder(LocalPos(s1x, s1y, s1z), face);
+    bool oc_s2 = is_occluder(LocalPos(s2x, s2y, s2z), face);
+    bool oc_c = is_occluder(LocalPos(cx, cy, cz), face);
+
+    if(oc_s1 && oc_s2)
+        return 0;
+    return 3 - (oc_s1 + oc_s2 + oc_c);
+}
+
+bool MeshingTask::is_culled(const LocalPos& lpos, block_face face, block_render self_render) const noexcept
 {
     auto neighbour_lpos = lpos + face_delta(face);
     auto neighbour_id = m_cache.get(neighbour_lpos);
@@ -283,8 +326,31 @@ bool MeshingTask::is_culled(const LocalPos& lpos, block_face face, block_render 
     return neighbour_baked->fully_covered[opposite_face(face)];
 }
 
+bool MeshingTask::is_occluder(const LocalPos& lpos, block_face exposed_face) const noexcept
+{
+    auto id = m_cache.get(lpos);
+
+    if(id == BLOCK_ID_NULL) {
+        return false;
+    }
+
+    auto def = block_registry::find_definition(id);
+
+    if(def == nullptr || def->render != BLOCK_RENDER_SOLID) {
+        return false;
+    }
+
+    auto baked = block_models::find(id);
+
+    if(baked == nullptr) {
+        return false;
+    }
+
+    return baked->fully_covered[opposite_face(exposed_face)];
+}
+
 void MeshingTask::emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
-    std::uint64_t entropy) const
+    std::uint64_t entropy, std::optional<block_face> face) const
 {
     auto block_origin = lpos.cast<float>() * 16.0f;
 
@@ -325,6 +391,17 @@ void MeshingTask::emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const B
 
         out_quad.data_uv = ChunkMesh_Quad::pack_uv(c0, c2);
         out_quad.data_texture = ChunkMesh_Quad::pack_texture(quad.texture_index, frame_offset, quad.tint_index);
+
+        std::array<std::uint32_t, 4> ao_values;
+        ao_values.fill(3);
+
+        if(face.has_value()) {
+            for(int i = 0; i < 4; ++i) {
+                ao_values[i] = calculate_ao(lpos, face.value(), quad.positions[i]);
+            }
+        }
+
+        out_quad.data_extras = ChunkMesh_Quad::pack_extras(ao_values);
 
         out.push_back(out_quad);
     }
@@ -369,24 +446,24 @@ void MeshingTask::mesh_block(const LocalPos& lpos, block_id_type id)
 
     if(def->render == BLOCK_RENDER_ALPHA) {
         if(!fully_enclosed) {
-            emit_quads(m_alpha, baked->unculled_quads, lpos, entropy);
+            emit_quads(m_alpha, baked->unculled_quads, lpos, entropy, std::nullopt);
         }
 
         for(auto face : ALL_FACES) {
             if(culled[face])
                 continue;
-            emit_quads(m_alpha, baked->face_quads[face], lpos, entropy);
+            emit_quads(m_alpha, baked->face_quads[face], lpos, entropy, face);
         }
     }
     else {
         if(!fully_enclosed) {
-            emit_quads(m_opaque, baked->unculled_quads, lpos, entropy);
+            emit_quads(m_opaque, baked->unculled_quads, lpos, entropy, std::nullopt);
         }
 
         for(auto face : ALL_FACES) {
             if(culled[face])
                 continue;
-            emit_quads(m_opaque, baked->face_quads[face], lpos, entropy);
+            emit_quads(m_opaque, baked->face_quads[face], lpos, entropy, face);
         }
     }
 }

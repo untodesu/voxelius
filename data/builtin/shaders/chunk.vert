@@ -9,11 +9,13 @@ layout(location = 1) in uint vert_EdgeU;
 layout(location = 2) in uint vert_EdgeV;
 layout(location = 3) in uint vert_TexCoord;
 layout(location = 4) in uint vert_Texture;
+layout(location = 5) in uint vert_Extras;
 
 out vec2 vs_TexCoord;
 flat out uint vs_FrameIndex;
 flat out uint vs_TintIndex;
 out float vs_Shade;
+out float vs_AO;
 
 uniform usamplerBuffer u_AtlasStrips;
 uniform mat4 u_ViewProjection;
@@ -69,13 +71,20 @@ float shade_factor(vec3 normal)
 
 void main(void)
 {
-    const vec2 vertices[6] = vec2[6](vec2(0.0, 0.0), vec2(1.0, 0.0), vec2(1.0, 1.0), vec2(0.0, 0.0), vec2(1.0, 1.0), vec2(0.0, 1.0));
+    const vec2 vertices_norm[6] = vec2[6](vec2(0.0, 0.0), vec2(1.0, 0.0), vec2(1.0, 1.0), vec2(0.0, 0.0), vec2(1.0, 1.0), vec2(0.0, 1.0));
+    const vec2 vertices_flip[6] = vec2[6](vec2(1.0, 0.0), vec2(1.0, 1.0), vec2(0.0, 1.0), vec2(1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, 0.0));
 
     vec3 origin = unpack_position(vert_Origin);
     vec3 edge_u = unpack_offset(vert_EdgeU);
     vec3 edge_v = unpack_offset(vert_EdgeV);
     
-    vec2 corner_st = vertices[gl_VertexID];
+    uint ao_0 = (vert_Extras >> 0U) & 0x03U;
+    uint ao_1 = (vert_Extras >> 2U) & 0x03U;
+    uint ao_2 = (vert_Extras >> 4U) & 0x03U;
+    uint ao_3 = (vert_Extras >> 6U) & 0x03U;
+    bool flip_quad = bool((ao_0 + ao_2) < (ao_1 + ao_3));
+
+    vec2 corner_st = flip_quad ? vertices_flip[gl_VertexID] : vertices_norm[gl_VertexID];
 
     vec3 local_position = origin + corner_st.x * edge_u + corner_st.y * edge_v + u_WorldPosition;
 
@@ -119,4 +128,9 @@ void main(void)
     else {
         vs_Shade = 1.0;
     }
+
+    uint ao_values[4] = uint[4](ao_0, ao_1, ao_3, ao_2);
+    uint corner_idx = uint(corner_st.x) + uint(corner_st.y) * 2U;
+    float ao_factor = float(ao_values[corner_idx]) / 3.0;
+    vs_AO = mix(0.1, 1.0, ao_factor);
 }

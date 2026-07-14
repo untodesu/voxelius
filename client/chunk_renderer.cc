@@ -50,6 +50,7 @@ static void draw_part(const Chunk_Component& chunk, const ChunkMesh_Part& part)
     glVertexAttribIPointer(2, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Quad, data_edge_v)));
     glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Quad, data_uv)));
     glVertexAttribIPointer(4, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Quad, data_texture)));
+    glVertexAttribIPointer(5, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Quad, data_extras)));
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, part.count);
 }
@@ -131,7 +132,7 @@ void chunk_renderer::init(void)
     glGenVertexArrays(1, &s_vao);
     glBindVertexArray(s_vao);
 
-    for(GLuint i = 0; i < 5; ++i) {
+    for(GLuint i = 0; i < 6; ++i) {
         glEnableVertexAttribArray(i);
         glVertexAttribDivisor(i, 1);
     }

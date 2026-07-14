@@ -4,6 +4,7 @@ in vec2 vs_TexCoord;
 flat in uint vs_FrameIndex;
 flat in uint vs_TintIndex;
 in float vs_Shade;
+in float vs_AO;
 
 out vec4 frag_ColorTarget;
 
@@ -32,5 +33,5 @@ void main() {
     AtlasFrame frame = get_frame(int(vs_FrameIndex));
     vec2 final_uv = mix(frame.uv_min, frame.uv_max, vs_TexCoord);
     vec4 albedo = texture(u_AtlasTexture, vec3(final_uv, float(frame.layer)));
-    frag_ColorTarget = vec4(albedo.rgb * vs_Shade, albedo.a);
+    frag_ColorTarget = vec4(albedo.rgb * vs_Shade * vs_AO, albedo.a);
 }
