@@ -1,6 +1,8 @@
 # Modding: block collisions
 
-Block collisions define the physical shape of a block that's used for touch/movement response; these models are independent from the block's render geometry.  
+Block collisions define the physical shape of a block that's used for touch/movement response; these models are independent from the block's render geometry  
+
+Block collisions are located in the directory: `namespace:collisions/block`  
 
 ## Top-level fields
 

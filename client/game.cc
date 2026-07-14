@@ -39,18 +39,8 @@ static void generate_debug_terrain(void)
         return;
     }
 
-    // Animated cross voxel; scattered on the surface below to exercise the
-    // per-quad animation path. Missing vtest just skips the decoration.
-    auto vtest_id = block_registry::find(Identifier::from_string("builtin:vtest"));
+    auto bush_id = block_registry::find(Identifier::from_string("builtin:bush"));
     auto chip_id = block_registry::find(Identifier::from_string("builtin:chip"));
-
-    if(vtest_id == BLOCK_ID_NULL) {
-        LOG_WARNING("builtin:vtest not found, skipping animated voxels");
-    }
-
-    if(chip_id == BLOCK_ID_NULL) {
-        LOG_WARNING("builtin:chip not found, skipping animated voxels");
-    }
 
     block_id_type slab_bottom_id = slab_id;
 
@@ -109,8 +99,8 @@ static void generate_debug_terrain(void)
                     auto chance_1 = std::uniform_int_distribution<std::int32_t>(0, 100)(rng);
                     auto chance_2 = std::uniform_int_distribution<std::int32_t>(0, 100)(rng);
 
-                    if(vtest_id && top + 1 < SIZE && chance_1 < 50) {
-                        chunk->set_block(LocalPos(x, top + 1, z), vtest_id);
+                    if(bush_id && top + 1 < SIZE && chance_1 < 50) {
+                        chunk->set_block(LocalPos(x, top + 1, z), bush_id);
                     }
 
                     if(chip_id != BLOCK_ID_NULL && top + 1 < SIZE && chance_2 == 1) {
@@ -174,7 +164,7 @@ void client_game::update(void)
     ray.direction = camera::forward;
     ray.max_distance = 16.0f;
 
-    s_target = physics::raycast_block(ray);
+    s_target = physics::raycast_block(ray, physics::BLOCK_FILTER_ALL);
 }
 
 void client_game::update_late(void)

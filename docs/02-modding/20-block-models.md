@@ -1,6 +1,8 @@
 # Modding: block models
 
-Block models define the visible geometry of a block
+Block models define the visible geometry of a block  
+
+Block models are located in the directory: `namespace:models/block`  
 
 > **NOTE:** textures _names_ are not part of the model. The model only declares named slots that it needs (eg. `top`, `north`, `nwse`, etc); the actual texture files are supplied per-block using `textures` field during registration  
 

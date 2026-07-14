@@ -25,6 +25,8 @@ blocks.add("grass", {
   health = 2,
   tools = { blocks.TOOL_SHOVEL },
 
+  touch = blocks.TOUCH_SOLID,
+  
   emission = 0,
   dissipation = 15,
 

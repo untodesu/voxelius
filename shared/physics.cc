@@ -9,8 +9,10 @@
 #include "shared/utils/coord.hh"
 #include "shared/world.hh"
 
-std::optional<physics::Hit> physics::raycast_block(const Ray& ray) noexcept
+std::optional<physics::Hit> physics::raycast_block(const Ray& ray, block_filter bfilter) noexcept
 {
+    assert(bfilter);
+
     std::optional<Hit> closest = std::nullopt;
     auto closest_distance = std::numeric_limits<float>::max();
 
@@ -23,9 +25,14 @@ std::optional<physics::Hit> physics::raycast_block(const Ray& ray) noexcept
             continue;
         }
 
+        auto def = block_registry::find_definition(block_id);
         auto bcoll = block_collisions::find(block_id);
 
-        if(bcoll == nullptr || bcoll->elements.empty()) {
+        if(def == nullptr || bcoll == nullptr) {
+            continue;
+        }
+
+        if(bfilter == BLOCK_FILTER_SOLID && (bcoll->elements.empty() || def->touch == BLOCK_TOUCH_NONE)) {
             continue;
         }
 
@@ -70,21 +77,23 @@ std::optional<physics::Hit> physics::raycast_block(const Ray& ray) noexcept
     return closest;
 }
 
-std::optional<physics::Hit> physics::raycast_entity(const Ray& ray) noexcept
+std::optional<physics::Hit> physics::raycast_entity(const Ray& ray, entity_filter efilter) noexcept
 {
+    assert(efilter);
+
     return std::nullopt; // TODO
 }
 
-std::optional<physics::Hit> physics::raycast(const Ray& ray, bool hit_blocks, bool hit_entities) noexcept
+std::optional<physics::Hit> physics::raycast(const Ray& ray, block_filter bfilter, entity_filter efilter) noexcept
 {
     std::optional<Hit> closest = std::nullopt;
 
-    if(hit_blocks) {
-        closest = raycast_block(ray);
+    if(bfilter) {
+        closest = raycast_block(ray, bfilter);
     }
 
-    if(hit_entities) {
-        auto hit = raycast_entity(ray);
+    if(efilter) {
+        auto hit = raycast_entity(ray, efilter);
         auto hit_distance = std::numeric_limits<float>::max();
         auto closest_distance = std::numeric_limits<float>::max();
 

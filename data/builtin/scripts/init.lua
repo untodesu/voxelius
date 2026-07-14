@@ -6,20 +6,16 @@ dofile("blocks/dirt.lua")
 dofile("blocks/grass.lua")
 dofile("blocks/stone.lua")
 
-blocks.add("vtest", {
+blocks.add("bush", {
     render = blocks.RENDER_ALPHA,
---  animated = true,
     textures = {
         default = {
---          "vtest_F1.png",
---          "vtest_F2.png",
---          "vtest_F3.png",
---          "vtest_F4.png",
             "bush.png",
         }
     },
 
     model_name = "cross",
+    bcoll_name = "bush",
 })
 
 blocks.add("chip", {
@@ -39,4 +35,7 @@ blocks.add("chip", {
     },
 
     model_name = "cube",
+    bcoll_name = "cube",
+    
+    touch = blocks.TOUCH_SOLID,
 })
