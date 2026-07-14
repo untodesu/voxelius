@@ -3,6 +3,8 @@
 #include "client/chunk_renderer.hh"
 
 #include "core/camera.hh"
+#include "core/config/map.hh"
+#include "core/config/ref.hh"
 #include "core/exception.hh"
 #include "core/threading.hh"
 
@@ -16,12 +18,24 @@
 #include "client/camera.hh"
 #include "client/chunk_mesh.hh"
 #include "client/globals.hh"
+#include "client/head.hh"
 #include "client/shader_program.hh"
+#include "client/skybox.hh"
+
+// ONLY TOUCH THESE IF THE RESPECTIVE SHADER
+// VARIANT MACRO DECLARATIONS LAYOUT CHANGED AS WELL
+constexpr static unsigned int CURVATURE = 0U;
+constexpr static unsigned int FOG_MODEL = 1U;
+
+static config::Ref<unsigned> s_fog_model;
+static config::Ref<bool> s_curvature;
 
 static ShaderProgram s_program;
 static std::size_t su_ViewProjection;
 static std::size_t su_AnimationTimer;
 static std::size_t su_WorldPosition;
+static std::size_t su_ViewDistance;
+static std::size_t su_FogColor;
 static std::size_t su_AtlasTexture;
 static std::size_t su_AtlasStrips;
 static std::size_t su_AtlasFrames;
@@ -118,6 +132,9 @@ static void on_chunk_mesh(entt::entity entity)
 
 void chunk_renderer::init(void)
 {
+    s_fog_model.bind(globals::client_config, "head.fog_model");
+    s_curvature.bind(globals::client_config, "head.curvature");
+
     auto program_id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "chunk");
     auto program_ok = s_program.setup(program_id);
     vx::throw_if_not_fmt(program_ok, "{}: setup failed", program_id.full_string());
@@ -125,6 +142,8 @@ void chunk_renderer::init(void)
     su_ViewProjection = s_program.add_uniform("u_ViewProjection");
     su_AnimationTimer = s_program.add_uniform("u_AnimationTimer");
     su_WorldPosition = s_program.add_uniform("u_WorldPosition");
+    su_ViewDistance = s_program.add_uniform("u_ViewDistance");
+    su_FogColor = s_program.add_uniform("u_FogColor");
     su_AtlasTexture = s_program.add_uniform("u_AtlasTexture");
     su_AtlasStrips = s_program.add_uniform("u_AtlasStrips");
     su_AtlasFrames = s_program.add_uniform("u_AtlasFrames");
@@ -174,6 +193,10 @@ void chunk_renderer::render(void)
         update_sorted_chunks();
     }
 
+    s_program.set_variant_vert(CURVATURE, s_curvature.value());
+    s_program.set_variant_vert(FOG_MODEL, s_fog_model.value());
+    s_program.set_variant_frag(FOG_MODEL, s_fog_model.value());
+
     vx::throw_if_not(s_program.update());
 
     const auto& vproj = camera::instance.view_projection();
@@ -184,6 +207,8 @@ void chunk_renderer::render(void)
     glUseProgram(s_program.handle);
     glUniformMatrix4fv(s_program.uniforms[su_ViewProjection].location, 1, GL_FALSE, vproj.data());
     glUniform1ui(s_program.uniforms[su_AnimationTimer].location, animation_timer);
+    glUniform1f(s_program.uniforms[su_ViewDistance].location, static_cast<float>(constant::CHUNK_SIZE * camera::view_distance.value()));
+    glUniform3fv(s_program.uniforms[su_FogColor].location, 1, skybox::fog_color.data());
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);

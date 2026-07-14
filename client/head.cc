@@ -11,12 +11,16 @@
 #include "client/chunk_renderer.hh"
 #include "client/globals.hh"
 #include "client/settings.hh"
+#include "client/skybox.hh"
 
 static GLuint s_world_fbo;
 static GLuint s_world_texture;
 static GLuint s_world_renderbuffer;
 
-static config::Ref<int> s_pixel_size { 2 };
+static config::Ref<int> s_pixel_size { 1 };
+static config::Ref<unsigned> s_fog_model { 2 };
+static config::Ref<bool> s_curvature { true };
+
 static int s_scaled_width;
 static int s_scaled_height;
 
@@ -59,8 +63,12 @@ static void on_sdl_window_event(const SDL_WindowEvent& event)
 void head::init(void)
 {
     s_pixel_size.bind(globals::client_config, "head.pixel_size");
+    s_fog_model.bind(globals::client_config, "head.fog_model");
+    s_curvature.bind(globals::client_config, "head.curvature");
 
     settings::slider<int>(2, settings_location::VIDEO, "head.pixel_size", 1, 4, true);
+    settings::stepper<unsigned>(3, settings_location::VIDEO, "head.fog_model", 0, 2, 1, false);
+    settings::checkbox(4, settings_location::VIDEO, "head.curvature", true);
 
     globals::gl_context = SDL_GL_CreateContext(globals::window);
     vx::throw_if_not_fmt(globals::gl_context, "SDL_GL_CreateContext failed: {}", SDL_GetError());
@@ -122,7 +130,7 @@ bool head::prepare(void)
         update_framebuffer(width, height);
     }
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -137,8 +145,13 @@ void head::render(void)
     glBindFramebuffer(GL_FRAMEBUFFER, s_world_fbo);
     glViewport(0, 0, s_scaled_width, s_scaled_height);
 
+    auto clear_r = skybox::fog_color.x();
+    auto clear_g = skybox::fog_color.y();
+    auto clear_b = skybox::fog_color.z();
+    auto clear_a = 1.0f;
+
     glClearDepth(1.0f);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(clear_r, clear_g, clear_b, clear_a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     chunk_renderer::render();

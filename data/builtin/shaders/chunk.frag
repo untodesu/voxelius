@@ -1,4 +1,6 @@
 #version 330 core
+#pragma variant 0 CURVATURE
+#pragma variant 1 FOG_MODEL
 
 in vec2 vs_TexCoord;
 flat in uint vs_FrameIndex;
@@ -6,8 +8,13 @@ flat in uint vs_TintIndex;
 in float vs_Shade;
 in float vs_AO;
 
-out vec4 frag_ColorTarget;
+#if FOG_MODEL
+in float vs_FogFactor;
+#endif
 
+out vec4 frag_Target;
+
+uniform vec3 u_FogColor;
 uniform sampler2DArray u_AtlasTexture;
 uniform samplerBuffer u_AtlasFrames;
 
@@ -33,5 +40,9 @@ void main() {
     AtlasFrame frame = get_frame(int(vs_FrameIndex));
     vec2 final_uv = mix(frame.uv_min, frame.uv_max, vs_TexCoord);
     vec4 albedo = texture(u_AtlasTexture, vec3(final_uv, float(frame.layer)));
-    frag_ColorTarget = vec4(albedo.rgb * vs_Shade * vs_AO, albedo.a);
+    frag_Target = vec4(albedo.rgb * vs_Shade * vs_AO, albedo.a);
+
+#if FOG_MODEL
+    frag_Target.rgb = mix(frag_Target.rgb, u_FogColor, vs_FogFactor);
+#endif
 }

@@ -46,6 +46,8 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/settings.hh"
     "${CMAKE_CURRENT_LIST_DIR}/shader_program.cc"
     "${CMAKE_CURRENT_LIST_DIR}/shader_program.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/skybox.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/skybox.hh"
     "${CMAKE_CURRENT_LIST_DIR}/style.cc"
     "${CMAKE_CURRENT_LIST_DIR}/style.hh"
     "${CMAKE_CURRENT_LIST_DIR}/video.cc"

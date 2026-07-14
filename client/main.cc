@@ -26,6 +26,7 @@
 #include "client/gui.hh"
 #include "client/head.hh"
 #include "client/res/texture2D.hh"
+#include "client/skybox.hh"
 #include "client/video.hh"
 
 static std::atomic_bool s_is_running;
@@ -141,6 +142,8 @@ static void wrapped_main(int argc, char** argv)
     block_collisions::init_late();
 
     chunk_mesher::init();
+
+    skybox::init();
 
     client_game::init_late();
 

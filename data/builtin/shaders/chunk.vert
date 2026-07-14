@@ -1,4 +1,6 @@
 #version 330 core
+#pragma variant 0 CURVATURE
+#pragma variant 1 FOG_MODEL
 
 #define SHADE_BIT       0x40000000U
 #define UV_ORIENT_BIT   0x80000000U
@@ -17,10 +19,15 @@ flat out uint vs_TintIndex;
 out float vs_Shade;
 out float vs_AO;
 
+#if FOG_MODEL
+out float vs_FogFactor;
+#endif
+
 uniform usamplerBuffer u_AtlasStrips;
 uniform mat4 u_ViewProjection;
 uniform uint u_AnimationTimer;
 uniform vec3 u_WorldPosition;
+uniform float u_ViewDistance;
 
 vec3 unpack_position(uint data)
 {
@@ -102,6 +109,11 @@ void main(void)
 
     gl_Position = u_ViewProjection * vec4(local_position, 1.0);
 
+#if CURVATURE
+    gl_Position.y -= gl_Position.z * gl_Position.z / u_ViewDistance / 32.0;
+    gl_Position.y -= gl_Position.x * gl_Position.x / u_ViewDistance / 32.0;
+#endif
+
     if(bool(vert_Origin & UV_ORIENT_BIT)) {
         float u = mix(c0.x, c2.x, corner_st.y);
         float v = mix(c0.y, c2.y, corner_st.x);
@@ -132,5 +144,12 @@ void main(void)
     uint ao_values[4] = uint[4](ao_0, ao_1, ao_3, ao_2);
     uint corner_idx = uint(corner_st.x) + uint(corner_st.y) * 2U;
     float ao_factor = float(ao_values[corner_idx]) / 3.0;
-    vs_AO = mix(0.4, 1.0, ao_factor);
+    vs_AO = mix(0.5, 1.0, ao_factor);
+
+#if FOG_MODEL == 1
+    vs_FogFactor = 1.0 - clamp((u_ViewDistance - length(gl_Position.xyz)) / (u_ViewDistance - 16.0), 0.0, 1.0);
+#elif FOG_MODEL == 2
+    float fogd = 2.0 / u_ViewDistance * length(gl_Position.xyz);
+    vs_FogFactor = 1.0 - clamp(exp2(fogd * fogd * -1.442695), 0.0, 1.0);
+#endif
 }
