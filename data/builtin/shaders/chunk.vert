@@ -137,8 +137,9 @@ void main(void)
 
     uint ao_values[4] = uint[4](ao_0, ao_1, ao_3, ao_2);
     uint corner_idx = uint(corner_st.x) + uint(corner_st.y) * 2U;
+
     float ao_factor = float(ao_values[corner_idx]) / 3.0;
-    vs_AO = mix(0.5, 1.0, ao_factor);
+    vs_AO = mix(0.25, 1.0, ao_factor);
 
 #if FOG_MODEL == 1
     vs_FogFactor = 1.0 - clamp((u_ViewDistance - length(gl_Position.xyz)) / (u_ViewDistance - 16.0), 0.0, 1.0);

@@ -23,7 +23,8 @@ struct AtlasFrame {
     uint layer;
 };
 
-AtlasFrame get_frame(int index) {
+AtlasFrame get_frame(int index)
+{
     vec4 part1 = texelFetch(u_AtlasFrames, index * 2);
     vec4 part2 = texelFetch(u_AtlasFrames, index * 2 + 1);
 
@@ -35,11 +36,15 @@ AtlasFrame get_frame(int index) {
     return frame;
 }
 
-void main() {
+void main(void)
+{
     AtlasFrame frame = get_frame(int(vs_FrameIndex));
     vec2 final_uv = mix(frame.uv_min, frame.uv_max, vs_TexCoord);
     vec4 albedo = texture(u_AtlasTexture, vec3(final_uv, float(frame.layer)));
-    frag_Target = vec4(albedo.rgb * vs_Shade * vs_AO, albedo.a);
+    vec3 shaded = albedo.rgb * vs_Shade * vs_AO;
+
+    frag_Target.rgb = shaded;
+    frag_Target.a = albedo.a;
 
 #if FOG_MODEL
     frag_Target.rgb = mix(frag_Target.rgb, u_FogColor, vs_FogFactor);

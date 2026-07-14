@@ -9,6 +9,7 @@ function slabs.on_place(identifier)
 
     if target.stem == slab_id then
       local state = world.get_state(target.bx, target.by, target.bz, "orientation")
+
       if state == "bottom" and target.face == blocks.FACE_TOP then
         world.set_state(target.bx, target.by, target.bz, "orientation", "double")
         return nil
@@ -26,10 +27,10 @@ function slabs.on_place(identifier)
       end
     end
 
-    if target.face == blocks.FACE_BOTTOM or target.ry < 0.5 then
-      return { orientation = "bottom" }
-    else
+    if target.face == blocks.FACE_BOTTOM or target.ry > 0.5 then
       return { orientation = "top" }
+    else
+      return { orientation = "bottom" }
     end
   end
 end

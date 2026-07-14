@@ -156,37 +156,52 @@ static void make_face_geometry(const Eigen::Vector3f& min, const Eigen::Vector3f
             break;
     }
 
-    quad.uvs[0] = Eigen::Vector2f(0.0f, 0.0f);
-    quad.uvs[1] = Eigen::Vector2f(1.0f, 0.0f);
-    quad.uvs[2] = Eigen::Vector2f(1.0f, 1.0f);
-    quad.uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
+    switch(face) {
+        case BLOCK_FACE_TOP:
+            quad.uvs[0] = Eigen::Vector2f(0.0f, 0.0f);
+            quad.uvs[1] = Eigen::Vector2f(0.0f, 1.0f);
+            quad.uvs[2] = Eigen::Vector2f(1.0f, 1.0f);
+            quad.uvs[3] = Eigen::Vector2f(1.0f, 0.0f);
+            break;
+
+        case BLOCK_FACE_BOTTOM:
+            quad.uvs[0] = Eigen::Vector2f(1.0f, 1.0f);
+            quad.uvs[1] = Eigen::Vector2f(1.0f, 0.0f);
+            quad.uvs[2] = Eigen::Vector2f(0.0f, 0.0f);
+            quad.uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
+            break;
+
+        default:
+            quad.uvs[0] = Eigen::Vector2f(1.0f, 0.0f);
+            quad.uvs[1] = Eigen::Vector2f(0.0f, 0.0f);
+            quad.uvs[2] = Eigen::Vector2f(0.0f, 1.0f);
+            quad.uvs[3] = Eigen::Vector2f(1.0f, 1.0f);
+            break;
+    }
 }
 
 static void face_uv_extent(const Eigen::Vector3f& min, const Eigen::Vector3f& max, block_face face, Eigen::Vector4f& out_uv)
 {
     switch(face) {
         case BLOCK_FACE_NORTH:
-            out_uv = Eigen::Vector4f(min.x(), max.y(), max.x(), min.y());
+            out_uv = Eigen::Vector4f(min.x(), 1.0f - max.y(), max.x(), 1.0f - min.y());
             break;
 
         case BLOCK_FACE_SOUTH:
-            out_uv = Eigen::Vector4f(max.x(), max.y(), min.x(), min.y());
+            out_uv = Eigen::Vector4f(max.x(), 1.0f - max.y(), min.x(), 1.0f - min.y());
             break;
 
         case BLOCK_FACE_EAST:
-            out_uv = Eigen::Vector4f(min.z(), max.y(), max.z(), min.y());
+            out_uv = Eigen::Vector4f(min.z(), 1.0f - max.y(), max.z(), 1.0f - min.y());
             break;
 
         case BLOCK_FACE_WEST:
-            out_uv = Eigen::Vector4f(max.z(), max.y(), min.z(), min.y());
+            out_uv = Eigen::Vector4f(max.z(), 1.0f - max.y(), min.z(), 1.0f - min.y());
             break;
 
         case BLOCK_FACE_TOP:
-            out_uv = Eigen::Vector4f(min.z(), min.x(), max.z(), max.x());
-            break;
-
         case BLOCK_FACE_BOTTOM:
-            out_uv = Eigen::Vector4f(max.z(), min.x(), min.z(), max.x());
+            out_uv = Eigen::Vector4f(min.x(), min.z(), max.x(), max.z());
             break;
     }
 }
@@ -194,19 +209,46 @@ static void face_uv_extent(const Eigen::Vector3f& min, const Eigen::Vector3f& ma
 static void apply_face_uv(const BlockModel_Face* face, const Eigen::Vector3f& min, const Eigen::Vector3f& max, block_face face_type,
     bool rescale, BakedBlockModel_Quad& quad)
 {
-    if(face->uv.has_value()) {
-        quad.uvs[0] = Eigen::Vector2f(face->uv->x(), face->uv->y());
-        quad.uvs[1] = Eigen::Vector2f(face->uv->z(), face->uv->y());
-        quad.uvs[2] = Eigen::Vector2f(face->uv->z(), face->uv->w());
-        quad.uvs[3] = Eigen::Vector2f(face->uv->x(), face->uv->w());
-    }
-    else if(!rescale) {
-        Eigen::Vector4f uv;
-        face_uv_extent(min, max, face_type, uv);
-        quad.uvs[0] = Eigen::Vector2f(uv.x(), uv.y());
-        quad.uvs[1] = Eigen::Vector2f(uv.z(), uv.y());
-        quad.uvs[2] = Eigen::Vector2f(uv.z(), uv.w());
-        quad.uvs[3] = Eigen::Vector2f(uv.x(), uv.w());
+    if(face->uv.has_value() || !rescale) {
+        float u_min, v_min, u_max, v_max;
+
+        if(face->uv.has_value()) {
+            u_min = face->uv->x();
+            v_min = face->uv->y();
+            u_max = face->uv->z();
+            v_max = face->uv->w();
+        }
+        else {
+            Eigen::Vector4f uv;
+            face_uv_extent(min, max, face_type, uv);
+            u_min = uv.x();
+            v_min = uv.y();
+            u_max = uv.z();
+            v_max = uv.w();
+        }
+
+        switch(face_type) {
+            case BLOCK_FACE_TOP:
+                quad.uvs[0] = Eigen::Vector2f(u_min, v_min);
+                quad.uvs[1] = Eigen::Vector2f(u_min, v_max);
+                quad.uvs[2] = Eigen::Vector2f(u_max, v_max);
+                quad.uvs[3] = Eigen::Vector2f(u_max, v_min);
+                break;
+
+            case BLOCK_FACE_BOTTOM:
+                quad.uvs[0] = Eigen::Vector2f(u_max, v_max);
+                quad.uvs[1] = Eigen::Vector2f(u_max, v_min);
+                quad.uvs[2] = Eigen::Vector2f(u_min, v_min);
+                quad.uvs[3] = Eigen::Vector2f(u_min, v_max);
+                break;
+
+            default:
+                quad.uvs[0] = Eigen::Vector2f(u_min, v_min);
+                quad.uvs[1] = Eigen::Vector2f(u_max, v_min);
+                quad.uvs[2] = Eigen::Vector2f(u_max, v_max);
+                quad.uvs[3] = Eigen::Vector2f(u_min, v_max);
+                break;
+        }
     }
 
     auto steps = static_cast<std::ptrdiff_t>(face->uv_rotation / 90);
