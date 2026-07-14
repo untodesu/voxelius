@@ -3,6 +3,7 @@
 #include "client/chunk_mesher.hh"
 
 #include "core/threading.hh"
+#include "core/utils/modulo.hh"
 
 #include "shared/block_registry.hh"
 #include "shared/block_storage.hh"
@@ -25,26 +26,6 @@ constexpr static std::array ALL_FACES = {
     BLOCK_FACE_WEST,
     BLOCK_FACE_TOP,
     BLOCK_FACE_BOTTOM,
-};
-
-class MeshingTask final : public Task {
-public:
-    explicit MeshingTask(entt::entity entity, const ChunkPos& cpos);
-    virtual ~MeshingTask(void) override = default;
-    virtual void process(void) override;
-    virtual void finalize(void) override;
-
-private:
-    bool is_culled(const LocalPos& lpos, block_face face, block_render self_render) const;
-    void emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
-        std::uint64_t entropy) const;
-    void mesh_block(const LocalPos& lpos, block_id_type id);
-
-    std::array<BlockStorage, 7> m_cache;
-    std::vector<ChunkMesh_Quad> m_opaque;
-    std::vector<ChunkMesh_Quad> m_alpha;
-    entt::entity m_entity;
-    ChunkPos m_cpos;
 };
 
 constexpr static block_face opposite_face(block_face face)
@@ -97,26 +78,119 @@ static ChunkPos face_delta(block_face face)
     return ChunkPos::Zero();
 }
 
-static bool is_neighbour(const LocalPos& lpos)
-{
-    auto result = false;
-    result = result || lpos.x() < 0 || lpos.x() >= constant::CHUNK_SIZE;
-    result = result || lpos.y() < 0 || lpos.y() >= constant::CHUNK_SIZE;
-    result = result || lpos.z() < 0 || lpos.z() >= constant::CHUNK_SIZE;
-    return result;
-}
+class BlockCache final {
+public:
+    constexpr static std::int16_t PADDING = 1;
+    constexpr static std::int16_t CHUNK_SIZE_I16 = static_cast<std::int16_t>(constant::CHUNK_SIZE);
 
-static void mark_dirty(entt::entity entity)
-{
-    world::chunk_entities.emplace_or_replace<ChunkMesh_DirtyMarker>(entity);
-}
+    constexpr static std::size_t SIZE = constant::CHUNK_SIZE + 2 * PADDING;
+    constexpr static std::size_t VOLUME = SIZE * SIZE * SIZE;
 
-static void mark_dirty(const ChunkPos& cpos)
+    void init(const ChunkPos& cpos) noexcept;
+
+    block_id_type get(const LocalPos& lpos) const noexcept;
+
+private:
+    std::array<block_id_type, VOLUME> m_blocks;
+};
+
+void BlockCache::init(const ChunkPos& cpos) noexcept
 {
-    if(auto chunk = world::find_chunk(cpos)) {
-        mark_dirty(chunk->entity());
+    std::shared_ptr<const Chunk> chunks[3][3][3] = {};
+
+    for(ChunkPos::value_type dz = -1; dz <= 1; dz += 1) {
+        for(ChunkPos::value_type dy = -1; dy <= 1; dy += 1) {
+            for(ChunkPos::value_type dx = -1; dx <= 1; dx += 1) {
+                auto delta = ChunkPos(dx, dy, dz);
+                auto query_pos = cpos + delta;
+
+                if(auto chunk = world::find_chunk(query_pos)) {
+                    chunks[dx + 1][dy + 1][dz + 1] = chunk;
+                }
+            }
+        }
+    }
+
+    std::size_t index = 0;
+
+    for(LocalPos::value_type lz = -PADDING; lz < CHUNK_SIZE_I16 + PADDING; lz += 1) {
+        for(LocalPos::value_type ly = -PADDING; ly < CHUNK_SIZE_I16 + PADDING; ly += 1) {
+            for(LocalPos::value_type lx = -PADDING; lx < CHUNK_SIZE_I16 + PADDING; lx += 1) {
+                std::size_t index_x = 0;
+                std::size_t index_y = 0;
+                std::size_t index_z = 0;
+
+                if(lx >= CHUNK_SIZE_I16) {
+                    index_x = 2;
+                }
+                else if(lx >= 0) {
+                    index_x = 1;
+                }
+
+                if(ly >= CHUNK_SIZE_I16) {
+                    index_y = 2;
+                }
+                else if(ly >= 0) {
+                    index_y = 1;
+                }
+
+                if(lz >= CHUNK_SIZE_I16) {
+                    index_z = 2;
+                }
+                else if(lz >= 0) {
+                    index_z = 1;
+                }
+
+                auto& chunk = chunks[index_x][index_y][index_z];
+
+                if(chunk == nullptr) {
+                    m_blocks[index] = BLOCK_ID_NULL;
+                }
+                else {
+                    auto query_lx = utils::mod_signed<LocalPos::value_type>(lx, constant::CHUNK_SIZE);
+                    auto query_ly = utils::mod_signed<LocalPos::value_type>(ly, constant::CHUNK_SIZE);
+                    auto query_lz = utils::mod_signed<LocalPos::value_type>(lz, constant::CHUNK_SIZE);
+                    m_blocks[index] = chunk->get_block(LocalPos(query_lx, query_ly, query_lz));
+                }
+
+                index += 1;
+            }
+        }
     }
 }
+
+block_id_type BlockCache::get(const LocalPos& lpos) const noexcept
+{
+    std::size_t index = 0;
+    index += static_cast<std::size_t>(lpos.x() + PADDING);
+    index += static_cast<std::size_t>(lpos.y() + PADDING) * SIZE;
+    index += static_cast<std::size_t>(lpos.z() + PADDING) * SIZE * SIZE;
+
+    if(index >= VOLUME)
+        return BLOCK_ID_NULL;
+    return m_blocks[index];
+}
+
+class MeshingTask final : public Task {
+public:
+    explicit MeshingTask(entt::entity entity, const ChunkPos& cpos);
+    virtual ~MeshingTask(void) override = default;
+    virtual void process(void) override;
+    virtual void finalize(void) override;
+
+private:
+    bool is_culled(const LocalPos& lpos, block_face face, block_render self_render) const;
+
+    void emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
+        std::uint64_t entropy) const;
+    void mesh_block(const LocalPos& lpos, block_id_type id);
+
+    BlockCache m_cache;
+    std::vector<ChunkMesh_Quad> m_opaque;
+    std::vector<ChunkMesh_Quad> m_alpha;
+    entt::entity m_entity;
+    ChunkPos m_cpos;
+};
 
 static void sync_part(ChunkMesh_Part& part)
 {
@@ -138,17 +212,7 @@ static void sync_part(ChunkMesh_Part& part)
 
 MeshingTask::MeshingTask(entt::entity entity, const ChunkPos& cpos) : m_entity(entity), m_cpos(cpos)
 {
-    if(auto chunk = world::find_chunk(cpos)) {
-        m_cache[0] = chunk->blocks();
-    }
-
-    for(std::size_t i = 0; i < ALL_FACES.size(); ++i) {
-        auto neighbor_cpos = cpos + face_delta(ALL_FACES[i]);
-
-        if(auto chunk = world::find_chunk(neighbor_cpos)) {
-            m_cache[1 + i] = chunk->blocks();
-        }
-    }
+    m_cache.init(cpos);
 }
 
 void MeshingTask::process(void)
@@ -160,7 +224,8 @@ void MeshingTask::process(void)
             return;
         }
 
-        mesh_block(utils::to_local(i), m_cache[0].get(i));
+        auto lpos = utils::to_local(i);
+        mesh_block(lpos, m_cache.get(lpos));
     }
 }
 
@@ -195,15 +260,7 @@ void MeshingTask::finalize(void)
 bool MeshingTask::is_culled(const LocalPos& lpos, block_face face, block_render self_render) const
 {
     auto neighbour_lpos = lpos + face_delta(face);
-    auto query_lpos = neighbour_lpos.eval();
-    auto storage = &m_cache[0];
-
-    if(is_neighbour(neighbour_lpos)) {
-        storage = &m_cache[1 + static_cast<std::size_t>(face)];
-        query_lpos = utils::wrap_local(neighbour_lpos);
-    }
-
-    auto neighbour_id = storage->get(query_lpos);
+    auto neighbour_id = m_cache.get(neighbour_lpos);
 
     if(neighbour_id == BLOCK_ID_NULL) {
         return false;
@@ -331,6 +388,27 @@ void MeshingTask::mesh_block(const LocalPos& lpos, block_id_type id)
                 continue;
             emit_quads(m_opaque, baked->face_quads[face], lpos, entropy);
         }
+    }
+}
+
+static bool is_neighbour(const LocalPos& lpos)
+{
+    auto result = false;
+    result = result || lpos.x() < 0 || lpos.x() >= constant::CHUNK_SIZE;
+    result = result || lpos.y() < 0 || lpos.y() >= constant::CHUNK_SIZE;
+    result = result || lpos.z() < 0 || lpos.z() >= constant::CHUNK_SIZE;
+    return result;
+}
+
+static void mark_dirty(entt::entity entity)
+{
+    world::chunk_entities.emplace_or_replace<ChunkMesh_DirtyMarker>(entity);
+}
+
+static void mark_dirty(const ChunkPos& cpos)
+{
+    if(auto chunk = world::find_chunk(cpos)) {
+        mark_dirty(chunk->entity());
     }
 }
 

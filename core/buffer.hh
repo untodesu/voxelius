@@ -8,7 +8,7 @@ public:
     explicit ReadBuffer(const void* data, std::size_t size);
     explicit ReadBuffer(const ENetPacket* packet);
     explicit ReadBuffer(PHYSFS_File* file);
-    virtual ~ReadBuffer(void) = default;
+    ~ReadBuffer(void) = default;
 
     std::size_t size(void) const;
     const std::byte* data(void) const;
@@ -38,7 +38,7 @@ class WriteBuffer final {
 public:
     WriteBuffer(void) = default;
     explicit WriteBuffer(const WriteBuffer& other);
-    virtual ~WriteBuffer(void) = default;
+    ~WriteBuffer(void) = default;
 
     std::size_t size(void) const;
     const std::byte* data(void) const;

@@ -24,7 +24,7 @@ public:
     template<typename... Args>
     explicit Exception(FormatWithLocation<typename std::type_identity<Args>::type...> fmt, Args&&... args);
     explicit Exception(std::string_view what, std::source_location location = std::source_location::current());
-    virtual ~Exception(void) = default;
+    ~Exception(void) = default;
 
     constexpr std::string_view what(void) const;
     constexpr const char* what_standard(void) const;

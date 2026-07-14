@@ -58,3 +58,13 @@ std::uint32_t ChunkMesh_Quad::pack_texture(std::uint32_t texture_index, std::uin
     result |= (tint_index & 0xFFU) << 24U;
     return result;
 }
+
+std::uint32_t ChunkMesh_Quad::pack_extras(const std::array<std::uint32_t, 4>& ao)
+{
+    std::uint32_t result = 0;
+    result |= (ao[0] & 0x03U);
+    result |= (ao[1] & 0x03U) << 2U;
+    result |= (ao[2] & 0x03U) << 4U;
+    result |= (ao[3] & 0x03U) << 6U;
+    return result;
+}

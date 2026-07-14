@@ -10,16 +10,18 @@ struct ChunkMesh_Quad final {
     static std::uint32_t pack_offset(const Eigen::Vector3f& offset_16ths);
     static std::uint32_t pack_uv(const Eigen::Vector2f& c0, const Eigen::Vector2f& c2);
     static std::uint32_t pack_texture(std::uint32_t texture_index, std::uint32_t frame_offset, std::uint32_t tint_index);
+    static std::uint32_t pack_extras(const std::array<std::uint32_t, 4>& ao);
 
     std::uint32_t data_origin;  ///< Quad origin plus SHADE_BIT and UV_ORIENT_BIT
     std::uint32_t data_edge_u;  ///< Quad edge_u plus ANIMATED_BIT
     std::uint32_t data_edge_v;  ///< Quad edge_v
     std::uint32_t data_uv;      ///< UV coordinates as unorm8x2
     std::uint32_t data_texture; ///< Texture index, frame offset and tint index
+    std::uint32_t data_extras;  ///< Baked AO
 };
 
 struct ChunkMesh_Part final {
-    virtual ~ChunkMesh_Part(void) noexcept;
+    ~ChunkMesh_Part(void) noexcept;
     std::vector<ChunkMesh_Quad> quads; // FIXME: might not want to clear these for blendable blocks
     std::uint32_t count { 0 };
     GLuint vbo { 0 };
