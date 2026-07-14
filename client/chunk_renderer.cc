@@ -18,21 +18,13 @@
 #include "client/globals.hh"
 #include "client/shader_program.hh"
 
-static ShaderProgram s_opaque;
-static std::size_t s_opaque_ViewProjection;
-static std::size_t s_opaque_AnimationTimer;
-static std::size_t s_opaque_WorldPosition;
-static std::size_t s_opaque_AtlasTexture;
-static std::size_t s_opaque_AtlasStrips;
-static std::size_t s_opaque_AtlasFrames;
-
-static ShaderProgram s_alpha;
-static std::size_t s_alpha_ViewProjection;
-static std::size_t s_alpha_AnimationTimer;
-static std::size_t s_alpha_WorldPosition;
-static std::size_t s_alpha_AtlasTexture;
-static std::size_t s_alpha_AtlasStrips;
-static std::size_t s_alpha_AtlasFrames;
+static ShaderProgram s_program;
+static std::size_t su_ViewProjection;
+static std::size_t su_AnimationTimer;
+static std::size_t su_WorldPosition;
+static std::size_t su_AtlasTexture;
+static std::size_t su_AtlasStrips;
+static std::size_t su_AtlasFrames;
 
 static GLuint s_vao;
 
@@ -42,13 +34,13 @@ static std::vector<std::pair<entt::entity, float>> s_sorted_alpha;
 
 static chunk_pos s_last_camera_chunk;
 
-static void draw_part(const Chunk_Component& chunk, const ChunkMesh_Part& part, GLint u_WorldPosition)
+static void draw_part(const Chunk_Component& chunk, const ChunkMesh_Part& part)
 {
     if(part.count == 0 || part.vbo == 0) {
         return;
     }
 
-    glUniform3fv(u_WorldPosition, 1, utils::to_fvec(chunk.position - camera::chunk).data());
+    glUniform3fv(s_program.uniforms[su_WorldPosition].location, 1, utils::to_fvec(chunk.position - camera::chunk).data());
 
     glBindBuffer(GL_ARRAY_BUFFER, part.vbo);
 
@@ -125,27 +117,16 @@ static void on_chunk_mesh(entt::entity entity)
 
 void chunk_renderer::init(void)
 {
-    auto opaque_id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "chunk");
-    auto opaque_ok = s_opaque.setup(opaque_id);
-    vx::throw_if_not_fmt(opaque_ok, "{}: setup failed", opaque_id.full_string());
+    auto program_id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "chunk");
+    auto program_ok = s_program.setup(program_id);
+    vx::throw_if_not_fmt(program_ok, "{}: setup failed", program_id.full_string());
 
-    s_opaque_ViewProjection = s_opaque.add_uniform("u_ViewProjection");
-    s_opaque_AnimationTimer = s_opaque.add_uniform("u_AnimationTimer");
-    s_opaque_WorldPosition = s_opaque.add_uniform("u_WorldPosition");
-    s_opaque_AtlasTexture = s_opaque.add_uniform("u_AtlasTexture");
-    s_opaque_AtlasStrips = s_opaque.add_uniform("u_AtlasStrips");
-    s_opaque_AtlasFrames = s_opaque.add_uniform("u_AtlasFrames");
-
-    auto alpha_id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "chunk");
-    auto alpha_ok = s_alpha.setup(alpha_id);
-    vx::throw_if_not_fmt(alpha_ok, "{}: setup failed", alpha_id.full_string());
-
-    s_alpha_ViewProjection = s_alpha.add_uniform("u_ViewProjection");
-    s_alpha_AnimationTimer = s_alpha.add_uniform("u_AnimationTimer");
-    s_alpha_WorldPosition = s_alpha.add_uniform("u_WorldPosition");
-    s_alpha_AtlasTexture = s_alpha.add_uniform("u_AtlasTexture");
-    s_alpha_AtlasStrips = s_alpha.add_uniform("u_AtlasStrips");
-    s_alpha_AtlasFrames = s_alpha.add_uniform("u_AtlasFrames");
+    su_ViewProjection = s_program.add_uniform("u_ViewProjection");
+    su_AnimationTimer = s_program.add_uniform("u_AnimationTimer");
+    su_WorldPosition = s_program.add_uniform("u_WorldPosition");
+    su_AtlasTexture = s_program.add_uniform("u_AtlasTexture");
+    su_AtlasStrips = s_program.add_uniform("u_AtlasStrips");
+    su_AtlasFrames = s_program.add_uniform("u_AtlasFrames");
 
     glGenVertexArrays(1, &s_vao);
     glBindVertexArray(s_vao);
@@ -171,21 +152,13 @@ void chunk_renderer::shutdown(void)
 {
     glDeleteVertexArrays(1, &s_vao);
 
-    s_alpha_AtlasFrames = std::numeric_limits<std::size_t>::max();
-    s_alpha_AtlasStrips = std::numeric_limits<std::size_t>::max();
-    s_alpha_AtlasTexture = std::numeric_limits<std::size_t>::max();
-    s_alpha_WorldPosition = std::numeric_limits<std::size_t>::max();
-    s_alpha_AnimationTimer = std::numeric_limits<std::size_t>::max();
-    s_alpha_ViewProjection = std::numeric_limits<std::size_t>::max();
-    s_alpha.destroy();
-
-    s_opaque_AtlasFrames = std::numeric_limits<std::size_t>::max();
-    s_opaque_AtlasStrips = std::numeric_limits<std::size_t>::max();
-    s_opaque_AtlasTexture = std::numeric_limits<std::size_t>::max();
-    s_opaque_WorldPosition = std::numeric_limits<std::size_t>::max();
-    s_opaque_AnimationTimer = std::numeric_limits<std::size_t>::max();
-    s_opaque_ViewProjection = std::numeric_limits<std::size_t>::max();
-    s_opaque.destroy();
+    su_AtlasFrames = std::numeric_limits<std::size_t>::max();
+    su_AtlasStrips = std::numeric_limits<std::size_t>::max();
+    su_AtlasTexture = std::numeric_limits<std::size_t>::max();
+    su_WorldPosition = std::numeric_limits<std::size_t>::max();
+    su_AnimationTimer = std::numeric_limits<std::size_t>::max();
+    su_ViewProjection = std::numeric_limits<std::size_t>::max();
+    s_program.destroy();
 }
 
 void chunk_renderer::render(void)
@@ -200,13 +173,28 @@ void chunk_renderer::render(void)
         update_sorted_chunks();
     }
 
-    vx::throw_if_not(s_opaque.update());
-    vx::throw_if_not(s_alpha.update());
+    vx::throw_if_not(s_program.update());
 
     const auto& vproj = camera::instance.view_projection();
     const auto& frustum = camera::instance.frustum();
 
     auto animation_timer = static_cast<std::uint32_t>(world::current_tick >> 2);
+
+    glUseProgram(s_program.handle);
+    glUniformMatrix4fv(s_program.uniforms[su_ViewProjection].location, 1, GL_FALSE, vproj.data());
+    glUniform1ui(s_program.uniforms[su_AnimationTimer].location, animation_timer);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);
+    glUniform1i(s_program.uniforms[su_AtlasTexture].location, 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_frames);
+    glUniform1i(s_program.uniforms[su_AtlasFrames].location, 1);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_strips);
+    glUniform1i(s_program.uniforms[su_AtlasStrips].location, 2);
 
     if(s_sorted_opaque.size()) {
         glEnable(GL_DEPTH_TEST);
@@ -215,22 +203,6 @@ void chunk_renderer::render(void)
         glCullFace(GL_BACK);
         glDisable(GL_BLEND);
 
-        glUseProgram(s_opaque.handle);
-        glUniformMatrix4fv(s_opaque.uniforms[s_opaque_ViewProjection].location, 1, GL_FALSE, vproj.data());
-        glUniform1ui(s_opaque.uniforms[s_opaque_AnimationTimer].location, animation_timer);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);
-        glUniform1i(s_opaque.uniforms[s_opaque_AtlasTexture].location, 0);
-
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_frames);
-        glUniform1i(s_opaque.uniforms[s_opaque_AtlasFrames].location, 1);
-
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_strips);
-        glUniform1i(s_opaque.uniforms[s_opaque_AtlasStrips].location, 2);
-
         glBindVertexArray(s_vao);
 
         for(const auto& it : s_sorted_opaque) {
@@ -238,7 +210,7 @@ void chunk_renderer::render(void)
             const auto& chunk = world::chunk_entities.get<Chunk_Component>(it.first);
 
             if(frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
-                draw_part(chunk, mesh.opaque, s_opaque.uniforms[s_opaque_WorldPosition].location);
+                draw_part(chunk, mesh.opaque);
 
                 globals::num_draw_calls += 1;
                 globals::num_draw_vertices += mesh.opaque.count * 6;
@@ -254,22 +226,6 @@ void chunk_renderer::render(void)
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        glUseProgram(s_alpha.handle);
-        glUniformMatrix4fv(s_alpha.uniforms[s_alpha_ViewProjection].location, 1, GL_FALSE, vproj.data());
-        glUniform1ui(s_alpha.uniforms[s_alpha_AnimationTimer].location, animation_timer);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);
-        glUniform1i(s_alpha.uniforms[s_alpha_AtlasTexture].location, 0);
-
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_frames);
-        glUniform1i(s_alpha.uniforms[s_alpha_AtlasFrames].location, 1);
-
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_strips);
-        glUniform1i(s_alpha.uniforms[s_alpha_AtlasStrips].location, 2);
-
         glBindVertexArray(s_vao);
 
         for(const auto& it : s_sorted_opaque) {
@@ -277,7 +233,7 @@ void chunk_renderer::render(void)
             const auto& chunk = world::chunk_entities.get<Chunk_Component>(it.first);
 
             if(frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
-                draw_part(chunk, mesh.alpha, s_alpha.uniforms[s_alpha_WorldPosition].location);
+                draw_part(chunk, mesh.alpha);
 
                 globals::num_draw_calls += 1;
                 globals::num_draw_vertices += mesh.alpha.count * 6;
