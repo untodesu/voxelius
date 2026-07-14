@@ -1,4 +1,4 @@
-# API Reference: Blocks Library
+# Engine API: Blocks
 
 Mods can register new block types and access existing one using the `blocks` library provided by the engine.  
 

@@ -12,6 +12,7 @@
 #include "shared/physics.hh"
 #include "shared/transform.hh"
 #include "shared/utils/coord.hh"
+#include "shared/utils/world.hh"
 #include "shared/velocity.hh"
 #include "shared/world.hh"
 
@@ -25,7 +26,7 @@
 
 #include <fastnoiselite.h>
 
-static std::optional<physics::Hit> s_target = std::nullopt;
+static physics::Hit s_target = std::monostate {};
 
 static void generate_debug_terrain(void)
 {
@@ -114,23 +115,14 @@ static void generate_debug_terrain(void)
 
 static void on_mouse_button_event(const SDL_MouseButtonEvent& event)
 {
-    if(event.button == SDL_BUTTON_RIGHT && event.down) {
-        if(s_target.has_value() && std::holds_alternative<block_id_type>(s_target->target)) {
-            auto block = s_target->block_pos + s_target->normal.cast<BlockPos::value_type>();
-            auto block_id = block_registry::find(Identifier::from_string("builtin:stone"));
-            world::set_block(block, block_id);
-
-            LOG_INFO("placed block {} at {} {} {}", block_id, block.x(), block.y(), block.z());
-        }
+    if(event.button == SDL_BUTTON_RIGHT && event.down && std::holds_alternative<physics::BlockHit>(s_target)) {
+        auto block = block_registry::find(Identifier::from_string("builtin:stone_slab"));
+        auto& hit = std::get<physics::BlockHit>(s_target);
+        utils::block_place(hit, globals::player, block);
     }
-    else if(event.button == SDL_BUTTON_LEFT && event.down) {
-        if(s_target.has_value() && std::holds_alternative<block_id_type>(s_target->target)) {
-            auto block = s_target->block_pos;
-
-            world::set_block(block, BLOCK_ID_NULL);
-
-            LOG_INFO("removed block at {} {} {}", block.x(), block.y(), block.z());
-        }
+    else if(event.button == SDL_BUTTON_LEFT && event.down && std::holds_alternative<physics::BlockHit>(s_target)) {
+        auto& hit = std::get<physics::BlockHit>(s_target);
+        utils::block_break(hit, globals::player);
     }
 }
 
@@ -164,7 +156,7 @@ void client_game::update(void)
     ray.direction = camera::forward;
     ray.max_distance = 16.0f;
 
-    s_target = physics::raycast_block(ray, physics::BLOCK_FILTER_ALL);
+    s_target = physics::raycast(ray, physics::BLOCK_FILTER_ALL, physics::ENTITY_FILTER_ALL);
 }
 
 void client_game::update_late(void)

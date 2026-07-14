@@ -2,6 +2,7 @@
 
 #include "shared/scripting/world_library.hh"
 
+#include "shared/block_registry.hh"
 #include "shared/utils/lua.hh"
 #include "shared/world.hh"
 
@@ -13,9 +14,16 @@ static int api_get_block(lua_State* L)
     pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
     auto block_id = world::get_block(pos);
+    auto family = block_registry::find_family_of(block_id);
 
-    lua_pushinteger(L, static_cast<lua_Integer>(block_id));
-    return 1;
+    if(family == nullptr) {
+        lua_pushinteger(L, static_cast<lua_Integer>(block_id));
+        return 1;
+    }
+    else {
+        lua_pushinteger(L, static_cast<lua_Integer>(family->stem_id));
+        return 1;
+    }
 }
 
 static int api_set_block(lua_State* L)

@@ -1,4 +1,4 @@
-# API Reference: Core Library
+# Engine API: Core
 
 The engine provides limited access to its subsystems and constants using `core` library.
 

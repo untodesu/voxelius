@@ -74,11 +74,13 @@ nav:
         - Overview: dev/modding/init-overview.md
         - Mod Metadata: dev/modding/init-modinfo.md
         - Filesystem: dev/modding/init-filesystem.md
-      - API Reference:
-        - Lua Libraries: dev/modding/api-lua.md
-        - Core Library: dev/modding/api-core.md
-        - Blocks Library: dev/modding/api-blocks.md
-        - World Library: dev/modding/api-world.md
+      - Engine API:
+        - Lua Base: dev/modding/api-lua.md
+        - Core: dev/modding/api-core.md
+        - Blocks: dev/modding/api-blocks.md
+        - World: dev/modding/api-world.md
       - File Formats:
         - Block Models: dev/modding/format-bmodel.md
         - Block Collisions: dev/modding/format-bcoll.md
+      - Libraries:
+        - Slabs: dev/modding/lib-slabs.md

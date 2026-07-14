@@ -885,31 +885,6 @@ static int api_get(lua_State* L)
         local_id = block_registry::find(id);
     }
 
-    if(auto family = block_registry::find_family_of(local_id)) {
-        local_id = family->default_variant;
-    }
-
-    lua_pushinteger(L, local_id);
-    return 1;
-}
-
-static int api_get_stem(lua_State* L)
-{
-    auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
-    auto raw_name = luaL_checkstring(L, 1);
-    auto id = Identifier::from_string(raw_name, ctx->name_space());
-
-    if(!id.is_valid()) {
-        lua_pushinteger(L, BLOCK_ID_NULL);
-        return 1;
-    }
-
-    auto local_id = ctx->find_block(id);
-
-    if(local_id == BLOCK_ID_NULL) {
-        local_id = block_registry::find(id);
-    }
-
     lua_pushinteger(L, local_id);
     return 1;
 }
@@ -1145,10 +1120,6 @@ void scripting::open_blocks_library(std::shared_ptr<lua_State>& lua, ModContext*
     lua_pushlightuserdata(L, ctx);
     lua_pushcclosure(L, &api_get, 1);
     lua_setfield(L, -2, "get");
-
-    lua_pushlightuserdata(L, ctx);
-    lua_pushcclosure(L, &api_get_stem, 1);
-    lua_setfield(L, -2, "get_stem");
 
     lua_pushcfunction(L, &api_has_tag);
     lua_setfield(L, -2, "has_tag");

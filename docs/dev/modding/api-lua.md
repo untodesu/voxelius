@@ -1,4 +1,4 @@
-# API Reference: Lua Libraries
+# Engine API: Lua Base
 
 Voxelius's runtime provides common Lua APIs:  
 
@@ -23,5 +23,5 @@ Voxelius's runtime provides common Lua APIs:
 |Global|Overriden behaviour|  
 |----|----|  
 |`dofile`|Treats the input path as a namespaced identifier with the `scripts` subdirectory implicitly defined|  
-|`require`|Same as `dofile`, named differently for clarity|  
+|`require`|Inputs a namespaced ID with the namespace _required to be explicit_. Files are fetched from the `lib` directory|  
 |`print`|Alias to uuLog's `LOG_INFO` macro|  

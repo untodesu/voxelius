@@ -30,12 +30,25 @@ struct Ray final {
 
 namespace physics
 {
-struct Hit final {
+struct BlockHit final {
     float distance;
     Eigen::Vector3f point; // float variant of local_pos
     Eigen::Vector3f normal;
 
-    std::variant<block_id_type, entt::entity> target;
+    block_id_type id;
+    block_face face;
+
+    BlockPos block_pos;
+    ChunkPos chunk_pos;
+    LocalPos local_pos;
+};
+
+struct EntityHit final {
+    float distance;
+    Eigen::Vector3f point; // float variant of local_pos
+    Eigen::Vector3f normal;
+
+    entt::entity entity;
 
     BlockPos block_pos;
     ChunkPos chunk_pos;
@@ -45,9 +58,14 @@ struct Hit final {
 
 namespace physics
 {
-std::optional<Hit> raycast_block(const Ray& ray, block_filter bfilter) noexcept;
-std::optional<Hit> raycast_entity(const Ray& ray, entity_filter efilter) noexcept;
-std::optional<Hit> raycast(const Ray& ray, block_filter bfilter, entity_filter efilter) noexcept;
+using Hit = std::variant<BlockHit, EntityHit, std::monostate>;
+} // namespace physics
+
+namespace physics
+{
+std::optional<BlockHit> raycast_block(const Ray& ray, block_filter bfilter) noexcept;
+std::optional<EntityHit> raycast_entity(const Ray& ray, entity_filter efilter) noexcept;
+Hit raycast(const Ray& ray, block_filter bfilter, entity_filter efilter) noexcept;
 } // namespace physics
 
 #endif /* AA4B08C7_6967_49FB_885F_5CF3E078AE96 */

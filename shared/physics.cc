@@ -9,11 +9,35 @@
 #include "shared/utils/coord.hh"
 #include "shared/world.hh"
 
-std::optional<physics::Hit> physics::raycast_block(const Ray& ray, block_filter bfilter) noexcept
+static block_face make_block_face(const Eigen::Vector3f& normal) noexcept
+{
+    if(normal.isApprox(Eigen::Vector3f::UnitX())) {
+        return BLOCK_FACE_EAST;
+    }
+    else if(normal.isApprox(-Eigen::Vector3f::UnitX())) {
+        return BLOCK_FACE_WEST;
+    }
+    else if(normal.isApprox(Eigen::Vector3f::UnitY())) {
+        return BLOCK_FACE_TOP;
+    }
+    else if(normal.isApprox(-Eigen::Vector3f::UnitY())) {
+        return BLOCK_FACE_BOTTOM;
+    }
+    else if(normal.isApprox(Eigen::Vector3f::UnitZ())) {
+        return BLOCK_FACE_SOUTH;
+    }
+    else if(normal.isApprox(-Eigen::Vector3f::UnitZ())) {
+        return BLOCK_FACE_NORTH;
+    }
+
+    return BLOCK_FACE_NORTH; // fallback
+}
+
+std::optional<physics::BlockHit> physics::raycast_block(const Ray& ray, block_filter bfilter) noexcept
 {
     assert(bfilter);
 
-    std::optional<Hit> closest = std::nullopt;
+    std::optional<physics::BlockHit> closest = std::nullopt;
     auto closest_distance = std::numeric_limits<float>::max();
 
     Ray_DDA dda(ray.start_chunk, ray.start, ray.direction);
@@ -50,15 +74,20 @@ std::optional<physics::Hit> physics::raycast_block(const Ray& ray, block_filter 
             if(auto hit = ray_aabb.intersect(world_aabb)) {
                 if(hit->distance <= ray.max_distance) {
                     if(hit->distance < closest_distance) {
-                        Hit new_hit {};
-                        new_hit.distance = hit->distance;
-                        new_hit.normal = hit->normal;
-                        new_hit.target = block_id;
-                        new_hit.block_pos = dda.position();
+                        physics::BlockHit new_hit {};
 
+                        new_hit.distance = hit->distance;
+                        new_hit.point = utils::to_relative(hit_cpos, ray.start_chunk, hit->point);
+                        new_hit.normal = hit->normal;
+
+                        auto family = block_registry::find_family(def->family);
+
+                        new_hit.id = family ? family->stem_id : block_id;
+                        new_hit.face = make_block_face(hit->normal);
+
+                        new_hit.block_pos = dda.position();
                         new_hit.chunk_pos = hit_cpos;
                         new_hit.local_pos = hit_lpos;
-                        new_hit.point = utils::to_relative(hit_cpos, ray.start_chunk, hit->point);
 
                         closest = std::move(new_hit);
                         closest_distance = hit->distance;
@@ -77,38 +106,43 @@ std::optional<physics::Hit> physics::raycast_block(const Ray& ray, block_filter 
     return closest;
 }
 
-std::optional<physics::Hit> physics::raycast_entity(const Ray& ray, entity_filter efilter) noexcept
+std::optional<physics::EntityHit> physics::raycast_entity(const Ray& ray, entity_filter efilter) noexcept
 {
     assert(efilter);
 
     return std::nullopt; // TODO
 }
 
-std::optional<physics::Hit> physics::raycast(const Ray& ray, block_filter bfilter, entity_filter efilter) noexcept
+physics::Hit physics::raycast(const Ray& ray, block_filter bfilter, entity_filter efilter) noexcept
 {
-    std::optional<Hit> closest = std::nullopt;
+    std::optional<physics::BlockHit> block_hit = std::nullopt;
+    std::optional<physics::EntityHit> entity_hit = std::nullopt;
 
     if(bfilter) {
-        closest = raycast_block(ray, bfilter);
+        block_hit = raycast_block(ray, bfilter);
     }
 
     if(efilter) {
-        auto hit = raycast_entity(ray, efilter);
-        auto hit_distance = std::numeric_limits<float>::max();
-        auto closest_distance = std::numeric_limits<float>::max();
-
-        if(hit.has_value()) {
-            hit_distance = hit->distance;
-        }
-
-        if(closest.has_value()) {
-            closest_distance = closest->distance;
-        }
-
-        if(hit_distance < closest_distance) {
-            closest = std::move(hit);
-        }
+        entity_hit = raycast_entity(ray, efilter);
     }
 
-    return closest;
+    auto block_distance = std::numeric_limits<float>::max();
+    auto entity_distance = std::numeric_limits<float>::max();
+
+    if(block_hit.has_value()) {
+        block_distance = block_hit->distance;
+    }
+
+    if(entity_hit.has_value()) {
+        entity_distance = entity_hit->distance;
+    }
+
+    if(block_distance < entity_distance) {
+        return block_hit.value();
+    }
+    else if(entity_distance < block_distance) {
+        return entity_hit.value();
+    }
+
+    return std::monostate {};
 }

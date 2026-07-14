@@ -4,31 +4,9 @@
 
 #include "core/identifier.hh"
 #include "core/utils/physfs.hh"
+#include "core/utils/string.hh"
 
 #include "shared/mod_context.hh"
-
-static bool run_script(lua_State* L, const ModContext* ctx, std::string_view path)
-{
-    auto identifier = Identifier::from_string(path, ctx->name_space());
-
-    if(!identifier.is_valid()) {
-        lua_pushfstring(L, "malformed path: %.*s", static_cast<int>(path.size()), path.data());
-        return false;
-    }
-
-    std::string source;
-    auto full_path = identifier.as_file_path("scripts", {});
-
-    if(!utils::read_file(full_path, source)) {
-        auto error_view = utils::physfs_error();
-        lua_pushfstring(L, "%s: %.*s", full_path.c_str(), static_cast<int>(error_view.size()), error_view.data());
-        return false;
-    }
-
-    auto chunk_name = std::format("@{}", full_path);
-    auto load_status = luaL_loadbuffer(L, source.data(), source.size(), chunk_name.c_str());
-    return load_status == LUA_OK;
-}
 
 static int api_override_dofile(lua_State* L)
 {
@@ -36,13 +14,114 @@ static int api_override_dofile(lua_State* L)
     auto path = std::string_view(raw_path, std::strlen(raw_path));
     auto ctx = static_cast<const ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
 
-    if(!run_script(L, ctx, path)) {
+    auto identifier = Identifier::from_string(path, ctx->name_space());
+
+    if(!identifier.is_valid()) {
+        lua_pushstring(L, "malformed path: ");
+        lua_pushlstring(L, path.data(), path.size());
+        lua_concat(L, 2);
         return lua_error(L);
     }
 
-    lua_call(L, 0, LUA_MULTRET);
+    std::string source;
+    auto full_path = identifier.as_file_path("scripts", {});
 
-    return lua_gettop(L) - 1;
+    if(!utils::read_file(full_path, source)) {
+        auto error_view = utils::physfs_error();
+        lua_pushfstring(L, "%s: ", full_path.c_str());
+        lua_pushlstring(L, error_view.data(), error_view.size());
+        lua_concat(L, 2);
+        return lua_error(L);
+    }
+
+    auto chunk_name = std::format("@{}", full_path);
+    auto load_status = luaL_loadbuffer(L, source.data(), source.size(), chunk_name.c_str());
+
+    chunk_name.clear();
+    chunk_name.shrink_to_fit();
+
+    if(load_status == LUA_OK) {
+        auto stack_base = lua_gettop(L);
+        auto pcall_status = lua_pcall(L, 0, LUA_MULTRET, 0);
+
+        if(pcall_status == LUA_OK) {
+            auto new_base = lua_gettop(L);
+            return new_base - stack_base;
+        }
+    }
+
+    return lua_error(L);
+}
+
+static int api_override_require(lua_State* L)
+{
+    auto raw_path = luaL_checkstring(L, 1);
+    auto path = std::string_view(raw_path, std::strlen(raw_path));
+
+    auto identifier = Identifier::from_string(path);
+
+    if(!identifier.is_valid() || utils::is_whitespace<char>(identifier.name_space())) {
+        lua_pushstring(L, "malformed path: ");
+        lua_pushlstring(L, path.data(), path.size());
+        lua_concat(L, 2);
+        return lua_error(L);
+    }
+
+    lua_pushstring(L, "VX_REQUIRE_CACHE");
+    lua_rawget(L, LUA_REGISTRYINDEX);
+
+    if(lua_isnil(L, -1)) {
+        lua_pop(L, 1);
+        lua_newtable(L);
+        lua_pushstring(L, "VX_REQUIRE_CACHE");
+        lua_pushvalue(L, -2);
+        lua_rawset(L, LUA_REGISTRYINDEX);
+    }
+
+    lua_pushvalue(L, 1);
+    lua_rawget(L, -2);
+
+    if(!lua_isnil(L, -1)) {
+        return 1; // cache hit
+    }
+
+    lua_pop(L, 1);
+
+    std::string source;
+    auto full_path = identifier.as_file_path("lib", {});
+
+    if(!utils::read_file(full_path, source)) {
+        auto error_view = utils::physfs_error();
+        lua_pushfstring(L, "%s: ", full_path.c_str());
+        lua_pushlstring(L, error_view.data(), error_view.size());
+        lua_concat(L, 2);
+        return lua_error(L);
+    }
+
+    auto chunk_name = std::format("@{}", full_path);
+    auto load_status = luaL_loadbuffer(L, source.data(), source.size(), chunk_name.c_str());
+
+    chunk_name.clear();
+    chunk_name.shrink_to_fit();
+
+    if(load_status == LUA_OK) {
+        auto pcall_status = lua_pcall(L, 0, 1, 0);
+
+        if(pcall_status == LUA_OK) {
+            if(lua_isnil(L, -1)) {
+                lua_pop(L, 1);
+                lua_pushboolean(L, 1);
+            }
+
+            lua_pushvalue(L, 1);
+            lua_pushvalue(L, -2);
+            lua_rawset(L, 2);
+
+            return 1;
+        }
+    }
+
+    return lua_error(L);
 }
 
 static int api_override_print(lua_State* L)
@@ -105,7 +184,7 @@ void scripting::open_lua_libraries(std::shared_ptr<lua_State>& lua, const ModCon
     lua_setglobal(L, "dofile");
 
     lua_pushlightuserdata(L, const_cast<ModContext*>(ctx));
-    lua_pushcclosure(L, &api_override_dofile, 1);
+    lua_pushcclosure(L, &api_override_require, 1);
     lua_setglobal(L, "require");
 
     lua_pushlightuserdata(L, const_cast<ModContext*>(ctx));

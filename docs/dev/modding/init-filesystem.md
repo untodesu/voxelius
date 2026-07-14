@@ -9,6 +9,7 @@ Each mod can have the following directories
 |`collisions`|Collision models for blocks and entities|  
 |`fonts`|Fonts in binary form. Currently only used in `builtin` and have font paths hard-coded inside the engine|  
 |`lang`|Translation files|  
+|`lib`|Lua libraries for `require`|  
 |`misc`|Miscellaneous files|  
 |`models`|3D models for blocks and entities|  
 |`music`|Music that's streamed from disk|  
