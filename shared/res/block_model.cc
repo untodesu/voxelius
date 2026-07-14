@@ -154,15 +154,15 @@ static bool parse_element(BlockModel_Element& element, const JSON_Object* object
     }
 
     auto is_valid = true;
-    is_valid = is_valid && utils::parse_json(object, "from", element.from);
-    is_valid = is_valid && utils::parse_json(object, "to", element.to);
+    is_valid = is_valid && utils::parse_json(object, "min", element.min);
+    is_valid = is_valid && utils::parse_json(object, "max", element.max);
 
     if(!is_valid) {
         return false;
     }
 
-    element.from /= 16.0f;
-    element.to /= 16.0f;
+    element.min /= 16.0f;
+    element.max /= 16.0f;
 
     element.rotation_origin = Eigen::Vector3f::Zero();
 

@@ -2,8 +2,8 @@
   "textures": ["top", "bottom", "east", "west", "north", "south"],
   "elements": [
     {
-      "from": [0, 0, 0],
-      "to": [16, 16, 16],
+      "min": [0, 0, 0],
+      "max": [16, 16, 16],
       "faces": {
         "top": {
           "texture": "top",

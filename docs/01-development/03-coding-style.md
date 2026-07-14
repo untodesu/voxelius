@@ -140,24 +140,21 @@ Example:
 
 #include "client/game.hh"
 
-#include "core/res/resource.hh"
-
 #include "core/buffer.hh"
 #include "core/exception.hh"
 #include "core/identifier.hh"
-
-#include "shared/utils/coord.hh"
+#include "core/res/resource.hh"
 
 #include "shared/block_registry.hh"
 #include "shared/block_storage.hh"
 #include "shared/coord.hh"
 #include "shared/mod_loader.hh"
+#include "shared/utils/coord.hh"
 #include "shared/utils/lua.hh"
 #include "shared/world.hh"
 
-#include "client/res/texture2D.hh"
-
 #include "client/globals.hh"
+#include "client/res/texture2D.hh"
 ```
 
 ## Comments

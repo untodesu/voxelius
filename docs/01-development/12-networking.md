@@ -1,3 +1,3 @@
-# Overview: network architecture
+# Development: networking architecture
 
 > **TODO:** document project's architecture

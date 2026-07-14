@@ -61,7 +61,7 @@ Lots of major strides have been made in this period of time, including voxel int
 
 ![type:video](https://youtube.com/embed/8HGzm0d7EdQ)  
 
-## 2026: QFengine and SDL3_GPU
+## 2026: QFengine
 
 I became interested in SDL3's GPU API that abstracts away from Vulkan, Metal and D3D12 and acts as a lower-level OpenGL, and the project that actually grew out of it was my attempt at a quake-like engine (I'm willing to get back to it later) that looks like this:  
 
@@ -70,10 +70,14 @@ I became interested in SDL3's GPU API that abstracts away from Vulkan, Metal and
 ![00-history.img-16.jpg](00-history.img-16.jpg)  
 ![00-history.img-17.jpg](00-history.img-17.jpg)  
 
-So it wasn't unexpected for me to want to use SDL3_GPU in Voxelius, however...  
+While doing this, I figued out a bunch of features that made the source tree much better organized. It wasn't really unexpected for me to want to bring these practices into Voxelius. However...
 
 ## 2026: the third rewrite
 
-Current version of Voxelius heavily relies on OpenGL, which is quite incompatible with SDL3_GPU. I also started using Eigen for vector maths and some other things improved in my skills to the point I decided I want a rewrite.  
+Current _public_ version of Voxelius heavily relies on libraries and tools that I no longer use (example: GLM - I use Eigen now, spdlog - I use my own simpler logging library I made for a work project, GLFW - I use SDL3 now, the list goes on...) and straight up porting the old code to the new stack isn't feasible.  
 
-Apart from SDL3_GPU, I want the new rewrite to base upon concepts defined by Minetest/Luanti and have game content defined by Lua scripts whilst core gameplay is defined in C++ code.  
+An another feature I really wanted to get my hands into was password-less authentication for players. I already had a sort-of a test project for Ed25519 authentication called Prospero so I'd also like to employ authentication stuff used in there into Voxelius.  
+
+And finally I want the new rewrite to base itself on concepts defined by the core inspiration, [OpenBuilder](https://github.com/Hopson97/open-builder) and Minetest/Luanti (or whatever the hell they decide to rename it in 2 years from now, I'm not kink-shaming), and have a similar way game content is defined through Lua while core gameplay and world generation is done in C++ code.  
+
+![00-history.img-18](00-history.img-18.png)  

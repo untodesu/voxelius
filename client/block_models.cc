@@ -108,51 +108,51 @@ static std::uint32_t pack_normal_2_10_10_10(const Eigen::Vector3f& normal)
     return (nz << 20) | (ny << 10) | nx;
 }
 
-static void make_face_geometry(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, BakedBlockModel_Quad& quad)
+static void make_face_geometry(const Eigen::Vector3f& min, const Eigen::Vector3f& max, block_face face, BakedBlockModel_Quad& quad)
 {
     quad.positions.fill(Eigen::Vector3f::Zero());
 
     switch(face) {
         case BLOCK_FACE_NORTH:
-            quad.positions[0] = Eigen::Vector3f(from.x(), to.y(), from.z());
-            quad.positions[1] = Eigen::Vector3f(to.x(), to.y(), from.z());
-            quad.positions[2] = Eigen::Vector3f(to.x(), from.y(), from.z());
-            quad.positions[3] = Eigen::Vector3f(from.x(), from.y(), from.z());
+            quad.positions[0] = Eigen::Vector3f(min.x(), max.y(), min.z());
+            quad.positions[1] = Eigen::Vector3f(max.x(), max.y(), min.z());
+            quad.positions[2] = Eigen::Vector3f(max.x(), min.y(), min.z());
+            quad.positions[3] = Eigen::Vector3f(min.x(), min.y(), min.z());
             break;
 
         case BLOCK_FACE_SOUTH:
-            quad.positions[0] = Eigen::Vector3f(to.x(), to.y(), to.z());
-            quad.positions[1] = Eigen::Vector3f(from.x(), to.y(), to.z());
-            quad.positions[2] = Eigen::Vector3f(from.x(), from.y(), to.z());
-            quad.positions[3] = Eigen::Vector3f(to.x(), from.y(), to.z());
+            quad.positions[0] = Eigen::Vector3f(max.x(), max.y(), max.z());
+            quad.positions[1] = Eigen::Vector3f(min.x(), max.y(), max.z());
+            quad.positions[2] = Eigen::Vector3f(min.x(), min.y(), max.z());
+            quad.positions[3] = Eigen::Vector3f(max.x(), min.y(), max.z());
             break;
 
         case BLOCK_FACE_EAST:
-            quad.positions[0] = Eigen::Vector3f(to.x(), to.y(), from.z());
-            quad.positions[1] = Eigen::Vector3f(to.x(), to.y(), to.z());
-            quad.positions[2] = Eigen::Vector3f(to.x(), from.y(), to.z());
-            quad.positions[3] = Eigen::Vector3f(to.x(), from.y(), from.z());
+            quad.positions[0] = Eigen::Vector3f(max.x(), max.y(), min.z());
+            quad.positions[1] = Eigen::Vector3f(max.x(), max.y(), max.z());
+            quad.positions[2] = Eigen::Vector3f(max.x(), min.y(), max.z());
+            quad.positions[3] = Eigen::Vector3f(max.x(), min.y(), min.z());
             break;
 
         case BLOCK_FACE_WEST:
-            quad.positions[0] = Eigen::Vector3f(from.x(), to.y(), to.z());
-            quad.positions[1] = Eigen::Vector3f(from.x(), to.y(), from.z());
-            quad.positions[2] = Eigen::Vector3f(from.x(), from.y(), from.z());
-            quad.positions[3] = Eigen::Vector3f(from.x(), from.y(), to.z());
+            quad.positions[0] = Eigen::Vector3f(min.x(), max.y(), max.z());
+            quad.positions[1] = Eigen::Vector3f(min.x(), max.y(), min.z());
+            quad.positions[2] = Eigen::Vector3f(min.x(), min.y(), min.z());
+            quad.positions[3] = Eigen::Vector3f(min.x(), min.y(), max.z());
             break;
 
         case BLOCK_FACE_TOP:
-            quad.positions[0] = Eigen::Vector3f(from.x(), to.y(), from.z());
-            quad.positions[1] = Eigen::Vector3f(from.x(), to.y(), to.z());
-            quad.positions[2] = Eigen::Vector3f(to.x(), to.y(), to.z());
-            quad.positions[3] = Eigen::Vector3f(to.x(), to.y(), from.z());
+            quad.positions[0] = Eigen::Vector3f(min.x(), max.y(), min.z());
+            quad.positions[1] = Eigen::Vector3f(min.x(), max.y(), max.z());
+            quad.positions[2] = Eigen::Vector3f(max.x(), max.y(), max.z());
+            quad.positions[3] = Eigen::Vector3f(max.x(), max.y(), min.z());
             break;
 
         case BLOCK_FACE_BOTTOM:
-            quad.positions[0] = Eigen::Vector3f(from.x(), from.y(), to.z());
-            quad.positions[1] = Eigen::Vector3f(from.x(), from.y(), from.z());
-            quad.positions[2] = Eigen::Vector3f(to.x(), from.y(), from.z());
-            quad.positions[3] = Eigen::Vector3f(to.x(), from.y(), to.z());
+            quad.positions[0] = Eigen::Vector3f(min.x(), min.y(), max.z());
+            quad.positions[1] = Eigen::Vector3f(min.x(), min.y(), min.z());
+            quad.positions[2] = Eigen::Vector3f(max.x(), min.y(), min.z());
+            quad.positions[3] = Eigen::Vector3f(max.x(), min.y(), max.z());
             break;
     }
 
@@ -162,36 +162,36 @@ static void make_face_geometry(const Eigen::Vector3f& from, const Eigen::Vector3
     quad.uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
 }
 
-static void face_uv_extent(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, Eigen::Vector4f& out_uv)
+static void face_uv_extent(const Eigen::Vector3f& min, const Eigen::Vector3f& max, block_face face, Eigen::Vector4f& out_uv)
 {
     switch(face) {
         case BLOCK_FACE_NORTH:
-            out_uv = Eigen::Vector4f(from.x(), to.y(), to.x(), from.y());
+            out_uv = Eigen::Vector4f(min.x(), max.y(), max.x(), min.y());
             break;
 
         case BLOCK_FACE_SOUTH:
-            out_uv = Eigen::Vector4f(to.x(), to.y(), from.x(), from.y());
+            out_uv = Eigen::Vector4f(max.x(), max.y(), min.x(), min.y());
             break;
 
         case BLOCK_FACE_EAST:
-            out_uv = Eigen::Vector4f(from.z(), to.y(), to.z(), from.y());
+            out_uv = Eigen::Vector4f(min.z(), max.y(), max.z(), min.y());
             break;
 
         case BLOCK_FACE_WEST:
-            out_uv = Eigen::Vector4f(to.z(), to.y(), from.z(), from.y());
+            out_uv = Eigen::Vector4f(max.z(), max.y(), min.z(), min.y());
             break;
 
         case BLOCK_FACE_TOP:
-            out_uv = Eigen::Vector4f(from.z(), from.x(), to.z(), to.x());
+            out_uv = Eigen::Vector4f(min.z(), min.x(), max.z(), max.x());
             break;
 
         case BLOCK_FACE_BOTTOM:
-            out_uv = Eigen::Vector4f(to.z(), from.x(), from.z(), to.x());
+            out_uv = Eigen::Vector4f(max.z(), min.x(), min.z(), max.x());
             break;
     }
 }
 
-static void apply_face_uv(const BlockModel_Face* face, const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face_type,
+static void apply_face_uv(const BlockModel_Face* face, const Eigen::Vector3f& min, const Eigen::Vector3f& max, block_face face_type,
     bool rescale, BakedBlockModel_Quad& quad)
 {
     if(face->uv.has_value()) {
@@ -202,7 +202,7 @@ static void apply_face_uv(const BlockModel_Face* face, const Eigen::Vector3f& fr
     }
     else if(!rescale) {
         Eigen::Vector4f uv;
-        face_uv_extent(from, to, face_type, uv);
+        face_uv_extent(min, max, face_type, uv);
         quad.uvs[0] = Eigen::Vector2f(uv.x(), uv.y());
         quad.uvs[1] = Eigen::Vector2f(uv.z(), uv.y());
         quad.uvs[2] = Eigen::Vector2f(uv.z(), uv.w());
@@ -214,83 +214,83 @@ static void apply_face_uv(const BlockModel_Face* face, const Eigen::Vector3f& fr
     std::rotate(quad.uvs.begin(), quad.uvs.begin() + steps, quad.uvs.end());
 }
 
-static void rotate_aabb(const Eigen::Matrix3f& rot, const Eigen::Vector3f& center, const Eigen::Vector3f& from, const Eigen::Vector3f& to,
-    Eigen::Vector3f& out_from, Eigen::Vector3f& out_to)
+static void rotate_aabb(const Eigen::Matrix3f& rot, const Eigen::Vector3f& center, const Eigen::Vector3f& min, const Eigen::Vector3f& max,
+    Eigen::Vector3f& out_min, Eigen::Vector3f& out_max)
 {
     constexpr static auto CORNERS = 8;
 
-    out_from = Eigen::Vector3f::Constant(std::numeric_limits<float>::max());
-    out_to = Eigen::Vector3f::Constant(std::numeric_limits<float>::lowest());
+    out_min = Eigen::Vector3f::Constant(std::numeric_limits<float>::max());
+    out_max = Eigen::Vector3f::Constant(std::numeric_limits<float>::lowest());
 
     for(int i = 0; i < CORNERS; ++i) {
         Eigen::Vector3f corner;
 
         if(i & 1) {
-            corner.x() = to.x();
+            corner.x() = max.x();
         }
         else {
-            corner.x() = from.x();
+            corner.x() = min.x();
         }
 
         if(i & 2) {
-            corner.y() = to.y();
+            corner.y() = max.y();
         }
         else {
-            corner.y() = from.y();
+            corner.y() = min.y();
         }
 
         if(i & 4) {
-            corner.z() = to.z();
+            corner.z() = max.z();
         }
         else {
-            corner.z() = from.z();
+            corner.z() = min.z();
         }
 
         Eigen::Vector3f rotated = center + rot * (corner - center);
-        out_from = out_from.cwiseMin(rotated);
-        out_to = out_to.cwiseMax(rotated);
+        out_min = out_min.cwiseMin(rotated);
+        out_max = out_max.cwiseMax(rotated);
     }
 }
 
-static bool is_covering(const Eigen::Vector3f& from, const Eigen::Vector3f& to, block_face face, bool axis_aligned)
+static bool is_covering(const Eigen::Vector3f& min, const Eigen::Vector3f& max, block_face face, bool axis_aligned)
 {
     auto result = true;
 
     switch(face) {
         case BLOCK_FACE_NORTH:
-            result = result && from.x() <= 0.0f && to.x() >= 1.0f;
-            result = result && from.y() <= 0.0f && to.y() >= 1.0f;
-            result = result && from.z() <= 0.0f;
+            result = result && min.x() <= 0.0f && max.x() >= 1.0f;
+            result = result && min.y() <= 0.0f && max.y() >= 1.0f;
+            result = result && min.z() <= 0.0f;
             break;
 
         case BLOCK_FACE_SOUTH:
-            result = result && from.x() <= 0.0f && to.x() >= 1.0f;
-            result = result && from.y() <= 0.0f && to.y() >= 1.0f;
-            result = result && to.z() >= 1.0f;
+            result = result && min.x() <= 0.0f && max.x() >= 1.0f;
+            result = result && min.y() <= 0.0f && max.y() >= 1.0f;
+            result = result && max.z() >= 1.0f;
             break;
 
         case BLOCK_FACE_EAST:
-            result = result && from.z() <= 0.0f && to.z() >= 1.0f;
-            result = result && from.y() <= 0.0f && to.y() >= 1.0f;
-            result = result && to.x() >= 1.0f;
+            result = result && min.z() <= 0.0f && max.z() >= 1.0f;
+            result = result && min.y() <= 0.0f && max.y() >= 1.0f;
+            result = result && max.x() >= 1.0f;
             break;
 
         case BLOCK_FACE_WEST:
-            result = result && from.z() <= 0.0f && to.z() >= 1.0f;
-            result = result && from.y() <= 0.0f && to.y() >= 1.0f;
-            result = result && from.x() <= 0.0f;
+            result = result && min.z() <= 0.0f && max.z() >= 1.0f;
+            result = result && min.y() <= 0.0f && max.y() >= 1.0f;
+            result = result && min.x() <= 0.0f;
             break;
 
         case BLOCK_FACE_TOP:
-            result = result && from.x() <= 0.0f && to.x() >= 1.0f;
-            result = result && from.z() <= 0.0f && to.z() >= 1.0f;
-            result = result && to.y() >= 1.0f;
+            result = result && min.x() <= 0.0f && max.x() >= 1.0f;
+            result = result && min.z() <= 0.0f && max.z() >= 1.0f;
+            result = result && max.y() >= 1.0f;
             break;
 
         case BLOCK_FACE_BOTTOM:
-            result = result && from.x() <= 0.0f && to.x() >= 1.0f;
-            result = result && from.z() <= 0.0f && to.z() >= 1.0f;
-            result = result && from.y() <= 0.0f;
+            result = result && min.x() <= 0.0f && max.x() >= 1.0f;
+            result = result && min.z() <= 0.0f && max.z() >= 1.0f;
+            result = result && min.y() <= 0.0f;
             break;
 
         default:
@@ -353,17 +353,17 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
 
             BakedBlockModel_Quad quad {};
 
-            Eigen::Vector3f used_from = element.from;
-            Eigen::Vector3f used_to = element.to;
+            Eigen::Vector3f used_min = element.min;
+            Eigen::Vector3f used_max = element.max;
             auto used_face = face;
 
             if(def.model_facing != BLOCK_FACE_NORTH) {
-                rotate_aabb(facing_rot, center, element.from, element.to, used_from, used_to);
+                rotate_aabb(facing_rot, center, element.min, element.max, used_min, used_max);
                 used_face = rotated_face;
             }
 
-            make_face_geometry(used_from, used_to, used_face, quad);
-            apply_face_uv(texture_face, used_from, used_to, used_face, element.rescale, quad);
+            make_face_geometry(used_min, used_max, used_face, quad);
+            apply_face_uv(texture_face, used_min, used_max, used_face, element.rescale, quad);
 
             quad.texture_index = static_cast<std::uint32_t>(strip->index);
             quad.frame_count = strip->frame_count;
@@ -381,7 +381,7 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
             if(face_def.cull_face.has_value()) {
                 baked->face_quads[rotated_face].push_back(quad);
 
-                if(is_covering(element.from, element.to, face, element.rotation_angles.isZero())) {
+                if(is_covering(element.min, element.max, face, element.rotation_angles.isZero())) {
                     baked->fully_covered[rotated_face] = true;
                 }
             }

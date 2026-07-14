@@ -13,8 +13,8 @@ struct BlockModel_Face final {
 };
 
 struct BlockModel_Element final {
-    Eigen::Vector3f from;
-    Eigen::Vector3f to;
+    Eigen::Vector3f min;
+    Eigen::Vector3f max;
     Eigen::Vector3f rotation_origin;
     Eigen::Vector3f rotation_angles;
     bool rescale;

@@ -47,17 +47,17 @@ nav:
   - Home: index.md
   - Overview:
     - History: 00-overview/00-history.md
-    - Features: 00-overview/10-features.md
-    - Architecture:
-      - General: 00-overview/20-general.md
-      - Rendering: 00-overview/21-rendering.md
-      - Network: 00-overview/22-network.md
-    - Source Code: 00-overview/30-source-code.md
+    - Features: 00-overview/01-features.md
   - Development:
     - Requirements: 01-development/00-requirements.md
     - Build Guide: 01-development/01-build-guide.md
-    - Coding Style: 01-development/02-coding-style.md
-    - Contributing: 01-development/03-contributing.md
+    - Source Code: 01-development/02-source-code.md
+    - Coding Style: 01-development/03-coding-style.md
+    - Contributing: 01-development/04-contributing.md
+    - Architecture:
+      - General: 01-development/10-general.md
+      - Rendering: 01-development/11-rendering.md
+      - Networking: 01-development/12-networking.md
   - Modding:
     - Overview: 02-modding/00-overview.md
     - Mod metadata: 02-modding/01-modinfo.md

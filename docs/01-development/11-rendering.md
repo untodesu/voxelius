@@ -1,3 +1,3 @@
-# Overview: general architecture
+# Development: rendering architecture
 
 > **TODO:** document project's architecture

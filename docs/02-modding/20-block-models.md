@@ -19,15 +19,8 @@ Block models are located in the directory: `namespace:models/block`
 
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
-|`from`|`number[3]`|yes|N/D|Cuboid start
-
-
-## Cuboid object
-
-|Field|Type|Required|Default|Description|  
-|----|----|----|----|----|  
-|`from`|`number[3]`|yes|N/D|Cuboid start in 1/16ths of a block|  
-|`to`|`number[3]`|yes|N/D|Cuboid end in 1/16ths of a block|  
+|`min`|`number[3]`|yes|N/D|Cuboid start in 1/16ths of a block|  
+|`max`|`number[3]`|yes|N/D|Cuboid end in 1/16ths of a block|  
 |`origin`|`number[3]`|no|`[0, 0, 0]`|If `rotation` is set, pivot point in 1/16ths of a block|  
 |`rotation`|`number[3]`|no|`[0, 0, 0]`|Euler rotation in degrees about X, Y and Z axes. Each axis is clamped to `[-180, 180]` and snapped to the nearest multiple of 15 degrees|  
 |`rescale`|`bool`|no|`true`|Whether the model should be forced into block bounds|  
@@ -52,8 +45,8 @@ Block models are located in the directory: `namespace:models/block`
   "textures": ["top", "bottom", "east", "west", "north", "south"],
   "elements": [
     {
-      "from": [0, 0, 0],
-      "to": [16, 16, 16],
+      "min": [0, 0, 0],
+      "max": [16, 16, 16],
       "faces": {
         "top":      { "texture": "top",     "cullface": "bottom"    },
         "bottom":   { "texture": "bottom",  "cullface": "top"       },
