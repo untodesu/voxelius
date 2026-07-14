@@ -41,7 +41,6 @@ static void generate_debug_terrain(void)
     }
 
     auto bush_id = block_registry::find(Identifier::from_string("builtin:bush"));
-    auto chip_id = block_registry::find(Identifier::from_string("builtin:chip"));
 
     block_id_type slab_bottom_id = slab_id;
 
@@ -102,10 +101,6 @@ static void generate_debug_terrain(void)
 
                     if(bush_id && top + 1 < SIZE && chance_1 < 50) {
                         chunk->set_block(LocalPos(x, top + 1, z), bush_id);
-                    }
-
-                    if(chip_id != BLOCK_ID_NULL && top + 1 < SIZE && chance_2 == 1) {
-                        chunk->set_block(LocalPos(x, top + 1, z), chip_id);
                     }
                 }
             }
