@@ -1,4 +1,4 @@
-# Modding: lua libraries
+# API Reference: Lua Libraries
 
 Voxelius's runtime provides common Lua APIs:  
 

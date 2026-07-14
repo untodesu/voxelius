@@ -1,4 +1,4 @@
-# Development: coding style
+# Development: Code Style
 
 ## Clang-format
 

@@ -132,5 +132,5 @@ void main(void)
     uint ao_values[4] = uint[4](ao_0, ao_1, ao_3, ao_2);
     uint corner_idx = uint(corner_st.x) + uint(corner_st.y) * 2U;
     float ao_factor = float(ao_values[corner_idx]) / 3.0;
-    vs_AO = mix(0.1, 1.0, ao_factor);
+    vs_AO = mix(0.4, 1.0, ao_factor);
 }

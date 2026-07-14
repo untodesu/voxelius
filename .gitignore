@@ -6,6 +6,8 @@
 
 ## Ignore build and output directories with
 ## everything build process generates
+/.cache/
+/.cache/*
 /build/
 /build/*
 /output/

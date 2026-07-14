@@ -1,4 +1,4 @@
-# Development: build guide
+# Getting Started: Build Guide
 
 ## The easy way
 

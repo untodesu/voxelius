@@ -229,7 +229,7 @@ void chunk_renderer::render(void)
 
         glBindVertexArray(s_vao);
 
-        for(const auto& it : s_sorted_opaque) {
+        for(const auto& it : s_sorted_alpha) {
             const auto& mesh = world::chunk_entities.get<ChunkMesh>(it.first);
             const auto& chunk = world::chunk_entities.get<Chunk_Component>(it.first);
 

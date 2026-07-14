@@ -1,6 +1,6 @@
-# Modding: mod metadata
+# Getting Started: Mod Metadata
 
-Every mod's root directory contains a `modinfo.conf` file that contains some useful information about the mod. The file uses the common configuration format used by the engine (see `core/config/map.cc`);
+Every mod's root directory contains a `modinfo.conf` file that contains some useful information about the mod. The file uses the common configuration format used by the engine  
 
 ## Fields
 

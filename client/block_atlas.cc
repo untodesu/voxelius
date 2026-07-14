@@ -149,10 +149,12 @@ static void build_atlas(void)
     glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, LAYER_SIZE, LAYER_SIZE, num_layers, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 1);
 
     std::vector<AtlasFrame_GL> gl_frames;
     gl_frames.reserve(s_pending.size());
@@ -210,6 +212,8 @@ static void build_atlas(void)
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, static_cast<GLint>(rect.x), static_cast<GLint>(rect.y), layer, padded_wide, padded_tall, 1,
             GL_RGBA, GL_UNSIGNED_BYTE, padded.data());
     }
+
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
     LOG_INFO("packed {} frames into {} layer(s) of a {}x{} atlas", rects.size(), num_layers, LAYER_SIZE, LAYER_SIZE);
 

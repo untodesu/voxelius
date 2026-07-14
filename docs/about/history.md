@@ -1,4 +1,4 @@
-# Overview: history
+# About: history
 
 Voxelius as a concept dates way back to 2021 when grass was greener and skies were less poluted with fiber optic  
 
@@ -20,19 +20,19 @@ At this point I got my voxel itch again (and if you know me, I really started to
 
 I first defined some structures and made a basic rendering implementation that only drew colored voxels with a specific color assigned to each side of it, here's the image:  
 
-![00-history.img-00.png](00-history.img-00.png)  
+![history.img-00.png](history.img-00.png)  
 
 > As a matter of fact, this is _the first_ ever image captured of Voxelius rendering anything. It was made in RenderDoc and was originally placed in the repository's root, named `rd0.png`. Funnily enough, the first ever image finds its way into whatever web and installer media associated with the game, it's something of a tradition at this point :D  
 
 Then came textures, the choice of which was quite unorthodox but that's what I had lying around on my drive at the moment:  
 
-![00-history.img-01.png](00-history.img-01.png)  
-![00-history.img-02.jpg](00-history.img-02.jpg)  
+![history.img-01.png](history.img-01.png)  
+![history.img-02.jpg](history.img-02.jpg)  
 
 Eventually, stuff like greedy meshing, shadows and a rudimentary networking was implemented, but at that point the code became practically unmaintainable...  
 
-![00-history.img-03.jpg](00-history.img-03.jpg)  
-![00-history.img-04.jpg](00-history.img-04.jpg)  
+![history.img-03.jpg](history.img-03.jpg)  
+![history.img-04.jpg](history.img-04.jpg)  
 
 ![type:video](https://youtube.com/embed/VHvfsX4B0iI)  
 
@@ -40,9 +40,9 @@ Eventually, stuff like greedy meshing, shadows and a rudimentary networking was 
 
 Nothing particular, just some performance improvements, better threading and a whole lot of doing nothing because 2022 was a hard on the IRL side ot things; although some experimental world generation was added later...  
 
-![00-history.img-05.jpg](00-history.img-05.jpg) 
-![00-history.img-06.jpg](00-history.img-06.jpg) 
-![00-history.img-07.jpg](00-history.img-07.jpg) 
+![history.img-05.jpg](history.img-05.jpg) 
+![history.img-06.jpg](history.img-06.jpg) 
+![history.img-07.jpg](history.img-07.jpg) 
 
 ## 2024-2025: large progress
 
@@ -50,14 +50,14 @@ Nothing particular, just some performance improvements, better threading and a w
 
 Lots of major strides have been made in this period of time, including voxel interactions (break/place), decent world generation, feature placement, multiplayer and an actually decent-to-use GUI!  
 
-![00-history.img-08.jpg](00-history.img-08.jpg)  
-![00-history.img-09.jpg](00-history.img-09.jpg)  
-![00-history.img-10.jpg](00-history.img-10.jpg)  
-![00-history.img-11.jpg](00-history.img-11.jpg)  
-![00-history.img-12.jpg](00-history.img-12.jpg)  
-![00-history.img-13.jpg](00-history.img-13.jpg)  
-![00-history.img-14.png](00-history.img-14.png)  
-![00-history.img-15.png](00-history.img-15.png)  
+![history.img-08.jpg](history.img-08.jpg)  
+![history.img-09.jpg](history.img-09.jpg)  
+![history.img-10.jpg](history.img-10.jpg)  
+![history.img-11.jpg](history.img-11.jpg)  
+![history.img-12.jpg](history.img-12.jpg)  
+![history.img-13.jpg](history.img-13.jpg)  
+![history.img-14.png](history.img-14.png)  
+![history.img-15.png](history.img-15.png)  
 
 ![type:video](https://youtube.com/embed/8HGzm0d7EdQ)  
 
@@ -67,8 +67,8 @@ I became interested in SDL3's GPU API that abstracts away from Vulkan, Metal and
 
 ![type:video](https://youtube.com/embed/g003FId_8BI)  
 
-![00-history.img-16.jpg](00-history.img-16.jpg)  
-![00-history.img-17.jpg](00-history.img-17.jpg)  
+![history.img-16.jpg](history.img-16.jpg)  
+![history.img-17.jpg](history.img-17.jpg)  
 
 While doing this, I figued out a bunch of features that made the source tree much better organized. It wasn't really unexpected for me to want to bring these practices into Voxelius. However...
 
@@ -80,4 +80,4 @@ An another feature I really wanted to get my hands into was password-less authen
 
 And finally I want the new rewrite to base itself on concepts defined by the core inspiration, [OpenBuilder](https://github.com/Hopson97/open-builder) and Minetest/Luanti (or whatever the hell they decide to rename it in 2 years from now, I'm not kink-shaming), and have a similar way game content is defined through Lua while core gameplay and world generation is done in C++ code.  
 
-![00-history.img-18](00-history.img-18.png)  
+![history.img-18](history.img-18.png)  
