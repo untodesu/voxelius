@@ -6,7 +6,7 @@
 struct Transform {
     static void fixed_update(void);
 
-    chunk_pos chunk;
+    ChunkPos chunk;
     Eigen::Vector3f local;
     Eigen::Vector3f angles;
 };

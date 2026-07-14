@@ -2,12 +2,14 @@
 
 #include "client/game.hh"
 
+#include "core/camera.hh"
 #include "core/identifier.hh"
 #include "core/utils/angles.hh"
 
 #include "shared/block_registry.hh"
 #include "shared/constant.hh"
 #include "shared/coord.hh"
+#include "shared/physics.hh"
 #include "shared/transform.hh"
 #include "shared/utils/coord.hh"
 #include "shared/velocity.hh"
@@ -22,6 +24,8 @@
 #include "client/utils/entity.hh"
 
 #include <fastnoiselite.h>
+
+static std::optional<physics::Hit> s_target = std::nullopt;
 
 static void generate_debug_terrain(void)
 {
@@ -76,7 +80,7 @@ static void generate_debug_terrain(void)
 
     for(std::int32_t cx = -CHUNK_RADIUS; cx <= CHUNK_RADIUS; cx += 1) {
         for(std::int32_t cz = -CHUNK_RADIUS; cz <= CHUNK_RADIUS; cz += 1) {
-            const chunk_pos cpos(cx, 0, cz);
+            const ChunkPos cpos(cx, 0, cz);
             auto chunk = world::create_chunk(cpos);
 
             for(std::int32_t x = 0; x < SIZE; x += 1) {
@@ -90,30 +94,52 @@ static void generate_debug_terrain(void)
                     const std::int32_t dirt_start = std::max(top - DIRT_DEPTH, 0);
 
                     for(std::int32_t y = 0; y < dirt_start; y += 1)
-                        chunk->set_block(local_pos(x, y, z), stone_id);
+                        chunk->set_block(LocalPos(x, y, z), stone_id);
 
                     for(std::int32_t y = dirt_start; y < top; y += 1)
-                        chunk->set_block(local_pos(x, y, z), dirt_id);
+                        chunk->set_block(LocalPos(x, y, z), dirt_id);
 
                     if((x * SIZE + z) % 37 == 0) {
-                        chunk->set_block(local_pos(x, top, z), slab_bottom_id);
+                        chunk->set_block(LocalPos(x, top, z), slab_bottom_id);
                     }
                     else {
-                        chunk->set_block(local_pos(x, top, z), grass_id);
+                        chunk->set_block(LocalPos(x, top, z), grass_id);
                     }
 
                     auto chance_1 = std::uniform_int_distribution<std::int32_t>(0, 100)(rng);
                     auto chance_2 = std::uniform_int_distribution<std::int32_t>(0, 100)(rng);
 
                     if(vtest_id && top + 1 < SIZE && chance_1 < 50) {
-                        chunk->set_block(local_pos(x, top + 1, z), vtest_id);
+                        chunk->set_block(LocalPos(x, top + 1, z), vtest_id);
                     }
 
                     if(chip_id != BLOCK_ID_NULL && top + 1 < SIZE && chance_2 == 1) {
-                        chunk->set_block(local_pos(x, top + 1, z), chip_id);
+                        chunk->set_block(LocalPos(x, top + 1, z), chip_id);
                     }
                 }
             }
+        }
+    }
+}
+
+static void on_mouse_button_event(const SDL_MouseButtonEvent& event)
+{
+    if(event.button == SDL_BUTTON_RIGHT && event.down) {
+        if(s_target.has_value() && std::holds_alternative<block_id_type>(s_target->target)) {
+            auto block = s_target->block_pos + s_target->normal.cast<BlockPos::value_type>();
+            auto block_id = block_registry::find(Identifier::from_string("builtin:stone"));
+            world::set_block(block, block_id);
+
+            LOG_INFO("placed block {} at {} {} {}", block_id, block.x(), block.y(), block.z());
+        }
+    }
+    else if(event.button == SDL_BUTTON_LEFT && event.down) {
+        if(s_target.has_value() && std::holds_alternative<block_id_type>(s_target->target)) {
+            auto block = s_target->block_pos;
+
+            world::set_block(block, BLOCK_ID_NULL);
+
+            LOG_INFO("removed block at {} {} {}", block.x(), block.y(), block.z());
         }
     }
 }
@@ -122,6 +148,8 @@ void client_game::init(void)
 {
     player_look::init();
     player_move::init();
+
+    globals::dispatcher.sink<SDL_MouseButtonEvent>().connect<&on_mouse_button_event>();
 }
 
 void client_game::init_late(void)
@@ -139,6 +167,14 @@ void client_game::shutdown(void)
 void client_game::update(void)
 {
     interpolation::update();
+
+    physics::Ray ray {};
+    ray.start_chunk = camera::chunk;
+    ray.start = camera::instance.position();
+    ray.direction = camera::forward;
+    ray.max_distance = 16.0f;
+
+    s_target = physics::raycast_block(ray);
 }
 
 void client_game::update_late(void)

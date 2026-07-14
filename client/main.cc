@@ -9,6 +9,7 @@
 #include "core/utils/epoch.hh"
 #include "core/version.hh"
 
+#include "shared/block_collisions.hh"
 #include "shared/block_registry.hh"
 #include "shared/mod_loader.hh"
 #include "shared/res/block_collision.hh"
@@ -137,6 +138,7 @@ static void wrapped_main(int argc, char** argv)
 
     block_atlas::init_late();
     block_models::init_late();
+    block_collisions::init_late();
 
     chunk_mesher::init();
 

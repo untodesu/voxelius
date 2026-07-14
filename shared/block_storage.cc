@@ -261,7 +261,7 @@ block_id_type BlockStorage::get(std::size_t index) const
     return BLOCK_ID_NULL;
 }
 
-block_id_type BlockStorage::get(const local_pos& pos) const
+block_id_type BlockStorage::get(const LocalPos& pos) const
 {
     return get(utils::to_index(pos));
 }
@@ -320,7 +320,7 @@ void BlockStorage::set(std::size_t index, block_id_type id)
     }
 }
 
-void BlockStorage::set(const local_pos& pos, block_id_type id)
+void BlockStorage::set(const LocalPos& pos, block_id_type id)
 {
     set(utils::to_index(pos), id);
 }

@@ -47,7 +47,7 @@ block_id_type Chunk::get_block(std::size_t index) const
     return m_blocks.get(index);
 }
 
-block_id_type Chunk::get_block(const local_pos& pos) const
+block_id_type Chunk::get_block(const LocalPos& pos) const
 {
     return m_blocks.get(pos);
 }
@@ -57,7 +57,7 @@ void Chunk::set_block(std::size_t index, block_id_type id)
     m_blocks.set(index, id);
 }
 
-void Chunk::set_block(const local_pos& pos, block_id_type id)
+void Chunk::set_block(const LocalPos& pos, block_id_type id)
 {
     m_blocks.set(pos, id);
 }

@@ -12,8 +12,8 @@ Block collisions define the physical shape of a block that's used for touch/move
 
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
-|`from`|`number[3]`|yes|N/D|AABB start in 1/16ths of a block|  
-|`to`|`number[3]`|yes|N/D|AABB end in 1/16ths of a block|  
+|`min`|`number[3]`|yes|N/D|AABB start in 1/16ths of a block|  
+|`max`|`number[3]`|yes|N/D|AABB end in 1/16ths of a block|  
 
 ## Examples
 
@@ -23,8 +23,8 @@ Block collisions define the physical shape of a block that's used for touch/move
 {
   "elements": [
     {
-      "from": [0, 0, 0],
-      "to": [16, 16, 16]
+      "min": [0, 0, 0],
+      "max": [16, 16, 16]
     }
   ]
 }
@@ -36,8 +36,8 @@ Block collisions define the physical shape of a block that's used for touch/move
 {
   "elements": [
     {
-      "from": [0, 0, 0],
-      "to": [16, 8, 16]
+      "min": [0, 0, 0],
+      "max": [16, 8, 16]
     }
   ]
 }
@@ -49,12 +49,12 @@ Block collisions define the physical shape of a block that's used for touch/move
 {
   "elements": [
     {
-      "from": [0, 0, 0],
-      "to": [16, 8, 16]
+      "min": [0, 0, 0],
+      "max": [16, 8, 16]
     },
     {
-      "from": [0, 8, 0],
-      "to": [8, 16, 16],
+      "min": [0, 8, 0],
+      "max": [8, 16, 16],
     }
   ]
 }

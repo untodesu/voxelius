@@ -8,7 +8,7 @@
 #include "shared/velocity.hh"
 #include "shared/world.hh"
 
-entt::entity utils::spawn_player_client(const block_pos& pos)
+entt::entity utils::spawn_player_client(const BlockPos& pos)
 {
     auto entity = utils::spawn_player(pos);
 

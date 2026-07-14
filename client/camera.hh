@@ -29,7 +29,7 @@ extern Eigen::Vector3f forward;
 extern Eigen::Vector3f right;
 extern Eigen::Vector3f up;
 extern Eigen::Vector3f local;
-extern chunk_pos chunk;
+extern ChunkPos chunk;
 } // namespace camera
 
 namespace camera

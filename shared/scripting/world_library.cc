@@ -7,10 +7,10 @@
 
 static int api_get_block(lua_State* L)
 {
-    block_pos pos = block_pos::Zero();
-    pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
-    pos.y() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 2));
-    pos.z() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 3));
+    BlockPos pos = BlockPos::Zero();
+    pos.x() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 1));
+    pos.y() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 2));
+    pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
     auto block_id = world::get_block(pos);
 
@@ -20,10 +20,10 @@ static int api_get_block(lua_State* L)
 
 static int api_set_block(lua_State* L)
 {
-    block_pos pos = block_pos::Zero();
-    pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
-    pos.y() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 2));
-    pos.z() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 3));
+    BlockPos pos = BlockPos::Zero();
+    pos.x() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 1));
+    pos.y() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 2));
+    pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
     auto block_id = static_cast<block_id_type>(luaL_checkinteger(L, 4));
     auto success = world::set_block(pos, block_id);
@@ -34,10 +34,10 @@ static int api_set_block(lua_State* L)
 
 static int api_get_light(lua_State* L)
 {
-    block_pos pos = block_pos::Zero();
-    pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
-    pos.y() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 2));
-    pos.z() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 3));
+    BlockPos pos = BlockPos::Zero();
+    pos.x() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 1));
+    pos.y() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 2));
+    pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
     auto light = world::get_light(pos);
 
@@ -47,10 +47,10 @@ static int api_get_light(lua_State* L)
 
 static int api_get_state(lua_State* L)
 {
-    block_pos pos = block_pos::Zero();
-    pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
-    pos.y() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 2));
-    pos.z() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 3));
+    BlockPos pos = BlockPos::Zero();
+    pos.x() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 1));
+    pos.y() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 2));
+    pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
     auto state_name = luaL_checkstring(L, 4);
     auto value_opt = world::get_state(pos, state_name);
@@ -67,10 +67,10 @@ static int api_get_state(lua_State* L)
 
 static int api_set_state(lua_State* L)
 {
-    block_pos pos = block_pos::Zero();
-    pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
-    pos.y() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 2));
-    pos.z() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 3));
+    BlockPos pos = BlockPos::Zero();
+    pos.x() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 1));
+    pos.y() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 2));
+    pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
     auto state_name = luaL_checkstring(L, 4);
     auto state_value = luaL_checkstring(L, 5);
@@ -83,10 +83,10 @@ static int api_set_state(lua_State* L)
 
 static int api_get_temperature_base(lua_State* L)
 {
-    block_pos pos = block_pos::Zero();
-    pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
-    pos.y() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 2));
-    pos.z() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 3));
+    BlockPos pos = BlockPos::Zero();
+    pos.x() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 1));
+    pos.y() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 2));
+    pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
     auto temperature = world::get_temperature_base(pos);
 
@@ -96,10 +96,10 @@ static int api_get_temperature_base(lua_State* L)
 
 static int api_get_temperature(lua_State* L)
 {
-    block_pos pos = block_pos::Zero();
-    pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
-    pos.y() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 2));
-    pos.z() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 3));
+    BlockPos pos = BlockPos::Zero();
+    pos.x() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 1));
+    pos.y() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 2));
+    pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
     auto temperature = world::get_temperature(pos);
 
@@ -109,10 +109,10 @@ static int api_get_temperature(lua_State* L)
 
 static int api_schedule(lua_State* L)
 {
-    block_pos pos = block_pos::Zero();
-    pos.x() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 1));
-    pos.y() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 2));
-    pos.z() = static_cast<block_pos::value_type>(luaL_checkinteger(L, 3));
+    BlockPos pos = BlockPos::Zero();
+    pos.x() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 1));
+    pos.y() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 2));
+    pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
     auto deadline = static_cast<std::uint64_t>(luaL_checkinteger(L, 4));
 

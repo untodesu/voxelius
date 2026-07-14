@@ -11,10 +11,10 @@ public:
     static void deserialize(Chunk& chunk, ReadBuffer& buffer);
 
     block_id_type get_block(std::size_t index) const;
-    block_id_type get_block(const local_pos& pos) const;
+    block_id_type get_block(const LocalPos& pos) const;
 
     void set_block(std::size_t index, block_id_type id);
-    void set_block(const local_pos& pos, block_id_type id);
+    void set_block(const LocalPos& pos, block_id_type id);
 
     constexpr entt::entity entity(void) const;
     constexpr const BlockStorage& blocks(void) const;
@@ -31,7 +31,7 @@ private:
 
 struct Chunk_Component final {
     std::shared_ptr<Chunk> ptr;
-    chunk_pos position;
+    ChunkPos position;
 };
 
 constexpr entt::entity Chunk::entity(void) const

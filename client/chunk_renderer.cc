@@ -32,7 +32,7 @@ static bool s_sorted_dirty;
 static std::vector<std::pair<entt::entity, float>> s_sorted_opaque;
 static std::vector<std::pair<entt::entity, float>> s_sorted_alpha;
 
-static chunk_pos s_last_camera_chunk;
+static ChunkPos s_last_camera_chunk;
 
 static void draw_part(const Chunk_Component& chunk, const ChunkMesh_Part& part)
 {
@@ -140,7 +140,7 @@ void chunk_renderer::init(void)
     s_sorted_opaque.clear();
     s_sorted_alpha.clear();
 
-    s_last_camera_chunk = camera::chunk + chunk_pos::Ones();
+    s_last_camera_chunk = camera::chunk + ChunkPos::Ones();
 
     globals::dispatcher.sink<ChunkCreateEvent>().connect<&on_chunk_create>();
     globals::dispatcher.sink<ChunkRemoveEvent>().connect<&on_chunk_remove>();

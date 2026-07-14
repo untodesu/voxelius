@@ -411,7 +411,7 @@ void block_models::shutdown(void)
     s_models.clear();
 }
 
-const BakedBlockModel* block_models::find(block_id_type id)
+const BakedBlockModel* block_models::find(block_id_type id) noexcept
 {
     if(id == BLOCK_ID_NULL || id >= s_models.size()) {
         return nullptr;

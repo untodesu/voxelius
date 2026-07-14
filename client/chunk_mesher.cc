@@ -29,22 +29,22 @@ constexpr static std::array ALL_FACES = {
 
 class MeshingTask final : public Task {
 public:
-    explicit MeshingTask(entt::entity entity, const chunk_pos& cpos);
+    explicit MeshingTask(entt::entity entity, const ChunkPos& cpos);
     virtual ~MeshingTask(void) override = default;
     virtual void process(void) override;
     virtual void finalize(void) override;
 
 private:
-    bool is_culled(const local_pos& lpos, block_face face, block_render self_render) const;
-    void emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos,
+    bool is_culled(const LocalPos& lpos, block_face face, block_render self_render) const;
+    void emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
         std::uint64_t entropy) const;
-    void mesh_block(const local_pos& lpos, block_id_type id);
+    void mesh_block(const LocalPos& lpos, block_id_type id);
 
     std::array<BlockStorage, 7> m_cache;
     std::vector<ChunkMesh_Quad> m_opaque;
     std::vector<ChunkMesh_Quad> m_alpha;
     entt::entity m_entity;
-    chunk_pos m_cpos;
+    ChunkPos m_cpos;
 };
 
 constexpr static block_face opposite_face(block_face face)
@@ -72,32 +72,32 @@ constexpr static block_face opposite_face(block_face face)
     return BLOCK_FACE_NORTH;
 }
 
-static chunk_pos face_delta(block_face face)
+static ChunkPos face_delta(block_face face)
 {
     switch(face) {
         case BLOCK_FACE_NORTH:
-            return -chunk_pos::UnitZ();
+            return -ChunkPos::UnitZ();
 
         case BLOCK_FACE_SOUTH:
-            return chunk_pos::UnitZ();
+            return ChunkPos::UnitZ();
 
         case BLOCK_FACE_EAST:
-            return chunk_pos::UnitX();
+            return ChunkPos::UnitX();
 
         case BLOCK_FACE_WEST:
-            return -chunk_pos::UnitX();
+            return -ChunkPos::UnitX();
 
         case BLOCK_FACE_TOP:
-            return chunk_pos::UnitY();
+            return ChunkPos::UnitY();
 
         case BLOCK_FACE_BOTTOM:
-            return -chunk_pos::UnitY();
+            return -ChunkPos::UnitY();
     }
 
-    return chunk_pos::Zero();
+    return ChunkPos::Zero();
 }
 
-static bool is_neighbour(const local_pos& lpos)
+static bool is_neighbour(const LocalPos& lpos)
 {
     auto result = false;
     result = result || lpos.x() < 0 || lpos.x() >= constant::CHUNK_SIZE;
@@ -111,7 +111,7 @@ static void mark_dirty(entt::entity entity)
     world::chunk_entities.emplace_or_replace<ChunkMesh_DirtyMarker>(entity);
 }
 
-static void mark_dirty(const chunk_pos& cpos)
+static void mark_dirty(const ChunkPos& cpos)
 {
     if(auto chunk = world::find_chunk(cpos)) {
         mark_dirty(chunk->entity());
@@ -136,7 +136,7 @@ static void sync_part(ChunkMesh_Part& part)
     glBufferData(GL_ARRAY_BUFFER, std::span(part.quads).size_bytes(), part.quads.data(), GL_STATIC_DRAW);
 }
 
-MeshingTask::MeshingTask(entt::entity entity, const chunk_pos& cpos) : m_entity(entity), m_cpos(cpos)
+MeshingTask::MeshingTask(entt::entity entity, const ChunkPos& cpos) : m_entity(entity), m_cpos(cpos)
 {
     if(auto chunk = world::find_chunk(cpos)) {
         m_cache[0] = chunk->blocks();
@@ -192,7 +192,7 @@ void MeshingTask::finalize(void)
     }
 }
 
-bool MeshingTask::is_culled(const local_pos& lpos, block_face face, block_render self_render) const
+bool MeshingTask::is_culled(const LocalPos& lpos, block_face face, block_render self_render) const
 {
     auto neighbour_lpos = lpos + face_delta(face);
     auto query_lpos = neighbour_lpos.eval();
@@ -226,7 +226,7 @@ bool MeshingTask::is_culled(const local_pos& lpos, block_face face, block_render
     return neighbour_baked->fully_covered[opposite_face(face)];
 }
 
-void MeshingTask::emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const local_pos& lpos,
+void MeshingTask::emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
     std::uint64_t entropy) const
 {
     auto block_origin = lpos.cast<float>() * 16.0f;
@@ -273,7 +273,7 @@ void MeshingTask::emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const B
     }
 }
 
-void MeshingTask::mesh_block(const local_pos& lpos, block_id_type id)
+void MeshingTask::mesh_block(const LocalPos& lpos, block_id_type id)
 {
     if(id == BLOCK_ID_NULL) {
         return;
@@ -334,14 +334,14 @@ void MeshingTask::mesh_block(const local_pos& lpos, block_id_type id)
     }
 }
 
-static void mark_neighbors_dirty(const chunk_pos& cpos)
+static void mark_neighbors_dirty(const ChunkPos& cpos)
 {
     for(auto face : ALL_FACES) {
         mark_dirty(cpos + face_delta(face));
     }
 }
 
-static void mark_border_neighbors_dirty(const chunk_pos& cpos, const local_pos& lpos)
+static void mark_border_neighbors_dirty(const ChunkPos& cpos, const LocalPos& lpos)
 {
     for(auto face : ALL_FACES) {
         if(is_neighbour((lpos + face_delta(face)).eval())) {

@@ -14,10 +14,10 @@ public:
     static void deserialize(BlockStorage& storage, ReadBuffer& buffer);
 
     block_id_type get(std::size_t index) const;
-    block_id_type get(const local_pos& pos) const;
+    block_id_type get(const LocalPos& pos) const;
 
     void set(std::size_t index, block_id_type id);
-    void set(const local_pos& pos, block_id_type id);
+    void set(const LocalPos& pos, block_id_type id);
     void fill(block_id_type id);
 
     void optimize(void);

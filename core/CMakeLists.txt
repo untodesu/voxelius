@@ -17,8 +17,6 @@ add_library(core STATIC
     "${CMAKE_CURRENT_LIST_DIR}/utils/modulo.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/physfs.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/physfs.hh"
-    "${CMAKE_CURRENT_LIST_DIR}/utils/raycast.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/utils/raycast.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/string.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/string.hh"
     "${CMAKE_CURRENT_LIST_DIR}/buffer.cc"

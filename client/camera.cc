@@ -24,7 +24,7 @@ Eigen::Vector3f camera::forward;
 Eigen::Vector3f camera::right;
 Eigen::Vector3f camera::up;
 Eigen::Vector3f camera::local;
-chunk_pos camera::chunk;
+ChunkPos camera::chunk;
 
 static void reset_camera(void)
 {

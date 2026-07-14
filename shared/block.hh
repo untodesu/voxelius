@@ -36,13 +36,14 @@ enum block_touch : unsigned {
     BLOCK_TOUCH_THROUGH,
 };
 
-enum block_tag_bit : unsigned {
-    BLOCK_TAG_GAS = 0x0001U,
-    BLOCK_TAG_ROCK = 0x0002U,
-    BLOCK_TAG_SOIL = 0x0004U,
-    BLOCK_TAG_TURF = 0x0008U,
-    BLOCK_TAG_FOIL = 0x0010U,
-    BLOCK_TAG_WOOD = 0x0020U,
+enum block_tag_bit : std::uint32_t {
+    BLOCK_TAG_GAS = 0x00000001U,
+    BLOCK_TAG_ROCK = 0x00000002U,
+    BLOCK_TAG_SOIL = 0x00000004U,
+    BLOCK_TAG_TURF = 0x00000008U,
+    BLOCK_TAG_FOIL = 0x00000010U,
+    BLOCK_TAG_WOOD = 0x00000020U,
+    BLOCK_TAG_ALL = 0xFFFFFFFFU,
 };
 
 using block_id_type = std::uint32_t;

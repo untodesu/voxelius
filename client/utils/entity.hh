@@ -5,7 +5,7 @@
 
 namespace utils
 {
-entt::entity spawn_player_client(const block_pos& pos);
+entt::entity spawn_player_client(const BlockPos& pos);
 } // namespace utils
 
 #endif /* A7C34B99_FF44_4F7E_862F_9B9FCD40AD9A */
