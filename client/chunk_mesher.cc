@@ -263,16 +263,21 @@ void MeshingTask::finalize(void)
 std::uint32_t MeshingTask::calculate_ao(const LocalPos& lpos, block_face face, const Eigen::Vector3f& vertex) const noexcept
 {
     auto delta = face_delta(face);
-    int nx = lpos.x() + delta.x();
-    int ny = lpos.y() + delta.y();
-    int nz = lpos.z() + delta.z();
+    LocalPos::value_type nx = lpos.x() + delta.x();
+    LocalPos::value_type ny = lpos.y() + delta.y();
+    LocalPos::value_type nz = lpos.z() + delta.z();
 
-    int dx = vertex.x() > 0.5f ? 1 : -1;
-    int dy = vertex.y() > 0.5f ? 1 : -1;
-    int dz = vertex.z() > 0.5f ? 1 : -1;
+    LocalPos::value_type dx = vertex.x() > 0.5f ? 1 : -1;
+    LocalPos::value_type dy = vertex.y() > 0.5f ? 1 : -1;
+    LocalPos::value_type dz = vertex.z() > 0.5f ? 1 : -1;
 
-    int s1x = nx, s1y = ny, s1z = nz;
-    int s2x = nx, s2y = ny, s2z = nz;
+    auto s1x = nx;
+    auto s1y = ny;
+    auto s1z = nz;
+
+    auto s2x = nx;
+    auto s2y = ny;
+    auto s2z = nz;
 
     if(delta.x()) {
         s1y += dy;
@@ -287,13 +292,13 @@ std::uint32_t MeshingTask::calculate_ao(const LocalPos& lpos, block_face face, c
         s2y += dy;
     }
 
-    int cx = s1x + s2x - nx;
-    int cy = s1y + s2y - ny;
-    int cz = s1z + s2z - nz;
+    auto cx = s1x + s2x - nx;
+    auto cy = s1y + s2y - ny;
+    auto cz = s1z + s2z - nz;
 
-    bool oc_s1 = is_occluder(LocalPos(s1x, s1y, s1z), face);
-    bool oc_s2 = is_occluder(LocalPos(s2x, s2y, s2z), face);
-    bool oc_c = is_occluder(LocalPos(cx, cy, cz), face);
+    auto oc_s1 = is_occluder(LocalPos(s1x, s1y, s1z), face);
+    auto oc_s2 = is_occluder(LocalPos(s2x, s2y, s2z), face);
+    auto oc_c = is_occluder(LocalPos(cx, cy, cz), face);
 
     if(oc_s1 && oc_s2)
         return 0;
