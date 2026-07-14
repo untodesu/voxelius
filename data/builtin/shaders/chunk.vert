@@ -1,6 +1,5 @@
 #version 330 core
-#pragma variant 0 CURVATURE
-#pragma variant 1 FOG_MODEL
+#pragma variant 0 FOG_MODEL
 
 #define SHADE_BIT       0x40000000U
 #define UV_ORIENT_BIT   0x80000000U
@@ -108,11 +107,6 @@ void main(void)
     uint strip_frame_count = strip_data.y;
 
     gl_Position = u_ViewProjection * vec4(local_position, 1.0);
-
-#if CURVATURE
-    gl_Position.y -= gl_Position.z * gl_Position.z / u_ViewDistance / 32.0;
-    gl_Position.y -= gl_Position.x * gl_Position.x / u_ViewDistance / 32.0;
-#endif
 
     if(bool(vert_Origin & UV_ORIENT_BIT)) {
         float u = mix(c0.x, c2.x, corner_st.y);

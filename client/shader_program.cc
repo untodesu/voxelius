@@ -15,7 +15,7 @@ static void parse_source(std::istringstream stream, std::vector<std::string>& li
     macros.clear();
 
     while(std::getline(stream, line)) {
-        unsigned int macro_index = {};
+        unsigned macro_index = {};
         char macro_name[128] = {};
 
         if(std::sscanf(line.c_str(), " # pragma variant %u %127[^, \"\t\r\n]", &macro_index, &macro_name) == 2) {
@@ -25,7 +25,7 @@ static void parse_source(std::istringstream stream, std::vector<std::string>& li
 
             macros[macro_index].line = line_number;
             macros[macro_index].identifier = macro_name;
-            macros[macro_index].value = std::numeric_limits<unsigned int>::max();
+            macros[macro_index].value = std::numeric_limits<unsigned>::max();
 
             lines.push_back(std::string());
             line_number += 1UL;
@@ -194,7 +194,7 @@ std::size_t ShaderProgram::add_uniform(std::string name) noexcept
     return index;
 }
 
-void ShaderProgram::set_variant_vert(unsigned int variant, unsigned int value) noexcept
+void ShaderProgram::set_variant_vert(unsigned variant, unsigned value) noexcept
 {
     if(variant < vert_macros.size()) {
         if(value != vert_macros[variant].value) {
@@ -204,7 +204,7 @@ void ShaderProgram::set_variant_vert(unsigned int variant, unsigned int value) n
     }
 }
 
-void ShaderProgram::set_variant_frag(unsigned int variant, unsigned int value) noexcept
+void ShaderProgram::set_variant_frag(unsigned variant, unsigned value) noexcept
 {
     if(variant < frag_macros.size()) {
         if(value != frag_macros[variant].value) {

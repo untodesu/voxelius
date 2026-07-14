@@ -22,11 +22,10 @@
 #include "client/interpolation.hh"
 #include "client/player_look.hh"
 #include "client/player_move.hh"
+#include "client/player_target.hh"
 #include "client/utils/entity.hh"
 
 #include <fastnoiselite.h>
-
-static physics::Hit s_target = std::monostate {};
 
 static void generate_debug_terrain(void)
 {
@@ -108,25 +107,11 @@ static void generate_debug_terrain(void)
     }
 }
 
-static void on_mouse_button_event(const SDL_MouseButtonEvent& event)
-{
-    if(event.button == SDL_BUTTON_RIGHT && event.down && std::holds_alternative<physics::BlockHit>(s_target)) {
-        auto block = block_registry::find(Identifier::from_string("builtin:stone_slab"));
-        auto& hit = std::get<physics::BlockHit>(s_target);
-        utils::block_place(hit, globals::player, block);
-    }
-    else if(event.button == SDL_BUTTON_LEFT && event.down && std::holds_alternative<physics::BlockHit>(s_target)) {
-        auto& hit = std::get<physics::BlockHit>(s_target);
-        utils::block_break(hit, globals::player);
-    }
-}
-
 void client_game::init(void)
 {
     player_look::init();
     player_move::init();
-
-    globals::dispatcher.sink<SDL_MouseButtonEvent>().connect<&on_mouse_button_event>();
+    player_target::init();
 }
 
 void client_game::init_late(void)
@@ -145,13 +130,7 @@ void client_game::update(void)
 {
     interpolation::update();
 
-    physics::Ray ray {};
-    ray.start_chunk = camera::chunk;
-    ray.start = camera::instance.position();
-    ray.direction = camera::forward;
-    ray.max_distance = 16.0f;
-
-    s_target = physics::raycast(ray, physics::BLOCK_FILTER_ALL, physics::ENTITY_FILTER_ALL);
+    player_target::update();
 }
 
 void client_game::update_late(void)
@@ -178,4 +157,9 @@ void client_game::fixed_update_late(void)
 void client_game::layout(void)
 {
     // empty
+}
+
+void client_game::render(void)
+{
+    player_target::render();
 }

@@ -44,8 +44,8 @@ bool utils::block_place(const physics::BlockHit& hit, entt::entity actor, block_
     lua_pushinteger(L, static_cast<lua_Integer>(pos.z()));
 
     lua_newtable(L);
-    lua_pushinteger(L, static_cast<lua_Integer>(hit.id));
-    lua_setfield(L, -2, "id");
+    lua_pushinteger(L, static_cast<lua_Integer>(hit.stem));
+    lua_setfield(L, -2, "stem");
     lua_pushinteger(L, static_cast<lua_Integer>(hit.face));
     lua_setfield(L, -2, "face");
     lua_pushnumber(L, static_cast<lua_Number>(hit.normal.x()));

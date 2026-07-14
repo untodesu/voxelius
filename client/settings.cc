@@ -13,7 +13,7 @@
 #include "client/video.hh"
 
 constexpr static ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration;
-constexpr static unsigned int NUM_LOCATIONS = static_cast<unsigned int>(settings_location::count);
+constexpr static unsigned NUM_LOCATIONS = static_cast<unsigned>(settings_location::count);
 constexpr static std::string_view TOOLTIP_TEXT = "[?]";
 
 enum class gui_location {
@@ -565,7 +565,7 @@ static void layout_values(settings_location location)
 {
     ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.70f);
 
-    for(auto& value : values[static_cast<unsigned int>(location)]) {
+    for(auto& value : values[static_cast<unsigned>(location)]) {
         value->layout();
     }
 
@@ -731,7 +731,7 @@ void settings::checkbox(int priority, settings_location location, std::string_vi
     setting_value->value.bind(globals::client_config, key);
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -752,7 +752,7 @@ void settings::input_arithmetic<float>(int priority, settings_location location,
     setting_value->value.bind(globals::client_config, key);
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -772,7 +772,7 @@ void settings::input_arithmetic<unsigned>(int priority, settings_location locati
     setting_value->value.bind(globals::client_config, key);
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -792,7 +792,7 @@ void settings::input_arithmetic<int>(int priority, settings_location location, s
     setting_value->value.bind(globals::client_config, key);
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -809,7 +809,7 @@ void settings::input_string(int priority, settings_location location, std::strin
     setting_value->value.bind(globals::client_config, key);
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -830,7 +830,7 @@ void settings::slider<float>(int priority, settings_location location, std::stri
     setting_value->value.bind(globals::client_config, key);
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -850,7 +850,7 @@ void settings::slider<unsigned>(int priority, settings_location location, std::s
     setting_value->value.bind(globals::client_config, key);
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -870,7 +870,7 @@ void settings::slider<int>(int priority, settings_location location, std::string
     setting_value->value.bind(globals::client_config, key);
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -891,7 +891,7 @@ void settings::stepper<unsigned>(int priority, settings_location location, std::
     setting_value->value.bind(globals::client_config, key);
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -911,7 +911,7 @@ void settings::stepper<int>(int priority, settings_location location, std::strin
     setting_value->value.bind(globals::client_config, key);
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -932,7 +932,7 @@ void settings::language(int priority, settings_location location, std::string_vi
 
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }
 
@@ -948,6 +948,6 @@ void settings::video_mode(int priority, settings_location location, std::string_
     setting_value->refresh_choices();
     setting_value->refresh_locale();
 
-    values[static_cast<unsigned int>(location)].push_back(setting_value);
+    values[static_cast<unsigned>(location)].push_back(setting_value);
     values_all.push_back(setting_value);
 }

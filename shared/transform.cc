@@ -5,7 +5,7 @@
 #include "shared/constant.hh"
 #include "shared/world.hh"
 
-constexpr inline static void update_component(unsigned int dim, Transform& component)
+constexpr inline static void update_component(unsigned dim, Transform& component)
 {
     if(component.local[dim] >= constant::CHUNK_SIZE) {
         component.local[dim] -= constant::CHUNK_SIZE;

@@ -18,17 +18,14 @@
 #include "client/camera.hh"
 #include "client/chunk_mesh.hh"
 #include "client/globals.hh"
-#include "client/head.hh"
 #include "client/shader_program.hh"
 #include "client/skybox.hh"
 
 // ONLY TOUCH THESE IF THE RESPECTIVE SHADER
 // VARIANT MACRO DECLARATIONS LAYOUT CHANGED AS WELL
-constexpr static unsigned int CURVATURE = 0U;
-constexpr static unsigned int FOG_MODEL = 1U;
+constexpr static unsigned FOG_MODEL = 0U;
 
 static config::Ref<unsigned> s_fog_model;
-static config::Ref<bool> s_curvature;
 
 static ShaderProgram s_program;
 static std::size_t su_ViewProjection;
@@ -133,7 +130,6 @@ static void on_chunk_mesh(entt::entity entity)
 void chunk_renderer::init(void)
 {
     s_fog_model.bind(globals::client_config, "head.fog_model");
-    s_curvature.bind(globals::client_config, "head.curvature");
 
     auto program_id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "chunk");
     auto program_ok = s_program.setup(program_id);
@@ -193,7 +189,6 @@ void chunk_renderer::render(void)
         update_sorted_chunks();
     }
 
-    s_program.set_variant_vert(CURVATURE, s_curvature.value());
     s_program.set_variant_vert(FOG_MODEL, s_fog_model.value());
     s_program.set_variant_frag(FOG_MODEL, s_fog_model.value());
 

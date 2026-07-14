@@ -9,7 +9,9 @@
 #include "core/exception.hh"
 
 #include "client/chunk_renderer.hh"
+#include "client/game.hh"
 #include "client/globals.hh"
+#include "client/outline.hh"
 #include "client/settings.hh"
 #include "client/skybox.hh"
 
@@ -19,7 +21,6 @@ static GLuint s_world_renderbuffer;
 
 static config::Ref<int> s_pixel_size { 1 };
 static config::Ref<unsigned> s_fog_model { 2 };
-static config::Ref<bool> s_curvature { true };
 
 static int s_scaled_width;
 static int s_scaled_height;
@@ -64,11 +65,9 @@ void head::init(void)
 {
     s_pixel_size.bind(globals::client_config, "head.pixel_size");
     s_fog_model.bind(globals::client_config, "head.fog_model");
-    s_curvature.bind(globals::client_config, "head.curvature");
 
     settings::slider<int>(2, settings_location::VIDEO, "head.pixel_size", 1, 4, true);
     settings::stepper<unsigned>(3, settings_location::VIDEO, "head.fog_model", 0, 2, 1, false);
-    settings::checkbox(4, settings_location::VIDEO, "head.curvature", true);
 
     globals::gl_context = SDL_GL_CreateContext(globals::window);
     vx::throw_if_not_fmt(globals::gl_context, "SDL_GL_CreateContext failed: {}", SDL_GetError());
@@ -94,6 +93,7 @@ void head::init(void)
     ImGui::GetIO().IniFilename = nullptr;
 
     chunk_renderer::init();
+    outline::init();
 
     SDL_ShowWindow(globals::window);
 
@@ -107,6 +107,7 @@ void head::init_late(void)
 
 void head::shutdown(void)
 {
+    outline::shutdown();
     chunk_renderer::shutdown();
 
     ImGui_ImplOpenGL3_Shutdown();
@@ -155,6 +156,8 @@ void head::render(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     chunk_renderer::render();
+
+    client_game::render();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, globals::width, globals::height);

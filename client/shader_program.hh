@@ -6,7 +6,7 @@ class Identifier;
 struct VariantMacro final {
     std::string identifier;
     unsigned long line;
-    unsigned int value;
+    unsigned value;
 };
 
 struct VariantUniform final {
@@ -21,8 +21,8 @@ public:
     bool update(void) noexcept;
 
     std::size_t add_uniform(std::string name) noexcept;
-    void set_variant_vert(unsigned int variant, unsigned int value) noexcept;
-    void set_variant_frag(unsigned int variant, unsigned int value) noexcept;
+    void set_variant_vert(unsigned variant, unsigned value) noexcept;
+    void set_variant_frag(unsigned variant, unsigned value) noexcept;
 
     std::string vert_path;
     std::string frag_path;

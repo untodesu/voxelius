@@ -7,7 +7,7 @@ function slabs.on_place(identifier)
     local slab_id = blocks.get(identifier)
     local current = world.get_block(bx, by, bz)
 
-    if target.id == slab_id then
+    if target.stem == slab_id then
       local state = world.get_state(target.bx, target.by, target.bz, "orientation")
       if state == "bottom" and target.face == blocks.FACE_TOP then
         world.set_state(target.bx, target.by, target.bz, "orientation", "double")

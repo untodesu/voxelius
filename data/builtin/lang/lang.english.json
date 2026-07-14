@@ -37,7 +37,6 @@
   
   "settings.value.camera.vertical_fov": "FOV",
   "settings.value.camera.view_distance": "View distance",
-  "settings.value.head.curvature": "Curvature",
   "settings.value.head.fog_model.0": "Disabled",
   "settings.value.head.fog_model.1": "Fast",
   "settings.value.head.fog_model.2": "Fancy",
@@ -49,7 +48,6 @@
   "settings.value.video.enable_vsync": "V-Sync",
 
   "settings.tooltip.camera.vertical_fov": "Field Of View",
-  "settings.tooltip.head.curvature": "Simulate horizon curvature",
   "settings.tooltip.head.pixel_size": "Controls the size of each pixel in the rendered image",
   "settings.tooltip.player_look.mouse.sensitivity": "Specifies the rate at which cursor movement on 2D screen is reflected by the camera",
   "settings.tooltip.video.enable_vsync": "Synchronize buffer swapping with your monitor's refresh rate; this removes screen tearing but adds a noticeable input lag",

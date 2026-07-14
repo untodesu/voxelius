@@ -1,6 +1,5 @@
 #version 330 core
-#pragma variant 0 CURVATURE
-#pragma variant 1 FOG_MODEL
+#pragma variant 0 FOG_MODEL
 
 in vec2 vs_TexCoord;
 flat in uint vs_FrameIndex;

@@ -35,6 +35,7 @@ struct BlockHit final {
     Eigen::Vector3f point; // float variant of local_pos
     Eigen::Vector3f normal;
 
+    block_id_type stem;
     block_id_type id;
     block_face face;
 
