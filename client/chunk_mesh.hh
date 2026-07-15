@@ -21,7 +21,7 @@ struct ChunkMesh_Quad final {
 };
 
 struct ChunkMesh_Part final {
-    ~ChunkMesh_Part(void) noexcept;
+    ~ChunkMesh_Part(void);
     std::vector<ChunkMesh_Quad> quads; // FIXME: might not want to clear these for blendable blocks
     std::uint32_t count { 0 };
     GLuint vbo { 0 };

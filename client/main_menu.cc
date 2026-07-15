@@ -28,21 +28,6 @@ static std::string str_mods_popup_title;
 static std::string str_mods_popup_message;
 static std::string str_mods_popup_choice_ok;
 
-static void on_keyboard_event(const SDL_KeyboardEvent& event)
-{
-    if(world::basic_entities.valid(globals::player) && event.type == SDL_EVENT_KEY_DOWN && event.key == SDLK_ESCAPE) {
-        if(gui::screen == GUI_SCREEN_NONE) {
-            gui::screen = GUI_MAIN_MENU;
-            return;
-        }
-
-        if(gui::screen == GUI_MAIN_MENU) {
-            gui::screen = GUI_SCREEN_NONE;
-            return;
-        }
-    }
-}
-
 static void on_language_update_event(const LanguageUpdateEvent& event)
 {
     str_button_play = language::resolve_gui("main_menu.button.play");
@@ -63,7 +48,6 @@ static void on_language_update_event(const LanguageUpdateEvent& event)
 
 void main_menu::init(void)
 {
-    globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&on_keyboard_event>();
     globals::dispatcher.sink<LanguageUpdateEvent>().connect<&on_language_update_event>();
 }
 

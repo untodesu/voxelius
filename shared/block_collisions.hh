@@ -16,7 +16,7 @@ void shutdown(void);
 
 namespace block_collisions
 {
-const BakedBlockCollision* find(block_id_type id) noexcept;
+const BakedBlockCollision* find(block_id_type id);
 } // namespace block_collisions
 
 #endif /* B6A54337_7869_417A_8BB1_A42EB7E96B49 */

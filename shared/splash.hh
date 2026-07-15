@@ -6,12 +6,12 @@ constexpr static std::string_view SPLASH_SERVER = "splashes_server";
 
 namespace splash
 {
-void init(std::string_view filename) noexcept;
+void init(std::string_view filename);
 } // namespace splash
 
 namespace splash
 {
-std::string_view get(void) noexcept;
+std::string_view get(void);
 } // namespace splash
 
 #endif /* F83DEC19_C701_4154_8E7D_362093A1EDBA */

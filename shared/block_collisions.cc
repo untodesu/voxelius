@@ -89,7 +89,7 @@ void block_collisions::shutdown(void)
     s_collisions.clear();
 }
 
-const BakedBlockCollision* block_collisions::find(block_id_type id) noexcept
+const BakedBlockCollision* block_collisions::find(block_id_type id)
 {
     if(id == BLOCK_ID_NULL || id >= s_collisions.size()) {
         return nullptr;

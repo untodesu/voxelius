@@ -48,6 +48,18 @@ void gui::shutdown(void)
 
 void gui::layout(void)
 {
+    if(world::basic_entities.valid(globals::player) && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+        switch(gui::screen) {
+            case GUI_SCREEN_NONE:
+                gui::screen = GUI_MAIN_MENU;
+                break;
+
+            case GUI_MAIN_MENU:
+                gui::screen = GUI_SCREEN_NONE;
+                break;
+        }
+    }
+
     background::layout();
 
     if(gui::screen) {

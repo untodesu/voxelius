@@ -6,7 +6,7 @@
 #include "core/utils/physfs.hh"
 #include "core/utils/string.hh"
 
-static void parse_source(std::istringstream stream, std::vector<std::string>& lines, std::vector<VariantMacro>& macros) noexcept
+static void parse_source(std::istringstream stream, std::vector<std::string>& lines, std::vector<VariantMacro>& macros)
 {
     std::string line;
     unsigned long line_number = 0UL;
@@ -37,7 +37,7 @@ static void parse_source(std::istringstream stream, std::vector<std::string>& li
     }
 }
 
-static GLuint compile_shader(std::string_view path, const char* source, GLenum shader_stage) noexcept
+static GLuint compile_shader(std::string_view path, const char* source, GLenum shader_stage)
 {
     GLuint shader = glCreateShader(shader_stage);
     glShaderSource(shader, 1, &source, nullptr);
@@ -65,7 +65,7 @@ static GLuint compile_shader(std::string_view path, const char* source, GLenum s
     return shader;
 }
 
-bool ShaderProgram::setup(const Identifier& id) noexcept
+bool ShaderProgram::setup(const Identifier& id)
 {
     destroy();
 
@@ -94,7 +94,7 @@ bool ShaderProgram::setup(const Identifier& id) noexcept
     return true;
 }
 
-bool ShaderProgram::update(void) noexcept
+bool ShaderProgram::update(void)
 {
     if(!needs_update) {
         // The program is already up to
@@ -159,7 +159,7 @@ bool ShaderProgram::update(void) noexcept
     return true;
 }
 
-void ShaderProgram::destroy(void) noexcept
+void ShaderProgram::destroy(void)
 {
     if(handle) {
         glDeleteProgram(handle);
@@ -179,7 +179,7 @@ void ShaderProgram::destroy(void) noexcept
     needs_update = false;
 }
 
-std::size_t ShaderProgram::add_uniform(std::string name) noexcept
+std::size_t ShaderProgram::add_uniform(std::string name)
 {
     for(std::size_t i = 0; i < uniforms.size(); ++i) {
         if(0 == uniforms[i].identifier.compare(name)) {
@@ -194,7 +194,7 @@ std::size_t ShaderProgram::add_uniform(std::string name) noexcept
     return index;
 }
 
-void ShaderProgram::set_variant_vert(unsigned variant, unsigned value) noexcept
+void ShaderProgram::set_variant_vert(unsigned variant, unsigned value)
 {
     if(variant < vert_macros.size()) {
         if(value != vert_macros[variant].value) {
@@ -204,7 +204,7 @@ void ShaderProgram::set_variant_vert(unsigned variant, unsigned value) noexcept
     }
 }
 
-void ShaderProgram::set_variant_frag(unsigned variant, unsigned value) noexcept
+void ShaderProgram::set_variant_frag(unsigned variant, unsigned value)
 {
     if(variant < frag_macros.size()) {
         if(value != frag_macros[variant].value) {

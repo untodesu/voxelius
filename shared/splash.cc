@@ -40,7 +40,7 @@ static void append_lines(std::string_view name_space, std::string_view filename)
     }
 }
 
-void splash::init(std::string_view filename) noexcept
+void splash::init(std::string_view filename)
 {
     for(const auto& ctx : mod_loader::all()) {
         append_lines(ctx.name_space(), filename);
@@ -53,7 +53,7 @@ void splash::init(std::string_view filename) noexcept
     s_random.seed(std::random_device {}());
 }
 
-std::string_view splash::get(void) noexcept
+std::string_view splash::get(void)
 {
     std::uniform_int_distribution<std::size_t> dist(0, s_lines.size() - 1);
 

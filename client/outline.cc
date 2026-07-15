@@ -113,7 +113,7 @@ void outline::prepare(void)
 }
 
 void outline::cube(const ChunkPos& cpos, const Eigen::Vector3f& fpos, const Eigen::Vector3f& size, float thickness,
-    const Eigen::Vector4f& color) noexcept
+    const Eigen::Vector4f& color)
 {
     auto patch_cpos = cpos - camera::chunk;
 
@@ -129,7 +129,7 @@ void outline::cube(const ChunkPos& cpos, const Eigen::Vector3f& fpos, const Eige
 }
 
 void outline::line(const ChunkPos& cpos, const Eigen::Vector3f& fpos, const Eigen::Vector3f& size, float thickness,
-    const Eigen::Vector4f& color) noexcept
+    const Eigen::Vector4f& color)
 {
     auto patch_cpos = cpos - camera::chunk;
 

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <compare>
 #include <concepts>
 #include <filesystem>
 #include <format>

@@ -21,7 +21,7 @@ static bool call_routine(lua_State* L, int argc, int retc, std::string_view debu
     return false;
 }
 
-bool utils::block_place(const physics::BlockHit& hit, entt::entity actor, block_id_type id) noexcept
+bool utils::block_place(const physics::BlockHit& hit, entt::entity actor, block_id_type id)
 {
     auto family = block_registry::find_family_of(id);
     auto pos = hit.block_pos + hit.normal.cast<BlockPos::value_type>();
@@ -118,7 +118,7 @@ bool utils::block_place(const physics::BlockHit& hit, entt::entity actor, block_
     return world::set_block(pos, id);
 }
 
-bool utils::block_break(const physics::BlockHit& hit, entt::entity actor) noexcept
+bool utils::block_break(const physics::BlockHit& hit, entt::entity actor)
 {
     auto replace_block = BLOCK_ID_NULL; // TODO: ask biome subsystem for this
     auto family = block_registry::find_family_of(hit.id);
@@ -146,7 +146,7 @@ bool utils::block_break(const physics::BlockHit& hit, entt::entity actor) noexce
     return world::set_block(hit.block_pos, replace_block);
 }
 
-bool utils::block_interact(const physics::BlockHit& hit, entt::entity actor) noexcept
+bool utils::block_interact(const physics::BlockHit& hit, entt::entity actor)
 {
     auto family = block_registry::find_family_of(hit.id);
 
@@ -194,7 +194,7 @@ bool utils::block_interact(const physics::BlockHit& hit, entt::entity actor) noe
     return call_routine(L, 5, 1, family->name.full_string());
 }
 
-bool utils::block_random_tick(const BlockPos& pos) noexcept
+bool utils::block_random_tick(const BlockPos& pos)
 {
     auto id = world::get_block(pos);
     auto family = block_registry::find_family_of(id);
@@ -219,7 +219,7 @@ bool utils::block_random_tick(const BlockPos& pos) noexcept
     return call_routine(L, 3, 1, family->name.full_string());
 }
 
-bool utils::block_sched_tick(const BlockPos& pos) noexcept
+bool utils::block_sched_tick(const BlockPos& pos)
 {
     auto id = world::get_block(pos);
     auto family = block_registry::find_family_of(id);

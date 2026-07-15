@@ -62,12 +62,10 @@ void player_look::update_late(void)
 
     if(gui::screen) {
         io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-        io.ConfigFlags &= ~ImGuiConfigFlags_NoKeyboard;
         SDL_SetWindowRelativeMouseMode(globals::window, false);
     }
     else {
         io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
-        io.ConfigFlags |= ImGuiConfigFlags_NoKeyboard;
         SDL_SetWindowRelativeMouseMode(globals::window, true);
     }
 }

@@ -13,12 +13,32 @@
 #include "client/camera.hh"
 #include "client/globals.hh"
 #include "client/gui.hh"
+#include "client/settings.hh"
 
 constexpr static float SPEED = 16.0f;
 
+static config::Ref<SDL_Keycode> s_key_forward { SDLK_W };
+static config::Ref<SDL_Keycode> s_key_backward { SDLK_S };
+static config::Ref<SDL_Keycode> s_key_left { SDLK_A };
+static config::Ref<SDL_Keycode> s_key_right { SDLK_D };
+static config::Ref<SDL_Keycode> s_key_jump { SDLK_SPACE };
+static config::Ref<SDL_Keycode> s_key_crouch { SDLK_LSHIFT };
+
 void player_move::init(void)
 {
-    // empty
+    s_key_forward.bind(globals::client_config, "player_move.key_forward");
+    s_key_backward.bind(globals::client_config, "player_move.key_backward");
+    s_key_left.bind(globals::client_config, "player_move.key_left");
+    s_key_right.bind(globals::client_config, "player_move.key_right");
+    s_key_jump.bind(globals::client_config, "player_move.key_jump");
+    s_key_crouch.bind(globals::client_config, "player_move.key_crouch");
+
+    settings::keybind(0, settings_location::KEYBOARD_MOVEMENT, "player_move.key_forward", false);
+    settings::keybind(1, settings_location::KEYBOARD_MOVEMENT, "player_move.key_backward", false);
+    settings::keybind(2, settings_location::KEYBOARD_MOVEMENT, "player_move.key_left", false);
+    settings::keybind(3, settings_location::KEYBOARD_MOVEMENT, "player_move.key_right", false);
+    settings::keybind(4, settings_location::KEYBOARD_MOVEMENT, "player_move.key_jump", false);
+    settings::keybind(5, settings_location::KEYBOARD_MOVEMENT, "player_move.key_crouch", false);
 }
 
 void player_move::fixed_update(void)
@@ -42,27 +62,34 @@ void player_move::fixed_update(void)
 
     Eigen::Vector3f wishdir = Eigen::Vector3f::Zero();
 
-    if(keyboard[SDL_SCANCODE_W]) {
+    auto forward_scancode = SDL_GetScancodeFromKey(s_key_forward.value(), nullptr);
+    auto backward_scancode = SDL_GetScancodeFromKey(s_key_backward.value(), nullptr);
+    auto left_scancode = SDL_GetScancodeFromKey(s_key_left.value(), nullptr);
+    auto right_scancode = SDL_GetScancodeFromKey(s_key_right.value(), nullptr);
+    auto jump_scancode = SDL_GetScancodeFromKey(s_key_jump.value(), nullptr);
+    auto crouch_scancode = SDL_GetScancodeFromKey(s_key_crouch.value(), nullptr);
+
+    if(keyboard[forward_scancode]) {
         wishdir.z() -= 1.0f;
     }
 
-    if(keyboard[SDL_SCANCODE_S]) {
+    if(keyboard[backward_scancode]) {
         wishdir.z() += 1.0f;
     }
 
-    if(keyboard[SDL_SCANCODE_A]) {
+    if(keyboard[left_scancode]) {
         wishdir.x() -= 1.0f;
     }
 
-    if(keyboard[SDL_SCANCODE_D]) {
+    if(keyboard[right_scancode]) {
         wishdir.x() += 1.0f;
     }
 
-    if(keyboard[SDL_SCANCODE_SPACE]) {
+    if(keyboard[jump_scancode]) {
         wishdir.y() += 1.0f;
     }
 
-    if(keyboard[SDL_SCANCODE_LSHIFT]) {
+    if(keyboard[crouch_scancode]) {
         wishdir.y() -= 1.0f;
     }
 

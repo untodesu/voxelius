@@ -20,6 +20,17 @@ enum class settings_location {
     count
 };
 
+namespace config
+{
+template<typename T>
+class Ref;
+} // namespace config
+
+namespace settings
+{
+extern config::Ref<SDL_Keycode> active_keybind;
+} // namespace settings
+
 namespace settings
 {
 void init(void);

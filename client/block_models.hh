@@ -28,7 +28,7 @@ void shutdown(void);
 
 namespace block_models
 {
-const BakedBlockModel* find(block_id_type id) noexcept;
+const BakedBlockModel* find(block_id_type id);
 } // namespace block_models
 
 #endif /* E58051D6_68EC_495E_92C9_545EBD9CD3E9 */

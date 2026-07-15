@@ -6,12 +6,12 @@
 #include "shared/utils/coord.hh"
 #include "shared/world.hh"
 
-Ray_DDA::Ray_DDA(const ChunkPos& start_chunk, const Eigen::Vector3f& start_pos, const Eigen::Vector3f& direction) noexcept
+Ray_DDA::Ray_DDA(const ChunkPos& start_chunk, const Eigen::Vector3f& start_pos, const Eigen::Vector3f& direction)
 {
     reset(start_chunk, start_pos, direction);
 }
 
-void Ray_DDA::reset(const ChunkPos& start_chunk, const Eigen::Vector3f& start_pos, const Eigen::Vector3f& direction) noexcept
+void Ray_DDA::reset(const ChunkPos& start_chunk, const Eigen::Vector3f& start_pos, const Eigen::Vector3f& direction)
 {
     m_start_chunk = start_chunk;
     m_start_pos = start_pos;
@@ -58,7 +58,7 @@ void Ray_DDA::reset(const ChunkPos& start_chunk, const Eigen::Vector3f& start_po
     m_last_chunk = world::find_chunk(m_last_chunk_pos);
 }
 
-block_id_type Ray_DDA::step(void) noexcept
+block_id_type Ray_DDA::step(void)
 {
     if(m_side_distance.x() < m_side_distance.z()) {
         if(m_side_distance.x() < m_side_distance.y()) {

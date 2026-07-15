@@ -9,7 +9,7 @@
 #include "shared/utils/coord.hh"
 #include "shared/world.hh"
 
-static block_face make_block_face(const Eigen::Vector3f& normal) noexcept
+static block_face make_block_face(const Eigen::Vector3f& normal)
 {
     if(normal.isApprox(Eigen::Vector3f::UnitX())) {
         return BLOCK_FACE_EAST;
@@ -33,7 +33,7 @@ static block_face make_block_face(const Eigen::Vector3f& normal) noexcept
     return BLOCK_FACE_NORTH; // fallback
 }
 
-std::optional<physics::BlockHit> physics::raycast_block(const Ray& ray, block_filter bfilter) noexcept
+std::optional<physics::BlockHit> physics::raycast_block(const Ray& ray, block_filter bfilter)
 {
     assert(bfilter);
 
@@ -107,14 +107,14 @@ std::optional<physics::BlockHit> physics::raycast_block(const Ray& ray, block_fi
     return closest;
 }
 
-std::optional<physics::EntityHit> physics::raycast_entity(const Ray& ray, entity_filter efilter) noexcept
+std::optional<physics::EntityHit> physics::raycast_entity(const Ray& ray, entity_filter efilter)
 {
     assert(efilter);
 
     return std::nullopt; // TODO
 }
 
-physics::Hit physics::raycast(const Ray& ray, block_filter bfilter, entity_filter efilter) noexcept
+physics::Hit physics::raycast(const Ray& ray, block_filter bfilter, entity_filter efilter)
 {
     std::optional<physics::BlockHit> block_hit = std::nullopt;
     std::optional<physics::EntityHit> entity_hit = std::nullopt;

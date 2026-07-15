@@ -86,15 +86,15 @@ public:
     constexpr static std::size_t SIZE = constant::CHUNK_SIZE + 2 * PADDING;
     constexpr static std::size_t VOLUME = SIZE * SIZE * SIZE;
 
-    void init(const ChunkPos& cpos) noexcept;
+    void init(const ChunkPos& cpos);
 
-    block_id_type get(const LocalPos& lpos) const noexcept;
+    block_id_type get(const LocalPos& lpos) const;
 
 private:
     std::array<block_id_type, VOLUME> m_blocks;
 };
 
-void BlockCache::init(const ChunkPos& cpos) noexcept
+void BlockCache::init(const ChunkPos& cpos)
 {
     std::shared_ptr<const Chunk> chunks[3][3][3] = {};
 
@@ -159,7 +159,7 @@ void BlockCache::init(const ChunkPos& cpos) noexcept
     }
 }
 
-block_id_type BlockCache::get(const LocalPos& lpos) const noexcept
+block_id_type BlockCache::get(const LocalPos& lpos) const
 {
     std::size_t index = 0;
     index += static_cast<std::size_t>(lpos.x() + PADDING);
@@ -179,10 +179,10 @@ public:
     virtual void finalize(void) override;
 
 private:
-    std::uint32_t calculate_ao(const LocalPos& lpos, block_face face, const Eigen::Vector3f& vertex) const noexcept;
+    std::uint32_t calculate_ao(const LocalPos& lpos, block_face face, const Eigen::Vector3f& vertex) const;
 
-    bool is_culled(const LocalPos& lpos, block_face face, block_render self_render) const noexcept;
-    bool is_occluder(const LocalPos& lpos, block_face exposed_face) const noexcept;
+    bool is_culled(const LocalPos& lpos, block_face face, block_render self_render) const;
+    bool is_occluder(const LocalPos& lpos, block_face exposed_face) const;
 
     void emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
         std::uint64_t entropy, std::optional<block_face> face) const;
@@ -260,7 +260,7 @@ void MeshingTask::finalize(void)
     }
 }
 
-std::uint32_t MeshingTask::calculate_ao(const LocalPos& lpos, block_face face, const Eigen::Vector3f& vertex) const noexcept
+std::uint32_t MeshingTask::calculate_ao(const LocalPos& lpos, block_face face, const Eigen::Vector3f& vertex) const
 {
     auto delta = face_delta(face);
     LocalPos::value_type nx = lpos.x() + delta.x();
@@ -305,7 +305,7 @@ std::uint32_t MeshingTask::calculate_ao(const LocalPos& lpos, block_face face, c
     return 3 - (oc_s1 + oc_s2 + oc_c);
 }
 
-bool MeshingTask::is_culled(const LocalPos& lpos, block_face face, block_render self_render) const noexcept
+bool MeshingTask::is_culled(const LocalPos& lpos, block_face face, block_render self_render) const
 {
     auto neighbour_lpos = lpos + face_delta(face);
     auto neighbour_id = m_cache.get(neighbour_lpos);
@@ -331,7 +331,7 @@ bool MeshingTask::is_culled(const LocalPos& lpos, block_face face, block_render 
     return neighbour_baked->fully_covered[opposite_face(face)];
 }
 
-bool MeshingTask::is_occluder(const LocalPos& lpos, block_face exposed_face) const noexcept
+bool MeshingTask::is_occluder(const LocalPos& lpos, block_face exposed_face) const
 {
     auto id = m_cache.get(lpos);
 

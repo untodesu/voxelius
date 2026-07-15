@@ -33,7 +33,6 @@ public:
     void layout_tooltip(void) const;
     void layout_label(void) const;
 
-public:
     std::string title;
     std::string tooltip;
     std::string key;
@@ -46,7 +45,6 @@ class SettingValueWID : public SettingValue {
 public:
     virtual ~SettingValueWID(void) override = default;
 
-public:
     std::string wid;
 };
 
@@ -56,7 +54,6 @@ public:
     virtual void layout(void) const override;
     virtual void refresh_locale(void) override;
 
-public:
     mutable config::Ref<bool> value;
     std::string wids[2];
 };
@@ -66,7 +63,6 @@ public:
     virtual ~SettingValue_InputInt(void) override = default;
     virtual void layout(void) const override;
 
-public:
     mutable config::Ref<int> value;
     int min_value;
     int max_value;
@@ -77,7 +73,6 @@ public:
     virtual ~SettingValue_InputFloat(void) override = default;
     virtual void layout(void) const override;
 
-public:
     mutable config::Ref<float> value;
     std::string format;
     float min_value;
@@ -89,7 +84,6 @@ public:
     virtual ~SettingValue_InputUnsigned(void) override = default;
     virtual void layout(void) const override;
 
-public:
     mutable config::Ref<unsigned> value;
     unsigned min_value;
     unsigned max_value;
@@ -100,7 +94,6 @@ public:
     virtual ~SettingValue_InputString(void) override = default;
     virtual void layout(void) const override;
 
-public:
     mutable config::Ref<std::string> value;
     bool allow_whitespace;
 };
@@ -110,7 +103,6 @@ public:
     virtual ~SettingValue_SliderInt(void) override = default;
     virtual void layout(void) const override;
 
-public:
     mutable config::Ref<int> value;
     int min_value;
     int max_value;
@@ -121,7 +113,6 @@ public:
     virtual ~SettingValue_SliderFloat(void) override = default;
     virtual void layout(void) const override;
 
-public:
     mutable config::Ref<float> value;
     std::string format;
     float min_value;
@@ -133,7 +124,6 @@ public:
     virtual ~SettingValue_SliderUnsigned(void) override = default;
     virtual void layout(void) const override;
 
-public:
     mutable config::Ref<unsigned> value;
     unsigned min_value;
     unsigned max_value;
@@ -145,7 +135,6 @@ public:
     virtual void layout(void) const override;
     virtual void refresh_locale(void) override;
 
-public:
     mutable config::Ref<int> value;
     int min_value;
     int max_value;
@@ -159,12 +148,22 @@ public:
     virtual void layout(void) const override;
     virtual void refresh_locale(void) override;
 
-public:
     mutable config::Ref<unsigned> value;
     unsigned min_value;
     unsigned max_value;
     unsigned step_value;
     std::vector<std::string> wids;
+};
+
+class SettingValue_KeyBind final : public SettingValue {
+public:
+    virtual ~SettingValue_KeyBind(void) override = default;
+    virtual void layout(void) const override;
+    virtual void refresh_locale(void) override;
+    void refresh_wids(void);
+
+    mutable config::Ref<SDL_Keycode> value;
+    std::string wids[2];
 };
 
 class SettingValue_Language final : public SettingValueWID {
@@ -180,10 +179,11 @@ public:
     virtual void refresh_locale(void) override;
     void refresh_choices(void);
 
-public:
     std::vector<SDL_DisplayMode> choices;
     std::vector<std::string> choice_labels;
 };
+
+config::Ref<SDL_Keycode> settings::active_keybind;
 
 static std::string str_location_general;
 static std::string str_location_video;
@@ -418,6 +418,33 @@ void SettingValue_StepperUnsigned::layout(void) const
     layout_tooltip();
 }
 
+void SettingValue_KeyBind::layout(void) const
+{
+    auto is_capturing = value == settings::active_keybind;
+    auto& wid = is_capturing ? wids[0] : wids[1];
+    auto& io = ImGui::GetIO();
+
+    if(ImGui::Button(wid.c_str(), ImVec2(ImGui::CalcItemWidth(), 0.0f))) {
+        io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+        settings::active_keybind = value;
+    }
+
+    layout_label();
+    layout_tooltip();
+}
+
+void SettingValue_KeyBind::refresh_locale(void)
+{
+    SettingValue::refresh_locale();
+    refresh_wids();
+}
+
+void SettingValue_KeyBind::refresh_wids(void)
+{
+    wids[0] = std::format("...###{}", static_cast<const void*>(this));
+    wids[1] = std::format("{}###{}", SDL_GetKeyName(value.value()), static_cast<const void*>(this));
+}
+
 void SettingValue_Language::layout(void) const
 {
     auto current = language::current();
@@ -523,10 +550,28 @@ void SettingValue_VideoMode::layout(void) const
     layout_tooltip();
 }
 
+static void unbind_focused_bindings(void)
+{
+    auto& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    settings::active_keybind.unbind();
+
+    for(auto& value : values_all) {
+        if(auto keybind = dynamic_cast<SettingValue_KeyBind*>(value.get())) {
+            keybind->refresh_wids();
+        }
+    }
+}
+
 static void on_keyboard_event(const SDL_KeyboardEvent& event)
 {
-    if(event.type == SDL_EVENT_KEY_DOWN && event.key == SDLK_ESCAPE && gui::screen == GUI_SETTINGS) {
-        gui::screen = GUI_MAIN_MENU;
+    if(event.type == SDL_EVENT_KEY_DOWN && gui::screen == GUI_SETTINGS) {
+        if(event.key != SDLK_ESCAPE && settings::active_keybind.bound()) {
+            settings::active_keybind.set_value(event.key);
+            unbind_focused_bindings();
+            return;
+        }
     }
 }
 
@@ -714,6 +759,23 @@ void settings::layout(void)
         }
         else {
             video::request_windowed();
+        }
+    }
+
+    auto can_close = true;
+    can_close = can_close && !ImGui::IsPopupOpen(str_popup_video_change_title.c_str());
+    can_close = can_close && !settings::active_keybind.bound();
+
+    if(ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+        auto can_close = true;
+        can_close = can_close && !ImGui::IsPopupOpen(str_popup_video_change_title.c_str());
+        can_close = can_close && !settings::active_keybind.bound();
+
+        if(can_close) {
+            gui::screen = GUI_MAIN_MENU;
+        }
+        else {
+            unbind_focused_bindings();
         }
     }
 
@@ -917,8 +979,17 @@ void settings::stepper<int>(int priority, settings_location location, std::strin
 
 void settings::keybind(int priority, settings_location location, std::string_view key, bool tooltip)
 {
-    // TODO: config::KeyBind doesn't exist yet after the SDL3 port, keybind rebinding UI is not implemented
-    assert(false && "settings::keybind not implemented");
+    auto setting_value = std::make_shared<SettingValue_KeyBind>();
+    setting_value->priority = priority;
+    setting_value->location = location;
+    setting_value->key = std::string(key);
+    setting_value->has_tooltip = tooltip;
+
+    setting_value->value.bind(globals::client_config, key);
+    setting_value->refresh_locale();
+
+    values[static_cast<unsigned>(location)].push_back(setting_value);
+    values_all.push_back(setting_value);
 }
 
 void settings::language(int priority, settings_location location, std::string_view key, bool tooltip)

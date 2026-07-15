@@ -15,12 +15,14 @@ public:
     operator const T&(void) const;
 
     constexpr bool dirty(void) const;
+    constexpr bool bound(void) const;
+    constexpr bool operator==(const Ref<T>& other) const;
 
     void set_value(const T& value);
     Ref<T>& operator=(const T& value);
-    Ref<T>& operator=(const Ref<T>& other);
 
     void bind(Map& map, std::string_view key);
+    void unbind(void);
     void commit(void);
 
 private:
@@ -65,6 +67,22 @@ constexpr bool config::Ref<T>::dirty(void) const
 }
 
 template<typename T>
+constexpr bool config::Ref<T>::bound(void) const
+{
+    if(m_map == nullptr || m_slot == NULL_SLOT) {
+        return false;
+    }
+
+    return true;
+}
+
+template<typename T>
+constexpr bool config::Ref<T>::operator==(const Ref<T>& other) const
+{
+    return m_map == other.m_map && m_slot == other.m_slot;
+}
+
+template<typename T>
 void config::Ref<T>::set_value(const T& value)
 {
     m_value = value;
@@ -81,15 +99,6 @@ config::Ref<T>& config::Ref<T>::operator=(const T& value)
 
     return *this;
 }
-
-template<typename T>
-config::Ref<T>& config::Ref<T>::operator=(const Ref<T>& other)
-{
-    set_value(other.value());
-
-    return *this;
-}
-
 template<typename T>
 void config::Ref<T>::bind(Map& map, std::string_view key)
 {
@@ -99,6 +108,15 @@ void config::Ref<T>::bind(Map& map, std::string_view key)
     m_generation = map.generation(m_slot);
 
     map.set_value_raw<T>(m_slot, m_value);
+}
+
+template<typename T>
+void config::Ref<T>::unbind(void)
+{
+    m_map = nullptr;
+    m_slot = NULL_SLOT;
+    m_generation = UINT64_MAX;
+    m_value = T {};
 }
 
 template<typename T>

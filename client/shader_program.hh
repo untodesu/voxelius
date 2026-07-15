@@ -16,13 +16,13 @@ struct VariantUniform final {
 
 class ShaderProgram final {
 public:
-    bool setup(const Identifier& id) noexcept;
-    void destroy(void) noexcept;
-    bool update(void) noexcept;
+    bool setup(const Identifier& id);
+    void destroy(void);
+    bool update(void);
 
-    std::size_t add_uniform(std::string name) noexcept;
-    void set_variant_vert(unsigned variant, unsigned value) noexcept;
-    void set_variant_frag(unsigned variant, unsigned value) noexcept;
+    std::size_t add_uniform(std::string name);
+    void set_variant_vert(unsigned variant, unsigned value);
+    void set_variant_frag(unsigned variant, unsigned value);
 
     std::string vert_path;
     std::string frag_path;

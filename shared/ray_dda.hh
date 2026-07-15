@@ -8,24 +8,24 @@ class Chunk;
 
 class Ray_DDA final {
 public:
-    Ray_DDA(void) noexcept = default;
-    explicit Ray_DDA(const ChunkPos& start_chunk, const Eigen::Vector3f& start_pos, const Eigen::Vector3f& direction) noexcept;
+    Ray_DDA(void) = default;
+    explicit Ray_DDA(const ChunkPos& start_chunk, const Eigen::Vector3f& start_pos, const Eigen::Vector3f& direction);
 
-    void reset(const ChunkPos& start_chunk, const Eigen::Vector3f& start_pos, const Eigen::Vector3f& direction) noexcept;
+    void reset(const ChunkPos& start_chunk, const Eigen::Vector3f& start_pos, const Eigen::Vector3f& direction);
 
-    block_id_type step(void) noexcept;
+    block_id_type step(void);
 
-    constexpr const ChunkPos& start_chunk(void) const noexcept;
-    constexpr const Eigen::Vector3f& start_pos(void) const noexcept;
-    constexpr const Eigen::Vector3f& direction(void) const noexcept;
+    constexpr const ChunkPos& start_chunk(void) const;
+    constexpr const Eigen::Vector3f& start_pos(void) const;
+    constexpr const Eigen::Vector3f& direction(void) const;
 
-    constexpr const Eigen::Vector3f& delta_distance(void) const noexcept;
-    constexpr const Eigen::Vector3f& side_distance(void) const noexcept;
-    constexpr const BlockPos& block_step(void) const noexcept;
+    constexpr const Eigen::Vector3f& delta_distance(void) const;
+    constexpr const Eigen::Vector3f& side_distance(void) const;
+    constexpr const BlockPos& block_step(void) const;
 
-    constexpr float distance(void) const noexcept;
-    constexpr const BlockPos& position(void) const noexcept;
-    constexpr const BlockPos& normal(void) const noexcept;
+    constexpr float distance(void) const;
+    constexpr const BlockPos& position(void) const;
+    constexpr const BlockPos& normal(void) const;
 
 private:
     ChunkPos m_start_chunk;
@@ -44,47 +44,47 @@ private:
     std::shared_ptr<Chunk> m_last_chunk;
 };
 
-constexpr const ChunkPos& Ray_DDA::start_chunk(void) const noexcept
+constexpr const ChunkPos& Ray_DDA::start_chunk(void) const
 {
     return m_start_chunk;
 }
 
-constexpr const Eigen::Vector3f& Ray_DDA::start_pos(void) const noexcept
+constexpr const Eigen::Vector3f& Ray_DDA::start_pos(void) const
 {
     return m_start_pos;
 }
 
-constexpr const Eigen::Vector3f& Ray_DDA::direction(void) const noexcept
+constexpr const Eigen::Vector3f& Ray_DDA::direction(void) const
 {
     return m_direction;
 }
 
-constexpr const Eigen::Vector3f& Ray_DDA::delta_distance(void) const noexcept
+constexpr const Eigen::Vector3f& Ray_DDA::delta_distance(void) const
 {
     return m_delta_distance;
 }
 
-constexpr const Eigen::Vector3f& Ray_DDA::side_distance(void) const noexcept
+constexpr const Eigen::Vector3f& Ray_DDA::side_distance(void) const
 {
     return m_side_distance;
 }
 
-constexpr const BlockPos& Ray_DDA::block_step(void) const noexcept
+constexpr const BlockPos& Ray_DDA::block_step(void) const
 {
     return m_block_step;
 }
 
-constexpr float Ray_DDA::distance(void) const noexcept
+constexpr float Ray_DDA::distance(void) const
 {
     return m_distance;
 }
 
-constexpr const BlockPos& Ray_DDA::position(void) const noexcept
+constexpr const BlockPos& Ray_DDA::position(void) const
 {
     return m_position;
 }
 
-constexpr const BlockPos& Ray_DDA::normal(void) const noexcept
+constexpr const BlockPos& Ray_DDA::normal(void) const
 {
     return m_normal;
 }

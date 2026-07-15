@@ -64,9 +64,9 @@ using Hit = std::variant<BlockHit, EntityHit, std::monostate>;
 
 namespace physics
 {
-std::optional<BlockHit> raycast_block(const Ray& ray, block_filter bfilter) noexcept;
-std::optional<EntityHit> raycast_entity(const Ray& ray, entity_filter efilter) noexcept;
-Hit raycast(const Ray& ray, block_filter bfilter, entity_filter efilter) noexcept;
+std::optional<BlockHit> raycast_block(const Ray& ray, block_filter bfilter);
+std::optional<EntityHit> raycast_entity(const Ray& ray, entity_filter efilter);
+Hit raycast(const Ray& ray, block_filter bfilter, entity_filter efilter);
 } // namespace physics
 
 #endif /* AA4B08C7_6967_49FB_885F_5CF3E078AE96 */
