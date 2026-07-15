@@ -6,26 +6,14 @@
 
 #include "shared/biome.hh"
 #include "shared/biome_registry.hh"
-#include "shared/block_registry.hh"
 #include "shared/mod_context.hh"
 #include "shared/utils/lua.hh"
 
-static block_id_type resolve_block(lua_State* L, ModContext* ctx, std::string_view raw_name)
+static BiomeBlockRef make_block_ref(ModContext* ctx, std::string_view raw_name)
 {
-    auto id = Identifier::from_string(raw_name, ctx->name_space());
-
-    if(id.is_valid()) {
-        auto local_id = ctx->find_block(id);
-
-        if(local_id) {
-            return local_id;
-        }
-        else {
-            return block_registry::find(id);
-        }
-    }
-
-    return BLOCK_ID_NULL;
+    BiomeBlockRef ref {};
+    ref.name = Identifier::from_string(raw_name, ctx->name_space());
+    return ref;
 }
 
 static std::optional<BiomeBlockPalette> parse_block_palette(lua_State* L, int idx, ModContext* ctx)
@@ -54,8 +42,7 @@ static std::optional<BiomeBlockPalette> parse_block_palette(lua_State* L, int id
             return std::nullopt;
         }
 
-        auto block_id = resolve_block(L, ctx, name.value());
-        it.second[0] = block_id;
+        it.second[0] = make_block_ref(ctx, name.value());
         lua_pop(L, 1);
     }
 
@@ -83,10 +70,10 @@ static std::optional<BiomeStratum> parse_stratum(lua_State* L, int idx, ModConte
         return std::nullopt;
     }
 
-    stratum.block = resolve_block(L, ctx, block_name.value());
+    stratum.block = make_block_ref(ctx, block_name.value());
     lua_pop(L, 1);
 
-    if(stratum.block == BLOCK_ID_NULL) {
+    if(!stratum.block.name.is_valid()) {
         return std::nullopt;
     }
 

@@ -62,30 +62,31 @@ static std::optional<BlockModel_Face> parse_face(const JSON_Object* object)
         return std::nullopt;
     }
 
-    auto uv = utils::parse_vector<float, 4>(object, "uv");
     auto uv_rotation = utils::parse_arithmetic<unsigned>(object, "uv_rotation");
-    auto cull_face = utils::parse_enum<unsigned>(object, "cullface", BLOCK_FACE_MAPPING);
-    auto tint_index = utils::parse_arithmetic<unsigned>(object, "tint");
     auto world_locked = json_object_get_boolean(object, "world_locked");
 
-    auto is_valid = true;
-    is_valid = is_valid && uv.has_value();
-    is_valid = is_valid && uv_rotation.has_value();
-    is_valid = is_valid && cull_face.has_value();
-    is_valid = is_valid && tint_index.has_value();
+    BlockModel_Face face {};
+    face.texture_slot = texture;
+    face.uv_rotation = uv_rotation.value_or(0);
+    face.world_locked = world_locked;
 
-    if(is_valid) {
-        BlockModel_Face face {};
-        face.texture_slot = texture;
+    auto uv = utils::parse_vector<float, 4>(object, "uv");
+    auto cull_face = utils::parse_enum<unsigned>(object, "cullface", BLOCK_FACE_MAPPING);
+    auto tint_index = utils::parse_arithmetic<unsigned>(object, "tint");
+
+    if(uv.has_value()) {
         face.uv = 0.0625f * uv.value();
-        face.uv_rotation = uv_rotation.value();
-        face.cull_face = static_cast<block_face>(cull_face.value());
-        face.tint_index = tint_index.value();
-        face.world_locked = world_locked;
-        return face;
     }
 
-    return std::nullopt;
+    if(cull_face.has_value()) {
+        face.cull_face = static_cast<block_face>(cull_face.value());
+    }
+
+    if(tint_index.has_value()) {
+        face.tint_index = tint_index.value();
+    }
+
+    return face;
 }
 
 static std::optional<BlockModel_Element> parse_element(const JSON_Object* object)
@@ -99,23 +100,20 @@ static std::optional<BlockModel_Element> parse_element(const JSON_Object* object
     auto origin = utils::parse_vector<float, 3>(object, "origin");
     auto rotation = utils::parse_vector<float, 3>(object, "rotation");
 
-    auto is_valid = true;
-    is_valid = is_valid && min.has_value();
-    is_valid = is_valid && max.has_value();
-    is_valid = is_valid && origin.has_value();
-    is_valid = is_valid && rotation.has_value();
-
-    if(is_valid) {
+    if(min.has_value() && max.has_value()) {
         BlockModel_Element element {};
         element.min = 0.0625f * min.value();
         element.max = 0.0625f * max.value();
-        element.rotation_origin = 0.0625f * origin.value();
-        element.rotation_angles = rotation.value();
+        element.rotation_angles = rotation.value_or(Eigen::Vector3f::Zero());
         element.rotation_angles[0] = snap_rotation(element.rotation_angles[0]);
         element.rotation_angles[1] = snap_rotation(element.rotation_angles[1]);
         element.rotation_angles[2] = snap_rotation(element.rotation_angles[2]);
         element.rescale = true;
         element.shade = true;
+
+        if(origin.has_value()) {
+            element.rotation_origin = 0.0625f * origin.value();
+        }
 
         if(json_object_has_value(object, "rescale")) {
             element.rescale = json_object_get_boolean(object, "rescale");

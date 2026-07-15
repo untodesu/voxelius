@@ -1,5 +1,5 @@
-#ifndef A3D8E1C4_6B2F_4E9A_8C7D_2F5B9E0A1C3D
-#define A3D8E1C4_6B2F_4E9A_8C7D_2F5B9E0A1C3D
+#ifndef F621D887_03BF_4930_817F_D7E18D8E2A55
+#define F621D887_03BF_4930_817F_D7E18D8E2A55
 
 #include "shared/biome.hh"
 
@@ -32,4 +32,4 @@ const BiomeDefinition* find_definition(biome_id_type id);
 const BiomeDefinition* find_definition(const Identifier& id);
 } // namespace biome_registry
 
-#endif /* A3D8E1C4_6B2F_4E9A_8C7D_2F5B9E0A1C3D */
+#endif /* F621D887_03BF_4930_817F_D7E18D8E2A55 */

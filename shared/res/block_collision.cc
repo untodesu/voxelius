@@ -15,19 +15,15 @@ static std::optional<Eigen::AlignedBox3f> parse_aabb(const JSON_Object* object)
     auto min = utils::parse_vector<float, 3>(object, "min");
     auto max = utils::parse_vector<float, 3>(object, "max");
 
-    auto is_valid = true;
-    is_valid = is_valid && min.has_value();
-    is_valid = is_valid && max.has_value();
+    if(min.has_value() && max.has_value()) {
+        Eigen::AlignedBox3f aabb {};
+        aabb.min() = 0.0625f * min.value();
+        aabb.max() = 0.0625f * max.value();
 
-    if(!is_valid) {
-        return std::nullopt;
+        return aabb;
     }
 
-    Eigen::AlignedBox3f aabb {};
-    aabb.min() = 0.0625f * min.value();
-    aabb.max() = 0.0625f * max.value();
-
-    return aabb;
+    return std::nullopt;
 }
 
 static const void* block_collision_load_fn(const char* path, std::uint32_t flags)

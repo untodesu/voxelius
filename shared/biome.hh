@@ -1,5 +1,5 @@
-#ifndef F1A5C0F0_9C3B_4C2C_9F1D_5B6A4D2E1A70
-#define F1A5C0F0_9C3B_4C2C_9F1D_5B6A4D2E1A70
+#ifndef EAE3F86A_3F25_4073_80EF_D5CD0289B1EF
+#define EAE3F86A_3F25_4073_80EF_D5CD0289B1EF
 
 #include "core/identifier.hh"
 
@@ -24,17 +24,22 @@ using biome_id_type = std::uint32_t;
 constexpr static biome_id_type BIOME_ID_NULL = 0;
 constexpr static biome_id_type BIOME_ID_MAX = std::numeric_limits<biome_id_type>::max();
 
+struct BiomeBlockRef final {
+    Identifier name;
+    block_id_type id { BLOCK_ID_NULL };
+};
+
 struct BiomeStratum final {
     int depth;
-    block_id_type block;
+    BiomeBlockRef block;
 };
 
 struct BiomeBlockPalette final {
-    block_id_type base { BLOCK_ID_NULL };
-    block_id_type filler { BLOCK_ID_NULL };
-    block_id_type surface { BLOCK_ID_NULL };
-    block_id_type fluid { BLOCK_ID_NULL };
-    block_id_type ceiling { BLOCK_ID_NULL };
+    BiomeBlockRef base;
+    BiomeBlockRef filler;
+    BiomeBlockRef surface;
+    BiomeBlockRef fluid;
+    BiomeBlockRef ceiling;
 };
 
 struct BiomeFeatureEntry final {
@@ -63,4 +68,4 @@ struct BiomeDefinition final {
     std::vector<BiomeFeatureEntry> features {};
 };
 
-#endif /* F1A5C0F0_9C3B_4C2C_9F1D_5B6A4D2E1A70 */
+#endif /* EAE3F86A_3F25_4073_80EF_D5CD0289B1EF */

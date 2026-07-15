@@ -130,7 +130,8 @@ static const void* feature_load_fn(const char* path, std::uint32_t flags)
     }
 
     auto palette = parse_palette(json);
-    auto parts = parse_parts(json, palette.value_or({}));
+    auto palette_data = palette.value_or({});
+    auto parts = parse_parts(json, palette_data);
     auto anchor = utils::parse_enum<int>(json, "anchor", ANCHOR_MAPPING);
 
     json_value_free(jsonv);
