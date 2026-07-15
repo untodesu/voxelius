@@ -7,6 +7,7 @@ Each mod can have the following directories
 |Directory|Description|  
 |----|----|  
 |`collisions`|Collision models for blocks and entities|  
+|`features`|World generation feature templates|  
 |`fonts`|Fonts in binary form. Currently only used in `builtin` and have font paths hard-coded inside the engine|  
 |`lang`|Translation files|  
 |`lib`|Lua libraries for `require`|  
