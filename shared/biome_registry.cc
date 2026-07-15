@@ -27,6 +27,7 @@ static void resolve_biome_blocks(BiomeDefinition& def)
 {
     auto name = def.name.full_string();
 
+    resolve_block_ref(def.blocks.empty, name);
     resolve_block_ref(def.blocks.base, name);
     resolve_block_ref(def.blocks.filler, name);
     resolve_block_ref(def.blocks.surface, name);

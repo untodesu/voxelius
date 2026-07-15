@@ -78,6 +78,7 @@ Returns the numeric biome ID used for debugging
 
 |Field|Description|  
 |----|----|  
+|`empty`|Empty block, eg. air|  
 |`base`|Base block, eg. stone|  
 |`filler`|Under-surface block, eg. dirt|  
 |`surface`|Surface block, eg. grass|  

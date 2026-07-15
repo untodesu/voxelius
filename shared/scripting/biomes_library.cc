@@ -21,6 +21,7 @@ static std::optional<BiomeBlockPalette> parse_block_palette(lua_State* L, int id
     BiomeBlockPalette palette {};
 
     const std::array fields = {
+        std::make_pair("empty", &palette.empty),
         std::make_pair("base", &palette.base),
         std::make_pair("filler", &palette.filler),
         std::make_pair("surface", &palette.surface),

@@ -35,6 +35,7 @@ struct BiomeStratum final {
 };
 
 struct BiomeBlockPalette final {
+    BiomeBlockRef empty;
     BiomeBlockRef base;
     BiomeBlockRef filler;
     BiomeBlockRef surface;
