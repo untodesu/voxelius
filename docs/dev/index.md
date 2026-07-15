@@ -1,4 +1,4 @@
-# Documentation
+# Introduction
 
 You seem to have found your way into the documentation section of the website!  
 

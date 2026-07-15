@@ -1,4 +1,4 @@
-# Library: Slabs
+# Slabs Library
 
 The `builtin:slabs.lua` library provides utility functions for registering slab types of regular blocks.  
 

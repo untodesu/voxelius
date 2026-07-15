@@ -1,4 +1,4 @@
-# Engine API: Lua Base
+# Lua Base
 
 Voxelius's runtime provides common Lua APIs:  
 

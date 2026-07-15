@@ -1,1 +1,1 @@
-# Architecture: General
+# General

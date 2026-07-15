@@ -1,1 +1,1 @@
-# Architecture: Networking
+# Networking

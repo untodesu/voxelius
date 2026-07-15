@@ -1,4 +1,4 @@
-# Engine API: Blocks
+# Blocks API
 
 Mods can register new block types and access existing one using the `blocks` library provided by the engine.  
 
@@ -161,14 +161,14 @@ Register a new block in the registry
 
 The `model_facing` and `bcoll_facing` fields each map to one, uniquely-determined 90-degree-step rotation of the whole resolved model/collision shape (never a combination/roll of multiple axes):
 
-|Value|Rotation applied|Axis held fixed|  
+|Value|Rotation|Image|  
 |----|----|----|  
-|`blocks.FACE_NORTH`|none (identity)| |  
-|`blocks.FACE_SOUTH`|180 degrees around the vertical (Y) axis|top/bottom unchanged|  
-|`blocks.FACE_EAST`|90 degrees around the vertical (Y) axis|top/bottom unchanged|  
-|`blocks.FACE_WEST`|-90 degrees around the vertical (Y) axis|top/bottom unchanged|  
-|`blocks.FACE_TOP`|-90 degrees around the east/west (X) axis|east/west unchanged|  
-|`blocks.FACE_BOTTOM`|90 degrees around the east/west (X) axis|east/west unchanged|  
+|`FACE_NORTH`|None|![](facing-north.png)|  
+|`FACE_SOUTH`|180 degrees around Y|![](facing-south.png)|  
+|`FACE_EAST`|+90 degrees around Y|![](facing-east.png)|  
+|`FACE_WEST`|-90 degrees around Y|![](facing-west.png)|  
+|`FACE_TOP`|-90 degrees around X|![](facing-top.png)|  
+|`FACE_BOTTOM`|+90 degrees around X|![](facing-bottom.png)|  
 
 ### Drops table
 

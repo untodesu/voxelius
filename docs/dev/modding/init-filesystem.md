@@ -1,4 +1,4 @@
-# Getting Started: Filesystem
+# Filesystem
 
 ## Mod root
 

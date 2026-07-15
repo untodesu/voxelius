@@ -1,4 +1,4 @@
-# Getting Started: Overview
+# Overview
 
 Starting with the project's 17th rewrite (this is a joke, though it's like the third major rewrite in the game's history dating back to 2021), Voxelius _the game_ builds on top of Voxelius _the engine_, which provides a bunch of Lua hooks to define blocks and other stuff that enhances core gameplay
 

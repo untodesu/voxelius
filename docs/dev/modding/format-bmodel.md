@@ -1,4 +1,4 @@
-# File Format: Block Models
+# Block Models
 
 Block models define the visible geometry of a block  
 

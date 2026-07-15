@@ -1,4 +1,4 @@
-# Getting Started: Requirements
+# Requirements
 
 ## Network access
 

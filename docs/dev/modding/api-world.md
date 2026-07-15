@@ -1,4 +1,4 @@
-# Engine API: World
+# World API
 
 Mods can access blocks in the world using the `world` library
 

@@ -1,4 +1,4 @@
-# Getting Started: Source Hierarchy
+# Source Hierarchy
 
 > **NOTE:** this file is mainly here to discourage me from shuffing sources _again_ because I _HATE_ writing documentation and if I shuffle sources most of documentation will have to be rewritten at some point  
 

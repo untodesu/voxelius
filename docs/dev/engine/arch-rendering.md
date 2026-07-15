@@ -1,1 +1,1 @@
-# Architecture: Rendering
+# Rendering

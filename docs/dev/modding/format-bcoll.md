@@ -1,4 +1,4 @@
-# File Format: Block Collisions
+# Block Collisions
 
 Block collisions define the physical shape of a block that's used for touch/movement response; these models are independent from the block's render geometry  
 

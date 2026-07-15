@@ -5,11 +5,11 @@ repo_name: voxelius/voxelius
 # use_directory_urls: false
 
 plugins:
-  - search:
+  - glightbox:
   - minify:
       minify_html: true
   - mkdocs-video:
-  - glightbox:
+  - search:
 
 markdown_extensions:
   - pymdownx.highlight:
