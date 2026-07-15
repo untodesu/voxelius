@@ -63,9 +63,10 @@ nav:
         - Source Hierarchy: dev/engine/init-sources.md
         - Build Guide: dev/engine/init-building.md
       - Architecture Overview:
-        - General: dev/engine/arch-general.md
+        - Core: dev/engine/arch-core.md
         - Rendering: dev/engine/arch-rendering.md
         - Networking: dev/engine/arch-networking.md
+        - Sound: dev/engine/arch-sound.md
       - Development:
         - Code Style: dev/engine/dev-code-style.md
         - Contributing: dev/engine/dev-contributing.md

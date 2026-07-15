@@ -159,16 +159,16 @@ Register a new block in the registry
 
 ### Facing rotation
 
-The `model_facing` and `bcoll_facing` fields each map to one, uniquely-determined 90-degree-step rotation of the whole resolved model/collision shape (never a combination/roll of multiple axes):
+The `model_facing` and `bcoll_facing` fields each define a single uniquely-determined 90-degree-step rotation of the entire model/collision shape. If we talk in simple terms, these fields define where the model's north face points - by default it points to the world north but it can be changed  
 
 |Value|Rotation|Image|  
 |----|----|----|  
-|`FACE_NORTH`|None|![](facing-north.png)|  
-|`FACE_SOUTH`|180 degrees around Y|![](facing-south.png)|  
-|`FACE_EAST`|+90 degrees around Y|![](facing-east.png)|  
-|`FACE_WEST`|-90 degrees around Y|![](facing-west.png)|  
-|`FACE_TOP`|-90 degrees around X|![](facing-top.png)|  
-|`FACE_BOTTOM`|+90 degrees around X|![](facing-bottom.png)|  
+|`blocks.FACE_NORTH`|None|![](facing-north.png)|  
+|`blocks.FACE_SOUTH`|180 degrees around Y|![](facing-south.png)|  
+|`blocks.FACE_EAST`|+90 degrees around Y|![](facing-east.png)|  
+|`blocks.FACE_WEST`|-90 degrees around Y|![](facing-west.png)|  
+|`blocks.FACE_TOP`|-90 degrees around X|![](facing-top.png)|  
+|`blocks.FACE_BOTTOM`|+90 degrees around X|![](facing-bottom.png)|  
 
 ### Drops table
 
@@ -224,14 +224,28 @@ variants = {
 
 `overrides` is a table of registration fields (same shape as the top-level definition) that gets merged on top of the block's base definition whenever `when` matches the block's current blockstate values.
 
+### Target table
+
+Some callbacks pass in a `target` table that defines the location at which the initiator was looking when attempting to interact with a block  
+
+|Field|Type|Description|  
+|----|----|----|  
+|`stem`|`integer`|Numeric block stem ID|  
+|`face`|`integer`|Surface direction|  
+|`ni`|`number`|Surface normal X/I component|  
+|`nj`|`number`|Surface normal Y/J component|  
+|`nk`|`number`|Surface normal Z/K component|  
+|`bx`|`integer`|Block position X component|  
+|`by`|`integer`|Block position Y component|  
+|`bz`|`integer`|Block position Z component|  
+|`rx`|`number`|Block-local position X component|  
+|`ry`|`number`|Block-local position Y component|  
+|`rz`|`number`|Block-local position Z component|  
+
 ### `on_place` handler
 
 ```lua
-on_place = function(bx, by, bz, placement)
-  -- placement.tblock is the targeted block ID
-  -- placement.tface is the targeted block face
-  -- placement.tx, placement.ty, placement.tz are target coordinates
-
+on_place = function(bx, by, bz, target, actor)
   if condition_to_reject then
     return nil -- blocks the placement entirely
   end
@@ -242,3 +256,34 @@ end
 ```
 
 Returning `nil` blocks the placement; returning a table (empty or not) permits it, with any entries in the table used as initial blockstate values for states not covered by their `default`.
+
+### `on_break` handler
+
+```lua
+on_break = function(bx, by, bz, actor)
+  -- Actions to do before the block is broken
+end
+```
+
+### `on_interact` handler
+
+```lua
+on_interact = function(bx, by, bz, target, actor)
+  -- Actions to do when someone interacts with the block
+end
+```
+
+### `on_rtick` handler
+
+```lua
+on_rtick = function(bx, by, bz)
+  -- Actions to do when the block is randomly ticked
+end
+```
+
+### `on_stick` handler
+
+```lua
+on_stick = function(bx, by, bz)
+  -- Actions to do when the block is ticked via scheduling
+end
