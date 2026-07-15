@@ -51,42 +51,6 @@ bool BlockDefReader::try_push(const char* key) const
     return true;
 }
 
-static std::optional<std::string_view> require_string(lua_State* L, int idx)
-{
-    auto type = lua_type(L, idx);
-
-    if(type == LUA_TSTRING || type == LUA_TNUMBER) {
-        std::size_t length = 0;
-        auto value = lua_tolstring(L, idx, &length);
-        return std::string_view(value, length);
-    }
-
-    lua_pushfstring(L, "expected a string, got %s", lua_typename(L, type));
-
-    return std::nullopt;
-}
-
-static std::optional<lua_Integer> require_integer(lua_State* L, int idx)
-{
-    int is_num = 0;
-    auto value = lua_tointegerx(L, idx, &is_num);
-
-    if(is_num) {
-        return value;
-    }
-
-    lua_pushfstring(L, "expected an integer, got %s", lua_typename(L, lua_type(L, idx)));
-
-    return std::nullopt;
-}
-
-static std::optional<lua_Integer> opt_integer(lua_State* L, int idx, lua_Integer default_value)
-{
-    if(lua_isnoneornil(L, idx))
-        return default_value;
-    return require_integer(L, idx);
-}
-
 static bool parse_drop_effects(lua_State* L, int when_idx, BlockDrop& drop, ModContext* ctx)
 {
     lua_getfield(L, when_idx, "effects");
@@ -106,7 +70,7 @@ static bool parse_drop_effects(lua_State* L, int when_idx, BlockDrop& drop, ModC
     for(lua_Integer i = 1; i <= static_cast<lua_Integer>(effects_count); ++i) {
         lua_rawgeti(L, effects_idx, i);
 
-        auto value = require_string(L, -1);
+        auto value = utils::require_string(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -184,7 +148,7 @@ static bool parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModCo
 
         lua_getfield(L, item_idx, "name");
 
-        auto name = require_string(L, -1);
+        auto name = utils::require_string(L, -1);
 
         if(!name.has_value()) {
             return false;
@@ -196,7 +160,7 @@ static bool parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModCo
 
         lua_getfield(L, item_idx, "count");
 
-        auto count = opt_integer(L, -1, 1);
+        auto count = utils::opt_integer(L, -1, 1);
 
         if(!count.has_value()) {
             return false;
@@ -252,7 +216,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     BlockDefReader reader(L, idx, 0);
 
     if(reader.try_push("render")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -270,7 +234,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         lua_pushnil(L);
 
         while(lua_next(L, textures_idx)) {
-            auto slot_name = require_string(L, -2);
+            auto slot_name = utils::require_string(L, -2);
 
             if(!slot_name.has_value()) {
                 return false;
@@ -285,7 +249,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
             for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
                 lua_rawgeti(L, -1, i);
 
-                auto variant_name = require_string(L, -1);
+                auto variant_name = utils::require_string(L, -1);
 
                 if(!variant_name.has_value()) {
                     return false;
@@ -313,7 +277,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("model_name")) {
-        auto value = require_string(L, -1);
+        auto value = utils::require_string(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -325,13 +289,19 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("model_offset")) {
-        patch.model_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
+        auto offset = utils::read_vector<float, 3>(L, lua_gettop(L));
+
+        if(!offset.has_value()) {
+            return false;
+        }
+
+        patch.model_offset = 0.0625f * offset.value();
 
         lua_pop(L, 1);
     }
 
     if(reader.try_push("model_facing")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -343,7 +313,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("bcoll_name")) {
-        auto value = require_string(L, -1);
+        auto value = utils::require_string(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -355,13 +325,19 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("bcoll_offset")) {
-        patch.bcoll_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
+        auto offset = utils::read_vector<float, 3>(L, lua_gettop(L));
+
+        if(!offset.has_value()) {
+            return false;
+        }
+
+        patch.bcoll_offset = 0.0625f * offset.value();
 
         lua_pop(L, 1);
     }
 
     if(reader.try_push("bcoll_facing")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -373,7 +349,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("health")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -385,7 +361,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("sound")) {
-        auto value = require_string(L, -1);
+        auto value = utils::require_string(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -397,7 +373,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("emission")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -409,7 +385,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("dissipation")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -421,7 +397,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("touch")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -432,7 +408,14 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("touch_coeffs")) {
-        patch.touch_coeffs = utils::read_vector3f(L, lua_gettop(L));
+        auto coeffs = utils::read_vector<float, 3>(L, lua_gettop(L));
+
+        if(!coeffs.has_value()) {
+            return false;
+        }
+
+        patch.touch_coeffs = coeffs.value();
+
         lua_pop(L, 1);
     }
 
@@ -461,7 +444,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     auto L = reader.L;
 
     if(reader.try_push("render")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -473,7 +456,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("model_name")) {
-        auto value = require_string(L, -1);
+        auto value = utils::require_string(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -485,13 +468,19 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("model_offset")) {
-        def.model_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
+        auto offset = utils::read_vector<float, 3>(L, lua_gettop(L));
+
+        if(!offset.has_value()) {
+            return false;
+        }
+
+        def.model_offset = 0.0625f * offset.value();
 
         lua_pop(L, 1);
     }
 
     if(reader.try_push("model_facing")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -503,7 +492,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("bcoll_name")) {
-        auto value = require_string(L, -1);
+        auto value = utils::require_string(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -515,13 +504,19 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("bcoll_offset")) {
-        def.bcoll_offset = utils::read_vector3f(L, lua_gettop(L)) / 16.0f;
+        auto offset = utils::read_vector<float, 3>(L, lua_gettop(L));
+
+        if(!offset.has_value()) {
+            return false;
+        }
+
+        def.bcoll_offset = 0.0625f * offset.value();
 
         lua_pop(L, 1);
     }
 
     if(reader.try_push("bcoll_facing")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -546,7 +541,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         lua_pushnil(L);
 
         while(lua_next(L, textures_idx)) {
-            auto slot_name = require_string(L, -2);
+            auto slot_name = utils::require_string(L, -2);
 
             if(!slot_name.has_value()) {
                 return false;
@@ -561,7 +556,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
             for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
                 lua_rawgeti(L, -1, i);
 
-                auto variant_name = require_string(L, -1);
+                auto variant_name = utils::require_string(L, -1);
 
                 if(!variant_name.has_value()) {
                     return false;
@@ -581,7 +576,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("health")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -593,7 +588,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("sound")) {
-        auto value = require_string(L, -1);
+        auto value = utils::require_string(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -605,7 +600,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("emission")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -617,7 +612,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("dissipation")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -629,7 +624,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("touch")) {
-        auto value = require_integer(L, -1);
+        auto value = utils::require_integer(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -641,7 +636,13 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("touch_coeffs")) {
-        def.touch_coeffs = utils::read_vector3f(L, lua_gettop(L));
+        auto coeffs = utils::read_vector<float, 3>(L, lua_gettop(L));
+
+        if(!coeffs.has_value()) {
+            return false;
+        }
+
+        def.touch_coeffs = coeffs.value();
 
         lua_pop(L, 1);
     }
@@ -682,7 +683,7 @@ static bool parse_state_hint(lua_State* L, int entry_idx, BlockStateDecl& decl, 
     for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
         lua_rawgeti(L, hint_idx, i);
 
-        auto value = require_string(L, -1);
+        auto value = utils::require_string(L, -1);
 
         if(!value.has_value()) {
             return false;
@@ -703,7 +704,7 @@ static bool parse_states(lua_State* L, int idx, BlockFamily& family)
     lua_pushnil(L);
 
     while(lua_next(L, idx)) {
-        auto state_name_str = require_string(L, -2);
+        auto state_name_str = utils::require_string(L, -2);
 
         if(!state_name_str.has_value()) {
             return false;
@@ -716,7 +717,7 @@ static bool parse_states(lua_State* L, int idx, BlockFamily& family)
 
         lua_getfield(L, entry_idx, "default");
 
-        auto default_value = require_string(L, -1);
+        auto default_value = utils::require_string(L, -1);
 
         if(!default_value.has_value()) {
             return false;
@@ -754,7 +755,7 @@ static bool parse_variant_when(lua_State* L, int entry_idx, BlockVariantRule& ru
     lua_pushnil(L);
 
     while(lua_next(L, when_idx)) {
-        auto state_name_str = require_string(L, -2);
+        auto state_name_str = utils::require_string(L, -2);
 
         if(!state_name_str.has_value()) {
             return false;
@@ -762,7 +763,7 @@ static bool parse_variant_when(lua_State* L, int entry_idx, BlockVariantRule& ru
 
         auto state_name = std::string(state_name_str.value());
 
-        auto value_str = require_string(L, -1);
+        auto value_str = utils::require_string(L, -1);
 
         if(!value_str.has_value()) {
             return false;

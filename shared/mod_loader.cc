@@ -5,6 +5,8 @@
 #include "core/config/map.hh"
 #include "core/exception.hh"
 
+#include "shared/biome_lut.hh"
+#include "shared/biome_registry.hh"
 #include "shared/block_registry.hh"
 #include "shared/constant.hh"
 
@@ -167,13 +169,18 @@ void mod_loader::init(void)
         }
 
         block_registry::commit(ctx);
+        biome_registry::commit(ctx);
     }
+
+    biome_lut::rebuild();
 }
 
 void mod_loader::shutdown(void)
 {
     s_mods.clear();
 
+    biome_lut::purge();
+    biome_registry::purge();
     block_registry::purge();
 }
 

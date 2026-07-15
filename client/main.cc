@@ -14,6 +14,7 @@
 #include "shared/mod_loader.hh"
 #include "shared/res/block_collision.hh"
 #include "shared/res/block_model.hh"
+#include "shared/res/feature.hh"
 #include "shared/splash.hh"
 #include "shared/world.hh"
 
@@ -113,6 +114,7 @@ static void wrapped_main(int argc, char** argv)
     Image::register_resource();
     BlockCollision::register_resource();
     BlockModel::register_resource();
+    Feature::register_resource();
     Texture2D::register_resource();
 
     mod_loader::init();

@@ -10,6 +10,15 @@ constexpr static float ROTATION_STEP = 15.0f;
 constexpr static float ROTATION_MIN = -180.0f;
 constexpr static float ROTATION_MAX = +180.0f;
 
+constexpr static std::array BLOCK_FACE_MAPPING = {
+    std::make_pair(std::string_view("north"), unsigned(BLOCK_FACE_NORTH)),
+    std::make_pair(std::string_view("south"), unsigned(BLOCK_FACE_SOUTH)),
+    std::make_pair(std::string_view("east"), unsigned(BLOCK_FACE_EAST)),
+    std::make_pair(std::string_view("west"), unsigned(BLOCK_FACE_WEST)),
+    std::make_pair(std::string_view("top"), unsigned(BLOCK_FACE_TOP)),
+    std::make_pair(std::string_view("bottom"), unsigned(BLOCK_FACE_BOTTOM)),
+};
+
 static float snap_rotation(float degrees)
 {
     auto clamped = std::clamp(degrees, ROTATION_MIN, ROTATION_MAX);
@@ -17,221 +26,144 @@ static float snap_rotation(float degrees)
     return std::round(clamped / ROTATION_STEP) * ROTATION_STEP;
 }
 
-static bool parse_block_face_name(const char* name, block_face& face)
-{
-    if(name == nullptr) {
-        return false;
-    }
-
-    if(0 == std::strcmp(name, "north")) {
-        face = BLOCK_FACE_NORTH;
-        return true;
-    }
-
-    if(0 == std::strcmp(name, "south")) {
-        face = BLOCK_FACE_SOUTH;
-        return true;
-    }
-
-    if(0 == std::strcmp(name, "east")) {
-        face = BLOCK_FACE_EAST;
-        return true;
-    }
-
-    if(0 == std::strcmp(name, "west")) {
-        face = BLOCK_FACE_WEST;
-        return true;
-    }
-
-    if(0 == std::strcmp(name, "top")) {
-        face = BLOCK_FACE_TOP;
-        return true;
-    }
-
-    if(0 == std::strcmp(name, "bottom")) {
-        face = BLOCK_FACE_BOTTOM;
-        return true;
-    }
-
-    return false;
-}
-
-static bool parse_texture_slots(BlockModel& model, const JSON_Array* array)
+static std::optional<std::vector<std::string>> parse_texture_slots(const JSON_Array* array)
 {
     auto count = json_array_get_count(array);
 
     if(array == nullptr || count == 0) {
-        return false;
+        return std::nullopt;
     }
 
-    model.texture_slots.clear();
-    model.texture_slots.reserve(count);
+    std::vector<std::string> texture_slots;
+    texture_slots.reserve(count);
 
     for(std::size_t i = 0; i < count; ++i) {
         auto value = json_array_get_string(array, i);
 
         if(value == nullptr) {
-            return false;
+            return std::nullopt;
         }
 
-        model.texture_slots.emplace_back(value);
+        texture_slots.emplace_back(value);
     }
 
-    return true;
+    return texture_slots;
 }
 
-static bool parse_face(BlockModel_Face& face, const JSON_Object* object)
+static std::optional<BlockModel_Face> parse_face(const JSON_Object* object)
 {
     if(object == nullptr) {
-        return false;
+        return std::nullopt;
     }
 
     auto texture = json_object_get_string(object, "texture");
 
     if(texture == nullptr) {
-        return false;
+        return std::nullopt;
     }
 
-    face.texture_slot = texture;
-
-    if(json_object_has_value(object, "uv")) {
-        Eigen::Vector4f uv;
-
-        if(!utils::parse_json(object, "uv", uv)) {
-            return false;
-        }
-
-        face.uv = uv / 16.0f;
-    }
-
-    face.uv_rotation = 0;
-
-    if(json_object_has_value(object, "uv_rotation")) {
-        auto raw = static_cast<int>(json_object_get_number(object, "uv_rotation"));
-
-        if(raw != 0 && raw != 90 && raw != 180 && raw != 270) {
-            return false;
-        }
-
-        face.uv_rotation = static_cast<unsigned>(raw);
-    }
-
-    if(json_object_has_value(object, "cullface")) {
-        auto name = json_object_get_string(object, "cullface");
-
-        block_face parsed;
-
-        if(!parse_block_face_name(name, parsed)) {
-            return false;
-        }
-
-        face.cull_face = parsed;
-    }
-
-    if(json_object_has_value(object, "tint")) {
-        auto raw = json_object_get_number(object, "tint");
-
-        if(raw < 0.0) {
-            return false;
-        }
-
-        face.tint_index = static_cast<unsigned>(raw);
-    }
-
-    face.world_locked = false;
-
-    if(json_object_has_value(object, "world_locked")) {
-        face.world_locked = json_object_get_boolean(object, "world_locked");
-    }
-
-    return true;
-}
-
-static bool parse_element(BlockModel_Element& element, const JSON_Object* object)
-{
-    if(object == nullptr) {
-        return false;
-    }
+    auto uv = utils::parse_vector<float, 4>(object, "uv");
+    auto uv_rotation = utils::parse_arithmetic<unsigned>(object, "uv_rotation");
+    auto cull_face = utils::parse_enum<unsigned>(object, "cullface", BLOCK_FACE_MAPPING);
+    auto tint_index = utils::parse_arithmetic<unsigned>(object, "tint");
+    auto world_locked = json_object_get_boolean(object, "world_locked");
 
     auto is_valid = true;
-    is_valid = is_valid && utils::parse_json(object, "min", element.min);
-    is_valid = is_valid && utils::parse_json(object, "max", element.max);
+    is_valid = is_valid && uv.has_value();
+    is_valid = is_valid && uv_rotation.has_value();
+    is_valid = is_valid && cull_face.has_value();
+    is_valid = is_valid && tint_index.has_value();
 
-    if(!is_valid) {
-        return false;
-    }
-
-    element.min /= 16.0f;
-    element.max /= 16.0f;
-
-    element.rotation_origin = Eigen::Vector3f::Zero();
-
-    if(json_object_has_value(object, "origin")) {
-        if(!utils::parse_json(object, "origin", element.rotation_origin)) {
-            return false;
-        }
-
-        element.rotation_origin /= 16.0f;
-    }
-
-    element.rotation_angles = Eigen::Vector3f::Zero();
-
-    if(json_object_has_value(object, "rotation")) {
-        if(!utils::parse_json(object, "rotation", element.rotation_angles)) {
-            return false;
-        }
-    }
-
-    element.rotation_angles[0] = snap_rotation(element.rotation_angles[0]);
-    element.rotation_angles[1] = snap_rotation(element.rotation_angles[1]);
-    element.rotation_angles[2] = snap_rotation(element.rotation_angles[2]);
-
-    element.rescale = true;
-
-    if(json_object_has_value(object, "rescale")) {
-        element.rescale = json_object_get_boolean(object, "rescale");
-    }
-
-    element.shade = true;
-
-    if(json_object_has_value(object, "shade")) {
-        element.shade = json_object_get_boolean(object, "shade");
-    }
-
-    element.faces.fill(std::nullopt);
-
-    auto faces = json_object_get_object(object, "faces");
-
-    if(faces == nullptr) {
-        return false;
-    }
-
-    auto num_faces = json_object_get_count(faces);
-
-    for(std::size_t i = 0; i < num_faces; ++i) {
-        auto face_name = json_object_get_name(faces, i);
-        auto face_object = json_object_get_object(faces, face_name);
-
-        if(face_object == nullptr) {
-            return false;
-        }
-
-        block_face face_index;
-
-        if(!parse_block_face_name(face_name, face_index)) {
-            return false;
-        }
-
+    if(is_valid) {
         BlockModel_Face face {};
-
-        if(!parse_face(face, face_object)) {
-            return false;
-        }
-
-        element.faces[face_index] = std::move(face);
+        face.texture_slot = texture;
+        face.uv = 0.0625f * uv.value();
+        face.uv_rotation = uv_rotation.value();
+        face.cull_face = static_cast<block_face>(cull_face.value());
+        face.tint_index = tint_index.value();
+        face.world_locked = world_locked;
+        return face;
     }
 
-    return true;
+    return std::nullopt;
+}
+
+static std::optional<BlockModel_Element> parse_element(const JSON_Object* object)
+{
+    if(object == nullptr) {
+        return std::nullopt;
+    }
+
+    auto min = utils::parse_vector<float, 3>(object, "min");
+    auto max = utils::parse_vector<float, 3>(object, "max");
+    auto origin = utils::parse_vector<float, 3>(object, "origin");
+    auto rotation = utils::parse_vector<float, 3>(object, "rotation");
+
+    auto is_valid = true;
+    is_valid = is_valid && min.has_value();
+    is_valid = is_valid && max.has_value();
+    is_valid = is_valid && origin.has_value();
+    is_valid = is_valid && rotation.has_value();
+
+    if(is_valid) {
+        BlockModel_Element element {};
+        element.min = 0.0625f * min.value();
+        element.max = 0.0625f * max.value();
+        element.rotation_origin = 0.0625f * origin.value();
+        element.rotation_angles = rotation.value();
+        element.rotation_angles[0] = snap_rotation(element.rotation_angles[0]);
+        element.rotation_angles[1] = snap_rotation(element.rotation_angles[1]);
+        element.rotation_angles[2] = snap_rotation(element.rotation_angles[2]);
+        element.rescale = true;
+        element.shade = true;
+
+        if(json_object_has_value(object, "rescale")) {
+            element.rescale = json_object_get_boolean(object, "rescale");
+        }
+
+        if(json_object_has_value(object, "shade")) {
+            element.shade = json_object_get_boolean(object, "shade");
+        }
+
+        element.faces.fill(std::nullopt);
+
+        auto faces = json_object_get_object(object, "faces");
+        auto num_faces = json_object_get_count(faces);
+
+        for(std::size_t i = 0; i < num_faces; ++i) {
+            auto face_name = json_object_get_name(faces, i);
+            auto face_object = json_object_get_object(faces, face_name);
+
+            if(face_object == nullptr) {
+                return std::nullopt;
+            }
+
+            std::optional<block_face> face_index = std::nullopt;
+
+            for(const auto& [name, index] : BLOCK_FACE_MAPPING) {
+                if(face_name == name) {
+                    face_index = static_cast<block_face>(index);
+                    break;
+                }
+            }
+
+            if(!face_index.has_value()) {
+                return std::nullopt;
+            }
+
+            auto face = parse_face(face_object);
+
+            if(!face.has_value()) {
+                return std::nullopt;
+            }
+
+            element.faces[face_index.value()] = std::move(face.value());
+        }
+
+        return element;
+    }
+
+    return std::nullopt;
 }
 
 static const void* block_model_load_fn(const char* path, std::uint32_t flags)
@@ -243,51 +175,56 @@ static const void* block_model_load_fn(const char* path, std::uint32_t flags)
         return nullptr;
     }
 
-    auto json = json_parse_string(source.c_str());
-    auto jsonv = json_value_get_object(json);
+    auto jsonv = json_parse_string(source.c_str());
+    auto json = json_value_get_object(jsonv);
 
-    if(json == nullptr || jsonv == nullptr) {
+    if(jsonv == nullptr) {
         LOG_WARNING("{}: parse error", path);
-        json_value_free(json);
+        return nullptr;
+    }
+
+    if(json == nullptr) {
+        LOG_WARNING("{}: malformed JSON", path);
+        json_value_free(jsonv);
+        return nullptr;
+    }
+
+    auto textures = json_object_get_array(json, "textures");
+    auto slots = parse_texture_slots(textures);
+
+    if(!slots.has_value()) {
+        LOG_WARNING("{}: invalid or missing textures", path);
+        json_value_free(jsonv);
+        return nullptr;
+    }
+
+    auto elements = json_object_get_array(json, "elements");
+    auto num_elements = json_array_get_count(elements);
+
+    if(elements == nullptr || num_elements == 0) {
+        LOG_WARNING("{}: invalid or missing elements", path);
+        json_value_free(jsonv);
         return nullptr;
     }
 
     BlockModel model {};
-
-    auto textures = json_object_get_array(jsonv, "textures");
-
-    if(!parse_texture_slots(model, textures)) {
-        LOG_WARNING("{}: invalid or missing 'textures'", path);
-        json_value_free(json);
-        return nullptr;
-    }
-
-    auto elements = json_object_get_array(jsonv, "elements");
-    auto num_elements = elements ? json_array_get_count(elements) : 0;
-
-    if(elements == nullptr || num_elements == 0) {
-        LOG_WARNING("{}: invalid or missing 'elements'", path);
-        json_value_free(json);
-        return nullptr;
-    }
-
+    model.texture_slots = std::move(slots.value());
     model.elements.reserve(num_elements);
 
     for(std::size_t i = 0; i < num_elements; ++i) {
         auto element_object = json_array_get_object(elements, i);
+        auto element = parse_element(element_object);
 
-        BlockModel_Element element {};
-
-        if(!parse_element(element, element_object)) {
+        if(!element.has_value()) {
             LOG_WARNING("{}: invalid element at index {}", path, i);
-            json_value_free(json);
+            json_value_free(jsonv);
             return nullptr;
         }
 
-        model.elements.push_back(std::move(element));
+        model.elements.push_back(std::move(element.value()));
     }
 
-    json_value_free(json);
+    json_value_free(jsonv);
 
     return new BlockModel(std::move(model));
 }

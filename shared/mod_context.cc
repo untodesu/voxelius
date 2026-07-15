@@ -10,6 +10,7 @@
 #include "core/version.hh"
 
 #include "shared/constant.hh"
+#include "shared/scripting/biomes_library.hh"
 #include "shared/scripting/blocks_library.hh"
 #include "shared/scripting/core_library.hh"
 #include "shared/scripting/lua_libraries.hh"
@@ -134,6 +135,7 @@ bool ModContext::initialize(void)
     m_lua_state = std::shared_ptr<lua_State>(L, &lua_close);
     scripting::open_lua_libraries(m_lua_state, this);
 
+    scripting::open_biomes_library(m_lua_state, this);
     scripting::open_blocks_library(m_lua_state, this);
     scripting::open_core_library(m_lua_state, this);
     scripting::open_world_library(m_lua_state, this);
@@ -229,4 +231,37 @@ std::vector<BlockFamily> ModContext::take_block_families(void)
 emhash8::HashMap<Identifier, block_id_type> ModContext::take_block_names(void)
 {
     return std::move(m_block_names);
+}
+
+biome_id_type ModContext::find_biome(const Identifier& name) const
+{
+    auto it = m_biome_names.find(name);
+
+    if(it == m_biome_names.cend())
+        return BIOME_ID_NULL;
+    return it->second;
+}
+
+biome_id_type ModContext::register_biome(const Identifier& name, BiomeDefinition def)
+{
+    if(m_biomes.empty()) {
+        m_biomes.emplace_back();
+    }
+
+    auto id = static_cast<biome_id_type>(m_biomes.size());
+
+    m_biomes.push_back(std::move(def));
+    m_biome_names.try_emplace(name, id);
+
+    return id;
+}
+
+std::vector<BiomeDefinition> ModContext::take_biomes(void)
+{
+    return std::move(m_biomes);
+}
+
+emhash8::HashMap<Identifier, biome_id_type> ModContext::take_biome_names(void)
+{
+    return std::move(m_biome_names);
 }

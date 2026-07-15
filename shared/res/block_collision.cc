@@ -6,24 +6,28 @@
 #include "core/utils/json.hh"
 #include "core/utils/physfs.hh"
 
-static bool parse_aabb(Eigen::AlignedBox3f& aabb, const JSON_Object* object)
+static std::optional<Eigen::AlignedBox3f> parse_aabb(const JSON_Object* object)
 {
     if(object == nullptr) {
-        return false;
+        return std::nullopt;
     }
+
+    auto min = utils::parse_vector<float, 3>(object, "min");
+    auto max = utils::parse_vector<float, 3>(object, "max");
 
     auto is_valid = true;
-    is_valid = is_valid && utils::parse_json(object, "min", aabb.min());
-    is_valid = is_valid && utils::parse_json(object, "max", aabb.max());
+    is_valid = is_valid && min.has_value();
+    is_valid = is_valid && max.has_value();
 
     if(!is_valid) {
-        return false;
+        return std::nullopt;
     }
 
-    aabb.min() /= 16.0f;
-    aabb.max() /= 16.0f;
+    Eigen::AlignedBox3f aabb {};
+    aabb.min() = 0.0625f * min.value();
+    aabb.max() = 0.0625f * max.value();
 
-    return true;
+    return aabb;
 }
 
 static const void* block_collision_load_fn(const char* path, std::uint32_t flags)
@@ -35,31 +39,41 @@ static const void* block_collision_load_fn(const char* path, std::uint32_t flags
         return nullptr;
     }
 
-    auto json = json_parse_string(source.c_str());
-    auto jsonv = json_value_get_object(json);
+    auto jsonv = json_parse_string(source.c_str());
+    auto json = json_value_get_object(jsonv);
+
+    if(jsonv == nullptr) {
+        LOG_WARNING("{}: parse error", path);
+        return nullptr;
+    }
+
+    if(json == nullptr) {
+        LOG_WARNING("{}: malformed JSON", path);
+        json_value_free(jsonv);
+        return nullptr;
+    }
+
+    auto elements = json_object_get_array(json, "elements");
+    auto num_elements = json_array_get_count(elements);
 
     BlockCollision collision {};
-
-    auto elements = json_object_get_array(jsonv, "elements");
-    auto num_elements = json_array_get_count(elements);
     collision.elements.reserve(num_elements);
 
     for(std::size_t i = 0; i < num_elements; ++i) {
-        if(auto element = json_array_get_object(elements, i)) {
-            Eigen::AlignedBox3f aabb {};
+        auto element = json_array_get_object(elements, i);
+        auto aabb = parse_aabb(element);
 
-            if(!parse_aabb(aabb, element)) {
-                LOG_WARNING("{}: invalid element at index {}", path, i);
-                json_value_free(json);
-                return nullptr;
-            }
-
-            collision.bounds.extend(aabb);
-            collision.elements.push_back(std::move(aabb));
+        if(!aabb.has_value()) {
+            LOG_WARNING("{}: invalid element at index {}", path, i);
+            json_value_free(jsonv);
+            return nullptr;
         }
+
+        collision.bounds.extend(aabb.value());
+        collision.elements.push_back(std::move(aabb.value()));
     }
 
-    json_value_free(json);
+    json_value_free(jsonv);
 
     return new BlockCollision(std::move(collision));
 }
