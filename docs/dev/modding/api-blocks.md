@@ -69,7 +69,7 @@ Freeform grouping tags checked at runtime with `blocks.has_tag`. Any block can c
 
 ## Constant: null block
 
-The `blocks.NULL_BLOCK` constants defines an empty, undefined or otherwise invalid block ID. Gameplay/gamedev-wise it can be treated as a block of void or vacuum.  
+The `blocks.NULL_BLOCK` constant defines an empty, undefined or otherwise invalid block ID. Gameplay/gamedev-wise it can be treated as a void block  
 
 ## Functions
 
@@ -133,17 +133,17 @@ Register a new block in the registry
 
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
-|`render`|`integer`|yes| |One of `blocks.RENDER_XXXX` constants|  
+|`render`|`integer`|yes|N/D|One of `blocks.RENDER_XXXX` constants|  
 |`textures`|`table`|depends|`{}`|Textures to attach to the block model|  
 |`animated`|`boolean`|no|`false`|When set to true, multiple textures from the `textures` value are used as animation frames instead of being positionally randomized in the world|  
-|`model_name`|`string`|depends| |Block model name for this variant|  
+|`model_name`|`string`|depends|N/D|Block model name for this variant|  
 |`model_offset`|`float[3]`|depends|`[0,0,0]`|Offset of the resolved block model|  
 |`model_facing`|`integer`|no|`blocks.FACE_NORTH`|One of the `blocks.FACE_XXXX` constants. Says which way the model's own north face should end up pointing; rotates the whole resolved block model|  
-|`bcoll_name`|`string`|depends| |Block collision shape for this variant|  
+|`bcoll_name`|`string`|depends|N/D|Block collision shape for this variant|  
 |`bcoll_offset`|`float[3]`|depends|`[0,0,0]`|Block collision offset|  
 |`bcoll_facing`|`integer`|no|`blocks.FACE_NORTH`|One of the `blocks.FACE_XXXX` constants. Rotates the whole resolved collision shape the same way `model_facing` rotates the model; set independently since collision doesn't have to follow the visual, though it usually should|  
 |`health`|`integer`|no|`0`|Base amount of hit points required for the block to be broken. Varies with different effects active on the tool|  
-|`sound`|`string`|no| |Sound set to use for this block|  
+|`sound`|`string`|no|N/D|Sound set to use for this block|  
 |`emission`|`integer`|no|0|Emission light value|  
 |`dissipation`|`integer`|no|15|How much light the block eats while light passes through|  
 |`touch`|`integer`|no|`blocks.TOUCH_SOLID`|Block's touch response|  

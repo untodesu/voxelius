@@ -1,47 +1,21 @@
 # Biomes API
 
-Mods can register new biome types for the world generator  
-
-## Constants: limits
-
-General engine-provided limits for reference  
-
-|Name|Value|Description|  
-|----|----|----|  
-|`biomes.TEMP_MIN`|200|Minimum temperature, K|  
-|`biomes.TEMP_MAX`|330|Maximum temperature, K|  
-|`biomes.HUMID_MIN`|0|Minimum relative humidity, percent|  
-|`biomes.HUMID_MAX`|100|Maximum relative humidity, percent|  
-|`biomes.AXIS_MIN`|0|Third axis minimum, percent|  
-|`biomes.AXIS_MAX`|100|Third axis maximum, percent|  
+Mods can register new biome types for the world generator
 
 ## Constants: realms
 
-Each biome is categorized into a realm. Realms mainly differ from each other by depth and noise generation groups  
+Because Voxelius defines a single "dimension" for the world, the vertical range of blocks can be utilized. Each biome is categorized into a realm. Realms are horizontal slices of the world assumed to have a specific terrain generation model.  
 
-|Name|Description|  
-|----|----|  
-|`biomes.REALM_SURFACE`|Basic world surface|  
-|`biomes.REALM_CAVE`|Basic underground caves|  
-|`biomes.REALM_DEEP`|Deep underground layers and caves|  
-|`biomes.REALM_SKY`|High up, floating islands and whatnot|  
-
-## Lookup tables
-
-Each biome defines its characteristics as nucleations points for a flood-fill lookup table. Each LUT is built per-realm and has three axes:  
-
-- First axis is the nominal temperature in Kelvin degrees  
-
-- Second axis is the relative humidity in percent  
-
-- Third axis depends on the realm  
-
-|Realm|Biome definition field|Descripton|  
+|Name|Y-Range|Description|  
 |----|----|----|  
-|`biomes.REALM_SURFACE`|`weirdness`|Terrain weirdness, 0 = regular, 100 = exotic|  
-|`biomes.REALM_CAVE`|`depth`|Relative depth|  
-|`biomes.REALM_DEEP`|`depth`|Relative depth|  
-|`biomes.REALM_SKY`|`altitude`|Relative altitude|  
+|`biomes.REALM_SKY`|`256..767`|Rare, large and ore-rich floating islands above highest surface points|  
+|`biomes.REALM_SURFACE`|`-64..255`|Common terrain and biomes. Players and most playable structures spawn there|  
+|`biomes.REALM_UNDERGROUND`|`-256..-63`|Classic cave systems, underground rivers and generally good ore amounts|  
+|`biomes.REALM_THE_DEPTHS`|`-512..-255`|Vast and very dark caverns, quite ore-rich if players take risks|  
+
+## Cosntant: null biome
+
+The `biomes.NULL_BIOME` constant defines an empty, undefined or otherwise invalid biome ID. Gameplay/gamedev-wise it can be treated as a void biome  
 
 ## Functions
 
@@ -57,57 +31,36 @@ Registers a new biome
 
 #### Return value
 
-Returns the numeric biome ID used for debugging  
+Returns the numeric biome ID
 
 ## Biome definition
 
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
-|`realm`|`integer`|yes|N/D|One of `biomes.REALM` values|  
-|`temperature`|`integer`|yes|N/D|Nominal temperature nucleation point|  
-|`humidity`|`integer`|yes|N/D|Relative humidity nucleation point|  
-|`weirdness`|`integer`|depends|N/D|Required for `biomes.REALM_SURFACE`|  
-|`depth`|`integer`|depends|N/D|Required for `biomes.REALM_CAVE` and `biomes.REALM_DEEP`|  
-|`altitude`|`integer`|depends|N/D|Required for `biomes.REALM_SKY`|  
-|`priority`|`integer`|no|0|In case of an equal flood-fill distance, the biome with higher priority wins|  
-|`blocks`|`table`|no|`{}`|Block palette|  
-|`strata`|`table`|no|`nil`|Explicit layers, overrides `blocks` logic|  
-|`features`|`table`|no|`{}`|List of features to scatter|  
+|`realm`|`integer`|yes|N/D|One of `biomes.REALM_XXXX` constants|  
+|`lut_temp`|`integer`|no|50|Nominal biome temperature, ranging from 0 to 99|  
+|`lut_humd`|`integer`|no|50|Nominal biome humidity, ranging from 0 to 99|  
+|`lut_axis`|`integer`|no|50|Realm-dependent LUT axis, ranging from 0 to 99|  
+|`priority`|`integer`|no|0|Flood-fill conflicts are resolved using this one|  
+|`palette`|`table`|no|`{}`|Biome's block palette|  
+|`scatter`|`table`|no|`{}`|List of features to scatter|  
 
-## Block palette
+## Palette table
 
 |Field|Description|  
 |----|----|  
-|`empty`|Empty block, eg. air|  
-|`base`|Base block, eg. stone|  
-|`filler`|Under-surface block, eg. dirt|  
-|`surface`|Surface block, eg. grass|  
-|`fluid`|Fluid block, eg. water|  
-|`ceiling`|Ceiling block, eg. stone|  
+|`empty`|Empty block type, eg `builtin:air`|  
+|`basic`|Basic block type, eg `builtin:stone`|  
+|`filler`|Filler block type, eg `builtin:dirt`|  
+|`surface`|Surface block type, eg `builtin:grass`|  
+|`ceiling`|Ceiling block type, eg `builtin:roots`|  
+|`fluid`|Fluid block type, eg `builtin:water`|  
 
-## Strata example
-
-```lua
-strata = {
-    { depth = -8, block = "builtin:stone" },
-    { depth = -3, block = "builtin:dirt"  },
-    { depth =  0, block = "builtin:grass" },
-}
-```
-
-Depth is the offset from a reference level in blocks, where zero means the surface block level  
-
-If strata is defined, `blocks` table is ignored  
-
-## Feature table
+## Scatter table
 
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
-|`id`|`string`|yes|N/D|Feature's namespaced ID|  
+|`name`|`string`|yes|N/D|Feature's namespaced ID|  
 |`chance`|`number`|no|0.5|Chance of a placement attempt|  
-|`requires_sky`|`boolean`|no|`false`|Does it need a `blocks.TAG_GAS` block above its origin?|  
-|`requires_floor`|`boolean`|no|`false`|Does it need a solid floor under its origin?|  
-|`min_depth`|`integer`|no|`nil`|Minimum depth required under the surface|  
-|`max_depth`|`integer`|no|`nil`|Maximum depth required under the surface|  
-|`min_altitude`|`integer`|no|`nil`|Minumum altitude for a sky realm|  
-|`max_altitude`|`integer`|no|`nil`|Maximum altitude for a sky realm|  
+|`need_gas`|`boolean`|no|`false`|Whether placement must have a block with the `blocks.TAG_GAS` tag above the origin|  
+|`need_floor`|`boolean`|no|`false`|Whether placement must have a solid block under the origin|  

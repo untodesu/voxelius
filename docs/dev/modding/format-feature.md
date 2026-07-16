@@ -9,13 +9,16 @@ Features are located in the directory: `namespace:features`
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
 |`anchor`|`string`|no|`"surface"`|Where the feature origin is anchored before `parts` offsets are applied|  
-|`palette`|`string[]`|yes|N/D|Block palette for the feature, a list of namespaced block IDs|  
+|`palette`|`string[]`|yes|N/D|Block palette for the feature, a list of namespaced block IDs. Each namespaced ID _requires_ the namespace|  
 |`parts`|`object[]`|yes|N/D|List of blocks to place|  
 
-- The `anchor` field can be one of the following values:  
-    - `surface` marks the feature as anchoring to a column surface  
-    - `floor` marks the feature as anchoring to a floor of a cave  
-    - `ceiling` marks the feature as anchoring to a ceiling of a cave or bottom of a floating island  
+The `anchor` field can be one of the following values:  
+
+- `surface` marks the feature as anchoring to a column surface  
+
+- `floor` marks the feature as anchoring to a floor of a cave  
+
+- `ceiling` marks the feature as anchoring to a ceiling of a cave or bottom of a floating island  
 
 ## Part object
 
