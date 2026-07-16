@@ -86,6 +86,10 @@ Retreive a numeric block stem ID from a namespaced block ID
 - Numeric block ID if the game likes your input  
 - If the block is missing or the namespace ID is malformed, `blocks.NULL_BLOCK` is returned  
 
+#### Notes
+
+- If a block defines states and variants, the returned value is a _stem_ ID. If placed in the world, this block is not rendered, not collidable or raycastable  
+
 ### Function: `blocks.has_tag(id, tag) -> boolean`
 
 Check if a block has a specified tag.  

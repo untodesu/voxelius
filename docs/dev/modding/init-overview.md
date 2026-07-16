@@ -21,6 +21,18 @@ Valid characters in both namespace and identifier include:
 
 During initialization, if the engine sees fully duplicate entries in a registry (eg. `mymod:myblock` is registered twice), it will append `~N` to the end and will try until it hits 10000 renames at which point I am not promising any defined behaviour...  
 
+### Namespaced ID: blockstates
+
+To specify a specific block variant, brackets are used:  
+
+- `builtin:stone_slab[orientation=bottom]`  
+
+- `builtin:stone_slab[orientation=double]`  
+
+- `builtin:stone_stairs[facing=down,orientation=east]`  
+
+A block ID/name that is assumed to support these is called a "full" block namespaced ID  
+
 ## Error handling
 
 The mod's root script, `modname/scripts/init.lua` can handle errors itself, though if an error propagates out of it (into the initializing `lua_pcall`), the mod will be considered as a load fail.  

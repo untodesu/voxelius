@@ -95,6 +95,7 @@ void purge(void);
 namespace block_registry
 {
 block_id_type find(const Identifier& id);
+block_id_type find_ex(std::string_view id_with_states);
 } // namespace block_registry
 
 namespace block_registry

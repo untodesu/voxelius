@@ -9,7 +9,7 @@ Features are located in the directory: `namespace:features`
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
 |`anchor`|`string`|no|`"surface"`|Where the feature origin is anchored before `parts` offsets are applied|  
-|`palette`|`string[]`|yes|N/D|Block palette for the feature, a list of namespaced block IDs. Each namespaced ID _requires_ the namespace|  
+|`palette`|`string[]`|yes|N/D|Block palette for the feature, a list of full namespaced block IDs. Each _requires_ the namespace|  
 |`parts`|`object[]`|yes|N/D|List of blocks to place|  
 
 The `anchor` field can be one of the following values:  
@@ -19,16 +19,6 @@ The `anchor` field can be one of the following values:
 - `floor` marks the feature as anchoring to a floor of a cave  
 
 - `ceiling` marks the feature as anchoring to a ceiling of a cave or bottom of a floating island  
-
-## Palette entry
-
-If the block is needed with a specific state, the states that produce a full variant are defined in square brackets and listed with a comma:  
-
-- `builtin:stone_slab[orientation=bottom]`  
-
-- `builtin:stone_slab[orientation=double]`  
-
-- `builtin:stone_stairs[facing=down,orientation=east]`  
 
 ## Part object
 

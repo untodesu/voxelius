@@ -905,7 +905,6 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
 
     if(!id.is_valid()) {
         lua_pushfstring(L, "blocks.add: malformed name: %s", raw_name);
-
         return false;
     }
 

@@ -4,6 +4,7 @@
 
 #include "core/exception.hh"
 #include "core/utils/crc64.hh"
+#include "core/utils/string.hh"
 
 #include "shared/mod_context.hh"
 
@@ -296,6 +297,64 @@ block_id_type block_registry::find(const Identifier& id)
     if(it == s_names.cend())
         return BLOCK_ID_NULL;
     return it->second;
+}
+
+block_id_type block_registry::find_ex(std::string_view id_with_states)
+{
+    auto bracket_a = id_with_states.find_first_of('[');
+    auto bracket_b = id_with_states.find_last_of(']');
+
+    if(bracket_a == std::string_view::npos || bracket_b == std::string_view::npos || bracket_b <= bracket_a) {
+        return find(Identifier::from_string(id_with_states));
+    }
+
+    auto id = Identifier::from_string(id_with_states.substr(0, bracket_a));
+    auto states = id_with_states.substr(bracket_a + 1, bracket_b - bracket_a - 1);
+
+    if(utils::is_whitespace<char>(states)) {
+        return find(id);
+    }
+
+    emhash8::HashMap<blockstate_key_type, blockstate_val_type> map;
+    std::string_view::size_type pos = 0;
+
+    do {
+        auto next = states.find_first_of(',', pos);
+        auto pair = states.substr(pos, next - pos);
+        auto sign = pair.find_first_of('=');
+
+        if(sign == std::string_view::npos) {
+            return BLOCK_ID_NULL;
+        }
+
+        auto key = utils::trim_whitespace<char>(pair.substr(0, sign));
+        auto value = utils::trim_whitespace<char>(pair.substr(sign + 1));
+
+        if(utils::is_whitespace(key) || utils::is_whitespace(value)) {
+            return BLOCK_ID_NULL;
+        }
+
+        auto family = find_family(id);
+
+        if(family == nullptr) {
+            return BLOCK_ID_NULL;
+        }
+
+        auto key_hash = family->state_hash(key);
+        auto value_hash = family->state_hash(value);
+        map.insert_or_assign(blockstate_key_type(key_hash), blockstate_val_type(value_hash));
+
+        if(next == std::string_view::npos) {
+            break;
+        }
+
+        pos = next + 1;
+
+    } while(pos < states.size());
+
+    auto base_id = find(id);
+    auto resolved_id = resolve_variant(base_id, map);
+    return resolved_id;
 }
 
 std::optional<Identifier> block_registry::name_of(block_id_type id)
