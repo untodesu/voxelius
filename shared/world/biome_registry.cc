@@ -55,6 +55,17 @@ void biome_registry::purge(void)
     s_reverse_names.clear();
 }
 
+void biome_registry::resolve_palettes(void)
+{
+    for(auto& def : s_definitions) {
+        def.block_empty = block_registry::find_ex(def.palette_empty);
+        def.block_basic = block_registry::find_ex(def.palette_basic);
+        def.block_filler = block_registry::find_ex(def.palette_filler);
+        def.block_surface = block_registry::find_ex(def.palette_surface);
+        def.block_fluid = block_registry::find_ex(def.palette_fluid);
+    }
+}
+
 biome_id_type biome_registry::find(const Identifier& id)
 {
     auto it = s_names.find(id);

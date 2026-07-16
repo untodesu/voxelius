@@ -170,6 +170,8 @@ void mod_loader::init(void)
         block_registry::commit(ctx);
         biome_registry::commit(ctx);
     }
+
+    biome_registry::resolve_palettes();
 }
 
 void mod_loader::shutdown(void)

@@ -18,6 +18,11 @@ void purge(void);
 
 namespace biome_registry
 {
+void resolve_palettes(void);
+} // namespace biome_registry
+
+namespace biome_registry
+{
 biome_id_type find(const Identifier& id);
 } // namespace biome_registry
 
