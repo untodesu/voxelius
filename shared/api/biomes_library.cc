@@ -47,7 +47,7 @@ static bool parse_tag_bitmask(lua_State* L, int idx, block_tag_bit& out)
     return true;
 }
 
-static bool parse_scatter_entry(lua_State* L, int entry_idx, ScatterEntry& entry, ModContext* ctx)
+static bool parse_scatter_entry(lua_State* L, int entry_idx, BiomeScatterEntry& entry, ModContext* ctx)
 {
     lua_getfield(L, entry_idx, "feature");
     auto feature = utils::require_string(L, -1);
@@ -90,7 +90,60 @@ static bool parse_scatter_entry(lua_State* L, int entry_idx, ScatterEntry& entry
     return true;
 }
 
-static bool parse_palette(lua_State* L, int palette_idx, BiomeDefinition& def)
+static bool parse_palette_entry(lua_State* L, int entry_idx, BiomePaletteEntry& entry, ModContext* ctx)
+{
+    lua_getfield(L, entry_idx, "name");
+    auto name = utils::require_string(L, -1);
+
+    if(!name.has_value()) {
+        return false;
+    }
+
+    entry.name = Identifier::from_string(name.value(), ctx->name_space());
+    lua_pop(L, 1);
+
+    lua_getfield(L, entry_idx, "states");
+
+    if(lua_isnil(L, -1)) {
+        lua_pop(L, 1);
+        return true;
+    }
+
+    if(!lua_istable(L, -1)) {
+        lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, -1)));
+        return false;
+    }
+
+    entry.states.clear();
+
+    lua_pushnil(L);
+
+    while(lua_next(L, -2)) {
+        auto key_str = utils::require_string(L, -2);
+
+        if(!key_str.has_value()) {
+            return false;
+        }
+
+        auto value_str = utils::require_string(L, -1);
+
+        if(!value_str.has_value()) {
+            return false;
+        }
+
+        entry.states.try_emplace(std::string(key_str.value()), std::string(value_str.value()));
+
+        lua_pop(L, 1);
+    }
+
+    entry.cached = BIOME_ID_NULL;
+
+    lua_pop(L, 1);
+
+    return true;
+}
+
+static bool parse_palette(lua_State* L, int palette_idx, BiomeDefinition& def, ModContext* ctx)
 {
     const std::array palette_fields = {
         std::make_pair("empty", &def.palette_empty),
@@ -104,13 +157,9 @@ static bool parse_palette(lua_State* L, int palette_idx, BiomeDefinition& def)
         lua_getfield(L, palette_idx, field_name);
 
         if(!lua_isnil(L, -1)) {
-            auto value = utils::require_string(L, -1);
-
-            if(!value.has_value()) {
+            if(!parse_palette_entry(L, lua_gettop(L), field_ptr[0], ctx)) {
                 return false;
             }
-
-            field_ptr->assign(value.value());
         }
 
         lua_pop(L, 1);
@@ -152,7 +201,7 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
                 return false;
             }
 
-            *field_ptr = static_cast<std::uint8_t>(value.value());
+            field_ptr[0] = static_cast<std::uint8_t>(value.value());
         }
 
         lua_pop(L, 1);
@@ -181,7 +230,7 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
             return false;
         }
 
-        if(!parse_palette(L, lua_gettop(L), def)) {
+        if(!parse_palette(L, lua_gettop(L), def, ctx)) {
             return false;
         }
     }
@@ -210,7 +259,7 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
                 return false;
             }
 
-            ScatterEntry entry {};
+            BiomeScatterEntry entry {};
 
             if(!parse_scatter_entry(L, entry_idx, entry, ctx)) {
                 return false;
@@ -245,12 +294,6 @@ static bool add_biome(lua_State* L, ModContext* ctx, const char* raw_name, int d
     def.lut_axis = 50;
 
     def.priority = 0;
-
-    def.block_empty = BLOCK_ID_NULL;
-    def.block_basic = BLOCK_ID_NULL;
-    def.block_filler = BLOCK_ID_NULL;
-    def.block_surface = BLOCK_ID_NULL;
-    def.block_fluid = BLOCK_ID_NULL;
 
     if(!parse_definition(L, def_idx, def, ctx)) {
         return false;

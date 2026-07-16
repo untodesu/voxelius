@@ -6,36 +6,55 @@ dofile("blocks/grass.lua")
 dofile("blocks/stone.lua")
 
 blocks.add("bush", {
-    render = blocks.RENDER_ALPHA,
-    textures = {
-        default = {
-            "bush.png",
-        }
-    },
+  render = blocks.RENDER_ALPHA,
+  textures = {
+    default = {
+      "bush.png",
+    }
+  },
 
-    model_name = "cross",
-    bcoll_name = "bush",
+  model_name = "cross",
+  bcoll_name = "bush",
 })
+
 
 biomes.add("plains", {
-    realm = biomes.REALM_SURFACE,
+  realm = biomes.REALM_SURFACE,
 
-    palette = {
-        basic = "stone",
-        filler = "dirt",
-        surface = "grass",
-    }
+  lut_temp = 50,
+  lut_humd = 50,
+  lut_axis = 50,
+
+  palette = {
+    basic = { name = "stone" },
+    filler = { name = "dirt" },
+    surface = { name = "grass" },
+  }
 })
 
-biomes.add("test", {
-    realm = biomes.REALM_SURFACE,
+biomes.add("testing", {
+  realm = biomes.REALM_SURFACE,
 
-    lut_temp = 70,
-    lut_humd = 20,
+  lut_temp = 40,
+  lut_humd = 90,
 
-    palette = {
-        basic = "stone",
-        filler = "dirt",
-        surface = "stone",
-    }
+  palette = {
+    basic = { name = "stone" },
+    filler = { name = "stone" },
+    surface = { name = "stone" }
+  }
 })
+
+biomes.add("testing2", {
+  realm = biomes.REALM_SURFACE,
+
+  lut_temp = 90,
+  lut_humd = 10,
+
+  palette = {
+    basic = { name = "stone" },
+    filler = { name = "stone" },
+    surface = { name = "dirt" }
+  }
+})
+

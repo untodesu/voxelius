@@ -58,11 +58,33 @@ void biome_registry::purge(void)
 void biome_registry::resolve_palettes(void)
 {
     for(auto& def : s_definitions) {
-        def.block_empty = block_registry::find_ex(def.palette_empty);
-        def.block_basic = block_registry::find_ex(def.palette_basic);
-        def.block_filler = block_registry::find_ex(def.palette_filler);
-        def.block_surface = block_registry::find_ex(def.palette_surface);
-        def.block_fluid = block_registry::find_ex(def.palette_fluid);
+        const std::array fields = {
+            &def.palette_empty,
+            &def.palette_basic,
+            &def.palette_filler,
+            &def.palette_surface,
+            &def.palette_fluid,
+        };
+
+        for(auto& field : fields) {
+            auto stem = block_registry::find(field->name);
+            auto family = block_registry::find_family(field->name);
+
+            if(family == nullptr) {
+                field->cached = stem;
+                continue;
+            }
+
+            emhash8::HashMap<blockstate_key_type, blockstate_val_type> map;
+
+            for(const auto& it : field->states) {
+                auto key_hash = family->state_hash(it.first);
+                auto value_hash = family->state_hash(it.second);
+                map.insert_or_assign(blockstate_key_type(key_hash), blockstate_val_type(value_hash));
+            }
+
+            field->cached = block_registry::resolve_variant(family->stem_id, map);
+        }
     }
 }
 

@@ -42,7 +42,8 @@ static std::optional<std::vector<block_id_type>> parse_palette(const JSON_Object
             return std::nullopt;
         }
 
-        auto block_id = block_registry::find_ex(raw);
+        auto id = Identifier::from_string(raw);
+        auto block_id = block_registry::find(id);
 
         if(block_id == BLOCK_ID_NULL) {
             return std::nullopt;

@@ -13,6 +13,7 @@
 #include "shared/physics/physics.hh"
 #include "shared/utils/coord.hh"
 #include "shared/utils/world.hh"
+#include "shared/world/biome_lut.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/world.hh"
 
@@ -59,7 +60,34 @@ static void generate_debug_terrain(void)
     noise.lacunarity = 2.0f;
     noise.gain = 0.5f;
 
-    constexpr std::int32_t CHUNK_RADIUS = 16;
+    // Three independent low-frequency noise fields drive the biome LUT lookup
+    // (temperature/humidity/a third climate axis), separate from the high
+    // frequency `noise` above that only shapes the terrain height
+    fnl_state noise_temp = fnlCreateState();
+    noise_temp.noise_type = FNL_NOISE_OPENSIMPLEX2;
+    noise_temp.frequency = 0.003f;
+    noise_temp.seed = 1;
+
+    // make temperature noise ridged
+    noise_temp.fractal_type = FNL_FRACTAL_RIDGED;
+    noise_temp.weighted_strength = 0.5f;
+
+    fnl_state noise_humd = fnlCreateState();
+    noise_humd.noise_type = FNL_NOISE_OPENSIMPLEX2;
+    noise_humd.frequency = 0.003f;
+    noise_humd.seed = 2;
+
+    fnl_state noise_axis = fnlCreateState();
+    noise_axis.noise_type = FNL_NOISE_OPENSIMPLEX2;
+    noise_axis.frequency = 0.003f;
+    noise_axis.seed = 3;
+
+    auto to_lut_coord = [](float sample) -> std::uint8_t {
+        const float normalized = std::clamp((sample + 1.0f) * 0.5f, 0.0f, 1.0f);
+        return static_cast<std::uint8_t>(normalized * 99.0f);
+    };
+
+    constexpr std::int32_t CHUNK_RADIUS = 32;
     constexpr std::int32_t SIZE = static_cast<std::int32_t>(constant::CHUNK_SIZE);
     constexpr std::int32_t BASE_HEIGHT = 8;
     constexpr std::int32_t AMPLITUDE = 5;
@@ -78,27 +106,47 @@ static void generate_debug_terrain(void)
                     const float wz = static_cast<float>(cz * SIZE + z);
                     const float sample = fnlGetNoise2D(&noise, wx, wz);
 
+                    const std::uint8_t lut_temp = to_lut_coord(fnlGetNoise2D(&noise_temp, wx, wz));
+                    const std::uint8_t lut_humd = to_lut_coord(fnlGetNoise2D(&noise_humd, wx, wz));
+                    const std::uint8_t lut_axis = to_lut_coord(fnlGetNoise2D(&noise_axis, wx, wz));
+
+                    const auto* biome = biome_lut::find(BIOME_REALM_SURFACE, lut_temp, lut_humd, lut_axis);
+
+                    if(biome == nullptr) {
+                        LOG_INFO("{}", static_cast<const void*>(biome));
+                    }
+
+                    block_id_type col_basic_id = stone_id;
+                    block_id_type col_filler_id = dirt_id;
+                    block_id_type col_surface_id = grass_id;
+
+                    if(biome != nullptr) {
+                        col_basic_id = biome->palette_basic.cached;
+                        col_filler_id = biome->palette_filler.cached;
+                        col_surface_id = biome->palette_surface.cached;
+                    }
+
                     const std::int32_t height = BASE_HEIGHT + static_cast<std::int32_t>(sample * static_cast<float>(AMPLITUDE));
                     const std::int32_t top = std::clamp(height, 1, SIZE - 2);
                     const std::int32_t dirt_start = std::max(top - DIRT_DEPTH, 0);
 
                     for(std::int32_t y = 0; y < dirt_start; y += 1)
-                        chunk->set_block(LocalPos(x, y, z), stone_id);
+                        chunk->set_block(LocalPos(x, y, z), col_basic_id);
 
                     for(std::int32_t y = dirt_start; y < top; y += 1)
-                        chunk->set_block(LocalPos(x, y, z), dirt_id);
+                        chunk->set_block(LocalPos(x, y, z), col_filler_id);
 
                     if((x * SIZE + z) % 37 == 0) {
                         chunk->set_block(LocalPos(x, top, z), slab_bottom_id);
                     }
                     else {
-                        chunk->set_block(LocalPos(x, top, z), grass_id);
+                        chunk->set_block(LocalPos(x, top, z), col_surface_id);
                     }
 
                     auto chance_1 = std::uniform_int_distribution<std::int32_t>(0, 100)(rng);
                     auto chance_2 = std::uniform_int_distribution<std::int32_t>(0, 100)(rng);
 
-                    if(bush_id && top + 1 < SIZE && chance_1 < 50) {
+                    if(bush_id && col_surface_id == grass_id && top + 1 < SIZE && chance_1 < 50) {
                         chunk->set_block(LocalPos(x, top + 1, z), bush_id);
                     }
                 }

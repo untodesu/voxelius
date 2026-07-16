@@ -55,7 +55,14 @@ Returns the numeric biome ID
 |`surface`|Surface block type, eg `builtin:grass`|  
 |`fluid`|Fluid block type, eg `builtin:water`|  
 
-## Scatter table
+## Palette entry
+
+|Field|Type|Required|Default|Description|  
+|----|----|----|----|----|  
+|`name`|`string`|yes|N/D|Block name|  
+|`states`|`table`|no|`{}`|Block states|  
+
+## Scatter entry
 
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
@@ -75,11 +82,11 @@ biomes.add("plains", {
   priority = 0,
 
   palette = {
-    empty = "air",
-    basic = "stone",
-    filler = "dirt",
-    surface = "grass",
-    fluid = "water",
+    empty = { name = "air" },
+    basic = { name = "stone" },
+    filler = { name = "dirt" },
+    surface = { name = "stone_slab", states = { orientation = "bottom" } },
+    fluid = { name = "water" },
   },
 
   scatter = {
@@ -112,6 +119,3 @@ A [Jump-Flooding Algorithm](https://en.wikipedia.org/wiki/Jump_flooding_algorith
 ![jfa-voronoi.gif](jfa-voronoi.gif)  
 
 Think of each color as a separate biome type - you start with a discrete "nucleation points" for biomes defined by Lua scripts and for a number of steps you extrapolate, which range of parameters a biome occupies   
-
-
-

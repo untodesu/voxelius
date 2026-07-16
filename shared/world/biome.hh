@@ -17,11 +17,17 @@ using biome_id_type = std::uint32_t;
 constexpr static biome_id_type BIOME_ID_NULL = 0;
 constexpr static biome_id_type BIOME_ID_MAX = std::numeric_limits<biome_id_type>::max();
 
-struct ScatterEntry final {
+struct BiomeScatterEntry final {
     Identifier feature;
     float chance;
     block_tag_bit need_above;
     block_tag_bit need_below;
+};
+
+struct BiomePaletteEntry final {
+    Identifier name;
+    emhash8::HashMap<std::string, std::string> states;
+    block_id_type cached;
 };
 
 struct BiomeDefinition {
@@ -35,19 +41,13 @@ struct BiomeDefinition {
 
     unsigned priority;
 
-    std::string palette_empty;
-    std::string palette_basic;
-    std::string palette_filler;
-    std::string palette_surface;
-    std::string palette_fluid;
+    BiomePaletteEntry palette_empty;
+    BiomePaletteEntry palette_basic;
+    BiomePaletteEntry palette_filler;
+    BiomePaletteEntry palette_surface;
+    BiomePaletteEntry palette_fluid;
 
-    block_id_type block_empty;
-    block_id_type block_basic;
-    block_id_type block_filler;
-    block_id_type block_surface;
-    block_id_type block_fluid;
-
-    std::vector<ScatterEntry> scatter;
+    std::vector<BiomeScatterEntry> scatter;
 };
 
 #endif /* BCF648BF_4565_4F82_9C42_0491F751D447 */
