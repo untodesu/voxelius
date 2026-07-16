@@ -1,7 +1,7 @@
 #ifndef EE38FCD4_F793_4446_9DCF_44B1285F9330
 #define EE38FCD4_F793_4446_9DCF_44B1285F9330
 
-#include "shared/world/biome_registry.hh"
+#include "shared/world/biome.hh"
 #include "shared/world/block_registry.hh"
 
 namespace config

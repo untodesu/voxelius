@@ -6,6 +6,7 @@
 #include "core/exception.hh"
 
 #include "shared/constant.hh"
+#include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
 
 static std::vector<ModContext> s_mods;
@@ -167,6 +168,7 @@ void mod_loader::init(void)
         }
 
         block_registry::commit(ctx);
+        biome_registry::commit(ctx);
     }
 }
 
@@ -175,6 +177,7 @@ void mod_loader::shutdown(void)
     s_mods.clear();
 
     block_registry::purge();
+    biome_registry::purge();
 }
 
 std::span<const ModContext> mod_loader::all(void)

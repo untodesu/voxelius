@@ -3,7 +3,6 @@
 #include "shared/api/biomes_library.hh"
 
 #include "core/identifier.hh"
-#include "core/utils/crc64.hh"
 
 #include "shared/mod_context.hh"
 #include "shared/utils/lua.hh"
@@ -32,6 +31,22 @@ static Identifier make_unique_id(const Identifier& id, const ModContext* ctx)
     return id;
 }
 
+static bool parse_tag_bitmask(lua_State* L, int idx, block_tag_bit& out)
+{
+    if(lua_isnil(L, idx)) {
+        out = static_cast<block_tag_bit>(0);
+        return true;
+    }
+
+    if(!lua_istable(L, idx)) {
+        lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, idx)));
+        return false;
+    }
+
+    out = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, idx));
+    return true;
+}
+
 static bool parse_scatter_entry(lua_State* L, int entry_idx, ScatterEntry& entry, ModContext* ctx)
 {
     lua_getfield(L, entry_idx, "feature");
@@ -57,17 +72,25 @@ static bool parse_scatter_entry(lua_State* L, int entry_idx, ScatterEntry& entry
     lua_pop(L, 1);
 
     lua_getfield(L, entry_idx, "need_above");
-    entry.need_above = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
+
+    if(!parse_tag_bitmask(L, lua_gettop(L), entry.need_above)) {
+        return false;
+    }
+
     lua_pop(L, 1);
 
     lua_getfield(L, entry_idx, "need_below");
-    entry.need_below = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
+
+    if(!parse_tag_bitmask(L, lua_gettop(L), entry.need_below)) {
+        return false;
+    }
+
     lua_pop(L, 1);
 
     return true;
 }
 
-static bool parse_palette(lua_State* L, int palette_idx, BiomeDefinition& def, ModContext* ctx)
+static bool parse_palette(lua_State* L, int palette_idx, BiomeDefinition& def)
 {
     const std::array palette_fields = {
         std::make_pair("empty", &def.palette_empty),
@@ -124,7 +147,12 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
                 return false;
             }
 
-            field_ptr[0] = static_cast<std::uint8_t>(value.value());
+            if(value.value() < 0 || value.value() > 99) {
+                lua_pushliteral(L, "lut value out of range [0..99]");
+                return false;
+            }
+
+            *field_ptr = static_cast<std::uint8_t>(value.value());
         }
 
         lua_pop(L, 1);
@@ -137,12 +165,23 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
         return false;
     }
 
+    if(priority.value() < 0) {
+        lua_pushliteral(L, "priority must be non-negative");
+        return false;
+    }
+
     def.priority = static_cast<unsigned>(priority.value());
+    lua_pop(L, 1);
 
     lua_getfield(L, def_idx, "palette");
 
     if(!lua_isnil(L, -1)) {
-        if(!parse_palette(L, lua_gettop(L), def, ctx)) {
+        if(!lua_istable(L, -1)) {
+            lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, -1)));
+            return false;
+        }
+
+        if(!parse_palette(L, lua_gettop(L), def)) {
             return false;
         }
     }
@@ -152,22 +191,35 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
     lua_getfield(L, def_idx, "scatter");
 
     def.scatter.clear();
-    def.scatter.reserve(lua_rawlen(L, -1));
 
-    lua_pushnil(L);
-
-    while(lua_next(L, -2)) {
-        auto entry_idx = lua_gettop(L);
-
-        ScatterEntry entry {};
-
-        if(!parse_scatter_entry(L, entry_idx, entry, ctx)) {
+    if(!lua_isnil(L, -1)) {
+        if(!lua_istable(L, -1)) {
+            lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, -1)));
             return false;
         }
 
-        def.scatter.push_back(std::move(entry));
+        def.scatter.reserve(lua_rawlen(L, -1));
 
-        lua_pop(L, 1);
+        lua_pushnil(L);
+
+        while(lua_next(L, -2)) {
+            auto entry_idx = lua_gettop(L);
+
+            if(!lua_istable(L, entry_idx)) {
+                lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, entry_idx)));
+                return false;
+            }
+
+            ScatterEntry entry {};
+
+            if(!parse_scatter_entry(L, entry_idx, entry, ctx)) {
+                return false;
+            }
+
+            def.scatter.push_back(std::move(entry));
+
+            lua_pop(L, 1);
+        }
     }
 
     lua_pop(L, 1);
@@ -213,7 +265,6 @@ static int api_add(lua_State* L)
 {
     auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
 
-    auto argc = lua_gettop(L);
     auto raw_name = luaL_checkstring(L, 1);
 
     int def_idx = 2;
@@ -247,6 +298,9 @@ void api::open_biomes_library(std::shared_ptr<lua_State>& lua, ModContext* ctx)
     lua_setfield(L, -2, "REALM_THE_DEPTHS");
     lua_pushinteger(L, BIOME_REALM_SKY);
     lua_setfield(L, -2, "REALM_SKY");
+
+    lua_pushinteger(L, BIOME_ID_NULL);
+    lua_setfield(L, -2, "NULL_BIOME");
 
     lua_pushlightuserdata(L, ctx);
     lua_pushcclosure(L, &api_add, 1);

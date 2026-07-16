@@ -31,14 +31,20 @@ void biome_registry::commit(ModContext& ctx)
         biome_offset = static_cast<biome_id_type>(s_definitions.size()) - 1;
     }
 
-    for(auto& def : biomes) {
-        s_definitions.emplace_back(std::move(def));
+    for(const auto& [name, local_id] : names) {
+        auto global_id = local_id + biome_offset;
+        auto [it, inserted] = s_names.try_emplace(name, global_id);
+
+        if(!inserted) {
+            LOG_WARNING("duplicate biome name: {}", name.full_string());
+            continue;
+        }
+
+        s_reverse_names.try_emplace(global_id, name);
     }
 
-    for(auto& [name, id] : names) {
-        id += biome_offset;
-        s_names.emplace(std::move(name), id);
-        s_reverse_names.emplace(id, std::move(name));
+    if(biomes.size()) {
+        s_definitions.insert(s_definitions.end(), std::make_move_iterator(biomes.begin() + 1), std::make_move_iterator(biomes.end()));
     }
 }
 

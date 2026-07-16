@@ -304,8 +304,20 @@ block_id_type block_registry::find_ex(std::string_view id_with_states)
     auto bracket_a = id_with_states.find_first_of('[');
     auto bracket_b = id_with_states.find_last_of(']');
 
-    if(bracket_a == std::string_view::npos || bracket_b == std::string_view::npos || bracket_b <= bracket_a) {
+    if(bracket_a == std::string_view::npos) {
         return find(Identifier::from_string(id_with_states));
+    }
+
+    if(bracket_b == std::string_view::npos || bracket_b <= bracket_a) {
+        return BLOCK_ID_NULL;
+    }
+
+    if(bracket_b + 1 < id_with_states.size()) {
+        auto trailing = id_with_states.substr(bracket_b + 1);
+
+        if(!utils::is_whitespace<char>(trailing)) {
+            return BLOCK_ID_NULL;
+        }
     }
 
     auto id = Identifier::from_string(id_with_states.substr(0, bracket_a));
@@ -313,6 +325,12 @@ block_id_type block_registry::find_ex(std::string_view id_with_states)
 
     if(utils::is_whitespace<char>(states)) {
         return find(id);
+    }
+
+    auto family = find_family(id);
+
+    if(family == nullptr) {
+        return BLOCK_ID_NULL;
     }
 
     emhash8::HashMap<blockstate_key_type, blockstate_val_type> map;
@@ -330,18 +348,21 @@ block_id_type block_registry::find_ex(std::string_view id_with_states)
         auto key = utils::trim_whitespace<char>(pair.substr(0, sign));
         auto value = utils::trim_whitespace<char>(pair.substr(sign + 1));
 
-        if(utils::is_whitespace(key) || utils::is_whitespace(value)) {
+        if(utils::is_whitespace<char>(key) || utils::is_whitespace<char>(value)) {
             return BLOCK_ID_NULL;
         }
 
-        auto family = find_family(id);
+        auto key_hash = static_cast<blockstate_key_type>(utils::crc64(key.data(), key.size()));
+        auto value_hash = static_cast<blockstate_val_type>(utils::crc64(value.data(), value.size()));
 
-        if(family == nullptr) {
+        if(!family->states.contains(key_hash)) {
             return BLOCK_ID_NULL;
         }
 
-        auto key_hash = family->state_hash(key);
-        auto value_hash = family->state_hash(value);
+        if(!family->state_values.contains(value_hash)) {
+            return BLOCK_ID_NULL;
+        }
+
         map.insert_or_assign(blockstate_key_type(key_hash), blockstate_val_type(value_hash));
 
         if(next == std::string_view::npos) {
@@ -353,8 +374,7 @@ block_id_type block_registry::find_ex(std::string_view id_with_states)
     } while(pos < states.size());
 
     auto base_id = find(id);
-    auto resolved_id = resolve_variant(base_id, map);
-    return resolved_id;
+    return resolve_variant(base_id, map);
 }
 
 std::optional<Identifier> block_registry::name_of(block_id_type id)
