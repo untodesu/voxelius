@@ -12,7 +12,7 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-#include "client/settings.hh"
+#include "client/gui/settings.hh"
 
 static Eigen::Vector2i s_last_windowed_size;
 static config::Ref<bool> s_enable_vsync { true };

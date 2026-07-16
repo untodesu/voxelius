@@ -2,8 +2,8 @@
 
 #include "client/utils/imgui.hh"
 
-#include "client/fonts.hh"
-#include "client/gui.hh"
+#include "client/gui/fonts.hh"
+#include "client/gui/gui.hh"
 
 void utils::text_nw(ImDrawList* list, std::string_view text, const ImVec2& pos, ImU32 color, ImU32 shadow, ImFont* font)
 {

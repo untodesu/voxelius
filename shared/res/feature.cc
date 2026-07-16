@@ -6,7 +6,7 @@
 #include "core/utils/json.hh"
 #include "core/utils/physfs.hh"
 
-#include "shared/block_registry.hh"
+#include "shared/world/block_registry.hh"
 
 constexpr static std::array ANCHOR_MAPPING = {
     std::make_pair(std::string_view("surface"), static_cast<int>(feature_anchor::SURFACE)),

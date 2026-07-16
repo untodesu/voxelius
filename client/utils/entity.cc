@@ -2,11 +2,11 @@
 
 #include "client/utils/entity.hh"
 
-#include "shared/head.hh"
-#include "shared/transform.hh"
+#include "shared/entity/head.hh"
+#include "shared/entity/transform.hh"
+#include "shared/entity/velocity.hh"
 #include "shared/utils/entity.hh"
-#include "shared/velocity.hh"
-#include "shared/world.hh"
+#include "shared/world/world.hh"
 
 entt::entity utils::spawn_player_client(const BlockPos& pos)
 {

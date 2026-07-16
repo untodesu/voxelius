@@ -1,8 +1,8 @@
 #ifndef C52EB39B_B4F6_4E65_A3E6_F664EEC9C8DE
 #define C52EB39B_B4F6_4E65_A3E6_F664EEC9C8DE
 
-#include "shared/block.hh"
 #include "shared/coord.hh"
+#include "shared/world/block.hh"
 
 namespace physics
 {

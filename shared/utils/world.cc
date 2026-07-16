@@ -4,9 +4,9 @@
 
 #include "core/utils/crc64.hh"
 
-#include "shared/block_registry.hh"
-#include "shared/physics.hh"
-#include "shared/world.hh"
+#include "shared/physics/physics.hh"
+#include "shared/world/block_registry.hh"
+#include "shared/world/world.hh"
 
 static bool call_routine(lua_State* L, int argc, int retc, std::string_view debug_name)
 {

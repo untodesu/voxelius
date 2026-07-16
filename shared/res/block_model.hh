@@ -1,7 +1,7 @@
 #ifndef D291C9C4_41FE_47DB_8620_6B7001383B16
 #define D291C9C4_41FE_47DB_8620_6B7001383B16
 
-#include "shared/block.hh"
+#include "shared/world/block.hh"
 
 struct BlockModel_Face final {
     std::string texture_slot;

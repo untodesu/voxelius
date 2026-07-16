@@ -1,7 +1,7 @@
 #ifndef D9EE9099_01A9_453B_AE92_D5EBD79B830A
 #define D9EE9099_01A9_453B_AE92_D5EBD79B830A
 
-#include "shared/block.hh"
+#include "shared/world/block.hh"
 
 enum class feature_anchor {
     SURFACE = 0, ///< Anchor to top-level block for SURFACE and SKY realms

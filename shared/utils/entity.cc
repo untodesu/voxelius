@@ -2,12 +2,12 @@
 
 #include "shared/utils/entity.hh"
 
-#include "shared/head.hh"
-#include "shared/player.hh"
-#include "shared/transform.hh"
+#include "shared/entity/head.hh"
+#include "shared/entity/player.hh"
+#include "shared/entity/transform.hh"
+#include "shared/entity/velocity.hh"
 #include "shared/utils/coord.hh"
-#include "shared/velocity.hh"
-#include "shared/world.hh"
+#include "shared/world/world.hh"
 
 entt::entity utils::spawn_player(const BlockPos& pos)
 {

@@ -1,8 +1,7 @@
 #ifndef EE38FCD4_F793_4446_9DCF_44B1285F9330
 #define EE38FCD4_F793_4446_9DCF_44B1285F9330
 
-#include "shared/biome.hh"
-#include "shared/block_registry.hh"
+#include "shared/world/block_registry.hh"
 
 namespace config
 {
@@ -82,12 +81,6 @@ public:
     std::vector<BlockFamily> take_block_families(void);
     emhash8::HashMap<Identifier, block_id_type> take_block_names(void);
 
-    biome_id_type find_biome(const Identifier& name) const;
-    biome_id_type register_biome(const Identifier& name, BiomeDefinition def);
-
-    std::vector<BiomeDefinition> take_biomes(void);
-    emhash8::HashMap<Identifier, biome_id_type> take_biome_names(void);
-
 private:
     ModInfo m_modinfo;
     mod_status m_status;
@@ -96,9 +89,6 @@ private:
     std::vector<BlockDefinition> m_blocks;
     std::vector<BlockFamily> m_block_families;
     emhash8::HashMap<Identifier, block_id_type> m_block_names;
-
-    std::vector<BiomeDefinition> m_biomes;
-    emhash8::HashMap<Identifier, biome_id_type> m_biome_names;
 };
 
 constexpr const ModInfo& ModContext::modinfo(void) const

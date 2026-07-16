@@ -8,12 +8,12 @@
 #include "core/config/ref.hh"
 #include "core/exception.hh"
 
-#include "client/chunk_renderer.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
-#include "client/outline.hh"
-#include "client/settings.hh"
-#include "client/skybox.hh"
+#include "client/gui/settings.hh"
+#include "client/world/chunk_renderer.hh"
+#include "client/world/outline.hh"
+#include "client/world/skybox.hh"
 
 static GLuint s_world_fbo;
 static GLuint s_world_texture;
