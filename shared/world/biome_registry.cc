@@ -85,3 +85,15 @@ std::optional<Identifier> biome_registry::name_of(biome_id_type id)
 
     return it->second;
 }
+
+const BiomeDefinition* biome_registry::find_definition(biome_id_type id)
+{
+    if(id == BIOME_ID_NULL || id >= s_definitions.size())
+        return nullptr;
+    return &s_definitions[id];
+}
+
+const BiomeDefinition* biome_registry::find_definition(const Identifier& id)
+{
+    return find_definition(find(id));
+}

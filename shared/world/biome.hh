@@ -10,6 +10,7 @@ enum biome_realm : unsigned {
     BIOME_REALM_UNDERGROUND,
     BIOME_REALM_THE_DEPTHS,
     BIOME_REALM_SKY,
+    BIOME_REALM_COUNT,
 };
 
 using biome_id_type = std::uint32_t;
