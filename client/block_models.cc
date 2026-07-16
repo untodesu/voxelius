@@ -184,7 +184,7 @@ static void face_uv_extent(const Eigen::Vector3f& min, const Eigen::Vector3f& ma
 {
     switch(face) {
         case BLOCK_FACE_NORTH:
-            out_uv = Eigen::Vector4f(min.x(), 1.0f - max.y(), max.x(), 1.0f - min.y());
+            out_uv = Eigen::Vector4f(1.0f - min.x(), 1.0f - max.y(), 1.0f - max.x(), 1.0f - min.y());
             break;
 
         case BLOCK_FACE_SOUTH:
@@ -192,7 +192,7 @@ static void face_uv_extent(const Eigen::Vector3f& min, const Eigen::Vector3f& ma
             break;
 
         case BLOCK_FACE_EAST:
-            out_uv = Eigen::Vector4f(min.z(), 1.0f - max.y(), max.z(), 1.0f - min.y());
+            out_uv = Eigen::Vector4f(1.0f - min.z(), 1.0f - max.y(), 1.0f - max.z(), 1.0f - min.y());
             break;
 
         case BLOCK_FACE_WEST:

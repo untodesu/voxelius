@@ -42,4 +42,12 @@ blocks.add("stone", stone_prototype, {
 
 slabs.register("stone_slab", stone_prototype, {
   health = 2,
+  textures = {
+    north = { "test_north.png" },
+    south = { "test_south.png" },
+    east = { "test_east.png" },
+    west = { "test_west.png" },
+    top = { "test_top.png" },
+    bottom = { "test_bottom.png" },
+  }
 })

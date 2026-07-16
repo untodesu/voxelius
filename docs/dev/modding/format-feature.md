@@ -20,6 +20,16 @@ The `anchor` field can be one of the following values:
 
 - `ceiling` marks the feature as anchoring to a ceiling of a cave or bottom of a floating island  
 
+## Palette entry
+
+If the block is needed with a specific state, the states that produce a full variant are defined in square brackets and listed with a comma:  
+
+- `builtin:stone_slab[orientation=bottom]`  
+
+- `builtin:stone_slab[orientation=double]`  
+
+- `builtin:stone_stairs[facing=down,orientation=east]`  
+
 ## Part object
 
 |Field|Type|Required|Default|Description|  
