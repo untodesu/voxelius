@@ -3,6 +3,7 @@
 #include "shared/world/biome_lut.hh"
 
 #include "core/exception.hh"
+#include "core/utils/crc64.hh"
 
 #include "shared/world/biome_registry.hh"
 
@@ -35,7 +36,7 @@ static void shift_seed(lookup_table_type& table, biome_id_type id, const TablePo
     auto curr = origin;
 
     for(std::size_t i = 0; i < LUT_TOTAL; ++i) {
-        auto next = curr + direction;
+        TablePos next = curr + direction;
 
         if(!s_bounds.contains(next)) {
             direction = s_neighbor_dirs[dir_dist(random)];
@@ -147,7 +148,7 @@ static std::pair<biome_id_type, TablePos> jfa_query(const TablePos& pos, int ste
     for(int ox = -step; ox <= step; ox += step) {
         for(int oy = -step; oy <= step; oy += step) {
             for(int oz = -step; oz <= step; oz += step) {
-                auto neighbour = pos + TablePos(ox, oy, oz);
+                TablePos neighbour = pos + TablePos(ox, oy, oz);
 
                 if(!s_bounds.contains(neighbour)) {
                     continue;
@@ -176,23 +177,27 @@ static std::pair<biome_id_type, TablePos> jfa_query(const TablePos& pos, int ste
 }
 
 static void jfa_step(int step, const lookup_table_type& read_ids, const lookup_seeds_type& read_seeds, lookup_table_type& write_ids,
-    lookup_seeds_type& write_seeds)
+    lookup_seeds_type& write_seeds, BS::light_thread_pool& threads)
 {
-    for(int temp = 0; temp < LUT_SIZE; temp += 1) {
-        for(int humd = 0; humd < LUT_SIZE; humd += 1) {
-            for(int axis = 0; axis < LUT_SIZE; axis += 1) {
-                auto pos = TablePos(temp, humd, axis);
-                auto index = table_index(pos);
-                auto jfa = jfa_query(pos, step, read_ids, read_seeds);
+    threads.detach_blocks(0, LUT_SIZE, [&](std::size_t first, std::size_t last) {
+        for(auto temp = first; temp < last; temp += 1) {
+            for(int humd = 0; humd < LUT_SIZE; humd += 1) {
+                for(int axis = 0; axis < LUT_SIZE; axis += 1) {
+                    auto pos = TablePos(static_cast<int>(temp), humd, axis);
+                    auto index = table_index(pos);
+                    auto jfa = jfa_query(pos, step, read_ids, read_seeds);
 
-                write_ids[index] = jfa.first;
-                write_seeds[index] = jfa.second;
+                    write_ids[index] = jfa.first;
+                    write_seeds[index] = jfa.second;
+                }
             }
         }
-    }
+    });
+
+    threads.wait();
 }
 
-static void table_fill(lookup_table_type& table)
+static void table_fill(lookup_table_type& table, BS::light_thread_pool& threads)
 {
     auto ids_a = std::make_unique<lookup_table_type>(table);
     auto ids_b = std::make_unique<lookup_table_type>();
@@ -210,12 +215,19 @@ static void table_fill(lookup_table_type& table)
     auto step = static_cast<int>(LUT_SIZE) / 2;
 
     while(step >= 1) {
-        jfa_step(step, *read_ids, *read_seeds, *write_ids, *write_seeds);
+        jfa_step(step, *read_ids, *read_seeds, *write_ids, *write_seeds, threads);
 
         std::swap(read_ids, write_ids);
         std::swap(read_seeds, write_seeds);
 
         step >>= 1;
+    }
+
+    for(int extra_step : std::array { 2, 1, 1 }) {
+        jfa_step(extra_step, *read_ids, *read_seeds, *write_ids, *write_seeds, threads);
+
+        std::swap(read_ids, write_ids);
+        std::swap(read_seeds, write_seeds);
     }
 
     table = std::move(read_ids[0]);
@@ -244,15 +256,11 @@ void biome_lut::generate(void)
     table_init(BIOME_REALM_THE_DEPTHS, s_tables[BIOME_REALM_THE_DEPTHS]);
     table_init(BIOME_REALM_SKY, s_tables[BIOME_REALM_SKY]);
 
-    BS::light_thread_pool pool(std::thread::hardware_concurrency());
-
-    pool.detach_blocks(0, s_tables.size(), [](std::size_t first, std::size_t last) {
-        for(auto i = first; i < last; ++i) {
-            table_fill(s_tables[i]);
-        }
-    });
-
-    pool.wait();
+    BS::light_thread_pool threads;
+    table_fill(s_tables[BIOME_REALM_SURFACE], threads);
+    table_fill(s_tables[BIOME_REALM_UNDERGROUND], threads);
+    table_fill(s_tables[BIOME_REALM_THE_DEPTHS], threads);
+    table_fill(s_tables[BIOME_REALM_SKY], threads);
 }
 
 const BiomeDefinition* biome_lut::find(biome_realm realm, std::uint8_t temp, std::uint8_t humd, std::uint8_t axis)
