@@ -179,18 +179,17 @@ static std::pair<biome_id_type, TablePos> jfa_query(const TablePos& pos, int ste
 static void jfa_step(int step, const lookup_table_type& read_ids, const lookup_seeds_type& read_seeds, lookup_table_type& write_ids,
     lookup_seeds_type& write_seeds, BS::light_thread_pool& threads)
 {
-    threads.detach_blocks(0, LUT_SIZE, [&](std::size_t first, std::size_t last) {
-        for(auto temp = first; temp < last; temp += 1) {
-            for(int humd = 0; humd < LUT_SIZE; humd += 1) {
-                for(int axis = 0; axis < LUT_SIZE; axis += 1) {
-                    auto pos = TablePos(static_cast<int>(temp), humd, axis);
-                    auto index = table_index(pos);
-                    auto jfa = jfa_query(pos, step, read_ids, read_seeds);
+    threads.detach_blocks(0, LUT_TOTAL, [&](std::size_t first, std::size_t last) {
+        for(std::size_t index = first; index < last; index += 1) {
+            TablePos pos;
+            pos.x() = static_cast<int>(index / (LUT_SIZE * LUT_SIZE));
+            pos.y() = static_cast<int>((index / LUT_SIZE) % LUT_SIZE);
+            pos.z() = static_cast<int>(index % LUT_SIZE);
 
-                    write_ids[index] = jfa.first;
-                    write_seeds[index] = jfa.second;
-                }
-            }
+            auto jfa = jfa_query(pos, step, read_ids, read_seeds);
+
+            write_ids[index] = jfa.first;
+            write_seeds[index] = jfa.second;
         }
     });
 
