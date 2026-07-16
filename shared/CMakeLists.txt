@@ -39,6 +39,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/utils/world.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/world.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/biome.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/world/biome_lut.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/world/biome_lut.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/biome_registry.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/biome_registry.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/block_collisions.cc"

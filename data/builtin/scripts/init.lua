@@ -20,6 +20,22 @@ blocks.add("bush", {
 biomes.add("plains", {
     realm = biomes.REALM_SURFACE,
 
-    
+    palette = {
+        basic = "stone",
+        filler = "dirt",
+        surface = "grass",
+    }
+})
 
+biomes.add("test", {
+    realm = biomes.REALM_SURFACE,
+
+    lut_temp = 70,
+    lut_humd = 20,
+
+    palette = {
+        basic = "stone",
+        filler = "dirt",
+        surface = "stone",
+    }
 })
