@@ -26,7 +26,7 @@ private:
 
     std::shared_ptr<Entry> get_or_create(const ChunkPosXZ& pos);
 
-    void generate(const ChunkPosXZ& pos, Entry& entry);
+    void generate(const ChunkPosXZ& pos, Entry* entry);
 
     fnl_state m_noise;
     Eigen::Vector2i m_cell_size;
@@ -58,7 +58,7 @@ private:
 
     std::shared_ptr<Entry> get_or_create(const ChunkPos& pos);
 
-    void generate(const ChunkPos& pos, Entry& entry);
+    void generate(const ChunkPos& pos, Entry* entry);
 
     fnl_state m_noise;
     Eigen::Vector3i m_cell_size;

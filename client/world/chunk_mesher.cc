@@ -171,6 +171,8 @@ block_id_type BlockCache::get(const LocalPos& lpos) const
     return m_blocks[index];
 }
 
+static emhash8::HashMap<ChunkPos, std::nullptr_t> s_pending;
+
 class MeshingTask final : public Task {
 public:
     explicit MeshingTask(entt::entity entity, const ChunkPos& cpos);
@@ -257,6 +259,8 @@ void MeshingTask::finalize(void)
         component.opaque.quads.shrink_to_fit();
 
         world::chunk_entities.patch<ChunkMesh>(m_entity);
+
+        s_pending.erase(m_cpos);
     }
 }
 
@@ -556,13 +560,16 @@ void chunk_mesher::update(void)
     auto count = 0;
 
     for(const auto [entity, chunk] : group.each()) {
-        world::chunk_entities.remove<ChunkMesh_DirtyMarker>(entity);
-        threading::submit<MeshingTask>(entity, chunk.position);
+        if(0 == s_pending.count(chunk.position)) {
+            s_pending.emplace(chunk.position, nullptr);
+            world::chunk_entities.remove<ChunkMesh_DirtyMarker>(entity);
+            threading::submit<MeshingTask>(entity, chunk.position);
 
-        count += 1;
+            count += 1;
 
-        if(count >= THROTTLE_COUNT) {
-            break;
+            if(count >= THROTTLE_COUNT) {
+                break;
+            }
         }
     }
 }

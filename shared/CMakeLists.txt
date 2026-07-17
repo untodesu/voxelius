@@ -53,6 +53,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/world/block.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/chunk.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/chunk.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/world/noise_cache.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/world/noise_cache.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/terrain.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/terrain.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/world.cc"

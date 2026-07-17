@@ -31,7 +31,7 @@
 
 static void generate_debug_terrain(void)
 {
-    constexpr static ChunkPos::value_type CHUNK_RADIUS = 64;
+    constexpr static ChunkPos::value_type CHUNK_RADIUS = 32;
     constexpr static ChunkPos::value_type VERT_RADIUS = 4;
 
     for(ChunkPos::value_type cx = -CHUNK_RADIUS; cx <= CHUNK_RADIUS; cx += 1) {
