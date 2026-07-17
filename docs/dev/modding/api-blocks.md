@@ -66,7 +66,6 @@ Freeform grouping tags checked at runtime with `blocks.has_tag`. Any block can c
 |`blocks.TAG_FOIL`|Foilage, leaves, grass, etc|  
 |`blocks.TAG_WOOD`|Wooden blocks|  
 
-
 ## Constant: null block
 
 The `blocks.NULL_BLOCK` constant defines an empty, undefined or otherwise invalid block ID. Gameplay/gamedev-wise it can be treated as a void block  

@@ -79,6 +79,7 @@ nav:
         - Lua Base: dev/modding/api-lua.md
         - Core: dev/modding/api-core.md
         - Blocks: dev/modding/api-blocks.md
+        - Features: dev/modding/api-features.md
         - Biomes: dev/modding/api-biomes.md
         - World: dev/modding/api-world.md
       - File Formats:
