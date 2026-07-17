@@ -7,33 +7,27 @@
         "rescale": false,
         "faces": {
             "north": {
-              "texture": "north",
-              "world_locked": true
+              "texture": "north"
             },
             "south": {
               "texture": "south",
-              "cullface": "north",
-              "world_locked": true
+              "cullface": "north"
             },
             "east": {
               "texture": "east",
-              "cullface": "west",
-              "world_locked": true
+              "cullface": "west"
             },
             "west": {
               "texture": "west",
-              "cullface": "east",
-              "world_locked": true
+              "cullface": "east"
             },
             "bottom": {
               "texture": "bottom",
-              "cullface": "top",
-              "world_locked": true
+              "cullface": "top"
             },
             "top": {
               "texture": "top",
-              "cullface": "bottom",
-              "world_locked": true
+              "cullface": "bottom"
             }
         }
     }

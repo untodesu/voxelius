@@ -4,6 +4,7 @@ print("engine version:", core.VERSION)
 dofile("blocks/dirt.lua")
 dofile("blocks/grass.lua")
 dofile("blocks/stone.lua")
+dofile("blocks/wood.lua")
 
 blocks.add("bush", {
   render = blocks.RENDER_ALPHA,

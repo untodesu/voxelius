@@ -203,7 +203,7 @@ bool utils::block_random_tick(const BlockPos& pos)
         return false;
     }
 
-    const auto& callback = family->on_rtick;
+    const auto& callback = family->on_random_tick;
 
     if(callback.callback_ref == LUA_NOREF || callback.state == nullptr) {
         return false;
@@ -228,7 +228,7 @@ bool utils::block_sched_tick(const BlockPos& pos)
         return false;
     }
 
-    const auto& callback = family->on_stick;
+    const auto& callback = family->on_sched_tick;
 
     if(callback.callback_ref == LUA_NOREF || callback.state == nullptr) {
         return false;

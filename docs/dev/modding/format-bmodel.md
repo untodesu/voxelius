@@ -4,7 +4,7 @@ Block models define the visible geometry of a block
 
 Block models are located in the directory: `namespace:models/block`  
 
-> **NOTE:** textures _names_ are not part of the model. The model only declares named slots that it needs (eg. `top`, `north`, `nwse`, etc); the actual texture files are supplied per-block using `textures` field during registration  
+> **NOTE:** texture _names_ are not part of the model. The model only declares named slots that it needs (eg. `top`, `north`, `nwse`, etc); the actual texture files are supplied per-block using `textures` field during registration  
 
 > **NOTE:** if the slot is missing, `default` slot is used instead
 
@@ -36,7 +36,12 @@ Block models are located in the directory: `namespace:models/block`
 |`uv_rotation`|`number`|no|0|UV rotation, either 0, 90, 180 or 270|  
 |`cullface`|`string`|no|N/D|The face is skipped if the neighbouring block in that direction has a face that's marked as opaque to touch|  
 |`tint`|`integer`|no|N/D|Tint group index used by climate and biomes|  
-|`world_locked`|`bool`|no|`false`|Samples the texture slot of whichever face ends up on this side after `model_facing`, instead of this face's own slot|  
+
+### UV resolution
+
+- If a face has no explicit `uv` rect defined, the UV coordinates are resolved from the world-space side that the face ends up pointing after a facing rotation is applied (see [Blocks API](api-blocks.md))  
+
+- If a face _does_ have an explicit `uv` rect defined, the orientation is locked in place and facing rotation doesn't do anything  
 
 ## Example
 

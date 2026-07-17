@@ -66,67 +66,71 @@ static BlockDefinition apply_matching_variant(const BlockDefinition& base_def, c
 BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverridePatch& patch)
 {
     if(patch.render) {
-        base.render = *patch.render;
+        base.render = patch.render.value();
     }
 
     if(patch.textures) {
-        base.textures = *patch.textures;
+        base.textures = patch.textures.value();
     }
 
     if(patch.animated) {
-        base.animated = *patch.animated;
+        base.animated = patch.animated.value();
     }
 
     if(patch.model_name) {
-        base.model_name = *patch.model_name;
+        base.model_name = patch.model_name.value();
     }
 
     if(patch.model_offset) {
-        base.model_offset = *patch.model_offset;
+        base.model_offset = patch.model_offset.value();
     }
 
     if(patch.model_facing) {
-        base.model_facing = *patch.model_facing;
+        base.model_facing = patch.model_facing.value();
     }
 
     if(patch.bcoll_name) {
-        base.bcoll_name = *patch.bcoll_name;
+        base.bcoll_name = patch.bcoll_name.value();
     }
 
     if(patch.bcoll_offset) {
-        base.bcoll_offset = *patch.bcoll_offset;
+        base.bcoll_offset = patch.bcoll_offset.value();
     }
 
     if(patch.bcoll_facing) {
-        base.bcoll_facing = *patch.bcoll_facing;
+        base.bcoll_facing = patch.bcoll_facing.value();
     }
 
     if(patch.health) {
-        base.health = *patch.health;
+        base.health = patch.health.value();
     }
 
     if(patch.sound_set) {
-        base.sound_set = *patch.sound_set;
+        base.sound_set = patch.sound_set.value();
     }
 
     if(patch.emission) {
-        base.emission = *patch.emission;
+        base.emission = patch.emission.value();
     }
 
     if(patch.dissipation) {
-        base.dissipation = *patch.dissipation;
+        base.dissipation = patch.dissipation.value();
     }
 
     if(patch.touch) {
-        base.touch = *patch.touch;
+        base.touch = patch.touch.value();
     }
 
     if(patch.touch_coeffs) {
-        base.touch_coeffs = *patch.touch_coeffs;
+        base.touch_coeffs = patch.touch_coeffs.value();
     }
 
     if(patch.tags) {
-        base.tags = *patch.tags;
+        base.tags = patch.tags.value();
+    }
+
+    if(patch.is_replaceable) {
+        base.is_replaceable = patch.is_replaceable.value();
     }
 
     if(patch.drops) {

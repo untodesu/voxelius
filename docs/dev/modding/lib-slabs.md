@@ -22,9 +22,9 @@ Produces an `on_place` callback for a specified slab identifier
 
 - A function that implements correct slab placement logic to be used in block registrations  
 
-### Function: `slabs.register(identifier, prototype, options) -> integer`
+### Function: `slabs.add_block(identifier, prototype, options) -> integer`
 
-A wrapper for `blocks.register` to define a slab block family  
+A wrapper for `blocks.add` to define a slab block family  
 
 #### Arguments
 

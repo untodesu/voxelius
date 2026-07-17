@@ -451,7 +451,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.render = static_cast<block_render>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -463,7 +462,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.model_name = Identifier::from_string(value.value(), ctx->name_space());
-
         lua_pop(L, 1);
     }
 
@@ -475,7 +473,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.model_offset = 0.0625f * offset.value();
-
         lua_pop(L, 1);
     }
 
@@ -487,7 +484,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.model_facing = static_cast<block_face>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -499,7 +495,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.bcoll_name = Identifier::from_string(value.value(), ctx->name_space());
-
         lua_pop(L, 1);
     }
 
@@ -511,7 +506,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.bcoll_offset = 0.0625f * offset.value();
-
         lua_pop(L, 1);
     }
 
@@ -523,13 +517,11 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.bcoll_facing = static_cast<block_face>(value.value());
-
         lua_pop(L, 1);
     }
 
     if(reader.try_push("animated")) {
         def.animated = static_cast<bool>(lua_toboolean(L, -1));
-
         lua_pop(L, 1);
     }
 
@@ -568,7 +560,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
             }
 
             def.textures.insert_or_assign(std::move(slot), std::move(variants));
-
             lua_pop(L, 1);
         }
 
@@ -583,7 +574,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.health = static_cast<unsigned>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -595,7 +585,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.sound_set = Identifier::from_string(value.value(), ctx->name_space());
-
         lua_pop(L, 1);
     }
 
@@ -607,7 +596,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.emission = static_cast<block_light_type>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -619,7 +607,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.dissipation = static_cast<block_light_type>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -631,7 +618,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.touch = static_cast<block_touch>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -643,13 +629,16 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.touch_coeffs = coeffs.value();
-
         lua_pop(L, 1);
     }
 
     if(reader.try_push("tags")) {
         def.tags = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
+        lua_pop(L, 1);
+    }
 
+    if(reader.try_push("tools")) {
+        def.tools = static_cast<block_tool_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
         lua_pop(L, 1);
     }
 
@@ -963,7 +952,7 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
         lua_pop(L, 1);
     }
 
-    for(const auto& key : std::array { "variants", "on_rtick", "on_stick", "on_place", "on_break", "on_interact" }) {
+    for(const auto& key : std::array { "variants", "on_random_tick", "on_sched_tick", "on_place", "on_break", "on_interact" }) {
         if(reader.try_push(key)) {
             has_checked_key = true;
             lua_pop(L, 1);
@@ -999,11 +988,11 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
             }
         }
 
-        family.on_rtick = parse_callback(L, def_idx, "on_rtick", ctx);
-        family.on_stick = parse_callback(L, def_idx, "on_stick", ctx);
         family.on_place = parse_callback(L, def_idx, "on_place", ctx);
         family.on_break = parse_callback(L, def_idx, "on_break", ctx);
         family.on_interact = parse_callback(L, def_idx, "on_interact", ctx);
+        family.on_random_tick = parse_callback(L, def_idx, "on_random_tick", ctx);
+        family.on_sched_tick = parse_callback(L, def_idx, "on_sched_tick", ctx);
 
         auto family_id = ctx->register_block_family(std::move(family));
         ctx->set_block_family(block_id, family_id);

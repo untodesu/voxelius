@@ -1,7 +1,5 @@
 local slabs = {}
 
-print("LOL")
-
 function slabs.on_place(identifier)
   return function(bx, by, bz, target, actor)
     local slab_id = blocks.get(identifier)
@@ -35,7 +33,7 @@ function slabs.on_place(identifier)
   end
 end
 
-function slabs.register(identifier, prototype, options)
+function slabs.add_block(identifier, prototype, options)
   options = options or {}
 
   local health = options.health or prototype.health or 2

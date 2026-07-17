@@ -372,10 +372,10 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
 
             auto& face_def = element.faces[face].value();
             auto rotated_face = rotate_face(face, def.model_facing);
-
+            auto model_locked = face_def.uv.has_value();
             auto texture_face = &face_def;
 
-            if(face_def.world_locked && element.faces[rotated_face].has_value()) {
+            if(!model_locked && element.faces[rotated_face].has_value()) {
                 texture_face = &element.faces[rotated_face].value();
             }
 
@@ -395,17 +395,27 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
 
             BakedBlockModel_Quad quad {};
 
-            Eigen::Vector3f used_min = element.min;
-            Eigen::Vector3f used_max = element.max;
-            auto used_face = face;
+            if(model_locked) {
+                make_face_geometry(element.min, element.max, face, quad);
+                apply_face_uv(texture_face, element.min, element.max, face, element.rescale, quad);
 
-            if(def.model_facing != BLOCK_FACE_NORTH) {
-                rotate_aabb(facing_rot, center, element.min, element.max, used_min, used_max);
-                used_face = rotated_face;
+                for(auto& position : quad.positions) {
+                    position = center + facing_rot * (position - center);
+                }
             }
+            else {
+                Eigen::Vector3f used_min = element.min;
+                Eigen::Vector3f used_max = element.max;
+                auto used_face = face;
 
-            make_face_geometry(used_min, used_max, used_face, quad);
-            apply_face_uv(texture_face, used_min, used_max, used_face, element.rescale, quad);
+                if(def.model_facing != BLOCK_FACE_NORTH) {
+                    rotate_aabb(facing_rot, center, element.min, element.max, used_min, used_max);
+                    used_face = rotated_face;
+                }
+
+                make_face_geometry(used_min, used_max, used_face, quad);
+                apply_face_uv(texture_face, used_min, used_max, used_face, element.rescale, quad);
+            }
 
             quad.texture_index = static_cast<std::uint32_t>(strip->index);
             quad.frame_count = strip->frame_count;

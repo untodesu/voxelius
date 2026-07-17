@@ -33,7 +33,7 @@ blocks.add("dirt", {
     }
   },
 
-  on_rtick = function(bx, by, bz)
+  on_random_tick = function(bx, by, bz)
     local above = world.get_block(bx, by + 1, bz)
     local light = world.get_light(bx, by + 1, bz)
 

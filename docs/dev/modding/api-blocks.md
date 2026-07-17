@@ -140,8 +140,8 @@ Register a new block in the registry
 |`tags`|`integer[]`|no|`[]`|Block tags|  
 |`states`|`table`|no|`{}`|Blockstates table|  
 |`variants`|`table`|no|`{}`|Variants table|  
-|`on_rtick`|`function`|no|`nil`|Random tick handler|  
-|`on_stick`|`function`|no|`nil`|Scheduled tick hanlder|  
+|`on_random_tick`|`function`|no|`nil`|Random tick handler|  
+|`on_sched_tick`|`function`|no|`nil`|Scheduled tick hanlder|  
 |`on_place`|`function`|no|`nil`|Placement handler, can decide whether it's ok or not to place the block there|  
 |`on_break`|`function`|no|`nil`|Break handler|  
 |`on_interact`|`function`|no|`nil`|Interaction handler|  
@@ -262,17 +262,18 @@ on_interact = function(bx, by, bz, target, actor)
 end
 ```
 
-### `on_rtick` handler
+### `on_random_tick` handler
 
 ```lua
-on_rtick = function(bx, by, bz)
+on_random_tick = function(bx, by, bz)
   -- Actions to do when the block is randomly ticked
 end
 ```
 
-### `on_stick` handler
+### `on_sched_tick` handler
 
 ```lua
-on_stick = function(bx, by, bz)
+on_sched_tick = function(bx, by, bz)
   -- Actions to do when the block is ticked via scheduling
 end
+```

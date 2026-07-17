@@ -40,7 +40,7 @@ blocks.add("stone", stone_prototype, {
   }
 })
 
-slabs.register("stone_slab", stone_prototype, {
+slabs.add_block("stone_slab", stone_prototype, {
   health = 2,
   textures = {
     north = { "test_north.png" },

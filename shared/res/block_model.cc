@@ -63,12 +63,10 @@ static std::optional<BlockModel_Face> parse_face(const JSON_Object* object)
     }
 
     auto uv_rotation = utils::parse_arithmetic<unsigned>(object, "uv_rotation");
-    auto world_locked = json_object_get_boolean(object, "world_locked");
 
     BlockModel_Face face {};
     face.texture_slot = texture;
     face.uv_rotation = uv_rotation.value_or(0);
-    face.world_locked = world_locked;
 
     auto uv = utils::parse_vector<float, 4>(object, "uv");
     auto cull_face = utils::parse_enum<unsigned>(object, "cullface", BLOCK_FACE_MAPPING);
