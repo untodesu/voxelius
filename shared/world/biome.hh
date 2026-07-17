@@ -41,7 +41,6 @@ struct BiomeDefinition {
 
     unsigned priority;
 
-    BiomePaletteEntry palette_empty;
     BiomePaletteEntry palette_basic;
     BiomePaletteEntry palette_filler;
     BiomePaletteEntry palette_surface;

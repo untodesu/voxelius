@@ -146,7 +146,6 @@ static bool parse_palette_entry(lua_State* L, int entry_idx, BiomePaletteEntry& 
 static bool parse_palette(lua_State* L, int palette_idx, BiomeDefinition& def, ModContext* ctx)
 {
     const std::array palette_fields = {
-        std::make_pair("empty", &def.palette_empty),
         std::make_pair("basic", &def.palette_basic),
         std::make_pair("filler", &def.palette_filler),
         std::make_pair("surface", &def.palette_surface),

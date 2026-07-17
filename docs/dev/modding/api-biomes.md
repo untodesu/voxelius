@@ -49,7 +49,6 @@ Returns the numeric biome ID
 
 |Field|Description|  
 |----|----|  
-|`empty`|Empty block type, eg `builtin:air`|  
 |`basic`|Basic block type, eg `builtin:stone`|  
 |`filler`|Filler block type, eg `builtin:dirt`|  
 |`surface`|Surface block type, eg `builtin:grass`|  

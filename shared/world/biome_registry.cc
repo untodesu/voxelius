@@ -59,7 +59,6 @@ void biome_registry::resolve_palettes(void)
 {
     for(auto& def : s_definitions) {
         const std::array fields = {
-            &def.palette_empty,
             &def.palette_basic,
             &def.palette_filler,
             &def.palette_surface,
