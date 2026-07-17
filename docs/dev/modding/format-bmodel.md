@@ -4,7 +4,9 @@ Block models define the visible geometry of a block
 
 Block models are located in the directory: `namespace:models/block`  
 
-> **NOTE:** texture _names_ are not part of the model. The model only declares named slots that it needs (eg. `top`, `north`, `nwse`, etc); the actual texture files are supplied per-block using `textures` field during registration  
+> **NOTE:** texture _names_ are not part of the model. The model only declares named slots that it needs (and these names are arbitrary: `top`, `north`, `nwse`, even `cumshit9000` for all I care); the actual texture filenames are supplied per block definition, see [Blocks API](api-blocks.md)  
+
+<!-- separator -->
 
 > **NOTE:** if the slot is missing, `default` slot is used instead
 

@@ -16,8 +16,9 @@ blocks.add("bush", {
 
   model_name = "cross",
   bcoll_name = "bush",
-})
 
+  replaceable = true,
+})
 
 biomes.add("plains", {
   realm = biomes.REALM_SURFACE,

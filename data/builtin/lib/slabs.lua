@@ -1,9 +1,8 @@
 local slabs = {}
 
 function slabs.on_place(identifier)
-  return function(bx, by, bz, target, actor)
+  return function(bx, by, bz, target, occupant, actor)
     local slab_id = blocks.get(identifier)
-    local current = world.get_block(bx, by, bz)
 
     if target.stem == slab_id then
       local state = world.get_state(target.bx, target.by, target.bz, "orientation")
@@ -17,12 +16,16 @@ function slabs.on_place(identifier)
       end
     end
 
-    if current == slab_id then
+    if occupant.id == slab_id then
       local state = world.get_state(bx, by, bz, "orientation")
       if state ~= "double" then
         world.set_state(bx, by, bz, "orientation", "double")
         return nil
       end
+    end
+
+    if occupant.id ~= blocks.NULL_BLOCK and occupant.id ~= slab_id and not occupant.replaceable then
+      return nil
     end
 
     if target.face == blocks.FACE_BOTTOM or target.ry > 0.5 then

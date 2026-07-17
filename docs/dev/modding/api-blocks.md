@@ -138,10 +138,11 @@ Register a new block in the registry
 |`touch`|`integer`|no|`blocks.TOUCH_SOLID`|Block's touch response|  
 |`touch_coeffs`|`float[3]`|no|`[0,0,0]`|Block's touch response coefficients|  
 |`tags`|`integer[]`|no|`[]`|Block tags|  
+|`replaceable`|`boolean`|no|`false`|When true, other blocks can be placed into this block's cell without breaking it first|  
 |`states`|`table`|no|`{}`|Blockstates table|  
 |`variants`|`table`|no|`{}`|Variants table|  
 |`on_random_tick`|`function`|no|`nil`|Random tick handler|  
-|`on_sched_tick`|`function`|no|`nil`|Scheduled tick hanlder|  
+|`on_sched_tick`|`function`|no|`nil`|Scheduled tick handler|  
 |`on_place`|`function`|no|`nil`|Placement handler, can decide whether it's ok or not to place the block there|  
 |`on_break`|`function`|no|`nil`|Break handler|  
 |`on_interact`|`function`|no|`nil`|Interaction handler|  
@@ -205,6 +206,7 @@ variants = {
       model_name = "slab_top",
       bcoll_offset = { 0, 8, 0 },
       health = 2,
+      replaceable = true,
       drops = { ... }
     }
   }
@@ -215,28 +217,40 @@ variants = {
 
 ### Target table
 
-Some callbacks pass in a `target` table that defines the location at which the initiator was looking when attempting to interact with a block  
+Some callbacks pass in a `target` table that describes the block the initiator was looking at (the raycast hit). In `on_place`, this is the block adjacent to the placement cell  
 
 |Field|Type|Description|  
 |----|----|----|  
-|`stem`|`integer`|Numeric block stem ID|  
-|`face`|`integer`|Surface direction|  
+|`stem`|`integer`|Numeric block stem ID of the hit block|  
+|`face`|`integer`|Hit surface direction|  
 |`ni`|`number`|Surface normal X/I component|  
 |`nj`|`number`|Surface normal Y/J component|  
 |`nk`|`number`|Surface normal Z/K component|  
-|`bx`|`integer`|Block position X component|  
-|`by`|`integer`|Block position Y component|  
-|`bz`|`integer`|Block position Z component|  
-|`rx`|`number`|Block-local position X component|  
-|`ry`|`number`|Block-local position Y component|  
-|`rz`|`number`|Block-local position Z component|  
+|`lx`|`number`|Hit point X component|  
+|`ly`|`number`|Hit point Y component|  
+|`lz`|`number`|Hit point Z component|  
+|`bx`|`integer`|Hit block position X component|  
+|`by`|`integer`|Hit block position Y component|  
+|`bz`|`integer`|Hit block position Z component|  
+|`rx`|`number`|Block-local hit position X component|  
+|`ry`|`number`|Block-local hit position Y component|  
+|`rz`|`number`|Block-local hit position Z component|  
+
+### Occupant table
+
+The `on_place` handler receives an `occupant` table describing the block currently in the placement cell  
+
+|Field|Type|Description|  
+|----|----|----|  
+|`id`|`integer`|Numeric block ID in the placement cell; `blocks.NULL_BLOCK` when empty|  
+|`replaceable`|`boolean`|Whether the placement cell can be occupied: `true` when empty or when the existing block is marked as `replaceable` during registration; `false` otherwise|  
 
 ### `on_place` handler
 
 ```lua
-on_place = function(bx, by, bz, target, actor)
-  if condition_to_reject then
-    return nil -- blocks the placement entirely
+on_place = function(bx, by, bz, target, occupant, actor)
+  if not occupant.replaceable then
+    return nil -- cell is occupied by a non-replaceable block
   end
 
   -- permits placement with these initial states
@@ -245,6 +259,8 @@ end
 ```
 
 Returning `nil` blocks the placement; returning a table (empty or not) permits it, with any entries in the table used as initial blockstate values for states not covered by their `default`.
+
+When placement is permitted, the new block overwrites whatever was in the cell; replaceable occupants are not broken and do not drop items  
 
 ### `on_break` handler
 

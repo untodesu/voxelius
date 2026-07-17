@@ -97,6 +97,7 @@ struct BlockDefinition final {
     Eigen::Vector3f touch_coeffs;
 
     block_tag_bit tags;
+    bool replaceable;
 
     std::vector<BlockDrop> drops;
 

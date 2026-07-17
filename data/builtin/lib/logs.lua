@@ -1,10 +1,8 @@
 local logs = {}
 
 function logs.on_place(identifier)
-  return function(bx, by, bz, target, actor)
-    local current = world.get_block(bx, by, bz)
-
-    if current ~= blocks.NULL_BLOCK then
+  return function(bx, by, bz, target, occupant, actor)
+    if not occupant.replaceable then
       return nil
     end
 

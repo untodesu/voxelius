@@ -256,23 +256,19 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
                 }
 
                 variants.emplace_back(Identifier::from_string(variant_name.value(), ctx->name_space()));
-
                 lua_pop(L, 1);
             }
 
             textures.insert_or_assign(std::move(slot), std::move(variants));
-
             lua_pop(L, 1);
         }
 
         patch.textures = std::move(textures);
-
         lua_pop(L, 1);
     }
 
     if(reader.try_push("animated")) {
         patch.animated = static_cast<bool>(lua_toboolean(L, -1));
-
         lua_pop(L, 1);
     }
 
@@ -284,7 +280,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.model_name = Identifier::from_string(value.value(), ctx->name_space());
-
         lua_pop(L, 1);
     }
 
@@ -296,7 +291,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.model_offset = 0.0625f * offset.value();
-
         lua_pop(L, 1);
     }
 
@@ -308,7 +302,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.model_facing = static_cast<block_face>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -320,7 +313,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.bcoll_name = Identifier::from_string(value.value(), ctx->name_space());
-
         lua_pop(L, 1);
     }
 
@@ -332,7 +324,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.bcoll_offset = 0.0625f * offset.value();
-
         lua_pop(L, 1);
     }
 
@@ -344,7 +335,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.bcoll_facing = static_cast<block_face>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -356,7 +346,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.health = static_cast<unsigned>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -368,7 +357,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.sound_set = Identifier::from_string(value.value(), ctx->name_space());
-
         lua_pop(L, 1);
     }
 
@@ -380,7 +368,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.emission = static_cast<block_light_type>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -392,7 +379,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.dissipation = static_cast<block_light_type>(value.value());
-
         lua_pop(L, 1);
     }
 
@@ -415,12 +401,16 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.touch_coeffs = coeffs.value();
-
         lua_pop(L, 1);
     }
 
     if(reader.try_push("tags")) {
         patch.tags = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
+        lua_pop(L, 1);
+    }
+
+    if(reader.try_push("replaceable")) {
+        patch.replaceable = static_cast<bool>(lua_toboolean(L, -1));
         lua_pop(L, 1);
     }
 
@@ -432,7 +422,6 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         }
 
         patch.drops = std::move(drops);
-
         lua_pop(L, 1);
     }
 
@@ -555,7 +544,6 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
                 }
 
                 variants.emplace_back(Identifier::from_string(variant_name.value(), ctx->name_space()));
-
                 lua_pop(L, 1);
             }
 
@@ -634,6 +622,11 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
 
     if(reader.try_push("tags")) {
         def.tags = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
+        lua_pop(L, 1);
+    }
+
+    if(reader.try_push("replaceable")) {
+        def.replaceable = static_cast<bool>(lua_toboolean(L, -1));
         lua_pop(L, 1);
     }
 
@@ -920,6 +913,7 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
     def.touch_coeffs.setOnes();
 
     def.tags = static_cast<block_tag_bit>(0);
+    def.replaceable = false;
 
     def.family = BLOCK_FAMILY_ID_NULL;
     def.is_stem = false;

@@ -26,18 +26,35 @@ bool utils::block_place(const physics::BlockHit& hit, entt::entity actor, block_
     auto family = block_registry::find_family_of(id);
     auto pos = hit.block_pos + hit.normal.cast<BlockPos::value_type>();
 
-    if(family == nullptr) {
+    const BlockCallback* callback = nullptr;
+
+    if(family) {
+        callback = &family->on_place;
+    }
+
+    auto has_on_place = true;
+    has_on_place = has_on_place && callback;
+    has_on_place = has_on_place && callback->callback_ref != LUA_NOREF;
+    has_on_place = has_on_place && callback->state;
+
+    auto can_occupy = true;
+    auto existing = world::get_block(pos);
+
+    if(existing) {
+        auto def = block_registry::find_definition(existing);
+        can_occupy = def && def->replaceable;
+    }
+
+    if(!has_on_place && !can_occupy) {
+        return false;
+    }
+
+    if(!has_on_place) {
         return world::set_block(pos, id);
     }
 
-    const auto& callback = family->on_place;
-
-    if(callback.callback_ref == LUA_NOREF || callback.state == nullptr) {
-        return world::set_block(pos, id);
-    }
-
-    auto L = callback.state.get();
-    lua_rawgeti(L, LUA_REGISTRYINDEX, callback.callback_ref);
+    auto L = callback->state.get();
+    lua_rawgeti(L, LUA_REGISTRYINDEX, callback->callback_ref);
 
     lua_pushinteger(L, static_cast<lua_Integer>(pos.x()));
     lua_pushinteger(L, static_cast<lua_Integer>(pos.y()));
@@ -73,9 +90,15 @@ bool utils::block_place(const physics::BlockHit& hit, entt::entity actor, block_
     lua_pushnumber(L, static_cast<lua_Number>(std::fmod(hit.point.z(), 1.0f)));
     lua_setfield(L, -2, "rz");
 
+    lua_newtable(L);
+    lua_pushinteger(L, static_cast<lua_Integer>(existing));
+    lua_setfield(L, -2, "id");
+    lua_pushinteger(L, static_cast<lua_Integer>(can_occupy));
+    lua_setfield(L, -2, "replaceable");
+
     lua_pushinteger(L, static_cast<lua_Integer>(actor));
 
-    if(!call_routine(L, 5, 1, family->name.full_string())) {
+    if(!call_routine(L, 6, 1, family->name.full_string())) {
         return false;
     }
 

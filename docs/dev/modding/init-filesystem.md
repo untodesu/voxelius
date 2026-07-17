@@ -23,7 +23,7 @@ Each mod can have the following directories
 
 The engine uses PhysFS for VFS and uses the following system paths:  
 
-|Mountpoint|Path|Access|Description|  
+|Mount|Path|Access|Description|  
 |----|----|----|----|  
 |`/`|`${PWD}/data`|Read-only|Vendored mods, including `builtin`|  
 |`/`|`${PWD}/mods`|Read-only|Used-provided mods|  

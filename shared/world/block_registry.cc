@@ -129,6 +129,10 @@ BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverr
         base.tags = patch.tags.value();
     }
 
+    if(patch.replaceable.has_value()) {
+        base.replaceable = patch.replaceable.value();
+    }
+
     if(patch.drops) {
         base.drops = *patch.drops;
         base.tools = BLOCK_TOOL_NONE;
