@@ -14,7 +14,11 @@ constexpr static std::size_t LUT_TOTAL = LUT_SIZE * LUT_SIZE * LUT_SIZE;
 constexpr static std::size_t LUT_COUNT = static_cast<std::size_t>(BIOME_REALM_COUNT);
 
 using lookup_table_type = std::array<biome_id_type, LUT_TOTAL>;
-using lookup_seeds_type = std::array<TablePos, LUT_TOTAL>;
+
+struct SeedPoint final {
+    TablePos pos;
+    biome_id_type id;
+};
 
 static Eigen::AlignedBox3i s_bounds;
 static std::array<lookup_table_type, LUT_COUNT> s_tables;
@@ -120,65 +124,41 @@ static void table_init(biome_realm realm, lookup_table_type& table)
     }
 }
 
-static void seed_distance_field(const lookup_table_type& ids, lookup_seeds_type& seeds)
+static void collect_seeds(const lookup_table_type& table, std::vector<SeedPoint>& seeds)
 {
-    for(int temp = 0; temp < static_cast<int>(LUT_SIZE); ++temp) {
-        for(int humd = 0; humd < static_cast<int>(LUT_SIZE); ++humd) {
-            for(int axis = 0; axis < static_cast<int>(LUT_SIZE); ++axis) {
+    for(int temp = 0; temp < static_cast<int>(LUT_SIZE); temp += 1) {
+        for(int humd = 0; humd < static_cast<int>(LUT_SIZE); humd += 1) {
+            for(int axis = 0; axis < static_cast<int>(LUT_SIZE); axis += 1) {
                 auto pos = TablePos(temp, humd, axis);
-                auto index = table_index(pos);
+                auto id = table[table_index(pos)];
 
-                if(ids[index] == BIOME_ID_NULL) {
+                if(id == BIOME_ID_NULL) {
                     continue;
                 }
 
-                seeds[index] = pos;
+                SeedPoint seed {};
+                seed.pos = pos;
+                seed.id = id;
+
+                seeds.emplace_back(std::move(seed));
             }
         }
     }
 }
 
-static std::pair<biome_id_type, TablePos> jfa_query(const TablePos& pos, int step, const lookup_table_type& ids,
-    const lookup_seeds_type& seeds)
+static void table_fill(lookup_table_type& table, BS::light_thread_pool& threads)
 {
-    auto best_id = BIOME_ID_NULL;
-    auto best_seed = TablePos(TablePos::Zero());
-    auto best_dist = std::numeric_limits<int>::max();
+    std::vector<SeedPoint> seeds;
+    seeds.reserve(LUT_TOTAL);
 
-    for(int ox = -step; ox <= step; ox += step) {
-        for(int oy = -step; oy <= step; oy += step) {
-            for(int oz = -step; oz <= step; oz += step) {
-                TablePos neighbour = pos + TablePos(ox, oy, oz);
+    collect_seeds(table, seeds);
 
-                if(!s_bounds.contains(neighbour)) {
-                    continue;
-                }
-
-                auto index = table_index(neighbour);
-                auto candidate_id = ids[index];
-
-                if(candidate_id == BIOME_ID_NULL) {
-                    continue;
-                }
-
-                auto candidate_seed = seeds[index];
-                auto dist = static_cast<int>((pos - candidate_seed).squaredNorm());
-
-                if(dist < best_dist) {
-                    best_dist = dist;
-                    best_id = candidate_id;
-                    best_seed = candidate_seed;
-                }
-            }
-        }
+    if(seeds.empty()) {
+        return;
     }
 
-    return std::make_pair(best_id, best_seed);
-}
+    auto result = std::make_unique<lookup_table_type>();
 
-static void jfa_step(int step, const lookup_table_type& read_ids, const lookup_seeds_type& read_seeds, lookup_table_type& write_ids,
-    lookup_seeds_type& write_seeds, BS::light_thread_pool& threads)
-{
     threads.detach_blocks(0, LUT_TOTAL, [&](std::size_t first, std::size_t last) {
         for(std::size_t index = first; index < last; index += 1) {
             TablePos pos;
@@ -186,50 +166,25 @@ static void jfa_step(int step, const lookup_table_type& read_ids, const lookup_s
             pos.y() = static_cast<int>((index / LUT_SIZE) % LUT_SIZE);
             pos.z() = static_cast<int>(index % LUT_SIZE);
 
-            auto jfa = jfa_query(pos, step, read_ids, read_seeds);
+            auto best_id = BIOME_ID_NULL;
+            auto best_dist = std::numeric_limits<int>::max();
 
-            write_ids[index] = jfa.first;
-            write_seeds[index] = jfa.second;
+            for(const auto& seed : seeds) {
+                auto dist = static_cast<int>((pos - seed.pos).squaredNorm());
+
+                if(dist < best_dist) {
+                    best_dist = dist;
+                    best_id = seed.id;
+                }
+            }
+
+            result->at(index) = best_id;
         }
     });
 
     threads.wait();
-}
 
-static void table_fill(lookup_table_type& table, BS::light_thread_pool& threads)
-{
-    auto ids_a = std::make_unique<lookup_table_type>(table);
-    auto ids_b = std::make_unique<lookup_table_type>();
-    auto seeds_a = std::make_unique<lookup_seeds_type>();
-    auto seeds_b = std::make_unique<lookup_seeds_type>();
-
-    seed_distance_field(*ids_a, *seeds_a);
-
-    auto read_ids = ids_a.get();
-    auto read_seeds = seeds_a.get();
-
-    auto write_ids = ids_b.get();
-    auto write_seeds = seeds_b.get();
-
-    auto step = static_cast<int>(LUT_SIZE) / 2;
-
-    while(step >= 1) {
-        jfa_step(step, *read_ids, *read_seeds, *write_ids, *write_seeds, threads);
-
-        std::swap(read_ids, write_ids);
-        std::swap(read_seeds, write_seeds);
-
-        step >>= 1;
-    }
-
-    for(int extra_step : std::array { 2, 1, 1 }) {
-        jfa_step(extra_step, *read_ids, *read_seeds, *write_ids, *write_seeds, threads);
-
-        std::swap(read_ids, write_ids);
-        std::swap(read_seeds, write_seeds);
-    }
-
-    table = std::move(read_ids[0]);
+    table = std::move(*result);
 }
 
 void biome_lut::generate(void)

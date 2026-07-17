@@ -112,10 +112,12 @@ Every biome defines three LUT axes - temperature, humidity and an extra. These v
 
 > **NOTE:** Voxelius uses 32-bit integers as biome IDs so a single lookup table for a realm is about 3.82 MiB. Considering current realm amount and possible expansion in the future, it probably won't run on your 486...  
 
-A [Jump-Flooding Algorithm](https://en.wikipedia.org/wiki/Jump_flooding_algorithm) is used to "fill in" the gaps. It generates map that suspiciously looks like a Voronoi map, so there's somewhat of a "smooth" border between biomes.
+Biomes are first placed as discrete "nucleation points" on the LUT grid, using their `temp`, `humd` and `axis` parameters as coordinates. If two biomes end up wanting the same point, `priority` decides who keeps it: the loser gets nudged to the nearest free cell instead  
+
+Once every biome has its point, the rest of the grid is resolved with a _nearest-seed search_: for every LUT cell, the engine finds the closest nucleation point (by squared distance) and assigns that biome's ID to the cell. The result is an exact 3D Voronoi diagram - borders form right where two nucleation points are equally close.
 
 > **NOTE:** probably a big TODO, but it would be cool if I also added a special "border" biome kind for all realms to prevent sharp biome borders. Kind of like old Minecraft was using rivers to split biomes apart, just much more data-driven  
 
-![jfa-voronoi.gif](jfa-voronoi.gif)  
+![flood-fill.gif](flood-fill.gif)  
 
-Think of each color as a separate biome type - you start with a discrete "nucleation points" for biomes defined by Lua scripts and for a number of steps you extrapolate, which range of parameters a biome occupies   
+Think of each color as a separate biome type: you start with the discrete nucleation points for biomes defined by Lua scripts, and every other cell simply inherits the ID of whichever point is closest to it.
