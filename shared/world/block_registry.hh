@@ -40,7 +40,6 @@ struct BlockOverridePatch final {
     std::optional<Eigen::Vector3f> touch_coeffs;
 
     std::optional<block_tag_bit> tags;
-    std::optional<bool> is_replaceable;
 
     std::optional<std::vector<BlockDrop>> drops;
 };
