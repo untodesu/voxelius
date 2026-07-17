@@ -365,7 +365,7 @@ void SettingValue_StepperInt::refresh_locale(void)
 
     for(std::size_t i = 0; i < wids.size(); ++i) {
         auto step_key = std::format("settings.value.{}.{}", key, i);
-        wids[i] = std::format("{}###{}", language::resolve(step_key), static_cast<const void*>(this));
+        wids[i] = std::string(language::resolve(step_key));
     }
 }
 
@@ -374,15 +374,43 @@ void SettingValue_StepperInt::layout(void) const
     auto current = value.value();
     auto index = (current - min_value) / step_value;
 
-    if(ImGui::Button(wids[index].c_str(), ImVec2(ImGui::CalcItemWidth(), 0.0f))) {
-        current += step_value;
+    const auto& style = ImGui::GetStyle();
+    auto frame_height = ImGui::GetFrameHeight();
+    auto spacing = style.ItemSpacing.x;
+    auto combo_width = ImGui::CalcItemWidth() - 2.0f * (frame_height + spacing);
 
-        if(current > max_value) {
-            current = min_value;
-        }
+    if(combo_width < 1.0f) {
+        combo_width = 1.0f;
+    }
 
+    ImGui::PushID(static_cast<const void*>(this));
+
+    if(ImGui::Button("<", ImVec2(frame_height, frame_height))) {
+        current = (current <= min_value) ? max_value : current - step_value;
         value.set_value(current);
     }
+
+    ImGui::SameLine(0.0f, spacing);
+    ImGui::SetNextItemWidth(combo_width);
+
+    if(ImGui::BeginCombo("###combo", wids[index].c_str())) {
+        for(std::size_t i = 0; i < wids.size(); ++i) {
+            if(ImGui::Selectable(wids[i].c_str(), i == static_cast<std::size_t>(index))) {
+                value.set_value(min_value + static_cast<int>(i) * step_value);
+            }
+        }
+
+        ImGui::EndCombo();
+    }
+
+    ImGui::SameLine(0.0f, spacing);
+
+    if(ImGui::Button(">", ImVec2(frame_height, frame_height))) {
+        current = (current >= max_value) ? min_value : current + step_value;
+        value.set_value(current);
+    }
+
+    ImGui::PopID();
 
     layout_label();
     layout_tooltip();
@@ -395,7 +423,7 @@ void SettingValue_StepperUnsigned::refresh_locale(void)
     for(std::size_t i = 0; i < wids.size(); ++i) {
         auto step_key = std::format("settings.value.{}.{}", key, i);
 
-        wids[i] = std::format("{}###{}", language::resolve(step_key), static_cast<const void*>(this));
+        wids[i] = std::string(language::resolve(step_key));
     }
 }
 
@@ -404,15 +432,43 @@ void SettingValue_StepperUnsigned::layout(void) const
     auto current = value.value();
     auto index = (current - min_value) / step_value;
 
-    if(ImGui::Button(wids[index].c_str(), ImVec2(ImGui::CalcItemWidth(), 0.0f))) {
-        current += step_value;
+    const auto& style = ImGui::GetStyle();
+    auto frame_height = ImGui::GetFrameHeight();
+    auto spacing = style.ItemSpacing.x;
+    auto combo_width = ImGui::CalcItemWidth() - 2.0f * (frame_height + spacing);
 
-        if(current > max_value) {
-            current = min_value;
-        }
+    if(combo_width < 1.0f) {
+        combo_width = 1.0f;
+    }
 
+    ImGui::PushID(static_cast<const void*>(this));
+
+    if(ImGui::Button("<", ImVec2(frame_height, frame_height))) {
+        current = (current <= min_value) ? max_value : current - step_value;
         value.set_value(current);
     }
+
+    ImGui::SameLine(0.0f, spacing);
+    ImGui::SetNextItemWidth(combo_width);
+
+    if(ImGui::BeginCombo("###combo", wids[index].c_str())) {
+        for(std::size_t i = 0; i < wids.size(); ++i) {
+            if(ImGui::Selectable(wids[i].c_str(), i == static_cast<std::size_t>(index))) {
+                value.set_value(min_value + static_cast<unsigned>(i) * step_value);
+            }
+        }
+
+        ImGui::EndCombo();
+    }
+
+    ImGui::SameLine(0.0f, spacing);
+
+    if(ImGui::Button(">", ImVec2(frame_height, frame_height))) {
+        current = (current >= max_value) ? min_value : current + step_value;
+        value.set_value(current);
+    }
+
+    ImGui::PopID();
 
     layout_label();
     layout_tooltip();
