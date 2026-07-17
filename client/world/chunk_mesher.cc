@@ -202,15 +202,17 @@ static void sync_part(ChunkMesh_Part& part)
     if(part.quads.empty()) {
         if(part.vbo) {
             glDeleteBuffers(1, &part.vbo);
+            part.vbo = 0;
         }
 
         part.count = 0;
-        part.vbo = 0;
         return;
     }
 
-    if(part.vbo == 0)
+    if(part.vbo == 0) {
         glGenBuffers(1, &part.vbo);
+    }
+
     glBindBuffer(GL_ARRAY_BUFFER, part.vbo);
     glBufferData(GL_ARRAY_BUFFER, std::span(part.quads).size_bytes(), part.quads.data(), GL_STATIC_DRAW);
 }
@@ -236,32 +238,43 @@ void MeshingTask::process(void)
 
 void MeshingTask::finalize(void)
 {
-    if(world::chunk_entities.valid(m_entity)) {
-        if(m_opaque.empty() && m_alpha.empty()) {
-            world::chunk_entities.remove<ChunkMesh>(m_entity);
-            return;
-        }
-
-        auto& component = world::chunk_entities.get_or_emplace<ChunkMesh>(m_entity);
-
-        component.opaque.quads = std::move(m_opaque);
-        component.opaque.count = static_cast<std::uint32_t>(component.opaque.quads.size());
-        sync_part(component.opaque);
-
-        component.alpha.quads = std::move(m_alpha);
-        component.alpha.count = static_cast<std::uint32_t>(component.alpha.quads.size());
-        sync_part(component.alpha);
-
-        // Opaque quads won't get depth-sorted
-        // at runtime so there's no point in keeping
-        // them persistent in the system memory
-        component.opaque.quads.clear();
-        component.opaque.quads.shrink_to_fit();
-
-        world::chunk_entities.patch<ChunkMesh>(m_entity);
-
+    if(!world::chunk_entities.valid(m_entity) || !world::chunk_entities.all_of<Chunk_Component>(m_entity)) {
         s_pending.erase(m_cpos);
+        return;
     }
+
+    const auto& chunk = world::chunk_entities.get<Chunk_Component>(m_entity);
+
+    if(chunk.position != m_cpos) {
+        s_pending.erase(m_cpos);
+        return;
+    }
+
+    if(m_opaque.empty() && m_alpha.empty()) {
+        world::chunk_entities.remove<ChunkMesh>(m_entity);
+        s_pending.erase(m_cpos);
+        return;
+    }
+
+    auto& component = world::chunk_entities.get_or_emplace<ChunkMesh>(m_entity);
+
+    component.opaque.quads = std::move(m_opaque);
+    component.opaque.count = static_cast<std::uint32_t>(component.opaque.quads.size());
+    sync_part(component.opaque);
+
+    component.alpha.quads = std::move(m_alpha);
+    component.alpha.count = static_cast<std::uint32_t>(component.alpha.quads.size());
+    sync_part(component.alpha);
+
+    // Opaque quads won't get depth-sorted
+    // at runtime so there's no point in keeping
+    // them persistent in the system memory
+    component.opaque.quads.clear();
+    component.opaque.quads.shrink_to_fit();
+
+    world::chunk_entities.patch<ChunkMesh>(m_entity);
+
+    s_pending.erase(m_cpos);
 }
 
 std::uint32_t MeshingTask::calculate_ao(const LocalPos& lpos, block_face face, const Eigen::Vector3f& vertex) const
@@ -498,10 +511,29 @@ static void mark_dirty(const ChunkPos& cpos)
     }
 }
 
+static bool should_remesh_neighbor(const ChunkPos& cpos)
+{
+    if(s_pending.contains(cpos)) {
+        return true;
+    }
+
+    auto chunk = world::find_chunk(cpos);
+
+    if(chunk == nullptr) {
+        return false;
+    }
+
+    return world::chunk_entities.all_of<ChunkMesh>(chunk->entity());
+}
+
 static void mark_neighbors_dirty(const ChunkPos& cpos)
 {
     for(auto face : ALL_FACES) {
-        mark_dirty(cpos + face_delta(face));
+        auto npos = cpos + face_delta(face);
+
+        if(should_remesh_neighbor(npos)) {
+            mark_dirty(npos);
+        }
     }
 }
 
@@ -509,7 +541,11 @@ static void mark_border_neighbors_dirty(const ChunkPos& cpos, const LocalPos& lp
 {
     for(auto face : ALL_FACES) {
         if(is_neighbour((lpos + face_delta(face)).eval())) {
-            mark_dirty(cpos + face_delta(face));
+            auto npos = cpos + face_delta(face);
+
+            if(should_remesh_neighbor(npos)) {
+                mark_dirty(npos);
+            }
         }
     }
 }
