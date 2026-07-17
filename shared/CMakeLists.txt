@@ -53,8 +53,12 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/world/block.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/chunk.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/chunk.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/world/terrain.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/world/terrain.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/world.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/world.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/world/worldgen.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/world/worldgen.hh"
     "${CMAKE_CURRENT_LIST_DIR}/constant.hh"
     "${CMAKE_CURRENT_LIST_DIR}/coord.hh"
     "${CMAKE_CURRENT_LIST_DIR}/globals.cc"
@@ -71,5 +75,6 @@ target_include_directories(shared PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(shared PUBLIC core)
 target_link_libraries(shared PUBLIC
     deps::entt
+    deps::FNL
     deps::lua)
 target_precompile_headers(shared PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")

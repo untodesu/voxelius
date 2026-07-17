@@ -17,6 +17,7 @@
 #include "shared/world/block_collisions.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/world.hh"
+#include "shared/world/worldgen.hh"
 
 #include "client/entity/camera.hh"
 #include "client/game.hh"
@@ -130,6 +131,8 @@ static void wrapped_main(int argc, char** argv)
     block_atlas::init();
 
     client_game::init();
+
+    worldgen::init(); // TODO: pass in a world config?
 
     globals::client_config.load("client.conf");
     globals::client_config.load("client.user.conf");

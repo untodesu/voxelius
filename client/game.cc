@@ -16,6 +16,7 @@
 #include "shared/world/biome_lut.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/world.hh"
+#include "shared/world/worldgen.hh"
 
 #include "client/entity/camera.hh"
 #include "client/entity/interpolation.hh"
@@ -28,6 +29,21 @@
 
 #include <fastnoiselite.h>
 
+static void generate_debug_terrain(void)
+{
+    constexpr static ChunkPos::value_type CHUNK_RADIUS = 64;
+    constexpr static ChunkPos::value_type VERT_RADIUS = 4;
+
+    for(ChunkPos::value_type cx = -CHUNK_RADIUS; cx <= CHUNK_RADIUS; cx += 1) {
+        for(ChunkPos::value_type cz = -CHUNK_RADIUS; cz <= CHUNK_RADIUS; cz += 1) {
+            for(ChunkPos::value_type cy = -VERT_RADIUS; cy <= VERT_RADIUS; cy += 1) {
+                worldgen::request({ cx, cy, cz });
+            }
+        }
+    }
+}
+
+#if 0
 static void generate_debug_terrain(void)
 {
     auto stone_id = block_registry::find(Identifier::from_string("builtin:stone"));
@@ -154,6 +170,7 @@ static void generate_debug_terrain(void)
         }
     }
 }
+#endif
 
 void client_game::init(void)
 {

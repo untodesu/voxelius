@@ -5,6 +5,8 @@
 
 #include <entt/entt.hpp>
 
+#include <fastnoiselite.h>
+
 extern "C" {
 #include <lauxlib.h>
 #include <lua.h>
