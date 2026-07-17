@@ -43,7 +43,7 @@ Returns the numeric biome ID
 |`lut_axis`|`integer`|no|50|Realm-dependent LUT axis, ranging from 0 to 99|  
 |`priority`|`integer`|no|0|LUT nucleation conflicts are resolved with this value. If the biome has higher priority, the lower-priority nucleation points gets shifted in a random direction. If priorities are equal, the random one wins|  
 |`palette`|`table`|no|`{}`|Biome's block palette|  
-|`scatter`|`table`|no|`{}`|List of features to scatter|  
+|`scatter`|`table[]`|no|`{}`|List of features to scatter|  
 
 ## Palette table
 
@@ -68,8 +68,8 @@ Returns the numeric biome ID
 |----|----|----|----|----|  
 |`feature`|`string`|yes|N/D|A feature to place|  
 |`chance`|`number`|no|0.5|Chance of a placement attempt|  
-|`need_above`|`table`|no|`{}`|List of `blocks.TAG_XXXX` constants. When checking if a scatter entry is qualified for placement, generator checks if the block above the origin has at least one of the listed tags|  
-|`need_below`|`table`|no|`{}`|List of `blocks.TAG_XXXX` constants. When checking if a scatter entry is qualified for placement, generator checks if the block below the origin has at least one of the listed tags|  
+|`need_above`|`integer[]`|no|`{}`|List of `blocks.TAG_XXXX` constants. When checking if a scatter entry is qualified for placement, generator checks if the block above the origin has at least one of the listed tags|  
+|`need_below`|`integer[]`|no|`{}`|List of `blocks.TAG_XXXX` constants. When checking if a scatter entry is qualified for placement, generator checks if the block below the origin has at least one of the listed tags|  
 
 ## Example
 

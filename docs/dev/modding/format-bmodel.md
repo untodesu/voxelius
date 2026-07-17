@@ -37,7 +37,7 @@ Block models are located in the directory: `namespace:models/block`
 |`uv`|`number[4]`|no|dynamic|Lets a face sample a sub-rect of the texture|  
 |`uv_rotation`|`number`|no|0|UV rotation, either 0, 90, 180 or 270|  
 |`cullface`|`string`|no|N/D|The face is skipped if the neighbouring block in that direction has a face that's marked as opaque to touch|  
-|`tint`|`integer`|no|N/D|Tint group index used by climate and biomes|  
+|`tint`|`number`|no|N/D|Tint group index used by climate and biomes|  
 
 ### UV resolution
 

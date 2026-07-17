@@ -84,6 +84,5 @@ nav:
       - File Formats:
         - Block Models: dev/modding/format-bmodel.md
         - Block Collisions: dev/modding/format-bcoll.md
-        - Feature: dev/modding/format-feature.md
       - Libraries:
         - Slabs: dev/modding/lib-slabs.md
