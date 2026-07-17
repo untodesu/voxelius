@@ -28,7 +28,32 @@ ChunkMesh_Part::~ChunkMesh_Part(void)
         // When the registry is cleaned or a chunk is removed, components
         // are expected to be safely disposed of so we need a destructor
         glDeleteBuffers(1, &vbo);
+        vbo = 0;
     }
+}
+
+ChunkMesh_Part::ChunkMesh_Part(ChunkMesh_Part&& other) : quads(std::move(other.quads)), count(other.count), vbo(other.vbo)
+{
+    other.count = 0;
+    other.vbo = 0;
+}
+
+ChunkMesh_Part& ChunkMesh_Part::operator=(ChunkMesh_Part&& other)
+{
+    if(this != &other) {
+        if(vbo) {
+            glDeleteBuffers(1, &vbo);
+        }
+
+        quads = std::move(other.quads);
+        count = other.count;
+        vbo = other.vbo;
+
+        other.count = 0;
+        other.vbo = 0;
+    }
+
+    return *this;
 }
 
 std::uint32_t ChunkMesh_Quad::pack_position(const Eigen::Vector3f& position_16ths)

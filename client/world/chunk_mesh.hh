@@ -21,7 +21,15 @@ struct ChunkMesh_Quad final {
 };
 
 struct ChunkMesh_Part final {
+    ChunkMesh_Part(void) = default;
     ~ChunkMesh_Part(void);
+
+    ChunkMesh_Part(const ChunkMesh_Part& other) = delete;
+    ChunkMesh_Part& operator=(const ChunkMesh_Part& other) = delete;
+
+    ChunkMesh_Part(ChunkMesh_Part&& other);
+    ChunkMesh_Part& operator=(ChunkMesh_Part&& other);
+
     std::vector<ChunkMesh_Quad> quads; // FIXME: might not want to clear these for blendable blocks
     std::uint32_t count { 0 };
     GLuint vbo { 0 };
