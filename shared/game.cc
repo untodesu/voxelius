@@ -1,0 +1,54 @@
+#include "shared/pch.hh"
+
+#include "shared/game.hh"
+
+#include "core/res/image.hh"
+
+#include "shared/entity/stasis.hh"
+#include "shared/entity/transform.hh"
+#include "shared/entity/velocity.hh"
+#include "shared/globals.hh"
+#include "shared/mod_loader.hh"
+#include "shared/res/block_collision.hh"
+#include "shared/res/block_model.hh"
+#include "shared/world/block_collisions.hh"
+#include "shared/world/world.hh"
+
+void shared_game::init(void)
+{
+    Image::register_resource();
+    BlockCollision::register_resource();
+    BlockModel::register_resource();
+
+    mod_loader::init();
+}
+
+void shared_game::init_late(void)
+{
+    block_collisions::init_late();
+}
+
+void shared_game::shutdown(void)
+{
+    world::shutdown();
+
+    block_collisions::shutdown();
+
+    mod_loader::shutdown();
+}
+
+void shared_game::fixed_update(void)
+{
+    Stasis::fixed_update();
+    Transform::fixed_update();
+    Velocity::fixed_update();
+
+    world::fixed_update();
+
+    world::current_tick += 1;
+}
+
+void shared_game::fixed_update_late(void)
+{
+    // empty
+}

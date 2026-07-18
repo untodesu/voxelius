@@ -3,19 +3,13 @@
 #include "core/config/map.hh"
 #include "core/core.hh"
 #include "core/exception.hh"
-#include "core/res/image.hh"
 #include "core/res/resource.hh"
 #include "core/threading.hh"
 #include "core/utils/epoch.hh"
 #include "core/version.hh"
 
-#include "shared/mod_loader.hh"
-#include "shared/res/block_collision.hh"
-#include "shared/res/block_model.hh"
+#include "shared/game.hh"
 #include "shared/splash.hh"
-#include "shared/world/block_collisions.hh"
-#include "shared/world/block_registry.hh"
-#include "shared/world/world.hh"
 #include "shared/world/worldgen.hh"
 
 #include "client/entity/camera.hh"
@@ -111,12 +105,9 @@ static void wrapped_main(int argc, char** argv)
 
     vx::throw_if_not_fmt(SDL_Init(SDL_INIT_EVENTS), "SDL_Init failed: {}", SDL_GetError());
 
-    Image::register_resource();
-    BlockCollision::register_resource();
-    BlockModel::register_resource();
     Texture2D::register_resource();
 
-    mod_loader::init();
+    shared_game::init();
 
     splash::init(SPLASH_CLIENT);
 
@@ -142,7 +133,8 @@ static void wrapped_main(int argc, char** argv)
 
     block_atlas::init_late();
     block_models::init_late();
-    block_collisions::init_late();
+
+    shared_game::init_late();
 
     chunk_mesher::init();
 
@@ -156,9 +148,7 @@ static void wrapped_main(int argc, char** argv)
 
     s_is_running.store(true);
 
-    globals::fixed_frametime = 0.0f;
     globals::fixed_frametime_avg = 0.0f;
-    globals::fixed_frametime_us = UINT64_MAX;
     globals::fixed_framecount = 0;
 
     globals::curtime_us = utils::epoch_microseconds();
@@ -201,8 +191,7 @@ static void wrapped_main(int argc, char** argv)
 
         for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
             client_game::fixed_update();
-
-            world::current_tick += 1;
+            shared_game::fixed_update();
         }
 
         video::update();
@@ -227,6 +216,7 @@ static void wrapped_main(int argc, char** argv)
 
         for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
             client_game::fixed_update_late();
+            shared_game::fixed_update_late();
         }
 
         video::update_late();
@@ -246,8 +236,6 @@ static void wrapped_main(int argc, char** argv)
     LOG_INFO("avg framerate: {:.03f} FPS ({:.03f} ms)", 1.0f / globals::window_frametime_avg, 1000.0f * globals::window_frametime_avg);
     LOG_INFO("last frame I drew {} vertices ({} draw calls)", globals::num_draw_vertices, globals::num_draw_calls);
 
-    world::shutdown();
-
     block_models::shutdown();
     block_atlas::shutdown();
 
@@ -257,12 +245,12 @@ static void wrapped_main(int argc, char** argv)
 
     // TODO: game_ui::shutdown();
 
+    shared_game::shutdown();
+
     res::hard_purge();
 
     head::shutdown();
     video::shutdown();
-
-    mod_loader::shutdown();
 
     globals::client_config.save("client.conf");
 

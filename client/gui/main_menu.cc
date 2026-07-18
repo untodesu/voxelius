@@ -117,7 +117,7 @@ void main_menu::layout(void)
     }
     else {
         utils::button(str_button_play.c_str(), control, [] {
-            gui::screen = GUI_PLAY_MENU;
+            gui::screen = GUI_WORLDS;
         });
     }
 

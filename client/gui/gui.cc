@@ -68,24 +68,8 @@ void gui::layout(void)
                 main_menu::layout();
                 break;
 
-            case GUI_PLAY_MENU:
-                // TODO: play_menu::layout();
-                break;
-
             case GUI_SETTINGS:
                 settings::layout();
-                break;
-
-            case GUI_PROGRESS:
-                // TODO: progress::layout();
-                break;
-
-            case GUI_MESSAGE:
-                // TODO: message::layout();
-                break;
-
-            case GUI_CONNECT:
-                // TODO: connect::layout();
                 break;
         }
     }

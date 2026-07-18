@@ -8,14 +8,11 @@
 
 #include "shared/constant.hh"
 #include "shared/coord.hh"
-#include "shared/entity/transform.hh"
-#include "shared/entity/velocity.hh"
 #include "shared/physics/physics.hh"
 #include "shared/utils/coord.hh"
 #include "shared/utils/world.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/climate.hh"
-#include "shared/world/world.hh"
 #include "shared/world/worldgen.hh"
 
 #include "client/entity/camera.hh"
@@ -78,11 +75,6 @@ void client_game::update_late(void)
 void client_game::fixed_update(void)
 {
     player_move::fixed_update();
-
-    Transform::fixed_update();
-    Velocity::fixed_update();
-
-    world::fixed_update();
 }
 
 void client_game::fixed_update_late(void)

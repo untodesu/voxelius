@@ -4,12 +4,12 @@
 enum gui_screen {
     GUI_SCREEN_NONE = 0,
     GUI_MAIN_MENU,
-    GUI_PLAY_MENU,
+    GUI_WORLDS,
+    GUI_SERVERS,
+    GUI_MODS,
     GUI_SETTINGS,
-    GUI_PROGRESS,
-    GUI_MESSAGE,
+    GUI_JOINING,
     GUI_CHAT,
-    GUI_CONNECT,
 };
 
 namespace gui

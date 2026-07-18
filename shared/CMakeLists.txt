@@ -63,6 +63,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/world/worldgen.hh"
     "${CMAKE_CURRENT_LIST_DIR}/constant.hh"
     "${CMAKE_CURRENT_LIST_DIR}/coord.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/game.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/game.hh"
     "${CMAKE_CURRENT_LIST_DIR}/globals.cc"
     "${CMAKE_CURRENT_LIST_DIR}/globals.hh"
     "${CMAKE_CURRENT_LIST_DIR}/mod_context.cc"
