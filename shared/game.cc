@@ -39,7 +39,10 @@ void shared_game::shutdown(void)
 
 void shared_game::fixed_update(void)
 {
-    Stasis::fixed_update();
+    // NOTE: this freezes entities that are out
+    // of a loaded chunk; uncomment this later!!!
+    // Stasis::fixed_update();
+
     Transform::fixed_update();
     Velocity::fixed_update();
 
