@@ -5,6 +5,8 @@ dofile("blocks/dirt.lua")
 dofile("blocks/grass.lua")
 dofile("blocks/stone.lua")
 dofile("blocks/wood.lua")
+dofile("blocks/sand.lua")
+dofile("blocks/sandstone.lua")
 
 blocks.add("bush", {
   render = blocks.RENDER_ALPHA,
@@ -23,9 +25,10 @@ blocks.add("bush", {
 biomes.add("plains", {
   realm = biomes.REALM_SURFACE,
 
-  lut_temp = 50,
-  lut_humd = 50,
-  lut_axis = 50,
+  temperature = 50,
+  humidity = 55,
+  continentalness = 50,
+  weirdness = 10,
 
   palette = {
     basic = { name = "stone" },
@@ -34,29 +37,32 @@ biomes.add("plains", {
   }
 })
 
-biomes.add("testing", {
+biomes.add("desert", {
   realm = biomes.REALM_SURFACE,
 
-  lut_temp = 40,
-  lut_humd = 90,
+  temperature = 85,
+  humidity = 15,
+  continentalness = 60,
+  weirdness = 12,
+
+  palette = {
+    basic = { name = "sandstone" },
+    filler = { name = "sand" },
+    surface = { name = "sand" },
+  }
+})
+
+biomes.add("stoney_peaks", {
+  realm = biomes.REALM_SURFACE,
+
+  temperature = 30,
+  humidity = 40,
+  continentalness = 80,
+  weirdness = 90,
 
   palette = {
     basic = { name = "stone" },
     filler = { name = "stone" },
-    surface = { name = "stone" }
+    surface = { name = "stone" },
   }
 })
-
-biomes.add("testing2", {
-  realm = biomes.REALM_SURFACE,
-
-  lut_temp = 90,
-  lut_humd = 10,
-
-  palette = {
-    basic = { name = "stone" },
-    filler = { name = "stone" },
-    surface = { name = "dirt" }
-  }
-})
-

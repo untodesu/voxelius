@@ -38,10 +38,12 @@ Returns the numeric biome ID
 |Field|Type|Required|Default|Description|  
 |----|----|----|----|----|  
 |`realm`|`integer`|yes|N/D|One of `biomes.REALM_XXXX` constants|  
-|`lut_temp`|`integer`|no|50|Nominal biome temperature, ranging from 0 to 99|  
-|`lut_humd`|`integer`|no|50|Nominal biome humidity, ranging from 0 to 99|  
-|`lut_axis`|`integer`|no|50|Realm-dependent LUT axis, ranging from 0 to 99|  
-|`priority`|`integer`|no|0|LUT nucleation conflicts are resolved with this value. If the biome has higher priority, the lower-priority nucleation points gets shifted in a random direction. If priorities are equal, the random one wins|  
+|`temperature`|`integer`|no|50|Target temperature in climate space, ranging from 0 to 99|  
+|`humidity`|`integer`|no|50|Target humidity in climate space, ranging from 0 to 99|  
+|`continentalness`|`integer`|no|50|Target continentalness, ranging from 0 to 99|  
+|`weirdness`|`integer`|no|50|Target weirdness / relief, ranging from 0 to 99|  
+|`priority`|`integer`|no|0|When two biomes claim the same climate target during setup, higher priority keeps the point; the loser is nudged until unique|  
+|`offset`|`number`|no|0|Added to climate distance when picking a biome. Larger values make the biome harder to win / effectively smaller|  
 |`palette`|`table`|no|`{}`|Biome's block palette|  
 |`scatter`|`table[]`|no|`{}`|List of features to scatter|  
 
@@ -75,10 +77,12 @@ Returns the numeric biome ID
 ```lua
 biomes.add("plains", {
   realm = biomes.REALM_SURFACE,
-  lut_temp = 50,
-  lut_humd = 50,
-  lut_axis = 50,
+  temperature = 50,
+  humidity = 50,
+  continentalness = 55,
+  weirdness = 35,
   priority = 0,
+  offset = 0,
 
   palette = {
     empty = { name = "air" },
@@ -105,18 +109,12 @@ biomes.add("plains", {
 })
 ```
 
-## Biome LUTs
+## Climate / multi-noise
 
-Every biome defines three LUT axes - temperature, humidity and an extra. These values are sampled from noise during terrain generation and based on their values a biome is chosen. For optimization purposes, the engine builds a 3D lookup table (a matrix?) of biome IDs for each LUT value.  
+Biome placement uses a sparse multi-noise model; at generation time, the engine samples four continious climate noises (temperature, humidity, continentalness and weirdness) and picks the biome which target point in that space is nearest  
 
-> **NOTE:** Voxelius uses 32-bit integers as biome IDs so a single lookup table for a realm is about 3.82 MiB. Considering current realm amount and possible expansion in the future, it probably won't run on your 486...  
+During mod loading, each biome defines a nucleation point at its target coordinates (0..99 per axis). If two biomes ever collide, higher `priority` keeps the cell and the loser is nudged randomly until it gets a free slot
 
-Biomes are first placed as discrete "nucleation points" on the LUT grid, using their `temp`, `humd` and `axis` parameters as coordinates. If two biomes end up wanting the same point, `priority` decides who keeps it: the loser gets nudged to the nearest free cell instead  
+### Notes: `biomes.REALM_SURFACE`
 
-Once every biome has its point, the rest of the grid is resolved with a _nearest-seed search_: for every LUT cell, the engine finds the closest nucleation point (by squared distance) and assigns that biome's ID to the cell. The result is an exact 3D Voronoi diagram - borders form right where two nucleation points are equally close.
-
-> **NOTE:** probably a big TODO, but it would be cool if I also added a special "border" biome kind for all realms to prevent sharp biome borders. Kind of like old Minecraft was using rivers to split biomes apart, just much more data-driven  
-
-![flood-fill.gif](flood-fill.gif)  
-
-Think of each color as a separate biome type: you start with the discrete nucleation points for biomes defined by Lua scripts, and every other cell simply inherits the ID of whichever point is closest to it.
+For the surface realm, the same continious noises also drive the terrain shape: weirdness scales density amplitude and continentalness shifts the base height, making ocenas and inland areas separate  

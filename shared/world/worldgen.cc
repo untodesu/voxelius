@@ -6,6 +6,7 @@
 
 #include "shared/globals.hh"
 #include "shared/world/chunk.hh"
+#include "shared/world/realm_surface.hh"
 #include "shared/world/terrain.hh"
 #include "shared/world/world.hh"
 
@@ -47,7 +48,9 @@ void WorldgenTask::finalize(void)
 
 void worldgen::init(void)
 {
-    // empty
+    // TODO: pass in a world config / seed
+
+    realm_surface::init();
 }
 
 void worldgen::request(const ChunkPos& pos)

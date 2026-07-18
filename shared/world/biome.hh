@@ -35,11 +35,13 @@ struct BiomeDefinition {
 
     biome_realm realm;
 
-    std::uint8_t lut_temp;
-    std::uint8_t lut_humd;
-    std::uint8_t lut_axis;
+    std::uint8_t temperature;
+    std::uint8_t humidity;
+    std::uint8_t continentalness;
+    std::uint8_t weirdness;
 
     unsigned priority;
+    float offset;
 
     BiomePaletteEntry palette_basic;
     BiomePaletteEntry palette_filler;

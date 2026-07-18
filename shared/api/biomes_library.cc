@@ -179,13 +179,14 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
     def.realm = static_cast<biome_realm>(realm.value());
     lua_pop(L, 1);
 
-    const std::array lut_fields = {
-        std::make_pair("lut_temp", &def.lut_temp),
-        std::make_pair("lut_humd", &def.lut_humd),
-        std::make_pair("lut_axis", &def.lut_axis),
+    const std::array climate_fields = {
+        std::make_pair("temperature", &def.temperature),
+        std::make_pair("humidity", &def.humidity),
+        std::make_pair("continentalness", &def.continentalness),
+        std::make_pair("weirdness", &def.weirdness),
     };
 
-    for(const auto& [field_name, field_ptr] : lut_fields) {
+    for(const auto& [field_name, field_ptr] : climate_fields) {
         lua_getfield(L, def_idx, field_name);
 
         if(!lua_isnil(L, -1)) {
@@ -196,7 +197,7 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
             }
 
             if(value.value() < 0 || value.value() > 99) {
-                lua_pushliteral(L, "lut value out of range [0..99]");
+                lua_pushliteral(L, "climate value out of range [0..99]");
                 return false;
             }
 
@@ -219,6 +220,16 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
     }
 
     def.priority = static_cast<unsigned>(priority.value());
+    lua_pop(L, 1);
+
+    lua_getfield(L, def_idx, "offset");
+    auto offset = utils::opt_number(L, -1, 0.0);
+
+    if(!offset.has_value()) {
+        return false;
+    }
+
+    def.offset = static_cast<float>(offset.value());
     lua_pop(L, 1);
 
     lua_getfield(L, def_idx, "palette");
@@ -288,9 +299,11 @@ static bool add_biome(lua_State* L, ModContext* ctx, const char* raw_name, int d
 
     BiomeDefinition def {};
 
-    def.lut_temp = 50;
-    def.lut_humd = 50;
-    def.lut_axis = 50;
+    def.temperature = 50;
+    def.humidity = 50;
+    def.continentalness = 50;
+    def.weirdness = 50;
+    def.offset = 0.0f;
 
     def.priority = 0;
 
