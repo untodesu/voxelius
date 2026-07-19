@@ -108,11 +108,36 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
 
     lua_pop(L, 1);
 
-    lua_getfield(L, def_idx, "tint");
-    auto tint = utils::opt_integer(L, -1, 0);
+    lua_getfield(L, def_idx, "fog_density");
+    auto fog_density = utils::opt_number(L, -1, 1.0);
 
-    if(tint.has_value()) {
-        def.tint = static_cast<unsigned>(tint.value());
+    if(!fog_density.has_value()) {
+        return false;
+    }
+
+    def.fog_density = std::max(static_cast<float>(fog_density.value()), 1.0f);
+    lua_pop(L, 1);
+
+    lua_getfield(L, def_idx, "fog_tint");
+
+    if(!lua_isnil(L, -1)) {
+        auto fog_tint = utils::read_vector<float, 3>(L, -1);
+
+        if(!fog_tint.has_value()) {
+            return false;
+        }
+
+        def.fog_tint = fog_tint.value();
+        def.fog_tint = def.fog_tint.cwiseMax(0.0f).cwiseMin(1.0f);
+    }
+
+    lua_pop(L, 1);
+
+    lua_getfield(L, def_idx, "tint_index");
+    auto tint_index = utils::opt_integer(L, -1, 0);
+
+    if(tint_index.has_value()) {
+        def.tint_index = static_cast<unsigned>(tint_index.value());
     }
 
     lua_pop(L, 1);
@@ -172,9 +197,15 @@ static bool add_fluid(lua_State* L, ModContext* ctx, const char* raw_name, int d
 
     FluidDefinition def {};
 
+    def.gravity = FLUID_GRAVITY_DOWN;
     def.opaque = false;
+
     def.max_level = std::nullopt;
-    def.tint = 0;
+
+    def.fog_density = 1.0f;
+    def.fog_tint.setOnes();
+
+    def.tint_index = 0;
 
     if(!parse_definition(L, def_idx, def, ctx)) {
         return false;

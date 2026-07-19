@@ -193,7 +193,7 @@ private:
     void emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
         std::uint64_t entropy, std::optional<block_face> face) const;
     void emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalPos& lpos, const Eigen::Vector3f& min, const Eigen::Vector3f& max,
-        block_face face, const AtlasStrip* strip, unsigned tint) const;
+        block_face face, const AtlasStrip* strip, unsigned tint_index) const;
 
     void mesh_fluid(const LocalPos& lpos, const BlockDefinition& def);
     void mesh_block(const LocalPos& lpos, block_id_type id);
@@ -517,7 +517,7 @@ void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<c
 }
 
 void MeshingTask::emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalPos& lpos, const Eigen::Vector3f& min,
-    const Eigen::Vector3f& max, block_face face, const AtlasStrip* strip, unsigned tint) const
+    const Eigen::Vector3f& max, block_face face, const AtlasStrip* strip, unsigned tint_index) const
 {
     if(strip == nullptr) {
         return;
@@ -615,7 +615,7 @@ void MeshingTask::emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalP
     }
 
     out_quad.data_uv = ChunkMesh_Quad::pack_uv(c0, c2);
-    out_quad.data_texture = ChunkMesh_Quad::pack_texture(static_cast<std::uint32_t>(strip->index), 0, tint);
+    out_quad.data_texture = ChunkMesh_Quad::pack_texture(static_cast<std::uint32_t>(strip->index), 0, tint_index);
 
     std::array<std::uint32_t, 4> ao_values;
     ao_values.fill(3);
@@ -674,7 +674,7 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
                     max.y() = 1.0f - neighbour_height;
                 }
 
-                emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, fluid->tint);
+                emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, fluid->tint_index.value_or(0));
 
                 continue;
             }
@@ -704,10 +704,10 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
         }
 
         if(is_side) {
-            emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, fluid->tint);
+            emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, fluid->tint_index.value_or(0));
         }
         else {
-            emit_fluid_quad(bucket, lpos, min, max, face, cached->still, fluid->tint);
+            emit_fluid_quad(bucket, lpos, min, max, face, cached->still, fluid->tint_index.value_or(0));
         }
     }
 }

@@ -4,6 +4,7 @@ print("engine version:", core.VERSION)
 fluids.add("water", {
   gravity = fluids.GRAVITY_DOWN,
   max_level = 14,
+
   textures = {
     still = {
       "water_still_01.png",
@@ -41,7 +42,10 @@ fluids.add("water", {
       "water_flowing_15.png",
       "water_flowing_16.png",
     }
-  }
+  },
+
+  fog_density = 10.0,
+  fog_tint = { 0.0, 0.3, 0.5 },
 })
 
 dofile("blocks/dirt.lua")
