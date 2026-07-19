@@ -338,6 +338,28 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         lua_pop(L, 1);
     }
 
+    if(reader.try_push("fluid_name")) {
+        auto value = utils::require_string(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.fluid = ctx->find_fluid(Identifier::from_string(value.value(), ctx->name_space()));
+        lua_pop(L, 1);
+    }
+
+    if(reader.try_push("fluid_level")) {
+        auto value = utils::require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        patch.fluid_level = static_cast<unsigned>(value.value());
+        lua_pop(L, 1);
+    }
+
     if(reader.try_push("health")) {
         auto value = utils::require_integer(L, -1);
 
@@ -506,6 +528,28 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         }
 
         def.bcoll_facing = static_cast<block_face>(value.value());
+        lua_pop(L, 1);
+    }
+
+    if(reader.try_push("fluid_name")) {
+        auto value = utils::require_string(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.fluid = ctx->find_fluid(Identifier::from_string(value.value(), ctx->name_space()));
+        lua_pop(L, 1);
+    }
+
+    if(reader.try_push("fluid_level")) {
+        auto value = utils::require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return false;
+        }
+
+        def.fluid_level = static_cast<unsigned>(value.value());
         lua_pop(L, 1);
     }
 
@@ -902,6 +946,9 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
 
     def.bcoll_offset.setZero();
     def.bcoll_facing = BLOCK_FACE_NORTH;
+
+    def.fluid = FLUID_ID_NULL;
+    def.fluid_level = 0;
 
     def.health = 0;
     def.tools = BLOCK_TOOL_NONE;

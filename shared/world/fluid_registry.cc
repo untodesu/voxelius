@@ -1,0 +1,90 @@
+#include "shared/pch.hh"
+
+#include "shared/world/fluid_registry.hh"
+
+#include "core/exception.hh"
+
+#include "shared/mod_context.hh"
+
+static std::vector<FluidDefinition> s_definitions;
+static emhash8::HashMap<Identifier, fluid_id_type> s_names;
+static emhash8::HashMap<fluid_id_type, Identifier> s_reverse_names;
+
+std::span<const FluidDefinition> fluid_registry::all_definitions(void)
+{
+    return s_definitions;
+}
+
+void fluid_registry::commit(ModContext& ctx)
+{
+    if(s_definitions.empty()) {
+        s_definitions.emplace_back();
+    }
+
+    auto fluids = ctx.take_fluids();
+    auto names = ctx.take_fluid_names();
+
+    fluid_id_type fluid_offset;
+
+    if(fluids.empty()) {
+        fluid_offset = static_cast<fluid_id_type>(s_definitions.size());
+    }
+    else {
+        fluid_offset = static_cast<fluid_id_type>(s_definitions.size()) - 1;
+    }
+
+    for(const auto& [name, local_id] : names) {
+        auto global_id = local_id + fluid_offset;
+        auto [it, inserted] = s_names.try_emplace(name, global_id);
+
+        if(!inserted) {
+            LOG_WARNING("duplicate fluid name: {}", name.full_string());
+            continue;
+        }
+
+        s_reverse_names.try_emplace(global_id, name);
+    }
+
+    if(fluids.size()) {
+        s_definitions.insert(s_definitions.end(), std::make_move_iterator(fluids.begin() + 1), std::make_move_iterator(fluids.end()));
+    }
+}
+
+void fluid_registry::purge(void)
+{
+    s_definitions.clear();
+    s_names.clear();
+    s_reverse_names.clear();
+}
+
+fluid_id_type fluid_registry::find(const Identifier& id)
+{
+    auto it = s_names.find(id);
+
+    if(it == s_names.cend())
+        return FLUID_ID_NULL;
+    return it->second;
+}
+
+std::optional<Identifier> fluid_registry::name_of(fluid_id_type id)
+{
+    auto it = s_reverse_names.find(id);
+
+    if(it == s_reverse_names.cend()) {
+        return std::nullopt;
+    }
+
+    return it->second;
+}
+
+const FluidDefinition* fluid_registry::find_definition(fluid_id_type id)
+{
+    if(id == FLUID_ID_NULL || id >= s_definitions.size())
+        return nullptr;
+    return &s_definitions[id];
+}
+
+const FluidDefinition* fluid_registry::find_definition(const Identifier& id)
+{
+    return find_definition(find(id));
+}

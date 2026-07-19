@@ -1,8 +1,9 @@
 #ifndef EE38FCD4_F793_4446_9DCF_44B1285F9330
 #define EE38FCD4_F793_4446_9DCF_44B1285F9330
 
-#include "shared/world/biome.hh"
+#include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
+#include "shared/world/fluid_registry.hh"
 
 namespace config
 {
@@ -88,6 +89,12 @@ public:
     std::vector<BiomeDefinition> take_biomes(void);
     emhash8::HashMap<Identifier, biome_id_type> take_biome_names(void);
 
+    fluid_id_type find_fluid(const Identifier& name) const;
+    fluid_id_type register_fluid(const Identifier& name, FluidDefinition def);
+
+    std::vector<FluidDefinition> take_fluids(void);
+    emhash8::HashMap<Identifier, fluid_id_type> take_fluid_names(void);
+
 private:
     ModInfo m_modinfo;
     mod_status m_status;
@@ -99,6 +106,9 @@ private:
 
     std::vector<BiomeDefinition> m_biomes;
     emhash8::HashMap<Identifier, biome_id_type> m_biome_names;
+
+    std::vector<FluidDefinition> m_fluids;
+    emhash8::HashMap<Identifier, fluid_id_type> m_fluid_names;
 };
 
 constexpr const ModInfo& ModContext::modinfo(void) const

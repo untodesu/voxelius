@@ -3,6 +3,8 @@
 
 #include "core/identifier.hh"
 
+#include "shared/world/fluid.hh"
+
 enum block_render : unsigned {
     BLOCK_RENDER_NONE = std::numeric_limits<unsigned>::max(),
     BLOCK_RENDER_SOLID = 0,
@@ -85,6 +87,9 @@ struct BlockDefinition final {
     Identifier bcoll_name;
     Eigen::Vector3f bcoll_offset;
     block_face bcoll_facing;
+
+    fluid_id_type fluid;
+    unsigned fluid_level;
 
     unsigned health;
     block_tool_bit tools; // big tool mask made from drops cond_tool_bits

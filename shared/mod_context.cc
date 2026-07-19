@@ -12,6 +12,7 @@
 #include "shared/api/biomes_library.hh"
 #include "shared/api/blocks_library.hh"
 #include "shared/api/core_library.hh"
+#include "shared/api/fluids_library.hh"
 #include "shared/api/lua_libraries.hh"
 #include "shared/api/world_library.hh"
 #include "shared/constant.hh"
@@ -135,6 +136,7 @@ bool ModContext::initialize(void)
     m_lua_state = std::shared_ptr<lua_State>(L, &lua_close);
     api::open_lua_libraries(m_lua_state, this);
     api::open_core_library(m_lua_state, this);
+    api::open_fluids_library(m_lua_state, this);
     api::open_blocks_library(m_lua_state, this);
     api::open_biomes_library(m_lua_state, this);
     api::open_world_library(m_lua_state, this);
@@ -263,4 +265,37 @@ std::vector<BiomeDefinition> ModContext::take_biomes(void)
 emhash8::HashMap<Identifier, biome_id_type> ModContext::take_biome_names(void)
 {
     return std::move(m_biome_names);
+}
+
+fluid_id_type ModContext::find_fluid(const Identifier& name) const
+{
+    auto it = m_fluid_names.find(name);
+
+    if(it == m_fluid_names.cend())
+        return FLUID_ID_NULL;
+    return it->second;
+}
+
+fluid_id_type ModContext::register_fluid(const Identifier& name, FluidDefinition def)
+{
+    if(m_fluids.empty()) {
+        m_fluids.emplace_back();
+    }
+
+    auto id = static_cast<fluid_id_type>(m_fluids.size());
+
+    m_fluids.push_back(std::move(def));
+    m_fluid_names.try_emplace(name, id);
+
+    return id;
+}
+
+std::vector<FluidDefinition> ModContext::take_fluids(void)
+{
+    return std::move(m_fluids);
+}
+
+emhash8::HashMap<Identifier, fluid_id_type> ModContext::take_fluid_names(void)
+{
+    return std::move(m_fluid_names);
 }

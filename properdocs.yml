@@ -78,6 +78,7 @@ nav:
       - Engine API:
         - Lua Base: dev/modding/api-lua.md
         - Core: dev/modding/api-core.md
+        - Fluids: dev/modding/api-fluids.md
         - Blocks: dev/modding/api-blocks.md
         - Features: dev/modding/api-features.md
         - Biomes: dev/modding/api-biomes.md

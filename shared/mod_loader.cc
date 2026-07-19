@@ -9,6 +9,7 @@
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/climate.hh"
+#include "shared/world/fluid_registry.hh"
 
 static std::vector<ModContext> s_mods;
 
@@ -168,6 +169,7 @@ void mod_loader::init(void)
             continue;
         }
 
+        fluid_registry::commit(ctx);
         block_registry::commit(ctx);
         biome_registry::commit(ctx);
     }
@@ -181,8 +183,9 @@ void mod_loader::shutdown(void)
 {
     s_mods.clear();
 
-    block_registry::purge();
     biome_registry::purge();
+    block_registry::purge();
+    fluid_registry::purge();
 }
 
 std::span<const ModContext> mod_loader::all(void)

@@ -113,6 +113,10 @@ Register a new block in the registry
 - `def` is a table of block definitions, see below for that  
 - `prototype` (3-argument form) is a base table of block definitions shared across a family of blocks (eg. all stone variants). `def` is merged on top of it, with `def`'s fields taking priority on conflicts  
 
+#### Return value
+
+Returns the numeric block ID
+
 #### Notes
 
 **Rename rule:** on conflict, the encroaching `name` is suffixed with `~N`, where `N` is the smallest integer starting at `1` that produces a free id (e.g. `mymod:myblock~1`). This keeps loading deterministic and reproducible across runs with the same mod list/order.
@@ -124,12 +128,14 @@ Register a new block in the registry
 |`render`|`integer`|yes|N/D|One of `blocks.RENDER_XXXX` constants|  
 |`textures`|`table`|depends|`{}`|Textures to attach to the block model|  
 |`animated`|`boolean`|no|`false`|When set to true, multiple textures from the `textures` value are used as animation frames instead of being positionally randomized in the world|  
-|`model_name`|`string`|depends|N/D|Block model name for this variant|  
+|`model_name`|`string`|depends|N/D|[Block model](format-bmodel.md) name for this variant|  
 |`model_offset`|`number[3]`|depends|`{0, 0, 0}`|Offset of the resolved block model|  
 |`model_facing`|`integer`|no|`blocks.FACE_NORTH`|One of the `blocks.FACE_XXXX` constants. Says which way the model's own north face should end up pointing; rotates the whole resolved block model|  
-|`bcoll_name`|`string`|depends|N/D|Block collision shape for this variant|  
+|`bcoll_name`|`string`|depends|N/D|[Block collision](format-bcoll.md) shape for this variant|  
 |`bcoll_offset`|`number[3]`|depends|`{0, 0, 0}`|Block collision offset|  
 |`bcoll_facing`|`integer`|no|`blocks.FACE_NORTH`|One of the `blocks.FACE_XXXX` constants. Rotates the whole resolved collision shape the same way `model_facing` rotates the model; set independently since collision doesn't have to follow the visual, though it usually should|  
+|`fluid_name`|`string`|no|N/D|[Fluid](api-fluids.md) name to share the grid cell with the block|  
+|`fluid_level`|`integer`|no|0|Fluid level if `fluid_name` is defined, in 1/16ths of a block|  
 |`health`|`integer`|no|`0`|Base amount of hit points required for the block to be broken. Varies with different effects active on the tool|  
 |`sound`|`string`|no|N/D|Sound set to use for this block|  
 |`emission`|`integer`|no|`0`|Emission light value|  

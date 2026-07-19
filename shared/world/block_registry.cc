@@ -101,6 +101,14 @@ BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverr
         base.bcoll_facing = patch.bcoll_facing.value();
     }
 
+    if(patch.fluid) {
+        base.fluid = patch.fluid.value();
+    }
+
+    if(patch.fluid_level) {
+        base.fluid_level = patch.fluid_level.value();
+    }
+
     if(patch.health) {
         base.health = patch.health.value();
     }

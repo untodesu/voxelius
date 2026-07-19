@@ -30,6 +30,9 @@ struct BlockOverridePatch final {
     std::optional<Eigen::Vector3f> bcoll_offset;
     std::optional<block_face> bcoll_facing;
 
+    std::optional<fluid_id_type> fluid;
+    std::optional<unsigned> fluid_level;
+
     std::optional<unsigned> health;
 
     std::optional<Identifier> sound_set;
