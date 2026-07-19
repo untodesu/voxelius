@@ -12,7 +12,7 @@
 #include "shared/world/noise_cache.hh"
 
 constexpr static float VARIATION_MIN = 16.0f;
-constexpr static float VARIATION_MAX = 128.0f;
+constexpr static float VARIATION_MAX = 96.0f;
 constexpr static float BASE_MIN = -24.0f;
 constexpr static float BASE_MAX = 16.0f;
 
