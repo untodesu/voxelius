@@ -95,9 +95,14 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
     lua_pop(L, 1);
 
     lua_getfield(L, def_idx, "max_level");
-    auto max_level = utils::opt_integer(L, -1, 0);
 
-    if(max_level.has_value()) {
+    if(!lua_isnoneornil(L, -1)) {
+        auto max_level = utils::require_integer(L, -1);
+
+        if(!max_level.has_value()) {
+            return false;
+        }
+
         def.max_level = static_cast<unsigned>(max_level.value());
     }
 
@@ -137,7 +142,7 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
         return false;
     }
 
-    lua_getfield(L, -2, "flowing");
+    lua_getfield(L, -1, "flowing");
 
     if(!parse_textures(L, lua_gettop(L), def.flowing_textures, ctx)) {
         return false;
@@ -150,6 +155,7 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
         return false;
     }
 
+    lua_pop(L, 1); // textures
     return true;
 }
 
@@ -167,7 +173,7 @@ static bool add_fluid(lua_State* L, ModContext* ctx, const char* raw_name, int d
     FluidDefinition def {};
 
     def.opaque = false;
-    def.max_level = 0;
+    def.max_level = std::nullopt;
     def.tint = 0;
 
     if(!parse_definition(L, def_idx, def, ctx)) {

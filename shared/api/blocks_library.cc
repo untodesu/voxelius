@@ -345,7 +345,14 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
             return false;
         }
 
-        patch.fluid = ctx->find_fluid(Identifier::from_string(value.value(), ctx->name_space()));
+        auto fluid_id = Identifier::from_string(value.value(), ctx->name_space());
+
+        if(!fluid_id.is_valid()) {
+            lua_pushfstring(L, "malformed fluid name: %s", value.value());
+            return false;
+        }
+
+        patch.fluid_name = std::move(fluid_id);
         lua_pop(L, 1);
     }
 
@@ -538,7 +545,14 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
             return false;
         }
 
-        def.fluid = ctx->find_fluid(Identifier::from_string(value.value(), ctx->name_space()));
+        auto fluid_id = Identifier::from_string(value.value(), ctx->name_space());
+
+        if(!fluid_id.is_valid()) {
+            lua_pushfstring(L, "malformed fluid name: %s", value.value());
+            return false;
+        }
+
+        def.fluid_name = std::move(fluid_id);
         lua_pop(L, 1);
     }
 
@@ -949,6 +963,7 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
 
     def.fluid = FLUID_ID_NULL;
     def.fluid_level = 0;
+    def.fluid_name = std::nullopt;
 
     def.health = 0;
     def.tools = BLOCK_TOOL_NONE;

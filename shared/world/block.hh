@@ -90,6 +90,7 @@ struct BlockDefinition final {
 
     fluid_id_type fluid;
     unsigned fluid_level;
+    std::optional<Identifier> fluid_name;
 
     unsigned health;
     block_tool_bit tools; // big tool mask made from drops cond_tool_bits

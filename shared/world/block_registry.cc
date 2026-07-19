@@ -7,6 +7,7 @@
 #include "core/utils/string.hh"
 
 #include "shared/mod_context.hh"
+#include "shared/world/fluid_registry.hh"
 
 static std::vector<BlockDefinition> s_definitions;
 static std::vector<BlockFamily> s_families;
@@ -28,6 +29,37 @@ static std::uint64_t hash_state_map(const emhash8::HashMap<blockstate_key_type, 
     }
 
     return hash;
+}
+
+static void resolve_fluid_binding(BlockDefinition& def)
+{
+    if(def.fluid_name.has_value()) {
+        def.fluid = fluid_registry::find(def.fluid_name.value());
+
+        if(def.fluid == FLUID_ID_NULL) {
+            LOG_WARNING("unknown fluid: {}", def.fluid_name->full_string());
+            def.fluid_name.reset();
+            return;
+        }
+
+        def.fluid_name.reset();
+    }
+
+    if(def.fluid) {
+        auto fluid_def = fluid_registry::find_definition(def.fluid);
+
+        if(fluid_def && fluid_def->max_level.has_value()) {
+            auto id = fluid_registry::name_of(def.fluid);
+            assert(id.has_value());
+
+            auto max_level = fluid_def->max_level.value();
+            auto cur_level = def.fluid_level;
+
+            if(cur_level > max_level) {
+                LOG_WARNING("fluid_level {} exceeds max_level {} for {}", cur_level, max_level, id->full_string());
+            }
+        }
+    }
 }
 
 static BlockDefinition apply_matching_variant(const BlockDefinition& base_def, const BlockFamily& family,
@@ -101,8 +133,8 @@ BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverr
         base.bcoll_facing = patch.bcoll_facing.value();
     }
 
-    if(patch.fluid) {
-        base.fluid = patch.fluid.value();
+    if(patch.fluid_name) {
+        base.fluid_name = patch.fluid_name;
     }
 
     if(patch.fluid_level) {
@@ -213,6 +245,10 @@ void block_registry::commit(ModContext& ctx)
     }
 
     for(auto& def : blocks) {
+        resolve_fluid_binding(def);
+    }
+
+    for(auto& def : blocks) {
         if(def.family) {
             def.family += family_offset;
         }
@@ -275,6 +311,9 @@ void block_registry::commit(ModContext& ctx)
 
                 if(auto stem_def = find_definition(family.stem_id)) {
                     auto resolved = apply_matching_variant(*stem_def, family, default_map);
+
+                    resolve_fluid_binding(resolved);
+
                     resolved.is_stem = false;
                     resolved.family = i;
 
@@ -404,6 +443,9 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id, const emhas
     vx::throw_if_fmt(stem_def == nullptr, "block_registry: {}: invalid stem_id: {}", family.name.full_string(), family.stem_id);
 
     BlockDefinition resolved = apply_matching_variant(*stem_def, family, map);
+
+    resolve_fluid_binding(resolved);
+
     resolved.family = def->family;
     resolved.is_stem = false;
 
