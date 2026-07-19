@@ -1,18 +1,10 @@
-local level_hints = {}
-local level_variants = {}
+local fluids = require("builtin:fluids.lua")
 
-for level = 1, 14 do
-  local level_str = tostring(level)
-  local level_variant = {
-    when = { level = level_str },
-    overrides = {
-      fluid_level = level,
-    },
-  }
-
-  level_hints[#level_hints + 1] = level_str
-  level_variants[#level_variants + 1] = level_variant
-end
+local FLUID = {
+  max_level = 8,
+  delay = 5,
+  infinite = true,
+}
 
 blocks.add("water", {
   render = blocks.RENDER_NONE,
@@ -25,12 +17,9 @@ blocks.add("water", {
   emission = 0,
   dissipation = 1,
 
-  states = {
-    level = {
-      default = "14",
-      hint = level_hints,
-    },
-  },
+  states = fluids.states(FLUID),
+  variants = fluids.variants(FLUID),
 
-  variants = level_variants,
+  on_place = fluids.on_place(FLUID),
+  on_tick = fluids.on_tick("water", FLUID),
 })

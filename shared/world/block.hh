@@ -48,6 +48,12 @@ enum block_tag_bit : std::uint32_t {
     BLOCK_TAG_ALL = 0xFFFFFFFFU,
 };
 
+enum block_tick_source : unsigned {
+    BLOCK_TICK_RANDOM,    ///< Random tick update
+    BLOCK_TICK_NEIGHBOUR, ///< Neighbour block change
+    BLOCK_TICK_SCRIPTED,  ///< Scripted update
+};
+
 using block_id_type = std::uint32_t;
 constexpr static block_id_type BLOCK_ID_NULL = 0;
 constexpr static block_id_type BLOCK_ID_MAX = std::numeric_limits<block_id_type>::max();

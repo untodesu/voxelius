@@ -47,8 +47,6 @@ void shared_game::fixed_update(void)
     Velocity::fixed_update();
 
     world::fixed_update();
-
-    world::current_tick += 1;
 }
 
 void shared_game::fixed_update_late(void)

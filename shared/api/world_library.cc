@@ -122,9 +122,10 @@ static int api_schedule(lua_State* L)
     pos.y() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 2));
     pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
-    auto deadline = static_cast<std::uint64_t>(luaL_checkinteger(L, 4));
+    auto dt = static_cast<std::uint64_t>(luaL_checkinteger(L, 4));
+    auto deadline = world::current_tick + dt;
 
-    world::schedule(pos, deadline);
+    world::schedule(pos, deadline, BLOCK_TICK_SCRIPTED);
 
     return 0;
 }

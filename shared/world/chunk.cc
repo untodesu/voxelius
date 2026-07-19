@@ -9,24 +9,26 @@ Chunk::Chunk(entt::entity entity) : m_entity(entity)
     // empty
 }
 
-static void serialize_schedule(const std::multimap<std::uint64_t, std::size_t>& schedule, WriteBuffer& buffer)
+static void serialize_schedule(const std::multimap<std::uint64_t, std::pair<std::size_t, block_tick_source>>& schedule, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(static_cast<std::uint32_t>(schedule.size()));
 
-    for(const auto& [deadline, index] : schedule) {
+    for(const auto& [deadline, entry] : schedule) {
         buffer.write<std::uint64_t>(deadline);
-        buffer.write<std::uint32_t>(static_cast<std::uint32_t>(index));
+        buffer.write<std::uint32_t>(static_cast<std::uint32_t>(entry.first));
+        buffer.write<std::uint32_t>(static_cast<std::uint32_t>(entry.second));
     }
 }
 
-static void deserialize_schedule(std::multimap<std::uint64_t, std::size_t>& schedule, ReadBuffer& buffer)
+static void deserialize_schedule(std::multimap<std::uint64_t, std::pair<std::size_t, block_tick_source>>& schedule, ReadBuffer& buffer)
 {
     const auto size = buffer.read<std::uint32_t>();
 
     for(std::uint32_t i = 0; i < size; ++i) {
         auto deadline = buffer.read<std::uint64_t>();
         auto index = buffer.read<std::uint32_t>();
-        schedule.emplace(deadline, index);
+        auto source = buffer.read<std::uint32_t>();
+        schedule.emplace(deadline, std::make_pair(index, static_cast<block_tick_source>(source)));
     }
 }
 
@@ -67,12 +69,25 @@ void Chunk::set_blocks(BlockStorage blocks)
     m_blocks = std::move(blocks);
 }
 
-void Chunk::schedule(std::size_t index, std::uint64_t deadline)
+void Chunk::schedule(std::size_t index, std::uint64_t deadline, block_tick_source source)
 {
-    m_scheduled.emplace(deadline, index);
+    for(auto it = m_scheduled.begin(); it != m_scheduled.end();) {
+        if(it->second.first == index && it->second.second == source) {
+            if(it->first <= deadline) {
+                return;
+            }
+
+            it = m_scheduled.erase(it);
+            continue;
+        }
+
+        ++it;
+    }
+
+    m_scheduled.emplace(deadline, std::make_pair(index, source));
 }
 
-void Chunk::pop_due(std::uint64_t now, std::vector<std::size_t>& out)
+void Chunk::pop_due(std::uint64_t now, std::vector<std::pair<std::size_t, block_tick_source>>& out)
 {
     auto it = m_scheduled.begin();
 

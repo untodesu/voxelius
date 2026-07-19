@@ -91,7 +91,7 @@ Retreive a biome-defined temperature base for a given block
 
 #### Return value
 
-- Temperature in Kelvin degrees;
+- Base temperature in biome registry units (0..99)  
 - If the block is void or the chunk is not present, `0` is returned
 
 #### Notes
@@ -110,7 +110,7 @@ Retreive a biome-influenced seasonal temperature for a given block
 
 #### Return value
 
-- Temperature in Kelvin degrees;
+- Temperature in biome registry units (0..99)  
 - If the block is void or the chunk is not present, `0` is returned
 
 #### Notes
@@ -119,7 +119,7 @@ This can be influenced by season, weather and other factors. Relatively low valu
 
 ### Function: `world.schedule(bx, by, bz, dt)`
 
-Schedule an `on_stick` call to a block, `dt` ticks from now.  
+Schedule an `on_tick` call to a block, `dt` ticks from now. The tick source will be `blocks.TICK_SCRIPTED`.  
 
 - `bx` is the world-scale block X position  
 - `by` is the world-scale block Y position  

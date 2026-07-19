@@ -939,6 +939,20 @@ static int api_has_tag(lua_State* L)
     return 1;
 }
 
+static int api_is_replaceable(lua_State* L)
+{
+    auto id = static_cast<block_id_type>(luaL_checkinteger(L, 1));
+
+    if(id == BLOCK_ID_NULL) {
+        lua_pushboolean(L, true);
+        return 1;
+    }
+
+    auto def = block_registry::find_definition(id);
+    lua_pushboolean(L, def != nullptr && def->replaceable);
+    return 1;
+}
+
 static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int def_idx, int proto_idx, block_id_type& out_block_id)
 {
     auto id = Identifier::from_string(raw_name, ctx->name_space());
@@ -1008,7 +1022,7 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
         lua_pop(L, 1);
     }
 
-    for(const auto& key : std::array { "variants", "on_random_tick", "on_sched_tick", "on_place", "on_break", "on_interact" }) {
+    for(const auto& key : std::array { "variants", "on_tick", "on_place", "on_break", "on_interact" }) {
         if(reader.try_push(key)) {
             has_checked_key = true;
             lua_pop(L, 1);
@@ -1047,8 +1061,7 @@ static bool add_block(lua_State* L, ModContext* ctx, const char* raw_name, int d
         family.on_place = parse_callback(L, def_idx, "on_place", ctx);
         family.on_break = parse_callback(L, def_idx, "on_break", ctx);
         family.on_interact = parse_callback(L, def_idx, "on_interact", ctx);
-        family.on_random_tick = parse_callback(L, def_idx, "on_random_tick", ctx);
-        family.on_sched_tick = parse_callback(L, def_idx, "on_sched_tick", ctx);
+        family.on_tick = parse_callback(L, def_idx, "on_tick", ctx);
 
         auto family_id = ctx->register_block_family(std::move(family));
         ctx->set_block_family(block_id, family_id);
@@ -1159,6 +1172,13 @@ void api::open_blocks_library(std::shared_ptr<lua_State>& lua, ModContext* ctx)
     lua_pushinteger(L, BLOCK_TAG_WOOD);
     lua_setfield(L, -2, "TAG_WOOD");
 
+    lua_pushinteger(L, BLOCK_TICK_RANDOM);
+    lua_setfield(L, -2, "TICK_RANDOM");
+    lua_pushinteger(L, BLOCK_TICK_NEIGHBOUR);
+    lua_setfield(L, -2, "TICK_NEIGHBOUR");
+    lua_pushinteger(L, BLOCK_TICK_SCRIPTED);
+    lua_setfield(L, -2, "TICK_SCRIPTED");
+
     lua_pushinteger(L, BLOCK_ID_NULL);
     lua_setfield(L, -2, "NULL_BLOCK");
 
@@ -1168,6 +1188,9 @@ void api::open_blocks_library(std::shared_ptr<lua_State>& lua, ModContext* ctx)
 
     lua_pushcfunction(L, &api_has_tag);
     lua_setfield(L, -2, "has_tag");
+
+    lua_pushcfunction(L, &api_is_replaceable);
+    lua_setfield(L, -2, "is_replaceable");
 
     lua_pushlightuserdata(L, ctx);
     lua_pushcclosure(L, &api_add, 1);

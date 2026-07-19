@@ -74,8 +74,7 @@ struct BlockFamily final {
     BlockCallback on_place;
     BlockCallback on_break;
     BlockCallback on_interact;
-    BlockCallback on_random_tick;
-    BlockCallback on_sched_tick;
+    BlockCallback on_tick;
 
     emhash8::HashMap<std::uint64_t, block_id_type> resolved_states;
     emhash8::HashMap<block_id_type, emhash8::HashMap<blockstate_key_type, blockstate_val_type>> id_states;

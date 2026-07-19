@@ -20,13 +20,13 @@ public:
     constexpr const BlockStorage& blocks(void) const;
     void set_blocks(BlockStorage blocks);
 
-    void schedule(std::size_t index, std::uint64_t deadline);
-    void pop_due(std::uint64_t now, std::vector<std::size_t>& out);
+    void schedule(std::size_t index, std::uint64_t deadline, block_tick_source source);
+    void pop_due(std::uint64_t now, std::vector<std::pair<std::size_t, block_tick_source>>& out);
 
 private:
     entt::entity m_entity;
     BlockStorage m_blocks;
-    std::multimap<std::uint64_t, std::size_t> m_scheduled;
+    std::multimap<std::uint64_t, std::pair<std::size_t, block_tick_source>> m_scheduled;
 };
 
 struct Chunk_Component final {

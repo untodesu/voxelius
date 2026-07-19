@@ -3,6 +3,7 @@
 
 #include "shared/coord.hh"
 #include "shared/world/block.hh"
+#include "shared/world/chunk.hh"
 
 namespace physics
 {
@@ -14,8 +15,7 @@ namespace utils
 bool block_place(const physics::BlockHit& hit, entt::entity actor, block_id_type id);
 bool block_break(const physics::BlockHit& hit, entt::entity actor);
 bool block_interact(const physics::BlockHit& hit, entt::entity actor);
-bool block_random_tick(const BlockPos& pos);
-bool block_sched_tick(const BlockPos& pos);
+bool block_sched_tick(const ChunkPos& cpos, const std::shared_ptr<Chunk>& chunk, std::size_t index, block_tick_source source);
 } // namespace utils
 
 #endif /* C52EB39B_B4F6_4E65_A3E6_F664EEC9C8DE */

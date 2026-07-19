@@ -4,6 +4,7 @@
 
 #include "shared/globals.hh"
 #include "shared/utils/coord.hh"
+#include "shared/utils/world.hh"
 #include "shared/world/block_registry.hh"
 
 emhash8::HashMap<ChunkPos, std::shared_ptr<Chunk>> world::chunks;
@@ -127,9 +128,37 @@ block_id_type world::get_block(const BlockPos& pos)
 bool world::set_block(const ChunkPos& cpos, const LocalPos& lpos, block_id_type id)
 {
     if(auto chunk = find_chunk(cpos)) {
+        if(chunk->get_block(lpos) == id) {
+            return true;
+        }
+
         chunk->set_block(lpos, id);
 
         globals::dispatcher.trigger(BlockUpdateEvent(utils::to_block(cpos, lpos), id, chunk));
+
+        const std::array neighbours = {
+            BlockPos(+1, 0, 0),
+            BlockPos(-1, 0, 0),
+            BlockPos(0, +1, 0),
+            BlockPos(0, -1, 0),
+            BlockPos(0, 0, +1),
+            BlockPos(0, 0, -1),
+        };
+
+        auto bpos = utils::to_block(cpos, lpos);
+
+        // Schedule for the next tick so neighbour updates never fire mid-pass
+        // in an order that depends on chunk iteration order.
+        auto neighbour_deadline = world::current_tick + 1;
+
+        for(const auto& npos : neighbours) {
+            auto nbpos = bpos + npos;
+            auto ncpos = utils::to_chunk(nbpos);
+
+            if(chunks.contains(ncpos)) {
+                schedule(nbpos, neighbour_deadline, BLOCK_TICK_NEIGHBOUR);
+            }
+        }
 
         return true;
     }
@@ -269,20 +298,20 @@ std::int32_t world::get_temperature(const BlockPos& pos)
     return get_temperature(cpos, lpos);
 }
 
-void world::schedule(const ChunkPos& cpos, const LocalPos& lpos, std::uint64_t deadline)
+void world::schedule(const ChunkPos& cpos, const LocalPos& lpos, std::uint64_t deadline, block_tick_source source)
 {
     if(auto chunk = find_chunk(cpos)) {
         auto index = utils::to_index(lpos);
 
-        chunk->schedule(index, deadline);
+        chunk->schedule(index, deadline, source);
     }
 }
 
-void world::schedule(const BlockPos& pos, std::uint64_t deadline)
+void world::schedule(const BlockPos& pos, std::uint64_t deadline, block_tick_source source)
 {
     auto cpos = utils::to_chunk(pos);
     auto lpos = utils::to_local(pos);
-    schedule(cpos, lpos, deadline);
+    schedule(cpos, lpos, deadline, source);
 }
 
 void world::shutdown(void)
@@ -295,16 +324,15 @@ void world::shutdown(void)
 
 void world::fixed_update(void)
 {
-    std::vector<std::size_t> due;
+    std::vector<std::pair<std::size_t, block_tick_source>> due;
 
     chunk_entities.view<Chunk_Component>().each([&](Chunk_Component& component) {
         due.clear();
 
         component.ptr->pop_due(current_tick, due);
 
-        for(auto index : due) {
-            // TODO: dispatch on_stick for component.ptr->get_block(index) here
-            // once there's a generic "call BlockCallback" helper
+        for(auto it : due) {
+            utils::block_sched_tick(component.position, component.ptr, it.first, it.second);
         }
     });
 

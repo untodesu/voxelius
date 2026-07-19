@@ -3,7 +3,6 @@ print("engine version:", core.VERSION)
 
 fluids.add("water", {
   gravity = fluids.GRAVITY_DOWN,
-  max_level = 14,
 
   textures = {
     still = {
@@ -82,7 +81,7 @@ biomes.add("plains", {
     basic = { name = "stone" },
     filler = { name = "dirt" },
     surface = { name = "grass" },
-    fluid = { name = "water", states = { level = "14" } },
+    fluid = { name = "water", states = { level = "8", source = "true" } },
   }
 })
 
@@ -98,7 +97,7 @@ biomes.add("desert", {
     basic = { name = "sandstone" },
     filler = { name = "sand" },
     surface = { name = "sand" },
-    fluid = { name = "water", states = { level = "14" } },
+    fluid = { name = "water", states = { level = "8", source = "true" } },
   }
 })
 
@@ -114,6 +113,6 @@ biomes.add("stoney_peaks", {
     basic = { name = "stone" },
     filler = { name = "stone" },
     surface = { name = "stone" },
-    fluid = { name = "water", states = { level = "14" } },
+    fluid = { name = "water", states = { level = "8", source = "true" } },
   }
 })

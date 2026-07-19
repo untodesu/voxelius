@@ -5,6 +5,7 @@
 #include "core/utils/crc64.hh"
 
 #include "shared/physics/physics.hh"
+#include "shared/utils/coord.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/world.hh"
 
@@ -217,16 +218,16 @@ bool utils::block_interact(const physics::BlockHit& hit, entt::entity actor)
     return call_routine(L, 5, 1, family->name.full_string());
 }
 
-bool utils::block_random_tick(const BlockPos& pos)
+bool utils::block_sched_tick(const ChunkPos& cpos, const std::shared_ptr<Chunk>& chunk, std::size_t index, block_tick_source source)
 {
-    auto id = world::get_block(pos);
+    auto id = chunk->get_block(index);
     auto family = block_registry::find_family_of(id);
 
     if(family == nullptr) {
         return false;
     }
 
-    const auto& callback = family->on_random_tick;
+    const auto& callback = family->on_tick;
 
     if(callback.callback_ref == LUA_NOREF || callback.state == nullptr) {
         return false;
@@ -235,34 +236,14 @@ bool utils::block_random_tick(const BlockPos& pos)
     auto L = callback.state.get();
     lua_rawgeti(L, LUA_REGISTRYINDEX, callback.callback_ref);
 
-    lua_pushinteger(L, static_cast<lua_Integer>(pos.x()));
-    lua_pushinteger(L, static_cast<lua_Integer>(pos.y()));
-    lua_pushinteger(L, static_cast<lua_Integer>(pos.z()));
+    auto lpos = utils::to_local(index);
+    auto bpos = utils::to_block(cpos, lpos);
 
-    return call_routine(L, 3, 1, family->name.full_string());
-}
+    lua_pushinteger(L, static_cast<lua_Integer>(bpos.x()));
+    lua_pushinteger(L, static_cast<lua_Integer>(bpos.y()));
+    lua_pushinteger(L, static_cast<lua_Integer>(bpos.z()));
 
-bool utils::block_sched_tick(const BlockPos& pos)
-{
-    auto id = world::get_block(pos);
-    auto family = block_registry::find_family_of(id);
+    lua_pushinteger(L, static_cast<lua_Integer>(source));
 
-    if(family == nullptr) {
-        return false;
-    }
-
-    const auto& callback = family->on_sched_tick;
-
-    if(callback.callback_ref == LUA_NOREF || callback.state == nullptr) {
-        return false;
-    }
-
-    auto L = callback.state.get();
-    lua_rawgeti(L, LUA_REGISTRYINDEX, callback.callback_ref);
-
-    lua_pushinteger(L, static_cast<lua_Integer>(pos.x()));
-    lua_pushinteger(L, static_cast<lua_Integer>(pos.y()));
-    lua_pushinteger(L, static_cast<lua_Integer>(pos.z()));
-
-    return call_routine(L, 3, 1, family->name.full_string());
+    return call_routine(L, 4, 1, family->name.full_string());
 }

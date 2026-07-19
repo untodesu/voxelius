@@ -66,6 +66,16 @@ Freeform grouping tags checked at runtime with `blocks.has_tag`. Any block can c
 |`blocks.TAG_FOIL`|Foilage, leaves, grass, etc|  
 |`blocks.TAG_WOOD`|Wooden blocks|  
 
+## Constants: schedule source
+
+A scheduled tick for a block is a tick that's issued non-randomly and with a specific tick timeout. Scheduled ticks can come from different sources  
+
+|Name|Description|  
+|----|----|  
+|`blocks.TICK_RANDOM`|Random tick|  
+|`blocks.TICK_NEIGHBOUR`|Neighbouring block changed|  
+|`blocks.TICK_SCRIPTED`|Scripted tick|  
+
 ## Constant: null block
 
 The `blocks.NULL_BLOCK` constant defines an empty, undefined or otherwise invalid block ID. Gameplay/gamedev-wise it can be treated as a void block  
@@ -101,6 +111,18 @@ Check if a block has a specified tag.
 #### Return value
 
 - `true` if the block has the specified tag, `false` otherwise  
+
+### Function: `blocks.is_replaceable(id) -> boolean`
+
+Check if a block ID can be overwritten without breaking it first (empty cell or `replaceable = true` at registration).  
+
+#### Arguments
+
+- `id` is a numeric block ID (stem or variant), or `blocks.NULL_BLOCK` for an empty cell  
+
+#### Return value
+
+- `true` if the cell may be occupied by another block, `false` otherwise  
 
 ### Function: `blocks.add(name, def) -> integer`
 ### Function: `blocks.add(name, prototype, def) -> integer`
@@ -146,8 +168,7 @@ Returns the numeric block ID
 |`replaceable`|`boolean`|no|`false`|When true, other blocks can be placed into this block's cell without breaking it first|  
 |`states`|`table`|no|`{}`|Blockstates table|  
 |`variants`|`table[]`|no|`{}`|Variants table|  
-|`on_random_tick`|`function`|no|`nil`|Random tick handler|  
-|`on_sched_tick`|`function`|no|`nil`|Scheduled tick handler|  
+|`on_tick`|`function`|no|`nil`|Scheduled tick handler|  
 |`on_place`|`function`|no|`nil`|Placement handler, can decide whether it's ok or not to place the block there|  
 |`on_break`|`function`|no|`nil`|Break handler|  
 |`on_interact`|`function`|no|`nil`|Interaction handler|  
@@ -290,18 +311,11 @@ on_interact = function(bx, by, bz, target, actor)
 end
 ```
 
-### `on_random_tick` handler
+### `on_tick` handler
 
 ```lua
-on_random_tick = function(bx, by, bz)
-  -- Actions to do when the block is randomly ticked
-end
-```
-
-### `on_sched_tick` handler
-
-```lua
-on_sched_tick = function(bx, by, bz)
+on_tick = function(bx, by, bz, source)
   -- Actions to do when the block is ticked via scheduling
+  -- source is one of blocks.TICK_XXXX constants
 end
 ```

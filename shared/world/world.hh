@@ -119,8 +119,8 @@ std::int32_t get_temperature(const BlockPos& pos);
 
 namespace world
 {
-void schedule(const ChunkPos& cpos, const LocalPos& lpos, std::uint64_t deadline);
-void schedule(const BlockPos& pos, std::uint64_t deadline);
+void schedule(const ChunkPos& cpos, const LocalPos& lpos, std::uint64_t deadline, block_tick_source source);
+void schedule(const BlockPos& pos, std::uint64_t deadline, block_tick_source source);
 } // namespace world
 
 namespace world

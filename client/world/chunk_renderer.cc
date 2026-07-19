@@ -212,7 +212,7 @@ void chunk_renderer::render(void)
     const auto& vproj = camera::instance.view_projection();
     const auto& frustum = camera::instance.frustum();
 
-    auto animation_timer = static_cast<std::uint32_t>(world::current_tick >> 2);
+    auto animation_timer = static_cast<std::uint32_t>(world::current_tick >> 1);
 
     glUseProgram(s_program.handle);
     glUniformMatrix4fv(s_program.uniforms[su_ViewProjection].location, 1, GL_FALSE, vproj.data());
