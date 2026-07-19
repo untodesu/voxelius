@@ -3,7 +3,7 @@
 
 namespace skybox
 {
-extern Eigen::Vector3f fog_color;
+extern Eigen::Vector3f sky_color;
 } // namespace skybox
 
 namespace skybox

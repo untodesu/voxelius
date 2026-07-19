@@ -118,17 +118,17 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
     def.fog_density = std::max(static_cast<float>(fog_density.value()), 1.0f);
     lua_pop(L, 1);
 
-    lua_getfield(L, def_idx, "fog_tint");
+    lua_getfield(L, def_idx, "fog_color");
 
     if(!lua_isnil(L, -1)) {
-        auto fog_tint = utils::read_vector<float, 3>(L, -1);
+        auto fog_color = utils::read_vector<float, 3>(L, -1);
 
-        if(!fog_tint.has_value()) {
+        if(!fog_color.has_value()) {
             return false;
         }
 
-        def.fog_tint = fog_tint.value();
-        def.fog_tint = def.fog_tint.cwiseMax(0.0f).cwiseMin(1.0f);
+        def.fog_color = fog_color.value();
+        def.fog_color = def.fog_color.cwiseMax(0.0f).cwiseMin(1.0f);
     }
 
     lua_pop(L, 1);
@@ -203,7 +203,7 @@ static bool add_fluid(lua_State* L, ModContext* ctx, const char* raw_name, int d
     def.max_level = std::nullopt;
 
     def.fog_density = 1.0f;
-    def.fog_tint.setOnes();
+    def.fog_color.setOnes();
 
     def.tint_index = 0;
 

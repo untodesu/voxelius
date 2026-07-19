@@ -22,7 +22,7 @@ struct FluidDefinition final {
     std::optional<unsigned> max_level;
 
     float fog_density;
-    Eigen::Vector3f fog_tint;
+    Eigen::Vector3f fog_color;
 
     std::optional<unsigned> tint_index;
 

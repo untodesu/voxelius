@@ -45,7 +45,7 @@ fluids.add("water", {
   },
 
   fog_density = 10.0,
-  fog_tint = { 0.0, 0.3, 0.5 },
+  fog_color = { 0.0, 0.3, 0.5 },
 })
 
 dofile("blocks/dirt.lua")

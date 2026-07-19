@@ -15,6 +15,7 @@
 #include "shared/world/world.hh"
 
 #include "client/entity/camera.hh"
+#include "client/fog.hh"
 #include "client/globals.hh"
 #include "client/shader_program.hh"
 #include "client/world/block_atlas.hh"
@@ -217,8 +218,8 @@ void chunk_renderer::render(void)
     glUseProgram(s_program.handle);
     glUniformMatrix4fv(s_program.uniforms[su_ViewProjection].location, 1, GL_FALSE, vproj.data());
     glUniform1ui(s_program.uniforms[su_AnimationTimer].location, animation_timer);
-    glUniform1f(s_program.uniforms[su_ViewDistance].location, static_cast<float>(constant::CHUNK_SIZE * camera::view_distance.value()));
-    glUniform3fv(s_program.uniforms[su_FogColor].location, 1, skybox::fog_color.data());
+    glUniform1f(s_program.uniforms[su_ViewDistance].location, fog::distance);
+    glUniform3fv(s_program.uniforms[su_FogColor].location, 1, fog::color.data());
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);
