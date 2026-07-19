@@ -22,7 +22,8 @@ static void on_mouse_button_event(const SDL_MouseButtonEvent& event)
         const auto& hit = std::get<physics::BlockHit>(player_target::hit);
 
         if(event.button == SDL_BUTTON_RIGHT) {
-            auto block = block_registry::find(Identifier::from_string("builtin:water"));
+            auto family = block_registry::find_family(Identifier::from_string("builtin:water"));
+            auto block = family ? family->default_variant : block_registry::find(Identifier::from_string("builtin:water"));
             utils::block_place(hit, globals::player, block);
         }
         else if(event.button == SDL_BUTTON_LEFT) {

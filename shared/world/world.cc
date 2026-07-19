@@ -249,15 +249,17 @@ bool world::set_state(const ChunkPos& cpos, const LocalPos& lpos, std::string_vi
     }
 
     emhash8::HashMap<blockstate_key_type, blockstate_val_type> map;
+
+    for(const auto& [decl_key, decl] : family->states) {
+        map.try_emplace(decl_key, decl.default_value);
+    }
+
     auto id_it = family->id_states.find(id);
 
-    if(id_it == family->id_states.cend()) {
-        for(const auto& [decl_key, decl] : family->states) {
-            map.try_emplace(decl_key, decl.default_value);
+    if(id_it != family->id_states.cend()) {
+        for(const auto& it : id_it->second) {
+            map.insert_or_assign(blockstate_key_type(it.first), blockstate_val_type(it.second));
         }
-    }
-    else {
-        map = id_it->second;
     }
 
     map.insert_or_assign(key, family->state_hash(value));

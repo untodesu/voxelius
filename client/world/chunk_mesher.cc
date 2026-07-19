@@ -187,13 +187,14 @@ private:
     std::uint32_t calculate_ao(const LocalPos& lpos, block_face face, const Eigen::Vector3f& vertex) const;
 
     bool is_culled_block(const LocalPos& lpos, block_face face, block_render self_render) const;
-    bool is_culled_fluid(const LocalPos& lpos, block_face face, fluid_id_type fluid_id) const;
+    bool is_culled_fluid(const LocalPos& lpos, block_face face, fluid_id_type fluid_id, bool face_flush) const;
     bool is_occluder(const LocalPos& lpos, block_face exposed_face) const;
 
     void emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
         std::uint64_t entropy, std::optional<block_face> face) const;
     void emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalPos& lpos, const Eigen::Vector3f& min, const Eigen::Vector3f& max,
-        block_face face, const AtlasStrip* strip, unsigned tint_index) const;
+        block_face face, const AtlasStrip* strip, unsigned tint_index,
+        std::optional<std::array<Eigen::Vector2f, 4>> uvs_override = std::nullopt) const;
 
     void mesh_fluid(const LocalPos& lpos, const BlockDefinition& def);
     void mesh_block(const LocalPos& lpos, block_id_type id);
@@ -362,7 +363,7 @@ bool MeshingTask::is_culled_block(const LocalPos& lpos, block_face face, block_r
     return neighbour_baked->fully_covered[opposite_face(face)];
 }
 
-bool MeshingTask::is_culled_fluid(const LocalPos& lpos, block_face face, fluid_id_type fluid_id) const
+bool MeshingTask::is_culled_fluid(const LocalPos& lpos, block_face face, fluid_id_type fluid_id, bool face_flush) const
 {
     auto neighbour_lpos = lpos + face_delta(face);
     auto neighbour_id = m_cache.get(neighbour_lpos);
@@ -377,10 +378,16 @@ bool MeshingTask::is_culled_fluid(const LocalPos& lpos, block_face face, fluid_i
         return false;
     }
 
-    if(neighbour_def->fluid == fluid_id) {
+    if(neighbour_def->fluid == fluid_id && neighbour_def->fluid_level > 0) {
         // Top/bottom against the same fluid are always merged. Side faces
-        // may still need a gap strip, these are handled in mesh_fluid
+        // may still need a height gap strip; those are handled in mesh_fluid.
         return face == BLOCK_FACE_TOP || face == BLOCK_FACE_BOTTOM;
+    }
+
+    // Solids only occlude faces that sit on the cell boundary. A partial-height
+    // top under a ceiling stays visible when we intentionally leave the gap.
+    if(!face_flush) {
+        return false;
     }
 
     if(neighbour_def->render != BLOCK_RENDER_SOLID) {
@@ -417,45 +424,6 @@ bool MeshingTask::is_occluder(const LocalPos& lpos, block_face exposed_face) con
     }
 
     return baked->fully_covered[opposite_face(exposed_face)];
-}
-
-static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos, const BlockDefinition& def, fluid_gravity gravity)
-{
-    auto height = 0.0625f * static_cast<float>(def.fluid_level);
-
-    if(height <= 0.0f) {
-        return 0.0f;
-    }
-
-    block_face anti_gravity;
-
-    if(gravity == FLUID_GRAVITY_DOWN) {
-        anti_gravity = BLOCK_FACE_TOP;
-    }
-    else {
-        anti_gravity = BLOCK_FACE_BOTTOM;
-    }
-
-    auto above_id = cache.get(lpos + face_delta(anti_gravity));
-    auto above_def = block_registry::find_definition(above_id);
-
-    if(above_def == nullptr) {
-        return height;
-    }
-
-    if(above_def->fluid == def.fluid) {
-        return 1.0f;
-    }
-
-    if(above_def->render == BLOCK_RENDER_SOLID) {
-        auto above_baked = block_models::find(above_id);
-
-        if(above_baked && above_baked->fully_covered[opposite_face(anti_gravity)]) {
-            return 1.0f;
-        }
-    }
-
-    return height;
 }
 
 void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
@@ -516,8 +484,140 @@ void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<c
     }
 }
 
+static bool fluid_has_solid_horizontal_side(const BlockCache& cache, const LocalPos& lpos)
+{
+    constexpr block_face sides[] = {
+        BLOCK_FACE_NORTH,
+        BLOCK_FACE_SOUTH,
+        BLOCK_FACE_EAST,
+        BLOCK_FACE_WEST,
+    };
+
+    for(auto face : sides) {
+        auto neighbour_id = cache.get(lpos + face_delta(face));
+
+        if(neighbour_id == BLOCK_ID_NULL) {
+            continue;
+        }
+
+        auto neighbour_def = block_registry::find_definition(neighbour_id);
+
+        if(neighbour_def == nullptr || neighbour_def->render != BLOCK_RENDER_SOLID) {
+            continue;
+        }
+
+        auto neighbour_baked = block_models::find(neighbour_id);
+
+        if(neighbour_baked == nullptr) {
+            continue;
+        }
+
+        if(neighbour_baked->fully_covered[opposite_face(face)]) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos, const BlockDefinition* def, fluid_gravity gravity)
+{
+    auto height = 0.0625f * static_cast<float>(def->fluid_level);
+
+    if(height <= 0.0f) {
+        return 0.0f;
+    }
+
+    block_face anti_gravity;
+
+    if(gravity == FLUID_GRAVITY_DOWN) {
+        anti_gravity = BLOCK_FACE_TOP;
+    }
+    else {
+        anti_gravity = BLOCK_FACE_BOTTOM;
+    }
+
+    auto above_id = cache.get(lpos + face_delta(anti_gravity));
+    auto above_def = block_registry::find_definition(above_id);
+
+    if(above_def && above_def->fluid == def->fluid && above_def->fluid_level > 0) {
+        return 1.0f;
+    }
+
+    constexpr unsigned FULL_FLUID_LEVEL = 14U; // TODO: make this a value in FluidDefinition
+
+    if(def->fluid_level >= FULL_FLUID_LEVEL && above_def && above_def->render == BLOCK_RENDER_SOLID) {
+        auto above_baked = block_models::find(above_id);
+
+        if(above_baked && above_baked->fully_covered[opposite_face(anti_gravity)]) {
+            if(fluid_has_solid_horizontal_side(cache, lpos)) {
+                return 1.0f;
+            }
+        }
+    }
+
+    return height;
+}
+
+static std::optional<float> fluid_neighbour_level(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id)
+{
+    auto def = block_registry::find_definition(cache.get(lpos));
+
+    if(def == nullptr || def->fluid != fluid_id || def->fluid_level == 0) {
+        return std::nullopt;
+    }
+
+    return 0.0625f * static_cast<float>(def->fluid_level);
+}
+
+static std::array<Eigen::Vector2f, 4> flowing_top_uvs(float flow_x, float flow_z)
+{
+    std::array<Eigen::Vector2f, 4> uvs = {
+        Eigen::Vector2f(0.0f, 0.0f),
+        Eigen::Vector2f(0.0f, 1.0f),
+        Eigen::Vector2f(1.0f, 1.0f),
+        Eigen::Vector2f(1.0f, 0.0f),
+    };
+
+    auto len_sq = flow_x * flow_x + flow_z * flow_z;
+
+    if(len_sq <= 1.0e-8f) {
+        return uvs;
+    }
+
+    auto angle = std::atan2(flow_z, flow_x);
+    auto quarter = static_cast<int>(std::lround(angle / (0.5f * 3.14159265f)));
+    quarter = ((quarter % 4) + 4) % 4;
+
+    switch(quarter) {
+        case 0:
+            uvs[0] = Eigen::Vector2f(0.0f, 0.0f);
+            uvs[1] = Eigen::Vector2f(1.0f, 0.0f);
+            uvs[2] = Eigen::Vector2f(1.0f, 1.0f);
+            uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
+            break;
+
+        case 2:
+            uvs[0] = Eigen::Vector2f(1.0f, 0.0f);
+            uvs[1] = Eigen::Vector2f(0.0f, 1.0f);
+            uvs[2] = Eigen::Vector2f(0.0f, 0.0f);
+            uvs[3] = Eigen::Vector2f(1.0f, 0.0f);
+            break;
+
+        case 3:
+            uvs[0] = Eigen::Vector2f(1.0f, 1.0f);
+            uvs[1] = Eigen::Vector2f(1.0f, 0.0f);
+            uvs[2] = Eigen::Vector2f(0.0f, 0.0f);
+            uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
+            break;
+    }
+
+    return uvs;
+}
+
 void MeshingTask::emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalPos& lpos, const Eigen::Vector3f& min,
-    const Eigen::Vector3f& max, block_face face, const AtlasStrip* strip, unsigned tint_index) const
+    const Eigen::Vector3f& max, block_face face, const AtlasStrip* strip, unsigned tint_index,
+    std::optional<std::array<Eigen::Vector2f, 4>> uvs_override) const
 {
     if(strip == nullptr) {
         return;
@@ -570,27 +670,32 @@ void MeshingTask::emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalP
             break;
     }
 
-    switch(face) {
-        case BLOCK_FACE_TOP:
-            uvs[0] = Eigen::Vector2f(0.0f, 0.0f);
-            uvs[1] = Eigen::Vector2f(0.0f, 1.0f);
-            uvs[2] = Eigen::Vector2f(1.0f, 1.0f);
-            uvs[3] = Eigen::Vector2f(1.0f, 0.0f);
-            break;
+    if(uvs_override.has_value()) {
+        uvs = uvs_override.value();
+    }
+    else {
+        switch(face) {
+            case BLOCK_FACE_TOP:
+                uvs[0] = Eigen::Vector2f(0.0f, 0.0f);
+                uvs[1] = Eigen::Vector2f(0.0f, 1.0f);
+                uvs[2] = Eigen::Vector2f(1.0f, 1.0f);
+                uvs[3] = Eigen::Vector2f(1.0f, 0.0f);
+                break;
 
-        case BLOCK_FACE_BOTTOM:
-            uvs[0] = Eigen::Vector2f(1.0f, 1.0f);
-            uvs[1] = Eigen::Vector2f(1.0f, 0.0f);
-            uvs[2] = Eigen::Vector2f(0.0f, 0.0f);
-            uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
-            break;
+            case BLOCK_FACE_BOTTOM:
+                uvs[0] = Eigen::Vector2f(1.0f, 1.0f);
+                uvs[1] = Eigen::Vector2f(1.0f, 0.0f);
+                uvs[2] = Eigen::Vector2f(0.0f, 0.0f);
+                uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
+                break;
 
-        default:
-            uvs[0] = Eigen::Vector2f(1.0f, 0.0f);
-            uvs[1] = Eigen::Vector2f(0.0f, 0.0f);
-            uvs[2] = Eigen::Vector2f(0.0f, 1.0f);
-            uvs[3] = Eigen::Vector2f(1.0f, 1.0f);
-            break;
+            default:
+                uvs[0] = Eigen::Vector2f(1.0f, 0.0f);
+                uvs[1] = Eigen::Vector2f(0.0f, 0.0f);
+                uvs[2] = Eigen::Vector2f(0.0f, 1.0f);
+                uvs[3] = Eigen::Vector2f(1.0f, 1.0f);
+                break;
+        }
     }
 
     auto block_origin = 16.0f * lpos.cast<float>();
@@ -619,7 +724,6 @@ void MeshingTask::emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalP
 
     std::array<std::uint32_t, 4> ao_values;
     ao_values.fill(3);
-
     out_quad.data_extras = ChunkMesh_Quad::pack_extras(ao_values);
 
     out.push_back(out_quad);
@@ -640,8 +744,36 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
         return;
     }
 
-    auto side_height = fluid_surface_height(m_cache, lpos, def, fluid->gravity);
+    auto surface_height = fluid_surface_height(m_cache, lpos, &def, fluid->gravity);
     auto& bucket = fluid->opaque ? m_opaque : m_fluid;
+    auto tint_index = fluid->tint_index.value_or(0);
+
+    constexpr unsigned FULL_FLUID_LEVEL = 14U; // TODO: make this a value in FluidDefinition
+
+    auto use_still = def.fluid_level >= FULL_FLUID_LEVEL;
+    auto flow_x = 0.0f;
+    auto flow_z = 0.0f;
+
+    if(!use_still) {
+        const std::array dirs = {
+            LocalPos(-1, 0, 0),
+            LocalPos(+1, 0, 0),
+            LocalPos(0, 0, -1),
+            LocalPos(0, 0, +1),
+        };
+
+        for(const auto& dir : dirs) {
+            auto neighbour_h = fluid_neighbour_level(m_cache, lpos + dir, def.fluid);
+
+            if(!neighbour_h.has_value()) {
+                continue;
+            }
+
+            auto delta = height - neighbour_h.value();
+            flow_x += delta * static_cast<float>(dir.x());
+            flow_z += delta * static_cast<float>(dir.z());
+        }
+    }
 
     for(auto face : ALL_FACES) {
         auto is_side = false;
@@ -655,10 +787,10 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
             auto neighbour_id = m_cache.get(neighbour_lpos);
             auto neighbour_def = block_registry::find_definition(neighbour_id);
 
-            if(neighbour_def && neighbour_def->fluid == def.fluid) {
-                auto neighbour_height = fluid_surface_height(m_cache, neighbour_lpos, *neighbour_def, fluid->gravity);
+            if(neighbour_def && neighbour_def->fluid == def.fluid && neighbour_def->fluid_level > 0) {
+                auto neighbour_height = fluid_surface_height(m_cache, neighbour_lpos, neighbour_def, fluid->gravity);
 
-                if(side_height <= neighbour_height) {
+                if(surface_height <= neighbour_height) {
                     continue;
                 }
 
@@ -667,47 +799,72 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
 
                 if(fluid->gravity == FLUID_GRAVITY_DOWN) {
                     min.y() = neighbour_height;
-                    max.y() = side_height;
+                    max.y() = surface_height;
                 }
                 else {
-                    min.y() = 1.0f - side_height;
+                    min.y() = 1.0f - surface_height;
                     max.y() = 1.0f - neighbour_height;
                 }
 
-                emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, fluid->tint_index.value_or(0));
-
+                emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, tint_index);
                 continue;
             }
         }
 
-        if(is_culled_fluid(lpos, face, def.fluid)) {
-            continue;
-        }
+        auto surface_face = !is_side;
+        auto face_flush = true;
 
-        float face_height;
-
-        if(is_side) {
-            face_height = side_height;
+        if(fluid->gravity == FLUID_GRAVITY_DOWN) {
+            surface_face = surface_face && face == BLOCK_FACE_TOP;
         }
         else {
-            face_height = height;
+            surface_face = surface_face && face == BLOCK_FACE_BOTTOM;
+        }
+
+        if(surface_face) {
+            face_flush = surface_height >= 1.0f;
+        }
+
+        if(is_culled_fluid(lpos, face, def.fluid, face_flush)) {
+            continue;
         }
 
         Eigen::Vector3f min = Eigen::Vector3f::Zero();
         Eigen::Vector3f max = Eigen::Vector3f::Ones();
 
         if(fluid->gravity == FLUID_GRAVITY_DOWN) {
-            max.y() = face_height;
+            max.y() = surface_height;
         }
         else {
-            min.y() = 1.0f - face_height;
+            min.y() = 1.0f - surface_height;
         }
 
         if(is_side) {
-            emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, fluid->tint_index.value_or(0));
+            emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, tint_index);
+        }
+        else if(face == BLOCK_FACE_TOP || (fluid->gravity == FLUID_GRAVITY_UP && face == BLOCK_FACE_BOTTOM)) {
+            const AtlasStrip* strip;
+
+            if(use_still) {
+                strip = cached->still;
+            }
+            else if(cached->flowing) {
+                strip = cached->flowing;
+            }
+            else {
+                strip = cached->still;
+            }
+
+            std::optional<std::array<Eigen::Vector2f, 4>> uvs;
+
+            if(!use_still && cached->flowing) {
+                uvs = flowing_top_uvs(flow_x, flow_z);
+            }
+
+            emit_fluid_quad(bucket, lpos, min, max, face, strip, tint_index, uvs);
         }
         else {
-            emit_fluid_quad(bucket, lpos, min, max, face, cached->still, fluid->tint_index.value_or(0));
+            emit_fluid_quad(bucket, lpos, min, max, face, cached->still, tint_index);
         }
     }
 }

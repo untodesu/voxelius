@@ -121,7 +121,7 @@ BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverr
         base.fluid_name = patch.fluid_name;
     }
 
-    if(patch.fluid_level) {
+    if(patch.fluid_level.has_value()) {
         base.fluid_level = patch.fluid_level.value();
     }
 
@@ -417,7 +417,20 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id, const emhas
     }
 
     auto& family = s_families[def->family];
-    auto hash = hash_state_map(map);
+
+    emhash8::HashMap<blockstate_key_type, blockstate_val_type> full_map;
+
+    for(const auto& [key, decl] : family.states) {
+        full_map.try_emplace(key, decl.default_value);
+    }
+
+    for(const auto& it : map) {
+        if(family.states.contains(it.first)) {
+            full_map.insert_or_assign(blockstate_key_type(it.first), blockstate_val_type(it.second));
+        }
+    }
+
+    auto hash = hash_state_map(full_map);
 
     if(family.resolved_states.contains(hash)) {
         return family.resolved_states.at(hash);
@@ -426,7 +439,7 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id, const emhas
     auto stem_def = find_definition(family.stem_id);
     vx::throw_if_fmt(stem_def == nullptr, "block_registry: {}: invalid stem_id: {}", family.name.full_string(), family.stem_id);
 
-    BlockDefinition resolved = apply_matching_variant(*stem_def, family, map);
+    BlockDefinition resolved = apply_matching_variant(*stem_def, family, full_map);
 
     resolve_fluid_binding(resolved);
 
@@ -435,7 +448,7 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id, const emhas
 
     auto new_id = static_cast<block_id_type>(s_definitions.size());
     family.resolved_states.insert_or_assign(std::uint64_t(hash), block_id_type(new_id));
-    family.id_states.insert_or_assign(block_id_type(new_id), emhash8::HashMap(map));
+    family.id_states.insert_or_assign(block_id_type(new_id), emhash8::HashMap(full_map));
     s_definitions.push_back(std::move(resolved));
 
     return new_id;
