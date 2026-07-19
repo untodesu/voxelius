@@ -42,6 +42,7 @@ static GLuint s_vao;
 static bool s_sorted_dirty;
 static std::vector<std::pair<entt::entity, float>> s_sorted_opaque;
 static std::vector<std::pair<entt::entity, float>> s_sorted_alpha;
+static std::vector<std::pair<entt::entity, float>> s_sorted_fluid;
 
 static ChunkPos s_last_camera_chunk;
 
@@ -105,6 +106,19 @@ static void update_sorted_chunks(void)
     std::sort(s_sorted_alpha.begin(), s_sorted_alpha.end(), [&](const auto& a, const auto& b) {
         return a.second > b.second;
     });
+
+    s_sorted_fluid.clear();
+    s_sorted_fluid.reserve(view.size_hint());
+
+    for(const auto [entity, chunk, mesh] : view.each()) {
+        if(mesh.fluid.vbo && mesh.fluid.count) {
+            s_sorted_fluid.push_back(std::make_pair(entity, chunk_distance_sq(entity)));
+        }
+    }
+
+    std::sort(s_sorted_fluid.begin(), s_sorted_fluid.end(), [&](const auto& a, const auto& b) {
+        return a.second > b.second;
+    });
 }
 
 static void on_chunk_create(const ChunkCreateEvent& event)
@@ -155,6 +169,7 @@ void chunk_renderer::init(void)
     s_sorted_dirty = true;
     s_sorted_opaque.clear();
     s_sorted_alpha.clear();
+    s_sorted_fluid.clear();
 
     s_last_camera_chunk = camera::chunk + ChunkPos::Ones();
 
@@ -258,6 +273,32 @@ void chunk_renderer::render(void)
 
                 globals::num_draw_calls += 1;
                 globals::num_draw_vertices += mesh.alpha.count * 6;
+            }
+        }
+
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+    }
+
+    if(s_sorted_fluid.size()) {
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glBindVertexArray(s_vao);
+
+        for(const auto& it : s_sorted_fluid) {
+            const auto& mesh = world::chunk_entities.get<ChunkMesh>(it.first);
+            const auto& chunk = world::chunk_entities.get<Chunk_Component>(it.first);
+
+            if(frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
+                draw_part(chunk, mesh.fluid);
+
+                globals::num_draw_calls += 1;
+                globals::num_draw_vertices += mesh.fluid.count * 6;
             }
         }
 

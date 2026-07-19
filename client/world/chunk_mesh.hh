@@ -38,6 +38,7 @@ struct ChunkMesh_Part final {
 struct ChunkMesh final {
     ChunkMesh_Part opaque;
     ChunkMesh_Part alpha;
+    ChunkMesh_Part fluid;
 };
 
 struct ChunkMesh_DirtyMarker final {};

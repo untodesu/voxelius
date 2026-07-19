@@ -22,6 +22,7 @@
 #include "client/world/block_atlas.hh"
 #include "client/world/block_models.hh"
 #include "client/world/chunk_mesher.hh"
+#include "client/world/fluid_cache.hh"
 #include "client/world/skybox.hh"
 
 static std::atomic_bool s_is_running;
@@ -237,6 +238,7 @@ static void wrapped_main(int argc, char** argv)
     LOG_INFO("last frame I drew {} vertices ({} draw calls)", globals::num_draw_vertices, globals::num_draw_calls);
 
     block_models::shutdown();
+    fluid_cache::shutdown();
     block_atlas::shutdown();
 
     gui::shutdown();

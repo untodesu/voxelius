@@ -11,6 +11,7 @@
 #include "shared/world/block_registry.hh"
 
 #include "client/globals.hh"
+#include "client/world/fluid_cache.hh"
 
 constexpr static int LAYER_SIZE = 4096;
 constexpr static int LAYER_CAP = 256;
@@ -325,6 +326,9 @@ void block_atlas::init_late(void)
             }
         }
     }
+
+    // Fluid textures must be loaded before the atlas is compiled
+    fluid_cache::init_late();
 
     build_atlas();
 }

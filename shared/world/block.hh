@@ -6,8 +6,8 @@
 #include "shared/world/fluid.hh"
 
 enum block_render : unsigned {
-    BLOCK_RENDER_NONE = std::numeric_limits<unsigned>::max(),
-    BLOCK_RENDER_SOLID = 0,
+    BLOCK_RENDER_NONE = 0,
+    BLOCK_RENDER_SOLID,
     BLOCK_RENDER_ALPHA,
 };
 

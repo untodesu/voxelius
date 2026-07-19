@@ -1,6 +1,8 @@
 local logs = require("builtin:logs.lua")
 
 logs.add_block("oak_log", {
+    render = blocks.RENDER_SOLID,
+
     health = 4,
     tools = { blocks.TOOL_AXE },
 

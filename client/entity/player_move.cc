@@ -15,7 +15,7 @@
 #include "client/gui/gui.hh"
 #include "client/gui/settings.hh"
 
-constexpr static float SPEED = 64.0f;
+constexpr static float SPEED = 16.0f;
 
 static config::Ref<SDL_Keycode> s_key_forward { SDLK_W };
 static config::Ref<SDL_Keycode> s_key_backward { SDLK_S };

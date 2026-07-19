@@ -12,10 +12,13 @@
 #include "shared/world/block_registry.hh"
 #include "shared/world/block_storage.hh"
 #include "shared/world/chunk.hh"
+#include "shared/world/fluid_registry.hh"
 #include "shared/world/world.hh"
 
+#include "client/world/block_atlas.hh"
 #include "client/world/block_models.hh"
 #include "client/world/chunk_mesh.hh"
+#include "client/world/fluid_cache.hh"
 
 constexpr static std::size_t THROTTLE_COUNT = 32;
 
@@ -183,16 +186,22 @@ public:
 private:
     std::uint32_t calculate_ao(const LocalPos& lpos, block_face face, const Eigen::Vector3f& vertex) const;
 
-    bool is_culled(const LocalPos& lpos, block_face face, block_render self_render) const;
+    bool is_culled_block(const LocalPos& lpos, block_face face, block_render self_render) const;
+    bool is_culled_fluid(const LocalPos& lpos, block_face face, fluid_id_type fluid_id) const;
     bool is_occluder(const LocalPos& lpos, block_face exposed_face) const;
 
-    void emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
+    void emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
         std::uint64_t entropy, std::optional<block_face> face) const;
+    void emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalPos& lpos, const Eigen::Vector3f& min, const Eigen::Vector3f& max,
+        block_face face, const AtlasStrip* strip, unsigned tint) const;
+
+    void mesh_fluid(const LocalPos& lpos, const BlockDefinition& def);
     void mesh_block(const LocalPos& lpos, block_id_type id);
 
     BlockCache m_cache;
     std::vector<ChunkMesh_Quad> m_opaque;
     std::vector<ChunkMesh_Quad> m_alpha;
+    std::vector<ChunkMesh_Quad> m_fluid;
     entt::entity m_entity;
     ChunkPos m_cpos;
 };
@@ -228,6 +237,7 @@ void MeshingTask::process(void)
         if(status.load(std::memory_order_relaxed) == task_status::CANCELLED) {
             m_opaque.clear();
             m_alpha.clear();
+            m_fluid.clear();
             return;
         }
 
@@ -250,7 +260,7 @@ void MeshingTask::finalize(void)
         return;
     }
 
-    if(m_opaque.empty() && m_alpha.empty()) {
+    if(m_opaque.empty() && m_alpha.empty() && m_fluid.empty()) {
         world::chunk_entities.remove<ChunkMesh>(m_entity);
         s_pending.erase(m_cpos);
         return;
@@ -265,6 +275,10 @@ void MeshingTask::finalize(void)
     component.alpha.quads = std::move(m_alpha);
     component.alpha.count = static_cast<std::uint32_t>(component.alpha.quads.size());
     sync_part(component.alpha);
+
+    component.fluid.quads = std::move(m_fluid);
+    component.fluid.count = static_cast<std::uint32_t>(component.fluid.quads.size());
+    sync_part(component.fluid);
 
     // Opaque quads won't get depth-sorted
     // at runtime so there's no point in keeping
@@ -322,7 +336,7 @@ std::uint32_t MeshingTask::calculate_ao(const LocalPos& lpos, block_face face, c
     return 3 - (oc_s1 + oc_s2 + oc_c);
 }
 
-bool MeshingTask::is_culled(const LocalPos& lpos, block_face face, block_render self_render) const
+bool MeshingTask::is_culled_block(const LocalPos& lpos, block_face face, block_render self_render) const
 {
     auto neighbour_lpos = lpos + face_delta(face);
     auto neighbour_id = m_cache.get(neighbour_lpos);
@@ -342,6 +356,40 @@ bool MeshingTask::is_culled(const LocalPos& lpos, block_face face, block_render 
         // Differing render modes shouldn't cull
         // each other; this way stuff like glass
         // panes don't cull ground beneath them
+        return false;
+    }
+
+    return neighbour_baked->fully_covered[opposite_face(face)];
+}
+
+bool MeshingTask::is_culled_fluid(const LocalPos& lpos, block_face face, fluid_id_type fluid_id) const
+{
+    auto neighbour_lpos = lpos + face_delta(face);
+    auto neighbour_id = m_cache.get(neighbour_lpos);
+
+    if(neighbour_id == BLOCK_ID_NULL) {
+        return false;
+    }
+
+    auto neighbour_def = block_registry::find_definition(neighbour_id);
+
+    if(neighbour_def == nullptr) {
+        return false;
+    }
+
+    if(neighbour_def->fluid == fluid_id) {
+        // Top/bottom against the same fluid are always merged. Side faces
+        // may still need a gap strip, these are handled in mesh_fluid
+        return face == BLOCK_FACE_TOP || face == BLOCK_FACE_BOTTOM;
+    }
+
+    if(neighbour_def->render != BLOCK_RENDER_SOLID) {
+        return false;
+    }
+
+    auto neighbour_baked = block_models::find(neighbour_id);
+
+    if(neighbour_baked == nullptr) {
         return false;
     }
 
@@ -371,7 +419,46 @@ bool MeshingTask::is_occluder(const LocalPos& lpos, block_face exposed_face) con
     return baked->fully_covered[opposite_face(exposed_face)];
 }
 
-void MeshingTask::emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
+static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos, const BlockDefinition& def, fluid_gravity gravity)
+{
+    auto height = 0.0625f * static_cast<float>(def.fluid_level);
+
+    if(height <= 0.0f) {
+        return 0.0f;
+    }
+
+    block_face anti_gravity;
+
+    if(gravity == FLUID_GRAVITY_DOWN) {
+        anti_gravity = BLOCK_FACE_TOP;
+    }
+    else {
+        anti_gravity = BLOCK_FACE_BOTTOM;
+    }
+
+    auto above_id = cache.get(lpos + face_delta(anti_gravity));
+    auto above_def = block_registry::find_definition(above_id);
+
+    if(above_def == nullptr) {
+        return height;
+    }
+
+    if(above_def->fluid == def.fluid) {
+        return 1.0f;
+    }
+
+    if(above_def->render == BLOCK_RENDER_SOLID) {
+        auto above_baked = block_models::find(above_id);
+
+        if(above_baked && above_baked->fully_covered[opposite_face(anti_gravity)]) {
+            return 1.0f;
+        }
+    }
+
+    return height;
+}
+
+void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
     std::uint64_t entropy, std::optional<block_face> face) const
 {
     auto block_origin = lpos.cast<float>() * 16.0f;
@@ -429,64 +516,267 @@ void MeshingTask::emit_quads(std::vector<ChunkMesh_Quad>& out, std::span<const B
     }
 }
 
+void MeshingTask::emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalPos& lpos, const Eigen::Vector3f& min,
+    const Eigen::Vector3f& max, block_face face, const AtlasStrip* strip, unsigned tint) const
+{
+    if(strip == nullptr) {
+        return;
+    }
+
+    std::array<Eigen::Vector3f, 4> positions {};
+    std::array<Eigen::Vector2f, 4> uvs {};
+
+    switch(face) {
+        case BLOCK_FACE_NORTH:
+            positions[0] = Eigen::Vector3f(min.x(), max.y(), min.z());
+            positions[1] = Eigen::Vector3f(max.x(), max.y(), min.z());
+            positions[2] = Eigen::Vector3f(max.x(), min.y(), min.z());
+            positions[3] = Eigen::Vector3f(min.x(), min.y(), min.z());
+            break;
+
+        case BLOCK_FACE_SOUTH:
+            positions[0] = Eigen::Vector3f(max.x(), max.y(), max.z());
+            positions[1] = Eigen::Vector3f(min.x(), max.y(), max.z());
+            positions[2] = Eigen::Vector3f(min.x(), min.y(), max.z());
+            positions[3] = Eigen::Vector3f(max.x(), min.y(), max.z());
+            break;
+
+        case BLOCK_FACE_EAST:
+            positions[0] = Eigen::Vector3f(max.x(), max.y(), min.z());
+            positions[1] = Eigen::Vector3f(max.x(), max.y(), max.z());
+            positions[2] = Eigen::Vector3f(max.x(), min.y(), max.z());
+            positions[3] = Eigen::Vector3f(max.x(), min.y(), min.z());
+            break;
+
+        case BLOCK_FACE_WEST:
+            positions[0] = Eigen::Vector3f(min.x(), max.y(), max.z());
+            positions[1] = Eigen::Vector3f(min.x(), max.y(), min.z());
+            positions[2] = Eigen::Vector3f(min.x(), min.y(), min.z());
+            positions[3] = Eigen::Vector3f(min.x(), min.y(), max.z());
+            break;
+
+        case BLOCK_FACE_TOP:
+            positions[0] = Eigen::Vector3f(min.x(), max.y(), min.z());
+            positions[1] = Eigen::Vector3f(min.x(), max.y(), max.z());
+            positions[2] = Eigen::Vector3f(max.x(), max.y(), max.z());
+            positions[3] = Eigen::Vector3f(max.x(), max.y(), min.z());
+            break;
+
+        case BLOCK_FACE_BOTTOM:
+            positions[0] = Eigen::Vector3f(min.x(), min.y(), max.z());
+            positions[1] = Eigen::Vector3f(min.x(), min.y(), min.z());
+            positions[2] = Eigen::Vector3f(max.x(), min.y(), min.z());
+            positions[3] = Eigen::Vector3f(max.x(), min.y(), max.z());
+            break;
+    }
+
+    switch(face) {
+        case BLOCK_FACE_TOP:
+            uvs[0] = Eigen::Vector2f(0.0f, 0.0f);
+            uvs[1] = Eigen::Vector2f(0.0f, 1.0f);
+            uvs[2] = Eigen::Vector2f(1.0f, 1.0f);
+            uvs[3] = Eigen::Vector2f(1.0f, 0.0f);
+            break;
+
+        case BLOCK_FACE_BOTTOM:
+            uvs[0] = Eigen::Vector2f(1.0f, 1.0f);
+            uvs[1] = Eigen::Vector2f(1.0f, 0.0f);
+            uvs[2] = Eigen::Vector2f(0.0f, 0.0f);
+            uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
+            break;
+
+        default:
+            uvs[0] = Eigen::Vector2f(1.0f, 0.0f);
+            uvs[1] = Eigen::Vector2f(0.0f, 0.0f);
+            uvs[2] = Eigen::Vector2f(0.0f, 1.0f);
+            uvs[3] = Eigen::Vector2f(1.0f, 1.0f);
+            break;
+    }
+
+    auto block_origin = 16.0f * lpos.cast<float>();
+    Eigen::Vector3f p0 = block_origin + 16.0f * positions[0];
+    Eigen::Vector3f p1 = block_origin + 16.0f * positions[1];
+    Eigen::Vector3f p3 = block_origin + 16.0f * positions[3];
+
+    const auto& c0 = uvs[0];
+    const auto& c2 = uvs[2];
+
+    auto dist_c0 = std::abs(uvs[1].x() - c0.x());
+    auto dist_c2 = std::abs(uvs[1].x() - c2.x());
+    auto uv_orient_flag = dist_c0 < dist_c2;
+
+    ChunkMesh_Quad out_quad {};
+    out_quad.data_origin = ChunkMesh_Quad::pack_position(p0);
+    out_quad.data_edge_u = ChunkMesh_Quad::pack_offset(p1 - p0) | ChunkMesh_Quad::ANIMATED_BIT;
+    out_quad.data_edge_v = ChunkMesh_Quad::pack_offset(p3 - p0);
+
+    if(uv_orient_flag) {
+        out_quad.data_origin |= ChunkMesh_Quad::UV_ORIENT_BIT;
+    }
+
+    out_quad.data_uv = ChunkMesh_Quad::pack_uv(c0, c2);
+    out_quad.data_texture = ChunkMesh_Quad::pack_texture(static_cast<std::uint32_t>(strip->index), 0, tint);
+
+    std::array<std::uint32_t, 4> ao_values;
+    ao_values.fill(3);
+
+    out_quad.data_extras = ChunkMesh_Quad::pack_extras(ao_values);
+
+    out.push_back(out_quad);
+}
+
+void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
+{
+    auto fluid = fluid_registry::find_definition(def.fluid);
+    auto cached = fluid_cache::find(def.fluid);
+
+    if(fluid == nullptr || cached == nullptr) {
+        return;
+    }
+
+    auto height = 0.0625f * static_cast<float>(def.fluid_level);
+
+    if(height <= 0.0f) {
+        return;
+    }
+
+    auto side_height = fluid_surface_height(m_cache, lpos, def, fluid->gravity);
+    auto& bucket = fluid->opaque ? m_opaque : m_fluid;
+
+    for(auto face : ALL_FACES) {
+        auto is_side = false;
+        is_side = is_side || face == BLOCK_FACE_NORTH;
+        is_side = is_side || face == BLOCK_FACE_SOUTH;
+        is_side = is_side || face == BLOCK_FACE_EAST;
+        is_side = is_side || face == BLOCK_FACE_WEST;
+
+        if(is_side) {
+            auto neighbour_lpos = lpos + face_delta(face);
+            auto neighbour_id = m_cache.get(neighbour_lpos);
+            auto neighbour_def = block_registry::find_definition(neighbour_id);
+
+            if(neighbour_def && neighbour_def->fluid == def.fluid) {
+                auto neighbour_height = fluid_surface_height(m_cache, neighbour_lpos, *neighbour_def, fluid->gravity);
+
+                if(side_height <= neighbour_height) {
+                    continue;
+                }
+
+                Eigen::Vector3f min = Eigen::Vector3f::Zero();
+                Eigen::Vector3f max = Eigen::Vector3f::Ones();
+
+                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
+                    min.y() = neighbour_height;
+                    max.y() = side_height;
+                }
+                else {
+                    min.y() = 1.0f - side_height;
+                    max.y() = 1.0f - neighbour_height;
+                }
+
+                emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, fluid->tint);
+
+                continue;
+            }
+        }
+
+        if(is_culled_fluid(lpos, face, def.fluid)) {
+            continue;
+        }
+
+        float face_height;
+
+        if(is_side) {
+            face_height = side_height;
+        }
+        else {
+            face_height = height;
+        }
+
+        Eigen::Vector3f min = Eigen::Vector3f::Zero();
+        Eigen::Vector3f max = Eigen::Vector3f::Ones();
+
+        if(fluid->gravity == FLUID_GRAVITY_DOWN) {
+            max.y() = face_height;
+        }
+        else {
+            min.y() = 1.0f - face_height;
+        }
+
+        if(is_side) {
+            emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, fluid->tint);
+        }
+        else {
+            emit_fluid_quad(bucket, lpos, min, max, face, cached->still, fluid->tint);
+        }
+    }
+}
+
 void MeshingTask::mesh_block(const LocalPos& lpos, block_id_type id)
 {
     if(id == BLOCK_ID_NULL) {
         return;
     }
 
-    auto baked = block_models::find(id);
     auto def = block_registry::find_definition(id);
 
-    if(baked == nullptr || def == nullptr) {
+    if(def == nullptr) {
         return;
     }
 
-    std::array<bool, 6> culled {};
-    auto fully_enclosed = true;
+    auto baked = block_models::find(id);
 
-    for(auto face : ALL_FACES) {
-        culled[face] = is_culled(lpos, face, def->render);
-        fully_enclosed = fully_enclosed && culled[face];
-    }
-
-    std::uint64_t entropy;
-
-    auto bpos = utils::to_block(m_cpos, lpos);
-    entropy = static_cast<std::uint64_t>(bpos.x()) * UINT64_C(0x9E3779B97F4A7C15);
-    entropy ^= static_cast<std::uint64_t>(bpos.y()) * UINT64_C(0xC2B2AE3D27D4EB4F);
-    entropy ^= static_cast<std::uint64_t>(bpos.z()) * UINT64_C(0x165667B19E3779F9);
-
-    // Just a simple-ish hash for a single 64-bit value; before that
-    // we were using CRC64 which is kind of an overkill for a mesher
-    // https://zimbry.blogspot.com/2011/09/better-bit-mixing-improving-on.html
-    entropy ^= entropy >> 33;
-    entropy *= UINT64_C(0xFF51AFD7ED558CCD);
-    entropy ^= entropy >> 33;
-    entropy *= UINT64_C(0xC4CEB9FE1A85EC53);
-    entropy ^= entropy >> 33;
-
-    if(def->render == BLOCK_RENDER_ALPHA) {
-        if(!fully_enclosed) {
-            emit_quads(m_alpha, baked->unculled_quads, lpos, entropy, std::nullopt);
-        }
+    if(baked && def->render) {
+        std::array<bool, 6> culled {};
+        auto fully_enclosed = true;
 
         for(auto face : ALL_FACES) {
-            if(culled[face])
-                continue;
-            emit_quads(m_alpha, baked->face_quads[face], lpos, entropy, face);
-        }
-    }
-    else {
-        if(!fully_enclosed) {
-            emit_quads(m_opaque, baked->unculled_quads, lpos, entropy, std::nullopt);
+            culled[face] = is_culled_block(lpos, face, def->render);
+            fully_enclosed = fully_enclosed && culled[face];
         }
 
-        for(auto face : ALL_FACES) {
-            if(culled[face])
-                continue;
-            emit_quads(m_opaque, baked->face_quads[face], lpos, entropy, face);
+        std::uint64_t entropy;
+
+        auto bpos = utils::to_block(m_cpos, lpos);
+        entropy = static_cast<std::uint64_t>(bpos.x()) * UINT64_C(0x9E3779B97F4A7C15);
+        entropy ^= static_cast<std::uint64_t>(bpos.y()) * UINT64_C(0xC2B2AE3D27D4EB4F);
+        entropy ^= static_cast<std::uint64_t>(bpos.z()) * UINT64_C(0x165667B19E3779F9);
+
+        // Just a simple-ish hash for a single 64-bit value; before that
+        // we were using CRC64 which is kind of an overkill for a mesher
+        // https://zimbry.blogspot.com/2011/09/better-bit-mixing-improving-on.html
+        entropy ^= entropy >> 33;
+        entropy *= UINT64_C(0xFF51AFD7ED558CCD);
+        entropy ^= entropy >> 33;
+        entropy *= UINT64_C(0xC4CEB9FE1A85EC53);
+        entropy ^= entropy >> 33;
+
+        if(def->render == BLOCK_RENDER_ALPHA) {
+            if(!fully_enclosed) {
+                emit_block_quads(m_alpha, baked->unculled_quads, lpos, entropy, std::nullopt);
+            }
+
+            for(auto face : ALL_FACES) {
+                if(culled[face])
+                    continue;
+                emit_block_quads(m_alpha, baked->face_quads[face], lpos, entropy, face);
+            }
         }
+        else {
+            if(!fully_enclosed) {
+                emit_block_quads(m_opaque, baked->unculled_quads, lpos, entropy, std::nullopt);
+            }
+
+            for(auto face : ALL_FACES) {
+                if(culled[face])
+                    continue;
+                emit_block_quads(m_opaque, baked->face_quads[face], lpos, entropy, face);
+            }
+        }
+    }
+
+    if(def->fluid) {
+        mesh_fluid(lpos, *def);
     }
 }
 

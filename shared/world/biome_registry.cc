@@ -74,6 +74,11 @@ void biome_registry::resolve_palettes(void)
                 continue;
             }
 
+            if(field->states.empty()) {
+                field->cached = family->default_variant;
+                continue;
+            }
+
             emhash8::HashMap<blockstate_key_type, blockstate_val_type> map;
 
             for(const auto& it : field->states) {

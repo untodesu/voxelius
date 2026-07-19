@@ -78,7 +78,7 @@ biomes.add("plains", {
     basic = { name = "stone" },
     filler = { name = "dirt" },
     surface = { name = "grass" },
-    fluid = { name = "water" },
+    fluid = { name = "water", states = { level = "14" } },
   }
 })
 
@@ -94,7 +94,7 @@ biomes.add("desert", {
     basic = { name = "sandstone" },
     filler = { name = "sand" },
     surface = { name = "sand" },
-    fluid = { name = "water" },
+    fluid = { name = "water", states = { level = "14" } },
   }
 })
 
@@ -110,6 +110,6 @@ biomes.add("stoney_peaks", {
     basic = { name = "stone" },
     filler = { name = "stone" },
     surface = { name = "stone" },
-    fluid = { name = "water" },
+    fluid = { name = "water", states = { level = "14" } },
   }
 })
