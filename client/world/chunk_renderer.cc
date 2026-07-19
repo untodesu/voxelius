@@ -14,13 +14,12 @@
 #include "shared/world/chunk.hh"
 #include "shared/world/world.hh"
 
-#include "client/entity/camera.hh"
+#include "client/camera.hh"
 #include "client/fog.hh"
 #include "client/globals.hh"
 #include "client/shader_program.hh"
 #include "client/world/block_atlas.hh"
 #include "client/world/chunk_mesh.hh"
-#include "client/world/skybox.hh"
 
 // ONLY TOUCH THESE IF THE RESPECTIVE SHADER
 // VARIANT MACRO DECLARATIONS LAYOUT CHANGED AS WELL
@@ -284,8 +283,7 @@ void chunk_renderer::render(void)
     if(s_sorted_fluid.size()) {
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

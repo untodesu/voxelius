@@ -19,8 +19,6 @@ struct FluidDefinition final {
 
     bool opaque;
 
-    std::optional<unsigned> max_level;
-
     float fog_density;
     Eigen::Vector3f fog_color;
 

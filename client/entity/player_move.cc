@@ -10,7 +10,7 @@
 #include "shared/entity/velocity.hh"
 #include "shared/world/world.hh"
 
-#include "client/entity/camera.hh"
+#include "client/camera.hh"
 #include "client/globals.hh"
 #include "client/gui/gui.hh"
 #include "client/gui/settings.hh"

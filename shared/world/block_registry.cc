@@ -44,22 +44,6 @@ static void resolve_fluid_binding(BlockDefinition& def)
 
         def.fluid_name.reset();
     }
-
-    if(def.fluid) {
-        auto fluid_def = fluid_registry::find_definition(def.fluid);
-
-        if(fluid_def && fluid_def->max_level.has_value()) {
-            auto id = fluid_registry::name_of(def.fluid);
-            assert(id.has_value());
-
-            auto max_level = fluid_def->max_level.value();
-            auto cur_level = def.fluid_level;
-
-            if(cur_level > max_level) {
-                LOG_WARNING("fluid_level {} exceeds max_level {} for {}", cur_level, max_level, id->full_string());
-            }
-        }
-    }
 }
 
 static BlockDefinition apply_matching_variant(const BlockDefinition& base_def, const BlockFamily& family,

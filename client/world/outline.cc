@@ -10,8 +10,8 @@
 
 #include "shared/utils/coord.hh"
 
+#include "client/camera.hh"
 #include "client/constant.hh"
-#include "client/entity/camera.hh"
 #include "client/globals.hh"
 #include "client/shader_program.hh"
 

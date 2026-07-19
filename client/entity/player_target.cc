@@ -9,7 +9,7 @@
 #include "shared/world/block_collisions.hh"
 #include "shared/world/block_registry.hh"
 
-#include "client/entity/camera.hh"
+#include "client/camera.hh"
 #include "client/globals.hh"
 #include "client/gui/gui.hh"
 #include "client/world/outline.hh"

@@ -8,12 +8,12 @@
 #include "core/config/ref.hh"
 #include "core/exception.hh"
 
+#include "client/fog.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
 #include "client/gui/settings.hh"
 #include "client/world/chunk_renderer.hh"
 #include "client/world/outline.hh"
-#include "client/world/skybox.hh"
 
 static GLuint s_world_fbo;
 static GLuint s_world_texture;
@@ -146,9 +146,9 @@ void head::render(void)
     glBindFramebuffer(GL_FRAMEBUFFER, s_world_fbo);
     glViewport(0, 0, s_scaled_width, s_scaled_height);
 
-    auto clear_r = skybox::fog_color.x();
-    auto clear_g = skybox::fog_color.y();
-    auto clear_b = skybox::fog_color.z();
+    auto clear_r = fog::color.x();
+    auto clear_g = fog::color.y();
+    auto clear_b = fog::color.z();
     auto clear_a = 1.0f;
 
     glClearDepth(1.0f);

@@ -1,6 +1,4 @@
 add_executable(voxelius-client
-    "${CMAKE_CURRENT_LIST_DIR}/entity/camera.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/entity/camera.hh"
     "${CMAKE_CURRENT_LIST_DIR}/entity/interpolation.cc"
     "${CMAKE_CURRENT_LIST_DIR}/entity/interpolation.hh"
     "${CMAKE_CURRENT_LIST_DIR}/entity/player_look.cc"
@@ -45,7 +43,11 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/world/outline.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/skybox.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/skybox.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/camera.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/camera.hh"
     "${CMAKE_CURRENT_LIST_DIR}/constant.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/fog.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/fog.hh"
     "${CMAKE_CURRENT_LIST_DIR}/game.cc"
     "${CMAKE_CURRENT_LIST_DIR}/game.hh"
     "${CMAKE_CURRENT_LIST_DIR}/globals.cc"

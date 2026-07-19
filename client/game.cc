@@ -15,7 +15,7 @@
 #include "shared/world/climate.hh"
 #include "shared/world/worldgen.hh"
 
-#include "client/entity/camera.hh"
+#include "client/camera.hh"
 #include "client/entity/interpolation.hh"
 #include "client/entity/player_look.hh"
 #include "client/entity/player_move.hh"

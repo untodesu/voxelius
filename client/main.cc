@@ -12,7 +12,8 @@
 #include "shared/splash.hh"
 #include "shared/world/worldgen.hh"
 
-#include "client/entity/camera.hh"
+#include "client/camera.hh"
+#include "client/fog.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
 #include "client/gui/gui.hh"
@@ -202,6 +203,8 @@ static void wrapped_main(int argc, char** argv)
         chunk_mesher::update();
 
         camera::update();
+
+        fog::update();
 
         gui::update_scale();
 

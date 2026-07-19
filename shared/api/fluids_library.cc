@@ -94,20 +94,6 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
 
     lua_pop(L, 1);
 
-    lua_getfield(L, def_idx, "max_level");
-
-    if(!lua_isnoneornil(L, -1)) {
-        auto max_level = utils::require_integer(L, -1);
-
-        if(!max_level.has_value()) {
-            return false;
-        }
-
-        def.max_level = static_cast<unsigned>(max_level.value());
-    }
-
-    lua_pop(L, 1);
-
     lua_getfield(L, def_idx, "fog_density");
     auto fog_density = utils::opt_number(L, -1, 1.0);
 
@@ -199,8 +185,6 @@ static bool add_fluid(lua_State* L, ModContext* ctx, const char* raw_name, int d
 
     def.gravity = FLUID_GRAVITY_DOWN;
     def.opaque = false;
-
-    def.max_level = std::nullopt;
 
     def.fog_density = 1.0f;
     def.fog_color.setOnes();
