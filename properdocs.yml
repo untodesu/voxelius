@@ -80,11 +80,13 @@ nav:
         - Core: dev/modding/api-core.md
         - Fluids: dev/modding/api-fluids.md
         - Blocks: dev/modding/api-blocks.md
-        - Features: dev/modding/api-features.md
         - Biomes: dev/modding/api-biomes.md
         - World: dev/modding/api-world.md
       - File Formats:
         - Block Models: dev/modding/format-bmodel.md
         - Block Collisions: dev/modding/format-bcoll.md
+        - Features: dev/modding/format-feature.md
       - Libraries:
-        - Slabs: dev/modding/lib-slabs.md
+        - Fluids: dev/modding/lib-flowdef.md
+        - Logs: dev/modding/lib-logdef.md
+        - Slabs: dev/modding/lib-slabdef.md

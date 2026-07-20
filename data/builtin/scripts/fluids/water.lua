@@ -1,0 +1,46 @@
+local flowdef = require("builtin:flowdef.lua")
+
+local still_frames = {}
+local flowing_frames = {}
+
+local WATER_CONFIG <const> = {
+    infinite = true,
+    max_level = 8,
+    delay = 5,
+}
+
+for i = 1, 16 do
+    local frame = string.format("%02d", i)
+    table.insert(still_frames, "water_still_" .. frame .. ".png")
+    table.insert(flowing_frames, "water_flowing_" .. frame .. ".png")
+end
+
+fluids.add("water", {
+    gravity = fluids.GRAVITY_DOWN,
+
+    textures = {
+        still = still_frames,
+        flowing = flowing_frames,
+    },
+
+    fog_density = 10.0,
+    fog_color = { 0.0, 0.0, 0.5 },
+})
+
+blocks.add("water", {
+    render = blocks.RENDER_NONE,
+
+    fluid_name = "water",
+
+    replaceable = true,
+    touch = blocks.TOUCH_NONE,
+
+    emission = 0,
+    dissipation = 1,
+
+    states = flowdef.states(WATER_CONFIG),
+    variants = flowdef.variants(WATER_CONFIG),
+
+    on_place = flowdef.on_place(WATER_CONFIG),
+    on_tick = flowdef.on_tick("water", WATER_CONFIG),
+})

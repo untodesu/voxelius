@@ -1,19 +1,17 @@
 local slabdef = require("builtin:slabdef.lua")
 
-local stone_prototype = {
+local cobblestone_prototype = {
   render = blocks.RENDER_SOLID,
   animated = false,
 
   textures = {
     default = {
-      "stone_01.png",
-      "stone_02.png",
-      "stone_03.png",
-      "stone_04.png",
+      "cobblestone_01.png",
+      "cobblestone_02.png",
     }
   },
 
-  health = 3,
+  health = 2,
   tools = { blocks.TOOL_PICKAXE },
 
   emission = 0,
@@ -23,22 +21,11 @@ local stone_prototype = {
   tags = { blocks.TAG_ROCK }
 }
 
-blocks.add("stone", stone_prototype, {
+blocks.add("cobblestone", cobblestone_prototype, {
   model_name = "cube",
   bcoll_name = "cube",
 
   drops = {
-    {
-      when = {
-        effects = { "silk_touch" }
-      },
-      items = {
-        {
-          name = "stone",
-          count = 1
-        }
-      }
-    },
     {
       items = {
         {
@@ -50,6 +37,6 @@ blocks.add("stone", stone_prototype, {
   }
 })
 
-slabdef.add_block("stone_slab", stone_prototype, {
-  health = 2,
+slabdef.add_block("cobblestone_slab", cobblestone_prototype, {
+  health = 1,
 })

@@ -1,6 +1,6 @@
-local slabs = {}
+local slabdef = {}
 
-function slabs.on_place(identifier)
+function slabdef.on_place(identifier)
   return function(bx, by, bz, target, occupant, actor)
     local slab_id = blocks.get(identifier)
 
@@ -36,7 +36,7 @@ function slabs.on_place(identifier)
   end
 end
 
-function slabs.add_block(identifier, prototype, options)
+function slabdef.add_block(identifier, prototype, options)
   options = options or {}
 
   local health = options.health or prototype.health or 2
@@ -82,7 +82,7 @@ function slabs.add_block(identifier, prototype, options)
       }
     },
 
-    on_place = options.on_place or slabs.on_place(identifier),
+    on_place = options.on_place or slabdef.on_place(identifier),
   }
 
   for k, v in pairs(options) do
@@ -94,4 +94,4 @@ function slabs.add_block(identifier, prototype, options)
   return blocks.add(identifier, prototype, def)
 end
 
-return slabs
+return slabdef

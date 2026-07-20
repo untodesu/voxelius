@@ -12,11 +12,11 @@ blocks.add("sandstone", {
   model_name = "cube",
   bcoll_name = "cube",
 
-  health = 2,
+  health = 1,
   tools = { blocks.TOOL_PICKAXE },
 
   touch = blocks.TOUCH_SOLID,
-  tags = { blocks.TAG_ROCK },
+  tags = { blocks.TAG_SOIL },
 
   emission = 0,
   dissipation = 15,
@@ -30,5 +30,5 @@ blocks.add("sandstone", {
         }
       }
     }
-  },
+  }
 })

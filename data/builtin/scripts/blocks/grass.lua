@@ -49,5 +49,4 @@ blocks.add("grass", {
       }
     }
   },
-
 })

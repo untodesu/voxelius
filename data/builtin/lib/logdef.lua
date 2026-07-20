@@ -1,6 +1,6 @@
-local logs = {}
+local logdef = {}
 
-function logs.on_place(identifier)
+function logdef.on_place(identifier)
   return function(bx, by, bz, target, occupant, actor)
     if not occupant.replaceable then
       return nil
@@ -16,7 +16,7 @@ function logs.on_place(identifier)
   end
 end
 
-function logs.add_block(identifier, prototype)
+function logdef.add_block(identifier, prototype)
   local def = {
     model_name = "log",
     bcoll_name = "cube",
@@ -49,10 +49,10 @@ function logs.add_block(identifier, prototype)
       }
     },
 
-    on_place = logs.on_place(identifier),
+    on_place = logdef.on_place(identifier),
   }
 
   return blocks.add(identifier, prototype, def)
 end
 
-return logs
+return logdef

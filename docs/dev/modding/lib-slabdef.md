@@ -1,16 +1,16 @@
 # Slabs Library
 
-The `builtin:slabs.lua` library provides utility functions for registering slab types of regular blocks.  
+The `builtin:slabdef.lua` library provides utility functions for registering slab types of regular blocks  
 
 ## Importing
 
 ```lua
-local slabs = require("builtin:slabs.lua")
+local slabdef = require("builtin:slabdef.lua")
 ```
 
 ## Functions
 
-### Function: `slabs.on_place(identifier) -> function`
+### Function: `slabdef.on_place(identifier) -> function`
 
 Produces an `on_place` callback for a specified slab identifier  
 
@@ -22,7 +22,7 @@ Produces an `on_place` callback for a specified slab identifier
 
 - A function that implements correct slab placement logic to be used in block registrations  
 
-### Function: `slabs.add_block(identifier, prototype, options) -> integer`
+### Function: `slabdef.add_block(identifier, prototype, options) -> integer`
 
 A wrapper for `blocks.add` to define a slab block family  
 
