@@ -3,6 +3,7 @@
 #include "shared/world/biome_registry.hh"
 
 #include "shared/mod_context.hh"
+#include "shared/res/feature.hh"
 
 static std::vector<BiomeDefinition> s_definitions;
 static emhash8::HashMap<Identifier, biome_id_type> s_names;
@@ -88,6 +89,15 @@ void biome_registry::resolve_palettes(void)
             }
 
             field->cached = block_registry::resolve_variant(family->stem_id, map);
+        }
+    }
+}
+
+void biome_registry::resolve_features(void)
+{
+    for(auto& def : s_definitions) {
+        for(auto& entry : def.scatter) {
+            entry.cached = res::load<Feature>(entry.feature);
         }
     }
 }

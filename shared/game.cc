@@ -11,14 +11,17 @@
 #include "shared/mod_loader.hh"
 #include "shared/res/block_collision.hh"
 #include "shared/res/block_model.hh"
+#include "shared/res/feature.hh"
 #include "shared/world/block_collisions.hh"
 #include "shared/world/world.hh"
 
 void shared_game::init(void)
 {
     Image::register_resource();
+
     BlockCollision::register_resource();
     BlockModel::register_resource();
+    Feature::register_resource();
 
     mod_loader::init();
 }

@@ -28,6 +28,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/res/block_collision.hh"
     "${CMAKE_CURRENT_LIST_DIR}/res/block_model.cc"
     "${CMAKE_CURRENT_LIST_DIR}/res/block_model.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/res/feature.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/res/feature.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/chunk.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/chunk.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/coord.cc"

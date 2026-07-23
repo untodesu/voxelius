@@ -2,8 +2,11 @@
 #define BCF648BF_4565_4F82_9C42_0491F751D447
 
 #include "core/identifier.hh"
+#include "core/res/resource.hh"
 
 #include "shared/world/block.hh"
+
+struct Feature;
 
 enum biome_realm : unsigned {
     BIOME_REALM_SURFACE = 0,
@@ -22,6 +25,7 @@ struct BiomeScatterEntry final {
     float chance;
     block_tag_bit need_above;
     block_tag_bit need_below;
+    res::handle<Feature> cached;
 };
 
 struct BiomePaletteEntry final {
