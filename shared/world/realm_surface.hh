@@ -7,7 +7,7 @@ class BlockStorage;
 
 namespace realm_surface
 {
-void init(void);
+void init(std::uint64_t seed);
 void shutdown(void);
 } // namespace realm_surface
 

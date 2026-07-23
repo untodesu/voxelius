@@ -6,6 +6,7 @@
 namespace worldgen
 {
 void init(void);
+void shutdown(void);
 void request(const ChunkPos& pos);
 bool pending(const ChunkPos& pos);
 } // namespace worldgen

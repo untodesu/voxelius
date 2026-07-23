@@ -55,6 +55,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/world/chunk.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/climate.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/climate.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/world/entropy_cache.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/world/entropy_cache.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/fluid_registry.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/fluid_registry.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/fluid.hh"

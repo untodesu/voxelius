@@ -6,6 +6,7 @@
 
 #include "shared/globals.hh"
 #include "shared/world/chunk.hh"
+#include "shared/world/entropy_cache.hh"
 #include "shared/world/realm_surface.hh"
 #include "shared/world/terrain.hh"
 #include "shared/world/world.hh"
@@ -48,9 +49,18 @@ void WorldgenTask::finalize(void)
 
 void worldgen::init(void)
 {
+    std::uint64_t seed = 1337;
+
     // TODO: pass in a world config / seed
 
-    realm_surface::init();
+    entropy_cache::init(seed);
+    realm_surface::init(seed);
+}
+
+void worldgen::shutdown(void)
+{
+    entropy_cache::shutdown();
+    realm_surface::shutdown();
 }
 
 void worldgen::request(const ChunkPos& pos)

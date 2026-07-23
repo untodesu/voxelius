@@ -248,6 +248,8 @@ static void wrapped_main(int argc, char** argv)
 
     client_game::shutdown();
 
+    worldgen::shutdown();
+
     // TODO: game_ui::shutdown();
 
     shared_game::shutdown();

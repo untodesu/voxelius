@@ -47,27 +47,30 @@ static bool is_inside_terrain(const BlockPos& bpos, float base_variation, float 
     return noise > 0.0f;
 }
 
-void realm_surface::init(void)
+void realm_surface::init(std::uint64_t seed)
 {
+    std::mt19937_64 seeder;
+    seeder.seed(seed);
+
     fnl_state noise_temp = fnlCreateState();
     noise_temp.noise_type = FNL_NOISE_OPENSIMPLEX2;
     noise_temp.frequency = 0.0007f;
-    noise_temp.seed = 1;
+    noise_temp.seed = static_cast<int>(seeder());
 
     fnl_state noise_humd = fnlCreateState();
     noise_humd.noise_type = FNL_NOISE_OPENSIMPLEX2;
     noise_humd.frequency = 0.0007f;
-    noise_humd.seed = 2;
+    noise_humd.seed = static_cast<int>(seeder());
 
     fnl_state noise_cont = fnlCreateState();
     noise_cont.noise_type = FNL_NOISE_OPENSIMPLEX2;
     noise_cont.frequency = 0.00035f;
-    noise_cont.seed = 4;
+    noise_cont.seed = static_cast<int>(seeder());
 
     fnl_state noise_weird = fnlCreateState();
     noise_weird.noise_type = FNL_NOISE_OPENSIMPLEX2;
     noise_weird.frequency = 0.001f;
-    noise_weird.seed = 3;
+    noise_weird.seed = static_cast<int>(seeder());
 
     s_temp_noise = std::make_unique<NoiseCache_2D>(std::move(noise_temp), Eigen::Vector2i(8, 8));
     s_humd_noise = std::make_unique<NoiseCache_2D>(std::move(noise_humd), Eigen::Vector2i(8, 8));
@@ -75,7 +78,7 @@ void realm_surface::init(void)
     s_weird_noise = std::make_unique<NoiseCache_2D>(std::move(noise_weird), Eigen::Vector2i(8, 8));
 
     fnl_state noise_terrain = fnlCreateState();
-    noise_terrain.seed = 1337;
+    noise_terrain.seed = static_cast<int>(seeder());
     noise_terrain.noise_type = FNL_NOISE_PERLIN;
     noise_terrain.fractal_type = FNL_FRACTAL_FBM;
     noise_terrain.frequency = 0.008f;
