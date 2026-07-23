@@ -1,7 +1,7 @@
 site_name: Voxelius
-site_url: https://voxelius.codeberg.page/voxelius
-repo_url: https://codeberg.org/voxelius/voxelius
-repo_name: voxelius/voxelius
+site_url: https://untodesu.github.io/voxelius
+repo_url: https://github.com/untodesu/voxelius
+repo_name: untodesu/voxelius
 # use_directory_urls: false
 
 plugins:
