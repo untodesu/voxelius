@@ -192,7 +192,7 @@ private:
 
     void emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
         std::uint64_t entropy, std::optional<block_face> face) const;
-    void emit_fluid_quad(std::vector<ChunkMesh_Vertex>& out, const LocalPos& lpos, const Eigen::Vector3f& min, const Eigen::Vector3f& max,
+    void emit_fluid_face(std::vector<ChunkMesh_Vertex>& out, const LocalPos& lpos, const std::array<Eigen::Vector3f, 4>& positions,
         block_face face, const AtlasStrip* strip, unsigned tint_index,
         std::optional<std::array<Eigen::Vector2f, 4>> uvs_override = std::nullopt) const;
 
@@ -432,8 +432,8 @@ bool MeshingTask::is_culled_fluid(const LocalPos& lpos, block_face face, fluid_i
     }
 
     if(neighbour_def->fluid == fluid_id && neighbour_def->fluid_level > 0) {
-        // Top/bottom against the same fluid are always merged. Side faces
-        // may still need a height gap strip; those are handled in mesh_fluid.
+        // Same-fluid neighbours weld via shared corner heights; skip all faces
+        // between them. Side skips happen in mesh_fluid before this runs.
         return face == BLOCK_FACE_TOP || face == BLOCK_FACE_BOTTOM;
     }
 
@@ -595,6 +595,57 @@ static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos,
     return height;
 }
 
+static std::optional<float> fluid_cell_height(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id, fluid_gravity gravity)
+{
+    auto def = block_registry::find_definition(cache.get(lpos));
+
+    if(def == nullptr || def->fluid != fluid_id || def->fluid_level == 0) {
+        return std::nullopt;
+    }
+
+    return fluid_surface_height(cache, lpos, def, gravity);
+}
+
+static float fluid_corner_height(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id, fluid_gravity gravity, int sx,
+    int sz, float self_height)
+{
+    auto sum = 0.0f;
+    auto count = 0;
+
+    for(int dx = sx - 1; dx <= sx; dx += 1) {
+        for(int dz = sz - 1; dz <= sz; dz += 1) {
+            auto nlpos = lpos + LocalPos(dx, 0, dz);
+            auto def = block_registry::find_definition(cache.get(nlpos));
+
+            if(def && def->fluid == fluid_id && def->fluid_level) {
+                auto height = fluid_surface_height(cache, nlpos, def, gravity);
+
+                if(height >= 1.0f) {
+                    return 1.0f;
+                }
+
+                sum += height;
+                count += 1;
+            }
+        }
+    }
+
+    if(count == 0) {
+        return self_height;
+    }
+
+    return sum / static_cast<float>(count);
+}
+
+static float fluid_surface_y(float corner_height, fluid_gravity gravity)
+{
+    if(gravity == FLUID_GRAVITY_DOWN) {
+        return corner_height;
+    }
+
+    return 1.0f - corner_height;
+}
+
 static std::optional<float> fluid_neighbour_level(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id)
 {
     auto def = block_registry::find_definition(cache.get(lpos));
@@ -651,60 +702,14 @@ static std::array<Eigen::Vector2f, 4> flowing_top_uvs(float flow_x, float flow_z
     return uvs;
 }
 
-void MeshingTask::emit_fluid_quad(std::vector<ChunkMesh_Vertex>& out, const LocalPos& lpos, const Eigen::Vector3f& min,
-    const Eigen::Vector3f& max, block_face face, const AtlasStrip* strip, unsigned tint_index,
-    std::optional<std::array<Eigen::Vector2f, 4>> uvs_override) const
+void MeshingTask::emit_fluid_face(std::vector<ChunkMesh_Vertex>& out, const LocalPos& lpos, const std::array<Eigen::Vector3f, 4>& positions,
+    block_face face, const AtlasStrip* strip, unsigned tint_index, std::optional<std::array<Eigen::Vector2f, 4>> uvs_override) const
 {
     if(strip == nullptr) {
         return;
     }
 
-    std::array<Eigen::Vector3f, 4> positions {};
     std::array<Eigen::Vector2f, 4> uvs {};
-
-    switch(face) {
-        case BLOCK_FACE_NORTH:
-            positions[0] = Eigen::Vector3f(min.x(), max.y(), min.z());
-            positions[1] = Eigen::Vector3f(max.x(), max.y(), min.z());
-            positions[2] = Eigen::Vector3f(max.x(), min.y(), min.z());
-            positions[3] = Eigen::Vector3f(min.x(), min.y(), min.z());
-            break;
-
-        case BLOCK_FACE_SOUTH:
-            positions[0] = Eigen::Vector3f(max.x(), max.y(), max.z());
-            positions[1] = Eigen::Vector3f(min.x(), max.y(), max.z());
-            positions[2] = Eigen::Vector3f(min.x(), min.y(), max.z());
-            positions[3] = Eigen::Vector3f(max.x(), min.y(), max.z());
-            break;
-
-        case BLOCK_FACE_EAST:
-            positions[0] = Eigen::Vector3f(max.x(), max.y(), min.z());
-            positions[1] = Eigen::Vector3f(max.x(), max.y(), max.z());
-            positions[2] = Eigen::Vector3f(max.x(), min.y(), max.z());
-            positions[3] = Eigen::Vector3f(max.x(), min.y(), min.z());
-            break;
-
-        case BLOCK_FACE_WEST:
-            positions[0] = Eigen::Vector3f(min.x(), max.y(), max.z());
-            positions[1] = Eigen::Vector3f(min.x(), max.y(), min.z());
-            positions[2] = Eigen::Vector3f(min.x(), min.y(), min.z());
-            positions[3] = Eigen::Vector3f(min.x(), min.y(), max.z());
-            break;
-
-        case BLOCK_FACE_TOP:
-            positions[0] = Eigen::Vector3f(min.x(), max.y(), min.z());
-            positions[1] = Eigen::Vector3f(min.x(), max.y(), max.z());
-            positions[2] = Eigen::Vector3f(max.x(), max.y(), max.z());
-            positions[3] = Eigen::Vector3f(max.x(), max.y(), min.z());
-            break;
-
-        case BLOCK_FACE_BOTTOM:
-            positions[0] = Eigen::Vector3f(min.x(), min.y(), max.z());
-            positions[1] = Eigen::Vector3f(min.x(), min.y(), min.z());
-            positions[2] = Eigen::Vector3f(max.x(), min.y(), min.z());
-            positions[3] = Eigen::Vector3f(max.x(), min.y(), max.z());
-            break;
-    }
 
     if(uvs_override.has_value()) {
         uvs = uvs_override.value();
@@ -767,6 +772,13 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
     }
 
     auto surface_height = fluid_surface_height(m_cache, lpos, &def, fluid->gravity);
+
+    std::array<float, 4> corners;
+    corners[0] = fluid_corner_height(m_cache, lpos, def.fluid, fluid->gravity, 0, 0, surface_height);
+    corners[1] = fluid_corner_height(m_cache, lpos, def.fluid, fluid->gravity, 0, 1, surface_height);
+    corners[2] = fluid_corner_height(m_cache, lpos, def.fluid, fluid->gravity, 1, 1, surface_height);
+    corners[3] = fluid_corner_height(m_cache, lpos, def.fluid, fluid->gravity, 1, 0, surface_height);
+
     auto& bucket = fluid->opaque ? m_opaque : m_fluid;
     auto tint_index = fluid->tint_index.value_or(0);
 
@@ -797,6 +809,20 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
         }
     }
 
+    float floor_y;
+
+    if(fluid->gravity == FLUID_GRAVITY_DOWN) {
+        floor_y = 0.0f;
+    }
+    else {
+        floor_y = 1.0f;
+    }
+
+    auto y0 = fluid_surface_y(corners[0], fluid->gravity);
+    auto y1 = fluid_surface_y(corners[1], fluid->gravity);
+    auto y2 = fluid_surface_y(corners[2], fluid->gravity);
+    auto y3 = fluid_surface_y(corners[3], fluid->gravity);
+
     for(auto face : ALL_FACES) {
         auto is_side = false;
         is_side = is_side || face == BLOCK_FACE_NORTH;
@@ -809,26 +835,7 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
             auto neighbour_id = m_cache.get(neighbour_lpos);
             auto neighbour_def = block_registry::find_definition(neighbour_id);
 
-            if(neighbour_def && neighbour_def->fluid == def.fluid && neighbour_def->fluid_level > 0) {
-                auto neighbour_height = fluid_surface_height(m_cache, neighbour_lpos, neighbour_def, fluid->gravity);
-
-                if(surface_height <= neighbour_height) {
-                    continue;
-                }
-
-                Eigen::Vector3f min = Eigen::Vector3f::Zero();
-                Eigen::Vector3f max = Eigen::Vector3f::Ones();
-
-                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
-                    min.y() = neighbour_height;
-                    max.y() = surface_height;
-                }
-                else {
-                    min.y() = 1.0f - surface_height;
-                    max.y() = 1.0f - neighbour_height;
-                }
-
-                emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, tint_index);
+            if(neighbour_def && neighbour_def->fluid == def.fluid && neighbour_def->fluid_level) {
                 continue;
             }
         }
@@ -851,20 +858,104 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
             continue;
         }
 
-        Eigen::Vector3f min = Eigen::Vector3f::Zero();
-        Eigen::Vector3f max = Eigen::Vector3f::Ones();
+        std::array<Eigen::Vector3f, 4> positions {};
 
-        if(fluid->gravity == FLUID_GRAVITY_DOWN) {
-            max.y() = surface_height;
-        }
-        else {
-            min.y() = 1.0f - surface_height;
+        switch(face) {
+            case BLOCK_FACE_NORTH:
+                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
+                    positions[0] = Eigen::Vector3f(0.0f, y0, 0.0f);
+                    positions[1] = Eigen::Vector3f(1.0f, y3, 0.0f);
+                    positions[2] = Eigen::Vector3f(1.0f, floor_y, 0.0f);
+                    positions[3] = Eigen::Vector3f(0.0f, floor_y, 0.0f);
+                }
+                else {
+                    positions[0] = Eigen::Vector3f(0.0f, floor_y, 0.0f);
+                    positions[1] = Eigen::Vector3f(1.0f, floor_y, 0.0f);
+                    positions[2] = Eigen::Vector3f(1.0f, y3, 0.0f);
+                    positions[3] = Eigen::Vector3f(0.0f, y0, 0.0f);
+                }
+                break;
+
+            case BLOCK_FACE_SOUTH:
+                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
+                    positions[0] = Eigen::Vector3f(1.0f, y2, 1.0f);
+                    positions[1] = Eigen::Vector3f(0.0f, y1, 1.0f);
+                    positions[2] = Eigen::Vector3f(0.0f, floor_y, 1.0f);
+                    positions[3] = Eigen::Vector3f(1.0f, floor_y, 1.0f);
+                }
+                else {
+                    positions[0] = Eigen::Vector3f(1.0f, floor_y, 1.0f);
+                    positions[1] = Eigen::Vector3f(0.0f, floor_y, 1.0f);
+                    positions[2] = Eigen::Vector3f(0.0f, y1, 1.0f);
+                    positions[3] = Eigen::Vector3f(1.0f, y2, 1.0f);
+                }
+                break;
+
+            case BLOCK_FACE_EAST:
+                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
+                    positions[0] = Eigen::Vector3f(1.0f, y3, 0.0f);
+                    positions[1] = Eigen::Vector3f(1.0f, y2, 1.0f);
+                    positions[2] = Eigen::Vector3f(1.0f, floor_y, 1.0f);
+                    positions[3] = Eigen::Vector3f(1.0f, floor_y, 0.0f);
+                }
+                else {
+                    positions[0] = Eigen::Vector3f(1.0f, floor_y, 0.0f);
+                    positions[1] = Eigen::Vector3f(1.0f, floor_y, 1.0f);
+                    positions[2] = Eigen::Vector3f(1.0f, y2, 1.0f);
+                    positions[3] = Eigen::Vector3f(1.0f, y3, 0.0f);
+                }
+                break;
+
+            case BLOCK_FACE_WEST:
+                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
+                    positions[0] = Eigen::Vector3f(0.0f, y1, 1.0f);
+                    positions[1] = Eigen::Vector3f(0.0f, y0, 0.0f);
+                    positions[2] = Eigen::Vector3f(0.0f, floor_y, 0.0f);
+                    positions[3] = Eigen::Vector3f(0.0f, floor_y, 1.0f);
+                }
+                else {
+                    positions[0] = Eigen::Vector3f(0.0f, floor_y, 1.0f);
+                    positions[1] = Eigen::Vector3f(0.0f, floor_y, 0.0f);
+                    positions[2] = Eigen::Vector3f(0.0f, y0, 0.0f);
+                    positions[3] = Eigen::Vector3f(0.0f, y1, 1.0f);
+                }
+                break;
+
+            case BLOCK_FACE_TOP:
+                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
+                    positions[0] = Eigen::Vector3f(0.0f, y0, 0.0f);
+                    positions[1] = Eigen::Vector3f(0.0f, y1, 1.0f);
+                    positions[2] = Eigen::Vector3f(1.0f, y2, 1.0f);
+                    positions[3] = Eigen::Vector3f(1.0f, y3, 0.0f);
+                }
+                else {
+                    positions[0] = Eigen::Vector3f(0.0f, 1.0f, 0.0f);
+                    positions[1] = Eigen::Vector3f(0.0f, 1.0f, 1.0f);
+                    positions[2] = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
+                    positions[3] = Eigen::Vector3f(1.0f, 1.0f, 0.0f);
+                }
+                break;
+
+            case BLOCK_FACE_BOTTOM:
+                if(fluid->gravity == FLUID_GRAVITY_UP) {
+                    positions[0] = Eigen::Vector3f(0.0f, y1, 1.0f);
+                    positions[1] = Eigen::Vector3f(0.0f, y0, 0.0f);
+                    positions[2] = Eigen::Vector3f(1.0f, y3, 0.0f);
+                    positions[3] = Eigen::Vector3f(1.0f, y2, 1.0f);
+                }
+                else {
+                    positions[0] = Eigen::Vector3f(0.0f, 0.0f, 1.0f);
+                    positions[1] = Eigen::Vector3f(0.0f, 0.0f, 0.0f);
+                    positions[2] = Eigen::Vector3f(1.0f, 0.0f, 0.0f);
+                    positions[3] = Eigen::Vector3f(1.0f, 0.0f, 1.0f);
+                }
+                break;
         }
 
         if(is_side) {
-            emit_fluid_quad(bucket, lpos, min, max, face, cached->flowing, tint_index);
+            emit_fluid_face(bucket, lpos, positions, face, cached->flowing, tint_index);
         }
-        else if(face == BLOCK_FACE_TOP || (fluid->gravity == FLUID_GRAVITY_UP && face == BLOCK_FACE_BOTTOM)) {
+        else if(surface_face) {
             const AtlasStrip* strip;
 
             if(use_still) {
@@ -883,10 +974,10 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
                 uvs = flowing_top_uvs(flow_x, flow_z);
             }
 
-            emit_fluid_quad(bucket, lpos, min, max, face, strip, tint_index, uvs);
+            emit_fluid_face(bucket, lpos, positions, face, strip, tint_index, uvs);
         }
         else {
-            emit_fluid_quad(bucket, lpos, min, max, face, cached->still, tint_index);
+            emit_fluid_face(bucket, lpos, positions, face, cached->still, tint_index);
         }
     }
 }
