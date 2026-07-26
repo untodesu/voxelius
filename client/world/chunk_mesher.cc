@@ -190,9 +190,9 @@ private:
     bool is_culled_fluid(const LocalPos& lpos, block_face face, fluid_id_type fluid_id, bool face_flush) const;
     bool is_occluder(const LocalPos& lpos, block_face exposed_face) const;
 
-    void emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
+    void emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
         std::uint64_t entropy, std::optional<block_face> face) const;
-    void emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalPos& lpos, const Eigen::Vector3f& min, const Eigen::Vector3f& max,
+    void emit_fluid_quad(std::vector<ChunkMesh_Vertex>& out, const LocalPos& lpos, const Eigen::Vector3f& min, const Eigen::Vector3f& max,
         block_face face, const AtlasStrip* strip, unsigned tint_index,
         std::optional<std::array<Eigen::Vector2f, 4>> uvs_override = std::nullopt) const;
 
@@ -200,16 +200,69 @@ private:
     void mesh_block(const LocalPos& lpos, block_id_type id);
 
     BlockCache m_cache;
-    std::vector<ChunkMesh_Quad> m_opaque;
-    std::vector<ChunkMesh_Quad> m_alpha;
-    std::vector<ChunkMesh_Quad> m_fluid;
+    std::vector<ChunkMesh_Vertex> m_opaque;
+    std::vector<ChunkMesh_Vertex> m_alpha;
+    std::vector<ChunkMesh_Vertex> m_fluid;
     entt::entity m_entity;
     ChunkPos m_cpos;
 };
 
+static float shade_factor(const Eigen::Vector3f& normal)
+{
+    auto ax = std::abs(normal.x());
+    auto ay = std::abs(normal.y());
+    auto az = std::abs(normal.z());
+
+    if(ay >= ax && ay >= az) {
+        if(normal.y()) {
+            return 1.0f;
+        }
+        else {
+            return 0.4f;
+        }
+    }
+
+    if(ax >= az) {
+        return 0.6f;
+    }
+    else {
+        return 0.8f;
+    }
+}
+
+static void emit_quad_vertices(std::vector<ChunkMesh_Vertex>& out, const std::array<Eigen::Vector3f, 4>& positions_16ths,
+    const std::array<Eigen::Vector2f, 4>& uvs, const std::array<std::uint32_t, 4>& ao_values, std::uint32_t texture, float shade,
+    bool animated)
+{
+    auto flip_quad = false;
+    std::array<int, 4> order;
+
+    if(ao_values[0] + ao_values[2] < ao_values[1] + ao_values[3]) {
+        order[0] = 0;
+        order[1] = 1;
+        order[2] = 3;
+        order[3] = 2;
+    }
+    else {
+        order[0] = 1;
+        order[1] = 2;
+        order[2] = 0;
+        order[3] = 3;
+    }
+
+    for(auto corner : order) {
+        ChunkMesh_Vertex vertex {};
+        vertex.data_position = ChunkMesh_Vertex::pack_position(positions_16ths[corner]);
+        vertex.data_uv = ChunkMesh_Vertex::pack_uv(uvs[corner]);
+        vertex.data_texture = texture;
+        vertex.data_extras = ChunkMesh_Vertex::pack_extras(ao_values[corner], shade, animated);
+        out.push_back(vertex);
+    }
+}
+
 static void sync_part(ChunkMesh_Part& part)
 {
-    if(part.quads.empty()) {
+    if(part.vertices.empty()) {
         if(part.vbo) {
             glDeleteBuffers(1, &part.vbo);
             part.vbo = 0;
@@ -224,7 +277,7 @@ static void sync_part(ChunkMesh_Part& part)
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, part.vbo);
-    glBufferData(GL_ARRAY_BUFFER, std::span(part.quads).size_bytes(), part.quads.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, std::span(part.vertices).size_bytes(), part.vertices.data(), GL_STATIC_DRAW);
 }
 
 MeshingTask::MeshingTask(entt::entity entity, const ChunkPos& cpos) : m_entity(entity), m_cpos(cpos)
@@ -269,23 +322,23 @@ void MeshingTask::finalize(void)
 
     auto& component = world::chunk_entities.get_or_emplace<ChunkMesh>(m_entity);
 
-    component.opaque.quads = std::move(m_opaque);
-    component.opaque.count = static_cast<std::uint32_t>(component.opaque.quads.size());
+    component.opaque.vertices = std::move(m_opaque);
+    component.opaque.count = static_cast<std::uint32_t>(component.opaque.vertices.size());
     sync_part(component.opaque);
 
-    component.alpha.quads = std::move(m_alpha);
-    component.alpha.count = static_cast<std::uint32_t>(component.alpha.quads.size());
+    component.alpha.vertices = std::move(m_alpha);
+    component.alpha.count = static_cast<std::uint32_t>(component.alpha.vertices.size());
     sync_part(component.alpha);
 
-    component.fluid.quads = std::move(m_fluid);
-    component.fluid.count = static_cast<std::uint32_t>(component.fluid.quads.size());
+    component.fluid.vertices = std::move(m_fluid);
+    component.fluid.count = static_cast<std::uint32_t>(component.fluid.vertices.size());
     sync_part(component.fluid);
 
-    // Opaque quads won't get depth-sorted
+    // Opaque vertices won't get depth-sorted
     // at runtime so there's no point in keeping
     // them persistent in the system memory
-    component.opaque.quads.clear();
-    component.opaque.quads.shrink_to_fit();
+    component.opaque.vertices.clear();
+    component.opaque.vertices.shrink_to_fit();
 
     world::chunk_entities.patch<ChunkMesh>(m_entity);
 
@@ -426,7 +479,7 @@ bool MeshingTask::is_occluder(const LocalPos& lpos, block_face exposed_face) con
     return baked->fully_covered[opposite_face(exposed_face)];
 }
 
-void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
+void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
     std::uint64_t entropy, std::optional<block_face> face) const
 {
     auto block_origin = lpos.cast<float>() * 16.0f;
@@ -438,36 +491,11 @@ void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<c
             frame_offset = static_cast<std::uint32_t>(entropy % quad.frame_count);
         }
 
-        Eigen::Vector3f p0 = block_origin + quad.positions[0] * 16.0f;
-        Eigen::Vector3f p1 = block_origin + quad.positions[1] * 16.0f;
-        Eigen::Vector3f p3 = block_origin + quad.positions[3] * 16.0f;
-
-        const auto& c0 = quad.uvs[0];
-        const auto& c2 = quad.uvs[2];
-
-        auto dist_c0 = std::abs(quad.uvs[1].x() - c0.x());
-        auto dist_c2 = std::abs(quad.uvs[1].x() - c2.x());
-        auto uv_orient_flag = dist_c0 < dist_c2;
-
-        ChunkMesh_Quad out_quad {};
-        out_quad.data_origin = ChunkMesh_Quad::pack_position(p0);
-        out_quad.data_edge_u = ChunkMesh_Quad::pack_offset(p1 - p0);
-        out_quad.data_edge_v = ChunkMesh_Quad::pack_offset(p3 - p0);
-
-        if(quad.shade) {
-            out_quad.data_origin |= ChunkMesh_Quad::SHADE_BIT;
-        }
-
-        if(uv_orient_flag) {
-            out_quad.data_origin |= ChunkMesh_Quad::UV_ORIENT_BIT;
-        }
-
-        if(quad.animated) {
-            out_quad.data_edge_u |= ChunkMesh_Quad::ANIMATED_BIT;
-        }
-
-        out_quad.data_uv = ChunkMesh_Quad::pack_uv(c0, c2);
-        out_quad.data_texture = ChunkMesh_Quad::pack_texture(quad.texture_index, frame_offset, quad.tint_index);
+        std::array<Eigen::Vector3f, 4> positions_16ths;
+        positions_16ths[0] = block_origin + 16.0f * quad.positions[0];
+        positions_16ths[1] = block_origin + 16.0f * quad.positions[1];
+        positions_16ths[2] = block_origin + 16.0f * quad.positions[2];
+        positions_16ths[3] = block_origin + 16.0f * quad.positions[3];
 
         std::array<std::uint32_t, 4> ao_values;
         ao_values.fill(3);
@@ -478,9 +506,17 @@ void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Quad>& out, std::span<c
             }
         }
 
-        out_quad.data_extras = ChunkMesh_Quad::pack_extras(ao_values);
+        auto shade = 1.0f;
 
-        out.push_back(out_quad);
+        if(quad.shade) {
+            auto edge_u = positions_16ths[1] - positions_16ths[0];
+            auto edge_v = positions_16ths[3] - positions_16ths[0];
+            shade = shade_factor(edge_u.cross(edge_v).normalized());
+        }
+
+        auto texture = ChunkMesh_Vertex::pack_texture(quad.texture_index, frame_offset, quad.tint_index);
+
+        emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, texture, shade, quad.animated);
     }
 }
 
@@ -615,7 +651,7 @@ static std::array<Eigen::Vector2f, 4> flowing_top_uvs(float flow_x, float flow_z
     return uvs;
 }
 
-void MeshingTask::emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalPos& lpos, const Eigen::Vector3f& min,
+void MeshingTask::emit_fluid_quad(std::vector<ChunkMesh_Vertex>& out, const LocalPos& lpos, const Eigen::Vector3f& min,
     const Eigen::Vector3f& max, block_face face, const AtlasStrip* strip, unsigned tint_index,
     std::optional<std::array<Eigen::Vector2f, 4>> uvs_override) const
 {
@@ -699,34 +735,20 @@ void MeshingTask::emit_fluid_quad(std::vector<ChunkMesh_Quad>& out, const LocalP
     }
 
     auto block_origin = 16.0f * lpos.cast<float>();
-    Eigen::Vector3f p0 = block_origin + 16.0f * positions[0];
-    Eigen::Vector3f p1 = block_origin + 16.0f * positions[1];
-    Eigen::Vector3f p3 = block_origin + 16.0f * positions[3];
 
-    const auto& c0 = uvs[0];
-    const auto& c2 = uvs[2];
-
-    auto dist_c0 = std::abs(uvs[1].x() - c0.x());
-    auto dist_c2 = std::abs(uvs[1].x() - c2.x());
-    auto uv_orient_flag = dist_c0 < dist_c2;
-
-    ChunkMesh_Quad out_quad {};
-    out_quad.data_origin = ChunkMesh_Quad::pack_position(p0);
-    out_quad.data_edge_u = ChunkMesh_Quad::pack_offset(p1 - p0) | ChunkMesh_Quad::ANIMATED_BIT;
-    out_quad.data_edge_v = ChunkMesh_Quad::pack_offset(p3 - p0);
-
-    if(uv_orient_flag) {
-        out_quad.data_origin |= ChunkMesh_Quad::UV_ORIENT_BIT;
-    }
-
-    out_quad.data_uv = ChunkMesh_Quad::pack_uv(c0, c2);
-    out_quad.data_texture = ChunkMesh_Quad::pack_texture(static_cast<std::uint32_t>(strip->index), 0, tint_index);
+    std::array<Eigen::Vector3f, 4> positions_16ths;
+    positions_16ths[0] = block_origin + 16.0f * positions[0];
+    positions_16ths[1] = block_origin + 16.0f * positions[1];
+    positions_16ths[2] = block_origin + 16.0f * positions[2];
+    positions_16ths[3] = block_origin + 16.0f * positions[3];
 
     std::array<std::uint32_t, 4> ao_values;
     ao_values.fill(3);
-    out_quad.data_extras = ChunkMesh_Quad::pack_extras(ao_values);
 
-    out.push_back(out_quad);
+    auto strip_index = static_cast<std::uint32_t>(strip->index);
+    auto texture = ChunkMesh_Vertex::pack_texture(strip_index, 0, tint_index);
+
+    emit_quad_vertices(out, positions_16ths, uvs, ao_values, texture, 1.0f, true);
 }
 
 void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)

@@ -15,7 +15,7 @@ static std::uint32_t pack_10_10_10(const Eigen::Vector3f& value_16ths, std::int3
     return px | (py << 10U) | (pz << 20U);
 }
 
-static std::uint32_t unorm8(float value)
+static std::uint32_t pack_unorm8(float value)
 {
     return static_cast<std::uint32_t>(std::lround(std::clamp(value, 0.0f, 1.0f) * 255.0f)) & 0xFFU;
 }
@@ -32,7 +32,7 @@ ChunkMesh_Part::~ChunkMesh_Part(void)
     }
 }
 
-ChunkMesh_Part::ChunkMesh_Part(ChunkMesh_Part&& other) : quads(std::move(other.quads)), count(other.count), vbo(other.vbo)
+ChunkMesh_Part::ChunkMesh_Part(ChunkMesh_Part&& other) : vertices(std::move(other.vertices)), count(other.count), vbo(other.vbo)
 {
     other.count = 0;
     other.vbo = 0;
@@ -45,7 +45,7 @@ ChunkMesh_Part& ChunkMesh_Part::operator=(ChunkMesh_Part&& other)
             glDeleteBuffers(1, &vbo);
         }
 
-        quads = std::move(other.quads);
+        vertices = std::move(other.vertices);
         count = other.count;
         vbo = other.vbo;
 
@@ -56,27 +56,20 @@ ChunkMesh_Part& ChunkMesh_Part::operator=(ChunkMesh_Part&& other)
     return *this;
 }
 
-std::uint32_t ChunkMesh_Quad::pack_position(const Eigen::Vector3f& position_16ths)
+std::uint32_t ChunkMesh_Vertex::pack_position(const Eigen::Vector3f& position_16ths)
 {
     return pack_10_10_10(position_16ths, INT32_C(16));
 }
 
-std::uint32_t ChunkMesh_Quad::pack_offset(const Eigen::Vector3f& offset_16ths)
-{
-    return pack_10_10_10(offset_16ths, INT32_C(512));
-}
-
-std::uint32_t ChunkMesh_Quad::pack_uv(const Eigen::Vector2f& c0, const Eigen::Vector2f& c2)
+std::uint32_t ChunkMesh_Vertex::pack_uv(const Eigen::Vector2f& uv)
 {
     std::uint32_t result = 0;
-    result |= unorm8(c0.x()) << 0U;
-    result |= unorm8(c0.y()) << 8U;
-    result |= unorm8(c2.x()) << 16U;
-    result |= unorm8(c2.y()) << 24U;
+    result |= pack_unorm8(uv.x());
+    result |= pack_unorm8(uv.y()) << 8U;
     return result;
 }
 
-std::uint32_t ChunkMesh_Quad::pack_texture(std::uint32_t texture_index, std::uint32_t frame_offset, std::uint32_t tint_index)
+std::uint32_t ChunkMesh_Vertex::pack_texture(std::uint32_t texture_index, std::uint32_t frame_offset, std::uint32_t tint_index)
 {
     std::uint32_t result = texture_index & 0xFFFFU;
     result |= (frame_offset & 0xFFU) << 16U;
@@ -84,12 +77,11 @@ std::uint32_t ChunkMesh_Quad::pack_texture(std::uint32_t texture_index, std::uin
     return result;
 }
 
-std::uint32_t ChunkMesh_Quad::pack_extras(const std::array<std::uint32_t, 4>& ao)
+std::uint32_t ChunkMesh_Vertex::pack_extras(std::uint32_t ao, float shade, bool animated)
 {
     std::uint32_t result = 0;
-    result |= (ao[0] & 0x03U);
-    result |= (ao[1] & 0x03U) << 2U;
-    result |= (ao[2] & 0x03U) << 4U;
-    result |= (ao[3] & 0x03U) << 6U;
+    result |= ao & 0x03U;
+    result |= pack_unorm8(shade) << 8U;
+    result |= animated ? ANIMATED_BIT : 0U;
     return result;
 }

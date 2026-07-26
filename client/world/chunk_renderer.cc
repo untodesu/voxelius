@@ -38,6 +38,11 @@ static std::size_t su_AtlasStrips;
 static std::size_t su_AtlasFrames;
 
 static GLuint s_vao;
+static GLuint s_ibo;
+
+static std::vector<GLsizei> s_md_counts;
+static std::vector<GLint> s_md_basevertices;
+static std::vector<const void*> s_md_indices;
 
 static bool s_sorted_dirty;
 static std::vector<std::pair<entt::entity, float>> s_sorted_opaque;
@@ -52,19 +57,37 @@ static void draw_part(const Chunk_Component& chunk, const ChunkMesh_Part& part)
         return;
     }
 
+    auto quad_count = part.count / 4U;
+
+    if(quad_count == 0) {
+        return;
+    }
+
+    if(s_md_counts.size() < quad_count) {
+        auto old_size = s_md_counts.size();
+        s_md_counts.resize(quad_count, 4);
+        s_md_basevertices.resize(quad_count);
+        s_md_indices.resize(quad_count, nullptr);
+
+        for(auto i = old_size; i < quad_count; ++i) {
+            s_md_counts[i] = 4;
+            s_md_basevertices[i] = static_cast<GLint>(i * 4);
+            s_md_indices[i] = nullptr;
+        }
+    }
+
     glUniform3fv(s_program.uniforms[su_WorldPosition].location, 1, utils::to_fvec(chunk.position - camera::chunk).data());
 
     glBindBuffer(GL_ARRAY_BUFFER, part.vbo);
 
-    auto stride = static_cast<GLsizei>(sizeof(ChunkMesh_Quad));
-    glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Quad, data_origin)));
-    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Quad, data_edge_u)));
-    glVertexAttribIPointer(2, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Quad, data_edge_v)));
-    glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Quad, data_uv)));
-    glVertexAttribIPointer(4, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Quad, data_texture)));
-    glVertexAttribIPointer(5, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Quad, data_extras)));
+    auto stride = static_cast<GLsizei>(sizeof(ChunkMesh_Vertex));
+    glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_position)));
+    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_uv)));
+    glVertexAttribIPointer(2, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_texture)));
+    glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_extras)));
 
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, part.count);
+    glMultiDrawElementsBaseVertex(GL_TRIANGLE_STRIP, s_md_counts.data(), GL_UNSIGNED_SHORT, s_md_indices.data(),
+        static_cast<GLsizei>(quad_count), s_md_basevertices.data());
 }
 
 static float chunk_distance_sq(entt::entity entity)
@@ -161,10 +184,21 @@ void chunk_renderer::init(void)
     glGenVertexArrays(1, &s_vao);
     glBindVertexArray(s_vao);
 
-    for(GLuint i = 0; i < 6; ++i) {
+    for(GLuint i = 0; i < 4; ++i) {
         glEnableVertexAttribArray(i);
-        glVertexAttribDivisor(i, 1);
+        glVertexAttribDivisor(i, 0);
     }
+
+    constexpr std::uint16_t quad_indices[4] = {
+        UINT16_C(0x0000),
+        UINT16_C(0x0001),
+        UINT16_C(0x0002),
+        UINT16_C(0x0003),
+    };
+
+    glGenBuffers(1, &s_ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quad_indices), quad_indices, GL_STATIC_DRAW);
 
     s_sorted_dirty = true;
     s_sorted_opaque.clear();
@@ -181,7 +215,15 @@ void chunk_renderer::init(void)
 
 void chunk_renderer::shutdown(void)
 {
+    glDeleteBuffers(1, &s_ibo);
+    s_ibo = 0;
+
     glDeleteVertexArrays(1, &s_vao);
+    s_vao = 0;
+
+    s_md_counts.clear();
+    s_md_basevertices.clear();
+    s_md_indices.clear();
 
     su_AtlasFrames = std::numeric_limits<std::size_t>::max();
     su_AtlasStrips = std::numeric_limits<std::size_t>::max();
@@ -249,7 +291,7 @@ void chunk_renderer::render(void)
                 draw_part(chunk, mesh.opaque);
 
                 globals::num_draw_calls += 1;
-                globals::num_draw_vertices += mesh.opaque.count * 6;
+                globals::num_draw_vertices += mesh.opaque.count;
             }
         }
     }
@@ -272,7 +314,7 @@ void chunk_renderer::render(void)
                 draw_part(chunk, mesh.alpha);
 
                 globals::num_draw_calls += 1;
-                globals::num_draw_vertices += mesh.alpha.count * 6;
+                globals::num_draw_vertices += mesh.alpha.count;
             }
         }
 
@@ -297,7 +339,7 @@ void chunk_renderer::render(void)
                 draw_part(chunk, mesh.fluid);
 
                 globals::num_draw_calls += 1;
-                globals::num_draw_vertices += mesh.fluid.count * 6;
+                globals::num_draw_vertices += mesh.fluid.count;
             }
         }
 
