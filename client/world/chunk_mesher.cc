@@ -232,12 +232,11 @@ static float shade_factor(const Eigen::Vector3f& normal)
 
 static void emit_quad_vertices(std::vector<ChunkMesh_Vertex>& out, const std::array<Eigen::Vector3f, 4>& positions_16ths,
     const std::array<Eigen::Vector2f, 4>& uvs, const std::array<std::uint32_t, 4>& ao_values, std::uint32_t texture, float shade,
-    bool animated)
+    bool animated, bool flip_quad)
 {
-    auto flip_quad = false;
     std::array<int, 4> order;
 
-    if(ao_values[0] + ao_values[2] < ao_values[1] + ao_values[3]) {
+    if(flip_quad) {
         order[0] = 0;
         order[1] = 1;
         order[2] = 3;
@@ -512,7 +511,12 @@ void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span
 
         auto texture = ChunkMesh_Vertex::pack_texture(quad.texture_index, frame_offset, quad.tint_index);
 
-        emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, texture, shade, quad.animated);
+        if(ao_values[0] + ao_values[2] < ao_values[1] + ao_values[3]) {
+            emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, texture, shade, quad.animated, true);
+        }
+        else {
+            emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, texture, shade, quad.animated, false);
+        }
     }
 }
 
@@ -644,18 +648,18 @@ static std::array<Eigen::Vector2f, 4> flowing_top_uvs(float flow_x, float flow_z
         Eigen::Vector2f(1.0f, 0.0f),
     };
 
-    auto len_sq = flow_x * flow_x + flow_z * flow_z;
-
-    if(len_sq <= 1.0e-8f) {
+    if(flow_x * flow_x + flow_z * flow_z <= 1.0e-8f) {
         return uvs;
     }
 
-    auto angle = std::atan2(flow_z, flow_x);
-    auto quarter = static_cast<int>(std::lround(angle / (0.5f * 3.14159265f)));
-    quarter = ((quarter % 4) + 4) % 4;
+    auto angle = std::atan2(flow_x, flow_z);
+    auto quarter = static_cast<int>(std::lround(angle / (0.5f * std::numbers::pi_v<float>)));
+    quarter %= 4;
+    quarter += 4;
+    quarter %= 4;
 
     switch(quarter) {
-        case 0:
+        case 1:
             uvs[0] = Eigen::Vector2f(0.0f, 0.0f);
             uvs[1] = Eigen::Vector2f(1.0f, 0.0f);
             uvs[2] = Eigen::Vector2f(1.0f, 1.0f);
@@ -663,17 +667,17 @@ static std::array<Eigen::Vector2f, 4> flowing_top_uvs(float flow_x, float flow_z
             break;
 
         case 2:
-            uvs[0] = Eigen::Vector2f(1.0f, 0.0f);
-            uvs[1] = Eigen::Vector2f(0.0f, 1.0f);
-            uvs[2] = Eigen::Vector2f(0.0f, 0.0f);
-            uvs[3] = Eigen::Vector2f(1.0f, 0.0f);
-            break;
-
-        case 3:
             uvs[0] = Eigen::Vector2f(1.0f, 1.0f);
             uvs[1] = Eigen::Vector2f(1.0f, 0.0f);
             uvs[2] = Eigen::Vector2f(0.0f, 0.0f);
             uvs[3] = Eigen::Vector2f(0.0f, 1.0f);
+            break;
+
+        case 3:
+            uvs[0] = Eigen::Vector2f(0.0f, 1.0f);
+            uvs[1] = Eigen::Vector2f(1.0f, 1.0f);
+            uvs[2] = Eigen::Vector2f(1.0f, 0.0f);
+            uvs[3] = Eigen::Vector2f(0.0f, 0.0f);
             break;
     }
 
@@ -709,10 +713,10 @@ void MeshingTask::emit_fluid_face(std::vector<ChunkMesh_Vertex>& out, const Loca
                 break;
 
             default:
-                uvs[0] = Eigen::Vector2f(1.0f, 0.0f);
-                uvs[1] = Eigen::Vector2f(0.0f, 0.0f);
-                uvs[2] = Eigen::Vector2f(0.0f, 1.0f);
-                uvs[3] = Eigen::Vector2f(1.0f, 1.0f);
+                uvs[0] = Eigen::Vector2f(1.0f, 1.0f - positions[0].y());
+                uvs[1] = Eigen::Vector2f(0.0f, 1.0f - positions[1].y());
+                uvs[2] = Eigen::Vector2f(0.0f, 1.0f - positions[2].y());
+                uvs[3] = Eigen::Vector2f(1.0f, 1.0f - positions[3].y());
                 break;
         }
     }
@@ -731,7 +735,12 @@ void MeshingTask::emit_fluid_face(std::vector<ChunkMesh_Vertex>& out, const Loca
     auto strip_index = static_cast<std::uint32_t>(strip->index);
     auto texture = ChunkMesh_Vertex::pack_texture(strip_index, 0, tint_index);
 
-    emit_quad_vertices(out, positions_16ths, uvs, ao_values, texture, 1.0f, true);
+    if(positions[0].y() + positions[2].y() < positions[1].y() + positions[3].y()) {
+        emit_quad_vertices(out, positions_16ths, uvs, ao_values, texture, 1.0f, true, true);
+    }
+    else {
+        emit_quad_vertices(out, positions_16ths, uvs, ao_values, texture, 1.0f, true, false);
+    }
 }
 
 void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
@@ -890,6 +899,13 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
         }
 
         if(is_side) {
+            auto h0 = std::abs(positions[0].y() - positions[3].y());
+            auto h1 = std::abs(positions[1].y() - positions[2].y());
+
+            if(h0 <= 1.0e-4f && h1 <= 1.0e-4f) {
+                continue;
+            }
+
             emit_fluid_face(bucket, lpos, positions, face, cached->flowing, tint_index);
         }
         else if(surface_face) {
