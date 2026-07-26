@@ -5,7 +5,7 @@ The `builtin:slabdef.lua` library provides utility functions for registering sla
 ## Importing
 
 ```lua
-local slabdef = require("builtin:slabdef.lua")
+local slabdef = require("builtin:slabdef")
 ```
 
 ## Functions

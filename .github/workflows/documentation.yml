@@ -2,12 +2,11 @@ name: Documentation SSG
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - .github/**
-      - docs/**
-      - properdocs.yml
+    tags:
+      - '*'
+  release:
+    types:
+      - published
   workflow_dispatch:
 
 jobs:

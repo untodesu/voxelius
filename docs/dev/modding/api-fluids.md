@@ -40,6 +40,7 @@ Returns the numeric fluid ID
 |----|----|----|----|----|  
 |`gravity`|`integer`|yes|N/D|One of `fluids.GRAVITY_XXXX` constants|  
 |`textures`|`table`|yes|N/D|Fluid textures|  
+|`full_level`|`integer`|yes|N/D|Fluid level to consider a cell to be fully filled, in 1/16ths of a block|  
 |`opaque`|`boolean`|no|`false`|If set to `true`, the fluid's quads will be forced into a `blocks.RENDER_SOLID` rendering step instead of its own|  
 |`tint_index`|`integer`|no|0|Tint group index used by climate and biomes|  
 |`fog_density`|`number`|no|1.0|When the client camera is inside of this fluid, the fog distance is divided by this value|  

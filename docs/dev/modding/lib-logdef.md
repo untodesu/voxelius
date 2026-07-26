@@ -5,7 +5,7 @@ The `builtin:logdef.lua` library provides utility functions for registering log-
 ## Importing
 
 ```lua
-local logdef = require("builtin:logdef.lua")
+local logdef = require("builtin:logdef")
 ```
 
 ### Function: `logdef.on_place(identifier) -> function`

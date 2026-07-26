@@ -1,4 +1,4 @@
-local slabdef = require("builtin:slabdef.lua")
+local slabdef = require("builtin:slabdef")
 
 local cobblestone_prototype = {
   render = blocks.RENDER_SOLID,

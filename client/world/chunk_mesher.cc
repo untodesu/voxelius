@@ -516,7 +516,8 @@ void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span
     }
 }
 
-static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos, const BlockDefinition* def, fluid_gravity gravity)
+static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos, const BlockDefinition* def, fluid_gravity gravity,
+    unsigned full_level)
 {
     auto height = 0.0625f * static_cast<float>(def->fluid_level);
 
@@ -540,9 +541,7 @@ static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos,
         return 1.0f;
     }
 
-    constexpr unsigned FULL_FLUID_LEVEL = 14U; // TODO: make this a value in FluidDefinition
-
-    if(def->fluid_level >= FULL_FLUID_LEVEL && above_def && above_def->render == BLOCK_RENDER_SOLID) {
+    if(def->fluid_level >= full_level && above_def && above_def->render == BLOCK_RENDER_SOLID) {
         auto above_baked = block_models::find(above_id);
         auto face = opposite_face(anti_gravity);
 
@@ -554,7 +553,8 @@ static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos,
     return height;
 }
 
-static std::optional<float> fluid_cell_height(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id, fluid_gravity gravity)
+static std::optional<float> fluid_cell_height(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id, fluid_gravity gravity,
+    unsigned full_level)
 {
     auto def = block_registry::find_definition(cache.get(lpos));
 
@@ -562,18 +562,18 @@ static std::optional<float> fluid_cell_height(const BlockCache& cache, const Loc
         return std::nullopt;
     }
 
-    return fluid_surface_height(cache, lpos, def, gravity);
+    return fluid_surface_height(cache, lpos, def, gravity, full_level);
 }
 
 static float fluid_corner_height(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id, fluid_gravity gravity, int sx,
-    int sz, float self_height)
+    int sz, float self_height, unsigned full_level)
 {
     auto sum = 0.0f;
     auto count = 0;
 
     for(int dx = sx - 1; dx <= sx; ++dx) {
         for(int dz = sz - 1; dz <= sz; ++dz) {
-            auto height = fluid_cell_height(cache, lpos + LocalPos(dx, 0, dz), fluid_id, gravity);
+            auto height = fluid_cell_height(cache, lpos + LocalPos(dx, 0, dz), fluid_id, gravity, full_level);
 
             if(!height.has_value()) {
                 continue;
@@ -596,13 +596,13 @@ static float fluid_corner_height(const BlockCache& cache, const LocalPos& lpos, 
 }
 
 static std::array<float, 4> fluid_corner_heights(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id,
-    fluid_gravity gravity, float self_height)
+    fluid_gravity gravity, float self_height, unsigned full_level)
 {
     return {
-        fluid_corner_height(cache, lpos, fluid_id, gravity, 0, 0, self_height),
-        fluid_corner_height(cache, lpos, fluid_id, gravity, 0, 1, self_height),
-        fluid_corner_height(cache, lpos, fluid_id, gravity, 1, 1, self_height),
-        fluid_corner_height(cache, lpos, fluid_id, gravity, 1, 0, self_height),
+        fluid_corner_height(cache, lpos, fluid_id, gravity, 0, 0, self_height, full_level),
+        fluid_corner_height(cache, lpos, fluid_id, gravity, 0, 1, self_height, full_level),
+        fluid_corner_height(cache, lpos, fluid_id, gravity, 1, 1, self_height, full_level),
+        fluid_corner_height(cache, lpos, fluid_id, gravity, 1, 0, self_height, full_level),
     };
 }
 
@@ -749,14 +749,12 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
         return;
     }
 
-    auto surface_height = fluid_surface_height(m_cache, lpos, &def, fluid->gravity);
-    auto corners = fluid_corner_heights(m_cache, lpos, def.fluid, fluid->gravity, surface_height);
+    auto surface_height = fluid_surface_height(m_cache, lpos, &def, fluid->gravity, fluid->full_level);
+    auto corners = fluid_corner_heights(m_cache, lpos, def.fluid, fluid->gravity, surface_height, fluid->full_level);
     auto& bucket = fluid->opaque ? m_opaque : m_fluid;
     auto tint_index = fluid->tint_index.value_or(0);
 
-    constexpr unsigned FULL_FLUID_LEVEL = 14U; // TODO: make this a value in FluidDefinition
-
-    auto use_still = def.fluid_level >= FULL_FLUID_LEVEL;
+    auto use_still = def.fluid_level >= fluid->full_level;
     auto flow_x = 0.0f;
     auto flow_z = 0.0f;
 

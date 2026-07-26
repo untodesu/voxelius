@@ -16,6 +16,7 @@ local function default_config(config_src)
   config_src = config_src or {}
 
   result = {}
+  result.full_height = config_src.full_height or 14
   result.max_level = config_src.max_level or 8
   result.level_decrease = config_src.level_decrease or 1
   result.delay = config_src.delay or 5
@@ -307,25 +308,24 @@ end
 
 function flowdef.variants(config_src)
   local config = default_config(config_src)
-  local full_height = 14 -- TODO: make this configurable
 
   local variants = {
     {
       when = { source = "true" },
       overrides = {
-        fluid_level = full_height,
+        fluid_level = config.full_height,
       },
     },
     {
       when = { source = "false", level = tostring(config.max_level) },
       overrides = {
-        fluid_level = full_height,
+        fluid_level = config.full_height,
       },
     }
   }
 
   for level = 1, config.max_level - 1 do
-    local height = math.max(1, math.floor(level * (full_height - 1) / (config.max_level - 1)))
+    local height = math.max(1, math.floor(level * (config.full_height - 1) / (config.max_level - 1)))
 
     table.insert(variants, {
       when = { source = "false", level = tostring(level) },

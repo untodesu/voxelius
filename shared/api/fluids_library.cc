@@ -81,6 +81,18 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
     def.gravity = static_cast<fluid_gravity>(gravity.value());
     lua_pop(L, 1);
 
+    lua_getfield(L, def_idx, "full_level");
+
+    auto full_level = utils::require_integer(L, -1);
+
+    if(!full_level.has_value()) {
+        return false;
+    }
+
+    def.full_level = static_cast<unsigned>(full_level.value());
+    def.full_level = std::clamp(def.full_level, 1U, 15U);
+    lua_pop(L, 1);
+
     lua_getfield(L, def_idx, "opaque");
 
     if(!lua_isnil(L, -1)) {

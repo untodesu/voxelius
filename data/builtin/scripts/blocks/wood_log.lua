@@ -1,4 +1,4 @@
-local logdef = require("builtin:logdef.lua")
+local logdef = require("builtin:logdef")
 
 logdef.add_block("oak_log", {
   render = blocks.RENDER_SOLID,

@@ -17,15 +17,17 @@ struct FluidDefinition final {
 
     fluid_gravity gravity;
 
+    std::vector<Identifier> still_textures;
+    std::vector<Identifier> flowing_textures;
+
+    unsigned full_level;
+
     bool opaque;
 
     float fog_density;
     Eigen::Vector3f fog_color;
 
     std::optional<unsigned> tint_index;
-
-    std::vector<Identifier> still_textures;
-    std::vector<Identifier> flowing_textures;
 };
 
 #endif /* B347B878_D23E_45CF_A346_EDD80070F951 */

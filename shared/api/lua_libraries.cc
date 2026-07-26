@@ -88,7 +88,7 @@ static int api_override_require(lua_State* L)
     lua_pop(L, 1);
 
     std::string source;
-    auto full_path = identifier.as_file_path("lib", {});
+    auto full_path = identifier.as_file_path("lib", ".lua");
 
     if(!utils::read_file(full_path, source)) {
         auto error_view = utils::physfs_error();

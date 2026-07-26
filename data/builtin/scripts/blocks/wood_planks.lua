@@ -1,4 +1,4 @@
-local slabdef = require("builtin:slabdef.lua")
+local slabdef = require("builtin:slabdef")
 
 local oak_planks_prototype = {
   render = blocks.RENDER_SOLID,

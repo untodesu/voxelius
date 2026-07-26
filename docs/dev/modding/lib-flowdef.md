@@ -7,7 +7,7 @@ The `builtin:flowdef.lua` library provides utility functions for flowing blocks
 ## Importing
 
 ```lua
-local flowdef = require("builtin:flowdef.lua")
+local flowdef = require("builtin:flowdef")
 ```
 
 ### Flow config
@@ -15,6 +15,7 @@ local flowdef = require("builtin:flowdef.lua")
 |Field|Type|Default|Description|  
 |----|----|----|----|  
 |`max_level`|`integer`|8|Max level for a fluid blockstate|  
+|`full_height`|`integer`|14|Maximum fluid level for blockstates|  
 |`level_decrease`|`integer`|1|Level decrement with flow distance|  
 |`delay`|`integer`|5|Scripted tick delay|  
 |`infinite`|`boolean`|`false`|If set, allows flowing fluids to merge into sources|  

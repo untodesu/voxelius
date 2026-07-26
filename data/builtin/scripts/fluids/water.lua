@@ -1,10 +1,11 @@
-local flowdef = require("builtin:flowdef.lua")
+local flowdef = require("builtin:flowdef")
 
 local still_frames = {}
 local flowing_frames = {}
 
 local WATER_CONFIG <const> = {
     infinite = true,
+    full_height = 14,
     max_level = 8,
     delay = 5,
 }
@@ -22,6 +23,8 @@ fluids.add("water", {
         still = still_frames,
         flowing = flowing_frames,
     },
+
+    full_level = WATER_CONFIG.full_height,
 
     fog_density = 10.0,
     fog_color = { 0.0, 0.0, 0.5 },
