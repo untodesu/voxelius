@@ -432,28 +432,24 @@ bool MeshingTask::is_culled_fluid(const LocalPos& lpos, block_face face, fluid_i
     }
 
     if(neighbour_def->fluid == fluid_id && neighbour_def->fluid_level > 0) {
-        // Same-fluid neighbours weld via shared corner heights; skip all faces
-        // between them. Side skips happen in mesh_fluid before this runs.
         return face == BLOCK_FACE_TOP || face == BLOCK_FACE_BOTTOM;
     }
 
-    // Solids only occlude faces that sit on the cell boundary. A partial-height
-    // top under a ceiling stays visible when we intentionally leave the gap.
-    if(!face_flush) {
-        return false;
+    if(face_flush) {
+        if(neighbour_def->render != BLOCK_RENDER_SOLID) {
+            return false;
+        }
+
+        auto neighbour_baked = block_models::find(neighbour_id);
+
+        if(neighbour_baked == nullptr) {
+            return false;
+        }
+
+        return neighbour_baked->fully_covered[opposite_face(face)];
     }
 
-    if(neighbour_def->render != BLOCK_RENDER_SOLID) {
-        return false;
-    }
-
-    auto neighbour_baked = block_models::find(neighbour_id);
-
-    if(neighbour_baked == nullptr) {
-        return false;
-    }
-
-    return neighbour_baked->fully_covered[opposite_face(face)];
+    return false;
 }
 
 bool MeshingTask::is_occluder(const LocalPos& lpos, block_face exposed_face) const
@@ -612,21 +608,20 @@ static float fluid_corner_height(const BlockCache& cache, const LocalPos& lpos, 
     auto sum = 0.0f;
     auto count = 0;
 
-    for(int dx = sx - 1; dx <= sx; dx += 1) {
-        for(int dz = sz - 1; dz <= sz; dz += 1) {
-            auto nlpos = lpos + LocalPos(dx, 0, dz);
-            auto def = block_registry::find_definition(cache.get(nlpos));
+    for(int dx = sx - 1; dx <= sx; ++dx) {
+        for(int dz = sz - 1; dz <= sz; ++dz) {
+            auto height = fluid_cell_height(cache, lpos + LocalPos(dx, 0, dz), fluid_id, gravity);
 
-            if(def && def->fluid == fluid_id && def->fluid_level) {
-                auto height = fluid_surface_height(cache, nlpos, def, gravity);
-
-                if(height >= 1.0f) {
-                    return 1.0f;
-                }
-
-                sum += height;
-                count += 1;
+            if(!height.has_value()) {
+                continue;
             }
+
+            if(height.value() >= 1.0f) {
+                return 1.0f;
+            }
+
+            sum += height.value();
+            count += 1;
         }
     }
 
@@ -637,6 +632,17 @@ static float fluid_corner_height(const BlockCache& cache, const LocalPos& lpos, 
     return sum / static_cast<float>(count);
 }
 
+static std::array<float, 4> fluid_corner_heights(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id,
+    fluid_gravity gravity, float self_height)
+{
+    return {
+        fluid_corner_height(cache, lpos, fluid_id, gravity, 0, 0, self_height),
+        fluid_corner_height(cache, lpos, fluid_id, gravity, 0, 1, self_height),
+        fluid_corner_height(cache, lpos, fluid_id, gravity, 1, 1, self_height),
+        fluid_corner_height(cache, lpos, fluid_id, gravity, 1, 0, self_height),
+    };
+}
+
 static float fluid_surface_y(float corner_height, fluid_gravity gravity)
 {
     if(gravity == FLUID_GRAVITY_DOWN) {
@@ -644,6 +650,15 @@ static float fluid_surface_y(float corner_height, fluid_gravity gravity)
     }
 
     return 1.0f - corner_height;
+}
+
+static float fluid_floor_y(fluid_gravity gravity)
+{
+    if(gravity == FLUID_GRAVITY_DOWN) {
+        return 0.0f;
+    }
+
+    return 1.0f;
 }
 
 static std::optional<float> fluid_neighbour_level(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id)
@@ -772,13 +787,7 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
     }
 
     auto surface_height = fluid_surface_height(m_cache, lpos, &def, fluid->gravity);
-
-    std::array<float, 4> corners;
-    corners[0] = fluid_corner_height(m_cache, lpos, def.fluid, fluid->gravity, 0, 0, surface_height);
-    corners[1] = fluid_corner_height(m_cache, lpos, def.fluid, fluid->gravity, 0, 1, surface_height);
-    corners[2] = fluid_corner_height(m_cache, lpos, def.fluid, fluid->gravity, 1, 1, surface_height);
-    corners[3] = fluid_corner_height(m_cache, lpos, def.fluid, fluid->gravity, 1, 0, surface_height);
-
+    auto corners = fluid_corner_heights(m_cache, lpos, def.fluid, fluid->gravity, surface_height);
     auto& bucket = fluid->opaque ? m_opaque : m_fluid;
     auto tint_index = fluid->tint_index.value_or(0);
 
@@ -809,15 +818,7 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
         }
     }
 
-    float floor_y;
-
-    if(fluid->gravity == FLUID_GRAVITY_DOWN) {
-        floor_y = 0.0f;
-    }
-    else {
-        floor_y = 1.0f;
-    }
-
+    auto floor_y = fluid_floor_y(fluid->gravity);
     auto y0 = fluid_surface_y(corners[0], fluid->gravity);
     auto y1 = fluid_surface_y(corners[1], fluid->gravity);
     auto y2 = fluid_surface_y(corners[2], fluid->gravity);
@@ -835,7 +836,7 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
             auto neighbour_id = m_cache.get(neighbour_lpos);
             auto neighbour_def = block_registry::find_definition(neighbour_id);
 
-            if(neighbour_def && neighbour_def->fluid == def.fluid && neighbour_def->fluid_level) {
+            if(neighbour_def && neighbour_def->fluid == def.fluid && neighbour_def->fluid_level > 0) {
                 continue;
             }
         }
@@ -862,63 +863,31 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
 
         switch(face) {
             case BLOCK_FACE_NORTH:
-                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
-                    positions[0] = Eigen::Vector3f(0.0f, y0, 0.0f);
-                    positions[1] = Eigen::Vector3f(1.0f, y3, 0.0f);
-                    positions[2] = Eigen::Vector3f(1.0f, floor_y, 0.0f);
-                    positions[3] = Eigen::Vector3f(0.0f, floor_y, 0.0f);
-                }
-                else {
-                    positions[0] = Eigen::Vector3f(0.0f, floor_y, 0.0f);
-                    positions[1] = Eigen::Vector3f(1.0f, floor_y, 0.0f);
-                    positions[2] = Eigen::Vector3f(1.0f, y3, 0.0f);
-                    positions[3] = Eigen::Vector3f(0.0f, y0, 0.0f);
-                }
+                positions[0] = Eigen::Vector3f(0.0f, y0, 0.0f);
+                positions[1] = Eigen::Vector3f(1.0f, y3, 0.0f);
+                positions[2] = Eigen::Vector3f(1.0f, floor_y, 0.0f);
+                positions[3] = Eigen::Vector3f(0.0f, floor_y, 0.0f);
                 break;
 
             case BLOCK_FACE_SOUTH:
-                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
-                    positions[0] = Eigen::Vector3f(1.0f, y2, 1.0f);
-                    positions[1] = Eigen::Vector3f(0.0f, y1, 1.0f);
-                    positions[2] = Eigen::Vector3f(0.0f, floor_y, 1.0f);
-                    positions[3] = Eigen::Vector3f(1.0f, floor_y, 1.0f);
-                }
-                else {
-                    positions[0] = Eigen::Vector3f(1.0f, floor_y, 1.0f);
-                    positions[1] = Eigen::Vector3f(0.0f, floor_y, 1.0f);
-                    positions[2] = Eigen::Vector3f(0.0f, y1, 1.0f);
-                    positions[3] = Eigen::Vector3f(1.0f, y2, 1.0f);
-                }
+                positions[0] = Eigen::Vector3f(1.0f, y2, 1.0f);
+                positions[1] = Eigen::Vector3f(0.0f, y1, 1.0f);
+                positions[2] = Eigen::Vector3f(0.0f, floor_y, 1.0f);
+                positions[3] = Eigen::Vector3f(1.0f, floor_y, 1.0f);
                 break;
 
             case BLOCK_FACE_EAST:
-                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
-                    positions[0] = Eigen::Vector3f(1.0f, y3, 0.0f);
-                    positions[1] = Eigen::Vector3f(1.0f, y2, 1.0f);
-                    positions[2] = Eigen::Vector3f(1.0f, floor_y, 1.0f);
-                    positions[3] = Eigen::Vector3f(1.0f, floor_y, 0.0f);
-                }
-                else {
-                    positions[0] = Eigen::Vector3f(1.0f, floor_y, 0.0f);
-                    positions[1] = Eigen::Vector3f(1.0f, floor_y, 1.0f);
-                    positions[2] = Eigen::Vector3f(1.0f, y2, 1.0f);
-                    positions[3] = Eigen::Vector3f(1.0f, y3, 0.0f);
-                }
+                positions[0] = Eigen::Vector3f(1.0f, y3, 0.0f);
+                positions[1] = Eigen::Vector3f(1.0f, y2, 1.0f);
+                positions[2] = Eigen::Vector3f(1.0f, floor_y, 1.0f);
+                positions[3] = Eigen::Vector3f(1.0f, floor_y, 0.0f);
                 break;
 
             case BLOCK_FACE_WEST:
-                if(fluid->gravity == FLUID_GRAVITY_DOWN) {
-                    positions[0] = Eigen::Vector3f(0.0f, y1, 1.0f);
-                    positions[1] = Eigen::Vector3f(0.0f, y0, 0.0f);
-                    positions[2] = Eigen::Vector3f(0.0f, floor_y, 0.0f);
-                    positions[3] = Eigen::Vector3f(0.0f, floor_y, 1.0f);
-                }
-                else {
-                    positions[0] = Eigen::Vector3f(0.0f, floor_y, 1.0f);
-                    positions[1] = Eigen::Vector3f(0.0f, floor_y, 0.0f);
-                    positions[2] = Eigen::Vector3f(0.0f, y0, 0.0f);
-                    positions[3] = Eigen::Vector3f(0.0f, y1, 1.0f);
-                }
+                positions[0] = Eigen::Vector3f(0.0f, y1, 1.0f);
+                positions[1] = Eigen::Vector3f(0.0f, y0, 0.0f);
+                positions[2] = Eigen::Vector3f(0.0f, floor_y, 0.0f);
+                positions[3] = Eigen::Vector3f(0.0f, floor_y, 1.0f);
                 break;
 
             case BLOCK_FACE_TOP:
@@ -938,10 +907,10 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
 
             case BLOCK_FACE_BOTTOM:
                 if(fluid->gravity == FLUID_GRAVITY_UP) {
-                    positions[0] = Eigen::Vector3f(0.0f, y1, 1.0f);
-                    positions[1] = Eigen::Vector3f(0.0f, y0, 0.0f);
-                    positions[2] = Eigen::Vector3f(1.0f, y3, 0.0f);
-                    positions[3] = Eigen::Vector3f(1.0f, y2, 1.0f);
+                    positions[0] = Eigen::Vector3f(0.0f, y0, 1.0f);
+                    positions[1] = Eigen::Vector3f(0.0f, y1, 0.0f);
+                    positions[2] = Eigen::Vector3f(1.0f, y2, 0.0f);
+                    positions[3] = Eigen::Vector3f(1.0f, y3, 1.0f);
                 }
                 else {
                     positions[0] = Eigen::Vector3f(0.0f, 0.0f, 1.0f);
