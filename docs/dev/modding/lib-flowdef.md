@@ -1,6 +1,6 @@
 # Fluids library
 
-The `builtin:flowdef.lua` library provides utility functions for flowing blocks  
+The `builtin:flowdef` library provides utility functions for flowing blocks  
 
 > **NOTE:** the library at least attempts to implement Minecraft-like flowing logic, allowing for infinite water sources and such  
 

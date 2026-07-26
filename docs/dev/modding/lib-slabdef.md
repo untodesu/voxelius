@@ -1,6 +1,6 @@
 # Slabs Library
 
-The `builtin:slabdef.lua` library provides utility functions for registering slab types of regular blocks  
+The `builtin:slabdef` library provides utility functions for registering slab types of regular blocks  
 
 ## Importing
 

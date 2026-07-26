@@ -1,6 +1,6 @@
 # Logs library
 
-The `builtin:logdef.lua` library provides utility functions for registering log-like blocks  
+The `builtin:logdef` library provides utility functions for registering log-like blocks  
 
 ## Importing
 
