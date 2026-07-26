@@ -516,42 +516,6 @@ void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span
     }
 }
 
-static bool fluid_has_solid_horizontal_side(const BlockCache& cache, const LocalPos& lpos)
-{
-    constexpr block_face sides[] = {
-        BLOCK_FACE_NORTH,
-        BLOCK_FACE_SOUTH,
-        BLOCK_FACE_EAST,
-        BLOCK_FACE_WEST,
-    };
-
-    for(auto face : sides) {
-        auto neighbour_id = cache.get(lpos + face_delta(face));
-
-        if(neighbour_id == BLOCK_ID_NULL) {
-            continue;
-        }
-
-        auto neighbour_def = block_registry::find_definition(neighbour_id);
-
-        if(neighbour_def == nullptr || neighbour_def->render != BLOCK_RENDER_SOLID) {
-            continue;
-        }
-
-        auto neighbour_baked = block_models::find(neighbour_id);
-
-        if(neighbour_baked == nullptr) {
-            continue;
-        }
-
-        if(neighbour_baked->fully_covered[opposite_face(face)]) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos, const BlockDefinition* def, fluid_gravity gravity)
 {
     auto height = 0.0625f * static_cast<float>(def->fluid_level);
@@ -580,11 +544,10 @@ static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos,
 
     if(def->fluid_level >= FULL_FLUID_LEVEL && above_def && above_def->render == BLOCK_RENDER_SOLID) {
         auto above_baked = block_models::find(above_id);
+        auto face = opposite_face(anti_gravity);
 
-        if(above_baked && above_baked->fully_covered[opposite_face(anti_gravity)]) {
-            if(fluid_has_solid_horizontal_side(cache, lpos)) {
-                return 1.0f;
-            }
+        if(above_baked && above_baked->fully_covered[face]) {
+            return 1.0f;
         }
     }
 
@@ -852,7 +815,14 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
         }
 
         if(surface_face) {
-            face_flush = surface_height >= 1.0f;
+            face_flush = true;
+
+            for(float corner : corners) {
+                if(corner < 1.0f) {
+                    face_flush = false;
+                    break;
+                }
+            }
         }
 
         if(is_culled_fluid(lpos, face, def.fluid, face_flush)) {
@@ -1019,15 +989,6 @@ void MeshingTask::mesh_block(const LocalPos& lpos, block_id_type id)
     }
 }
 
-static bool is_neighbour(const LocalPos& lpos)
-{
-    auto result = false;
-    result = result || lpos.x() < 0 || lpos.x() >= constant::CHUNK_SIZE;
-    result = result || lpos.y() < 0 || lpos.y() >= constant::CHUNK_SIZE;
-    result = result || lpos.z() < 0 || lpos.z() >= constant::CHUNK_SIZE;
-    return result;
-}
-
 static void mark_dirty(entt::entity entity)
 {
     world::chunk_entities.emplace_or_replace<ChunkMesh_DirtyMarker>(entity);
@@ -1040,40 +1001,66 @@ static void mark_dirty(const ChunkPos& cpos)
     }
 }
 
-static bool should_remesh_neighbor(const ChunkPos& cpos)
+static bool touches_neighbor_chunk(const LocalPos& lpos, ChunkPos::value_type dx, ChunkPos::value_type dy, ChunkPos::value_type dz)
 {
-    if(s_pending.contains(cpos)) {
-        return true;
-    }
+    constexpr auto size = static_cast<LocalPos::value_type>(constant::CHUNK_SIZE);
 
-    auto chunk = world::find_chunk(cpos);
-
-    if(chunk == nullptr) {
+    if(dx < 0 && lpos.x() > 0) {
         return false;
     }
 
-    return world::chunk_entities.all_of<ChunkMesh>(chunk->entity());
+    if(dx > 0 && lpos.x() < size - 1) {
+        return false;
+    }
+
+    if(dy < 0 && lpos.y() > 0) {
+        return false;
+    }
+
+    if(dy > 0 && lpos.y() < size - 1) {
+        return false;
+    }
+
+    if(dz < 0 && lpos.z() > 0) {
+        return false;
+    }
+
+    if(dz > 0 && lpos.z() < size - 1) {
+        return false;
+    }
+
+    return true;
 }
 
 static void mark_neighbors_dirty(const ChunkPos& cpos)
 {
-    for(auto face : ALL_FACES) {
-        auto npos = cpos + face_delta(face);
+    for(ChunkPos::value_type dz = -1; dz <= 1; ++dz) {
+        for(ChunkPos::value_type dy = -1; dy <= 1; ++dy) {
+            for(ChunkPos::value_type dx = -1; dx <= 1; ++dx) {
+                if(dx == 0 && dy == 0 && dz == 0) {
+                    continue;
+                }
 
-        if(should_remesh_neighbor(npos)) {
-            mark_dirty(npos);
+                mark_dirty(cpos + ChunkPos(dx, dy, dz));
+            }
         }
     }
 }
 
 static void mark_border_neighbors_dirty(const ChunkPos& cpos, const LocalPos& lpos)
 {
-    for(auto face : ALL_FACES) {
-        if(is_neighbour((lpos + face_delta(face)).eval())) {
-            auto npos = cpos + face_delta(face);
+    for(ChunkPos::value_type dz = -1; dz <= 1; ++dz) {
+        for(ChunkPos::value_type dy = -1; dy <= 1; ++dy) {
+            for(ChunkPos::value_type dx = -1; dx <= 1; ++dx) {
+                if(dx == 0 && dy == 0 && dz == 0) {
+                    continue;
+                }
 
-            if(should_remesh_neighbor(npos)) {
-                mark_dirty(npos);
+                if(!touches_neighbor_chunk(lpos, dx, dy, dz)) {
+                    continue;
+                }
+
+                mark_dirty(cpos + ChunkPos(dx, dy, dz));
             }
         }
     }
