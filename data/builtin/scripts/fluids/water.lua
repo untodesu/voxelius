@@ -10,7 +10,7 @@ local WATER_CONFIG <const> = {
     delay = 5,
 }
 
-for i = 1, 16 do
+for i = 1, 32 do
     local frame = string.format("%02d", i)
     table.insert(still_frames, "water_still_" .. frame .. ".png")
     table.insert(flowing_frames, "water_flowing_" .. frame .. ".png")
