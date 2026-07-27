@@ -36,5 +36,3 @@ A wrapper around `blocks.add` that defines a log block family.
 #### Notes
 
 - The registered block family gets an `orientation` state and variants for `north`, `east`, and `up`.
-
-![](logdef-states.png)
