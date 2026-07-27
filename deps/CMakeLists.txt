@@ -11,6 +11,7 @@ add_subdirectory(physfs)
 add_subdirectory(SDL3)
 add_subdirectory(stb)
 add_subdirectory(thread_pool)
+add_subdirectory(tracy)
 add_subdirectory(uulog)
 
 # Generate thirdparty.txt; I find it annoying to manually aggregate

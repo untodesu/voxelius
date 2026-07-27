@@ -49,6 +49,7 @@ target_link_libraries(core PUBLIC
     deps::physfs
     deps::stb
     deps::thread_pool
+    deps::tracy
     deps::uulog)
 target_precompile_headers(core PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
 

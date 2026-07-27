@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(Voxelius LANGUAGES C CXX VERSION 17.0.0)
 
+option(ENABLE_PROFILING "Enable profiling" ON)
+
 option(BUILD_CLIENT "Build game client" ON)
 option(BUILD_SERVER "Build game server" ON)
 
@@ -21,6 +23,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 if(MSVC)
     add_compile_options(/MP)
     add_compile_options(/W3)
+endif()
+
+if(ENABLE_PROFILING)
+    add_compile_definitions(TRACY_ENABLE)
 endif()
 
 execute_process(COMMAND git rev-parse --short=8 HEAD WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE GIT_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)

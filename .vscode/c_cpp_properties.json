@@ -4,7 +4,7 @@
         {
             "name": "Voxelius",
             "cppStandard": "c++20",
-            "defines": ["NOMINMAX", "_CRT_SECURE_NO_WARNINGS", "_USE_MATH_DEFINES"],
+            "defines": ["TRACY_ENABLE", "NOMINMAX", "_CRT_SECURE_NO_WARNINGS", "_USE_MATH_DEFINES"],
             "includePath": [
                 "${workspaceFolder}/build/generic-debug/_deps/download_sdl3-src/include",
                 "${workspaceFolder}/build/generic-release/_deps/download_sdl3-src/include",
@@ -22,6 +22,7 @@
                 "${workspaceFolder}/deps/physfs/include",
                 "${workspaceFolder}/deps/stb/include",
                 "${workspaceFolder}/deps/thread_pool/include",
+                "${workspaceFolder}/deps/tracy/public/tracy",
                 "${workspaceFolder}/deps/uulog/include",
                 "${workspaceFolder}",
                 "${default}"

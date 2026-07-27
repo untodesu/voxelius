@@ -42,6 +42,8 @@
 
 #include <BS_thread_pool.hpp>
 
+#include <Tracy.hpp>
+
 #include <emhash/hash_table8.hpp>
 
 #include <enet/enet.h>
