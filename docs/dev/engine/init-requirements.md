@@ -2,24 +2,22 @@
 
 ## Network access
 
-- In general, the source code is designed around bringing its own dependencies in source form when possible. The only case when it _might_ need network access is when you're building for Windows systems and build system can't seem to locate a working SDL3 installation, then it downloads its own  
+The source tree vendors most dependencies when it can. Network access is rarely required.
 
-- Other than that, you only need Internet to clone the repository  
+The main exception is a Windows build that cannot find a working SDL3 install. In that case the build may download SDL3.
+
+You also need network access to clone the repository.
 
 ## Software
 
-- Any C++20 compiler will suffice. Although it is worth noting that you might have some issues building for a system that doesn't provide fixed-width integers (see cppreference for `cstdint`) in the stadnard library  
-
-- A C99 compiler is required; a good amount of dependencies are written in C and will need to be compiled. I am not providing any guarantees that building them with a C++ compiler is going to work as expected  
-
-- CMake of version 3.15 is required, as long as a working backend (Visual Studio, GNU make, literally anything CMake can generate build files for) is required  
-
-- Python 3.x is required for running internal scripts  
-
-- For actual development, you'd need a text editor of sorts. I personally use Visual Studio Code, although there's quite a foster of other editors you can choose from, pick whichever horrible Vim fork that tickes your fancy  
+- A C++20 compiler. You may hit issues on platforms that lack fixed-width integers in the standard library (see cppreference for `cstdint`).
+- A C99 compiler. Many dependencies are C and must be compiled as C. Building them with a C++ compiler is not guaranteed to work.
+- CMake 3.15 or newer, plus a working generator backend (Visual Studio, GNU make, or any other backend CMake supports).
+- Python 3.x for internal scripts.
+- A text editor. Visual Studio Code works. Use whatever editor you prefer.
 
 ## Brains
 
-- You should probably know what modern features C++20 offers and probably resort to using older stuff with consideration. Genuinely, a lot of stuff that was made by abusing undefined behaviour, stuff like bit-casting `float` to `std::uint32_t`, is now a part of the standard; the example I provided now uses `std::bit_cast` for this, much simpler than whatever horrible union hack or `reinterpret_cast` sorcery was in its place before  
+Know modern C++20 features and prefer them over older patterns when they fit. Many old undefined-behaviour tricks are now standard. For example, bit-casting `float` to `std::uint32_t` uses `std::bit_cast` instead of union hacks or `reinterpret_cast`.
 
-- Maybe perchance possibly perhaps probably try testing your code. I like writing things blind and praying they will work as intended but you can never be sure  
+Test your code. Blind coding and hope are not a substitute for checks.

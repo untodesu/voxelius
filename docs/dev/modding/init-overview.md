@@ -1,26 +1,29 @@
 # Overview
 
-Starting with the project's 17th rewrite (this is a joke, though it's like the third major rewrite in the game's history dating back to 2021), Voxelius _the game_ builds on top of Voxelius _the engine_, which provides a bunch of Lua hooks to define blocks and other stuff that enhances core gameplay
+Voxelius _the game_ builds on Voxelius _the engine_. The engine exposes Lua hooks so mods can define blocks and other content that extends core gameplay.
 
 ## Namespaced identifiers
 
-Voxelius's engine uses _namespaced identifiers_ akin to what Minecraft uses. A namespaced identifier consists of, well... a namespace, and, you're not going to believe it, an identifier.  
+The engine uses _namespaced identifiers_, similar to Minecraft. A namespaced identifier has a namespace and an identifier:
 
 ```
 [<namespace>:]<identifier>
 ```
 
-Namespace can be optional. When omitted in a mod's scripts, it defaults to the mod's namespace, otherwise it uses `builtin` (the quote-unquote "mod" ID associated with the base Voxelius game) for the namespace.  
+The namespace is optional.
 
-Valid characters in both namespace and identifier include:
+- In a mod script, a missing namespace defaults to that mod's namespace.
+- Elsewhere, a missing namespace defaults to `builtin` (the base game "mod" ID).
 
-- Latin alphabet: `A-Z` and `a-z` ASCII range;  
-- Numeric values: `0-9` ASCII range;  
-- Underscore: `_` ASCII character;  
-- Tilde: `~` ASCII character. Not recommended for general use, see below;  
+Valid characters in both namespace and identifier:
 
-During initialization, if the engine sees fully duplicate entries in a registry (eg. `mymod:myblock` is registered twice), it will append `~N` to the end and will try until it hits 10000 renames at which point I am not promising any defined behaviour...  
+- Latin letters: `A-Z` and `a-z`
+- Digits: `0-9`
+- Underscore: `_`
+- Tilde: `~` (not recommended for general use, see below)
+
+On init, if the engine finds a duplicate registry entry (for example `mymod:myblock` registered twice), it appends `~N` and retries. After 10000 renames, behaviour is undefined.
 
 ## Error handling
 
-The mod's root script, `modname/scripts/init.lua` can handle errors itself, though if an error propagates out of it (into the initializing `lua_pcall`), the mod will be considered as a load fail.  
+The mod root script `modname/scripts/init.lua` can catch its own errors. If an error leaves that script (into the init `lua_pcall`), the engine treats the mod as a load failure.

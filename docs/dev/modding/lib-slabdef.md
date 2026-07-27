@@ -1,6 +1,6 @@
 # Slabs Library
 
-The `builtin:slabdef` library provides utility functions for registering slab types of regular blocks  
+The `builtin:slabdef` library provides helpers for registering slab variants of regular blocks.
 
 ## Importing
 
@@ -12,27 +12,25 @@ local slabdef = require("builtin:slabdef")
 
 ### Function: `slabdef.on_place(identifier) -> function`
 
-Produces an `on_place` callback for a specified slab identifier  
+Produces an `on_place` callback for a given slab identifier.
 
 #### Arguments
 
-- `identifier` is the namespaced block ID. Namespace can be omitted, in which case `core.NAMESPACE` is substituted  
+- `identifier` is the namespaced block ID. If the namespace is omitted, `core.NAMESPACE` is used.
 
 #### Return value
 
-- A function that implements correct slab placement logic to be used in block registrations  
+- A function that implements slab placement logic for block registration
 
 ### Function: `slabdef.add_block(identifier, prototype, options) -> integer`
 
-A wrapper for `blocks.add` to define a slab block family  
+A wrapper around `blocks.add` that defines a slab block family.
 
 #### Arguments
 
-- `identifier` is the namespaced block ID. Namespace can be omitted, in which case `core.NAMESPACE` is substituted  
-
-- `prototype` is the base (prototype) block definition which the function builds upon  
-
-- `options` is an optional table with additional parameters
+- `identifier` is the namespaced block ID. If the namespace is omitted, `core.NAMESPACE` is used.
+- `prototype` is the base block definition the function builds on
+- `options` is an optional table with extra parameters
 
 #### Return value
 
@@ -40,6 +38,5 @@ A wrapper for `blocks.add` to define a slab block family
 
 #### Notes
 
-- The registered block family will have an `orientation` state and variants for `top`, `bottom`, and `double` values of it  
-
-- The function doesn't modify touch response values from the prototype, though it does define block collisions  
+- The registered block family gets an `orientation` state and variants for `top`, `bottom`, and `double`.
+- The function does not modify touch response values from the prototype. It does define block collisions.

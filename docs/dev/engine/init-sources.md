@@ -1,33 +1,33 @@
 # Source Hierarchy
 
-> **NOTE:** this file is mainly here to discourage me from shuffing sources _again_ because I _HATE_ writing documentation and if I shuffle sources most of documentation will have to be rewritten at some point  
+> **NOTE:** this file exists mainly so I do not shuffle sources _again_. I _HATE_ rewriting docs every time the tree moves.
 
 ## In-tree directories
 
-|Directory|Description|  
-|----|----|  
-|`client`|Home for the client executable sources|  
-|`core`|Core library. Defines stuff that might be useful without depending on anything block-related|  
-|`data`|Stuff that is packed in with game executables in releases, essentially the base game content. Contains at least `builtin` mod but might contain more stuff in future if people contribute|  
-|`deps`|Third-party dependencies|  
-|`docs`|Website sources, including documentation and a devlog|  
-|`scripts`|Scripts utilized by the build system|  
-|`server`|Home for the server executable sources|  
-|`shared`|Shared game library. Defines the bulk of game logic, networking and whatever stuff both client and server need|  
+|Directory|Description|
+|----|----|
+|`client`|Client executable sources|
+|`core`|Core library. Useful without depending on block-related code|
+|`data`|Content packed with release executables. At least the `builtin` mod. More may appear later if people contribute|
+|`deps`|Third-party dependencies|
+|`docs`|Website sources, including documentation and a devlog|
+|`scripts`|Build-system scripts|
+|`server`|Server executable sources|
+|`shared`|Shared game library. Most game logic, networking, and other client/server shared code|
 
 ## Ignored directories
 
-These are emitted by running the game or trying to build it using scripts. These directories are placed inside the `.gitignore` file and are not tracked by Git  
+These appear when you run or build the game with the scripts. They are listed in `.gitignore` and are not tracked.
 
-|Directory|Description|  
-|----|----|  
-|`build`|Root build directory|  
-|`dist`|CPack emits distributions here|  
-|`mods`|Created by running the game inside the source tree, usually empty but can be used to place mods there for debugging|  
+|Directory|Description|
+|----|----|
+|`build`|Root build directory|
+|`dist`|CPack output directory|
+|`mods`|Created when you run the game inside the source tree. Often empty. Useful for local debug mods|
 
 ## Directory tree
 
-Made by running `tree.exe` on the repository root  
+Produced by running `tree.exe` on the repository root.
 
 ```
 C:\PATH\TO\REPOSITORY

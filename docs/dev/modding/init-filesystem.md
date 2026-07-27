@@ -2,31 +2,31 @@
 
 ## Mod root
 
-Each mod can have the following directories  
+Each mod may use these directories:
 
-|Directory|Description|  
-|----|----|  
-|`collisions`|Collision models for blocks and entities|  
-|`features`|World generation feature templates|  
-|`fonts`|Fonts in binary form. Currently only used in `builtin` and have font paths hard-coded inside the engine|  
-|`lang`|Translation files|  
-|`lib`|Lua libraries for `require`|  
-|`misc`|Miscellaneous files|  
-|`models`|3D models for blocks and entities|  
-|`music`|Music that's streamed from disk|  
-|`scripts`|Lua scripts|  
-|`shaders`|GLSL shader sources. Currently only used in `builtin` and have shader paths hard-coded inside the engine|  
-|`sounds`|Sound effects|  
-|`textures`|Textures|  
+|Directory|Description|
+|----|----|
+|`collisions`|Collision models for blocks and entities|
+|`features`|World generation feature templates|
+|`fonts`|Fonts in binary form. Currently used only in `builtin`. Font paths are hard-coded in the engine|
+|`lang`|Translation files|
+|`lib`|Lua libraries for `require`|
+|`misc`|Miscellaneous files|
+|`models`|3D models for blocks and entities|
+|`music`|Music streamed from disk|
+|`scripts`|Lua scripts|
+|`shaders`|GLSL shader sources. Currently used only in `builtin`. Shader paths are hard-coded in the engine|
+|`sounds`|Sound effects|
+|`textures`|Textures|
 
 ## Virtual filesystem
 
-The engine uses PhysFS for VFS and uses the following system paths:  
+The engine uses PhysFS for the VFS. It mounts these system paths:
 
-|Mount|Path|Access|Description|  
-|----|----|----|----|  
-|`/`|`${PWD}/data`|Read-only|Vendored mods, including `builtin`|  
-|`/`|`${PWD}/mods`|Read-only|Used-provided mods|  
-|`/`|`${APPDATA}/Voxelius` or similar|Read/Write|User directory. The game keeps settings and world saves there and the user can override vendored assets within it|  
+|Mount|Path|Access|Description|
+|----|----|----|----|
+|`/`|`${PWD}/data`|Read-only|Vendored mods, including `builtin`|
+|`/`|`${PWD}/mods`|Read-only|User-provided mods|
+|`/`|`${APPDATA}/Voxelius` or similar|Read/Write|User directory. Settings and world saves live here. The user can also override vendored assets|
 
-All three are mounted as virtual root with mods being appended to the list and user directory prepended; this defines the priority - user directory _always_ overrides _anything_ defined by game directory, which overrides _anything_ defined by mods directory.  
+All three mount at virtual root. Mods are appended. The user directory is prepended. That sets priority: the user directory _always_ overrides the game directory, and the game directory overrides mods.

@@ -1,26 +1,26 @@
 # Features
 
-Feature is a terrain generation primitive used to bring randomness into the world and to enhance gameplay. Features can currently be assigned to biomes to be randomly scattered around, and a way to place features from scripts is planned  
+A feature is a terrain generation primitive. It adds randomness to the world and can improve gameplay. Features can be assigned to biomes for random scatter. Placing features from scripts is planned.
 
-Stored features are located in the directory: `namespace:features`  
+Stored features live under: `namespace:features`
 
 ## Top-level fields
 
-|Field|Type|Required|Default|Description|  
-|----|----|----|----|----|  
-|`anchor`|`string`|yes|N/D|Feature anchor|  
-|`palette`|`object[]`|no|`[]`|Block palette to use|  
-|`parts`|`object[]`|yes|N/D|Feature parts|  
+|Field|Type|Required|Default|Description|
+|----|----|----|----|----|
+|`anchor`|`string`|yes|N/D|Feature anchor|
+|`palette`|`object[]`|no|`[]`|Block palette to use|
+|`parts`|`object[]`|yes|N/D|Feature parts|
 
 ### Anchor values
 
-Features have a starting point. These starting points need to be anchored onto something. The engine provides three modes of anchoring:  
+Features have a starting point. That point must be anchored. The engine provides three anchor modes:
 
-|Name|Description|Image|    
-|----|----|----|    
-|`"surface"`|Feature's origin point is assumed to be a surface block (eg. grass)|![](anchor-surface.png)|    
-|`"ceiling"`|Feature's origin point is assumed to be a ceiling block (eg. a cave ceiling)|![](anchor-ceiling.png)|  
-|`"whatever"`|Feature is placed whereever the game decides is a good spot|![](anchor-whatever.png)|    
+|Name|Description|Image|
+|----|----|----|
+|`"surface"`|Feature origin is a surface block (eg. grass)|![](anchor-surface.png)|
+|`"ceiling"`|Feature origin is a ceiling block (eg. a cave ceiling)|![](anchor-ceiling.png)|
+|`"whatever"`|Feature is placed wherever the game decides is a good spot|![](anchor-whatever.png)|
 
 ## Palette entries
 
@@ -44,10 +44,10 @@ Features have a starting point. These starting points need to be anchored onto s
 ]
 ```
 
-|Field|Type|Required|Default|Description|  
-|----|----|----|----|----|  
-|`block`|`string`|yes|N/D|Namespaced block ID|  
-|`states`|`object`|no|`{}`|Blockstate key-values|  
+|Field|Type|Required|Default|Description|
+|----|----|----|----|----|
+|`block`|`string`|yes|N/D|Namespaced block ID|
+|`states`|`object`|no|`{}`|Blockstate key-values|
 
 ## Parts entries
 
@@ -61,19 +61,19 @@ Features have a starting point. These starting points need to be anchored onto s
 ]
 ```
 
-|Field|Type|Required|Default|Description|  
-|----|----|----|----|----|  
-|`block`|`integer`|yes|N/D|Palette entry index|  
-|`offset`|`integer[3]`|yes|N/D|Offset in blocks from the origi point|  
-|`overwrite`|`string[]`|no|`{}`|List of block tags the feature can and will overwrite if they occupy the space we need|  
+|Field|Type|Required|Default|Description|
+|----|----|----|----|----|
+|`block`|`integer`|yes|N/D|Palette entry index|
+|`offset`|`integer[3]`|yes|N/D|Offset in blocks from the origin point|
+|`overwrite`|`string[]`|no|`{}`|Block tags the feature can overwrite when they occupy the needed space|
 
 ### Tag values
 
-|JSON|Lua constant|  
-|----|----|  
-|`"gas"`|`blocks.TAG_GAS`|  
-|`"rock"`|`blocks.TAG_ROCK`|  
-|`"soil"`|`blocks.TAG_SOIL`|  
-|`"turf"`|`blocks.TAG_TURF`|  
-|`"foil"`|`blocks.TAG_FOIL`|  
-|`"wood"`|`blocks.TAG_WOOD`|  
+|JSON|Lua constant|
+|----|----|
+|`"gas"`|`blocks.TAG_GAS`|
+|`"rock"`|`blocks.TAG_ROCK`|
+|`"soil"`|`blocks.TAG_SOIL`|
+|`"turf"`|`blocks.TAG_TURF`|
+|`"foil"`|`blocks.TAG_FOIL`|
+|`"wood"`|`blocks.TAG_WOOD`|

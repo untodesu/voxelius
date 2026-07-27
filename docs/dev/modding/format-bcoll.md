@@ -1,21 +1,21 @@
 # Block Collisions
 
-Block collisions define the physical shape of a block that's used for touch/movement response; these models are independent from the block's render geometry  
+Block collisions define the physical shape used for touch and movement response. These models are independent from render geometry.
 
-Block collisions are located in the directory: `namespace:collisions/block`  
+Block collisions live under: `namespace:collisions/block`
 
 ## Top-level fields
 
-|Field|Type|Required|Default|Description|  
-|----|----|----|----|----|  
-|`elements`|`object[]`|yes|N/D|List of axis-aligned boxes that make the model|  
+|Field|Type|Required|Default|Description|
+|----|----|----|----|----|
+|`elements`|`object[]`|yes|N/D|List of axis-aligned boxes that make the model|
 
 ## Element object
 
-|Field|Type|Required|Default|Description|  
-|----|----|----|----|----|  
-|`min`|`number[3]`|yes|N/D|AABB start in 1/16ths of a block|  
-|`max`|`number[3]`|yes|N/D|AABB end in 1/16ths of a block|  
+|Field|Type|Required|Default|Description|
+|----|----|----|----|----|
+|`min`|`number[3]`|yes|N/D|AABB start in 1/16ths of a block|
+|`max`|`number[3]`|yes|N/D|AABB end in 1/16ths of a block|
 
 ## Examples
 

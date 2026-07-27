@@ -1,24 +1,24 @@
 # Mod Metadata
 
-Every mod's root directory contains a `modinfo.conf` file that contains some useful information about the mod. The file uses the common configuration format used by the engine  
+Every mod root directory contains a `modinfo.conf` file. The file uses the engine's common configuration format.
 
 ## Fields
 
-|Name|Required|Default|Description|  
-|----|----|----|----|  
-|`name`|yes|N/D|The mod's name/ID used for namespacing|  
-|`version`|yes|`0.0.0`|The mod's semantic version used for compatibility checks|  
-|`hard_depends`|no|N/D|Whitespace-separated list of hard dependencies|  
-|`soft_depends`|no|N/D|Whitespace-separated list of soft dependencies|  
-|`conflicts`|no|N/D|Whitespace-separated list of conflicting mods|  
-|`meta_author`|no|N/D|Metadata: the mod's author/authors|  
-|`meta_homepage`|no|N/D|Metadata: the mod's homepage URL|  
-|`meta_tracker`|no|N/D|Metadata: the mod's issue tracker URL|  
-|`meta_license`|no|`ARR`|Metadata: the mod's license as a short SPDX identifier|  
-|`display_name`|no|Value of `name`|Metadata: the mod's display name|  
-|`display_desc`|no|N/D|Metadata: a short description|  
+|Name|Required|Default|Description|
+|----|----|----|----|
+|`name`|yes|N/D|Mod name/ID used for namespacing|
+|`version`|yes|`0.0.0`|Semantic version used for compatibility checks|
+|`hard_depends`|no|N/D|Whitespace-separated list of hard dependencies|
+|`soft_depends`|no|N/D|Whitespace-separated list of soft dependencies|
+|`conflicts`|no|N/D|Whitespace-separated list of conflicting mods|
+|`meta_author`|no|N/D|Metadata: author or authors|
+|`meta_homepage`|no|N/D|Metadata: homepage URL|
+|`meta_tracker`|no|N/D|Metadata: issue tracker URL|
+|`meta_license`|no|`ARR`|Metadata: license as a short SPDX identifier|
+|`display_name`|no|Value of `name`|Metadata: display name|
+|`display_desc`|no|N/D|Metadata: short description|
 
-> **NOTE:** all mods implicitly depend on `builtin` of the version the game runtime provides (see core/version.cc)  
+> **NOTE:** every mod implicitly depends on `builtin` at the version the game runtime provides (see `core/version.cc`).
 
 ## Example
 
@@ -41,6 +41,6 @@ display_desc = Adds explosive blocks to Voxelius
 
 ## Load order
 
-Mods are ordered by a topological sort of dependencies. Within a single "group" of mods in that list, things are loaded in an alphabetical order. Mods without dependencies (ie only depending on `builtin`) are loaded first.  
+Mods are ordered by a topological sort of dependencies. Within one group in that list, mods load in alphabetical order. Mods with no dependencies beyond `builtin` load first.
 
-> **NOTE:** non-existent dependencies cause the mod to fail  
+> **NOTE:** a missing dependency causes the mod to fail.

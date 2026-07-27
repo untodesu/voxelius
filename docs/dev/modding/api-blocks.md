@@ -1,193 +1,192 @@
 # Blocks API
 
-Mods can register new block types and access existing one using the `blocks` library provided by the engine.  
+Mods register new block types and access existing ones through the `blocks` library.
 
 ## Constants: render mode
 
-Defines a block rendering step
+Defines a block rendering step.
 
-|Name|Description|  
-|----|----|  
-|`blocks.RENDER_NONE`|Block is not rendered (eg. air)|  
-|`blocks.RENDER_SOLID`|Block is rendered as opaque, cullable geometry|  
-|`blocks.RENDER_ALPHA`|Block is rendered using alpha testing and blending|  
+|Name|Description|
+|----|----|
+|`blocks.RENDER_NONE`|Block is not rendered (eg. air)|
+|`blocks.RENDER_SOLID`|Block is rendered as opaque, cullable geometry|
+|`blocks.RENDER_ALPHA`|Block is rendered using alpha testing and blending|
 
 ## Constants: block face
 
-Defines a block face used for culling and other grid-aligned operations  
+Defines a block face used for culling and other grid-aligned operations.
 
-|Name|Description|  
-|----|----|  
-|`blocks.FACE_NORTH`|North face|  
-|`blocks.FACE_SOUTH`|South face|  
-|`blocks.FACE_EAST`|East face|  
-|`blocks.FACE_WEST`|West face|  
-|`blocks.FACE_TOP`|Top/upper face|  
-|`blocks.FACE_BOTTOM`|Bottom/lower face|  
-|`blocks.FACE_UP`|Same as `blocks.FACE_TOP`|  
-|`blocks.FACE_DOWN`|Same as `blocks.FACE_BOTTOM`|  
+|Name|Description|
+|----|----|
+|`blocks.FACE_NORTH`|North face|
+|`blocks.FACE_SOUTH`|South face|
+|`blocks.FACE_EAST`|East face|
+|`blocks.FACE_WEST`|West face|
+|`blocks.FACE_TOP`|Top/upper face|
+|`blocks.FACE_BOTTOM`|Bottom/lower face|
+|`blocks.FACE_UP`|Same as `blocks.FACE_TOP`|
+|`blocks.FACE_DOWN`|Same as `blocks.FACE_BOTTOM`|
 
 ## Constants: tool conditionals
 
-Defines a tool category used for block interactions  
+Defines a tool category used for block interactions.
 
-|Name|Description|  
-|----|----|  
-|`blocks.TOOL_NONE`|Bare hands|  
-|`blocks.TOOL_BLADE`|A bladed tool (eg. sword, knife)|  
-|`blocks.TOOL_XBLADE`|A mult-bladed tool (eg. scissors)|  
-|`blocks.TOOL_AXE`|Axe-like tool|  
-|`blocks.TOOL_HOE`|Hoe-like tool|  
-|`blocks.TOOL_SHOVEL`|Shovel-like tool|  
-|`blocks.TOOL_HAMMER`|Hammer-like tool|  
-|`blocks.TOOL_PICK`|Pickaxe-like tool|  
+|Name|Description|
+|----|----|
+|`blocks.TOOL_NONE`|Bare hands|
+|`blocks.TOOL_BLADE`|A bladed tool (eg. sword, knife)|
+|`blocks.TOOL_XBLADE`|A multi-bladed tool (eg. scissors)|
+|`blocks.TOOL_AXE`|Axe-like tool|
+|`blocks.TOOL_HOE`|Hoe-like tool|
+|`blocks.TOOL_SHOVEL`|Shovel-like tool|
+|`blocks.TOOL_HAMMER`|Hammer-like tool|
+|`blocks.TOOL_PICK`|Pickaxe-like tool|
 
 ## Constants: touch responses
 
-Defines a touch response for a block  
+Defines a touch response for a block.
 
-|Name|Description|  
-|----|----|  
-|`blocks.TOUCH_NONE`|Block is not collidable|  
-|`blocks.TOUCH_SOLID`|Movement is stopped in the touch direction|  
-|`blocks.TOUCH_BOUNCE`|Movement is reflected with some attenuation. Reserved for future use (e.g. slime-like blocks), no builtin block uses it yet|  
-|`blocks.TOUCH_THROUGH`|Movement is attenuated but direction is unchanged. Reserved for future use (e.g. cobweb, liquids), no builtin block uses it yet|  
+|Name|Description|
+|----|----|
+|`blocks.TOUCH_NONE`|Block is not collidable|
+|`blocks.TOUCH_SOLID`|Movement stops in the touch direction|
+|`blocks.TOUCH_BOUNCE`|Movement is reflected with some attenuation. Reserved for future use (e.g. slime-like blocks). No builtin block uses it yet|
+|`blocks.TOUCH_THROUGH`|Movement is attenuated but direction is unchanged. Reserved for future use (e.g. cobweb, liquids). No builtin block uses it yet|
 
 ## Constants: category bits
 
 Freeform grouping tags checked at runtime with `blocks.has_tag`. Any block can carry any number of tags via the `tags` registration field.
 
-|Name|Description|  
-|----|----|  
-|`blocks.TAG_GAS`|Non-solid, passable block (eg. air)|  
-|`blocks.TAG_ROCK`|Stone-family block, used by tools/worldgen that care about "is this rock"|  
-|`blocks.TAG_SOIL`|A soil-type block. Stuff like dirt, mud and so on end up here|  
-|`blocks.TAG_TURF`|A turf-type block. Stuff like grass ends up here|  
-|`blocks.TAG_FOIL`|Foilage, leaves, grass, etc|  
-|`blocks.TAG_WOOD`|Wooden blocks|  
+|Name|Description|
+|----|----|
+|`blocks.TAG_GAS`|Non-solid, passable block (eg. air)|
+|`blocks.TAG_ROCK`|Stone-family block. Used by tools/worldgen that care about "is this rock"|
+|`blocks.TAG_SOIL`|Soil-type block. Dirt, mud, and similar go here|
+|`blocks.TAG_TURF`|Turf-type block. Grass and similar go here|
+|`blocks.TAG_FOIL`|Foliage, leaves, grass, etc|
+|`blocks.TAG_WOOD`|Wooden blocks|
 
 ## Constants: schedule source
 
-A scheduled tick for a block is a tick that's issued non-randomly and with a specific tick timeout. Scheduled ticks can come from different sources  
+A scheduled tick is issued non-randomly with a specific timeout. Scheduled ticks can come from different sources.
 
-|Name|Description|  
-|----|----|  
-|`blocks.TICK_RANDOM`|Random tick|  
-|`blocks.TICK_NEIGHBOUR`|Neighbouring block changed|  
-|`blocks.TICK_SCRIPTED`|Scripted tick|  
+|Name|Description|
+|----|----|
+|`blocks.TICK_RANDOM`|Random tick|
+|`blocks.TICK_NEIGHBOUR`|Neighbouring block changed|
+|`blocks.TICK_SCRIPTED`|Scripted tick|
 
 ## Constant: null block
 
-The `blocks.NULL_BLOCK` constant defines an empty, undefined or otherwise invalid block ID. Gameplay/gamedev-wise it can be treated as a void block  
+`blocks.NULL_BLOCK` is an empty, undefined, or otherwise invalid block ID. Treat it as a void block for gameplay and gamedev.
 
 ## Functions
 
 ### Function: `blocks.get(name) -> integer`
 
-Retreive a numeric block stem ID from a namespaced block ID
+Retrieve a numeric block stem ID from a namespaced block ID.
 
 #### Arguments
 
-- `name` is a namespaced ID of a block, eg. `mymod:coolblockname`  
+- `name` is a namespaced block ID, eg. `mymod:coolblockname`
 
 #### Return value
 
-- Numeric block ID if the game likes your input  
-- If the block is missing or the namespace ID is malformed, `blocks.NULL_BLOCK` is returned  
+- Numeric block ID on success
+- `blocks.NULL_BLOCK` if the block is missing or the namespace ID is malformed
 
 #### Notes
 
-- If a block defines states and variants, the returned value is a _stem_ ID. If placed in the world, this block is not rendered, not collidable or raycastable  
+- If a block defines states and variants, the return value is a _stem_ ID. A stem placed in the world is not rendered, not collidable, and not raycastable.
 
 ### Function: `blocks.has_tag(id, tag) -> boolean`
 
-Check if a block has a specified tag.  
+Check if a block has a specified tag.
 
 #### Arguments
 
-- `name` is a namespaced ID of a block, eg. `mymod:coolblockname`  
-- `tag` is a tag constant, eg. `blocks.TAG_SOIL`  
+- `id` is a numeric block ID
+- `tag` is a tag constant, eg. `blocks.TAG_SOIL`
 
 #### Return value
 
-- `true` if the block has the specified tag, `false` otherwise  
+- `true` if the block has the specified tag, `false` otherwise
 
 ### Function: `blocks.is_replaceable(id) -> boolean`
 
-Check if a block ID can be overwritten without breaking it first (empty cell or `replaceable = true` at registration).  
+Check if a block ID can be overwritten without breaking it first (empty cell or `replaceable = true` at registration).
 
 #### Arguments
 
-- `id` is a numeric block ID (stem or variant), or `blocks.NULL_BLOCK` for an empty cell  
+- `id` is a numeric block ID (stem or variant), or `blocks.NULL_BLOCK` for an empty cell
 
 #### Return value
 
-- `true` if the cell may be occupied by another block, `false` otherwise  
+- `true` if another block may occupy the cell, `false` otherwise
 
 ### Function: `blocks.add(name, def) -> integer`
 ### Function: `blocks.add(name, prototype, def) -> integer`
 
-Register a new block in the registry  
+Register a new block in the registry.
 
 #### Arguments
 
-- `name` is a namespaced ID of a block, eg `mymod:coolblockname`  
-- `def` is a table of block definitions, see below for that  
-- `prototype` (3-argument form) is a base table of block definitions shared across a family of blocks (eg. all stone variants). `def` is merged on top of it, with `def`'s fields taking priority on conflicts  
+- `name` is a namespaced block ID, eg `mymod:coolblockname`
+- `def` is a block definition table (see below)
+- `prototype` (3-argument form) is a base definition shared across a family of blocks (eg. all stone variants). `def` merges on top. Fields in `def` win on conflict.
 
 #### Return value
 
-Returns the numeric block ID
+Returns the numeric block ID.
 
 #### Notes
 
-**Rename rule:** on conflict, the encroaching `name` is suffixed with `~N`, where `N` is the smallest integer starting at `1` that produces a free id (e.g. `mymod:myblock~1`). This keeps loading deterministic and reproducible across runs with the same mod list/order.
+**Rename rule:** on conflict, the encroaching `name` gets a `~N` suffix. `N` is the smallest integer starting at `1` that yields a free id (e.g. `mymod:myblock~1`). Loading stays deterministic for the same mod list and order.
 
 ## Block definition
 
-|Field|Type|Required|Default|Description|  
-|----|----|----|----|----|  
-|`render`|`integer`|yes|N/D|One of `blocks.RENDER_XXXX` constants|  
-|`textures`|`table`|depends|`{}`|Textures to attach to the block model|  
-|`animated`|`boolean`|no|`false`|When set to true, multiple textures from the `textures` value are used as animation frames instead of being positionally randomized in the world|  
-|`model_name`|`string`|depends|N/D|[Block model](format-bmodel.md) name for this variant|  
-|`model_offset`|`number[3]`|depends|`{0, 0, 0}`|Offset of the resolved block model|  
-|`model_facing`|`integer`|no|`blocks.FACE_NORTH`|One of the `blocks.FACE_XXXX` constants. Says which way the model's own north face should end up pointing; rotates the whole resolved block model|  
-|`bcoll_name`|`string`|depends|N/D|[Block collision](format-bcoll.md) shape for this variant|  
-|`bcoll_offset`|`number[3]`|depends|`{0, 0, 0}`|Block collision offset|  
-|`bcoll_facing`|`integer`|no|`blocks.FACE_NORTH`|One of the `blocks.FACE_XXXX` constants. Rotates the whole resolved collision shape the same way `model_facing` rotates the model; set independently since collision doesn't have to follow the visual, though it usually should|  
-|`fluid_name`|`string`|no|N/D|[Fluid](api-fluids.md) name to share the grid cell with the block|  
-|`fluid_level`|`integer`|no|0|Fluid level if `fluid_name` is defined, in 1/16ths of a block|  
-|`health`|`integer`|no|`0`|Base amount of hit points required for the block to be broken. Varies with different effects active on the tool|  
-|`sound`|`string`|no|N/D|Sound set to use for this block|  
-|`emission`|`integer`|no|`0`|Emission light value|  
-|`dissipation`|`integer`|no|`0`|How much light the block eats while light passes through|  
-|`touch`|`integer`|no|`blocks.TOUCH_SOLID`|Block's touch response|  
-|`touch_coeffs`|`number[3]`|no|`{1, 1, 1}`|Block's touch response coefficients|  
-|`tags`|`integer[]`|no|`{}`|Block tags|  
-|`replaceable`|`boolean`|no|`false`|When true, other blocks can be placed into this block's cell without breaking it first|  
-|`states`|`table`|no|`{}`|Blockstates table|  
-|`variants`|`table[]`|no|`{}`|Variants table|  
-|`on_tick`|`function`|no|`nil`|Scheduled tick handler|  
-|`on_place`|`function`|no|`nil`|Placement handler, can decide whether it's ok or not to place the block there|  
-|`on_break`|`function`|no|`nil`|Break handler|  
-|`on_interact`|`function`|no|`nil`|Interaction handler|  
+|Field|Type|Required|Default|Description|
+|----|----|----|----|----|
+|`render`|`integer`|yes|N/D|One of `blocks.RENDER_XXXX` constants|
+|`textures`|`table`|depends|`{}`|Textures to attach to the block model|
+|`animated`|`boolean`|no|`false`|If true, textures in `textures` are animation frames instead of world-position random frames|
+|`model_name`|`string`|depends|N/D|[Block model](format-bmodel.md) name for this variant|
+|`model_offset`|`number[3]`|depends|`{0, 0, 0}`|Offset of the resolved block model|
+|`model_facing`|`integer`|no|`blocks.FACE_NORTH`|One of `blocks.FACE_XXXX`. Sets where the model's own north face points. Rotates the whole resolved block model|
+|`bcoll_name`|`string`|depends|N/D|[Block collision](format-bcoll.md) shape for this variant|
+|`bcoll_offset`|`number[3]`|depends|`{0, 0, 0}`|Block collision offset|
+|`bcoll_facing`|`integer`|no|`blocks.FACE_NORTH`|One of `blocks.FACE_XXXX`. Rotates the resolved collision shape the same way `model_facing` rotates the model. Set independently. Collision need not match the visual, though it usually should|
+|`fluid_name`|`string`|no|N/D|[Fluid](api-fluids.md) name that shares the grid cell with the block|
+|`fluid_level`|`integer`|no|0|Fluid level if `fluid_name` is set, in 1/16ths of a block|
+|`health`|`integer`|no|`0`|Base hit points needed to break the block. Tool effects can change this|
+|`sound`|`string`|no|N/D|Sound set for this block|
+|`emission`|`integer`|no|`0`|Emission light value|
+|`dissipation`|`integer`|no|`0`|How much light the block eats as light passes through|
+|`touch`|`integer`|no|`blocks.TOUCH_SOLID`|Block touch response|
+|`touch_coeffs`|`number[3]`|no|`{1, 1, 1}`|Block touch response coefficients|
+|`tags`|`integer[]`|no|`{}`|Block tags|
+|`replaceable`|`boolean`|no|`false`|If true, other blocks can be placed into this cell without breaking it first|
+|`states`|`table`|no|`{}`|Blockstates table|
+|`variants`|`table[]`|no|`{}`|Variants table|
+|`on_tick`|`function`|no|`nil`|Scheduled tick handler|
+|`on_place`|`function`|no|`nil`|Placement handler. Can allow or deny placement|
+|`on_break`|`function`|no|`nil`|Break handler|
+|`on_interact`|`function`|no|`nil`|Interaction handler|
 
 ### Facing rotation
 
-The `model_facing` and `bcoll_facing` fields each define a single uniquely-determined 90-degree-step rotation of the entire model/collision shape. If we talk in simple terms, these fields define where the model's north face points - by default it points to the world north but it can be changed  
+`model_facing` and `bcoll_facing` each define one uniquely determined 90-degree-step rotation of the whole model or collision shape. In simple terms: they set where the model's north face points. By default it points world north.
 
-|Value|Rotation|Image|  
-|----|----|----|  
-|`blocks.FACE_NORTH`|None|![](facing-north.png)|  
-|`blocks.FACE_SOUTH`|180 degrees around Y|![](facing-south.png)|  
-|`blocks.FACE_EAST`|+90 degrees around Y|![](facing-east.png)|  
-|`blocks.FACE_WEST`|-90 degrees around Y|![](facing-west.png)|  
-|`blocks.FACE_TOP`|-90 degrees around X|![](facing-top.png)|  
-|`blocks.FACE_BOTTOM`|+90 degrees around X|![](facing-bottom.png)|  
+|Value|Rotation|Image|
+|----|----|----|
+|`blocks.FACE_NORTH`|None|![](facing-north.png)|
+|`blocks.FACE_SOUTH`|180 degrees around Y|![](facing-south.png)|
+|`blocks.FACE_EAST`|+90 degrees around Y|![](facing-east.png)|
+|`blocks.FACE_WEST`|-90 degrees around Y|![](facing-west.png)|
+|`blocks.FACE_TOP`|-90 degrees around X|![](facing-top.png)|
+|`blocks.FACE_BOTTOM`|+90 degrees around X|![](facing-bottom.png)|
 
 ### Drops table
-
 
 ```lua
 drops = {
@@ -207,7 +206,7 @@ drops = {
 }
 ```
 
-Entries are evaluated top to bottom; the first entry whose `when` clause matches (or that has no `when` at all) provides the drops, later entries are ignored.
+Entries are evaluated top to bottom. The first entry whose `when` clause matches (or that has no `when`) provides the drops. Later entries are ignored.
 
 ### States table
 
@@ -220,14 +219,14 @@ states = {
 }
 ```
 
-Blockstate values are hashed strings - any value can be written via `world.sset`, `hint` does not restrict this at runtime. `hint` is purely a registration-time cross-check: every `when` clause across this block's `variants` is validated against the union of `hint` lists of the states it references, and any value not present in `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state simply skip validation for that state.
+Blockstate values are hashed strings. Any value can be written via `world.sset`. `hint` does not restrict this at runtime. `hint` is only a registration-time cross-check: every `when` clause across this block's `variants` is checked against the union of `hint` lists for the states it references. A value missing from `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state skip validation for that state.
 
 ### State object
 
-|Field|Type|Required|Default|Description|  
-|----|----|----|----|----|  
-|`default`|`string`|yes|N/D|Default blockstate value|  
-|`hint`|`string[]`|no|`{}`|Optional list of valid values for registration-time validation|  
+|Field|Type|Required|Default|Description|
+|----|----|----|----|----|
+|`default`|`string`|yes|N/D|Default blockstate value|
+|`hint`|`string[]`|no|`{}`|Optional list of valid values for registration-time validation|
 
 ### Variants
 
@@ -246,37 +245,37 @@ variants = {
 }
 ```
 
-`overrides` is a table of registration fields (same shape as the top-level definition) that gets merged on top of the block's base definition whenever `when` matches the block's current blockstate values.
+`overrides` is a table of registration fields (same shape as the top-level definition). It merges on top of the block's base definition when `when` matches the current blockstate values.
 
 ### Target table
 
-Some callbacks pass in a `target` table that describes the block the initiator was looking at (the raycast hit). In `on_place`, this is the block adjacent to the placement cell  
+Some callbacks pass a `target` table for the block the initiator looked at (the raycast hit). In `on_place`, this is the block adjacent to the placement cell.
 
-|Field|Type|Description|  
-|----|----|----|  
-|`stem`|`integer`|Numeric block stem ID of the hit block|  
-|`face`|`integer`|Hit surface direction|  
-|`ni`|`number`|Surface normal X/I component|  
-|`nj`|`number`|Surface normal Y/J component|  
-|`nk`|`number`|Surface normal Z/K component|  
-|`lx`|`number`|Hit point X component|  
-|`ly`|`number`|Hit point Y component|  
-|`lz`|`number`|Hit point Z component|  
-|`bx`|`integer`|Hit block position X component|  
-|`by`|`integer`|Hit block position Y component|  
-|`bz`|`integer`|Hit block position Z component|  
-|`rx`|`number`|Block-local hit position X component|  
-|`ry`|`number`|Block-local hit position Y component|  
-|`rz`|`number`|Block-local hit position Z component|  
+|Field|Type|Description|
+|----|----|----|
+|`stem`|`integer`|Numeric block stem ID of the hit block|
+|`face`|`integer`|Hit surface direction|
+|`ni`|`number`|Surface normal X/I component|
+|`nj`|`number`|Surface normal Y/J component|
+|`nk`|`number`|Surface normal Z/K component|
+|`lx`|`number`|Hit point X component|
+|`ly`|`number`|Hit point Y component|
+|`lz`|`number`|Hit point Z component|
+|`bx`|`integer`|Hit block position X component|
+|`by`|`integer`|Hit block position Y component|
+|`bz`|`integer`|Hit block position Z component|
+|`rx`|`number`|Block-local hit position X component|
+|`ry`|`number`|Block-local hit position Y component|
+|`rz`|`number`|Block-local hit position Z component|
 
 ### Occupant table
 
-The `on_place` handler receives an `occupant` table describing the block currently in the placement cell  
+The `on_place` handler receives an `occupant` table for the block currently in the placement cell.
 
-|Field|Type|Description|  
-|----|----|----|  
-|`id`|`integer`|Numeric block ID in the placement cell; `blocks.NULL_BLOCK` when empty|  
-|`replaceable`|`boolean`|Whether the placement cell can be occupied: `true` when empty or when the existing block is marked as `replaceable` during registration; `false` otherwise|  
+|Field|Type|Description|
+|----|----|----|
+|`id`|`integer`|Numeric block ID in the placement cell. `blocks.NULL_BLOCK` when empty|
+|`replaceable`|`boolean`|Whether the placement cell can be occupied: `true` when empty or when the existing block was registered with `replaceable`. `false` otherwise|
 
 ### `on_place` handler
 
@@ -291,9 +290,9 @@ on_place = function(bx, by, bz, target, occupant, actor)
 end
 ```
 
-Returning `nil` blocks the placement; returning a table (empty or not) permits it, with any entries in the table used as initial blockstate values for states not covered by their `default`.
+Returning `nil` blocks placement. Returning a table (empty or not) permits it. Table entries become initial blockstate values for states not covered by their `default`.
 
-When placement is permitted, the new block overwrites whatever was in the cell; replaceable occupants are not broken and do not drop items  
+When placement is permitted, the new block overwrites whatever was in the cell. Replaceable occupants are not broken and do not drop items.
 
 ### `on_break` handler
 

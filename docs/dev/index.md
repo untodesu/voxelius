@@ -1,13 +1,26 @@
 # Introduction
 
-You seem to have found your way into the documentation section of the website!  
+This section covers engine development and modding.
 
-## Where do I go?!
+## Where to go
 
-### Engine deveopment
+### Engine development
 
-You found a nasty bug, have a wonderful idea on how to improve rendering, have a great idea on adding a new noise mode to the world generator? And you can write in C++? Head over to the _**ENGINE SECTION**_ for engine development reference! It should guide you through setting up, building the engine, making a patch and submitting a pull request...  
+Use the **ENGINE SECTION** if you want to:
+
+- fix a bug in the engine
+- improve rendering
+- add a new noise mode to the world generator
+- write C++ patches and submit a pull request
+
+It covers setup, building, patches, and pull requests.
 
 ### Modding
 
-Appear to have a great idea that you'd like to see in-game but might not want to bother purists? Can vibecode in some Lua? Head over to the _**MODDING SECTION**_ for mod development reference! It shoud guide you through the way mods are structured and give you a good reference on what functions to use within runtime...  
+Use the **MODDING SECTION** if you want to:
+
+- add content in Lua without changing the engine
+- learn how mods are structured
+- look up runtime functions
+
+It covers mod layout and the Lua API reference.

@@ -2,45 +2,43 @@
 
 ## Clang-format
 
-All C++ code is automatically formatted using `clang-format`, the configuration of which is placed in the repository root. If your editor supports format-on-save you're in the clear, otherwise format changes before committing.  
+All C++ code is formatted with `clang-format`. The config lives in the repository root. If your editor supports format-on-save, use it. Otherwise format before you commit.
 
-Dependencies are excluded from automatic formatting since they practically never use the same styling as Voxelius.  
+Dependencies are excluded from automatic formatting. They rarely match Voxelius style.
 
-Notable settings:  
+Notable settings:
 
-|Settings|Value|  
-|----|----|  
-|Column limit|140|  
-|Indentation|4 spaces|  
-|Line endings|CRLF|  
-|Braces|Custom, see below|  
-|Pointer alignment|Left|  
-|Reference alignment|Left|  
+|Settings|Value|
+|----|----|
+|Column limit|140|
+|Indentation|4 spaces|
+|Line endings|CRLF|
+|Braces|Custom, see below|
+|Pointer alignment|Left|
+|Reference alignment|Left|
 
-> **NOTE:** if a formatting result looks wrong, it's probably not the best idea to try and edit `.clang-format`. Instead, maybe possibly probably perhaps try to split your code into chunks so they are better formatted, please... 👉👈  
+> **NOTE:** if a formatting result looks wrong, do not edit `.clang-format` first. Split the code into smaller chunks so clang-format can handle it better. 👉👈
 
 ## Naming
 
-|Kind|Style|Example|  
-|----|----|----|  
-|Files|`snake_case`|`shared/block_storage.cc`|  
-|Namespaces|`snake_case`|`namespace block_storage`|  
-|Classes and structures|`PascalCase`|`class ReadBuffer`|  
-|Functions and methods|`snake_case`|`block_registry::name_of(...)`|  
-|Public fields and members|`snake_case`|`BlockDefinition::model_offset`|  
-|Private fields and members|`m_snake_case`|`Chunk::m_blocks`|  
-|Constants|`UPPER_SNAKE_CASE`|`BASE_WIDTH`|  
-|Type aliases|Inherited|...|  
+|Kind|Style|Example|
+|----|----|----|
+|Files|`snake_case`|`shared/block_storage.cc`|
+|Namespaces|`snake_case`|`namespace block_storage`|
+|Classes and structures|`PascalCase`|`class ReadBuffer`|
+|Functions and methods|`snake_case`|`block_registry::name_of(...)`|
+|Public fields and members|`snake_case`|`BlockDefinition::model_offset`|
+|Private fields and members|`m_snake_case`|`Chunk::m_blocks`|
+|Constants|`UPPER_SNAKE_CASE`|`BASE_WIDTH`|
+|Type aliases|Inherited|...|
 
 ## Brace newlines
 
-- Functions, methods and namespaces open their brace on a new line  
+- Functions, methods, and namespaces put the opening brace on a new line.
+- Classes, structs, enums, unions, control statements, and lambdas keep the brace on the same line.
+- `else` and `catch` go on a new line after the closing brace. Two braces and a keyword on one line are hard to read.
 
-- Classes, structs, enums, unions, control statements and lambdas keep the brace on the same line  
-
-- Stuff like `else` and `catch` go on a new line after the closing brace. Honestly I don't understand why having two opposite braces and a keyword on the same line is remotely considered readable  
-
-Example:  
+Example:
 
 ```cpp
 namespace vx
@@ -70,27 +68,20 @@ void vx::teardown(void)
 
 ## Styling considerations
 
-- Classes and structures are to be marked `final` unless they're explicitly designed as a base  
-
-- Functions and methods that take zero arguments spell it out in C-style - a `void` keyword is placed inside parentheses  
-
-- Compile-time (`constexpr`) function bodies are to be placed inside the header they're declared in, just after all the declarations  
-
-- C++ headers have the `.hh` extension and C++ sources have the `.cc` extension  
-
-- Profanity inside source code is allowed because I own the code and I can comment whatever the fuck I please inside of it  
-
-- Use the standard `assert` for debug-time checks and `vx::throw_if_xxxx` for cases the game should crash if something goes wrong  
+- Mark classes and structures `final` unless they are meant as a base.
+- Functions and methods with zero arguments use C-style `void` inside the parentheses.
+- Place `constexpr` function bodies in the header, just after the declarations.
+- C++ headers use `.hh`. C++ sources use `.cc`.
+- Profanity inside source code is allowed because I own the code and I can comment whatever the fuck I please inside of it.
+- Use standard `assert` for debug-time checks. Use `vx::throw_if_xxxx` when the game should crash on failure.
 
 ## Include guards
 
-- Every header uses an ifndef-block with a random GUID-style token with dashes replaced with underscores  
+- Every header uses an ifndef-block with a random GUID-style token. Dashes become underscores.
+- Do not use `#pragma once`.
+- End the ifndef block with a block comment that repeats the same GUID.
 
-- No `#pragma once`  
-
-- The ifndef block terminates with a block comment with the same GUID  
-
-Example:  
+Example:
 
 ```cpp
 #ifndef B843EAA9_60C3_4C2B_8036_DF1026035AA8
@@ -101,15 +92,14 @@ Example:
 #endif /* B843EAA9_60C3_4C2B_8036_DF1026035AA8 */
 ```
 
-> **NOTE:** this is practically the default behaviour of the [C/C++ Include Guard](https://marketplace.visualstudio.com/items?itemName=akiramiyakoda.cppincludeguard) VSCode extension  
+> **NOTE:** this matches the default behaviour of the [C/C++ Include Guard](https://marketplace.visualstudio.com/items?itemName=akiramiyakoda.cppincludeguard) VSCode extension.
 
 ## Namespaces
 
--  Namespaces are organized by module and are frequently reopened in the same header per logical group of declarations. Internal/private stuff goes into a `detail` sub-namespace.  
+- Namespaces follow modules. The same header often reopens a namespace per logical group. Put internal or private types in a `detail` sub-namespace.
+- Every closing brace gets a `// namespace name` comment. Clang-format enforces this.
 
--  Every closing brace gets a `// namespace name` comment enforced by clang-format.  
-
-Example:  
+Example:
 
 ```cpp
 namespace vx::detail
@@ -127,11 +117,9 @@ using runtime_error = detail::TaggedException<struct runtime_error_tag>;
 
 ## Include grouping
 
-- Each engine module has its own precompiled header, it is included first for every compiled source  
-
-- Includes are sorted in dependency order (eg. `core`, then `shared`, then `client`)  
-
-- Includes within a group are sorted alphabetically via clang-format  
+- Each engine module has its own precompiled header. Include it first in every compiled source.
+- Sort includes by dependency order (for example `core`, then `shared`, then `client`).
+- Within a group, clang-format sorts includes alphabetically.
 
 Example:
 
@@ -159,13 +147,11 @@ Example:
 
 ## Comments
 
-- Plain C++ comments (except for include guards)  
+- Use plain C++ comments (except for include guards).
+- Comment sparingly. Explain non-obvious logic, or vent. Read existing comments for the tone.
+- Mark empty function or method bodies with `// empty`.
 
-- Comments are to be used sparingly and only to explain non-obvious stuff, maybe express a frustration with something, just read what exists right now, show-dont-tell  
-
-- Empty function/method bodies are to be marked with an `// empty` comment  
-
-Example 1:  
+Example 1:
 
 ```cpp
 explicit Exception(std::string_view what, std::source_location location = std::source_location::current())
@@ -174,7 +160,7 @@ explicit Exception(std::string_view what, std::source_location location = std::s
 }
 ```
 
-Example 2:  
+Example 2:
 
 ```cpp
 // NOTE: SDL seems to defer handle release until the GPU
@@ -185,4 +171,4 @@ reset();
 
 ## See also
 
-- [Clang-format is good enough](https://untode.su/posts/2026-02-16-clang-format/)  
+- [Clang-format is good enough](https://untode.su/posts/2026-02-16-clang-format/)

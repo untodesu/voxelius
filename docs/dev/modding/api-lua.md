@@ -1,27 +1,27 @@
 # Lua Base
 
-Voxelius's runtime provides common Lua APIs:  
+The Voxelius runtime exposes these common Lua APIs:
 
-|Table|Notes|  
-|----|----|  
-|`LUA_GNAME`| |  
-|`LUA_TABLIBNAME`|May have some of its values stripped later in development|  
-|`LUA_STRLIBNAME`| |  
-|`LUA_MATHLIBNAME`| |  
-|`LUA_UTF8LIBNAME`| |  
+|Table|Notes|
+|----|----|
+|`LUA_GNAME`| |
+|`LUA_TABLIBNAME`|Some values may be stripped later in development|
+|`LUA_STRLIBNAME`| |
+|`LUA_MATHLIBNAME`| |
+|`LUA_UTF8LIBNAME`| |
 
 ## Stripped globals
 
-|Global|Reason|  
-|----|----|  
-|`loadfile`|Sandbox breaking|  
-|`load`|Sandbox breaking|  
-|`collectgarbage`|Sandbox breaking|  
+|Global|Reason|
+|----|----|
+|`loadfile`|Sandbox breaking|
+|`load`|Sandbox breaking|
+|`collectgarbage`|Sandbox breaking|
 
 ## Replaced globals
 
-|Global|Overriden behaviour|  
-|----|----|  
-|`dofile`|Treats the input path as a namespaced identifier with the `scripts` subdirectory implicitly defined|  
-|`require`|Inputs a namespaced ID with the namespace _required to be explicit_. Files are fetched from the `lib` directory|  
-|`print`|Alias to uuLog's `LOG_INFO` macro|  
+|Global|Overridden behaviour|
+|----|----|
+|`dofile`|Treats the input path as a namespaced identifier. The `scripts` subdirectory is implied|
+|`require`|Takes a namespaced ID. The namespace _must_ be explicit. Files come from the `lib` directory|
+|`print`|Alias to uuLog's `LOG_INFO` macro|
