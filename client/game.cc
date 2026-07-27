@@ -61,6 +61,8 @@ void client_game::shutdown(void)
 
 void client_game::update(void)
 {
+    ZoneScoped;
+
     interpolation::update();
 
     player_target::update();
@@ -68,17 +70,23 @@ void client_game::update(void)
 
 void client_game::update_late(void)
 {
+    ZoneScoped;
+
     player_look::update_late();
     player_move::update_late();
 }
 
 void client_game::fixed_update(void)
 {
+    ZoneScoped;
+
     player_move::fixed_update();
 }
 
 void client_game::fixed_update_late(void)
 {
+    ZoneScoped;
+
     // empty
 }
 
@@ -89,5 +97,7 @@ void client_game::layout(void)
 
 void client_game::render(void)
 {
+    ZoneScoped;
+
     player_target::render();
 }

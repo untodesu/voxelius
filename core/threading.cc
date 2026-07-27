@@ -11,6 +11,8 @@ static std::deque<std::unique_ptr<Task>> s_deque;
 
 static void task_process(Task* task)
 {
+    ZoneScoped;
+
     task->status.store(task_status::PROCESSING, std::memory_order_relaxed);
     task->process();
 
@@ -60,7 +62,12 @@ void threading::init(void)
 
     LOG_INFO("using {} threads for pooling tasks", thread_pool_size);
 
-    s_threads = std::make_unique<BS::light_thread_pool>(thread_pool_size);
+    s_threads = std::make_unique<BS::light_thread_pool>(thread_pool_size, [](std::size_t idx) {
+        auto name = std::format("Worker {}", idx);
+
+        tracy::SetThreadName(name.c_str());
+    });
+
     s_deque.clear();
 }
 
@@ -83,6 +90,8 @@ void threading::shutdown(void)
 
 void threading::update(void)
 {
+    ZoneScoped;
+
     auto it = s_deque.cbegin();
 
     while(it != s_deque.cend()) {

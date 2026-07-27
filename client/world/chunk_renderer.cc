@@ -236,6 +236,8 @@ void chunk_renderer::shutdown(void)
 
 void chunk_renderer::render(void)
 {
+    ZoneScoped;
+
     if(block_atlas::texture == 0 || block_atlas::tbo_frames == 0 || block_atlas::tbo_strips == 0) {
         return;
     }

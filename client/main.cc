@@ -37,6 +37,8 @@ static void signal_handler(int)
 
 static void handle_events(void)
 {
+    ZoneScopedN("Events");
+
     thread_local SDL_Event event;
 
     while(SDL_PollEvent(&event)) {
@@ -96,9 +98,81 @@ static void handle_events(void)
     }
 }
 
+static void zoned_fixed_update(void)
+{
+    ZoneScopedN("client::fixed_update");
+
+    for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
+        FrameMarkStart("Fixed");
+        client_game::fixed_update();
+        shared_game::fixed_update();
+        FrameMarkEnd("Fixed");
+    }
+}
+
+static void zoned_update(void)
+{
+    ZoneScopedN("client::update");
+
+    video::update();
+
+    client_game::update();
+
+    chunk_mesher::update();
+
+    camera::update();
+
+    fog::update();
+
+    gui::update_scale();
+}
+
+static void zoned_render(void)
+{
+    ZoneScopedN("client::render");
+
+    if(head::prepare()) {
+        head::render();
+
+        gui::layout();
+
+        client_game::layout();
+
+        head::present();
+    }
+}
+
+static void zoned_fixed_update_late(void)
+{
+    ZoneScopedN("client::fixed_update_late");
+
+    for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
+        FrameMarkStart("Fixed");
+        client_game::fixed_update_late();
+        shared_game::fixed_update_late();
+        FrameMarkEnd("Fixed");
+    }
+}
+
+static void zoned_update_late(void)
+{
+    ZoneScopedN("client::update_late");
+
+    video::update_late();
+
+    client_game::update_late();
+
+    threading::update();
+}
+
 static void wrapped_main(int argc, char** argv)
 {
     core::setup(argc, argv);
+
+    tracy::SetThreadName("Main");
+    TracySetProgramName("Voxelius");
+    TracyAppInfo(version::full.data(), version::full.size());
+    TracyPlotConfig("Frametime ms", tracy::PlotFormatType::Number, false, true, 0);
 
     LOG_INFO("engine version: {}", version::full);
 
@@ -191,51 +265,27 @@ static void wrapped_main(int argc, char** argv)
 
         handle_events();
 
-        for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
-            client_game::fixed_update();
-            shared_game::fixed_update();
-        }
+        zoned_fixed_update();
 
-        video::update();
+        zoned_update();
 
-        client_game::update();
-
-        chunk_mesher::update();
-
-        camera::update();
-
-        fog::update();
-
-        gui::update_scale();
-
-        if(head::prepare()) {
-            head::render();
-
-            gui::layout();
-
-            client_game::layout();
-
-            head::present();
-        }
+        zoned_render();
 
         FrameMark;
 
-        for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
-            client_game::fixed_update_late();
-            shared_game::fixed_update_late();
-        }
+        zoned_fixed_update_late();
 
-        video::update_late();
-
-        client_game::update_late();
-
-        threading::update();
+        zoned_update_late();
 
         globals::window_framecount += 1;
 
         globals::dispatcher.update();
 
         res::soft_purge();
+
+        TracyPlot("Frametime ms", 1000.0f * globals::window_frametime);
+        TracyPlot("Draw calls", static_cast<int64_t>(globals::num_draw_calls));
+        TracyPlot("Vertices", static_cast<int64_t>(globals::num_draw_vertices));
     }
 
     LOG_INFO("shutdown after {} frames", globals::window_framecount);

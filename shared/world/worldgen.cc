@@ -32,6 +32,8 @@ WorldgenTask::WorldgenTask(const ChunkPos& pos) : m_pos(pos)
 
 void WorldgenTask::process(void)
 {
+    ZoneScopedN("worldgen::process");
+
     if(!terrain::generate(m_pos, m_blocks)) {
         status.store(task_status::CANCELLED, std::memory_order_release);
     }
@@ -39,6 +41,8 @@ void WorldgenTask::process(void)
 
 void WorldgenTask::finalize(void)
 {
+    ZoneScopedN("worldgen::finalize");
+
     auto chunk = world::create_chunk(m_pos);
     chunk->set_blocks(std::move(m_blocks));
 

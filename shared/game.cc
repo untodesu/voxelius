@@ -42,6 +42,8 @@ void shared_game::shutdown(void)
 
 void shared_game::fixed_update(void)
 {
+    ZoneScoped;
+
     // NOTE: this freezes entities that are out
     // of a loaded chunk; uncomment this later!!!
     // Stasis::fixed_update();
@@ -54,5 +56,7 @@ void shared_game::fixed_update(void)
 
 void shared_game::fixed_update_late(void)
 {
+    ZoneScoped;
+
     // empty
 }

@@ -20,8 +20,6 @@
 #include "client/world/chunk_mesh.hh"
 #include "client/world/fluid_cache.hh"
 
-constexpr static std::size_t THROTTLE_COUNT = 32;
-
 constexpr static std::array ALL_FACES = {
     BLOCK_FACE_NORTH,
     BLOCK_FACE_SOUTH,
@@ -286,6 +284,8 @@ MeshingTask::MeshingTask(entt::entity entity, const ChunkPos& cpos) : m_entity(e
 
 void MeshingTask::process(void)
 {
+    ZoneScopedN("chunk_mesher::process");
+
     for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
         if(status.load(std::memory_order_relaxed) == task_status::CANCELLED) {
             m_opaque.clear();
@@ -301,6 +301,8 @@ void MeshingTask::process(void)
 
 void MeshingTask::finalize(void)
 {
+    ZoneScopedN("chunk_mesher::finalize");
+
     if(!world::chunk_entities.valid(m_entity) || !world::chunk_entities.all_of<Chunk_Component>(m_entity)) {
         s_pending.erase(m_cpos);
         return;
@@ -1122,20 +1124,17 @@ void chunk_mesher::init(void)
 
 void chunk_mesher::update(void)
 {
+    ZoneScoped;
+
+    TracyPlot("Mesh queue", static_cast<int64_t>(s_pending.size()));
+
     auto group = world::chunk_entities.group<ChunkMesh_DirtyMarker>(entt::get<Chunk_Component>);
-    auto count = 0;
 
     for(const auto [entity, chunk] : group.each()) {
         if(0 == s_pending.count(chunk.position)) {
             s_pending.emplace(chunk.position, nullptr);
             world::chunk_entities.remove<ChunkMesh_DirtyMarker>(entity);
             threading::submit<MeshingTask>(entity, chunk.position);
-
-            count += 1;
-
-            if(count >= THROTTLE_COUNT) {
-                break;
-            }
         }
     }
 }

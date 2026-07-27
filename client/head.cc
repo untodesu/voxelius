@@ -61,6 +61,10 @@ static void on_sdl_window_event(const SDL_WindowEvent& event)
     }
 }
 
+static void present_imgui(void)
+{
+}
+
 void head::init(void)
 {
     s_pixel_size.bind(globals::client_config, "head.pixel_size");
@@ -123,6 +127,8 @@ void head::shutdown(void)
 
 bool head::prepare(void)
 {
+    ZoneScoped;
+
     int width, height;
     SDL_GetWindowSizeInPixels(globals::window, &width, &height);
     glViewport(0, 0, width, height);
@@ -143,6 +149,8 @@ bool head::prepare(void)
 
 void head::render(void)
 {
+    ZoneScoped;
+
     glBindFramebuffer(GL_FRAMEBUFFER, s_world_fbo);
     glViewport(0, 0, s_scaled_width, s_scaled_height);
 
@@ -169,6 +177,8 @@ void head::render(void)
 
 void head::present(void)
 {
+    ZoneScoped;
+
     ImGui::Render();
 
     auto draw_data = ImGui::GetDrawData();

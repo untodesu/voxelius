@@ -27,6 +27,8 @@ endif()
 
 if(ENABLE_PROFILING)
     add_compile_definitions(TRACY_ENABLE)
+    add_compile_definitions(TRACY_ON_DEMAND)
+    add_compile_definitions(TRACY_NO_FRAME_IMAGE)
 endif()
 
 execute_process(COMMAND git rev-parse --short=8 HEAD WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE GIT_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
