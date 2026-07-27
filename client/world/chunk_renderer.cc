@@ -100,8 +100,6 @@ static float chunk_distance_sq(entt::entity entity)
 
 static void update_sorted_chunks(void)
 {
-    const auto& frustum = camera::instance.frustum();
-
     auto view = world::chunk_entities.view<Chunk_Component, ChunkMesh>();
 
     s_sorted_opaque.clear();

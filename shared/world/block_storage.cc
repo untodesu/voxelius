@@ -266,6 +266,34 @@ block_id_type BlockStorage::get(const LocalPos& pos) const
     return get(utils::to_index(pos));
 }
 
+void BlockStorage::flatten(std::span<block_id_type> out) const
+{
+    assert(out.size() >= constant::CHUNK_VOLUME);
+
+    if(const auto uniform = std::get_if<Uniform>(&m_variant)) {
+        std::fill_n(out.data(), constant::CHUNK_VOLUME, uniform->filler);
+        return;
+    }
+
+    if(const auto p8 = std::get_if<Palette8>(&m_variant)) {
+        for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
+            out[i] = p8->palette[p8->indices[i]].first;
+        }
+
+        return;
+    }
+
+    if(const auto p16 = std::get_if<Palette16>(&m_variant)) {
+        for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
+            out[i] = p16->palette[p16->indices[i]].first;
+        }
+
+        return;
+    }
+
+    std::fill_n(out.data(), constant::CHUNK_VOLUME, BLOCK_ID_NULL);
+}
+
 void BlockStorage::set(std::size_t index, block_id_type id)
 {
     if(index >= constant::CHUNK_VOLUME) {

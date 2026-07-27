@@ -3,7 +3,6 @@
 #include "client/world/chunk_mesher.hh"
 
 #include "core/threading.hh"
-#include "core/utils/modulo.hh"
 
 #include "shared/constant.hh"
 #include "shared/coord.hh"
@@ -19,6 +18,8 @@
 #include "client/world/block_models.hh"
 #include "client/world/chunk_mesh.hh"
 #include "client/world/fluid_cache.hh"
+
+#include "client/camera.hh"
 
 constexpr static std::array ALL_FACES = {
     BLOCK_FACE_NORTH,
@@ -79,6 +80,16 @@ static ChunkPos face_delta(block_face face)
     return ChunkPos::Zero();
 }
 
+static void flatten_chunk(const Chunk& chunk, std::span<block_id_type> out)
+{
+    chunk.blocks().flatten(out);
+}
+
+static std::size_t cache_index(std::size_t x, std::size_t y, std::size_t z, std::size_t size)
+{
+    return x + y * size + z * size * size;
+}
+
 class BlockCache final {
 public:
     constexpr static std::int16_t PADDING = 2;
@@ -97,6 +108,8 @@ private:
 
 void BlockCache::init(const ChunkPos& cpos)
 {
+    m_blocks.fill(BLOCK_ID_NULL);
+
     std::shared_ptr<const Chunk> chunks[3][3][3] = {};
 
     for(ChunkPos::value_type dz = -1; dz <= 1; dz += 1) {
@@ -112,49 +125,44 @@ void BlockCache::init(const ChunkPos& cpos)
         }
     }
 
-    std::size_t index = 0;
+    std::array<block_id_type, constant::CHUNK_VOLUME> flat {};
 
-    for(LocalPos::value_type lz = -PADDING; lz < CHUNK_SIZE_I16 + PADDING; lz += 1) {
-        for(LocalPos::value_type ly = -PADDING; ly < CHUNK_SIZE_I16 + PADDING; ly += 1) {
-            for(LocalPos::value_type lx = -PADDING; lx < CHUNK_SIZE_I16 + PADDING; lx += 1) {
-                std::size_t index_x = 0;
-                std::size_t index_y = 0;
-                std::size_t index_z = 0;
-
-                if(lx >= CHUNK_SIZE_I16) {
-                    index_x = 2;
-                }
-                else if(lx >= 0) {
-                    index_x = 1;
-                }
-
-                if(ly >= CHUNK_SIZE_I16) {
-                    index_y = 2;
-                }
-                else if(ly >= 0) {
-                    index_y = 1;
-                }
-
-                if(lz >= CHUNK_SIZE_I16) {
-                    index_z = 2;
-                }
-                else if(lz >= 0) {
-                    index_z = 1;
-                }
-
-                auto& chunk = chunks[index_x][index_y][index_z];
+    for(ChunkPos::value_type dz = -1; dz <= 1; dz += 1) {
+        for(ChunkPos::value_type dy = -1; dy <= 1; dy += 1) {
+            for(ChunkPos::value_type dx = -1; dx <= 1; dx += 1) {
+                auto& chunk = chunks[dx + 1][dy + 1][dz + 1];
 
                 if(chunk == nullptr) {
-                    m_blocks[index] = BLOCK_ID_NULL;
-                }
-                else {
-                    auto query_lx = utils::mod_signed<LocalPos::value_type>(lx, constant::CHUNK_SIZE);
-                    auto query_ly = utils::mod_signed<LocalPos::value_type>(ly, constant::CHUNK_SIZE);
-                    auto query_lz = utils::mod_signed<LocalPos::value_type>(lz, constant::CHUNK_SIZE);
-                    m_blocks[index] = chunk->get_block(LocalPos(query_lx, query_ly, query_lz));
+                    continue;
                 }
 
-                index += 1;
+                chunk->blocks().flatten(flat);
+
+                for(LocalPos::value_type lz = 0; lz < CHUNK_SIZE_I16; lz += 1) {
+                    for(LocalPos::value_type ly = 0; ly < CHUNK_SIZE_I16; ly += 1) {
+                        for(LocalPos::value_type lx = 0; lx < CHUNK_SIZE_I16; lx += 1) {
+                            auto hx = static_cast<std::int32_t>(lx) + PADDING + static_cast<std::int32_t>(dx * CHUNK_SIZE_I16);
+                            auto hy = static_cast<std::int32_t>(ly) + PADDING + static_cast<std::int32_t>(dy * CHUNK_SIZE_I16);
+                            auto hz = static_cast<std::int32_t>(lz) + PADDING + static_cast<std::int32_t>(dz * CHUNK_SIZE_I16);
+
+                            if(hx < 0 || hy < 0 || hz < 0) {
+                                continue;
+                            }
+
+                            auto hx_sz = static_cast<std::size_t>(hx);
+                            auto hy_sz = static_cast<std::size_t>(hy);
+                            auto hz_sz = static_cast<std::size_t>(hz);
+
+                            if(hx_sz >= SIZE || hy_sz >= SIZE || hz_sz >= SIZE) {
+                                continue;
+                            }
+
+                            auto c_index = cache_index(hx_sz, hy_sz, hz_sz, SIZE);
+                            auto f_index = utils::to_index(LocalPos(lx, ly, lz));
+                            m_blocks[c_index] = flat[f_index];
+                        }
+                    }
+                }
             }
         }
     }
@@ -162,14 +170,24 @@ void BlockCache::init(const ChunkPos& cpos)
 
 block_id_type BlockCache::get(const LocalPos& lpos) const
 {
-    std::size_t index = 0;
-    index += static_cast<std::size_t>(lpos.x() + PADDING);
-    index += static_cast<std::size_t>(lpos.y() + PADDING) * SIZE;
-    index += static_cast<std::size_t>(lpos.z() + PADDING) * SIZE * SIZE;
+    auto hx = static_cast<std::size_t>(PADDING + lpos.x());
+    auto hy = static_cast<std::size_t>(PADDING + lpos.y());
+    auto hz = static_cast<std::size_t>(PADDING + lpos.z());
 
-    if(index >= VOLUME)
+    if(hx >= SIZE || hy >= SIZE || hz >= SIZE) {
         return BLOCK_ID_NULL;
-    return m_blocks[index];
+    }
+
+    auto c_index = cache_index(hx, hy, hz, SIZE);
+
+    return m_blocks[c_index];
+}
+
+static float mesh_queue_distance_sq(const ChunkPos& cpos)
+{
+    Eigen::Vector3f position = utils::to_fvec(cpos - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
+    Eigen::Vector3f delta = position - camera::local;
+    return delta.squaredNorm();
 }
 
 static emhash8::HashMap<ChunkPos, std::nullptr_t> s_pending;
@@ -1124,17 +1142,31 @@ void chunk_mesher::init(void)
 
 void chunk_mesher::update(void)
 {
+    static std::vector<std::tuple<entt::entity, ChunkPos, float>> batch;
+
     ZoneScoped;
 
     TracyPlot("Mesh queue", static_cast<int64_t>(s_pending.size()));
 
     auto group = world::chunk_entities.group<ChunkMesh_DirtyMarker>(entt::get<Chunk_Component>);
 
+    batch.clear();
+
     for(const auto [entity, chunk] : group.each()) {
         if(0 == s_pending.count(chunk.position)) {
-            s_pending.emplace(chunk.position, nullptr);
-            world::chunk_entities.remove<ChunkMesh_DirtyMarker>(entity);
-            threading::submit<MeshingTask>(entity, chunk.position);
+            batch.emplace_back(entity, chunk.position, mesh_queue_distance_sq(chunk.position));
         }
+    }
+
+    std::sort(batch.begin(), batch.end(), [](const auto& a, const auto& b) {
+        const auto& [a_entity, a_position, a_dist_sq] = a;
+        const auto& [b_entity, b_position, b_dist_sq] = b;
+        return a_dist_sq < b_dist_sq;
+    });
+
+    for(const auto& [entity, position, dist_sq] : batch) {
+        s_pending.emplace(position, nullptr);
+        world::chunk_entities.remove<ChunkMesh_DirtyMarker>(entity);
+        threading::submit<MeshingTask>(entity, position);
     }
 }
