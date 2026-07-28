@@ -42,6 +42,7 @@ struct BiomeDefinition {
     std::uint8_t temperature;
     std::uint8_t humidity;
     std::uint8_t continentalness;
+    std::uint8_t erosion;
     std::uint8_t weirdness;
 
     unsigned priority;

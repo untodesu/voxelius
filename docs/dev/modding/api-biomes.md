@@ -39,8 +39,9 @@ Returns the numeric biome ID.
 |`realm`|`integer`|yes|N/D|One of `biomes.REALM_XXXX` constants|
 |`temperature`|`integer`|no|50|Target temperature in climate space, 0 to 99|
 |`humidity`|`integer`|no|50|Target humidity in climate space, 0 to 99|
-|`continentalness`|`integer`|no|50|Target continentalness, 0 to 99|
-|`weirdness`|`integer`|no|50|Target weirdness / relief, 0 to 99|
+|`continentalness`|`integer`|no|50|Target continentalness, 0 to 99. Low values correspond to oceans|
+|`erosion`|`integer`|no|50|Target erosion, 0 to 99. High values are flat terrain, low values are mountainous|
+|`weirdness`|`integer`|no|50|Target weirdness / ridges, 0 to 99. Drives biome variants and peaks-vs-valleys terrain offset|
 |`priority`|`integer`|no|0|If two biomes claim the same climate target during setup, higher priority keeps the point. The loser is nudged until the point is unique|
 |`offset`|`number`|no|0|Added to climate distance when picking a biome. Larger values make the biome harder to win / effectively smaller|
 |`palette`|`table`|no|`{}`|Biome block palette|
@@ -79,7 +80,8 @@ biomes.add("plains", {
   temperature = 50,
   humidity = 50,
   continentalness = 55,
-  weirdness = 35,
+  erosion = 70,
+  weirdness = 50,
   priority = 0,
   offset = 0,
 
@@ -110,10 +112,26 @@ biomes.add("plains", {
 
 ## Climate / multi-noise
 
-Biome placement uses a sparse multi-noise model. At generation time the engine samples four continuous climate noises (temperature, humidity, continentalness, and weirdness). It picks the biome whose target point in that space is nearest.
+Biome placement uses a sparse multi-noise model aligned with Minecraft 1.18+. At generation time the engine samples five continuous climate noises: temperature, humidity, continentalness, erosion, and weirdness. The engine picks a biome whose target point in that space is nearest.
 
 During mod loading, each biome defines a nucleation point at its target coordinates (0..99 per axis). If two biomes collide, higher `priority` keeps the cell. The loser is nudged randomly until it gets a free slot.
 
+### Climate axes
+
+|Axis|Terrain role|Biome role|
+|----|------------|----------|
+|Temperature|none|Climate bands, frozen ocean|
+|Humidity|none|Forests, swamps, jungles|
+|Continentalness|Base height, oceans vs land|Ocean / inland biomes|
+|Erosion|Flat vs mountainous relief|Peaks, meadows, shattered terrain|
+|Weirdness|Peaks-and-valleys offset via PV transform|Biome variants|
+
 ### Notes: `biomes.REALM_SURFACE`
 
-For the surface realm, the same continuous noises also drive terrain shape. Weirdness scales density amplitude. Continentalness shifts base height, so oceans and inland areas stay separate.
+For the surface realm, continentalness, erosion, and weirdness also drive terrain shape:
+
+- Continentalness shifts base height, so oceans and inland areas stay separate
+- Erosion controls relief amplitude. High erosion is flatter, low erosion is hillier
+- Weirdness is converted to a peaks-and-valleys (PV) value and shifts base height for peaks and valleys
+
+Ocean biomes use low continentalness targets. Terrain still lowers base height in those areas, so oceans emerge from both terrain shape and biome palettes.

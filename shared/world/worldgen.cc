@@ -6,7 +6,9 @@
 
 #include "shared/globals.hh"
 #include "shared/world/chunk.hh"
+#include "shared/world/climate_noise.hh"
 #include "shared/world/entropy_cache.hh"
+#include "shared/world/realm_sky.hh"
 #include "shared/world/realm_surface.hh"
 #include "shared/world/terrain.hh"
 #include "shared/world/world.hh"
@@ -58,13 +60,17 @@ void worldgen::init(void)
     // TODO: pass in a world config / seed
 
     entropy_cache::init(seed);
+    climate_noise::init(seed);
     realm_surface::init(seed);
+    realm_sky::init(seed);
 }
 
 void worldgen::shutdown(void)
 {
-    entropy_cache::shutdown();
+    realm_sky::shutdown();
     realm_surface::shutdown();
+    climate_noise::shutdown();
+    entropy_cache::shutdown();
 }
 
 void worldgen::request(const ChunkPos& pos)

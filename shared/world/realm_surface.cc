@@ -9,35 +9,19 @@
 #include "shared/world/block_registry.hh"
 #include "shared/world/block_storage.hh"
 #include "shared/world/climate.hh"
+#include "shared/world/climate_noise.hh"
 #include "shared/world/noise_cache.hh"
 
 constexpr static float VARIATION_MIN = 16.0f;
 constexpr static float VARIATION_MAX = 96.0f;
 constexpr static float BASE_MIN = -24.0f;
 constexpr static float BASE_MAX = 16.0f;
+constexpr static float PV_VALLEY_OFFSET = -8.0f;
+constexpr static float PV_PEAK_OFFSET = 12.0f;
 
 constexpr static BlockPos::value_type SEA_LEVEL = 0;
 
-static std::unique_ptr<NoiseCache_2D> s_temp_noise;
-static std::unique_ptr<NoiseCache_2D> s_humd_noise;
-static std::unique_ptr<NoiseCache_2D> s_cont_noise;
-static std::unique_ptr<NoiseCache_2D> s_weird_noise;
 static std::unique_ptr<NoiseCache_3D> s_terrain_noise;
-
-static float normalize_01(float sample)
-{
-    return std::clamp((sample + 1.0f) * 0.5f, 0.0f, 1.0f);
-}
-
-static ClimateSample sample_climate(const BlockPosXZ& pos)
-{
-    ClimateSample sample {};
-    sample.temperature = s_temp_noise->sample(pos);
-    sample.humidity = s_humd_noise->sample(pos);
-    sample.continentalness = s_cont_noise->sample(pos);
-    sample.weirdness = s_weird_noise->sample(pos);
-    return sample;
-}
 
 static bool is_inside_terrain(const BlockPos& bpos, float base_variation, float base_height)
 {
@@ -52,31 +36,6 @@ void realm_surface::init(std::uint64_t seed)
     std::mt19937_64 seeder;
     seeder.seed(seed);
 
-    fnl_state noise_temp = fnlCreateState();
-    noise_temp.noise_type = FNL_NOISE_OPENSIMPLEX2;
-    noise_temp.frequency = 0.0007f;
-    noise_temp.seed = static_cast<int>(seeder());
-
-    fnl_state noise_humd = fnlCreateState();
-    noise_humd.noise_type = FNL_NOISE_OPENSIMPLEX2;
-    noise_humd.frequency = 0.0007f;
-    noise_humd.seed = static_cast<int>(seeder());
-
-    fnl_state noise_cont = fnlCreateState();
-    noise_cont.noise_type = FNL_NOISE_OPENSIMPLEX2;
-    noise_cont.frequency = 0.00035f;
-    noise_cont.seed = static_cast<int>(seeder());
-
-    fnl_state noise_weird = fnlCreateState();
-    noise_weird.noise_type = FNL_NOISE_OPENSIMPLEX2;
-    noise_weird.frequency = 0.001f;
-    noise_weird.seed = static_cast<int>(seeder());
-
-    s_temp_noise = std::make_unique<NoiseCache_2D>(std::move(noise_temp), Eigen::Vector2i(8, 8));
-    s_humd_noise = std::make_unique<NoiseCache_2D>(std::move(noise_humd), Eigen::Vector2i(8, 8));
-    s_cont_noise = std::make_unique<NoiseCache_2D>(std::move(noise_cont), Eigen::Vector2i(8, 8));
-    s_weird_noise = std::make_unique<NoiseCache_2D>(std::move(noise_weird), Eigen::Vector2i(8, 8));
-
     fnl_state noise_terrain = fnlCreateState();
     noise_terrain.seed = static_cast<int>(seeder());
     noise_terrain.noise_type = FNL_NOISE_PERLIN;
@@ -90,10 +49,6 @@ void realm_surface::init(std::uint64_t seed)
 
 void realm_surface::shutdown(void)
 {
-    s_temp_noise.reset();
-    s_humd_noise.reset();
-    s_cont_noise.reset();
-    s_weird_noise.reset();
     s_terrain_noise.reset();
 }
 
@@ -112,7 +67,7 @@ bool realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
             auto bpos = utils::to_block(pos, LocalPos(lx, 0, lz));
             auto bpos_xz = BlockPosXZ(bpos.x(), bpos.z());
 
-            auto sample = sample_climate(bpos_xz);
+            auto sample = climate_noise::sample(bpos_xz);
             auto biome = climate::find(BIOME_REALM_SURFACE, sample);
 
             if(biome == nullptr) {
@@ -128,10 +83,13 @@ bool realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
                 fluid_slice[index] = biome->palette_fluid.cached;
             }
 
-            auto weirdness = normalize_01(sample.weirdness);
-            auto continentalness = normalize_01(sample.continentalness);
-            variation_slice[index] = std::lerp(VARIATION_MIN, VARIATION_MAX, weirdness);
-            base_slice[index] = std::lerp(BASE_MIN, BASE_MAX, continentalness);
+            auto cont_01 = climate::normalize_01(sample.continentalness);
+            auto eros_01 = climate::normalize_01(sample.erosion);
+            auto pv = climate::peaks_valleys(sample.weirdness);
+
+            variation_slice[index] = std::lerp(VARIATION_MAX, VARIATION_MIN, eros_01);
+            base_slice[index] = std::lerp(BASE_MIN, BASE_MAX, cont_01);
+            base_slice[index] += std::lerp(PV_VALLEY_OFFSET, PV_PEAK_OFFSET, climate::normalize_01(pv));
         }
     }
 

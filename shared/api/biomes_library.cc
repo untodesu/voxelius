@@ -183,6 +183,7 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
         std::make_pair("temperature", &def.temperature),
         std::make_pair("humidity", &def.humidity),
         std::make_pair("continentalness", &def.continentalness),
+        std::make_pair("erosion", &def.erosion),
         std::make_pair("weirdness", &def.weirdness),
     };
 
@@ -302,6 +303,7 @@ static bool add_biome(lua_State* L, ModContext* ctx, const char* raw_name, int d
     def.temperature = 50;
     def.humidity = 50;
     def.continentalness = 50;
+    def.erosion = 50;
     def.weirdness = 50;
     def.offset = 0.0f;
 

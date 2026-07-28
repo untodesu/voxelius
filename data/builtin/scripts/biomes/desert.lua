@@ -3,8 +3,9 @@ biomes.add("desert", {
 
   temperature = 80,
   humidity = 20,
-  continentalness = 50,
-  weirdness = 10,
+  continentalness = 60,
+  erosion = 65,
+  weirdness = 50,
 
   palette = {
     basic = { name = "stone" },

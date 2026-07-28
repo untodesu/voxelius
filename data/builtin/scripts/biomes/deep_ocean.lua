@@ -1,10 +1,10 @@
-biomes.add("stoney_hills", {
+biomes.add("deep_ocean", {
   realm = biomes.REALM_SURFACE,
 
-  temperature = 30,
-  humidity = 40,
-  continentalness = 75,
-  erosion = 15,
+  temperature = 50,
+  humidity = 70,
+  continentalness = 10,
+  erosion = 50,
   weirdness = 50,
 
   palette = {

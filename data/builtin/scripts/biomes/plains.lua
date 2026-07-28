@@ -3,8 +3,9 @@ biomes.add("plains", {
 
   temperature = 50,
   humidity = 55,
-  continentalness = 50,
-  weirdness = 10,
+  continentalness = 55,
+  erosion = 70,
+  weirdness = 50,
 
   palette = {
     basic = { name = "stone" },
