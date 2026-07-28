@@ -129,7 +129,7 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
     }
 
     // Pass 2: surface skin
-    for(std::size_t i = 0; i < constant::CHUNK_SIZE; ++i) {
+    for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
         auto lpos = utils::to_local(i);
         auto bpos = utils::to_block(pos, lpos);
         auto index_xz = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);

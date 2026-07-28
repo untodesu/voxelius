@@ -23,6 +23,22 @@ constexpr static float MAX_Y_BIAS = 96.0f;
 
 static std::unique_ptr<NoiseCache_3D> s_density;
 
+static bool is_inside_sky_terrain(const BlockPos& bpos, float continentalness)
+{
+    auto center_y = BASE_CENTER_Y + MAX_Y_BIAS * continentalness;
+    auto relative_y = static_cast<float>(bpos.y()) - center_y;
+    auto density = s_density->sample(bpos);
+
+    if(relative_y > 0.0f) {
+        density -= relative_y * 0.05f;
+    }
+    else {
+        density -= std::abs(relative_y) * 0.015f;
+    }
+
+    return density > 0.0f;
+}
+
 void realm_sky::init(std::mt19937_64& seeder)
 {
     auto density = fnlCreateState();
@@ -81,19 +97,44 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
 
         auto& item = slice[index_xz];
 
-        auto center_y = BASE_CENTER_Y + MAX_Y_BIAS * item.continentalness;
-        auto relative_y = static_cast<float>(bpos.y()) - center_y;
-        auto density = s_density->sample(bpos);
-
-        if(relative_y > 0.0f) {
-            density -= relative_y * 0.05f;
-        }
-        else {
-            density -= std::abs(relative_y) * 0.015f;
-        }
-
-        if(density > 0.0f) {
+        if(is_inside_sky_terrain(bpos, item.continentalness)) {
             storage.set(i, item.palette_basic);
+        }
+    }
+
+    // Pass 2: surface skin
+    for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
+        auto lpos = utils::to_local(i);
+        auto bpos = utils::to_block(pos, lpos);
+        auto index_xz = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
+
+        auto& item = slice[index_xz];
+        auto current = storage.get(i);
+
+        if(current == BLOCK_ID_NULL || current == item.palette_fluid) {
+            continue;
+        }
+
+        auto depth = 0U;
+
+        for(unsigned dy = 0; dy < 5; dy += 1) {
+            auto d_lpos = LocalPos(lpos.x(), lpos.y() + static_cast<LocalPos::value_type>(dy + 1), lpos.z());
+            auto d_bpos = utils::to_block(pos, d_lpos);
+
+            if(!is_inside_sky_terrain(d_bpos, item.continentalness)) {
+                break;
+            }
+
+            depth += 1U;
+        }
+
+        if(depth < 5) {
+            if(depth > 0) {
+                storage.set(i, item.palette_filler);
+            }
+            else {
+                storage.set(i, item.palette_surface);
+            }
         }
     }
 
