@@ -10,11 +10,8 @@ static std::unique_ptr<NoiseCache_2D> s_continentalness;
 static std::unique_ptr<NoiseCache_2D> s_erosion;
 static std::unique_ptr<NoiseCache_2D> s_weirdness;
 
-void climate_noise::init(std::uint64_t seed)
+void climate_noise::init(std::mt19937_64& seeder)
 {
-    std::mt19937_64 seeder;
-    seeder.seed(seed);
-
     fnl_state temperature = fnlCreateState();
     temperature.noise_type = FNL_NOISE_OPENSIMPLEX2;
     temperature.frequency = 0.0007f;

@@ -1,11 +1,11 @@
 biomes.add("sky_island", {
   realm = biomes.REALM_SKY,
 
-  temperature = 50,
-  humidity = 45,
-  continentalness = 50,
-  erosion = 40,
-  weirdness = 50,
+  temperature = 55,
+  humidity = 50,
+  continentalness = 55,
+  erosion = 45,
+  weirdness = 45,
 
   palette = {
     basic = { name = "stone" },

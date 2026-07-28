@@ -8,6 +8,7 @@
 #include "shared/world/chunk.hh"
 #include "shared/world/climate_noise.hh"
 #include "shared/world/entropy_cache.hh"
+#include "shared/world/heightmap.hh"
 #include "shared/world/realm_sky.hh"
 #include "shared/world/realm_surface.hh"
 #include "shared/world/terrain.hh"
@@ -56,13 +57,14 @@ void WorldgenTask::finalize(void)
 void worldgen::init(void)
 {
     std::uint64_t seed = 1337;
+    std::mt19937_64 seeder(seed);
 
     // TODO: pass in a world config / seed
 
-    entropy_cache::init(seed);
-    climate_noise::init(seed);
-    realm_surface::init(seed);
-    realm_sky::init(seed);
+    entropy_cache::init(seeder);
+    climate_noise::init(seeder);
+    realm_surface::init(seeder);
+    realm_sky::init(seeder);
 }
 
 void worldgen::shutdown(void)

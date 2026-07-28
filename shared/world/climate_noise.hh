@@ -6,7 +6,7 @@
 
 namespace climate_noise
 {
-void init(std::uint64_t seed);
+void init(std::mt19937_64& seeder);
 void shutdown(void);
 } // namespace climate_noise
 

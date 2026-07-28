@@ -7,13 +7,13 @@ class BlockStorage;
 
 namespace realm_sky
 {
-void init(std::uint64_t seed);
+void init(std::mt19937_64& seeder);
 void shutdown(void);
 } // namespace realm_sky
 
 namespace realm_sky
 {
-bool generate(BlockStorage& storage, const ChunkPos& pos);
+void generate(BlockStorage& storage, const ChunkPos& pos);
 } // namespace realm_sky
 
 #endif /* CDF3046F_AD1A_4954_8B4A_00B7AFB2A2B0 */

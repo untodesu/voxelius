@@ -8,7 +8,7 @@ using cached_entropy_type = std::array<std::uint64_t, constant::CHUNK_AREA>;
 
 namespace entropy_cache
 {
-void init(std::uint64_t seed);
+void init(std::mt19937_64& seeder);
 void shutdown(void);
 } // namespace entropy_cache
 

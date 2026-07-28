@@ -10,86 +10,96 @@
 #include "shared/world/block_storage.hh"
 #include "shared/world/climate.hh"
 #include "shared/world/climate_noise.hh"
+#include "shared/world/heightmap.hh"
 #include "shared/world/noise_cache.hh"
+#include "shared/world/terrain.hh"
+
+struct SliceItem final {
+    block_id_type palette_basic;
+    block_id_type palette_filler;
+    block_id_type palette_surface;
+    block_id_type palette_fluid;
+    float variation;
+    float base;
+};
 
 constexpr static float VARIATION_MIN = 16.0f;
 constexpr static float VARIATION_MAX = 96.0f;
+
 constexpr static float BASE_MIN = -24.0f;
 constexpr static float BASE_MAX = 16.0f;
+
 constexpr static float PV_VALLEY_OFFSET = -8.0f;
 constexpr static float PV_PEAK_OFFSET = 12.0f;
 
-constexpr static BlockPos::value_type SEA_LEVEL = 0;
+constexpr static LocalPos::value_type CHUNK_SIZE_LP = static_cast<LocalPos::value_type>(constant::CHUNK_SIZE);
 
-static std::unique_ptr<NoiseCache_3D> s_terrain_noise;
+static std::unique_ptr<NoiseCache_3D> s_terrain;
 
-static bool is_inside_terrain(const BlockPos& bpos, float base_variation, float base_height)
+static bool is_inside_terrain(const BlockPos& bpos, float y_relative, float base_variation)
 {
-    auto variation_noise = s_terrain_noise->sample(bpos);
-    auto variation = base_variation * (1.0f - 0.6f * variation_noise * variation_noise);
-    auto noise = variation * variation_noise - (static_cast<float>(bpos.y()) - base_height);
+    auto variation_noise = s_terrain->sample(bpos);
+    auto variation = base_variation * (1.0f - variation_noise * variation_noise);
+    auto noise = variation * variation_noise - y_relative;
+
     return noise > 0.0f;
 }
 
-void realm_surface::init(std::uint64_t seed)
+void realm_surface::init(std::mt19937_64& seeder)
 {
-    std::mt19937_64 seeder;
-    seeder.seed(seed);
-
     fnl_state noise_terrain = fnlCreateState();
     noise_terrain.seed = static_cast<int>(seeder());
-    noise_terrain.noise_type = FNL_NOISE_PERLIN;
+    noise_terrain.noise_type = FNL_NOISE_OPENSIMPLEX2S;
     noise_terrain.fractal_type = FNL_FRACTAL_FBM;
-    noise_terrain.frequency = 0.008f;
-    noise_terrain.octaves = 5;
-    noise_terrain.gain = 0.55f;
+    noise_terrain.frequency = 0.005f;
+    noise_terrain.octaves = 4;
 
-    s_terrain_noise = std::make_unique<NoiseCache_3D>(std::move(noise_terrain), Eigen::Vector3i(4, 8, 4));
+    s_terrain = std::make_unique<NoiseCache_3D>(std::move(noise_terrain), Eigen::Vector3i(4, 8, 4));
 }
 
 void realm_surface::shutdown(void)
 {
-    s_terrain_noise.reset();
+    s_terrain.reset();
 }
 
-bool realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
+void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
 {
-    thread_local std::array<block_id_type, constant::CHUNK_VOLUME> basic_slice;
-    thread_local std::array<block_id_type, constant::CHUNK_VOLUME> filler_slice;
-    thread_local std::array<block_id_type, constant::CHUNK_VOLUME> surface_slice;
-    thread_local std::array<block_id_type, constant::CHUNK_VOLUME> fluid_slice;
-    thread_local std::array<float, constant::CHUNK_VOLUME> variation_slice;
-    thread_local std::array<float, constant::CHUNK_VOLUME> base_slice;
+    thread_local std::array<SliceItem, constant::CHUNK_VOLUME> slice;
 
-    for(std::int16_t lz = 0; lz < constant::CHUNK_SIZE; lz += 1) {
-        for(std::int16_t lx = 0; lx < constant::CHUNK_SIZE; lx += 1) {
+    storage.fill(BLOCK_ID_NULL);
+
+    for(LocalPos::value_type lz = 0; lz < constant::CHUNK_SIZE; lz += 1) {
+        for(LocalPos::value_type lx = 0; lx < constant::CHUNK_SIZE; lx += 1) {
             auto index = static_cast<std::size_t>(lx + lz * constant::CHUNK_SIZE);
             auto bpos = utils::to_block(pos, LocalPos(lx, 0, lz));
             auto bpos_xz = BlockPosXZ(bpos.x(), bpos.z());
 
             auto sample = climate_noise::sample(bpos_xz);
-            auto biome = climate::find(BIOME_REALM_SURFACE, sample);
 
-            if(biome == nullptr) {
-                basic_slice[index] = BLOCK_ID_NULL;
-                filler_slice[index] = BLOCK_ID_NULL;
-                surface_slice[index] = BLOCK_ID_NULL;
-                fluid_slice[index] = BLOCK_ID_NULL;
-            }
-            else {
-                basic_slice[index] = biome->palette_basic.cached;
-                filler_slice[index] = biome->palette_filler.cached;
-                surface_slice[index] = biome->palette_surface.cached;
-                fluid_slice[index] = biome->palette_fluid.cached;
+            SliceItem item {};
+            item.palette_basic = BLOCK_ID_NULL;
+            item.palette_filler = BLOCK_ID_NULL;
+            item.palette_surface = BLOCK_ID_NULL;
+            item.palette_fluid = BLOCK_ID_NULL;
+            item.variation = VARIATION_MIN;
+            item.base = BASE_MIN;
+
+            if(auto biome = climate::find(BIOME_REALM_SURFACE, sample)) {
+                item.palette_basic = biome->palette_basic.cached;
+                item.palette_filler = biome->palette_filler.cached;
+                item.palette_surface = biome->palette_surface.cached;
+                item.palette_fluid = biome->palette_fluid.cached;
             }
 
-            auto cont_01 = climate::normalize_01(sample.continentalness);
-            auto eros_01 = climate::normalize_01(sample.erosion);
+            auto continentalness = climate::normalize_01(sample.continentalness);
+            auto erosion = climate::normalize_01(sample.erosion);
             auto pv = climate::peaks_valleys(sample.weirdness);
 
-            variation_slice[index] = std::lerp(VARIATION_MAX, VARIATION_MIN, eros_01);
-            base_slice[index] = std::lerp(BASE_MIN, BASE_MAX, cont_01);
-            base_slice[index] += std::lerp(PV_VALLEY_OFFSET, PV_PEAK_OFFSET, climate::normalize_01(pv));
+            item.variation = std::lerp(VARIATION_MAX, VARIATION_MIN, erosion);
+            item.base = std::lerp(BASE_MIN, BASE_MAX, continentalness);
+            item.base += std::lerp(PV_VALLEY_OFFSET, PV_PEAK_OFFSET, climate::normalize_01(pv));
+
+            slice[index] = std::move(item);
         }
     }
 
@@ -97,46 +107,43 @@ bool realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
     for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
         auto lpos = utils::to_local(i);
         auto bpos = utils::to_block(pos, lpos);
-        auto index = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
+        auto index_xz = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
 
-        auto variation = variation_slice[index];
-        auto base = base_slice[index];
-        auto y_rel = static_cast<float>(bpos.y()) - base;
+        auto& item = slice[index_xz];
+        auto y_relative = static_cast<float>(bpos.y()) - item.base;
+        auto has_terrain = false;
 
-        if(y_rel > variation) {
+        if(y_relative > item.variation) {
             continue;
         }
 
-        if(y_rel < -variation) {
-            storage.set(i, basic_slice[index]);
-            continue;
+        if(y_relative < -item.variation) {
+            storage.set(i, item.palette_basic);
         }
-
-        if(is_inside_terrain(bpos, variation, base)) {
-            storage.set(i, basic_slice[index]);
+        else if(is_inside_terrain(bpos, y_relative, item.variation)) {
+            storage.set(i, item.palette_basic);
         }
-        else if(bpos.y() < SEA_LEVEL) {
-            storage.set(i, fluid_slice[index]);
+        else if(bpos.y() < 0) {
+            storage.set(i, item.palette_fluid);
         }
     }
 
     // Pass 2: surface skin
-    for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
+    for(std::size_t i = 0; i < constant::CHUNK_SIZE; ++i) {
         auto lpos = utils::to_local(i);
         auto bpos = utils::to_block(pos, lpos);
-        auto index = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
+        auto index_xz = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
 
-        auto variation = variation_slice[index];
-        auto base = base_slice[index];
-        auto y_rel = static_cast<float>(bpos.y()) - base;
+        auto& item = slice[index_xz];
+        auto y_relative = static_cast<float>(bpos.y()) - item.base;
 
-        if(std::abs(y_rel) > variation) {
+        if(y_relative > item.variation) {
             continue;
         }
 
         auto current = storage.get(i);
 
-        if(current == BLOCK_ID_NULL || current == fluid_slice[index]) {
+        if(current == BLOCK_ID_NULL || current == item.palette_fluid) {
             continue;
         }
 
@@ -148,33 +155,59 @@ bool realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
             auto d_bpos = utils::to_block(pos, d_lpos);
             auto d_index = utils::to_index(d_lpos);
 
-            if(d_lpos.y() >= static_cast<LocalPos::value_type>(constant::CHUNK_SIZE)) {
-                if(!is_inside_terrain(d_bpos, variation, base)) {
-                    underwater = dy == 0 && d_bpos.y() < SEA_LEVEL;
+            if(d_lpos.y() >= CHUNK_SIZE_LP) {
+                auto y_relative = static_cast<float>(d_bpos.y()) - item.base;
+
+                if(!is_inside_terrain(d_bpos, y_relative, item.variation)) {
+                    underwater = dy == 0 && d_bpos.y() < 0;
                     break;
                 }
+
                 depth += 1U;
             }
             else {
                 auto above = storage.get(d_index);
 
-                if(above == BLOCK_ID_NULL || above == fluid_slice[index]) {
-                    underwater = dy == 0 && above == fluid_slice[index];
+                if(above == BLOCK_ID_NULL || above == item.palette_fluid) {
+                    underwater = dy == 0 && above == item.palette_fluid;
                     break;
                 }
+
                 depth += 1U;
             }
         }
 
         if(depth < 5) {
             if(underwater || depth > 0) {
-                storage.set(i, filler_slice[index]);
+                storage.set(i, item.palette_filler);
             }
             else {
-                storage.set(i, surface_slice[index]);
+                storage.set(i, item.palette_surface);
             }
         }
     }
 
-    return true;
+    storage.optimize();
+
+    auto cpos_xz = ChunkPosXZ(pos.x(), pos.z());
+    auto heights = heightmap::get(BIOME_REALM_SURFACE, cpos_xz);
+
+    for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
+        auto lpos = utils::to_local(i);
+        auto bpos = utils::to_block(pos, lpos);
+        auto index_xz = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
+
+        auto& item = slice[index_xz];
+        auto current = storage.get(i);
+
+        if(current == BLOCK_ID_NULL || current == item.palette_fluid) {
+            continue;
+        }
+
+        if(bpos.y() > heights[index_xz]) {
+            heights[index_xz] = bpos.y();
+        }
+    }
+
+    heightmap::update(BIOME_REALM_SURFACE, cpos_xz, heights);
 }

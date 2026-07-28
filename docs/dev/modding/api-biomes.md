@@ -135,3 +135,13 @@ For the surface realm, continentalness, erosion, and weirdness also drive terrai
 - Weirdness is converted to a peaks-and-valleys (PV) value and shifts base height for peaks and valleys
 
 Ocean biomes use low continentalness targets. Terrain still lowers base height in those areas, so oceans emerge from both terrain shape and biome palettes.
+
+### Notes: `biomes.REALM_SKY`
+
+Sky islands use three 2D noises (mask, top height, bottom height) plus continentalness bias:
+
+- Mask decides the island footprint in XZ. Low continentalness (oceans on the surface) lowers the mask threshold, so islands appear more often over oceans
+- Top and bottom are independent height fields, so the underside is not a mirror of the surface
+- Columns thinner toward the mask edge (strength falloff) so footprints taper instead of forming flat disks
+
+Temperature, humidity, erosion, and weirdness only affect sky biome selection, not island shape.

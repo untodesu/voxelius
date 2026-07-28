@@ -8,25 +8,26 @@
 #include "shared/world/realm_sky.hh"
 #include "shared/world/realm_surface.hh"
 
-constexpr static BlockPos::value_type SURFACE_MIN_Y = -64;
-constexpr static BlockPos::value_type SURFACE_MAX_Y = 255;
-constexpr static BlockPos::value_type SKY_MIN_Y = 256;
-constexpr static BlockPos::value_type SKY_MAX_Y = 767;
-
-constexpr static ChunkPos::value_type SURFACE_MIN_CHUNK_Y = SURFACE_MIN_Y >> constant::CHUNK_SIZE_LOG2;
-constexpr static ChunkPos::value_type SURFACE_MAX_CHUNK_Y = SURFACE_MAX_Y >> constant::CHUNK_SIZE_LOG2;
-constexpr static ChunkPos::value_type SKY_MIN_CHUNK_Y = SKY_MIN_Y >> constant::CHUNK_SIZE_LOG2;
-constexpr static ChunkPos::value_type SKY_MAX_CHUNK_Y = SKY_MAX_Y >> constant::CHUNK_SIZE_LOG2;
+static bool check_range(ChunkPos::value_type y, ChunkPos::value_type min, ChunkPos::value_type max)
+{
+    return y >= min && y <= max;
+}
 
 bool terrain::generate(const ChunkPos& pos, BlockStorage& storage)
 {
-    if(pos.y() >= SURFACE_MIN_CHUNK_Y && pos.y() <= SURFACE_MAX_CHUNK_Y) {
-        return realm_surface::generate(storage, pos);
+    auto generated = false;
+    auto vertical = pos.y();
+
+    if(check_range(vertical, SURFACE_MIN_CHUNK_Y, SURFACE_MAX_CHUNK_Y)) {
+        realm_surface::generate(storage, pos);
+        generated = true;
+    }
+    else if(check_range(vertical, SKY_MIN_CHUNK_Y, SKY_MAX_CHUNK_Y)) {
+        realm_sky::generate(storage, pos);
+        generated = true;
     }
 
-    if(pos.y() >= SKY_MIN_CHUNK_Y && pos.y() <= SKY_MAX_CHUNK_Y) {
-        return realm_sky::generate(storage, pos);
-    }
+    // TODO: if generated, carve caves
 
-    return false;
+    return generated;
 }

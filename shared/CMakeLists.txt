@@ -62,6 +62,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/world/fluid_registry.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/fluid_registry.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/fluid.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/world/heightmap.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/world/heightmap.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/noise_cache.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/noise_cache.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/realm_sky.cc"

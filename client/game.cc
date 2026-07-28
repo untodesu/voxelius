@@ -24,17 +24,15 @@
 #include "client/gui/gui.hh"
 #include "client/utils/entity.hh"
 
-#include <fastnoiselite.h>
-
 static void generate_debug_terrain(void)
 {
     constexpr static ChunkPos::value_type CHUNK_RADIUS = 32;
-    constexpr static ChunkPos::value_type VERT_RADIUS = 20;
+    constexpr static ChunkPos::value_type VERT_RADIUS = 4;
 
     for(ChunkPos::value_type cx = -CHUNK_RADIUS; cx <= CHUNK_RADIUS; cx += 1) {
         for(ChunkPos::value_type cz = -CHUNK_RADIUS; cz <= CHUNK_RADIUS; cz += 1) {
             for(ChunkPos::value_type cy = -VERT_RADIUS; cy <= VERT_RADIUS; cy += 1) {
-                worldgen::request({ cx, cy, cz });
+                worldgen::request({ cx, 20 + cy, cz });
             }
         }
     }

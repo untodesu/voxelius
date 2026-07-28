@@ -36,9 +36,9 @@ static std::shared_ptr<Entry> get_or_create(const ChunkPosXZ& pos)
     return it->second;
 }
 
-void entropy_cache::init(std::uint64_t seed)
+void entropy_cache::init(std::mt19937_64& seeder)
 {
-    s_seed = seed;
+    s_seed = seeder();
 }
 
 void entropy_cache::shutdown(void)
