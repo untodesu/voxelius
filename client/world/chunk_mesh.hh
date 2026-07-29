@@ -9,10 +9,11 @@ struct ChunkMesh_Vertex final {
     static std::uint32_t pack_texture(std::uint32_t texture_index, std::uint32_t frame_offset, std::uint32_t tint_index);
     static std::uint32_t pack_extras(std::uint32_t ao, float shade, bool animated);
 
-    std::uint32_t data_position; ///< XYZ in 1/16ths (10_10_10)
-    std::uint32_t data_uv;       ///< UV as unorm8x2
-    std::uint32_t data_texture;  ///< Texture index, frame offset and tint index
-    std::uint32_t data_extras;   ///< AO (2 bit), ANIMATED_BIT, shade (unorm8)
+    std::uint32_t data_position;   ///< XYZ in 1/16ths (10_10_10)
+    std::uint32_t data_uv;         ///< UV as unorm8x2
+    std::uint32_t data_texture;    ///< Texture index, frame offset and tint index
+    std::uint32_t data_extras;     ///< AO (2 bit), ANIMATED_BIT, shade (unorm8)
+    std::uint32_t data_chunk_slot; ///< index into u_ChunkPositions TBO
 };
 
 struct ChunkMesh_Part final {
@@ -25,12 +26,22 @@ struct ChunkMesh_Part final {
     ChunkMesh_Part(ChunkMesh_Part&& other);
     ChunkMesh_Part& operator=(ChunkMesh_Part&& other);
 
-    std::vector<ChunkMesh_Vertex> vertices; // FIXME: might not want to clear these for blendable blocks
+    std::vector<ChunkMesh_Vertex> vertices;
     std::uint32_t count { 0 };
-    GLuint vbo { 0 };
+    std::uint32_t base_vertex { 0 };
 };
 
 struct ChunkMesh final {
+    ChunkMesh(void);
+    ~ChunkMesh(void);
+
+    ChunkMesh(const ChunkMesh& other) = delete;
+    ChunkMesh& operator=(const ChunkMesh& other) = delete;
+
+    ChunkMesh(ChunkMesh&& other);
+    ChunkMesh& operator=(ChunkMesh&& other);
+
+    std::uint32_t slot;
     ChunkMesh_Part opaque;
     ChunkMesh_Part alpha;
     ChunkMesh_Part fluid;

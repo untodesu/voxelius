@@ -7,6 +7,7 @@ layout(location = 0) in uint vert_Position;
 layout(location = 1) in uint vert_TexCoord;
 layout(location = 2) in uint vert_Texture;
 layout(location = 3) in uint vert_Extras;
+layout(location = 4) in uint vert_ChunkSlot;
 
 out vec2 vs_TexCoord;
 flat out uint vs_FrameIndex;
@@ -19,9 +20,9 @@ out float vs_FogFactor;
 #endif
 
 uniform usamplerBuffer u_AtlasStrips;
+uniform samplerBuffer u_ChunkPositions;
 uniform mat4 u_ViewProjection;
 uniform uint u_AnimationTimer;
-uniform vec3 u_WorldPosition;
 uniform float u_ViewDistance;
 
 vec3 unpack_position(uint data)
@@ -34,7 +35,7 @@ vec3 unpack_position(uint data)
 
 void main(void)
 {
-    vec3 local_position = unpack_position(vert_Position) + u_WorldPosition;
+    vec3 local_position = unpack_position(vert_Position) + texelFetch(u_ChunkPositions, int(vert_ChunkSlot)).xyz;
 
     vs_TexCoord = vec2(float(vert_TexCoord & 0xFFU), float((vert_TexCoord >> 8U) & 0xFFU)) / 255.0;
 
@@ -51,6 +52,7 @@ void main(void)
     if(bool(vert_Extras & ANIMATED_BIT)) {
         vs_FrameIndex = strip_frame_base + u_AnimationTimer % max(strip_frame_count, 1U);
     }
+
     else {
         vs_FrameIndex = strip_frame_base + frame_offset;
     }

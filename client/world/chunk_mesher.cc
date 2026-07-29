@@ -17,6 +17,7 @@
 #include "client/world/block_atlas.hh"
 #include "client/world/block_models.hh"
 #include "client/world/chunk_mesh.hh"
+#include "client/world/chunk_vbo.hh"
 #include "client/world/fluid_cache.hh"
 
 #include "client/camera.hh"
@@ -275,24 +276,32 @@ static void emit_quad_vertices(std::vector<ChunkMesh_Vertex>& out, const std::ar
     }
 }
 
-static void sync_part(ChunkMesh_Part& part)
+static void sync_part(ChunkMesh_Part& part, std::uint32_t slot)
 {
+    auto old_count = part.count;
+    auto old_base = part.base_vertex;
+
     if(part.vertices.empty()) {
-        if(part.vbo) {
-            glDeleteBuffers(1, &part.vbo);
-            part.vbo = 0;
+        if(old_count > 0) {
+            chunk_vbo::free(old_base, old_count);
         }
 
         part.count = 0;
+        part.base_vertex = 0;
         return;
     }
 
-    if(part.vbo == 0) {
-        glGenBuffers(1, &part.vbo);
+    for(auto& vertex : part.vertices) {
+        vertex.data_chunk_slot = slot;
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, part.vbo);
-    glBufferData(GL_ARRAY_BUFFER, std::span(part.vertices).size_bytes(), part.vertices.data(), GL_STATIC_DRAW);
+    if(old_count > 0) {
+        chunk_vbo::free(old_base, old_count);
+    }
+
+    part.count = static_cast<std::uint32_t>(part.vertices.size());
+    part.base_vertex = chunk_vbo::allocate(part.count);
+    chunk_vbo::upload(part.base_vertex, part.vertices);
 }
 
 MeshingTask::MeshingTask(entt::entity entity, const ChunkPos& cpos) : m_entity(entity), m_cpos(cpos)
@@ -342,16 +351,13 @@ void MeshingTask::finalize(void)
     auto& component = world::chunk_entities.get_or_emplace<ChunkMesh>(m_entity);
 
     component.opaque.vertices = std::move(m_opaque);
-    component.opaque.count = static_cast<std::uint32_t>(component.opaque.vertices.size());
-    sync_part(component.opaque);
+    sync_part(component.opaque, component.slot);
 
     component.alpha.vertices = std::move(m_alpha);
-    component.alpha.count = static_cast<std::uint32_t>(component.alpha.vertices.size());
-    sync_part(component.alpha);
+    sync_part(component.alpha, component.slot);
 
     component.fluid.vertices = std::move(m_fluid);
-    component.fluid.count = static_cast<std::uint32_t>(component.fluid.vertices.size());
-    sync_part(component.fluid);
+    sync_part(component.fluid, component.slot);
 
     // Opaque vertices won't get depth-sorted
     // at runtime so there's no point in keeping
