@@ -22,6 +22,7 @@ markdown_extensions:
 
 theme:
   name: material
+  font: false
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -44,6 +45,7 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.top
+  custom_dir: docs/overrides
   favicon: favicon.ico
   logo: favicon.png
 
