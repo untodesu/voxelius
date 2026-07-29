@@ -14,9 +14,10 @@ constexpr static float BASE_CENTER_Y = 320.0f;
 constexpr static float MAX_Y_BIAS = 96.0f;
 
 // Density falloff makes terrain impossible outside this envelope when abs(noise) <= 1.
-// Above: density > 0.2 + relative_y * 0.068                    --> relative_y < 0.8/0.068 ~ 11.76
+// Above: density > 0.35 + relative_y * 0.068                   --> relative_y < 0.65/0.068 ~ 9.56
 // Below: density > -0.15 + 0.006 x depth + 0.00004 x depth^2   --> depth < 110.4
-constexpr static float DENSITY_MAX_ABOVE = 12.0f;
+constexpr static float BASE_DENSITY_THRESHOLD = 0.35f;
+constexpr static float DENSITY_MAX_ABOVE = 10.0f;
 constexpr static float DENSITY_MAX_BELOW = 112.0f;
 
 constexpr static float TERRAIN_Y_MIN = BASE_CENTER_Y - DENSITY_MAX_BELOW;
@@ -26,9 +27,9 @@ constexpr static LocalPos::value_type CHUNK_SIZE_LP = static_cast<LocalPos::valu
 
 static std::unique_ptr<NoiseCache3D_4x8x4> s_density;
 
-static bool is_inside_sky_terrain(float density, float relative_y)
+static bool is_inside_sky_terrain(float density, float relative_y, float density_bias)
 {
-    auto threshold = 0.2f;
+    auto threshold = BASE_DENSITY_THRESHOLD - density_bias;
 
     if(relative_y > 0.0f) {
         density -= relative_y * 0.06f;
@@ -44,7 +45,7 @@ static bool is_inside_sky_terrain(float density, float relative_y)
 }
 
 static bool is_inside_sky_terrain(const NoiseCache3D_4x8x4::array_type& density, const LocalPos& lpos, const BlockPos& bpos,
-    float continentalness)
+    float continentalness, float density_bias)
 {
     auto center_y = BASE_CENTER_Y + MAX_Y_BIAS * continentalness;
     auto relative_y = static_cast<float>(bpos.y()) - center_y;
@@ -53,10 +54,10 @@ static bool is_inside_sky_terrain(const NoiseCache3D_4x8x4::array_type& density,
         return false;
     }
 
-    return is_inside_sky_terrain(NoiseCache3D_4x8x4::sample(density, lpos), relative_y);
+    return is_inside_sky_terrain(NoiseCache3D_4x8x4::sample(density, lpos), relative_y, density_bias);
 }
 
-static bool is_inside_sky_terrain(const BlockPos& bpos, float continentalness)
+static bool is_inside_sky_terrain(const BlockPos& bpos, float continentalness, float density_bias)
 {
     auto center_y = BASE_CENTER_Y + MAX_Y_BIAS * continentalness;
     auto relative_y = static_cast<float>(bpos.y()) - center_y;
@@ -65,7 +66,7 @@ static bool is_inside_sky_terrain(const BlockPos& bpos, float continentalness)
         return false;
     }
 
-    return is_inside_sky_terrain(s_density->get_slow(bpos), relative_y);
+    return is_inside_sky_terrain(s_density->get_slow(bpos), relative_y, density_bias);
 }
 
 void realm_sky::init(std::mt19937_64& seeder)
@@ -92,12 +93,14 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
     thread_local std::array<block_id_type, constant::CHUNK_AREA> palette_surface_array;
     thread_local std::array<block_id_type, constant::CHUNK_AREA> palette_fluid_array;
     thread_local std::array<float, constant::CHUNK_AREA> continentalness_array;
+    thread_local std::array<float, constant::CHUNK_AREA> density_bias_array;
 
     palette_basic_array.fill(BLOCK_ID_NULL);
     palette_filler_array.fill(BLOCK_ID_NULL);
     palette_surface_array.fill(BLOCK_ID_NULL);
     palette_fluid_array.fill(BLOCK_ID_NULL);
     continentalness_array.fill(0.0f);
+    density_bias_array.fill(0.0f);
     storage.fill(BLOCK_ID_NULL);
 
     auto chunk_y_min = static_cast<float>(pos.y()) * static_cast<float>(constant::CHUNK_SIZE);
@@ -122,7 +125,13 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
             palette_fluid_array[i] = biome->palette_fluid.cached;
         }
 
-        continentalness_array[i] = climate::normalize_01(sample.continentalness);
+        auto cont = climate::normalize_01(sample.continentalness);
+        continentalness_array[i] = cont;
+
+        auto pv_norm = climate::normalize_01(climate::peaks_valleys(sample.weirdness));
+        auto ocean_factor = std::max(0.0f, 0.3f - cont) / 0.3f;
+        auto mountain_factor = std::max(0.0f, pv_norm - 0.65f) / 0.35f;
+        density_bias_array[i] = 0.08f * ocean_factor + 0.12f * mountain_factor;
     }
 
     auto& density_array = s_density->get(pos);
@@ -136,7 +145,7 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
         auto bpos = utils::to_block(pos, lpos);
         auto index_xz = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
 
-        if(is_inside_sky_terrain(density_array, lpos, bpos, continentalness_array[index_xz])) {
+        if(is_inside_sky_terrain(density_array, lpos, bpos, continentalness_array[index_xz], density_bias_array[index_xz])) {
             storage.set(i, palette_basic_array[index_xz]);
         }
     }
@@ -162,7 +171,7 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
             auto d_index = utils::to_index(d_lpos);
 
             if(d_lpos.y() >= CHUNK_SIZE_LP) {
-                if(!is_inside_sky_terrain(d_bpos, continentalness_array[index_xz])) {
+                if(!is_inside_sky_terrain(d_bpos, continentalness_array[index_xz], density_bias_array[index_xz])) {
                     break;
                 }
 
