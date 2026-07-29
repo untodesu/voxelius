@@ -18,7 +18,7 @@ static void grow(std::size_t required)
 {
     static std::vector<std::uint8_t> scratch;
 
-    std::size_t new_capacity = chunk_vbo::capacity;
+    std::size_t new_capacity = chunk_vbo::capacity ? chunk_vbo::capacity : INITIAL_CAPACITY;
 
     while(new_capacity < required) {
         new_capacity <<= 1;

@@ -13,6 +13,7 @@
 #include "client/globals.hh"
 #include "client/gui/settings.hh"
 #include "client/world/chunk_renderer.hh"
+#include "client/world/chunk_vbo.hh"
 #include "client/world/outline.hh"
 
 static GLuint s_world_fbo;
@@ -96,6 +97,7 @@ void head::init(void)
 
     ImGui::GetIO().IniFilename = nullptr;
 
+    chunk_vbo::init();
     chunk_renderer::init();
     outline::init();
 
@@ -113,6 +115,7 @@ void head::shutdown(void)
 {
     outline::shutdown();
     chunk_renderer::shutdown();
+    chunk_vbo::shutdown();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
