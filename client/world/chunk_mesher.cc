@@ -599,7 +599,8 @@ static float fluid_corner_height(const BlockCache& cache, const LocalPos& lpos, 
     int sz, float self_height, unsigned full_level)
 {
     auto sum = 0.0f;
-    auto count = 0;
+    auto weight_sum = 0.0f;
+    auto full_height = 0.0625f * static_cast<float>(full_level);
 
     for(int dx = sx - 1; dx <= sx; ++dx) {
         for(int dz = sz - 1; dz <= sz; ++dz) {
@@ -613,16 +614,22 @@ static float fluid_corner_height(const BlockCache& cache, const LocalPos& lpos, 
                 return 1.0f;
             }
 
-            sum += height.value();
-            count += 1;
+            if(height.value() >= full_height) {
+                sum += 10.0f * height.value();
+                weight_sum += 10.0f;
+            }
+            else {
+                sum += height.value();
+                weight_sum += 1.0f;
+            }
         }
     }
 
-    if(count == 0) {
+    if(weight_sum == 0.0f) {
         return self_height;
     }
 
-    return sum / static_cast<float>(count);
+    return sum / weight_sum;
 }
 
 static std::array<float, 4> fluid_corner_heights(const BlockCache& cache, const LocalPos& lpos, fluid_id_type fluid_id,
