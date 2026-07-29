@@ -33,6 +33,15 @@ LocalPos utils::to_local(std::size_t index)
     return lpos;
 }
 
+BlockPos utils::to_block(const ChunkPos& cpos)
+{
+    BlockPos bpos;
+    bpos.x() = static_cast<BlockPos::value_type>(cpos.x() << constant::CHUNK_SIZE_LOG2);
+    bpos.y() = static_cast<BlockPos::value_type>(cpos.y() << constant::CHUNK_SIZE_LOG2);
+    bpos.z() = static_cast<BlockPos::value_type>(cpos.z() << constant::CHUNK_SIZE_LOG2);
+    return bpos;
+}
+
 BlockPos utils::to_block(const ChunkPos& cpos, const LocalPos& lpos)
 {
     BlockPos bpos;

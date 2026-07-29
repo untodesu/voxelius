@@ -16,6 +16,7 @@ LocalPos to_local(std::size_t index);
 
 namespace utils
 {
+BlockPos to_block(const ChunkPos& cpos);
 BlockPos to_block(const ChunkPos& cpos, const LocalPos& lpos);
 } // namespace utils
 

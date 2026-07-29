@@ -27,12 +27,17 @@
 static void generate_debug_terrain(void)
 {
     constexpr static ChunkPos::value_type CHUNK_RADIUS = 32;
-    constexpr static ChunkPos::value_type VERT_RADIUS = 4;
+    constexpr static ChunkPos::value_type VERT_RADIUS_SURFACE = 4;
+    constexpr static ChunkPos::value_type VERT_RADIUS_SKY = 5;
 
     for(ChunkPos::value_type cx = -CHUNK_RADIUS; cx <= CHUNK_RADIUS; cx += 1) {
         for(ChunkPos::value_type cz = -CHUNK_RADIUS; cz <= CHUNK_RADIUS; cz += 1) {
-            for(ChunkPos::value_type cy = -VERT_RADIUS; cy <= VERT_RADIUS; cy += 1) {
-                worldgen::request({ cx, 20 + cy, cz });
+            for(ChunkPos::value_type cy = -VERT_RADIUS_SURFACE; cy <= VERT_RADIUS_SURFACE; cy += 1) {
+                worldgen::request({ cx, cy, cz });
+            }
+
+            for(ChunkPos::value_type cy = -VERT_RADIUS_SKY; cy <= VERT_RADIUS_SKY; cy += 1) {
+                worldgen::request({ cx, 24 + cy, cz });
             }
         }
     }
@@ -47,7 +52,7 @@ void client_game::init(void)
 
 void client_game::init_late(void)
 {
-    globals::player = utils::spawn_player_client({ -8, 24, -8 });
+    globals::player = utils::spawn_player_client({ -8, 250, -8 });
 
     generate_debug_terrain();
 }
