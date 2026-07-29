@@ -27,15 +27,13 @@
 // VARIANT MACRO DECLARATIONS LAYOUT CHANGED AS WELL
 constexpr static unsigned FOG_MODEL = 0;
 
-// This value seems to be the best performing on a decent
-// hardware (cryptomined-to-shit RX 590); I tested multiple
-// values including 512, 1024, 2048 and 4096: framerate extrema
-// sits around 1024 and I didn't bother testing intermediate values...
-// Current measurements so far on the half-alive RX 590:
+// This value "won" the test of drawing 6080892 vertices in a single
+// frame for a decent hardware (cryptomined-to-shit RX 590); I tested multiple
+// values and the framerate extrema appears to sit around 1024:
 //  BATCH_MAX_PARTS     AVG. FPS
 //   512                84.792
 //  1024                92.376
-//  1280                89.142  <-- seems like a cache-missing case
+//  1280                89.142  <-- looks like a cache-miss
 //  2048                89.510
 //  4096                77.742
 constexpr static std::size_t BATCH_MAX_PARTS = 1024;
