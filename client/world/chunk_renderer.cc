@@ -45,9 +45,7 @@ static std::vector<GLint> s_md_basevertices;
 static std::vector<const void*> s_md_indices;
 
 static bool s_sorted_dirty;
-static std::vector<std::pair<entt::entity, float>> s_sorted_opaque;
-static std::vector<std::pair<entt::entity, float>> s_sorted_alpha;
-static std::vector<std::pair<entt::entity, float>> s_sorted_fluid;
+static std::vector<std::pair<entt::entity, float>> s_sorted_chunks;
 
 static ChunkPos s_last_camera_chunk;
 
@@ -102,43 +100,22 @@ static void update_sorted_chunks(void)
 {
     auto view = world::chunk_entities.view<Chunk_Component, ChunkMesh>();
 
-    s_sorted_opaque.clear();
-    s_sorted_opaque.reserve(view.size_hint());
+    s_sorted_chunks.clear();
+    s_sorted_chunks.reserve(view.size_hint());
 
     for(const auto [entity, chunk, mesh] : view.each()) {
-        if(mesh.opaque.count && mesh.opaque.vbo) {
-            s_sorted_opaque.push_back(std::make_pair(entity, chunk_distance_sq(entity)));
+        auto has_any = false;
+        has_any = has_any || mesh.opaque.count && mesh.opaque.vbo;
+        has_any = has_any || mesh.alpha.count && mesh.alpha.vbo;
+        has_any = has_any || mesh.fluid.count && mesh.fluid.vbo;
+
+        if(has_any) {
+            s_sorted_chunks.push_back(std::make_pair(entity, chunk_distance_sq(entity)));
         }
     }
 
-    std::sort(s_sorted_opaque.begin(), s_sorted_opaque.end(), [&](const auto& a, const auto& b) {
+    std::sort(s_sorted_chunks.begin(), s_sorted_chunks.end(), [](const auto& a, const auto& b) {
         return a.second < b.second;
-    });
-
-    s_sorted_alpha.clear();
-    s_sorted_alpha.reserve(view.size_hint());
-
-    for(const auto [entity, chunk, mesh] : view.each()) {
-        if(mesh.alpha.vbo && mesh.alpha.count) {
-            s_sorted_alpha.push_back(std::make_pair(entity, chunk_distance_sq(entity)));
-        }
-    }
-
-    std::sort(s_sorted_alpha.begin(), s_sorted_alpha.end(), [&](const auto& a, const auto& b) {
-        return a.second > b.second;
-    });
-
-    s_sorted_fluid.clear();
-    s_sorted_fluid.reserve(view.size_hint());
-
-    for(const auto [entity, chunk, mesh] : view.each()) {
-        if(mesh.fluid.vbo && mesh.fluid.count) {
-            s_sorted_fluid.push_back(std::make_pair(entity, chunk_distance_sq(entity)));
-        }
-    }
-
-    std::sort(s_sorted_fluid.begin(), s_sorted_fluid.end(), [&](const auto& a, const auto& b) {
-        return a.second > b.second;
     });
 }
 
@@ -199,9 +176,7 @@ void chunk_renderer::init(void)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quad_indices), quad_indices, GL_STATIC_DRAW);
 
     s_sorted_dirty = true;
-    s_sorted_opaque.clear();
-    s_sorted_alpha.clear();
-    s_sorted_fluid.clear();
+    s_sorted_chunks.clear();
 
     s_last_camera_chunk = camera::chunk + ChunkPos::Ones();
 
@@ -274,20 +249,20 @@ void chunk_renderer::render(void)
     glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_strips);
     glUniform1i(s_program.uniforms[su_AtlasStrips].location, 2);
 
-    if(s_sorted_opaque.size()) {
+    glBindVertexArray(s_vao);
+
+    if(s_sorted_chunks.size()) {
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glDisable(GL_BLEND);
 
-        glBindVertexArray(s_vao);
-
-        for(const auto& it : s_sorted_opaque) {
+        for(const auto& it : s_sorted_chunks) {
             const auto& mesh = world::chunk_entities.get<ChunkMesh>(it.first);
             const auto& chunk = world::chunk_entities.get<Chunk_Component>(it.first);
 
-            if(frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
+            if(mesh.opaque.count && mesh.opaque.vbo && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
                 draw_part(chunk, mesh.opaque);
 
                 globals::num_draw_calls += 1;
@@ -296,7 +271,7 @@ void chunk_renderer::render(void)
         }
     }
 
-    if(s_sorted_alpha.size()) {
+    if(s_sorted_chunks.size()) {
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
         glEnable(GL_CULL_FACE);
@@ -304,13 +279,11 @@ void chunk_renderer::render(void)
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        glBindVertexArray(s_vao);
+        for(auto it = s_sorted_chunks.rbegin(); it != s_sorted_chunks.rend(); it = std::next(it)) {
+            const auto& mesh = world::chunk_entities.get<ChunkMesh>(it->first);
+            const auto& chunk = world::chunk_entities.get<Chunk_Component>(it->first);
 
-        for(const auto& it : s_sorted_alpha) {
-            const auto& mesh = world::chunk_entities.get<ChunkMesh>(it.first);
-            const auto& chunk = world::chunk_entities.get<Chunk_Component>(it.first);
-
-            if(frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
+            if(mesh.alpha.count && mesh.alpha.vbo && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
                 draw_part(chunk, mesh.alpha);
 
                 globals::num_draw_calls += 1;
@@ -322,20 +295,18 @@ void chunk_renderer::render(void)
         glDisable(GL_BLEND);
     }
 
-    if(s_sorted_fluid.size()) {
+    if(s_sorted_chunks.size()) {
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        glBindVertexArray(s_vao);
+        for(auto it = s_sorted_chunks.rbegin(); it != s_sorted_chunks.rend(); it = std::next(it)) {
+            const auto& mesh = world::chunk_entities.get<ChunkMesh>(it->first);
+            const auto& chunk = world::chunk_entities.get<Chunk_Component>(it->first);
 
-        for(const auto& it : s_sorted_fluid) {
-            const auto& mesh = world::chunk_entities.get<ChunkMesh>(it.first);
-            const auto& chunk = world::chunk_entities.get<Chunk_Component>(it.first);
-
-            if(frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
+            if(mesh.fluid.count && mesh.fluid.vbo && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
                 draw_part(chunk, mesh.fluid);
 
                 globals::num_draw_calls += 1;
