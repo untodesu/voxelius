@@ -54,6 +54,8 @@
       if (slides.length < 2) return;
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+      slides[0].classList.remove("is-active");
+
       var last_index = Math.floor(Math.random() * slides.length);
       slides[last_index].classList.add("is-active");
 
