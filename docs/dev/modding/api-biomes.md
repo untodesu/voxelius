@@ -73,7 +73,8 @@ Scatter entries are evaluated in list order. If several entries pass the roll on
 |`chance`|`number`|no|0.5|Chance of a placement attempt per column|
 |`need_above`|`integer[]`|no|`{}`|List of `blocks.TAG_XXXX` constants. The block above the origin must have at least one listed tag|
 |`need_below`|`integer[]`|no|`{}`|List of `blocks.TAG_XXXX` constants. The origin block (surface) must have at least one listed tag|
-|`padding`|`integer`|no|0|Minimum block clearance between this feature's bounding box and another placement of the same scatter entry. Uses expanded-box separation: each box is grown by `padding` blocks before intersection is tested|
+|`padding`|`integer`|no|0|Minimum block clearance between this feature's bounding box and another placement in the same padding family. Uses expanded-box separation: the current box is grown by `padding` blocks before intersection is tested|
+|`group`|`string`|no|`""`|Padding family name. Entries with the same non-empty `group` share padding. Empty group pads only against the same scatter entry|
 
 ## Example
 

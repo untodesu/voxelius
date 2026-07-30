@@ -26,6 +26,7 @@ biomes.add("plains", {
       chance = 1.0 / 32.0,
       need_above = { blocks.TAG_GAS },
       need_below = { blocks.TAG_TURF },
+      group = "oak_tree",
       padding = 2,
     },
     {
@@ -33,6 +34,7 @@ biomes.add("plains", {
       chance = 1.0 / 32.0,
       need_above = { blocks.TAG_GAS },
       need_below = { blocks.TAG_TURF },
+      group = "oak_tree",
       padding = 2,
     },
     {
@@ -40,6 +42,7 @@ biomes.add("plains", {
       chance = 1.0 / 32.0,
       need_above = { blocks.TAG_GAS },
       need_below = { blocks.TAG_TURF },
+      group = "oak_tree",
       padding = 2,
     },
   },

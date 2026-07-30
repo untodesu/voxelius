@@ -146,6 +146,60 @@ static bool bounds_too_close(const BlockAlignedBox& a, const BlockAlignedBox& b,
     return expanded.intersects(b);
 }
 
+static bool same_group(const BiomeScatterEntry& a, const BiomeScatterEntry& b, std::size_t a_index, std::size_t b_index)
+{
+    if(a.group_hash) {
+        return a.group_hash == b.group_hash;
+    }
+
+    return a_index == b_index;
+}
+
+static const BiomeScatterEntry* find_group_winner(BlockPos::value_type bx, BlockPos::value_type bz, const PlacementContext& context,
+    const BiomeDefinition& biome, const BiomeScatterEntry& entry, std::size_t entry_index)
+{
+    const BiomeScatterEntry* winner = nullptr;
+
+    for(std::size_t i = 0; i < biome.scatter.size(); i += 1) {
+        const auto& candidate = biome.scatter[i];
+
+        if(!same_group(entry, candidate, entry_index, i)) {
+            continue;
+        }
+
+        if(!would_place(bx, bz, context, biome, candidate, i)) {
+            continue;
+        }
+
+        winner = &candidate;
+    }
+
+    return winner;
+}
+
+static BlockPos::value_type group_search_radius(const BiomeDefinition& biome, const BiomeScatterEntry& entry, std::size_t entry_index)
+{
+    auto search = static_cast<BlockPos::value_type>(entry.padding) + scatter_extent(*entry.cached);
+
+    for(std::size_t i = 0; i < biome.scatter.size(); i += 1) {
+        auto& candidate = biome.scatter[i];
+
+        if(candidate.cached == nullptr) {
+            continue;
+        }
+
+        if(!same_group(entry, candidate, entry_index, i)) {
+            continue;
+        }
+
+        auto candidate_search = static_cast<BlockPos::value_type>(candidate.padding);
+        candidate_search += scatter_extent(*candidate.cached);
+        search = std::max(search, candidate_search);
+    }
+
+    return search;
+}
+
 static bool resolve_padding_tie(BlockPos::value_type bx, BlockPos::value_type bz, const Column& column, const PlacementContext& context,
     const BiomeDefinition& biome, const BiomeScatterEntry& entry, std::size_t entry_index)
 {
@@ -156,7 +210,7 @@ static bool resolve_padding_tie(BlockPos::value_type bx, BlockPos::value_type bz
     auto& feature = *entry.cached;
     auto origin = BlockPos(bx, column.surface_y, bz);
     auto current_box = scatter_bounds(origin, feature, BLOCK_FACE_NORTH);
-    auto search = scatter_extent(feature) + entry.padding;
+    auto search = group_search_radius(biome, entry, entry_index);
 
     for(auto dx = -search; dx <= search; dx += 1) {
         for(auto dz = -search; dz <= search; dz += 1) {
@@ -167,7 +221,9 @@ static bool resolve_padding_tie(BlockPos::value_type bx, BlockPos::value_type bz
             auto ox = bx + dx;
             auto oz = bz + dz;
 
-            if(!would_place(ox, oz, context, biome, entry, entry_index)) {
+            auto neighbour_entry = find_group_winner(ox, oz, context, biome, entry, entry_index);
+
+            if(neighbour_entry == nullptr || neighbour_entry->cached == nullptr) {
                 continue;
             }
 
@@ -182,7 +238,7 @@ static bool resolve_padding_tie(BlockPos::value_type bx, BlockPos::value_type bz
             }
 
             auto neighbour_origin = BlockPos(ox, neighbour_column.surface_y, oz);
-            auto neighbour_bounds = scatter_bounds(neighbour_origin, feature, BLOCK_FACE_NORTH);
+            auto neighbour_bounds = scatter_bounds(neighbour_origin, *neighbour_entry->cached, BLOCK_FACE_NORTH);
 
             if(!bounds_too_close(current_box, neighbour_bounds, entry.padding)) {
                 continue;

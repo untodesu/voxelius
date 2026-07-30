@@ -87,6 +87,22 @@ static bool parse_scatter_entry(lua_State* L, int entry_idx, BiomeScatterEntry& 
 
     lua_pop(L, 1);
 
+    lua_getfield(L, entry_idx, "group");
+    auto group = utils::opt_string(L, -1, {});
+
+    if(!group.has_value()) {
+        return false;
+    }
+
+    if(group->empty()) {
+        entry.group_hash = 0;
+    }
+    else {
+        entry.group_hash = std::hash<std::string_view>()(*group);
+    }
+
+    lua_pop(L, 1);
+
     lua_getfield(L, entry_idx, "padding");
     auto padding = utils::opt_integer(L, -1, 0);
 
