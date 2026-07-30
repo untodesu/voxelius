@@ -15,7 +15,7 @@ blocks.add("oak_leaves", {
   tools = { blocks.TOOL_XBLADE },
 
   touch = blocks.TOUCH_SOLID,
-  tags = { blocks.TAG_FOIL },
+  tags = { blocks.TAG_SFOIL },
 
   emission = 0,
   dissipation = 14,

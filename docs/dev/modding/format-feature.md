@@ -41,7 +41,7 @@ Features are authored facing **north** (`blocks.FACE_NORTH`). Placement rules su
   {
     "block": 0,
     "offset": [0, 1, 0],
-    "overwrite": ["gas", "foil"]
+    "overwrite": ["gas", "xfoil"]
   }
 ]
 ```
@@ -60,5 +60,6 @@ Features are authored facing **north** (`blocks.FACE_NORTH`). Placement rules su
 |`"rock"`|`blocks.TAG_ROCK`|
 |`"soil"`|`blocks.TAG_SOIL`|
 |`"turf"`|`blocks.TAG_TURF`|
-|`"foil"`|`blocks.TAG_FOIL`|
+|`"xfoil"`|`blocks.TAG_XFOIL`|
+|`"sfoil"`|`blocks.TAG_SFOIL`|
 |`"wood"`|`blocks.TAG_WOOD`|

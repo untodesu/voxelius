@@ -21,8 +21,8 @@ DIRT = 0
 LOG = 1
 LEAVES = 2
 
-OVERWRITE_DIRT = ["turf", "foil"]
-OVERWRITE_WOOD = ["gas", "foil"]
+OVERWRITE_DIRT = ["turf", "xfoil"]
+OVERWRITE_WOOD = ["gas", "xfoil"]
 
 
 def part(block: int, x: int, y: int, z: int, overwrite: list[str]) -> dict:

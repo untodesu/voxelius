@@ -21,10 +21,11 @@ constexpr static float VARIATION_MAX = 96.0f;
 constexpr static float BASE_MIN = -24.0f;
 constexpr static float BASE_MAX = 16.0f;
 
-constexpr static float PV_VALLEY_OFFSET = -8.0f;
+constexpr static float PV_VALLEY_OFFSET = -32.0f;
 constexpr static float PV_PEAK_OFFSET = 12.0f;
 constexpr static float TERRAIN_DENSITY_PEAK = 0.385f;
 
+constexpr static BlockPos::value_type SEA_LEVEL = 0;
 constexpr static LocalPos::value_type CHUNK_SIZE_LP = static_cast<LocalPos::value_type>(constant::CHUNK_SIZE);
 
 static std::unique_ptr<NoiseCache3D_4x8x4> s_terrain;
@@ -71,7 +72,7 @@ static BlockPos::value_type column_liquid_y(BlockPos::value_type wx, BlockPos::v
 {
     auto liquid_y = Column::UNSET;
 
-    for(auto y = surface_y + 1; y < 0; y += 1) {
+    for(auto y = surface_y + 1; y < SEA_LEVEL; y += 1) {
         if(column_solid_pass_1(wx, y, wz, base, variation)) {
             break;
         }
@@ -167,23 +168,20 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
         auto y_relative = static_cast<float>(bpos.y()) - base;
         auto density_range = variation * TERRAIN_DENSITY_PEAK;
 
-        if(y_relative > density_range) {
-            continue;
-        }
+        auto solid = false;
 
         if(y_relative < -density_range) {
-            storage.set(i, palette_basic_array[index_xz]);
-            continue;
+            solid = true;
+        }
+        else if(y_relative <= density_range) {
+            solid = is_inside_terrain(terrain_array, lpos, y_relative, variation);
         }
 
-        if(is_inside_terrain(terrain_array, lpos, y_relative, variation)) {
+        if(solid) {
             storage.set(i, palette_basic_array[index_xz]);
-            continue;
         }
-
-        if(bpos.y() < 0) {
+        else if(bpos.y() < SEA_LEVEL) {
             storage.set(i, palette_fluid_array[index_xz]);
-            continue;
         }
     }
 
@@ -223,7 +221,7 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
                 auto y_relative_above = static_cast<float>(d_bpos.y()) - base;
 
                 if(!is_inside_terrain(d_bpos, y_relative_above, variation)) {
-                    underwater = dy == 0 && d_bpos.y() < 0;
+                    underwater = dy == 0 && d_bpos.y() < SEA_LEVEL;
                     break;
                 }
 

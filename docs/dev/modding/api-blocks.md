@@ -63,7 +63,8 @@ Freeform grouping tags checked at runtime with `blocks.has_tag`. Any block can c
 |`blocks.TAG_ROCK`|Stone-family block. Used by tools/worldgen that care about "is this rock"|
 |`blocks.TAG_SOIL`|Soil-type block. Dirt, mud, and similar go here|
 |`blocks.TAG_TURF`|Turf-type block. Grass and similar go here|
-|`blocks.TAG_FOIL`|Foliage, leaves, grass, etc|
+|`blocks.TAG_XFOIL`|Non-solid foliage: grass, bushes, etc|
+|`blocks.TAG_SFOIL`|Solid foliage: leaves, etc|
 |`blocks.TAG_WOOD`|Wooden blocks|
 
 ## Constants: schedule source

@@ -11,4 +11,6 @@ blocks.add("bush", {
   bcoll_name = "bush",
 
   replaceable = true,
+  
+  tags = { blocks.TAG_XFOIL }
 })

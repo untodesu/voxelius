@@ -13,7 +13,8 @@ constexpr static std::array BLOCK_TAG_MAPPING = {
     std::make_pair(std::string_view("rock"), static_cast<unsigned>(BLOCK_TAG_ROCK)),
     std::make_pair(std::string_view("soil"), static_cast<unsigned>(BLOCK_TAG_SOIL)),
     std::make_pair(std::string_view("turf"), static_cast<unsigned>(BLOCK_TAG_TURF)),
-    std::make_pair(std::string_view("foil"), static_cast<unsigned>(BLOCK_TAG_FOIL)),
+    std::make_pair(std::string_view("xfoil"), static_cast<unsigned>(BLOCK_TAG_XFOIL)),
+    std::make_pair(std::string_view("sfoil"), static_cast<unsigned>(BLOCK_TAG_SFOIL)),
     std::make_pair(std::string_view("wood"), static_cast<unsigned>(BLOCK_TAG_WOOD)),
 };
 

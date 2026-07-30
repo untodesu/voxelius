@@ -1167,8 +1167,10 @@ void api::open_blocks_library(std::shared_ptr<lua_State>& lua, ModContext* ctx)
     lua_setfield(L, -2, "TAG_SOIL");
     lua_pushinteger(L, BLOCK_TAG_TURF);
     lua_setfield(L, -2, "TAG_TURF");
-    lua_pushinteger(L, BLOCK_TAG_FOIL);
-    lua_setfield(L, -2, "TAG_FOIL");
+    lua_pushinteger(L, BLOCK_TAG_XFOIL);
+    lua_setfield(L, -2, "TAG_XFOIL");
+    lua_pushinteger(L, BLOCK_TAG_SFOIL);
+    lua_setfield(L, -2, "TAG_SFOIL");
     lua_pushinteger(L, BLOCK_TAG_WOOD);
     lua_setfield(L, -2, "TAG_WOOD");
 
