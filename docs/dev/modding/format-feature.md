@@ -1,26 +1,17 @@
 # Features
 
-A feature is a terrain generation primitive. It adds randomness to the world and can improve gameplay. Features can be assigned to biomes for random scatter. Placing features from scripts is planned.
+A feature is an atomic world-generation template: a palette of blocks and relative part offsets. Features are placed by the engine as scatter decorators (via `biome.scatter`) or as structure pieces (future). Placing features from scripts is planned.
 
 Stored features live under: `namespace:features`
+
+Features are authored facing **north** (`blocks.FACE_NORTH`). Placement rules supply world origin and facing at runtime.
 
 ## Top-level fields
 
 |Field|Type|Required|Default|Description|
 |----|----|----|----|----|
-|`anchor`|`string`|yes|N/D|Feature anchor|
 |`palette`|`object[]`|no|`[]`|Block palette to use|
 |`parts`|`object[]`|yes|N/D|Feature parts|
-
-### Anchor values
-
-Features have a starting point. That point must be anchored. The engine provides three anchor modes:
-
-|Name|Description|Image|
-|----|----|----|
-|`"surface"`|Feature origin is a surface block (eg. grass)|![](anchor-surface.png)|
-|`"ceiling"`|Feature origin is a ceiling block (eg. a cave ceiling)|![](anchor-ceiling.png)|
-|`"whatever"`|Feature is placed wherever the game decides is a good spot|![](anchor-whatever.png)|
 
 ## Palette entries
 
@@ -30,12 +21,6 @@ Features have a starting point. That point must be anchored. The engine provides
     "block": "builtin:stone_slab",
     "states": {
       "orientation": "bottom"
-    }
-  },
-  {
-    "block": "bultin:stone_slab",
-    "states": {
-      "orientation": "top"
     }
   },
   {

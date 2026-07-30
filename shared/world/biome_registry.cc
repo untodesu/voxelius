@@ -97,7 +97,7 @@ void biome_registry::resolve_features(void)
 {
     for(auto& def : s_definitions) {
         for(auto& entry : def.scatter) {
-            entry.cached = res::load<Feature>(entry.feature);
+            entry.cached = res::load<Feature>(entry.feature, "features", ".json");
         }
     }
 }

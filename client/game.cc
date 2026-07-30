@@ -52,7 +52,7 @@ void client_game::init(void)
 
 void client_game::init_late(void)
 {
-    globals::player = utils::spawn_player_client({ -8, 250, -8 });
+    globals::player = utils::spawn_player_client({ -8, 25, -8 });
 
     generate_debug_terrain();
 }

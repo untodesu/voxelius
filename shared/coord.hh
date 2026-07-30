@@ -9,6 +9,14 @@ using ChunkPosXZ = Eigen::Vector<std::int32_t, 2>;
 using BlockPosXZ = Eigen::Vector<std::int64_t, 2>;
 using LocalPosXZ = Eigen::Vector<std::int32_t, 2>;
 
+using ChunkAlignedBox = Eigen::AlignedBox<ChunkPos::value_type, 3>;
+using BlockAlignedBox = Eigen::AlignedBox<BlockPos::value_type, 3>;
+using LocalAlignedBox = Eigen::AlignedBox<LocalPos::value_type, 3>;
+
+using ChunkAlignedBoxXZ = Eigen::AlignedBox<ChunkPosXZ::value_type, 2>;
+using BlockAlignedBoxXZ = Eigen::AlignedBox<BlockPosXZ::value_type, 2>;
+using LocalAlignedBoxXZ = Eigen::AlignedBox<LocalPosXZ::value_type, 2>;
+
 template<>
 struct std::hash<ChunkPos> final {
     constexpr inline std::size_t operator()(const ChunkPos& pos) const

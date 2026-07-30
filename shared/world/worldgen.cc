@@ -8,6 +8,8 @@
 #include "shared/world/chunk.hh"
 #include "shared/world/climate_noise.hh"
 #include "shared/world/entropy_cache.hh"
+#include "shared/world/feature_placer.hh"
+#include "shared/world/feature_scatter.hh"
 #include "shared/world/heightmap.hh"
 #include "shared/world/realm_sky.hh"
 #include "shared/world/realm_surface.hh"
@@ -63,15 +65,24 @@ void worldgen::init(void)
 
     entropy_cache::init(seeder);
     climate_noise::init(seeder);
+
     realm_surface::init(seeder);
     realm_sky::init(seeder);
+
+    feature_placer::init();
+
+    FeatureScatter::init();
 }
 
 void worldgen::shutdown(void)
 {
+    feature_placer::shutdown();
+
     realm_sky::shutdown();
     realm_surface::shutdown();
+
     climate_noise::shutdown();
+    heightmap::purge();
     entropy_cache::shutdown();
 }
 

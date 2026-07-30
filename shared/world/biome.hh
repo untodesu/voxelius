@@ -25,6 +25,8 @@ struct BiomeScatterEntry final {
     float chance;
     block_tag_bit need_above;
     block_tag_bit need_below;
+    unsigned padding;
+
     res::handle<Feature> cached;
 };
 

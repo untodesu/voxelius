@@ -17,12 +17,6 @@ constexpr static std::array BLOCK_TAG_MAPPING = {
     std::make_pair(std::string_view("wood"), static_cast<unsigned>(BLOCK_TAG_WOOD)),
 };
 
-constexpr static std::array FEATURE_ANCHOR_MAPPING = {
-    std::make_pair(std::string_view("surface"), static_cast<unsigned>(feature_anchor::SURFACE)),
-    std::make_pair(std::string_view("ceiling"), static_cast<unsigned>(feature_anchor::CEILING)),
-    std::make_pair(std::string_view("whatever"), static_cast<unsigned>(feature_anchor::WHATEVER)),
-};
-
 static block_id_type parse_palette_entry(const JSON_Object* object)
 {
     auto id_raw = json_object_get_string(object, "block");
@@ -198,16 +192,7 @@ static const void* feature_load_fn(const char* path, std::uint32_t flags)
         return nullptr;
     }
 
-    auto anchor = utils::parse_enum<unsigned>(json, "anchor", FEATURE_ANCHOR_MAPPING);
-
-    if(!anchor.has_value()) {
-        LOG_WARNING("{}: invalid or missing anchor", path);
-        json_value_free(jsonv);
-        return nullptr;
-    }
-
     auto feature = new Feature {};
-    feature->anchor = static_cast<feature_anchor>(anchor.value());
     feature->parts = std::move(parts.value());
     feature->bounds = std::move(bounds);
     return feature;

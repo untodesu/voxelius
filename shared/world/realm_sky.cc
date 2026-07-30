@@ -7,8 +7,10 @@
 #include "shared/world/block_storage.hh"
 #include "shared/world/climate.hh"
 #include "shared/world/climate_noise.hh"
+#include "shared/world/feature_placer.hh"
 #include "shared/world/heightmap.hh"
 #include "shared/world/noise_cache_3D.hh"
+#include "shared/world/terrain.hh"
 
 constexpr static float BASE_CENTER_Y = 320.0f;
 constexpr static float MAX_Y_BIAS = 96.0f;
@@ -67,6 +69,21 @@ static bool is_inside_sky_terrain(const BlockPos& bpos, float continentalness, f
     }
 
     return is_inside_sky_terrain(s_density->get_slow(bpos), relative_y, density_bias);
+}
+
+static Column probe_column(BlockPos::value_type bx, BlockPos::value_type bz, float continentalness, float density_bias)
+{
+    for(auto y = terrain::SKY_MAX_Y; y >= terrain::SKY_MIN_Y; y -= 1) {
+        auto bpos = BlockPos(bx, y, bz);
+
+        if(is_inside_sky_terrain(bpos, continentalness, density_bias)) {
+            Column column {};
+            column.surface_y = y;
+            return column;
+        }
+    }
+
+    return {};
 }
 
 void realm_sky::init(std::mt19937_64& seeder)
@@ -197,22 +214,41 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
         }
     }
 
-    auto heights = heightmap::get(BIOME_REALM_SKY, chunk_xz);
+    feature_placer::commit(storage, pos, BIOME_REALM_SKY);
+}
 
-    for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
-        auto lpos = utils::to_local(i);
-        auto bpos = utils::to_block(pos, lpos);
-        auto index_xz = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
-        auto current = storage.get(i);
+ColumnSlice realm_sky::probe(const ChunkPosXZ& pos)
+{
+    thread_local std::array<float, constant::CHUNK_AREA> continentalness_array;
+    thread_local std::array<float, constant::CHUNK_AREA> density_bias_array;
 
-        if(current == BLOCK_ID_NULL || current == palette_fluid_array[index_xz]) {
-            continue;
-        }
+    continentalness_array.fill(0.0f);
+    density_bias_array.fill(0.0f);
 
-        if(bpos.y() > heights[index_xz]) {
-            heights[index_xz] = bpos.y();
+    ColumnSlice slice {};
+    auto climate_array = climate_noise::sample_array(pos);
+    auto origin_x = static_cast<BlockPos::value_type>(pos.x()) << constant::CHUNK_SIZE_LOG2;
+    auto origin_z = static_cast<BlockPos::value_type>(pos.y()) << constant::CHUNK_SIZE_LOG2;
+
+    for(std::size_t i = 0; i < constant::CHUNK_AREA; i += 1) {
+        auto& sample = climate_array[i];
+
+        auto cont = climate::normalize_01(sample.continentalness);
+        auto pv_norm = climate::normalize_01(climate::peaks_valleys(sample.weirdness));
+        auto ocean_factor = std::max(0.0f, 0.3f - cont) / 0.3f;
+        auto mountain_factor = std::max(0.0f, pv_norm - 0.65f) / 0.35f;
+
+        continentalness_array[i] = cont;
+        density_bias_array[i] = 0.08f * ocean_factor + 0.12f * mountain_factor;
+    }
+
+    for(LocalPos::value_type lz = 0; lz < constant::CHUNK_SIZE; lz += 1) {
+        for(LocalPos::value_type lx = 0; lx < constant::CHUNK_SIZE; lx += 1) {
+            auto index = static_cast<std::size_t>(lx + lz * constant::CHUNK_SIZE);
+            auto column = probe_column(origin_x + lx, origin_z + lz, continentalness_array[index], density_bias_array[index]);
+            slice[index] = std::move(column);
         }
     }
 
-    heightmap::update(BIOME_REALM_SKY, chunk_xz, heights);
+    return slice;
 }

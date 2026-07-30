@@ -10,6 +10,7 @@ dofile("blocks/grass.lua")
 dofile("blocks/sand.lua")
 dofile("blocks/sandstone.lua")
 dofile("blocks/stone.lua")
+dofile("blocks/wood_leaves.lua")
 dofile("blocks/wood_log.lua")
 dofile("blocks/wood_planks.lua")
 

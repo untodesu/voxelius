@@ -3,12 +3,6 @@
 
 #include "shared/world/block.hh"
 
-enum class feature_anchor {
-    SURFACE,
-    CEILING,
-    WHATEVER,
-};
-
 struct Feature_Part final {
     block_id_type block;
     Eigen::Vector3i offset;
@@ -18,7 +12,6 @@ struct Feature_Part final {
 struct Feature final {
     static void register_resource(void);
 
-    feature_anchor anchor;
     std::vector<Feature_Part> parts;
     Eigen::AlignedBox3i bounds;
 };

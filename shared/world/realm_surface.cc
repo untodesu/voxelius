@@ -10,6 +10,7 @@
 #include "shared/world/block_storage.hh"
 #include "shared/world/climate.hh"
 #include "shared/world/climate_noise.hh"
+#include "shared/world/feature_placer.hh"
 #include "shared/world/heightmap.hh"
 #include "shared/world/noise_cache_3D.hh"
 #include "shared/world/terrain.hh"
@@ -45,6 +46,54 @@ static bool is_inside_terrain(const BlockPos& bpos, float y_relative, float base
 {
     auto variation_noise = s_terrain->get_slow(bpos);
     return is_inside_terrain(variation_noise, y_relative, base_variation);
+}
+
+static bool column_solid_pass_1(BlockPos::value_type wx, BlockPos::value_type y, BlockPos::value_type wz, float base, float variation)
+{
+    auto y_relative = static_cast<float>(y) - base;
+    auto density_range = variation * TERRAIN_DENSITY_PEAK;
+
+    if(y_relative > density_range) {
+        return false;
+    }
+
+    if(y_relative < -density_range) {
+        return true;
+    }
+
+    auto bpos = BlockPos(wx, y, wz);
+
+    return is_inside_terrain(bpos, y_relative, variation);
+}
+
+static BlockPos::value_type column_liquid_y(BlockPos::value_type wx, BlockPos::value_type surface_y, BlockPos::value_type wz, float base,
+    float variation)
+{
+    auto liquid_y = Column::UNSET;
+
+    for(auto y = surface_y + 1; y < 0; y += 1) {
+        if(column_solid_pass_1(wx, y, wz, base, variation)) {
+            break;
+        }
+
+        liquid_y = y;
+    }
+
+    return liquid_y;
+}
+
+static Column probe_column(BlockPos::value_type bx, BlockPos::value_type bz, float base, float variation)
+{
+    for(auto y = terrain::SURFACE_MAX_Y; y >= terrain::SURFACE_MIN_Y; y -= 1) {
+        if(column_solid_pass_1(bx, y, bz, base, variation)) {
+            Column column {};
+            column.surface_y = y;
+            column.liquid_y = column_liquid_y(bx, y, bz, base, variation);
+            return column;
+        }
+    }
+
+    return {};
 }
 
 void realm_surface::init(std::mt19937_64& seeder)
@@ -202,22 +251,41 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
         }
     }
 
-    auto heights = heightmap::get(BIOME_REALM_SURFACE, cpos_xz);
+    feature_placer::commit(storage, pos, BIOME_REALM_SURFACE);
+}
 
-    for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
-        auto lpos = utils::to_local(i);
-        auto bpos = utils::to_block(pos, lpos);
-        auto index_xz = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
-        auto current = storage.get(i);
+ColumnSlice realm_surface::probe(const ChunkPosXZ& pos)
+{
+    thread_local std::array<float, constant::CHUNK_AREA> variation_array;
+    thread_local std::array<float, constant::CHUNK_AREA> base_array;
 
-        if(current == BLOCK_ID_NULL || current == palette_fluid_array[index_xz]) {
-            continue;
-        }
+    variation_array.fill(VARIATION_MIN);
+    base_array.fill(BASE_MIN);
 
-        if(bpos.y() > heights[index_xz]) {
-            heights[index_xz] = bpos.y();
+    ColumnSlice slice {};
+    auto climate_array = climate_noise::sample_array(pos);
+    auto origin_x = static_cast<BlockPos::value_type>(pos.x()) << constant::CHUNK_SIZE_LOG2;
+    auto origin_z = static_cast<BlockPos::value_type>(pos.y()) << constant::CHUNK_SIZE_LOG2;
+
+    for(std::size_t i = 0; i < constant::CHUNK_AREA; i += 1) {
+        auto& sample = climate_array[i];
+
+        auto continentalness = climate::normalize_01(sample.continentalness);
+        auto erosion = climate::normalize_01(sample.erosion);
+        auto pv = climate::peaks_valleys(sample.weirdness);
+
+        variation_array[i] = std::lerp(VARIATION_MAX, VARIATION_MIN, erosion);
+        base_array[i] = std::lerp(BASE_MIN, BASE_MAX, continentalness);
+        base_array[i] += std::lerp(PV_VALLEY_OFFSET, PV_PEAK_OFFSET, climate::normalize_01(pv));
+    }
+
+    for(LocalPos::value_type lz = 0; lz < constant::CHUNK_SIZE; lz += 1) {
+        for(LocalPos::value_type lx = 0; lx < constant::CHUNK_SIZE; lx += 1) {
+            auto index = static_cast<std::size_t>(lx + lz * constant::CHUNK_SIZE);
+            auto column = probe_column(origin_x + lx, origin_z + lz, base_array[index], variation_array[index]);
+            slice[index] = std::move(column);
         }
     }
 
-    heightmap::update(BIOME_REALM_SURFACE, cpos_xz, heights);
+    return slice;
 }
