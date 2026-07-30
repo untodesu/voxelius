@@ -1,4 +1,3 @@
-/* Press Start 2P: brand wordmark only. font-display:optional avoids FOUT. */
 @font-face {
   font-family: "Press Start 2P";
   font-style: normal;
@@ -57,9 +56,16 @@
   margin-top: 0;
 }
 
-.md-sidebar--primary,
-.md-sidebar--secondary {
-  display: none;
+@media screen and (min-width: 76.25em) {
+  .md-sidebar--primary {
+    display: none;
+  }
+}
+
+@media screen and (min-width: 60em) {
+  .md-sidebar--secondary {
+    display: none;
+  }
 }
 
 .md-content {
