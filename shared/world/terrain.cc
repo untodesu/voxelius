@@ -18,6 +18,8 @@ bool terrain::generate(const ChunkPos& pos, BlockStorage& storage)
     auto generated = false;
     auto vertical = pos.y();
 
+    storage.fill(BLOCK_ID_NULL);
+
     if(check_range(vertical, SURFACE_MIN_CHUNK_Y, SURFACE_MAX_CHUNK_Y)) {
         realm_surface::generate(storage, pos);
         generated = true;
@@ -28,6 +30,8 @@ bool terrain::generate(const ChunkPos& pos, BlockStorage& storage)
     }
 
     // TODO: if generated, carve caves
+
+    storage.optimize();
 
     return generated;
 }

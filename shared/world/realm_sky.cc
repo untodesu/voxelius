@@ -101,7 +101,6 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
     palette_fluid_array.fill(BLOCK_ID_NULL);
     continentalness_array.fill(0.0f);
     density_bias_array.fill(0.0f);
-    storage.fill(BLOCK_ID_NULL);
 
     auto chunk_y_min = static_cast<float>(pos.y()) * static_cast<float>(constant::CHUNK_SIZE);
     auto chunk_y_max = chunk_y_min + static_cast<float>(constant::CHUNK_SIZE - 1);
@@ -197,8 +196,6 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
             }
         }
     }
-
-    storage.optimize();
 
     auto heights = heightmap::get(BIOME_REALM_SKY, chunk_xz);
 

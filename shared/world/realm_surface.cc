@@ -79,7 +79,6 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
     palette_fluid_array.fill(BLOCK_ID_NULL);
     variation_array.fill(VARIATION_MIN);
     base_array.fill(BASE_MIN);
-    storage.fill(BLOCK_ID_NULL);
 
     auto cpos_xz = ChunkPosXZ(pos.x(), pos.z());
     auto climate_array = climate_noise::sample_array(cpos_xz);
@@ -202,8 +201,6 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
             }
         }
     }
-
-    storage.optimize();
 
     auto heights = heightmap::get(BIOME_REALM_SURFACE, cpos_xz);
 
