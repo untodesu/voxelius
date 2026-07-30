@@ -42,12 +42,5 @@ biomes.add("plains", {
       need_below = { blocks.TAG_TURF },
       padding = 2,
     },
-    {
-      feature = "oak_tree_04",
-      chance = 1.0 / 32.0,
-      need_above = { blocks.TAG_GAS },
-      need_below = { blocks.TAG_TURF },
-      padding = 2,
-    },
   },
 })

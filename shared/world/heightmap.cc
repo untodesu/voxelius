@@ -9,10 +9,15 @@
 
 constexpr static std::size_t REALM_COUNT = static_cast<std::size_t>(BIOME_REALM_COUNT);
 
-static std::mutex s_mutex;
-static std::array<emhash8::HashMap<ChunkPosXZ, ColumnSlice>, REALM_COUNT> s_cache;
+struct HeightmapEntry final {
+    std::once_flag init_flag;
+    ColumnSlice data;
+};
 
-static ColumnSlice init_slice(biome_realm realm, const ChunkPosXZ& pos)
+static std::mutex s_mutex;
+static std::array<emhash8::HashMap<ChunkPosXZ, std::shared_ptr<HeightmapEntry>>, REALM_COUNT> s_cache;
+
+static ColumnSlice generate_slice(biome_realm realm, const ChunkPosXZ& pos)
 {
     switch(realm) {
         case BIOME_REALM_SURFACE:
@@ -25,7 +30,7 @@ static ColumnSlice init_slice(biome_realm realm, const ChunkPosXZ& pos)
     return {};
 }
 
-static const ColumnSlice* find_cached(biome_realm realm, const ChunkPosXZ& pos)
+static std::shared_ptr<HeightmapEntry> get_or_create(biome_realm realm, const ChunkPosXZ& pos)
 {
     std::scoped_lock lock(s_mutex);
 
@@ -35,23 +40,13 @@ static const ColumnSlice* find_cached(biome_realm realm, const ChunkPosXZ& pos)
     auto& cache = s_cache.at(index);
     auto it = cache.find(pos);
 
-    if(it == cache.cend()) {
-        return nullptr;
+    if(it == cache.end()) {
+        auto entry = std::make_shared<HeightmapEntry>();
+        cache[pos] = entry;
+        return entry;
     }
 
-    return &it->second;
-}
-
-static const ColumnSlice* insert_cached(biome_realm realm, const ChunkPosXZ& pos, ColumnSlice slice)
-{
-    std::scoped_lock lock(s_mutex);
-
-    auto index = static_cast<std::size_t>(realm);
-    assert(index < REALM_COUNT);
-
-    auto& cache = s_cache.at(index);
-    auto it = cache.insert_or_assign(pos, std::move(slice));
-    return &it.first->second;
+    return it->second;
 }
 
 void heightmap::purge(void)
@@ -63,37 +58,28 @@ void heightmap::purge(void)
     }
 }
 
+const ColumnSlice& heightmap::probe(biome_realm realm, const ChunkPosXZ& pos)
+{
+    auto entry = get_or_create(realm, pos);
+
+    std::call_once(entry->init_flag, [realm, pos, entry] {
+        entry->data = generate_slice(realm, pos);
+    });
+
+    return entry->data;
+}
+
 const Column& heightmap::probe_slow(biome_realm realm, const BlockPosXZ& pos)
 {
     ChunkPosXZ cpos;
     cpos[0] = static_cast<ChunkPosXZ::value_type>(pos[0] >> constant::CHUNK_SIZE_LOG2);
     cpos[1] = static_cast<ChunkPosXZ::value_type>(pos[1] >> constant::CHUNK_SIZE_LOG2);
 
-    auto cached = find_cached(realm, cpos);
-
-    if(cached == nullptr) {
-        auto slice = init_slice(realm, cpos);
-        cached = insert_cached(realm, cpos, std::move(slice));
-        assert(cached);
-    }
-
     LocalPosXZ lpos;
     lpos[0] = static_cast<LocalPosXZ::value_type>(utils::mod_signed<BlockPosXZ::value_type>(pos[0], constant::CHUNK_SIZE));
     lpos[1] = static_cast<LocalPosXZ::value_type>(utils::mod_signed<BlockPosXZ::value_type>(pos[1], constant::CHUNK_SIZE));
 
     auto index = static_cast<std::size_t>(lpos[0] + lpos[1] * constant::CHUNK_SIZE);
-    return cached->at(index);
-}
-
-const ColumnSlice& heightmap::probe(biome_realm realm, const ChunkPosXZ& pos)
-{
-    auto cached = find_cached(realm, pos);
-
-    if(cached == nullptr) {
-        auto slice = init_slice(realm, pos);
-        cached = insert_cached(realm, pos, std::move(slice));
-        assert(cached);
-    }
-
-    return *cached;
+    auto& slice = probe(realm, cpos);
+    return slice[index];
 }
