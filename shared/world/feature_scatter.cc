@@ -86,6 +86,32 @@ static bool can_place(const PlacementContext& context, const BlockPos& origin, c
     return true;
 }
 
+static bool check_footprint(biome_realm realm, BlockPos::value_type bx, BlockPos::value_type bz, const Feature& feature, unsigned edge,
+    const BiomeDefinition* biome)
+{
+    auto& bounds = feature.bounds;
+    auto pad = static_cast<int>(edge);
+
+    auto min_x = bounds.min().x() - pad;
+    auto max_x = bounds.max().x() + pad;
+    auto min_z = bounds.min().z() - pad;
+    auto max_z = bounds.max().z() + pad;
+
+    for(auto dz = min_z; dz <= max_z; dz += 1) {
+        for(auto dx = min_x; dx <= max_x; dx += 1) {
+            BlockPosXZ sample_pos;
+            sample_pos[0] = bx + dx;
+            sample_pos[1] = bz + dz;
+
+            if(biome == climate::find(realm, climate_noise::sample_block(sample_pos)))
+                continue;
+            return false;
+        }
+    }
+
+    return true;
+}
+
 static bool would_place(BlockPos::value_type bx, BlockPos::value_type bz, const PlacementContext& context, const BiomeDefinition& biome,
     const BiomeScatterEntry& entry, std::size_t entry_index)
 {
@@ -113,7 +139,12 @@ static bool would_place(BlockPos::value_type bx, BlockPos::value_type bz, const 
 
     auto& column = heightmap::probe_slow(context.realm, sample_xz);
     auto position = BlockPos(bx, column.surface_y, bz);
-    return can_place(context, position, biome, entry, column);
+
+    if(!can_place(context, position, biome, entry, column)) {
+        return false;
+    }
+
+    return check_footprint(context.realm, bx, bz, *entry.cached, entry.edge, &biome);
 }
 
 static BlockAlignedBox scatter_bounds(const BlockPos& origin, const Feature& feature, block_face facing)

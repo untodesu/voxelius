@@ -41,14 +41,17 @@ static bool check_intersection(const FeatureInstance& instance, const ChunkPos& 
     chunk_bounds.max() = Eigen::Vector3i::Constant(constant::CHUNK_SIZE - 1);
 
     BlockAlignedBox block_bounds;
-    block_bounds.min() = instance.origin.cast<BlockPos::value_type>() + bounds.min().cast<BlockPos::value_type>();
-    block_bounds.max() = instance.origin.cast<BlockPos::value_type>() + bounds.max().cast<BlockPos::value_type>();
+    block_bounds.min() = instance.origin + bounds.min().cast<BlockPos::value_type>();
+    block_bounds.max() = instance.origin + bounds.max().cast<BlockPos::value_type>();
 
-    LocalAlignedBox local_bounds;
-    local_bounds.min() = block_bounds.min().cast<LocalPos::value_type>() - chunk_origin.cast<LocalPos::value_type>();
-    local_bounds.max() = block_bounds.max().cast<LocalPos::value_type>() - chunk_origin.cast<LocalPos::value_type>();
+    auto local_min = block_bounds.min() - chunk_origin;
+    auto local_max = block_bounds.max() - chunk_origin;
 
-    return chunk_bounds.intersects(local_bounds.cast<Eigen::Vector3i::value_type>());
+    Eigen::AlignedBox3i local_bounds;
+    local_bounds.min() = local_min.cast<Eigen::Vector3i::Scalar>();
+    local_bounds.max() = local_max.cast<Eigen::Vector3i::Scalar>();
+
+    return chunk_bounds.intersects(local_bounds);
 }
 
 static void collect_candidates(const ChunkPos& cpos, biome_realm realm, const BlockStorage& storage, std::vector<FeatureInstance>& out)
@@ -135,7 +138,7 @@ void feature_placer::init(void)
             Eigen::Vector2i max_xz = Eigen::Vector2i(bounds.max().x(), bounds.max().z());
             auto horizontal = std::max(min_xz.cwiseAbs().maxCoeff(), max_xz.cwiseAbs().maxCoeff());
 
-            s_max_extent = std::max(s_max_extent, entry.padding + static_cast<std::size_t>(horizontal));
+            s_max_extent = std::max(s_max_extent, entry.padding + entry.edge + static_cast<std::size_t>(horizontal));
         }
     }
 }

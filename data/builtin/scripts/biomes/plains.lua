@@ -23,7 +23,7 @@ biomes.add("plains", {
     },
     {
       feature = "oak_tree_01",
-      chance = 1.0 / 32.0,
+      chance = 1.0 / 4096.0,
       need_above = { blocks.TAG_GAS },
       need_below = { blocks.TAG_TURF },
       group = "oak_tree",
@@ -31,7 +31,7 @@ biomes.add("plains", {
     },
     {
       feature = "oak_tree_02",
-      chance = 1.0 / 32.0,
+      chance = 1.0 / 4096.0,
       need_above = { blocks.TAG_GAS },
       need_below = { blocks.TAG_TURF },
       group = "oak_tree",
@@ -39,7 +39,7 @@ biomes.add("plains", {
     },
     {
       feature = "oak_tree_03",
-      chance = 1.0 / 32.0,
+      chance = 1.0 / 4096.0,
       need_above = { blocks.TAG_GAS },
       need_below = { blocks.TAG_TURF },
       group = "oak_tree",

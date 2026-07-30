@@ -75,6 +75,7 @@ Scatter entries are evaluated in list order. If several entries pass the roll on
 |`need_below`|`integer[]`|no|`{}`|List of `blocks.TAG_XXXX` constants. The origin block (surface) must have at least one listed tag|
 |`padding`|`integer`|no|0|Minimum block clearance between this feature's bounding box and another placement in the same padding family. Uses expanded-box separation: the current box is grown by `padding` blocks before intersection is tested|
 |`group`|`string`|no|`""`|Padding family name. Entries with the same non-empty `group` share padding. Empty group pads only against the same scatter entry|
+|`edge`|`integer`|no|0|Extra blocks beyond the feature's XZ bounds that must still belong to the same biome. The feature AABB footprint is always checked; `edge` grows that check so large decorations keep clear of biome borders|
 
 ## Example
 

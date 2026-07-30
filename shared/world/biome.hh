@@ -27,6 +27,7 @@ struct BiomeScatterEntry final {
     block_tag_bit need_below;
     std::size_t group_hash;
     unsigned padding;
+    unsigned edge;
 
     res::handle<Feature> cached;
 };

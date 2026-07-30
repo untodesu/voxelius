@@ -106,11 +106,22 @@ static bool parse_scatter_entry(lua_State* L, int entry_idx, BiomeScatterEntry& 
     lua_getfield(L, entry_idx, "padding");
     auto padding = utils::opt_integer(L, -1, 0);
 
-    if(!padding.has_value()) {
+    if(!padding.has_value() || padding.value() < 0) {
         return false;
     }
 
     entry.padding = static_cast<unsigned>(padding.value());
+
+    lua_pop(L, 1);
+
+    lua_getfield(L, entry_idx, "edge");
+    auto edge = utils::opt_integer(L, -1, 0);
+
+    if(!edge.has_value() || edge.value() < 0) {
+        return false;
+    }
+
+    entry.edge = static_cast<unsigned>(edge.value());
 
     lua_pop(L, 1);
 
