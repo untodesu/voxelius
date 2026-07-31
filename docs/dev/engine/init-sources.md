@@ -11,7 +11,7 @@
 |`data`|Content packed with release executables. At least the `builtin` mod. More may appear later if people contribute|
 |`deps`|Third-party dependencies|
 |`docs`|Website sources, including documentation and a devlog|
-|`scripts`|Build-system scripts|
+|`scripts`|Useful scripts to be used during build and elsewhere|
 |`server`|Server executable sources|
 |`shared`|Shared game library. Most game logic, networking, and other client/server shared code|
 

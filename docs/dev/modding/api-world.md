@@ -123,6 +123,8 @@ Season, weather, and other factors can change this. Relatively low values (below
 
 Schedule an `on_tick` call for a block in `dt` ticks. The tick source is `blocks.TICK_SCRIPTED`.
 
+#### Arguments
+
 - `bx` is the world-scale block X position
 - `by` is the world-scale block Y position
 - `bz` is the world-scale block Z position

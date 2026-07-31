@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(Voxelius LANGUAGES C CXX VERSION 17.0.0)
 
-option(ENABLE_PROFILING "Enable profiling" ON)
+option(ENABLE_PROFILING "Enable profiling" OFF)
 
 option(BUILD_CLIENT "Build game client" ON)
 option(BUILD_SERVER "Build game server" ON)

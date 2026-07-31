@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 """
-This is vibecoded, here be dragons
+This is vibecoded, here be dragons. Well, not exactly vibecoded. The old
+tree generator was written in C++ and was inside overworld.cc generator and
+since we're currently only have one world type and features are now stored as
+JSON files, the generator's code has been forward-ported by an LLM into a script
 
 Generate tree feature JSON from the classic stem + canopy layout.
-
-Ports the old compute_tree_feature C++ helper into the feature JSON format
-used under data/*/features/. Local Y is shifted by +1 so dirt sits at the
-placement origin [0, 0, 0] (matching oak_tree.json).
 """
 
 from __future__ import annotations
