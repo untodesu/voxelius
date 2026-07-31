@@ -56,6 +56,7 @@ private:
 namespace world
 {
 extern emhash8::HashMap<ChunkPos, std::shared_ptr<Chunk>> chunks;
+extern std::array<emhash8::HashMap<ChunkPosXZ, std::shared_ptr<BiomeStorage>>, NUM_BIOME_REALMS> biomes;
 extern entt::registry basic_entities;
 extern entt::registry chunk_entities;
 extern std::uint64_t current_tick;
@@ -119,14 +120,26 @@ std::int32_t get_temperature(const BlockPos& pos);
 
 namespace world
 {
+biome_id_type get_biome(const ChunkPos& cpos, const LocalPos& lpos);
+biome_id_type get_biome(const BlockPos& pos);
+} // namespace world
+
+namespace world
+{
 void schedule(const ChunkPos& cpos, const LocalPos& lpos, std::uint64_t deadline, block_tick_source source);
 void schedule(const BlockPos& pos, std::uint64_t deadline, block_tick_source source);
 } // namespace world
 
 namespace world
 {
+void init(void);
 void shutdown(void);
 void fixed_update(void);
+} // namespace world
+
+namespace world
+{
+void purge(void);
 } // namespace world
 
 constexpr const std::shared_ptr<Chunk>& ChunkCreateEvent::chunk(void) const

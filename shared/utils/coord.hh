@@ -6,23 +6,29 @@
 namespace utils
 {
 ChunkPos to_chunk(const BlockPos& bpos);
+ChunkPosXZ to_chunk_xz(const BlockPosXZ& bpos);
 } // namespace utils
 
 namespace utils
 {
 LocalPos to_local(const BlockPos& bpos);
 LocalPos to_local(std::size_t index);
+LocalPosXZ to_local_xz(const BlockPosXZ& bpos);
+LocalPosXZ to_local_xz(std::size_t index);
 } // namespace utils
 
 namespace utils
 {
 BlockPos to_block(const ChunkPos& cpos);
 BlockPos to_block(const ChunkPos& cpos, const LocalPos& lpos);
+BlockPosXZ to_block_xz(const ChunkPosXZ& cpos);
+BlockPosXZ to_block_xz(const ChunkPosXZ& cpos, const LocalPosXZ& lpos);
 } // namespace utils
 
 namespace utils
 {
 std::size_t to_index(const LocalPos& lpos);
+std::size_t to_index_xz(const LocalPosXZ& lpos);
 } // namespace utils
 
 namespace utils
@@ -42,6 +48,7 @@ Eigen::Vector3f to_fvec(const ChunkPos& cpos, const Eigen::Vector3f& offset);
 namespace utils
 {
 LocalPos wrap_local(const LocalPos& lpos);
+LocalPosXZ wrap_local_xz(const LocalPosXZ& lpos);
 } // namespace utils
 
 #endif /* B1F3492F_30A1_43E0_BD73_F36814AF8F72 */

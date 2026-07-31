@@ -1,17 +1,15 @@
 #ifndef EE0E3E20_655A_4D1C_89FB_25C924073EAC
 #define EE0E3E20_655A_4D1C_89FB_25C924073EAC
 
-#include "shared/world/biome.hh"
+#include "shared/world/biome_storage.hh"
 #include "shared/world/block_storage.hh"
 
 class Chunk final {
 public:
-    using biomes_array_type = std::array<biome_id_type, constant::CHUNK_AREA>;
-
-    explicit Chunk(entt::entity entity);
-
     static void serialize(const Chunk& chunk, WriteBuffer& buffer);
     static void deserialize(Chunk& chunk, ReadBuffer& buffer);
+
+    explicit Chunk(entt::entity entity, std::shared_ptr<BiomeStorage> biomes);
 
     block_id_type get_block(std::size_t index) const;
     block_id_type get_block(const LocalPos& pos) const;
@@ -19,16 +17,10 @@ public:
     void set_block(std::size_t index, block_id_type id);
     void set_block(const LocalPos& pos, block_id_type id);
 
-    biome_id_type get_biome(std::size_t index) const;
-    biome_id_type get_biome(const LocalPosXZ& pos) const;
-
     constexpr entt::entity entity(void) const;
-
     constexpr const BlockStorage& blocks(void) const;
+    constexpr const std::shared_ptr<BiomeStorage>& biomes(void) const;
     void set_blocks(BlockStorage blocks);
-
-    constexpr const biomes_array_type& biomes(void) const;
-    void set_biomes(biomes_array_type biomes);
 
     void schedule(std::size_t index, std::uint64_t deadline, block_tick_source source);
     void pop_due(std::uint64_t now, std::vector<std::pair<std::size_t, block_tick_source>>& out);
@@ -36,7 +28,7 @@ public:
 private:
     entt::entity m_entity;
     BlockStorage m_blocks;
-    biomes_array_type m_biomes;
+    std::shared_ptr<BiomeStorage> m_biomes;
     std::multimap<std::uint64_t, std::pair<std::size_t, block_tick_source>> m_scheduled;
 };
 
@@ -55,7 +47,7 @@ constexpr const BlockStorage& Chunk::blocks(void) const
     return m_blocks;
 }
 
-constexpr const Chunk::biomes_array_type& Chunk::biomes(void) const
+constexpr const std::shared_ptr<BiomeStorage>& Chunk::biomes(void) const
 {
     return m_biomes;
 }

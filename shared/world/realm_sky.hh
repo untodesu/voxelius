@@ -2,9 +2,9 @@
 #define CDF3046F_AD1A_4954_8B4A_00B7AFB2A2B0
 
 #include "shared/coord.hh"
+#include "shared/world/biome_storage.hh"
+#include "shared/world/block_storage.hh"
 #include "shared/world/heightmap.hh"
-
-class BlockStorage;
 
 namespace realm_sky
 {
@@ -14,7 +14,7 @@ void shutdown(void);
 
 namespace realm_sky
 {
-void generate(BlockStorage& storage, const ChunkPos& pos);
+void generate(BlockStorage& blocks, BiomeStorage::array_type& biomes, const ChunkPos& pos);
 } // namespace realm_sky
 
 namespace realm_sky

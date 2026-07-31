@@ -27,6 +27,7 @@ public:
 
 private:
     BlockStorage m_blocks;
+    BiomeStorage::array_type m_biomes;
     ChunkPos m_pos;
 };
 
@@ -39,7 +40,7 @@ void WorldgenTask::process(void)
 {
     ZoneScopedN("worldgen::process");
 
-    if(!terrain::generate(m_pos, m_blocks)) {
+    if(!terrain::generate(m_pos, m_blocks, m_biomes)) {
         status.store(task_status::CANCELLED, std::memory_order_release);
     }
 }
@@ -49,7 +50,15 @@ void WorldgenTask::finalize(void)
     ZoneScopedN("worldgen::finalize");
 
     auto chunk = world::create_chunk(m_pos);
+    auto& biomes = chunk->biomes();
+
     chunk->set_blocks(std::move(m_blocks));
+
+    // Biome lookups are immutable per realm column
+    // so it makes sense to only submit this data once
+    std::call_once(biomes->initialized(), [&] {
+        biomes->set_biomes(std::move(m_biomes));
+    });
 
     s_pending.erase(m_pos);
 

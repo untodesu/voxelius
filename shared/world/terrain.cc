@@ -3,35 +3,33 @@
 #include "shared/world/terrain.hh"
 
 #include "shared/constant.hh"
-#include "shared/utils/coord.hh"
-#include "shared/world/block_storage.hh"
+#include "shared/utils/biome.hh"
 #include "shared/world/realm_sky.hh"
 #include "shared/world/realm_surface.hh"
 
-static bool check_range(ChunkPos::value_type y, ChunkPos::value_type min, ChunkPos::value_type max)
+bool terrain::generate(const ChunkPos& pos, BlockStorage& blocks, BiomeStorage::array_type& biomes)
 {
-    return y >= min && y <= max;
-}
-
-bool terrain::generate(const ChunkPos& pos, BlockStorage& storage)
-{
+    auto realm = utils::realm_from_chunk(pos.y());
     auto generated = false;
-    auto vertical = pos.y();
 
-    storage.fill(BLOCK_ID_NULL);
+    blocks.fill(BLOCK_ID_NULL);
+    biomes.fill(BIOME_ID_NULL);
 
-    if(check_range(vertical, SURFACE_MIN_CHUNK_Y, SURFACE_MAX_CHUNK_Y)) {
-        realm_surface::generate(storage, pos);
-        generated = true;
-    }
-    else if(check_range(vertical, SKY_MIN_CHUNK_Y, SKY_MAX_CHUNK_Y)) {
-        realm_sky::generate(storage, pos);
-        generated = true;
+    switch(realm) {
+        case BIOME_REALM_SURFACE:
+            realm_surface::generate(blocks, biomes, pos);
+            generated = true;
+            break;
+
+        case BIOME_REALM_SKY:
+            realm_sky::generate(blocks, biomes, pos);
+            generated = true;
+            break;
     }
 
     // TODO: if generated, carve caves
 
-    storage.optimize();
+    blocks.optimize();
 
     return generated;
 }

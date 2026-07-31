@@ -4,7 +4,7 @@
 
 #include "shared/constant.hh"
 #include "shared/utils/coord.hh"
-#include "shared/world/block_storage.hh"
+#include "shared/world/biome_registry.hh"
 #include "shared/world/climate.hh"
 #include "shared/world/climate_noise.hh"
 #include "shared/world/feature_placer.hh"
@@ -73,7 +73,7 @@ static bool is_inside_sky_terrain(const BlockPos& bpos, float continentalness, f
 
 static Column probe_column(BlockPos::value_type bx, BlockPos::value_type bz, float continentalness, float density_bias)
 {
-    for(auto y = terrain::SKY_MAX_Y; y >= terrain::SKY_MIN_Y; y -= 1) {
+    for(auto y = constant::SKY_MAX_Y; y >= constant::SKY_MIN_Y; y -= 1) {
         auto bpos = BlockPos(bx, y, bz);
 
         if(is_inside_sky_terrain(bpos, continentalness, density_bias)) {
@@ -103,7 +103,7 @@ void realm_sky::shutdown(void)
     s_density.reset();
 }
 
-void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
+void realm_sky::generate(BlockStorage& blocks, BiomeStorage::array_type& biomes, const ChunkPos& pos)
 {
     thread_local std::array<block_id_type, constant::CHUNK_AREA> palette_basic_array;
     thread_local std::array<block_id_type, constant::CHUNK_AREA> palette_filler_array;
@@ -130,15 +130,16 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
     auto climate_array = climate_noise::sample_array(chunk_xz);
 
     for(std::size_t i = 0; i < constant::CHUNK_AREA; ++i) {
-        auto lpos = utils::to_local(i);
-        auto bpos = utils::to_block(pos, lpos);
         auto& sample = climate_array[i];
+        auto biome = climate::find(BIOME_REALM_SKY, sample);
+        auto biome_def = biome_registry::find_definition(biome);
 
-        if(auto biome = climate::find(BIOME_REALM_SKY, sample)) {
-            palette_basic_array[i] = biome->palette_basic.cached;
-            palette_filler_array[i] = biome->palette_filler.cached;
-            palette_surface_array[i] = biome->palette_surface.cached;
-            palette_fluid_array[i] = biome->palette_fluid.cached;
+        if(biome && biome_def) {
+            palette_basic_array[i] = biome_def->palette_basic.cached;
+            palette_filler_array[i] = biome_def->palette_filler.cached;
+            palette_surface_array[i] = biome_def->palette_surface.cached;
+            palette_fluid_array[i] = biome_def->palette_fluid.cached;
+            biomes[i] = biome;
         }
 
         auto cont = climate::normalize_01(sample.continentalness);
@@ -162,7 +163,7 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
         auto index_xz = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
 
         if(is_inside_sky_terrain(density_array, lpos, bpos, continentalness_array[index_xz], density_bias_array[index_xz])) {
-            storage.set(i, palette_basic_array[index_xz]);
+            blocks.set(i, palette_basic_array[index_xz]);
         }
     }
 
@@ -173,7 +174,7 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
     for(std::size_t i = 0; i < constant::CHUNK_VOLUME; ++i) {
         auto lpos = utils::to_local(i);
         auto index_xz = static_cast<std::size_t>(lpos.x() + lpos.z() * constant::CHUNK_SIZE);
-        auto current = storage.get(i);
+        auto current = blocks.get(i);
 
         if(current == BLOCK_ID_NULL || current == palette_fluid_array[index_xz]) {
             continue;
@@ -194,7 +195,7 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
                 depth += 1U;
             }
             else {
-                auto above = storage.get(d_index);
+                auto above = blocks.get(d_index);
 
                 if(above == BLOCK_ID_NULL || above == palette_fluid_array[index_xz]) {
                     break;
@@ -206,15 +207,15 @@ void realm_sky::generate(BlockStorage& storage, const ChunkPos& pos)
 
         if(depth < 5) {
             if(depth > 0) {
-                storage.set(i, palette_filler_array[index_xz]);
+                blocks.set(i, palette_filler_array[index_xz]);
             }
             else {
-                storage.set(i, palette_surface_array[index_xz]);
+                blocks.set(i, palette_surface_array[index_xz]);
             }
         }
     }
 
-    feature_placer::commit(storage, pos, BIOME_REALM_SKY);
+    feature_placer::commit(blocks, pos, BIOME_REALM_SKY);
 }
 
 ColumnSlice realm_sky::probe(const ChunkPosXZ& pos)

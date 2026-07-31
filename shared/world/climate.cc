@@ -6,7 +6,6 @@
 
 constexpr static int CLIMATE_SIZE = 100;
 constexpr static std::size_t CLIMATE_DIMS = 5;
-constexpr static std::size_t REALM_COUNT = static_cast<std::size_t>(BIOME_REALM_COUNT);
 constexpr static std::size_t MAX_NUDGE_STEPS = 1000000;
 
 using ClimatePos = std::array<std::uint8_t, CLIMATE_DIMS>;
@@ -19,7 +18,7 @@ struct ClimateSeed final {
     float offset;
 };
 
-static std::array<std::vector<ClimateSeed>, REALM_COUNT> s_seeds;
+static std::array<std::vector<ClimateSeed>, NUM_BIOME_REALMS> s_seeds;
 static std::array<ClimateDir, 242> s_neighbour_dirs;
 static std::once_flag s_neighbour_dirs_once;
 
@@ -218,16 +217,16 @@ void climate::rebuild(void)
     }
 }
 
-const BiomeDefinition* climate::find(biome_realm realm, const ClimateSample& sample)
+biome_id_type climate::find(biome_realm realm, const ClimateSample& sample)
 {
     if(realm >= BIOME_REALM_COUNT) {
-        return nullptr; // WTF
+        return BIOME_ID_NULL; // WTF
     }
 
     const auto& seeds = s_seeds.at(static_cast<std::size_t>(realm));
 
     if(seeds.empty()) {
-        return nullptr;
+        return BIOME_ID_NULL;
     }
 
     auto unit = sample_to_unit(sample);
@@ -257,5 +256,5 @@ const BiomeDefinition* climate::find(biome_realm realm, const ClimateSample& sam
         }
     }
 
-    return biome_registry::find_definition(best_id);
+    return best_id;
 }

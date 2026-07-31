@@ -5,6 +5,7 @@
 #include "shared/constant.hh"
 #include "shared/res/feature.hh"
 #include "shared/utils/coord.hh"
+#include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/climate.hh"
 #include "shared/world/climate_noise.hh"
@@ -103,7 +104,10 @@ static bool check_footprint(biome_realm realm, BlockPos::value_type bx, BlockPos
             sample_pos[0] = bx + dx;
             sample_pos[1] = bz + dz;
 
-            if(biome == climate::find(realm, climate_noise::sample_block(sample_pos)))
+            auto biome_id = climate::find(realm, climate_noise::sample_block(sample_pos));
+            auto biome_def = biome_registry::find_definition(biome_id);
+
+            if(biome == biome_def)
                 continue;
             return false;
         }
@@ -309,8 +313,9 @@ void FeatureScatter::collect(const ChunkPos& pos, const PlacementContext& contex
 
             auto sample = climate_noise::sample_block(sample_pos);
             auto biome = climate::find(context.realm, sample);
+            auto biome_def = biome_registry::find_definition(biome);
 
-            if(biome == nullptr || biome->scatter.empty()) {
+            if(biome_def == nullptr || biome_def->scatter.empty()) {
                 continue;
             }
 
@@ -327,14 +332,14 @@ void FeatureScatter::collect(const ChunkPos& pos, const PlacementContext& contex
 
             std::optional<FeatureInstance> column_winner;
 
-            for(std::size_t i = 0; i < biome->scatter.size(); ++i) {
-                auto& entry = biome->scatter[i];
+            for(std::size_t i = 0; i < biome_def->scatter.size(); ++i) {
+                auto& entry = biome_def->scatter[i];
 
-                if(!would_place(wx, wz, context, *biome, entry, i)) {
+                if(!would_place(wx, wz, context, *biome_def, entry, i)) {
                     continue;
                 }
 
-                if(resolve_padding_tie(wx, wz, column, context, *biome, entry, i)) {
+                if(resolve_padding_tie(wx, wz, column, context, *biome_def, entry, i)) {
                     continue;
                 }
 

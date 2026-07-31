@@ -7,15 +7,13 @@
 #include "shared/world/realm_sky.hh"
 #include "shared/world/realm_surface.hh"
 
-constexpr static std::size_t REALM_COUNT = static_cast<std::size_t>(BIOME_REALM_COUNT);
-
 struct HeightmapEntry final {
     std::once_flag init_flag;
     ColumnSlice data;
 };
 
 static std::mutex s_mutex;
-static std::array<emhash8::HashMap<ChunkPosXZ, std::shared_ptr<HeightmapEntry>>, REALM_COUNT> s_cache;
+static std::array<emhash8::HashMap<ChunkPosXZ, std::shared_ptr<HeightmapEntry>>, NUM_BIOME_REALMS> s_cache;
 
 static ColumnSlice generate_slice(biome_realm realm, const ChunkPosXZ& pos)
 {
@@ -35,7 +33,7 @@ static std::shared_ptr<HeightmapEntry> get_or_create(biome_realm realm, const Ch
     std::scoped_lock lock(s_mutex);
 
     auto index = static_cast<std::size_t>(realm);
-    assert(index < REALM_COUNT);
+    assert(index < NUM_BIOME_REALMS);
 
     auto& cache = s_cache.at(index);
     auto it = cache.find(pos);

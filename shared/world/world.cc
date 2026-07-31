@@ -3,14 +3,39 @@
 #include "shared/world/world.hh"
 
 #include "shared/globals.hh"
+#include "shared/utils/biome.hh"
 #include "shared/utils/coord.hh"
 #include "shared/utils/world.hh"
 #include "shared/world/block_registry.hh"
 
 emhash8::HashMap<ChunkPos, std::shared_ptr<Chunk>> world::chunks;
+std::array<emhash8::HashMap<ChunkPosXZ, std::shared_ptr<BiomeStorage>>, NUM_BIOME_REALMS> world::biomes;
 entt::registry world::basic_entities;
 entt::registry world::chunk_entities;
 std::uint64_t world::current_tick = 0;
+
+static std::shared_ptr<BiomeStorage> s_dummy_biomes;
+
+static std::shared_ptr<BiomeStorage> get_or_create_biomes(biome_realm realm, const ChunkPosXZ& pos)
+{
+    if(realm == BIOME_REALM_VOID) {
+        return s_dummy_biomes;
+    }
+
+    auto index = static_cast<std::size_t>(realm);
+    assert(index < NUM_BIOME_REALMS);
+
+    auto& cache = world::biomes.at(index);
+    auto it = cache.find(pos);
+
+    if(it == cache.cend()) {
+        auto biomes = std::make_shared<BiomeStorage>();
+        cache.insert_or_assign(pos, std::shared_ptr(biomes));
+        return biomes;
+    }
+
+    return it->second;
+}
 
 ChunkCreateEvent::ChunkCreateEvent(const ChunkPos& pos, const std::shared_ptr<Chunk>& chunk) : m_chunk(chunk), m_pos(pos)
 {
@@ -38,8 +63,12 @@ std::shared_ptr<Chunk> world::create_chunk(const ChunkPos& pos)
     auto it = chunks.find(pos);
 
     if(it == chunks.cend()) {
+        auto realm = utils::realm_from_chunk(pos.y());
+        auto cpos_xz = ChunkPosXZ(pos.x(), pos.z());
+        auto biomes = get_or_create_biomes(realm, cpos_xz);
+
         auto entity = chunk_entities.create();
-        auto chunk = std::make_shared<Chunk>(entity);
+        auto chunk = std::make_shared<Chunk>(entity, std::move(biomes));
 
         auto& component = chunk_entities.emplace<Chunk_Component>(entity);
         component.position = pos;
@@ -300,6 +329,37 @@ std::int32_t world::get_temperature(const BlockPos& pos)
     return get_temperature(cpos, lpos);
 }
 
+biome_id_type world::get_biome(const ChunkPos& cpos, const LocalPos& lpos)
+{
+    return get_biome(utils::to_block(cpos, lpos));
+}
+
+biome_id_type world::get_biome(const BlockPos& pos)
+{
+    auto cpos = utils::to_chunk(pos);
+    auto lpos = utils::to_local(pos);
+    auto realm = utils::realm_from_chunk(cpos.y());
+
+    if(realm == BIOME_REALM_VOID) {
+        return BIOME_ID_NULL;
+    }
+
+    auto index = static_cast<std::size_t>(realm);
+    assert(index < NUM_BIOME_REALMS);
+
+    auto cpos_xz = ChunkPosXZ(cpos.x(), cpos.z());
+    auto& cache = biomes.at(index);
+    auto it = cache.find(cpos_xz);
+
+    if(it == cache.cend()) {
+        return BIOME_ID_NULL;
+    }
+
+    auto lpos_xz = LocalPosXZ(lpos.x(), lpos.z());
+    auto index_xz = utils::to_index_xz(lpos_xz);
+    return it->second->get_biome(index_xz);
+}
+
 void world::schedule(const ChunkPos& cpos, const LocalPos& lpos, std::uint64_t deadline, block_tick_source source)
 {
     if(auto chunk = find_chunk(cpos)) {
@@ -316,12 +376,28 @@ void world::schedule(const BlockPos& pos, std::uint64_t deadline, block_tick_sou
     schedule(cpos, lpos, deadline, source);
 }
 
+void world::init(void)
+{
+    s_dummy_biomes = std::make_shared<BiomeStorage>();
+}
+
 void world::shutdown(void)
+{
+    purge();
+
+    s_dummy_biomes.reset();
+}
+
+void world::purge(void)
 {
     chunks.clear();
     chunk_entities.clear();
     basic_entities.clear();
     current_tick = 0;
+
+    for(auto& cache : biomes) {
+        cache.clear();
+    }
 }
 
 void world::fixed_update(void)

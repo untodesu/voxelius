@@ -6,8 +6,8 @@
 
 #include "shared/constant.hh"
 #include "shared/utils/coord.hh"
+#include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
-#include "shared/world/block_storage.hh"
 #include "shared/world/climate.hh"
 #include "shared/world/climate_noise.hh"
 #include "shared/world/feature_placer.hh"
@@ -85,7 +85,7 @@ static BlockPos::value_type column_liquid_y(BlockPos::value_type wx, BlockPos::v
 
 static Column probe_column(BlockPos::value_type bx, BlockPos::value_type bz, float base, float variation)
 {
-    for(auto y = terrain::SURFACE_MAX_Y; y >= terrain::SURFACE_MIN_Y; y -= 1) {
+    for(auto y = constant::SURFACE_MAX_Y; y >= constant::SURFACE_MIN_Y; y -= 1) {
         if(column_solid_pass_1(bx, y, bz, base, variation)) {
             Column column {};
             column.surface_y = y;
@@ -114,7 +114,7 @@ void realm_surface::shutdown(void)
     s_terrain.reset();
 }
 
-void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
+void realm_surface::generate(BlockStorage& blocks, BiomeStorage::array_type& biomes, const ChunkPos& pos)
 {
     thread_local std::array<block_id_type, constant::CHUNK_AREA> palette_basic_array;
     thread_local std::array<block_id_type, constant::CHUNK_AREA> palette_filler_array;
@@ -135,12 +135,15 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
 
     for(std::size_t i = 0; i < constant::CHUNK_AREA; ++i) {
         auto& sample = climate_array[i];
+        auto biome = climate::find(BIOME_REALM_SURFACE, sample);
+        auto biome_def = biome_registry::find_definition(biome);
 
-        if(auto biome = climate::find(BIOME_REALM_SURFACE, sample)) {
-            palette_basic_array[i] = biome->palette_basic.cached;
-            palette_filler_array[i] = biome->palette_filler.cached;
-            palette_surface_array[i] = biome->palette_surface.cached;
-            palette_fluid_array[i] = biome->palette_fluid.cached;
+        if(biome && biome_def) {
+            palette_basic_array[i] = biome_def->palette_basic.cached;
+            palette_filler_array[i] = biome_def->palette_filler.cached;
+            palette_surface_array[i] = biome_def->palette_surface.cached;
+            palette_fluid_array[i] = biome_def->palette_fluid.cached;
+            biomes[i] = biome;
         }
 
         auto continentalness = climate::normalize_01(sample.continentalness);
@@ -178,10 +181,10 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
         }
 
         if(solid) {
-            storage.set(i, palette_basic_array[index_xz]);
+            blocks.set(i, palette_basic_array[index_xz]);
         }
         else if(bpos.y() < SEA_LEVEL) {
-            storage.set(i, palette_fluid_array[index_xz]);
+            blocks.set(i, palette_fluid_array[index_xz]);
         }
     }
 
@@ -203,7 +206,7 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
             continue;
         }
 
-        auto current = storage.get(i);
+        auto current = blocks.get(i);
 
         if(current == BLOCK_ID_NULL || current == palette_fluid_array[index_xz]) {
             continue;
@@ -228,7 +231,7 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
                 depth += 1U;
             }
             else {
-                auto above = storage.get(d_index);
+                auto above = blocks.get(d_index);
 
                 if(above == BLOCK_ID_NULL || above == palette_fluid_array[index_xz]) {
                     underwater = dy == 0 && above == palette_fluid_array[index_xz];
@@ -241,15 +244,15 @@ void realm_surface::generate(BlockStorage& storage, const ChunkPos& pos)
 
         if(depth < 5) {
             if(underwater || depth > 0) {
-                storage.set(i, palette_filler_array[index_xz]);
+                blocks.set(i, palette_filler_array[index_xz]);
             }
             else {
-                storage.set(i, palette_surface_array[index_xz]);
+                blocks.set(i, palette_surface_array[index_xz]);
             }
         }
     }
 
-    feature_placer::commit(storage, pos, BIOME_REALM_SURFACE);
+    feature_placer::commit(blocks, pos, BIOME_REALM_SURFACE);
 }
 
 ColumnSlice realm_surface::probe(const ChunkPosXZ& pos)

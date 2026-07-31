@@ -14,7 +14,10 @@ enum biome_realm : unsigned {
     BIOME_REALM_THE_DEPTHS,
     BIOME_REALM_SKY,
     BIOME_REALM_COUNT,
+    BIOME_REALM_VOID = 0xFFFF,
 };
+
+constexpr static std::size_t NUM_BIOME_REALMS = static_cast<std::size_t>(BIOME_REALM_COUNT);
 
 using biome_id_type = std::uint32_t;
 constexpr static biome_id_type BIOME_ID_NULL = 0;

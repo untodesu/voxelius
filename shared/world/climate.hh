@@ -18,7 +18,7 @@ void rebuild(void);
 
 namespace climate
 {
-const BiomeDefinition* find(biome_realm realm, const ClimateSample& sample);
+biome_id_type find(biome_realm realm, const ClimateSample& sample);
 float peaks_valleys(float weirdness);
 float normalize_01(float sample);
 } // namespace climate
