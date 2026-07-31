@@ -1,0 +1,49 @@
+biomes.add("surface_forest_oak", {
+  realm = biomes.REALM_SURFACE,
+
+  temperature = 50,
+  humidity = 70,
+  continentalness = 55,
+  erosion = 60,
+  weirdness = 45,
+
+  palette = {
+    basic = { name = "stone" },
+    filler = { name = "dirt" },
+    surface = { name = "grass" },
+    fluid = { name = "water", states = { level = "8", source = "true" } },
+  },
+
+  scatter = {
+    {
+      feature = "bush",
+      chance = 1.0 / 3.0,
+      need_above = { blocks.TAG_GAS },
+      need_below = { blocks.TAG_TURF },
+    },
+    {
+      feature = "oak_tree_01",
+      chance = 1.0 / 512.0,
+      need_above = { blocks.TAG_GAS },
+      need_below = { blocks.TAG_TURF },
+      group = "oak_tree",
+      padding = 2,
+    },
+    {
+      feature = "oak_tree_02",
+      chance = 1.0 / 512.0,
+      need_above = { blocks.TAG_GAS },
+      need_below = { blocks.TAG_TURF },
+      group = "oak_tree",
+      padding = 2,
+    },
+    {
+      feature = "oak_tree_03",
+      chance = 1.0 / 512.0,
+      need_above = { blocks.TAG_GAS },
+      need_below = { blocks.TAG_TURF },
+      group = "oak_tree",
+      padding = 2,
+    },
+  },
+})
