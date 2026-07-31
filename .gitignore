@@ -16,6 +16,8 @@
 /mods/*
 /site/
 /site/*
+/*.old/
+/*.old/**
 
 ## Ignore generated files and everything else
 ## that would be emitted by running the game
