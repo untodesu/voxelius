@@ -13,10 +13,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout ${{ github.GITHUB_SHA }}
+      - name: Checkout ${{ github.sha }}
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.GITHUB_SHA }}
+          ref: ${{ github.sha }}
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -41,5 +41,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
-        with:
-          id: deployment
+        id: deployment
