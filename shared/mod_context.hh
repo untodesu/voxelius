@@ -4,6 +4,7 @@
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/fluid_registry.hh"
+#include "shared/world/tint_registry.hh"
 
 namespace config
 {
@@ -95,6 +96,12 @@ public:
     std::vector<FluidDefinition> take_fluids(void);
     emhash8::HashMap<Identifier, fluid_id_type> take_fluid_names(void);
 
+    tint_id_type find_tint(const Identifier& name) const;
+    tint_id_type register_tint(const Identifier& name, TintDefinition def);
+
+    std::vector<TintDefinition> take_tints(void);
+    emhash8::HashMap<Identifier, tint_id_type> take_tint_names(void);
+
 private:
     ModInfo m_modinfo;
     mod_status m_status;
@@ -109,6 +116,9 @@ private:
 
     std::vector<FluidDefinition> m_fluids;
     emhash8::HashMap<Identifier, fluid_id_type> m_fluid_names;
+
+    std::vector<TintDefinition> m_tints;
+    emhash8::HashMap<Identifier, tint_id_type> m_tint_names;
 };
 
 constexpr const ModInfo& ModContext::modinfo(void) const

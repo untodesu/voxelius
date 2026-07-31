@@ -2,13 +2,14 @@
 #define D291C9C4_41FE_47DB_8620_6B7001383B16
 
 #include "shared/world/block.hh"
+#include "shared/world/tint.hh"
 
 struct BlockModel_Face final {
     std::string texture_slot;
     std::optional<Eigen::Vector4f> uv;
     unsigned uv_rotation;
     std::optional<block_face> cull_face;
-    std::optional<unsigned> tint_index;
+    Identifier tint_name;
 };
 
 struct BlockModel_Element final {

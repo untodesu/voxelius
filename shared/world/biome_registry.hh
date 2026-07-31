@@ -20,6 +20,7 @@ namespace biome_registry
 {
 void resolve_palettes(void);
 void resolve_features(void);
+void resolve_tint_colors(void);
 } // namespace biome_registry
 
 namespace biome_registry

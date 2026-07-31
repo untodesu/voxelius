@@ -131,11 +131,15 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
 
     lua_pop(L, 1);
 
-    lua_getfield(L, def_idx, "tint_index");
-    auto tint_index = utils::opt_integer(L, -1, 0);
+    lua_getfield(L, def_idx, "tint");
+    auto tint_name = utils::opt_string(L, -1, {});
 
-    if(tint_index.has_value()) {
-        def.tint_index = static_cast<unsigned>(tint_index.value());
+    if(!tint_name.has_value()) {
+        return false;
+    }
+
+    if(tint_name->size()) {
+        def.tint_name = Identifier::from_string(tint_name.value(), ctx->name_space());
     }
 
     lua_pop(L, 1);
@@ -173,6 +177,44 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
 
     lua_pop(L, 1);
 
+    lua_getfield(L, -1, "still_mask");
+
+    if(!lua_isnil(L, -1)) {
+        auto still_mask = utils::require_string(L, -1);
+
+        if(!still_mask.has_value()) {
+            return false;
+        }
+
+        def.still_mask = Identifier::from_string(still_mask.value(), ctx->name_space());
+
+        if(!def.still_mask->is_valid()) {
+            lua_pushfstring(L, "malformed still mask name: %s", still_mask.value());
+            return false;
+        }
+    }
+
+    lua_pop(L, 1);
+
+    lua_getfield(L, -1, "flowing_mask");
+
+    if(!lua_isnil(L, -1)) {
+        auto flowing_mask = utils::require_string(L, -1);
+
+        if(!flowing_mask.has_value()) {
+            return false;
+        }
+
+        def.flowing_mask = Identifier::from_string(flowing_mask.value(), ctx->name_space());
+
+        if(!def.flowing_mask->is_valid()) {
+            lua_pushfstring(L, "malformed flowing mask name: %s", flowing_mask.value());
+            return false;
+        }
+    }
+
+    lua_pop(L, 1);
+
     if(def.flowing_textures.empty()) {
         lua_pushfstring(L, "missing required flowing textures");
         return false;
@@ -201,7 +243,8 @@ static bool add_fluid(lua_State* L, ModContext* ctx, const char* raw_name, int d
     def.fog_density = 1.0f;
     def.fog_color.setOnes();
 
-    def.tint_index = 0;
+    def.tint_name = {};
+    def.tint = TINT_ID_NULL;
 
     if(!parse_definition(L, def_idx, def, ctx)) {
         return false;

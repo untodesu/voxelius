@@ -32,16 +32,32 @@ static void deserialize_schedule(std::multimap<std::uint64_t, std::pair<std::siz
     }
 }
 
+static void serialize_biomes(const Chunk::biomes_array_type& biomes, WriteBuffer& buffer)
+{
+    for(std::size_t i = 0; i < constant::CHUNK_AREA; ++i) {
+        buffer.write<std::uint32_t>(biomes[i]);
+    }
+}
+
+static void deserialize_biomes(Chunk::biomes_array_type& biomes, ReadBuffer& buffer)
+{
+    for(std::size_t i = 0; i < constant::CHUNK_AREA; ++i) {
+        biomes[i] = buffer.read<std::uint32_t>();
+    }
+}
+
 void Chunk::serialize(const Chunk& chunk, WriteBuffer& buffer)
 {
     BlockStorage::serialize(chunk.m_blocks, buffer);
     serialize_schedule(chunk.m_scheduled, buffer);
+    serialize_biomes(chunk.m_biomes, buffer);
 }
 
 void Chunk::deserialize(Chunk& chunk, ReadBuffer& buffer)
 {
     BlockStorage::deserialize(chunk.m_blocks, buffer);
     deserialize_schedule(chunk.m_scheduled, buffer);
+    deserialize_biomes(chunk.m_biomes, buffer);
 }
 
 block_id_type Chunk::get_block(std::size_t index) const
@@ -52,6 +68,19 @@ block_id_type Chunk::get_block(std::size_t index) const
 block_id_type Chunk::get_block(const LocalPos& pos) const
 {
     return m_blocks.get(pos);
+}
+
+biome_id_type Chunk::get_biome(std::size_t index) const
+{
+    return m_biomes[index];
+}
+
+biome_id_type Chunk::get_biome(const LocalPosXZ& pos) const
+{
+    auto x_sz = static_cast<std::size_t>(pos[0]);
+    auto z_sz = static_cast<std::size_t>(pos[1]);
+    auto index = constant::CHUNK_SIZE * z_sz + x_sz;
+    return m_biomes[index];
 }
 
 void Chunk::set_block(std::size_t index, block_id_type id)
@@ -67,6 +96,11 @@ void Chunk::set_block(const LocalPos& pos, block_id_type id)
 void Chunk::set_blocks(BlockStorage blocks)
 {
     m_blocks = std::move(blocks);
+}
+
+void Chunk::set_biomes(biomes_array_type biomes)
+{
+    m_biomes = std::move(biomes);
 }
 
 void Chunk::schedule(std::size_t index, std::uint64_t deadline, block_tick_source source)

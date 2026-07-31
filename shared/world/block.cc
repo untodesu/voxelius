@@ -16,3 +16,14 @@ std::optional<std::span<const Identifier>> BlockDefinition::resolve_texture_slot
 
     return std::span<const Identifier>(it->second);
 }
+
+std::optional<Identifier> BlockDefinition::resolve_mask_slot(std::string_view slot) const
+{
+    auto it = masks.find(std::string(slot));
+
+    if(it == masks.cend()) {
+        return std::nullopt;
+    }
+
+    return it->second;
+}

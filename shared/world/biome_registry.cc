@@ -102,6 +102,30 @@ void biome_registry::resolve_features(void)
     }
 }
 
+void biome_registry::resolve_tint_colors(void)
+{
+    auto all_tints = tint_registry::all_definitions();
+
+    for(auto& def : s_definitions) {
+        def.tint_colors.resize(all_tints.size());
+
+        for(tint_id_type i = 1; i < all_tints.size(); ++i) {
+            auto& tint_def = all_tints[i];
+            auto name = tint_registry::name_of(i);
+            assert(name.has_value());
+
+            auto it = def.tint_map.find(name.value());
+
+            if(it == def.tint_map.cend()) {
+                def.tint_colors[i] = tint_def.default_color;
+            }
+            else {
+                def.tint_colors[i] = it->second;
+            }
+        }
+    }
+}
+
 biome_id_type biome_registry::find(const Identifier& id)
 {
     auto it = s_names.find(id);

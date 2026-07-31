@@ -7,6 +7,7 @@
 
 #include "shared/res/block_model.hh"
 #include "shared/world/block_registry.hh"
+#include "shared/world/tint_registry.hh"
 
 #include "client/world/block_atlas.hh"
 
@@ -419,7 +420,7 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
 
             quad.texture_index = static_cast<std::uint32_t>(strip->index);
             quad.frame_count = strip->frame_count;
-            quad.tint_index = face_def.tint_index.value_or(0);
+            quad.tint = tint_registry::find(texture_face->tint_name);
             quad.animated = def.animated;
             quad.shade = element.shade;
 

@@ -70,7 +70,7 @@ static std::optional<BlockModel_Face> parse_face(const JSON_Object* object)
 
     auto uv = utils::parse_vector<float, 4>(object, "uv");
     auto cull_face = utils::parse_enum<unsigned>(object, "cullface", BLOCK_FACE_MAPPING);
-    auto tint_index = utils::parse_arithmetic<unsigned>(object, "tint");
+    auto tint_name = json_object_get_string(object, "tint");
 
     if(uv.has_value()) {
         face.uv = 0.0625f * uv.value();
@@ -80,8 +80,8 @@ static std::optional<BlockModel_Face> parse_face(const JSON_Object* object)
         face.cull_face = static_cast<block_face>(cull_face.value());
     }
 
-    if(tint_index.has_value()) {
-        face.tint_index = tint_index.value();
+    if(tint_name) {
+        face.tint_name = Identifier::from_string(tint_name);
     }
 
     return face;

@@ -42,7 +42,7 @@ Returns the numeric fluid ID.
 |`textures`|`table`|yes|N/D|Fluid textures|
 |`full_level`|`integer`|yes|N/D|Level that counts as a full cell, in 1/16ths of a block|
 |`opaque`|`boolean`|no|`false`|If `true`, fluid quads use the `blocks.RENDER_SOLID` step instead of the fluid step|
-|`tint_index`|`integer`|no|0|Tint group index used by climate and biomes|
+|`tint`|`string`|no|`nil`|Tint group index used by climate and biomes|
 |`fog_density`|`number`|no|1.0|When the client camera is inside this fluid, fog distance is divided by this value|
 |`fog_color`|`number[3]`|no|`{1,1,1}`|When the client camera is inside this fluid, fog color is replaced with this|
 

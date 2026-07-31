@@ -20,6 +20,7 @@ struct BlockOverridePatch final {
 
     std::optional<block_render> render;
     std::optional<emhash8::HashMap<std::string, std::vector<Identifier>>> textures;
+    std::optional<emhash8::HashMap<std::string, Identifier>> masks;
     std::optional<bool> animated;
 
     std::optional<Identifier> model_name;

@@ -37,7 +37,7 @@ Block models live under: `namespace:models/block`
 |`uv`|`number[4]`|no|dynamic|Lets a face sample a sub-rect of the texture|
 |`uv_rotation`|`number`|no|0|UV rotation: 0, 90, 180, or 270|
 |`cullface`|`string`|no|N/D|Skip this face if the neighbouring block in that direction has a face marked opaque to touch|
-|`tint`|`number`|no|N/D|Tint group index used by climate and biomes|
+|`tint`|`string`|no|`null`|Tint group index used by climate and biomes|
 
 ### UV resolution
 

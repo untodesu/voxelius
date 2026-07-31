@@ -15,6 +15,22 @@ std::span<const FluidDefinition> fluid_registry::all_definitions(void)
     return s_definitions;
 }
 
+void fluid_registry::resolve_tints(void)
+{
+    for(auto& def : s_definitions) {
+        if(def.tint_name.is_empty()) {
+            def.tint = TINT_ID_NULL;
+            continue;
+        }
+
+        def.tint = tint_registry::find(def.tint_name);
+
+        if(def.tint == TINT_ID_NULL) {
+            LOG_WARNING("fluid {} references unknown tint {}", def.tint_name.full_string(), def.tint_name.full_string());
+        }
+    }
+}
+
 void fluid_registry::commit(ModContext& ctx)
 {
     if(s_definitions.empty()) {

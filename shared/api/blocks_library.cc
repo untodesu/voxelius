@@ -267,6 +267,43 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         lua_pop(L, 1);
     }
 
+    if(reader.try_push("masks")) {
+        emhash8::HashMap<std::string, Identifier> masks;
+
+        auto masks_idx = lua_gettop(L);
+
+        lua_pushnil(L);
+
+        while(lua_next(L, masks_idx)) {
+            auto slot_name = utils::require_string(L, -2);
+
+            if(!slot_name.has_value()) {
+                return false;
+            }
+
+            auto slot = std::string(slot_name.value());
+
+            auto mask_name = utils::require_string(L, -1);
+
+            if(!mask_name.has_value()) {
+                return false;
+            }
+
+            auto mask_id = Identifier::from_string(mask_name.value(), ctx->name_space());
+
+            if(!mask_id.is_valid()) {
+                lua_pushfstring(L, "malformed mask name: %s", mask_name.value());
+                return false;
+            }
+
+            masks.insert_or_assign(std::move(slot), std::move(mask_id));
+            lua_pop(L, 1);
+        }
+
+        patch.masks = std::move(masks);
+        lua_pop(L, 1);
+    }
+
     if(reader.try_push("animated")) {
         patch.animated = static_cast<bool>(lua_toboolean(L, -1));
         lua_pop(L, 1);
@@ -606,6 +643,42 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
             }
 
             def.textures.insert_or_assign(std::move(slot), std::move(variants));
+            lua_pop(L, 1);
+        }
+
+        lua_pop(L, 1);
+    }
+
+    if(reader.try_push("masks")) {
+        auto masks_idx = lua_gettop(L);
+
+        def.masks.clear();
+
+        lua_pushnil(L);
+
+        while(lua_next(L, masks_idx)) {
+            auto slot_name = utils::require_string(L, -2);
+
+            if(!slot_name.has_value()) {
+                return false;
+            }
+
+            auto slot = std::string(slot_name.value());
+
+            auto mask_name = utils::require_string(L, -1);
+
+            if(!mask_name.has_value()) {
+                return false;
+            }
+
+            auto mask_id = Identifier::from_string(mask_name.value(), ctx->name_space());
+
+            if(!mask_id.is_valid()) {
+                lua_pushfstring(L, "malformed mask name: %s", mask_name.value());
+                return false;
+            }
+
+            def.masks.insert_or_assign(std::move(slot), std::move(mask_id));
             lua_pop(L, 1);
         }
 

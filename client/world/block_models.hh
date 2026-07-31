@@ -2,6 +2,7 @@
 #define E58051D6_68EC_495E_92C9_545EBD9CD3E9
 
 #include "shared/world/block.hh"
+#include "shared/world/tint.hh"
 
 struct BakedBlockModel_Quad final {
     std::array<Eigen::Vector3f, 4> positions;
@@ -9,7 +10,7 @@ struct BakedBlockModel_Quad final {
     std::uint32_t packed_normal;
     std::uint32_t texture_index;
     std::size_t frame_count;
-    unsigned tint_index;
+    tint_id_type tint;
     bool animated;
     bool shade;
 };

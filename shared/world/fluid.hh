@@ -3,6 +3,8 @@
 
 #include "core/identifier.hh"
 
+#include "shared/world/tint.hh"
+
 enum fluid_gravity : unsigned {
     FLUID_GRAVITY_DOWN,
     FLUID_GRAVITY_UP,
@@ -20,6 +22,9 @@ struct FluidDefinition final {
     std::vector<Identifier> still_textures;
     std::vector<Identifier> flowing_textures;
 
+    std::optional<Identifier> still_mask;
+    std::optional<Identifier> flowing_mask;
+
     unsigned full_level;
 
     bool opaque;
@@ -27,7 +32,8 @@ struct FluidDefinition final {
     float fog_density;
     Eigen::Vector3f fog_color;
 
-    std::optional<unsigned> tint_index;
+    Identifier tint_name;
+    tint_id_type tint;
 };
 
 #endif /* B347B878_D23E_45CF_A346_EDD80070F951 */

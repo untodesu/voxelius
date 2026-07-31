@@ -322,6 +322,39 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
 
     lua_pop(L, 1);
 
+    lua_getfield(L, def_idx, "tints");
+
+    if(!lua_isnil(L, -1)) {
+        if(!lua_istable(L, -1)) {
+            lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, -1)));
+            return false;
+        }
+
+        def.tint_map.clear();
+
+        lua_pushnil(L);
+
+        while(lua_next(L, -2)) {
+            auto key_str = utils::require_string(L, -2);
+
+            if(!key_str.has_value()) {
+                return false;
+            }
+
+            auto value_vec = utils::read_vector<float, 3>(L, -1);
+
+            if(!value_vec.has_value()) {
+                return false;
+            }
+
+            auto key_id = Identifier::from_string(key_str.value(), ctx->name_space());
+
+            def.tint_map.insert_or_assign(std::move(key_id), std::move(value_vec.value()));
+        }
+    }
+
+    lua_pop(L, 1);
+
     return true;
 }
 

@@ -14,6 +14,7 @@
 #include "shared/api/core_library.hh"
 #include "shared/api/fluids_library.hh"
 #include "shared/api/lua_libraries.hh"
+#include "shared/api/tints_library.hh"
 #include "shared/api/world_library.hh"
 #include "shared/constant.hh"
 
@@ -136,6 +137,7 @@ bool ModContext::initialize(void)
     m_lua_state = std::shared_ptr<lua_State>(L, &lua_close);
     api::open_lua_libraries(m_lua_state, this);
     api::open_core_library(m_lua_state, this);
+    api::open_tints_library(m_lua_state, this);
     api::open_fluids_library(m_lua_state, this);
     api::open_blocks_library(m_lua_state, this);
     api::open_biomes_library(m_lua_state, this);
@@ -298,4 +300,37 @@ std::vector<FluidDefinition> ModContext::take_fluids(void)
 emhash8::HashMap<Identifier, fluid_id_type> ModContext::take_fluid_names(void)
 {
     return std::move(m_fluid_names);
+}
+
+tint_id_type ModContext::find_tint(const Identifier& name) const
+{
+    auto it = m_tint_names.find(name);
+
+    if(it == m_tint_names.cend())
+        return TINT_ID_NULL;
+    return it->second;
+}
+
+tint_id_type ModContext::register_tint(const Identifier& name, TintDefinition def)
+{
+    if(m_tints.empty()) {
+        m_tints.emplace_back();
+    }
+
+    auto id = static_cast<tint_id_type>(m_tints.size());
+
+    m_tints.push_back(std::move(def));
+    m_tint_names.try_emplace(name, id);
+
+    return id;
+}
+
+std::vector<TintDefinition> ModContext::take_tints(void)
+{
+    return std::move(m_tints);
+}
+
+emhash8::HashMap<Identifier, tint_id_type> ModContext::take_tint_names(void)
+{
+    return std::move(m_tint_names);
 }

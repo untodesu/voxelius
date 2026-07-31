@@ -10,6 +10,7 @@
 #include "shared/world/block_registry.hh"
 #include "shared/world/climate.hh"
 #include "shared/world/fluid_registry.hh"
+#include "shared/world/tint_registry.hh"
 
 static std::vector<ModContext> s_mods;
 
@@ -169,13 +170,17 @@ void mod_loader::init(void)
             continue;
         }
 
+        tint_registry::commit(ctx);
         fluid_registry::commit(ctx);
         block_registry::commit(ctx);
         biome_registry::commit(ctx);
     }
 
+    fluid_registry::resolve_tints();
+
     biome_registry::resolve_palettes();
     biome_registry::resolve_features();
+    biome_registry::resolve_tint_colors();
 
     climate::rebuild();
 }

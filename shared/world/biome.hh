@@ -58,6 +58,9 @@ struct BiomeDefinition {
     BiomePaletteEntry palette_fluid;
 
     std::vector<BiomeScatterEntry> scatter;
+
+    emhash8::HashMap<Identifier, Eigen::Vector3f> tint_map;
+    std::vector<Eigen::Vector3f> tint_colors;
 };
 
 #endif /* BCF648BF_4565_4F82_9C42_0491F751D447 */
