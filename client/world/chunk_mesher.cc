@@ -458,18 +458,28 @@ Eigen::Vector3f MeshingTask::resolve_tint(const LocalPos& lpos, tint_id_type tin
         return Eigen::Vector3f::Ones();
     }
 
-    auto biome_id = m_biomes.get(lpos);
-    auto biome_def = biome_registry::find_definition(biome_id);
+    Eigen::Vector3f sum = Eigen::Vector3f::Zero();
 
-    if(biome_def && tint < biome_def->tint_colors.size()) {
-        return biome_def->tint_colors[tint];
+    for(int dz = -1; dz <= 1; dz += 1) {
+        for(int dx = -1; dx <= 1; dx += 1) {
+            auto biome_id = m_biomes.get(LocalPosXZ(lpos.x() + dx, lpos.z() + dz));
+            auto biome_def = biome_registry::find_definition(biome_id);
+
+            if(biome_def && tint < biome_def->tint_colors.size()) {
+                sum += biome_def->tint_colors[tint];
+                continue;
+            }
+
+            if(auto tint_def = tint_registry::find_definition(tint)) {
+                sum += tint_def->default_color;
+                continue;
+            }
+
+            sum += Eigen::Vector3f::Ones();
+        }
     }
 
-    if(auto tint_def = tint_registry::find_definition(tint)) {
-        return tint_def->default_color;
-    }
-
-    return Eigen::Vector3f::Ones();
+    return sum / 9.0f;
 }
 
 static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos, const BlockDefinition* def, fluid_gravity gravity,
