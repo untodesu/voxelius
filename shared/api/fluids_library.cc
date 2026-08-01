@@ -144,10 +144,10 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
 
     lua_pop(L, 1);
 
-    lua_getfield(L, def_idx, "textures");
+    lua_getfield(L, def_idx, "albedo");
 
     if(lua_isnil(L, -1)) {
-        lua_pushfstring(L, "missing required textures field");
+        lua_pushfstring(L, "missing required albedo field");
         return false;
     }
 
@@ -158,69 +158,81 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
 
     lua_getfield(L, -1, "still");
 
-    if(!parse_textures(L, lua_gettop(L), def.still_textures, ctx)) {
+    if(!parse_textures(L, lua_gettop(L), def.albedo_still, ctx)) {
         return false;
     }
 
     lua_pop(L, 1);
 
-    if(def.still_textures.empty()) {
+    if(def.albedo_still.empty()) {
         lua_pushfstring(L, "missing required still textures");
         return false;
     }
 
     lua_getfield(L, -1, "flowing");
 
-    if(!parse_textures(L, lua_gettop(L), def.flowing_textures, ctx)) {
+    if(!parse_textures(L, lua_gettop(L), def.albedo_flowing, ctx)) {
         return false;
     }
 
     lua_pop(L, 1);
 
-    lua_getfield(L, -1, "still_mask");
-
-    if(!lua_isnil(L, -1)) {
-        auto still_mask = utils::require_string(L, -1);
-
-        if(!still_mask.has_value()) {
-            return false;
-        }
-
-        def.still_mask = Identifier::from_string(still_mask.value(), ctx->name_space());
-
-        if(!def.still_mask->is_valid()) {
-            lua_pushfstring(L, "malformed still mask name: %s", still_mask.value());
-            return false;
-        }
-    }
-
-    lua_pop(L, 1);
-
-    lua_getfield(L, -1, "flowing_mask");
-
-    if(!lua_isnil(L, -1)) {
-        auto flowing_mask = utils::require_string(L, -1);
-
-        if(!flowing_mask.has_value()) {
-            return false;
-        }
-
-        def.flowing_mask = Identifier::from_string(flowing_mask.value(), ctx->name_space());
-
-        if(!def.flowing_mask->is_valid()) {
-            lua_pushfstring(L, "malformed flowing mask name: %s", flowing_mask.value());
-            return false;
-        }
-    }
-
-    lua_pop(L, 1);
-
-    if(def.flowing_textures.empty()) {
+    if(def.albedo_flowing.empty()) {
         lua_pushfstring(L, "missing required flowing textures");
         return false;
     }
 
-    lua_pop(L, 1); // textures
+    lua_pop(L, 1); // albedo
+
+    lua_getfield(L, def_idx, "masks");
+
+    if(!lua_isnil(L, -1)) {
+        if(!lua_istable(L, -1)) {
+            lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, -1)));
+            return false;
+        }
+
+        lua_getfield(L, -1, "still");
+
+        if(!lua_isnil(L, -1)) {
+            auto still_mask = utils::require_string(L, -1);
+
+            if(!still_mask.has_value()) {
+                return false;
+            }
+
+            def.mask_still = Identifier::from_string(still_mask.value(), ctx->name_space());
+
+            if(!def.mask_still->is_valid()) {
+                lua_pushfstring(L, "malformed still mask name: %s", still_mask.value());
+                return false;
+            }
+        }
+
+        lua_pop(L, 1);
+
+        lua_getfield(L, -1, "flowing");
+
+        if(!lua_isnil(L, -1)) {
+            auto flowing_mask = utils::require_string(L, -1);
+
+            if(!flowing_mask.has_value()) {
+                return false;
+            }
+
+            def.mask_flowing = Identifier::from_string(flowing_mask.value(), ctx->name_space());
+
+            if(!def.mask_flowing->is_valid()) {
+                lua_pushfstring(L, "malformed flowing mask name: %s", flowing_mask.value());
+                return false;
+            }
+        }
+
+        lua_pop(L, 1);
+    }
+
+    lua_pop(L, 1); // masks
+
     return true;
 }
 

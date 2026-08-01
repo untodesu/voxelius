@@ -122,6 +122,9 @@ void realm_sky::generate(BlockStorage& blocks, BiomeStorage::array_type& biomes,
     auto chunk_y_min = static_cast<float>(pos.y()) * static_cast<float>(constant::CHUNK_SIZE);
     auto chunk_y_max = chunk_y_min + static_cast<float>(constant::CHUNK_SIZE - 1);
 
+    // Same early-out as main: empty Y slices must not pay climate/biome work.
+    // Biomes are only written below — finalize must not try_set an all-NULL
+    // array from this path (that would lock the realm column forever).
     if(chunk_y_max < TERRAIN_Y_MIN || chunk_y_min > TERRAIN_Y_MAX) {
         return;
     }

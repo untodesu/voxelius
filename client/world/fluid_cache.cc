@@ -22,22 +22,44 @@ void fluid_cache::init_late(void)
 
         const auto& def = definitions[id];
 
-        auto still = block_atlas::load(def.still_textures);
-        auto flowing = block_atlas::load(def.flowing_textures);
+        auto albedo_still = block_atlas::find(def.albedo_still);
+        auto albedo_flowing = block_atlas::find(def.albedo_flowing);
 
-        if(still == nullptr) {
+        if(albedo_still == nullptr) {
             LOG_WARNING("fluid {}: failed to load still textures", id);
             continue;
         }
 
-        if(flowing == nullptr) {
+        if(albedo_flowing == nullptr) {
             LOG_WARNING("fluid {}: failed to load flowing textures", id);
             continue;
         }
 
         CachedFluid cached {};
-        cached.still = still;
-        cached.flowing = flowing;
+        cached.albedo_still = albedo_still;
+        cached.albedo_flowing = albedo_flowing;
+        cached.mask_still = nullptr;
+        cached.mask_flowing = nullptr;
+
+        if(def.mask_still.has_value()) {
+            std::array mask_frames { def.mask_still.value() };
+
+            cached.mask_still = block_atlas::find(mask_frames);
+
+            if(cached.mask_still == nullptr) {
+                LOG_WARNING("fluid {}: failed to load still mask", id);
+            }
+        }
+
+        if(def.mask_flowing.has_value()) {
+            std::array mask_frames { def.mask_flowing.value() };
+
+            cached.mask_flowing = block_atlas::find(mask_frames);
+
+            if(cached.mask_flowing == nullptr) {
+                LOG_WARNING("fluid {}: failed to load flowing mask", id);
+            }
+        }
 
         s_cache[id] = cached;
     }

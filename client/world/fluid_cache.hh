@@ -6,8 +6,10 @@
 struct AtlasStrip;
 
 struct CachedFluid final {
-    const AtlasStrip* still;
-    const AtlasStrip* flowing;
+    const AtlasStrip* albedo_still;
+    const AtlasStrip* albedo_flowing;
+    const AtlasStrip* mask_still;
+    const AtlasStrip* mask_flowing;
 };
 
 namespace fluid_cache

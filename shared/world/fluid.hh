@@ -19,11 +19,11 @@ struct FluidDefinition final {
 
     fluid_gravity gravity;
 
-    std::vector<Identifier> still_textures;
-    std::vector<Identifier> flowing_textures;
+    std::vector<Identifier> albedo_still;
+    std::vector<Identifier> albedo_flowing;
 
-    std::optional<Identifier> still_mask;
-    std::optional<Identifier> flowing_mask;
+    std::optional<Identifier> mask_still;
+    std::optional<Identifier> mask_flowing;
 
     unsigned full_level;
 

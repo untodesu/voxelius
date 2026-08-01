@@ -23,6 +23,7 @@ void shared_game::init(void)
     BlockModel::register_resource();
     Feature::register_resource();
 
+    world::init();
     mod_loader::init();
 }
 

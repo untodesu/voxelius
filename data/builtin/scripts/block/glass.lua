@@ -2,7 +2,7 @@ blocks.add("glass", {
   render = blocks.RENDER_ALPHA,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "glass/glass.png",
     }

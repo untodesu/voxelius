@@ -16,6 +16,8 @@ void BiomeStorage::deserialize(BiomeStorage* biomes, ReadBuffer& buffer)
     for(std::size_t i = 0; i < constant::CHUNK_AREA; ++i) {
         biomes->m_biomes[i] = buffer.read<std::uint32_t>();
     }
+
+    biomes->m_initialized = true;
 }
 
 biome_id_type BiomeStorage::get_biome(std::size_t index) const
@@ -44,7 +46,14 @@ void BiomeStorage::set_biome(const LocalPosXZ& pos, biome_id_type biome)
     m_biomes[index] = biome;
 }
 
-void BiomeStorage::set_biomes(array_type biomes)
+bool BiomeStorage::set_biomes(array_type biomes)
 {
+    // First write wins — refuse if the column was already initialized.
+    if(m_initialized) {
+        return false;
+    }
+
     m_biomes = std::move(biomes);
+    m_initialized = true;
+    return true;
 }

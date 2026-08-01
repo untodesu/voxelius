@@ -1,6 +1,6 @@
 #include "client/pch.hh"
 
-#include "client/world/block_models.hh"
+#include "client/world/bmodel_cache.hh"
 
 #include "core/res/resource.hh"
 #include "core/utils/angles.hh"
@@ -29,7 +29,7 @@ constexpr static std::array FACE_ROTATIONS = {
     std::array { BLOCK_FACE_TOP, BLOCK_FACE_BOTTOM, BLOCK_FACE_EAST, BLOCK_FACE_WEST, BLOCK_FACE_SOUTH, BLOCK_FACE_NORTH },
 };
 
-static std::vector<std::unique_ptr<BakedBlockModel>> s_models;
+static std::vector<std::unique_ptr<CachedBlockModel>> s_models;
 
 static Eigen::Vector3f face_normal(block_face face)
 {
@@ -109,7 +109,7 @@ static std::uint32_t pack_normal_2_10_10_10(const Eigen::Vector3f& normal)
     return (nz << 20) | (ny << 10) | nx;
 }
 
-static void make_face_geometry(const Eigen::Vector3f& min, const Eigen::Vector3f& max, block_face face, BakedBlockModel_Quad& quad)
+static void make_face_geometry(const Eigen::Vector3f& min, const Eigen::Vector3f& max, block_face face, CachedBlockModel_Quad& quad)
 {
     quad.positions.fill(Eigen::Vector3f::Zero());
 
@@ -208,7 +208,7 @@ static void face_uv_extent(const Eigen::Vector3f& min, const Eigen::Vector3f& ma
 }
 
 static void apply_face_uv(const BlockModel_Face* face, const Eigen::Vector3f& min, const Eigen::Vector3f& max, block_face face_type,
-    bool rescale, BakedBlockModel_Quad& quad)
+    bool rescale, CachedBlockModel_Quad& quad)
 {
     if(face->uv.has_value() || !rescale) {
         float u_min, v_min, u_max, v_max;
@@ -344,7 +344,7 @@ static bool is_covering(const Eigen::Vector3f& min, const Eigen::Vector3f& max, 
     return result && axis_aligned;
 }
 
-static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
+static std::unique_ptr<CachedBlockModel> bake_model(const BlockDefinition& def)
 {
     if(def.is_stem || def.model_name.is_empty()) {
         return nullptr;
@@ -357,7 +357,7 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
         return nullptr;
     }
 
-    auto baked = std::make_unique<BakedBlockModel>();
+    auto baked = std::make_unique<CachedBlockModel>();
     baked->fully_covered.fill(false);
 
     auto facing_rot = facing_rotation(def.model_facing);
@@ -380,21 +380,21 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
                 texture_face = &element.faces[rotated_face].value();
             }
 
-            auto frames = def.resolve_texture_slot(texture_face->texture_slot);
+            auto albedo_frames = def.resolve_albedo_slot(texture_face->texture_slot);
 
-            if(!frames.has_value()) {
-                LOG_WARNING("{}: {}: missing textures", def.model_name.full_string(), texture_face->texture_slot);
+            if(!albedo_frames.has_value()) {
+                LOG_WARNING("{}: {}: missing albedo textures", def.model_name.full_string(), texture_face->texture_slot);
                 continue;
             }
 
-            auto strip = block_atlas::find(frames.value());
+            auto albedo_strip = block_atlas::find(albedo_frames.value());
 
-            if(strip == nullptr) {
-                LOG_WARNING("{}: {}: atlas strip not found", def.model_name.full_string(), texture_face->texture_slot);
+            if(albedo_strip == nullptr) {
+                LOG_WARNING("{}: {}: albedo strip not found", def.model_name.full_string(), texture_face->texture_slot);
                 continue;
             }
 
-            BakedBlockModel_Quad quad {};
+            CachedBlockModel_Quad quad {};
 
             if(model_locked) {
                 make_face_geometry(element.min, element.max, face, quad);
@@ -418,11 +418,28 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
                 apply_face_uv(texture_face, used_min, used_max, used_face, element.rescale, quad);
             }
 
-            quad.texture_index = static_cast<std::uint32_t>(strip->index);
-            quad.frame_count = strip->frame_count;
-            quad.tint = tint_registry::find(texture_face->tint_name);
+            auto face_tint = tint_registry::find(texture_face->tint_name);
+            auto mask_id = def.resolve_mask_slot(texture_face->texture_slot);
+
+            quad.albedo_strip = static_cast<std::uint32_t>(albedo_strip->index);
+            quad.albedo_frames = static_cast<std::uint32_t>(albedo_strip->frame_count);
+            quad.tint = face_tint;
             quad.animated = def.animated;
             quad.shade = element.shade;
+
+            auto mask_strip = block_atlas::stub_white;
+
+            if(mask_id.has_value()) {
+                auto mask_frames = std::array { mask_id.value() };
+
+                mask_strip = block_atlas::find(mask_frames);
+
+                if(mask_strip == nullptr) {
+                    mask_strip = block_atlas::stub_white;
+                }
+            }
+
+            quad.mask_frame = static_cast<std::uint32_t>(mask_strip->frame_base);
 
             for(auto& position : quad.positions) {
                 position = element_rot * (position - element.rotation_origin) + element.rotation_origin;
@@ -447,7 +464,7 @@ static std::unique_ptr<BakedBlockModel> bake_model(const BlockDefinition& def)
     return baked;
 }
 
-void block_models::init_late(void)
+void bmodel_cache::init_late(void)
 {
     auto definitions = block_registry::all_definitions();
 
@@ -459,12 +476,12 @@ void block_models::init_late(void)
     }
 }
 
-void block_models::shutdown(void)
+void bmodel_cache::shutdown(void)
 {
     s_models.clear();
 }
 
-const BakedBlockModel* block_models::find(block_id_type id)
+const CachedBlockModel* bmodel_cache::find(block_id_type id)
 {
     if(id == BLOCK_ID_NULL || id >= s_models.size()) {
         return nullptr;

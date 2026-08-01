@@ -2,7 +2,7 @@ blocks.add("slime", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "slime/slime_01.png",
     }

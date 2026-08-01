@@ -3,7 +3,8 @@
 
 in vec2 vs_TexCoord;
 flat in uint vs_FrameIndex;
-flat in uint vs_TintIndex;
+flat in uint vs_MaskFrame;
+flat in vec3 vs_TintColor;
 in float vs_Shade;
 in float vs_AO;
 
@@ -41,7 +42,13 @@ void main(void)
     AtlasFrame frame = get_frame(int(vs_FrameIndex));
     vec2 final_uv = mix(frame.uv_min, frame.uv_max, vs_TexCoord);
     vec4 albedo = texture(u_AtlasTexture, vec3(final_uv, float(frame.layer)));
-    vec3 shaded = albedo.rgb * vs_Shade * vs_AO;
+
+    AtlasFrame mask_frame = get_frame(int(vs_MaskFrame));
+    vec2 mask_uv = mix(mask_frame.uv_min, mask_frame.uv_max, vs_TexCoord);
+    float tint_mask = texture(u_AtlasTexture, vec3(mask_uv, float(mask_frame.layer))).r;
+
+    vec3 tint = mix(vec3(1.0), vs_TintColor, tint_mask);
+    vec3 shaded = albedo.rgb * vs_Shade * vs_AO * tint;
 
     frag_Target.rgb = shaded;
     frag_Target.a = albedo.a;

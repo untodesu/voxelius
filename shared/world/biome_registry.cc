@@ -109,9 +109,11 @@ void biome_registry::resolve_tint_colors(void)
     for(auto& def : s_definitions) {
         def.tint_colors.resize(all_tints.size());
 
-        for(tint_id_type i = 1; i < all_tints.size(); ++i) {
+        for(std::size_t i = 1; i < all_tints.size(); ++i) {
+            auto tint_id = static_cast<tint_id_type>(i);
             auto& tint_def = all_tints[i];
-            auto name = tint_registry::name_of(i);
+
+            auto name = tint_registry::name_of(tint_id);
             assert(name.has_value());
 
             auto it = def.tint_map.find(name.value());

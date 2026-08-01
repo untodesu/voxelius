@@ -4,7 +4,7 @@ local cobble_prototype = {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "cobble/cobble_01.png",
       "cobble/cobble_02.png",

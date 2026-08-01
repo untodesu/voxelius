@@ -227,13 +227,13 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
         lua_pop(L, 1);
     }
 
-    if(reader.try_push("textures")) {
-        emhash8::HashMap<std::string, std::vector<Identifier>> textures;
-        auto textures_idx = lua_gettop(L);
+    if(reader.try_push("albedo")) {
+        emhash8::HashMap<std::string, std::vector<Identifier>> albedo;
+        auto albedo_idx = lua_gettop(L);
 
         lua_pushnil(L);
 
-        while(lua_next(L, textures_idx)) {
+        while(lua_next(L, albedo_idx)) {
             auto slot_name = utils::require_string(L, -2);
 
             if(!slot_name.has_value()) {
@@ -259,11 +259,11 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
                 lua_pop(L, 1);
             }
 
-            textures.insert_or_assign(std::move(slot), std::move(variants));
+            albedo.insert_or_assign(std::move(slot), std::move(variants));
             lua_pop(L, 1);
         }
 
-        patch.textures = std::move(textures);
+        patch.albedo = std::move(albedo);
         lua_pop(L, 1);
     }
 
@@ -609,14 +609,14 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
         lua_pop(L, 1);
     }
 
-    if(reader.try_push("textures")) {
-        auto textures_idx = lua_gettop(L);
+    if(reader.try_push("albedo")) {
+        auto albedo_idx = lua_gettop(L);
 
-        def.textures.clear();
+        def.albedo.clear();
 
         lua_pushnil(L);
 
-        while(lua_next(L, textures_idx)) {
+        while(lua_next(L, albedo_idx)) {
             auto slot_name = utils::require_string(L, -2);
 
             if(!slot_name.has_value()) {
@@ -642,7 +642,7 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
                 lua_pop(L, 1);
             }
 
-            def.textures.insert_or_assign(std::move(slot), std::move(variants));
+            def.albedo.insert_or_assign(std::move(slot), std::move(variants));
             lua_pop(L, 1);
         }
 

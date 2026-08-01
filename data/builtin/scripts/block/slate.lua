@@ -4,7 +4,7 @@ local slate_prototype = {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "slate/slate_01.png",
       "slate/slate_02.png",

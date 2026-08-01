@@ -46,4 +46,10 @@ biomes.add("surface_forest_oak", {
       padding = 2,
     },
   },
+
+  tints = {
+    grass = { 0.35, 0.68, 0.22 },
+    foliage = { 0.28, 0.58, 0.18 },
+    water = { 0.20, 0.42, 0.78 },
+  },
 })

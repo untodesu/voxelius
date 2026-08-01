@@ -4,7 +4,7 @@ logdef.add_block("pine_log", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "pine/pine_wood_01.png",
       "pine/pine_wood_02.png",
@@ -43,7 +43,7 @@ blocks.add("pine_wood", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "pine/pine_wood_01.png",
       "pine/pine_wood_02.png",

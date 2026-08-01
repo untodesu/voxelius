@@ -22,4 +22,10 @@ biomes.add("surface_hills_grassy", {
       need_below = { blocks.TAG_TURF },
     },
   },
+
+  tints = {
+    grass = { 0.50, 0.70, 0.35 },
+    foliage = { 0.36, 0.58, 0.28 },
+    water = { 0.22, 0.45, 0.80 },
+  },
 })

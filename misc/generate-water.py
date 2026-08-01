@@ -126,13 +126,18 @@ def write_debug_gif(path: Path, frames_rgba: list[bytes], src_size: int, fps: in
 # ---------------------------------------------------------------------------
 
 
-def soup_to_rgba(soup: float, alpha_min: int, alpha_span: int) -> tuple[int, int, int, int]:
+def soup_to_rgba(soup: float, alpha_min: int, alpha_span: int, grayscale: bool = False) -> tuple[int, int, int, int]:
     h = 0.0 if soup < 0.0 else 1.0 if soup > 1.0 else soup
     h2 = h * h
     r = int(32.0 + h2 * 32.0)
     g = int(50.0 + h2 * 64.0)
     b = 255
     a = int(alpha_min + h2 * alpha_span)
+    
+    if grayscale:
+        lum = int(0.299 * r + 0.587 * g + 0.114 * b)
+        r = g = b = lum
+
     if a < 0:
         a = 0
     elif a > 255:
@@ -146,12 +151,13 @@ def render_soup(
     alpha_min: int,
     alpha_span: int,
     scroll: int = 0,
+    grayscale: bool = False,
 ) -> bytes:
     n = size * size
     out = bytearray(n * 4)
     for i in range(n):
         src = (i - scroll * size) % n
-        r, g, b, a = soup_to_rgba(soup[src], alpha_min, alpha_span)
+        r, g, b, a = soup_to_rgba(soup[src], alpha_min, alpha_span, grayscale)
         o = i * 4
         out[o] = r
         out[o + 1] = g
@@ -235,6 +241,7 @@ def simulate(
     flowing: bool,
     alpha_min: int,
     alpha_span: int,
+    grayscale: bool = False,
 ) -> list[bytes]:
     n = size * size
     soup = [0.0] * n
@@ -257,7 +264,7 @@ def simulate(
         step(soup, soup_next, pot, flame, size, tape[tick % frames], pot_cap)
         tick += 1
         scroll = tick if flowing else 0
-        out.append(render_soup(soup, size, alpha_min, alpha_span, scroll=scroll))
+        out.append(render_soup(soup, size, alpha_min, alpha_span, scroll=scroll, grayscale=grayscale))
     return out
 
 
@@ -278,6 +285,7 @@ def generate(
     alpha_min: int,
     alpha_span: int,
     debug_gif: bool,
+    grayscale: bool,
 ) -> None:
     if size & (size - 1):
         raise SystemExit(f"--size must be a power of two (Classic uses bitmask wrap; got {size})")
@@ -299,6 +307,7 @@ def generate(
         flowing=False,
         alpha_min=alpha_min,
         alpha_span=alpha_span,
+        grayscale=grayscale,
     )
     for i, rgba in enumerate(still):
         path = out_dir / f"{still_prefix}_{i + 1:0{digits}d}.png"
@@ -314,6 +323,7 @@ def generate(
         flowing=True,
         alpha_min=alpha_min,
         alpha_span=alpha_span,
+        grayscale=grayscale,
     )
     for i, rgba in enumerate(flowing_frames):
         path = out_dir / f"{flowing_prefix}_{i + 1:0{digits}d}.png"
@@ -334,7 +344,7 @@ def generate(
 
 def main() -> None:
     repo = Path(__file__).resolve().parents[1]
-    default_out = repo / "data" / "builtin" / "textures" / "block"
+    default_out = repo / "data" / "builtin" / "textures" / "block" / "water"
 
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -387,6 +397,11 @@ def main() -> None:
         action="store_true",
         help="also write 512x512 debug GIFs at 10 FPS (2x2 tiled NN upscale; needs Pillow)",
     )
+    parser.add_argument(
+        "--grayscale",
+        action="store_true",
+        help="generate grayscale textures instead of standard color",
+    )
     args = parser.parse_args()
 
     if args.frames < 1:
@@ -421,6 +436,7 @@ def main() -> None:
         alpha_min=alpha_min,
         alpha_span=alpha_span,
         debug_gif=args.debug_gif,
+        grayscale=args.grayscale,
     )
 
 

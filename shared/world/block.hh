@@ -81,11 +81,11 @@ struct BlockDrop final {
 struct BlockDefinition final {
     BlockDefinition(void) = default;
 
-    std::optional<std::span<const Identifier>> resolve_texture_slot(std::string_view slot) const;
+    std::optional<std::span<const Identifier>> resolve_albedo_slot(std::string_view slot) const;
     std::optional<Identifier> resolve_mask_slot(std::string_view slot) const;
 
     block_render render;
-    emhash8::HashMap<std::string, std::vector<Identifier>> textures;
+    emhash8::HashMap<std::string, std::vector<Identifier>> albedo;
     emhash8::HashMap<std::string, Identifier> masks;
     bool animated;
 

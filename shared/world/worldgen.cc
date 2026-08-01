@@ -5,6 +5,7 @@
 #include "core/threading.hh"
 
 #include "shared/globals.hh"
+#include "shared/utils/biome.hh"
 #include "shared/world/chunk.hh"
 #include "shared/world/climate_noise.hh"
 #include "shared/world/entropy_cache.hh"
@@ -21,13 +22,13 @@ static emhash8::HashMap<ChunkPos, std::nullptr_t> s_pending;
 class WorldgenTask final : public Task {
 public:
     explicit WorldgenTask(const ChunkPos& pos);
-    virtual ~WorldgenTask(void) = default;
+    virtual ~WorldgenTask(void) override;
     virtual void process(void) override;
     virtual void finalize(void) override;
 
 private:
     BlockStorage m_blocks;
-    BiomeStorage::array_type m_biomes;
+    std::unique_ptr<BiomeStorage::array_type> m_biomes;
     ChunkPos m_pos;
 };
 
@@ -36,13 +37,30 @@ WorldgenTask::WorldgenTask(const ChunkPos& pos) : m_pos(pos)
     m_blocks.fill(BLOCK_ID_NULL);
 }
 
+WorldgenTask::~WorldgenTask(void)
+{
+    s_pending.erase(m_pos);
+}
+
 void WorldgenTask::process(void)
 {
     ZoneScopedN("worldgen::process");
 
-    if(!terrain::generate(m_pos, m_blocks, m_biomes)) {
+    auto realm = utils::realm(m_pos.y());
+
+    if(realm != BIOME_REALM_SURFACE && realm != BIOME_REALM_SKY) {
         status.store(task_status::CANCELLED, std::memory_order_release);
+        return;
     }
+
+    auto biomes = std::make_unique<BiomeStorage::array_type>();
+
+    if(!terrain::generate(m_pos, m_blocks, *biomes)) {
+        status.store(task_status::CANCELLED, std::memory_order_release);
+        return;
+    }
+
+    m_biomes = std::move(biomes);
 }
 
 void WorldgenTask::finalize(void)
@@ -50,17 +68,19 @@ void WorldgenTask::finalize(void)
     ZoneScopedN("worldgen::finalize");
 
     auto chunk = world::create_chunk(m_pos);
-    auto& biomes = chunk->biomes();
-
     chunk->set_blocks(std::move(m_blocks));
 
-    // Biome lookups are immutable per realm column
-    // so it makes sense to only submit this data once
-    std::call_once(biomes->initialized(), [&] {
-        biomes->set_biomes(std::move(m_biomes));
-    });
+    if(m_biomes) {
+        auto has_biome = std::any_of(m_biomes->cbegin(), m_biomes->cend(), [](biome_id_type id) {
+            return static_cast<bool>(id);
+        });
 
-    s_pending.erase(m_pos);
+        if(has_biome) {
+            chunk->biomes()->set_biomes(std::move(*m_biomes));
+        }
+
+        m_biomes.reset();
+    }
 
     globals::dispatcher.trigger(ChunkUpdateEvent(m_pos, chunk));
 }

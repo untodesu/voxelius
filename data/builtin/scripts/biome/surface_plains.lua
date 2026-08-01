@@ -46,4 +46,10 @@ biomes.add("surface_plains", {
       padding = 2,
     },
   },
+
+  tints = {
+    grass = { 0.57, 0.74, 0.30 },
+    foliage = { 0.42, 0.66, 0.28 },
+    water = { 0.25, 0.48, 0.85 },
+  },
 })

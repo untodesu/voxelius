@@ -2,7 +2,7 @@ blocks.add("pine_leaves", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "pine/pine_leaves_01.png",
       "pine/pine_leaves_02.png",
@@ -10,7 +10,7 @@ blocks.add("pine_leaves", {
     }
   },
 
-  model_name = "cube",
+  model_name = "leaves",
   bcoll_name = "cube",
 
   health = 1,

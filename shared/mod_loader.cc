@@ -192,6 +192,7 @@ void mod_loader::shutdown(void)
     biome_registry::purge();
     block_registry::purge();
     fluid_registry::purge();
+    tint_registry::purge();
 }
 
 std::span<const ModContext> mod_loader::all(void)

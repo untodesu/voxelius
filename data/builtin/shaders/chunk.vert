@@ -11,7 +11,8 @@ layout(location = 4) in uint vert_ChunkSlot;
 
 out vec2 vs_TexCoord;
 flat out uint vs_FrameIndex;
-flat out uint vs_TintIndex;
+flat out uint vs_MaskFrame;
+flat out vec3 vs_TintColor;
 out float vs_Shade;
 out float vs_AO;
 
@@ -33,15 +34,24 @@ vec3 unpack_position(uint data)
     return vec3(xpos, ypos, zpos) / 16.0;
 }
 
+vec3 unpack_tint_rgb565(uint data)
+{
+    uint bits = (data >> 16U) & 0xFFFFU;
+    float r = float(bits & 0x1FU) / 31.0;
+    float g = float((bits >> 5U) & 0x3FU) / 63.0;
+    float b = float((bits >> 11U) & 0x1FU) / 31.0;
+    return vec3(r, g, b);
+}
+
 void main(void)
 {
     vec3 local_position = unpack_position(vert_Position) + texelFetch(u_ChunkPositions, int(vert_ChunkSlot)).xyz;
 
     vs_TexCoord = vec2(float(vert_TexCoord & 0xFFU), float((vert_TexCoord >> 8U) & 0xFFU)) / 255.0;
+    vs_MaskFrame = (vert_TexCoord >> 16U) & 0xFFFFU;
 
     uint texture_index = vert_Texture & 0xFFFFu;
     uint frame_offset = (vert_Texture >> 16u) & 0xFFU;
-    uint tint_index = (vert_Texture >> 24u) & 0xFFU;
 
     uvec4 strip_data = texelFetch(u_AtlasStrips, int(texture_index));
     uint strip_frame_base = strip_data.x;
@@ -57,7 +67,7 @@ void main(void)
         vs_FrameIndex = strip_frame_base + frame_offset;
     }
 
-    vs_TintIndex = tint_index;
+    vs_TintColor = unpack_tint_rgb565(vert_Extras);
     vs_Shade = float((vert_Extras >> 8U) & 0xFFU) / 255.0;
 
     float ao_factor = float(vert_Extras & 0x03U) / 3.0;

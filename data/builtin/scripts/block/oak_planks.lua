@@ -4,7 +4,7 @@ local oak_planks_prototype = {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "oak/oak_planks_01.png",
       "oak/oak_planks_02.png",

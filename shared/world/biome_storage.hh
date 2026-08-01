@@ -22,12 +22,13 @@ public:
     void set_biome(const LocalPosXZ& pos, biome_id_type id);
 
     constexpr const array_type& biomes(void) const;
-    constexpr std::once_flag& initialized(void);
-    void set_biomes(array_type biomes);
+    constexpr bool initialized(void) const;
+
+    bool set_biomes(array_type biomes);
 
 private:
-    array_type m_biomes;
-    std::once_flag m_initialized;
+    array_type m_biomes {};
+    bool m_initialized { false };
 };
 
 constexpr const BiomeStorage::array_type& BiomeStorage::biomes(void) const
@@ -35,7 +36,7 @@ constexpr const BiomeStorage::array_type& BiomeStorage::biomes(void) const
     return m_biomes;
 }
 
-constexpr std::once_flag& BiomeStorage::initialized(void)
+constexpr bool BiomeStorage::initialized(void) const
 {
     return m_initialized;
 }

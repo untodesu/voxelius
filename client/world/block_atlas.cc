@@ -9,6 +9,7 @@
 
 #include "shared/res/block_model.hh"
 #include "shared/world/block_registry.hh"
+#include "shared/world/fluid_registry.hh"
 
 #include "client/globals.hh"
 #include "client/world/fluid_cache.hh"
@@ -16,12 +17,17 @@
 constexpr static int LAYER_SIZE = 4096;
 constexpr static int LAYER_CAP = 256;
 constexpr static int ATLAS_PADDING = 1;
+constexpr static int STUB_SIZE = 16;
 
 GLuint block_atlas::texture;
 GLuint block_atlas::vbo_frames;
 GLuint block_atlas::tbo_frames;
 GLuint block_atlas::vbo_strips;
 GLuint block_atlas::tbo_strips;
+
+const AtlasStrip* block_atlas::stub_white = nullptr;
+const AtlasStrip* block_atlas::stub_black = nullptr;
+const AtlasStrip* block_atlas::stub_check = nullptr;
 
 static bool s_compiled = false;
 static std::deque<AtlasStrip> s_strips;
@@ -122,12 +128,66 @@ static std::uint32_t pack_layers(std::vector<stbrp_rect>& rects, std::vector<std
     return num_layers;
 }
 
+static void stub_image_deleter(Image* image)
+{
+    delete[] image->pixels;
+    delete image;
+}
+
+static res::handle<Image> make_stub_image(const Eigen::Vector4i& color_a, const Eigen::Vector4i& color_b)
+{
+    auto image = new Image {};
+    image->width = STUB_SIZE;
+    image->height = STUB_SIZE;
+    image->pixels = new stbi_uc[STUB_SIZE * STUB_SIZE * 4];
+    image->channels = 4;
+
+    for(int y = 0; y < STUB_SIZE; ++y) {
+        for(int x = 0; x < STUB_SIZE; ++x) {
+            auto dest = image->pixels;
+            dest += 4 * y * STUB_SIZE;
+            dest += 4 * x;
+
+            if((x < STUB_SIZE / 2 && y < STUB_SIZE / 2) || (x >= STUB_SIZE / 2 && y >= STUB_SIZE / 2)) {
+                dest[0] = static_cast<stbi_uc>(color_a.x());
+                dest[1] = static_cast<stbi_uc>(color_a.y());
+                dest[2] = static_cast<stbi_uc>(color_a.z());
+                dest[3] = static_cast<stbi_uc>(color_a.w());
+            }
+            else {
+                dest[0] = static_cast<stbi_uc>(color_b.x());
+                dest[1] = static_cast<stbi_uc>(color_b.y());
+                dest[2] = static_cast<stbi_uc>(color_b.z());
+                dest[3] = static_cast<stbi_uc>(color_b.w());
+            }
+        }
+    }
+
+    return res::handle<Image>(std::move(image), &stub_image_deleter);
+}
+
+static AtlasStrip* make_stub_strip(const Eigen::Vector4i& color_a, const Eigen::Vector4i& color_b)
+{
+    s_pending.emplace_back(make_stub_image(color_a, color_b));
+
+    AtlasStrip strip {};
+    strip.frame_base = s_pending.size() - 1;
+    strip.frame_count = 1;
+    strip.index = s_strips.size();
+
+    s_strips.emplace_back(std::move(strip));
+    return &s_strips.back();
+}
+
 static void build_atlas(void)
 {
-    if(s_pending.empty()) {
-        s_compiled = true;
-        return;
-    }
+    auto color_black = Eigen::Vector4i(0x00, 0x00, 0x00, 0xFF);
+    auto color_white = Eigen::Vector4i(0xFF, 0xFF, 0xFF, 0xFF);
+    auto color_check = Eigen::Vector4i(0xFF, 0x00, 0xFF, 0xFF);
+
+    block_atlas::stub_black = make_stub_strip(color_black, color_black);
+    block_atlas::stub_white = make_stub_strip(color_white, color_white);
+    block_atlas::stub_check = make_stub_strip(color_check, color_black);
 
     std::vector<stbrp_rect> rects;
     rects.resize(s_pending.size());
@@ -296,6 +356,10 @@ void block_atlas::init(void)
     s_lookup.clear();
     s_pending.clear();
 
+    stub_white = nullptr;
+    stub_black = nullptr;
+    stub_check = nullptr;
+
     s_compiled = false;
 }
 
@@ -314,10 +378,10 @@ void block_atlas::init_late(void)
         }
 
         for(const auto& slot : model->texture_slots) {
-            auto frames = def.resolve_texture_slot(slot);
+            auto frames = def.resolve_albedo_slot(slot);
 
             if(!frames.has_value()) {
-                LOG_WARNING("{}: missing texture for slot '{}'", def.model_name.full_string(), slot);
+                LOG_WARNING("{}: missing albedo texture for slot '{}'", def.model_name.full_string(), slot);
                 continue;
             }
 
@@ -325,10 +389,45 @@ void block_atlas::init_late(void)
                 LOG_WARNING("{}: failed to load atlas strip for slot '{}'", def.model_name.full_string(), slot);
             }
         }
+
+        for(const auto& [slot, mask_id] : def.masks) {
+            auto mask_frames = std::array { mask_id };
+
+            if(nullptr == block_atlas::load(mask_frames)) {
+                LOG_WARNING("{}: failed to load mask for slot '{}'", def.model_name.full_string(), slot);
+            }
+        }
     }
 
-    // Fluid textures must be loaded before the atlas is compiled
-    fluid_cache::init_late();
+    for(const auto& def : fluid_registry::all_definitions()) {
+        auto albedo_still = block_atlas::load(def.albedo_still);
+
+        if(albedo_still == nullptr) {
+            LOG_WARNING("fluid {}: failed to load still textures", def.tint_name.full_string());
+        }
+
+        auto albedo_flowing = block_atlas::load(def.albedo_flowing);
+
+        if(albedo_flowing == nullptr) {
+            LOG_WARNING("fluid {}: failed to load flowing textures", def.tint_name.full_string());
+        }
+
+        if(def.mask_still.has_value()) {
+            std::array mask_frames { def.mask_still.value() };
+
+            if(nullptr == block_atlas::load(mask_frames)) {
+                LOG_WARNING("fluid {}: failed to load still mask", def.tint_name.full_string());
+            }
+        }
+
+        if(def.mask_flowing.has_value()) {
+            std::array mask_frames { def.mask_flowing.value() };
+
+            if(nullptr == block_atlas::load(mask_frames)) {
+                LOG_WARNING("fluid {}: failed to load flowing mask", def.tint_name.full_string());
+            }
+        }
+    }
 
     build_atlas();
 }
@@ -346,4 +445,8 @@ void block_atlas::shutdown(void)
     s_pending.clear();
 
     s_compiled = false;
+
+    stub_white = nullptr;
+    stub_black = nullptr;
+    stub_check = nullptr;
 }

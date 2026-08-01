@@ -2,7 +2,7 @@ blocks.add("dev_vtest", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "dev/vtest_F1.png",
       "dev/vtest_F2.png",

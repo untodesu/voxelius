@@ -4,7 +4,7 @@ local pine_planks_prototype = {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "pine/pine_planks_01.png",
       "pine/pine_planks_02.png",

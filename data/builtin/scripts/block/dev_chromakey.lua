@@ -2,7 +2,7 @@ blocks.add("dev_chromakey", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "dev/chromakey.png",
     }

@@ -8,10 +8,12 @@
       "rotation": [0, 45, 0],
       "faces": {
         "north": {
-          "texture": "nwse"
+          "texture": "nwse",
+          "tint": "builtin:foliage"
         },
         "south": {
-          "texture": "nwse"
+          "texture": "nwse",
+          "tint": "builtin:foliage"
         }
       }
     },
@@ -22,10 +24,12 @@
       "rotation": [0, 45, 0],
       "faces": {
         "east": {
-          "texture": "nesw"
+          "texture": "nesw",
+          "tint": "builtin:foliage"
         },
         "west": {
-          "texture": "nesw"
+          "texture": "nesw",
+          "tint": "builtin:foliage"
         }
       }
     }

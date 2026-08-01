@@ -2,7 +2,7 @@ blocks.add("dirt", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "dirt/dirt_01.png",
       "dirt/dirt_02.png",

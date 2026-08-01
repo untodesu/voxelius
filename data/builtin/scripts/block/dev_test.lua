@@ -2,7 +2,7 @@ blocks.add("dev_test", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     top = { "dev/test_top.png" },
     bottom = { "dev/test_bottom.png" },
     north = { "dev/test_north.png" },

@@ -63,7 +63,7 @@ std::shared_ptr<Chunk> world::create_chunk(const ChunkPos& pos)
     auto it = chunks.find(pos);
 
     if(it == chunks.cend()) {
-        auto realm = utils::realm_from_chunk(pos.y());
+        auto realm = utils::realm(pos.y());
         auto cpos_xz = ChunkPosXZ(pos.x(), pos.z());
         auto biomes = get_or_create_biomes(realm, cpos_xz);
 
@@ -338,7 +338,7 @@ biome_id_type world::get_biome(const BlockPos& pos)
 {
     auto cpos = utils::to_chunk(pos);
     auto lpos = utils::to_local(pos);
-    auto realm = utils::realm_from_chunk(cpos.y());
+    auto realm = utils::realm(cpos.y());
 
     if(realm == BIOME_REALM_VOID) {
         return BIOME_ID_NULL;

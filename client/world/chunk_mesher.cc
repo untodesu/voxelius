@@ -8,14 +8,17 @@
 #include "shared/coord.hh"
 #include "shared/globals.hh"
 #include "shared/utils/coord.hh"
+#include "shared/world/biome_registry.hh"
+#include "shared/world/biome_storage.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/block_storage.hh"
 #include "shared/world/chunk.hh"
 #include "shared/world/fluid_registry.hh"
+#include "shared/world/tint_registry.hh"
 #include "shared/world/world.hh"
 
 #include "client/world/block_atlas.hh"
-#include "client/world/block_models.hh"
+#include "client/world/bmodel_cache.hh"
 #include "client/world/chunk_mesh.hh"
 #include "client/world/chunk_vbo.hh"
 #include "client/world/fluid_cache.hh"
@@ -184,6 +187,81 @@ block_id_type BlockCache::get(const LocalPos& lpos) const
     return m_blocks[c_index];
 }
 
+class BiomeCache final {
+public:
+    constexpr static std::int16_t PADDING = BlockCache::PADDING;
+    constexpr static std::int16_t CHUNK_SIZE_I16 = BlockCache::CHUNK_SIZE_I16;
+
+    constexpr static std::size_t SIZE = BlockCache::SIZE;
+    constexpr static std::size_t AREA = SIZE * SIZE;
+
+    void init(const ChunkPos& cpos);
+
+    biome_id_type get(const LocalPosXZ& lpos) const;
+    biome_id_type get(const LocalPos& lpos) const;
+
+private:
+    std::array<biome_id_type, AREA> m_biomes;
+};
+
+void BiomeCache::init(const ChunkPos& cpos)
+{
+    m_biomes.fill(BIOME_ID_NULL);
+
+    for(ChunkPos::value_type dz = -1; dz <= 1; dz += 1) {
+        for(ChunkPos::value_type dx = -1; dx <= 1; dx += 1) {
+            auto query_pos = ChunkPos(cpos.x() + dx, cpos.y(), cpos.z() + dz);
+            auto chunk = world::find_chunk(query_pos);
+
+            if(chunk == nullptr || chunk->biomes() == nullptr) {
+                continue;
+            }
+
+            const auto& src = chunk->biomes()->biomes();
+            auto origin_x = PADDING + static_cast<std::int32_t>(dx * CHUNK_SIZE_I16);
+            auto origin_z = PADDING + static_cast<std::int32_t>(dz * CHUNK_SIZE_I16);
+
+            for(LocalPosXZ::value_type lz = 0; lz < CHUNK_SIZE_I16; lz += 1) {
+                auto hz = origin_z + static_cast<std::int32_t>(lz);
+
+                if(hz < 0 || static_cast<std::size_t>(hz) >= SIZE) {
+                    continue;
+                }
+
+                auto hz_sz = static_cast<std::size_t>(hz);
+                auto src_row = &src[static_cast<std::size_t>(lz) * constant::CHUNK_SIZE];
+
+                for(LocalPosXZ::value_type lx = 0; lx < CHUNK_SIZE_I16; lx += 1) {
+                    auto hx = origin_x + static_cast<std::int32_t>(lx);
+
+                    if(hx < 0 || static_cast<std::size_t>(hx) >= SIZE) {
+                        continue;
+                    }
+
+                    m_biomes[static_cast<std::size_t>(hx) + hz_sz * SIZE] = src_row[static_cast<std::size_t>(lx)];
+                }
+            }
+        }
+    }
+}
+
+biome_id_type BiomeCache::get(const LocalPosXZ& lpos) const
+{
+    auto hx = static_cast<std::size_t>(PADDING + lpos[0]);
+    auto hz = static_cast<std::size_t>(PADDING + lpos[1]);
+
+    if(hx >= SIZE || hz >= SIZE) {
+        return BIOME_ID_NULL;
+    }
+
+    return m_biomes[hx + hz * SIZE];
+}
+
+biome_id_type BiomeCache::get(const LocalPos& lpos) const
+{
+    return get(LocalPosXZ(lpos.x(), lpos.z()));
+}
+
 static float mesh_queue_distance_sq(const ChunkPos& cpos)
 {
     Eigen::Vector3f position = utils::to_fvec(cpos - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
@@ -207,16 +285,19 @@ private:
     bool is_culled_fluid(const LocalPos& lpos, block_face face, fluid_id_type fluid_id, bool face_flush) const;
     bool is_occluder(const LocalPos& lpos, block_face exposed_face) const;
 
-    void emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
+    void emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const CachedBlockModel_Quad> quads, const LocalPos& lpos,
         std::uint64_t entropy, std::optional<block_face> face) const;
     void emit_fluid_face(std::vector<ChunkMesh_Vertex>& out, const LocalPos& lpos, const std::array<Eigen::Vector3f, 4>& positions,
-        block_face face, const AtlasStrip* strip, unsigned tint_index,
+        block_face face, const AtlasStrip* strip, tint_id_type tint, std::uint32_t mask_frame,
         std::optional<std::array<Eigen::Vector2f, 4>> uvs_override = std::nullopt) const;
+
+    Eigen::Vector3f resolve_tint(const LocalPos& lpos, tint_id_type tint) const;
 
     void mesh_fluid(const LocalPos& lpos, const BlockDefinition& def);
     void mesh_block(const LocalPos& lpos, block_id_type id);
 
     BlockCache m_cache;
+    BiomeCache m_biomes;
     std::vector<ChunkMesh_Vertex> m_opaque;
     std::vector<ChunkMesh_Vertex> m_alpha;
     std::vector<ChunkMesh_Vertex> m_fluid;
@@ -249,7 +330,7 @@ static float shade_factor(const Eigen::Vector3f& normal)
 
 static void emit_quad_vertices(std::vector<ChunkMesh_Vertex>& out, const std::array<Eigen::Vector3f, 4>& positions_16ths,
     const std::array<Eigen::Vector2f, 4>& uvs, const std::array<std::uint32_t, 4>& ao_values, std::uint32_t texture, float shade,
-    bool animated, bool flip_quad)
+    bool animated, bool flip_quad, const Eigen::Vector3f& tint_rgb, std::uint32_t mask_frame)
 {
     std::array<int, 4> order;
 
@@ -269,9 +350,9 @@ static void emit_quad_vertices(std::vector<ChunkMesh_Vertex>& out, const std::ar
     for(auto corner : order) {
         ChunkMesh_Vertex vertex {};
         vertex.data_position = ChunkMesh_Vertex::pack_position(positions_16ths[corner]);
-        vertex.data_uv = ChunkMesh_Vertex::pack_uv(uvs[corner]);
+        vertex.data_uv = ChunkMesh_Vertex::pack_uv(uvs[corner], mask_frame);
         vertex.data_texture = texture;
-        vertex.data_extras = ChunkMesh_Vertex::pack_extras(ao_values[corner], shade, animated);
+        vertex.data_extras = ChunkMesh_Vertex::pack_extras(ao_values[corner], shade, animated, tint_rgb);
         out.push_back(vertex);
     }
 }
@@ -307,6 +388,7 @@ static void sync_part(ChunkMesh_Part& part, std::uint32_t slot)
 MeshingTask::MeshingTask(entt::entity entity, const ChunkPos& cpos) : m_entity(entity), m_cpos(cpos)
 {
     m_cache.init(cpos);
+    m_biomes.init(cpos);
 }
 
 void MeshingTask::process(void)
@@ -424,7 +506,7 @@ bool MeshingTask::is_culled_block(const LocalPos& lpos, block_face face, block_r
         return false;
     }
 
-    auto neighbour_baked = block_models::find(neighbour_id);
+    auto neighbour_baked = bmodel_cache::find(neighbour_id);
     auto neighbour_def = block_registry::find_definition(neighbour_id);
 
     if(neighbour_baked == nullptr || neighbour_def == nullptr) {
@@ -465,7 +547,7 @@ bool MeshingTask::is_culled_fluid(const LocalPos& lpos, block_face face, fluid_i
             return false;
         }
 
-        auto neighbour_baked = block_models::find(neighbour_id);
+        auto neighbour_baked = bmodel_cache::find(neighbour_id);
 
         if(neighbour_baked == nullptr) {
             return false;
@@ -491,7 +573,7 @@ bool MeshingTask::is_occluder(const LocalPos& lpos, block_face exposed_face) con
         return false;
     }
 
-    auto baked = block_models::find(id);
+    auto baked = bmodel_cache::find(id);
 
     if(baked == nullptr) {
         return false;
@@ -500,7 +582,7 @@ bool MeshingTask::is_occluder(const LocalPos& lpos, block_face exposed_face) con
     return baked->fully_covered[opposite_face(exposed_face)];
 }
 
-void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const BakedBlockModel_Quad> quads, const LocalPos& lpos,
+void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span<const CachedBlockModel_Quad> quads, const LocalPos& lpos,
     std::uint64_t entropy, std::optional<block_face> face) const
 {
     auto block_origin = lpos.cast<float>() * 16.0f;
@@ -508,8 +590,8 @@ void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span
     for(const auto& quad : quads) {
         std::uint32_t frame_offset = 0;
 
-        if(quad.frame_count > 0 && !quad.animated) {
-            frame_offset = static_cast<std::uint32_t>(entropy % quad.frame_count);
+        if(quad.albedo_frames > 0 && !quad.animated) {
+            frame_offset = static_cast<std::uint32_t>(entropy % quad.albedo_frames);
         }
 
         std::array<Eigen::Vector3f, 4> positions_16ths;
@@ -535,15 +617,36 @@ void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span
             shade = shade_factor(edge_u.cross(edge_v).normalized());
         }
 
-        auto texture = ChunkMesh_Vertex::pack_texture(quad.texture_index, frame_offset, quad.tint_index);
+        auto tint_rgb = resolve_tint(lpos, quad.tint);
+        auto texture = ChunkMesh_Vertex::pack_texture(quad.albedo_strip, frame_offset, quad.tint);
 
         if(ao_values[0] + ao_values[2] < ao_values[1] + ao_values[3]) {
-            emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, texture, shade, quad.animated, true);
+            emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, texture, shade, quad.animated, true, tint_rgb, quad.mask_frame);
         }
         else {
-            emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, texture, shade, quad.animated, false);
+            emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, texture, shade, quad.animated, false, tint_rgb, quad.mask_frame);
         }
     }
+}
+
+Eigen::Vector3f MeshingTask::resolve_tint(const LocalPos& lpos, tint_id_type tint) const
+{
+    if(tint == TINT_ID_NULL) {
+        return Eigen::Vector3f::Ones();
+    }
+
+    auto biome_id = m_biomes.get(lpos);
+    auto biome_def = biome_registry::find_definition(biome_id);
+
+    if(biome_def && tint < biome_def->tint_colors.size()) {
+        return biome_def->tint_colors[tint];
+    }
+
+    if(auto tint_def = tint_registry::find_definition(tint)) {
+        return tint_def->default_color;
+    }
+
+    return Eigen::Vector3f::Ones();
 }
 
 static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos, const BlockDefinition* def, fluid_gravity gravity,
@@ -572,7 +675,7 @@ static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos,
     }
 
     if(def->fluid_level >= full_level && above_def && above_def->render == BLOCK_RENDER_SOLID) {
-        auto above_baked = block_models::find(above_id);
+        auto above_baked = bmodel_cache::find(above_id);
         auto face = opposite_face(anti_gravity);
 
         if(above_baked && above_baked->fully_covered[face]) {
@@ -718,7 +821,8 @@ static std::array<Eigen::Vector2f, 4> flowing_top_uvs(float flow_x, float flow_z
 }
 
 void MeshingTask::emit_fluid_face(std::vector<ChunkMesh_Vertex>& out, const LocalPos& lpos, const std::array<Eigen::Vector3f, 4>& positions,
-    block_face face, const AtlasStrip* strip, unsigned tint_index, std::optional<std::array<Eigen::Vector2f, 4>> uvs_override) const
+    block_face face, const AtlasStrip* strip, tint_id_type tint, std::uint32_t mask_frame,
+    std::optional<std::array<Eigen::Vector2f, 4>> uvs_override) const
 {
     if(strip == nullptr) {
         return;
@@ -766,13 +870,14 @@ void MeshingTask::emit_fluid_face(std::vector<ChunkMesh_Vertex>& out, const Loca
     ao_values.fill(3);
 
     auto strip_index = static_cast<std::uint32_t>(strip->index);
-    auto texture = ChunkMesh_Vertex::pack_texture(strip_index, 0, tint_index);
+    auto texture = ChunkMesh_Vertex::pack_texture(strip_index, 0, tint);
+    auto tint_rgb = resolve_tint(lpos, tint);
 
     if(positions[0].y() + positions[2].y() < positions[1].y() + positions[3].y()) {
-        emit_quad_vertices(out, positions_16ths, uvs, ao_values, texture, 1.0f, true, true);
+        emit_quad_vertices(out, positions_16ths, uvs, ao_values, texture, 1.0f, true, true, tint_rgb, mask_frame);
     }
     else {
-        emit_quad_vertices(out, positions_16ths, uvs, ao_values, texture, 1.0f, true, false);
+        emit_quad_vertices(out, positions_16ths, uvs, ao_values, texture, 1.0f, true, false, tint_rgb, mask_frame);
     }
 }
 
@@ -794,7 +899,7 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
     auto surface_height = fluid_surface_height(m_cache, lpos, &def, fluid->gravity, fluid->full_level);
     auto corners = fluid_corner_heights(m_cache, lpos, def.fluid, fluid->gravity, surface_height, fluid->full_level);
     auto& bucket = fluid->opaque ? m_opaque : m_fluid;
-    auto tint_index = fluid->tint_index.value_or(0);
+    auto tint = fluid->tint;
 
     auto use_still = def.fluid_level >= fluid->full_level;
     auto flow_x = 0.0f;
@@ -939,31 +1044,51 @@ void MeshingTask::mesh_fluid(const LocalPos& lpos, const BlockDefinition& def)
                 continue;
             }
 
-            emit_fluid_face(bucket, lpos, positions, face, cached->flowing, tint_index);
+            auto mask = block_atlas::stub_white;
+
+            if(fluid->mask_flowing.has_value()) {
+                mask = cached->mask_flowing ? cached->mask_flowing : block_atlas::stub_white;
+            }
+
+            emit_fluid_face(bucket, lpos, positions, face, cached->albedo_flowing, tint, static_cast<std::uint32_t>(mask->frame_base));
         }
         else if(surface_face) {
             const AtlasStrip* strip;
 
             if(use_still) {
-                strip = cached->still;
+                strip = cached->albedo_still;
             }
-            else if(cached->flowing) {
-                strip = cached->flowing;
+            else if(cached->albedo_flowing) {
+                strip = cached->albedo_flowing;
             }
             else {
-                strip = cached->still;
+                strip = cached->albedo_still;
             }
 
             std::optional<std::array<Eigen::Vector2f, 4>> uvs;
 
-            if(!use_still && cached->flowing) {
+            if(!use_still && cached->albedo_flowing) {
                 uvs = flowing_top_uvs(flow_x, flow_z);
             }
 
-            emit_fluid_face(bucket, lpos, positions, face, strip, tint_index, uvs);
+            auto mask = block_atlas::stub_white;
+            auto& fluid_mask = use_still ? fluid->mask_still : fluid->mask_flowing;
+            auto cached_mask = use_still ? cached->mask_still : cached->mask_flowing;
+
+            if(fluid_mask.has_value()) {
+                mask = cached_mask ? cached_mask : block_atlas::stub_white;
+            }
+
+            emit_fluid_face(bucket, lpos, positions, face, strip, tint, static_cast<std::uint32_t>(mask->frame_base), uvs);
         }
         else {
-            emit_fluid_face(bucket, lpos, positions, face, cached->still, tint_index);
+            auto mask = block_atlas::stub_white;
+
+            if(fluid->mask_still.has_value()) {
+                mask = cached->mask_still ? cached->mask_still : block_atlas::stub_white;
+            }
+
+            emit_fluid_face(bucket, lpos, positions, face, cached->albedo_still, tint, static_cast<std::uint32_t>(mask->frame_base));
         }
     }
 }
@@ -980,7 +1105,7 @@ void MeshingTask::mesh_block(const LocalPos& lpos, block_id_type id)
         return;
     }
 
-    auto baked = block_models::find(id);
+    auto baked = bmodel_cache::find(id);
 
     if(baked && def->render) {
         std::array<bool, 6> culled {};
@@ -1113,13 +1238,6 @@ static void mark_border_neighbors_dirty(const ChunkPos& cpos, const LocalPos& lp
     }
 }
 
-static void on_chunk_create(const ChunkCreateEvent& event)
-{
-    auto chunk = event.chunk();
-    mark_dirty(chunk->entity());
-    mark_neighbors_dirty(event.pos());
-}
-
 static void on_chunk_update(const ChunkUpdateEvent& event)
 {
     auto chunk = event.chunk();
@@ -1147,7 +1265,10 @@ static void on_block_update(const BlockUpdateEvent& event)
 
 void chunk_mesher::init(void)
 {
-    globals::dispatcher.sink<ChunkCreateEvent>().connect<&on_chunk_create>();
+    // ChunkCreateEvent is intentionally ignored: create_chunk inserts an empty
+    // storage, and worldgen (or load) always follows with ChunkUpdateEvent once
+    // blocks are ready. Remeshing on create only floods the shared thread pool
+    // with empty/partial meshes and steals workers from worldgen.
     globals::dispatcher.sink<ChunkUpdateEvent>().connect<&on_chunk_update>();
     globals::dispatcher.sink<ChunkRemoveEvent>().connect<&on_chunk_remove>();
     globals::dispatcher.sink<BlockUpdateEvent>().connect<&on_block_update>();

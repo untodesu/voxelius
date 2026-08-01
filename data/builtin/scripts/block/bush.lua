@@ -1,13 +1,13 @@
 blocks.add("bush", {
   render = blocks.RENDER_ALPHA,
 
-  textures = {
+  albedo = {
     default = {
       "bush/bush_01.png"
     }
   },
 
-  model_name = "cross",
+  model_name = "bush",
   bcoll_name = "bush",
 
   replaceable = true,

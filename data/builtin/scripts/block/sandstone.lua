@@ -2,7 +2,7 @@ blocks.add("sandstone", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "sandstone/sandstone_01.png",
       "sandstone/sandstone_02.png",

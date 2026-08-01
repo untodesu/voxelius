@@ -10,6 +10,10 @@ Block models live under: `namespace:models/block`
 
 > **NOTE:** if the slot is missing, the `default` slot is used instead.
 
+<!-- separator -->
+
+> **NOTE:** namespaced IDs inside block models _must_ have a namespace. This is a thing because the engine's resource management only uses namespaced IDs for path resolutions and raw C++ load/free functions don't get a namespace as an argument
+
 ## Top-level fields
 
 |Field|Type|Required|Default|Description|
@@ -37,7 +41,7 @@ Block models live under: `namespace:models/block`
 |`uv`|`number[4]`|no|dynamic|Lets a face sample a sub-rect of the texture|
 |`uv_rotation`|`number`|no|0|UV rotation: 0, 90, 180, or 270|
 |`cullface`|`string`|no|N/D|Skip this face if the neighbouring block in that direction has a face marked opaque to touch|
-|`tint`|`string`|no|`null`|Tint group index used by climate and biomes|
+|`tint`|`string`|no|`null`|Namespaced tint id|
 
 ### UV resolution
 

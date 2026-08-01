@@ -1,6 +1,10 @@
 print("mod:", core.NAMESPACE)
 print("engine version:", core.VERSION)
 
+tints.add("grass", { default_color = { 0.57, 0.75, 0.28 } })
+tints.add("foliage", { default_color = { 0.40, 0.65, 0.25 } })
+tints.add("water", { default_color = { 0.25, 0.45, 0.85 } })
+
 dofile("fluid/water.lua")
 
 dofile("block/bush.lua")

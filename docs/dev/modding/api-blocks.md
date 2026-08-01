@@ -149,7 +149,8 @@ Returns the numeric block ID.
 |Field|Type|Required|Default|Description|
 |----|----|----|----|----|
 |`render`|`integer`|yes|N/D|One of `blocks.RENDER_XXXX` constants|
-|`textures`|`table`|depends|`{}`|Textures to attach to the block model|
+|`albedo`|`table`|depends|`{}`|Albedo textures to attach to the block model|
+|`masks`|`table`|no|`{}`|Mask textures to attach to the block model|
 |`animated`|`boolean`|no|`false`|If true, textures in `textures` are animation frames instead of world-position random frames|
 |`model_name`|`string`|depends|N/D|[Block model](format-bmodel.md) name for this variant|
 |`model_offset`|`number[3]`|depends|`{0, 0, 0}`|Offset of the resolved block model|
@@ -173,6 +174,23 @@ Returns the numeric block ID.
 |`on_place`|`function`|no|`nil`|Placement handler. Can allow or deny placement|
 |`on_break`|`function`|no|`nil`|Break handler|
 |`on_interact`|`function`|no|`nil`|Interaction handler|
+
+### Textures
+
+#### Albedo
+
+Each texture slot is a list of textures used by the engine as either randomized-by-position variations, or as an animation frames if `animated` field is assigned `true`  
+
+#### Masks
+
+Each texture slot can have a mask texture used by the engine for certain purposes. Each color channel of an RGBA mask texture can (and will in the future) be used for some per-face logic
+
+|Channel|Designation|Description|
+|----|----|----|
+|Red|Tint mask|Actual tint color is multiplied with this value in shaders|
+|Green|Unused|N/A|
+|Blue|Unused|N/A|
+|Alpha|Unused|N/A|
 
 ### Facing rotation
 

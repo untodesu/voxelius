@@ -46,6 +46,7 @@ Returns the numeric biome ID.
 |`offset`|`number`|no|0|Added to climate distance when picking a biome. Larger values make the biome harder to win / effectively smaller|
 |`palette`|`table`|no|`{}`|Biome block palette|
 |`scatter`|`table[]`|no|`{}`|List of features to scatter|
+|`tints`|`table`|no|`{}`|Tint group override colors|
 
 ## Palette table
 

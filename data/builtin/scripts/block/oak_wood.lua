@@ -4,7 +4,7 @@ logdef.add_block("oak_log", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "oak/oak_wood_01.png",
       "oak/oak_wood_02.png",
@@ -42,7 +42,7 @@ blocks.add("oak_wood", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "oak/oak_wood_01.png",
       "oak/oak_wood_02.png",

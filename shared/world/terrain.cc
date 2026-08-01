@@ -9,7 +9,7 @@
 
 bool terrain::generate(const ChunkPos& pos, BlockStorage& blocks, BiomeStorage::array_type& biomes)
 {
-    auto realm = utils::realm_from_chunk(pos.y());
+    auto realm = utils::realm(pos.y());
     auto generated = false;
 
     blocks.fill(BLOCK_ID_NULL);

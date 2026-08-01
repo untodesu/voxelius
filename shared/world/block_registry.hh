@@ -19,7 +19,7 @@ struct BlockOverridePatch final {
     BlockOverridePatch(void) = default;
 
     std::optional<block_render> render;
-    std::optional<emhash8::HashMap<std::string, std::vector<Identifier>>> textures;
+    std::optional<emhash8::HashMap<std::string, std::vector<Identifier>>> albedo;
     std::optional<emhash8::HashMap<std::string, Identifier>> masks;
     std::optional<bool> animated;
 

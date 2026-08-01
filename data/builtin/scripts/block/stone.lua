@@ -4,7 +4,7 @@ local stone_prototype = {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "stone/stone_01.png",
       "stone/stone_02.png",

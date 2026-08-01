@@ -19,7 +19,7 @@ end
 fluids.add("water", {
     gravity = fluids.GRAVITY_DOWN,
 
-    textures = {
+    albedo = {
         still = still_frames,
         flowing = flowing_frames,
     },
@@ -28,6 +28,8 @@ fluids.add("water", {
 
     fog_density = 10.0,
     fog_color = { 0.0, 0.0, 0.5 },
+
+    tint = "water",
 })
 
 blocks.add("water", {

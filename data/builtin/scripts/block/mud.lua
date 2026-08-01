@@ -2,7 +2,7 @@ blocks.add("mud", {
   render = blocks.RENDER_SOLID,
   animated = false,
 
-  textures = {
+  albedo = {
     default = {
       "mud/mud_01.png",
       "mud/mud_02.png",

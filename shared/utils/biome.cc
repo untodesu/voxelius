@@ -9,7 +9,7 @@ static bool check_range(ChunkPos::value_type y, ChunkPos::value_type min, ChunkP
     return y >= min && y <= max;
 }
 
-biome_realm utils::realm_from_chunk(ChunkPos::value_type y)
+biome_realm utils::realm(ChunkPos::value_type y)
 {
     if(check_range(y, constant::SURFACE_MIN_CHUNK_Y, constant::SURFACE_MAX_CHUNK_Y)) {
         return BIOME_REALM_SURFACE;
@@ -25,9 +25,4 @@ biome_realm utils::realm_from_chunk(ChunkPos::value_type y)
     }
 
     return BIOME_REALM_VOID;
-}
-
-biome_realm utils::realm_from_block(BlockPos::value_type y)
-{
-    return realm_from_chunk(y >> constant::CHUNK_SIZE_LOG2);
 }

@@ -54,4 +54,10 @@ biomes.add("surface_forest_pine", {
       padding = 3,
     },
   },
+
+  tints = {
+    grass = { 0.38, 0.62, 0.30 },
+    foliage = { 0.22, 0.48, 0.28 },
+    water = { 0.18, 0.40, 0.72 },
+  },
 })

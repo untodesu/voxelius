@@ -5,14 +5,14 @@ struct ChunkMesh_Vertex final {
     static constexpr std::uint32_t ANIMATED_BIT = 1U << 2U;
 
     static std::uint32_t pack_position(const Eigen::Vector3f& position_16ths);
-    static std::uint32_t pack_uv(const Eigen::Vector2f& uv);
+    static std::uint32_t pack_uv(const Eigen::Vector2f& uv, std::uint32_t mask_frame);
     static std::uint32_t pack_texture(std::uint32_t texture_index, std::uint32_t frame_offset, std::uint32_t tint_index);
-    static std::uint32_t pack_extras(std::uint32_t ao, float shade, bool animated);
+    static std::uint32_t pack_extras(std::uint32_t ao, float shade, bool animated, const Eigen::Vector3f& tint_rgb);
 
     std::uint32_t data_position;   ///< XYZ in 1/16ths (10_10_10)
-    std::uint32_t data_uv;         ///< UV as unorm8x2
+    std::uint32_t data_uv;         ///< UV as unorm8x2, mask atlas frame in high 16 bits
     std::uint32_t data_texture;    ///< Texture index, frame offset and tint index
-    std::uint32_t data_extras;     ///< AO (2 bit), ANIMATED_BIT, shade (unorm8)
+    std::uint32_t data_extras;     ///< AO (2 bit), ANIMATED_BIT, shade (unorm8), tint RGB565
     std::uint32_t data_chunk_slot; ///< index into u_ChunkPositions TBO
 };
 

@@ -350,6 +350,8 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
             auto key_id = Identifier::from_string(key_str.value(), ctx->name_space());
 
             def.tint_map.insert_or_assign(std::move(key_id), std::move(value_vec.value()));
+
+            lua_pop(L, 1);
         }
     }
 

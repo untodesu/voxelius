@@ -85,8 +85,8 @@ BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverr
         base.render = patch.render.value();
     }
 
-    if(patch.textures) {
-        base.textures = patch.textures.value();
+    if(patch.albedo) {
+        base.albedo = patch.albedo.value();
     }
 
     if(patch.masks) {

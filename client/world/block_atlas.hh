@@ -41,6 +41,13 @@ extern GLuint tbo_strips;
 
 namespace block_atlas
 {
+extern const AtlasStrip* stub_white; // fully white stub texture
+extern const AtlasStrip* stub_black; // fully black stub texture
+extern const AtlasStrip* stub_check; // checkerboard stub texture
+} // namespace block_atlas
+
+namespace block_atlas
+{
 const AtlasStrip* load(std::span<const Identifier> textures);
 const AtlasStrip* find(std::span<const Identifier> textures);
 } // namespace block_atlas

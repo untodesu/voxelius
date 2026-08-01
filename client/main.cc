@@ -21,7 +21,7 @@
 #include "client/res/texture2D.hh"
 #include "client/video.hh"
 #include "client/world/block_atlas.hh"
-#include "client/world/block_models.hh"
+#include "client/world/bmodel_cache.hh"
 #include "client/world/chunk_mesher.hh"
 #include "client/world/fluid_cache.hh"
 #include "client/world/skybox.hh"
@@ -208,7 +208,8 @@ static void wrapped_main(int argc, char** argv)
     gui::init_late();
 
     block_atlas::init_late();
-    block_models::init_late();
+    fluid_cache::init_late();
+    bmodel_cache::init_late();
 
     shared_game::init_late();
 
@@ -292,7 +293,7 @@ static void wrapped_main(int argc, char** argv)
     LOG_INFO("avg framerate: {:.03f} FPS ({:.03f} ms)", 1.0f / globals::window_frametime_avg, 1000.0f * globals::window_frametime_avg);
     LOG_INFO("last frame I drew {} vertices ({} draw calls)", globals::num_draw_vertices, globals::num_draw_calls);
 
-    block_models::shutdown();
+    bmodel_cache::shutdown();
     fluid_cache::shutdown();
     block_atlas::shutdown();
 
