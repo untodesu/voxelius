@@ -399,24 +399,34 @@ void block_atlas::init_late(void)
         }
     }
 
-    for(const auto& def : fluid_registry::all_definitions()) {
+    auto fluid_definitions = fluid_registry::all_definitions();
+
+    for(fluid_id_type id = 0; id < fluid_definitions.size(); id += 1) {
+        if(id == FLUID_ID_NULL) {
+            continue;
+        }
+
+        auto& def = fluid_definitions[id];
+        auto fluid_name = fluid_registry::name_of(id);
+        auto fluid_label = fluid_name.has_value() ? fluid_name->full_string() : std::format("#{}", id);
+
         auto albedo_still = block_atlas::load(def.albedo_still);
 
         if(albedo_still == nullptr) {
-            LOG_WARNING("fluid {}: failed to load still textures", def.tint_name.full_string());
+            LOG_WARNING("fluid {}: failed to load still textures", fluid_label);
         }
 
         auto albedo_flowing = block_atlas::load(def.albedo_flowing);
 
         if(albedo_flowing == nullptr) {
-            LOG_WARNING("fluid {}: failed to load flowing textures", def.tint_name.full_string());
+            LOG_WARNING("fluid {}: failed to load flowing textures", fluid_label);
         }
 
         if(def.mask_still.has_value()) {
             std::array mask_frames { def.mask_still.value() };
 
             if(nullptr == block_atlas::load(mask_frames)) {
-                LOG_WARNING("fluid {}: failed to load still mask", def.tint_name.full_string());
+                LOG_WARNING("fluid {}: failed to load still mask", fluid_label);
             }
         }
 
@@ -424,7 +434,7 @@ void block_atlas::init_late(void)
             std::array mask_frames { def.mask_flowing.value() };
 
             if(nullptr == block_atlas::load(mask_frames)) {
-                LOG_WARNING("fluid {}: failed to load flowing mask", def.tint_name.full_string());
+                LOG_WARNING("fluid {}: failed to load flowing mask", fluid_label);
             }
         }
     }

@@ -324,11 +324,11 @@ void chunk_renderer::init(void)
     glBindBuffer(GL_ARRAY_BUFFER, chunk_vbo::handle);
 
     auto stride = static_cast<GLsizei>(sizeof(ChunkMesh_Vertex));
-    glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_position)));
-    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_uv)));
-    glVertexAttribIPointer(2, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_texture)));
-    glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_extras)));
-    glVertexAttribIPointer(4, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_chunk_slot)));
+    glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_1)));
+    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_2)));
+    glVertexAttribIPointer(2, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_3)));
+    glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_4)));
+    glVertexAttribIPointer(4, 1, GL_UNSIGNED_INT, stride, (const void*)(offsetof(ChunkMesh_Vertex, data_5)));
 
     for(GLuint i = 0; i < 5; ++i) {
         glEnableVertexAttribArray(i);

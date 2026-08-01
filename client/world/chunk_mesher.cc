@@ -152,7 +152,7 @@ static float shade_factor(const Eigen::Vector3f& normal)
 }
 
 static void emit_quad_vertices(std::vector<ChunkMesh_Vertex>& out, const std::array<Eigen::Vector3f, 4>& positions_16ths,
-    const std::array<Eigen::Vector2f, 4>& uvs, const std::array<std::uint32_t, 4>& ao_values, std::uint32_t texture, float shade,
+    const std::array<Eigen::Vector2f, 4>& uvs, const std::array<std::uint32_t, 4>& ao_values, std::uint32_t data_3, float shade,
     bool animated, bool flip_quad, const Eigen::Vector3f& tint_rgb, std::uint32_t mask_frame)
 {
     std::array<int, 4> order;
@@ -172,10 +172,10 @@ static void emit_quad_vertices(std::vector<ChunkMesh_Vertex>& out, const std::ar
 
     for(auto corner : order) {
         ChunkMesh_Vertex vertex {};
-        vertex.data_position = ChunkMesh_Vertex::pack_position(positions_16ths[corner]);
-        vertex.data_uv = ChunkMesh_Vertex::pack_uv(uvs[corner], mask_frame);
-        vertex.data_texture = texture;
-        vertex.data_extras = ChunkMesh_Vertex::pack_extras(ao_values[corner], shade, animated, tint_rgb);
+        vertex.data_1 = ChunkMesh_Vertex::pack_1(positions_16ths[corner]);
+        vertex.data_2 = ChunkMesh_Vertex::pack_2(uvs[corner], mask_frame);
+        vertex.data_3 = data_3;
+        vertex.data_4 = ChunkMesh_Vertex::pack_4(ao_values[corner], shade, animated, tint_rgb);
         out.push_back(vertex);
     }
 }
@@ -196,7 +196,7 @@ static void sync_part(ChunkMesh_Part& part, std::uint32_t slot)
     }
 
     for(auto& vertex : part.vertices) {
-        vertex.data_chunk_slot = slot;
+        vertex.data_5 = slot;
     }
 
     if(old_count > 0) {
@@ -441,13 +441,13 @@ void MeshingTask::emit_block_quads(std::vector<ChunkMesh_Vertex>& out, std::span
         }
 
         auto tint_rgb = resolve_tint(lpos, quad.tint);
-        auto texture = ChunkMesh_Vertex::pack_texture(quad.albedo_strip, frame_offset, quad.tint);
+        auto data_3 = ChunkMesh_Vertex::pack_3(quad.albedo_strip, frame_offset);
 
         if(ao_values[0] + ao_values[2] < ao_values[1] + ao_values[3]) {
-            emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, texture, shade, quad.animated, true, tint_rgb, quad.mask_frame);
+            emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, data_3, shade, quad.animated, true, tint_rgb, quad.mask_frame);
         }
         else {
-            emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, texture, shade, quad.animated, false, tint_rgb, quad.mask_frame);
+            emit_quad_vertices(out, positions_16ths, quad.uvs, ao_values, data_3, shade, quad.animated, false, tint_rgb, quad.mask_frame);
         }
     }
 }
@@ -693,14 +693,14 @@ void MeshingTask::emit_fluid_face(std::vector<ChunkMesh_Vertex>& out, const Loca
     ao_values.fill(3);
 
     auto strip_index = static_cast<std::uint32_t>(strip->index);
-    auto texture = ChunkMesh_Vertex::pack_texture(strip_index, 0, tint);
+    auto data_3 = ChunkMesh_Vertex::pack_3(strip_index, 0);
     auto tint_rgb = resolve_tint(lpos, tint);
 
     if(positions[0].y() + positions[2].y() < positions[1].y() + positions[3].y()) {
-        emit_quad_vertices(out, positions_16ths, uvs, ao_values, texture, 1.0f, true, true, tint_rgb, mask_frame);
+        emit_quad_vertices(out, positions_16ths, uvs, ao_values, data_3, 1.0f, true, true, tint_rgb, mask_frame);
     }
     else {
-        emit_quad_vertices(out, positions_16ths, uvs, ao_values, texture, 1.0f, true, false, tint_rgb, mask_frame);
+        emit_quad_vertices(out, positions_16ths, uvs, ao_values, data_3, 1.0f, true, false, tint_rgb, mask_frame);
     }
 }
 

@@ -348,8 +348,9 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
             }
 
             auto key_id = Identifier::from_string(key_str.value(), ctx->name_space());
+            auto color = value_vec->cwiseMin(1.0f).cwiseMax(0.0f);
 
-            def.tint_map.insert_or_assign(std::move(key_id), std::move(value_vec.value()));
+            def.tint_map.insert_or_assign(std::move(key_id), std::move(color));
 
             lua_pop(L, 1);
         }

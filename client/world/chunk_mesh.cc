@@ -23,12 +23,12 @@ static std::uint32_t pack_unorm8(float value)
     return static_cast<std::uint32_t>(std::lround(std::clamp(value, 0.0f, 1.0f) * 255.0f)) & 0xFFU;
 }
 
-std::uint32_t ChunkMesh_Vertex::pack_position(const Eigen::Vector3f& position_16ths)
+std::uint32_t ChunkMesh_Vertex::pack_1(const Eigen::Vector3f& position_16ths)
 {
     return pack_10_10_10(position_16ths, INT32_C(16));
 }
 
-std::uint32_t ChunkMesh_Vertex::pack_uv(const Eigen::Vector2f& uv, std::uint32_t mask_frame)
+std::uint32_t ChunkMesh_Vertex::pack_2(const Eigen::Vector2f& uv, std::uint32_t mask_frame)
 {
     std::uint32_t result = 0;
     result |= pack_unorm8(uv.x());
@@ -37,15 +37,14 @@ std::uint32_t ChunkMesh_Vertex::pack_uv(const Eigen::Vector2f& uv, std::uint32_t
     return result;
 }
 
-std::uint32_t ChunkMesh_Vertex::pack_texture(std::uint32_t texture_index, std::uint32_t frame_offset, std::uint32_t tint_index)
+std::uint32_t ChunkMesh_Vertex::pack_3(std::uint32_t texture_index, std::uint32_t frame_offset)
 {
     std::uint32_t result = texture_index & 0xFFFFU;
     result |= (frame_offset & 0xFFU) << 16U;
-    result |= (tint_index & 0xFFU) << 24U;
     return result;
 }
 
-std::uint32_t ChunkMesh_Vertex::pack_extras(std::uint32_t ao, float shade, bool animated, const Eigen::Vector3f& tint_rgb)
+std::uint32_t ChunkMesh_Vertex::pack_4(std::uint32_t ao, float shade, bool animated, const Eigen::Vector3f& tint_rgb)
 {
     auto r = static_cast<std::uint32_t>(std::lround(std::clamp(tint_rgb.x(), 0.0f, 1.0f) * 31.0f)) & 0x1FU;
     auto g = static_cast<std::uint32_t>(std::lround(std::clamp(tint_rgb.y(), 0.0f, 1.0f) * 63.0f)) & 0x3FU;
@@ -54,8 +53,14 @@ std::uint32_t ChunkMesh_Vertex::pack_extras(std::uint32_t ao, float shade, bool 
     std::uint32_t result = 0;
     result |= ao & 0x03U;
     result |= pack_unorm8(shade) << 8U;
-    result |= animated ? ANIMATED_BIT : 0U;
-    result |= (r | (g << 5U) | (b << 11U)) << 16U;
+    result |= r << 16U;
+    result |= g << 21U;
+    result |= b << 27U;
+
+    if(animated) {
+        result |= ANIMATED_BIT;
+    }
+
     return result;
 }
 
