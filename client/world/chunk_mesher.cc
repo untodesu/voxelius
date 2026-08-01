@@ -9,7 +9,6 @@
 #include "shared/globals.hh"
 #include "shared/utils/coord.hh"
 #include "shared/world/biome_registry.hh"
-#include "shared/world/biome_storage.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/block_storage.hh"
 #include "shared/world/chunk.hh"
@@ -17,7 +16,9 @@
 #include "shared/world/tint_registry.hh"
 #include "shared/world/world.hh"
 
+#include "client/world/biome_cache.hh"
 #include "client/world/block_atlas.hh"
+#include "client/world/block_cache.hh"
 #include "client/world/bmodel_cache.hh"
 #include "client/world/chunk_mesh.hh"
 #include "client/world/chunk_vbo.hh"
@@ -82,184 +83,6 @@ static ChunkPos face_delta(block_face face)
     }
 
     return ChunkPos::Zero();
-}
-
-static void flatten_chunk(const Chunk& chunk, std::span<block_id_type> out)
-{
-    chunk.blocks().flatten(out);
-}
-
-static std::size_t cache_index(std::size_t x, std::size_t y, std::size_t z, std::size_t size)
-{
-    return x + y * size + z * size * size;
-}
-
-class BlockCache final {
-public:
-    constexpr static std::int16_t PADDING = 2;
-    constexpr static std::int16_t CHUNK_SIZE_I16 = static_cast<std::int16_t>(constant::CHUNK_SIZE);
-
-    constexpr static std::size_t SIZE = constant::CHUNK_SIZE + 2 * PADDING;
-    constexpr static std::size_t VOLUME = SIZE * SIZE * SIZE;
-
-    void init(const ChunkPos& cpos);
-
-    block_id_type get(const LocalPos& lpos) const;
-
-private:
-    std::array<block_id_type, VOLUME> m_blocks;
-};
-
-void BlockCache::init(const ChunkPos& cpos)
-{
-    m_blocks.fill(BLOCK_ID_NULL);
-
-    std::shared_ptr<const Chunk> chunks[3][3][3] = {};
-
-    for(ChunkPos::value_type dz = -1; dz <= 1; dz += 1) {
-        for(ChunkPos::value_type dy = -1; dy <= 1; dy += 1) {
-            for(ChunkPos::value_type dx = -1; dx <= 1; dx += 1) {
-                auto delta = ChunkPos(dx, dy, dz);
-                auto query_pos = cpos + delta;
-
-                if(auto chunk = world::find_chunk(query_pos)) {
-                    chunks[dx + 1][dy + 1][dz + 1] = chunk;
-                }
-            }
-        }
-    }
-
-    std::array<block_id_type, constant::CHUNK_VOLUME> flat {};
-
-    for(ChunkPos::value_type dz = -1; dz <= 1; dz += 1) {
-        for(ChunkPos::value_type dy = -1; dy <= 1; dy += 1) {
-            for(ChunkPos::value_type dx = -1; dx <= 1; dx += 1) {
-                auto& chunk = chunks[dx + 1][dy + 1][dz + 1];
-
-                if(chunk == nullptr) {
-                    continue;
-                }
-
-                chunk->blocks().flatten(flat);
-
-                for(LocalPos::value_type lz = 0; lz < CHUNK_SIZE_I16; lz += 1) {
-                    for(LocalPos::value_type ly = 0; ly < CHUNK_SIZE_I16; ly += 1) {
-                        for(LocalPos::value_type lx = 0; lx < CHUNK_SIZE_I16; lx += 1) {
-                            auto hx = static_cast<std::int32_t>(lx) + PADDING + static_cast<std::int32_t>(dx * CHUNK_SIZE_I16);
-                            auto hy = static_cast<std::int32_t>(ly) + PADDING + static_cast<std::int32_t>(dy * CHUNK_SIZE_I16);
-                            auto hz = static_cast<std::int32_t>(lz) + PADDING + static_cast<std::int32_t>(dz * CHUNK_SIZE_I16);
-
-                            if(hx < 0 || hy < 0 || hz < 0) {
-                                continue;
-                            }
-
-                            auto hx_sz = static_cast<std::size_t>(hx);
-                            auto hy_sz = static_cast<std::size_t>(hy);
-                            auto hz_sz = static_cast<std::size_t>(hz);
-
-                            if(hx_sz >= SIZE || hy_sz >= SIZE || hz_sz >= SIZE) {
-                                continue;
-                            }
-
-                            auto c_index = cache_index(hx_sz, hy_sz, hz_sz, SIZE);
-                            auto f_index = utils::to_index(LocalPos(lx, ly, lz));
-                            m_blocks[c_index] = flat[f_index];
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-block_id_type BlockCache::get(const LocalPos& lpos) const
-{
-    auto hx = static_cast<std::size_t>(PADDING + lpos.x());
-    auto hy = static_cast<std::size_t>(PADDING + lpos.y());
-    auto hz = static_cast<std::size_t>(PADDING + lpos.z());
-
-    if(hx >= SIZE || hy >= SIZE || hz >= SIZE) {
-        return BLOCK_ID_NULL;
-    }
-
-    auto c_index = cache_index(hx, hy, hz, SIZE);
-
-    return m_blocks[c_index];
-}
-
-class BiomeCache final {
-public:
-    constexpr static std::int16_t PADDING = BlockCache::PADDING;
-    constexpr static std::int16_t CHUNK_SIZE_I16 = BlockCache::CHUNK_SIZE_I16;
-
-    constexpr static std::size_t SIZE = BlockCache::SIZE;
-    constexpr static std::size_t AREA = SIZE * SIZE;
-
-    void init(const ChunkPos& cpos);
-
-    biome_id_type get(const LocalPosXZ& lpos) const;
-    biome_id_type get(const LocalPos& lpos) const;
-
-private:
-    std::array<biome_id_type, AREA> m_biomes;
-};
-
-void BiomeCache::init(const ChunkPos& cpos)
-{
-    m_biomes.fill(BIOME_ID_NULL);
-
-    for(ChunkPos::value_type dz = -1; dz <= 1; dz += 1) {
-        for(ChunkPos::value_type dx = -1; dx <= 1; dx += 1) {
-            auto query_pos = ChunkPos(cpos.x() + dx, cpos.y(), cpos.z() + dz);
-            auto chunk = world::find_chunk(query_pos);
-
-            if(chunk == nullptr || chunk->biomes() == nullptr) {
-                continue;
-            }
-
-            const auto& src = chunk->biomes()->biomes();
-            auto origin_x = PADDING + static_cast<std::int32_t>(dx * CHUNK_SIZE_I16);
-            auto origin_z = PADDING + static_cast<std::int32_t>(dz * CHUNK_SIZE_I16);
-
-            for(LocalPosXZ::value_type lz = 0; lz < CHUNK_SIZE_I16; lz += 1) {
-                auto hz = origin_z + static_cast<std::int32_t>(lz);
-
-                if(hz < 0 || static_cast<std::size_t>(hz) >= SIZE) {
-                    continue;
-                }
-
-                auto hz_sz = static_cast<std::size_t>(hz);
-                auto src_row = &src[static_cast<std::size_t>(lz) * constant::CHUNK_SIZE];
-
-                for(LocalPosXZ::value_type lx = 0; lx < CHUNK_SIZE_I16; lx += 1) {
-                    auto hx = origin_x + static_cast<std::int32_t>(lx);
-
-                    if(hx < 0 || static_cast<std::size_t>(hx) >= SIZE) {
-                        continue;
-                    }
-
-                    m_biomes[static_cast<std::size_t>(hx) + hz_sz * SIZE] = src_row[static_cast<std::size_t>(lx)];
-                }
-            }
-        }
-    }
-}
-
-biome_id_type BiomeCache::get(const LocalPosXZ& lpos) const
-{
-    auto hx = static_cast<std::size_t>(PADDING + lpos[0]);
-    auto hz = static_cast<std::size_t>(PADDING + lpos[1]);
-
-    if(hx >= SIZE || hz >= SIZE) {
-        return BIOME_ID_NULL;
-    }
-
-    return m_biomes[hx + hz * SIZE];
-}
-
-biome_id_type BiomeCache::get(const LocalPos& lpos) const
-{
-    return get(LocalPosXZ(lpos.x(), lpos.z()));
 }
 
 static float mesh_queue_distance_sq(const ChunkPos& cpos)
@@ -1238,6 +1061,13 @@ static void mark_border_neighbors_dirty(const ChunkPos& cpos, const LocalPos& lp
     }
 }
 
+static void on_chunk_create(const ChunkCreateEvent& event)
+{
+    auto chunk = event.chunk();
+    mark_dirty(chunk->entity());
+    mark_neighbors_dirty(event.pos());
+}
+
 static void on_chunk_update(const ChunkUpdateEvent& event)
 {
     auto chunk = event.chunk();
@@ -1265,10 +1095,7 @@ static void on_block_update(const BlockUpdateEvent& event)
 
 void chunk_mesher::init(void)
 {
-    // ChunkCreateEvent is intentionally ignored: create_chunk inserts an empty
-    // storage, and worldgen (or load) always follows with ChunkUpdateEvent once
-    // blocks are ready. Remeshing on create only floods the shared thread pool
-    // with empty/partial meshes and steals workers from worldgen.
+    globals::dispatcher.sink<ChunkCreateEvent>().connect<&on_chunk_create>();
     globals::dispatcher.sink<ChunkUpdateEvent>().connect<&on_chunk_update>();
     globals::dispatcher.sink<ChunkRemoveEvent>().connect<&on_chunk_remove>();
     globals::dispatcher.sink<BlockUpdateEvent>().connect<&on_block_update>();

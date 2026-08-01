@@ -12,6 +12,7 @@
 #include "shared/res/block_collision.hh"
 #include "shared/res/block_model.hh"
 #include "shared/res/feature.hh"
+#include "shared/world/biome_map.hh"
 #include "shared/world/block_collisions.hh"
 #include "shared/world/world.hh"
 
@@ -23,7 +24,7 @@ void shared_game::init(void)
     BlockModel::register_resource();
     Feature::register_resource();
 
-    world::init();
+    biome_map::init();
     mod_loader::init();
 }
 
@@ -34,7 +35,7 @@ void shared_game::init_late(void)
 
 void shared_game::shutdown(void)
 {
-    world::shutdown();
+    world::purge();
 
     block_collisions::shutdown();
 

@@ -1,6 +1,7 @@
 #ifndef AC10DC15_9E3A_4C9E_B8B4_E6C5CAE5BB89
 #define AC10DC15_9E3A_4C9E_B8B4_E6C5CAE5BB89
 
+#include "shared/world/biome.hh"
 #include "shared/world/chunk.hh"
 
 class ChunkCreateEvent final {
@@ -56,7 +57,6 @@ private:
 namespace world
 {
 extern emhash8::HashMap<ChunkPos, std::shared_ptr<Chunk>> chunks;
-extern std::array<emhash8::HashMap<ChunkPosXZ, std::shared_ptr<BiomeStorage>>, NUM_BIOME_REALMS> biomes;
 extern entt::registry basic_entities;
 extern entt::registry chunk_entities;
 extern std::uint64_t current_tick;
@@ -132,8 +132,6 @@ void schedule(const BlockPos& pos, std::uint64_t deadline, block_tick_source sou
 
 namespace world
 {
-void init(void);
-void shutdown(void);
 void fixed_update(void);
 } // namespace world
 

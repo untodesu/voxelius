@@ -1,7 +1,6 @@
 #ifndef EE0E3E20_655A_4D1C_89FB_25C924073EAC
 #define EE0E3E20_655A_4D1C_89FB_25C924073EAC
 
-#include "shared/world/biome_storage.hh"
 #include "shared/world/block_storage.hh"
 
 class Chunk final {
@@ -9,7 +8,7 @@ public:
     static void serialize(const Chunk& chunk, WriteBuffer& buffer);
     static void deserialize(Chunk& chunk, ReadBuffer& buffer);
 
-    explicit Chunk(entt::entity entity, std::shared_ptr<BiomeStorage> biomes);
+    explicit Chunk(entt::entity entity);
 
     block_id_type get_block(std::size_t index) const;
     block_id_type get_block(const LocalPos& pos) const;
@@ -19,7 +18,6 @@ public:
 
     constexpr entt::entity entity(void) const;
     constexpr const BlockStorage& blocks(void) const;
-    constexpr const std::shared_ptr<BiomeStorage>& biomes(void) const;
     void set_blocks(BlockStorage blocks);
 
     void schedule(std::size_t index, std::uint64_t deadline, block_tick_source source);
@@ -28,7 +26,6 @@ public:
 private:
     entt::entity m_entity;
     BlockStorage m_blocks;
-    std::shared_ptr<BiomeStorage> m_biomes;
     std::multimap<std::uint64_t, std::pair<std::size_t, block_tick_source>> m_scheduled;
 };
 
@@ -45,11 +42,6 @@ constexpr entt::entity Chunk::entity(void) const
 constexpr const BlockStorage& Chunk::blocks(void) const
 {
     return m_blocks;
-}
-
-constexpr const std::shared_ptr<BiomeStorage>& Chunk::biomes(void) const
-{
-    return m_biomes;
 }
 
 #endif /* EE0E3E20_655A_4D1C_89FB_25C924073EAC */

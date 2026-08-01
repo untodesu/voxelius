@@ -114,7 +114,7 @@ void realm_surface::shutdown(void)
     s_terrain.reset();
 }
 
-void realm_surface::generate(BlockStorage& blocks, BiomeStorage::array_type& biomes, const ChunkPos& pos)
+void realm_surface::generate(BlockStorage& blocks, BiomeSlice& biomes, const ChunkPos& pos)
 {
     thread_local std::array<block_id_type, constant::CHUNK_AREA> palette_basic_array;
     thread_local std::array<block_id_type, constant::CHUNK_AREA> palette_filler_array;

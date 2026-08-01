@@ -4,9 +4,9 @@
 
 #include "core/buffer.hh"
 
-Chunk::Chunk(entt::entity entity, std::shared_ptr<BiomeStorage> biomes) : m_entity(entity), m_biomes(std::move(biomes))
+Chunk::Chunk(entt::entity entity) : m_entity(entity)
 {
-    assert(m_biomes);
+    // empty
 }
 
 static void serialize_schedule(const std::multimap<std::uint64_t, std::pair<std::size_t, block_tick_source>>& schedule, WriteBuffer& buffer)
@@ -35,14 +35,12 @@ static void deserialize_schedule(std::multimap<std::uint64_t, std::pair<std::siz
 void Chunk::serialize(const Chunk& chunk, WriteBuffer& buffer)
 {
     BlockStorage::serialize(chunk.m_blocks, buffer);
-    BiomeStorage::serialize(chunk.m_biomes.get(), buffer);
     serialize_schedule(chunk.m_scheduled, buffer);
 }
 
 void Chunk::deserialize(Chunk& chunk, ReadBuffer& buffer)
 {
     BlockStorage::deserialize(chunk.m_blocks, buffer);
-    BiomeStorage::deserialize(chunk.m_biomes.get(), buffer);
     deserialize_schedule(chunk.m_scheduled, buffer);
 }
 

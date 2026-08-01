@@ -2,7 +2,7 @@
 #define A798F450_19DF_487D_82C7_AA3511C9328A
 
 #include "shared/coord.hh"
-#include "shared/world/biome_storage.hh"
+#include "shared/world/biome_slice.hh"
 #include "shared/world/block_storage.hh"
 #include "shared/world/heightmap.hh"
 
@@ -14,7 +14,7 @@ void shutdown(void);
 
 namespace realm_surface
 {
-void generate(BlockStorage& blocks, BiomeStorage::array_type& biomes, const ChunkPos& pos);
+void generate(BlockStorage& blocks, BiomeSlice& biomes, const ChunkPos& pos);
 } // namespace realm_surface
 
 namespace realm_surface

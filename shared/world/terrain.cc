@@ -7,7 +7,7 @@
 #include "shared/world/realm_sky.hh"
 #include "shared/world/realm_surface.hh"
 
-bool terrain::generate(const ChunkPos& pos, BlockStorage& blocks, BiomeStorage::array_type& biomes)
+bool terrain::generate(const ChunkPos& pos, BlockStorage& blocks, BiomeSlice& biomes)
 {
     auto realm = utils::realm(pos.y());
     auto generated = false;

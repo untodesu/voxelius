@@ -6,6 +6,8 @@
 
 #include "shared/globals.hh"
 #include "shared/utils/biome.hh"
+#include "shared/world/biome_map.hh"
+#include "shared/world/biome_slice.hh"
 #include "shared/world/chunk.hh"
 #include "shared/world/climate_noise.hh"
 #include "shared/world/entropy_cache.hh"
@@ -28,7 +30,7 @@ public:
 
 private:
     BlockStorage m_blocks;
-    std::unique_ptr<BiomeStorage::array_type> m_biomes;
+    std::unique_ptr<BiomeSlice> m_biomes;
     ChunkPos m_pos;
 };
 
@@ -53,7 +55,7 @@ void WorldgenTask::process(void)
         return;
     }
 
-    auto biomes = std::make_unique<BiomeStorage::array_type>();
+    auto biomes = std::make_unique<BiomeSlice>();
 
     if(!terrain::generate(m_pos, m_blocks, *biomes)) {
         status.store(task_status::CANCELLED, std::memory_order_release);
@@ -76,7 +78,9 @@ void WorldgenTask::finalize(void)
         });
 
         if(has_biome) {
-            chunk->biomes()->set_biomes(std::move(*m_biomes));
+            auto realm = utils::realm(m_pos.y());
+            auto cpos_xz = ChunkPosXZ(m_pos.x(), m_pos.z());
+            biome_map::insert(realm, cpos_xz, std::move(*m_biomes));
         }
 
         m_biomes.reset();
