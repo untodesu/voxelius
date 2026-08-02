@@ -23,6 +23,7 @@
 #include <mutex>
 #include <numbers>
 #include <random>
+#include <shared_mutex>
 #include <source_location>
 #include <span>
 #include <sstream>

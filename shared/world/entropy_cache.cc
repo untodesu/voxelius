@@ -7,7 +7,7 @@ struct Entry final {
     cached_entropy_type data;
 };
 
-static std::mutex s_mutex;
+static std::shared_mutex s_mutex;
 static emhash8::HashMap<ChunkPosXZ, std::shared_ptr<Entry>> s_cache;
 static std::uint64_t s_seed;
 
@@ -21,19 +21,30 @@ static void generate(const ChunkPosXZ& pos, cached_entropy_type& data)
     }
 }
 
-static std::shared_ptr<Entry> get_or_create(const ChunkPosXZ& pos)
+static std::shared_ptr<Entry> find_entry(const ChunkPosXZ& pos)
 {
-    std::scoped_lock lock(s_mutex);
+    std::shared_lock lock(s_mutex);
 
     auto it = s_cache.find(pos);
 
     if(it == s_cache.end()) {
-        auto entry = std::make_shared<Entry>();
-        s_cache[pos] = entry;
-        return entry;
+        return nullptr;
     }
 
     return it->second;
+}
+
+static std::shared_ptr<Entry> get_entry(const ChunkPosXZ& pos)
+{
+    if(auto entry = find_entry(pos)) {
+        return entry;
+    }
+
+    std::unique_lock lock(s_mutex);
+
+    auto entry = std::make_shared<Entry>();
+    s_cache[pos] = entry;
+    return entry;
 }
 
 void entropy_cache::init(std::mt19937_64& seeder)
@@ -43,12 +54,14 @@ void entropy_cache::init(std::mt19937_64& seeder)
 
 void entropy_cache::shutdown(void)
 {
+    std::unique_lock lock(s_mutex);
+
     s_cache.clear();
 }
 
 const cached_entropy_type& entropy_cache::get(const ChunkPosXZ& pos)
 {
-    auto entry = get_or_create(pos);
+    auto entry = get_entry(pos);
 
     std::call_once(entry->init_flag, [pos, entry] {
         generate(pos, entry->data);

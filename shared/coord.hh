@@ -40,4 +40,15 @@ struct std::hash<ChunkPosXZ> final {
     }
 };
 
+template<>
+struct std::hash<BlockPosXZ> final {
+    constexpr inline std::size_t operator()(const BlockPosXZ& pos) const
+    {
+        std::size_t value = 0;
+        value ^= pos.x() * 73856093;
+        value ^= pos.y() * 19349663;
+        return value;
+    }
+};
+
 #endif /* C8465E9C_1D37_4AA0_9BDB_2E2620C6E3CD */
