@@ -10,7 +10,7 @@ Defines a block rendering step.
 |----|----|
 |`blocks.RENDER_NONE`|Block is not rendered (eg. air)|
 |`blocks.RENDER_SOLID`|Block is rendered as opaque, cullable geometry|
-|`blocks.RENDER_ALPHA`|Block is rendered using alpha testing and blending|
+|`blocks.RENDER_ALPHA`|Block is rendered as translucent geometry|
 
 ## Constants: block face
 

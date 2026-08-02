@@ -7,18 +7,47 @@
 #include "core/config/map.hh"
 #include "core/config/ref.hh"
 #include "core/exception.hh"
+#include "core/identifier.hh"
 
+#include "shared/constant.hh"
+
+#include "client/camera.hh"
 #include "client/fog.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
 #include "client/gui/settings.hh"
+#include "client/shader_program.hh"
 #include "client/world/chunk_renderer.hh"
 #include "client/world/chunk_vbo.hh"
 #include "client/world/outline.hh"
 
-static GLuint s_world_fbo;
-static GLuint s_world_texture;
-static GLuint s_world_renderbuffer;
+// ONLY TOUCH THESE IF THE RESPECTIVE SHADER
+// VARIANT MACRO DECLARATIONS LAYOUT CHANGED AS WELL
+constexpr static unsigned FOG_MODEL = 0;
+
+struct LayerTarget final {
+    GLuint fbo { 0 };
+    GLuint color { 0 };
+    GLuint depth { 0 };
+};
+
+static LayerTarget s_diffuse;
+static LayerTarget s_alpha;
+static LayerTarget s_fluid;
+
+static GLuint s_compose_fbo;
+static GLuint s_compose_color;
+
+static ShaderProgram s_transparency;
+static std::size_t su_DiffuseColor;
+static std::size_t su_DiffuseDepth;
+static std::size_t su_AlphaColor;
+static std::size_t su_AlphaDepth;
+static std::size_t su_FluidColor;
+static std::size_t su_FluidDepth;
+static std::size_t su_FogColor;
+static std::size_t su_ViewDistance;
+static std::size_t su_InverseProjection;
 
 static config::Ref<int> s_pixel_size { 1 };
 static config::Ref<unsigned> s_fog_model { 2 };
@@ -26,32 +55,156 @@ static config::Ref<unsigned> s_fog_model { 2 };
 static int s_scaled_width;
 static int s_scaled_height;
 
+static void destroy_layer(LayerTarget& layer)
+{
+    if(layer.fbo) {
+        glDeleteFramebuffers(1, &layer.fbo);
+        glDeleteTextures(1, &layer.color);
+        glDeleteTextures(1, &layer.depth);
+
+        layer.fbo = 0;
+        layer.color = 0;
+        layer.depth = 0;
+    }
+}
+
+static void create_or_resize_layer(LayerTarget& layer, int width, int height)
+{
+    if(layer.fbo == 0) {
+        glGenFramebuffers(1, &layer.fbo);
+        glGenTextures(1, &layer.color);
+        glGenTextures(1, &layer.depth);
+    }
+
+    glBindTexture(GL_TEXTURE_2D, layer.color);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glBindTexture(GL_TEXTURE_2D, layer.depth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, layer.fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, layer.color, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, layer.depth, 0);
+
+    auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    vx::throw_if_not(status == GL_FRAMEBUFFER_COMPLETE, "failed to update layer FBO");
+}
+
 static void update_framebuffer(int new_width, int new_height)
 {
     auto pixel_size = std::clamp<int>(s_pixel_size.value(), 1, 4);
     s_scaled_width = new_width / pixel_size;
     s_scaled_height = new_height / pixel_size;
 
-    if(s_world_fbo == 0) {
-        glGenFramebuffers(1, &s_world_fbo);
-        glGenTextures(1, &s_world_texture);
-        glGenRenderbuffers(1, &s_world_renderbuffer);
+    create_or_resize_layer(s_diffuse, s_scaled_width, s_scaled_height);
+    create_or_resize_layer(s_alpha, s_scaled_width, s_scaled_height);
+    create_or_resize_layer(s_fluid, s_scaled_width, s_scaled_height);
+
+    if(s_compose_fbo == 0) {
+        glGenFramebuffers(1, &s_compose_fbo);
+        glGenTextures(1, &s_compose_color);
     }
 
-    glBindTexture(GL_TEXTURE_2D, s_world_texture);
+    glBindTexture(GL_TEXTURE_2D, s_compose_color);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, s_scaled_width, s_scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glBindRenderbuffer(GL_RENDERBUFFER, s_world_renderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, s_scaled_width, s_scaled_height);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, s_world_fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, s_world_texture, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, s_world_renderbuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, s_compose_fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, s_compose_color, 0);
 
     auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    vx::throw_if_not(status == GL_FRAMEBUFFER_COMPLETE, "failed to update world FBO");
+    vx::throw_if_not(status == GL_FRAMEBUFFER_COMPLETE, "failed to update compose FBO");
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+static void blit_depth(const LayerTarget& src, const LayerTarget& dst)
+{
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, src.fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst.fbo);
+    glBlitFramebuffer(0, 0, s_scaled_width, s_scaled_height, 0, 0, s_scaled_width, s_scaled_height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+}
+
+static void begin_diffuse(void)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, s_diffuse.fbo);
+    glViewport(0, 0, s_scaled_width, s_scaled_height);
+
+    glClearDepth(1.0f);
+    glClearColor(fog::color.x(), fog::color.y(), fog::color.z(), 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+static void begin_translucent(LayerTarget& layer)
+{
+    blit_depth(s_diffuse, layer);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, layer.fbo);
+    glViewport(0, 0, s_scaled_width, s_scaled_height);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+static void composite_layers(void)
+{
+    s_transparency.set_variant_frag(FOG_MODEL, s_fog_model.value());
+    vx::throw_if_not(s_transparency.update());
+
+    glBindFramebuffer(GL_FRAMEBUFFER, s_compose_fbo);
+    glViewport(0, 0, s_scaled_width, s_scaled_height);
+
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    glDisable(GL_BLEND);
+    glDisable(GL_CULL_FACE);
+
+    glUseProgram(s_transparency.handle);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, s_diffuse.color);
+    glUniform1i(s_transparency.uniforms[su_DiffuseColor].location, 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, s_diffuse.depth);
+    glUniform1i(s_transparency.uniforms[su_DiffuseDepth].location, 1);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, s_alpha.color);
+    glUniform1i(s_transparency.uniforms[su_AlphaColor].location, 2);
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, s_alpha.depth);
+    glUniform1i(s_transparency.uniforms[su_AlphaDepth].location, 3);
+
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, s_fluid.color);
+    glUniform1i(s_transparency.uniforms[su_FluidColor].location, 4);
+
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, s_fluid.depth);
+    glUniform1i(s_transparency.uniforms[su_FluidDepth].location, 5);
+
+    glUniform3fv(s_transparency.uniforms[su_FogColor].location, 1, fog::color.data());
+    glUniform1f(s_transparency.uniforms[su_ViewDistance].location, fog::distance);
+
+    Eigen::Matrix4f inv_proj = camera::instance.projection().inverse();
+    glUniformMatrix4fv(s_transparency.uniforms[su_InverseProjection].location, 1, GL_FALSE, inv_proj.data());
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glDepthMask(GL_TRUE);
 }
 
 static void on_sdl_window_event(const SDL_WindowEvent& event)
@@ -60,10 +213,6 @@ static void on_sdl_window_event(const SDL_WindowEvent& event)
         update_framebuffer(event.data1, event.data2);
         return;
     }
-}
-
-static void present_imgui(void)
-{
 }
 
 void head::init(void)
@@ -97,6 +246,20 @@ void head::init(void)
 
     ImGui::GetIO().IniFilename = nullptr;
 
+    auto transparency_id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "transparency");
+    auto transparency_ok = s_transparency.setup(transparency_id);
+    vx::throw_if_not_fmt(transparency_ok, "{}: setup failed", transparency_id.full_string());
+
+    su_DiffuseColor = s_transparency.add_uniform("u_DiffuseColor");
+    su_DiffuseDepth = s_transparency.add_uniform("u_DiffuseDepth");
+    su_AlphaColor = s_transparency.add_uniform("u_AlphaColor");
+    su_AlphaDepth = s_transparency.add_uniform("u_AlphaDepth");
+    su_FluidColor = s_transparency.add_uniform("u_FluidColor");
+    su_FluidDepth = s_transparency.add_uniform("u_FluidDepth");
+    su_FogColor = s_transparency.add_uniform("u_FogColor");
+    su_ViewDistance = s_transparency.add_uniform("u_ViewDistance");
+    su_InverseProjection = s_transparency.add_uniform("u_InverseProjection");
+
     chunk_vbo::init();
     chunk_renderer::init();
     outline::init();
@@ -117,13 +280,23 @@ void head::shutdown(void)
     chunk_renderer::shutdown();
     chunk_vbo::shutdown();
 
+    s_transparency.destroy();
+
+    destroy_layer(s_diffuse);
+    destroy_layer(s_alpha);
+    destroy_layer(s_fluid);
+
+    if(s_compose_fbo) {
+        glDeleteFramebuffers(1, &s_compose_fbo);
+        glDeleteTextures(1, &s_compose_color);
+
+        s_compose_color = 0;
+        s_compose_fbo = 0;
+    }
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
-
-    glDeleteRenderbuffers(1, &s_world_renderbuffer);
-    glDeleteTextures(1, &s_world_texture);
-    glDeleteFramebuffers(1, &s_world_fbo);
 
     SDL_GL_DestroyContext(globals::gl_context);
 }
@@ -136,7 +309,7 @@ bool head::prepare(void)
     SDL_GetWindowSizeInPixels(globals::window, &width, &height);
     glViewport(0, 0, width, height);
 
-    if(s_pixel_size.dirty()) {
+    if(s_pixel_size.dirty() || s_diffuse.fbo == 0) {
         update_framebuffer(width, height);
     }
 
@@ -154,26 +327,25 @@ void head::render(void)
 {
     ZoneScoped;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, s_world_fbo);
-    glViewport(0, 0, s_scaled_width, s_scaled_height);
+    begin_diffuse();
 
-    auto clear_r = fog::color.x();
-    auto clear_g = fog::color.y();
-    auto clear_b = fog::color.z();
-    auto clear_a = 1.0f;
-
-    glClearDepth(1.0f);
-    glClearColor(clear_r, clear_g, clear_b, clear_a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-    chunk_renderer::render();
+    chunk_renderer::prepare();
+    chunk_renderer::render_opaque();
 
     client_game::render();
+
+    begin_translucent(s_alpha);
+    chunk_renderer::render_alpha();
+
+    begin_translucent(s_fluid);
+    chunk_renderer::render_fluid();
+
+    composite_layers();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, globals::width, globals::height);
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, s_world_fbo);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, s_compose_fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBlitFramebuffer(0, 0, s_scaled_width, s_scaled_height, 0, 0, globals::width, globals::height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }

@@ -74,6 +74,8 @@ static std::size_t s_pattern_ibo_capacity;
 static std::size_t s_pattern_ibo_size;
 static std::vector<GLintptr> s_pattern_offsets;
 
+static bool s_frame_ready;
+
 static void ensure_multidraw_capacity(std::size_t draw_count)
 {
     if(s_multidraw_counts.size() < draw_count) {
@@ -299,6 +301,42 @@ static void on_chunk_mesh(entt::entity entity)
     s_sorted_dirty = true;
 }
 
+static void bind_pipeline_state(unsigned fog_model)
+{
+    s_program.set_variant_vert(FOG_MODEL, fog_model);
+    s_program.set_variant_frag(FOG_MODEL, fog_model);
+    vx::throw_if_not(s_program.update());
+
+    auto& vproj = camera::instance.view_projection();
+    auto animation_timer = static_cast<std::uint32_t>(world::current_tick >> 1);
+
+    glUseProgram(s_program.handle);
+    glUniformMatrix4fv(s_program.uniforms[su_ViewProjection].location, 1, GL_FALSE, vproj.data());
+    glUniform1ui(s_program.uniforms[su_AnimationTimer].location, animation_timer);
+    glUniform1f(s_program.uniforms[su_ViewDistance].location, fog::distance);
+    glUniform3fv(s_program.uniforms[su_FogColor].location, 1, fog::color.data());
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);
+    glUniform1i(s_program.uniforms[su_AtlasTexture].location, 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_frames);
+    glUniform1i(s_program.uniforms[su_AtlasFrames].location, 1);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_strips);
+    glUniform1i(s_program.uniforms[su_AtlasStrips].location, 2);
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_BUFFER, s_chunk_positions_tbo);
+    glUniform1i(s_program.uniforms[su_ChunkPositions].location, 3);
+
+    glBindVertexArray(s_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, chunk_vbo::handle);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_pattern_ibo);
+}
+
 void chunk_renderer::init(void)
 {
     constexpr static std::size_t INITIAL_CAPACITY = 256;
@@ -391,9 +429,11 @@ void chunk_renderer::shutdown(void)
     s_program.destroy();
 }
 
-void chunk_renderer::render(void)
+void chunk_renderer::prepare(void)
 {
     ZoneScoped;
+
+    s_frame_ready = false;
 
     if(block_atlas::texture == 0 || block_atlas::tbo_frames == 0 || block_atlas::tbo_strips == 0) {
         return;
@@ -412,98 +452,107 @@ void chunk_renderer::render(void)
         update_chunk_positions_tbo();
     }
 
-    s_program.set_variant_vert(FOG_MODEL, s_fog_model.value());
-    s_program.set_variant_frag(FOG_MODEL, s_fog_model.value());
-    vx::throw_if_not(s_program.update());
+    s_frame_ready = true;
+}
 
-    auto& vproj = camera::instance.view_projection();
+void chunk_renderer::render_opaque(void)
+{
+    ZoneScoped;
+
+    if(!s_frame_ready || s_sorted_chunks.empty()) {
+        return;
+    }
+
+    bind_pipeline_state(s_fog_model.value());
+
     auto& frustum = camera::instance.frustum();
 
-    auto animation_timer = static_cast<std::uint32_t>(world::current_tick >> 1);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glDisable(GL_BLEND);
 
-    glUseProgram(s_program.handle);
-    glUniformMatrix4fv(s_program.uniforms[su_ViewProjection].location, 1, GL_FALSE, vproj.data());
-    glUniform1ui(s_program.uniforms[su_AnimationTimer].location, animation_timer);
-    glUniform1f(s_program.uniforms[su_ViewDistance].location, fog::distance);
-    glUniform3fv(s_program.uniforms[su_FogColor].location, 1, fog::color.data());
+    for(const auto& it : s_sorted_chunks) {
+        const auto& mesh = world::chunk_entities.get<ChunkMesh>(it.first);
+        const auto& chunk = world::chunk_entities.get<Chunk_Component>(it.first);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);
-    glUniform1i(s_program.uniforms[su_AtlasTexture].location, 0);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_frames);
-    glUniform1i(s_program.uniforms[su_AtlasFrames].location, 1);
-
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_BUFFER, block_atlas::tbo_strips);
-    glUniform1i(s_program.uniforms[su_AtlasStrips].location, 2);
-
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_BUFFER, s_chunk_positions_tbo);
-    glUniform1i(s_program.uniforms[su_ChunkPositions].location, 3);
-
-    glBindVertexArray(s_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, chunk_vbo::handle);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_pattern_ibo);
-
-    if(s_sorted_chunks.size()) {
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_TRUE);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glDisable(GL_BLEND);
-
-        for(const auto& it : s_sorted_chunks) {
-            const auto& mesh = world::chunk_entities.get<ChunkMesh>(it.first);
-            const auto& chunk = world::chunk_entities.get<Chunk_Component>(it.first);
-
-            if(mesh.opaque.count && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
-                batch_append(mesh.opaque);
-            }
+        if(mesh.opaque.count && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
+            batch_append(mesh.opaque);
         }
-
-        batch_flush();
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        for(auto it = s_sorted_chunks.rbegin(); it != s_sorted_chunks.rend(); it = std::next(it)) {
-            const auto& mesh = world::chunk_entities.get<ChunkMesh>(it->first);
-            const auto& chunk = world::chunk_entities.get<Chunk_Component>(it->first);
-
-            if(mesh.alpha.count && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
-                batch_append(mesh.alpha);
-            }
-        }
-
-        batch_flush();
-
-        glDepthMask(GL_TRUE);
-        glDisable(GL_BLEND);
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
-        glDisable(GL_CULL_FACE);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        for(auto it = s_sorted_chunks.rbegin(); it != s_sorted_chunks.rend(); it = std::next(it)) {
-            const auto& mesh = world::chunk_entities.get<ChunkMesh>(it->first);
-            const auto& chunk = world::chunk_entities.get<Chunk_Component>(it->first);
-
-            if(mesh.fluid.count && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
-                batch_append(mesh.fluid);
-            }
-        }
-
-        batch_flush();
-
-        glDepthMask(GL_TRUE);
-        glDisable(GL_BLEND);
     }
+
+    batch_flush();
+}
+
+void chunk_renderer::render_alpha(void)
+{
+    ZoneScoped;
+
+    if(!s_frame_ready || s_sorted_chunks.empty()) {
+        return;
+    }
+
+    bind_pipeline_state(0);
+
+    auto& frustum = camera::instance.frustum();
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    for(auto it = s_sorted_chunks.rbegin(); it != s_sorted_chunks.rend(); it = std::next(it)) {
+        const auto& mesh = world::chunk_entities.get<ChunkMesh>(it->first);
+        const auto& chunk = world::chunk_entities.get<Chunk_Component>(it->first);
+
+        if(mesh.alpha.count && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
+            batch_append(mesh.alpha);
+        }
+    }
+
+    batch_flush();
+
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    glDepthFunc(GL_LESS);
+}
+
+void chunk_renderer::render_fluid(void)
+{
+    ZoneScoped;
+
+    if(!s_frame_ready || s_sorted_chunks.empty()) {
+        return;
+    }
+
+    bind_pipeline_state(0);
+
+    auto& frustum = camera::instance.frustum();
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    for(auto it = s_sorted_chunks.rbegin(); it != s_sorted_chunks.rend(); it = std::next(it)) {
+        const auto& mesh = world::chunk_entities.get<ChunkMesh>(it->first);
+        const auto& chunk = world::chunk_entities.get<Chunk_Component>(it->first);
+
+        if(mesh.fluid.count && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
+            batch_append(mesh.fluid);
+        }
+    }
+
+    batch_flush();
+
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    glDepthFunc(GL_LESS);
 }

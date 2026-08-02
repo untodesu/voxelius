@@ -50,6 +50,10 @@ void main(void)
     vec3 tint = mix(vec3(1.0), vs_TintColor, tint_mask);
     vec3 shaded = albedo.rgb * vs_Shade * vs_AO * tint;
 
+    if(albedo.a < 0.01) {
+        discard;
+    }
+
     frag_Target.rgb = shaded;
     frag_Target.a = albedo.a;
 
