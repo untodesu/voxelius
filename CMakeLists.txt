@@ -46,7 +46,8 @@ if(BUILD_SERVER)
     add_subdirectory(server)
 endif()
 
-install(FILES "${PROJECT_SOURCE_DIR}/LICENSE" DESTINATION "doc/voxelius")
+install(FILES "${PROJECT_SOURCE_DIR}/LICENSE" DESTINATION ".")
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/data" DESTINATION ".")
 
 set(CPACK_PACKAGE_NAME "Voxelius")
 set(CPACK_PACKAGE_VENDOR "untodesu")

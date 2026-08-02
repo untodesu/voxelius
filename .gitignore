@@ -10,8 +10,8 @@
 /.cache/*
 /build/
 /build/*
-/output/
-/output/*
+/dist/
+/dist/*
 /mods/
 /mods/*
 /site/

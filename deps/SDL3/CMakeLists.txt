@@ -35,6 +35,8 @@ if(WIN32 AND TARGET SDL3::SDL3)
             COMMENT "Copying SDL3 DLL" VERBATIM)
         add_dependencies(deps_SDL3 deps_SDL3_DLL)
     endif()
+
+    install(FILES "${SDL3_DLL_LOCATION}" DESTINATION ".")
 endif()
 
 ## Add an alias library so dependency list looks nicer

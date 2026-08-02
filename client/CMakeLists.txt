@@ -76,3 +76,5 @@ target_link_libraries(voxelius-client PUBLIC
     deps::SDL3
     deps::glad)
 target_precompile_headers(voxelius-client PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
+
+install(TARGETS voxelius-client RUNTIME DESTINATION ".")
