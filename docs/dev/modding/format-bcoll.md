@@ -1,6 +1,6 @@
 # Block Collisions
 
-Block collisions define the physical shape used for touch and movement response. These models are independent from render geometry.
+Block collisions define the physical shape for touch and movement response. These models are separate from render geometry.
 
 Block collisions live under: `namespace:collisions/block`
 
@@ -8,7 +8,7 @@ Block collisions live under: `namespace:collisions/block`
 
 |Field|Type|Required|Default|Description|
 |----|----|----|----|----|
-|`elements`|`object[]`|yes|N/D|List of axis-aligned boxes that make the model|
+|`elements`|`object[]`|yes|N/D|List of axis-aligned boxes that form the model|
 
 ## Element object
 

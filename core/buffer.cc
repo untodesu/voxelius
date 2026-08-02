@@ -4,14 +4,12 @@
 
 ReadBuffer::ReadBuffer(const ReadBuffer& other)
 {
-    reset(other.data(), other.size());
+    reset(std::span(other.data(), other.size()));
 }
 
-ReadBuffer::ReadBuffer(const void* data, std::size_t size)
+ReadBuffer::ReadBuffer(std::span<const std::byte> data)
 {
-    assert(data);
-
-    reset(data, size);
+    reset(data);
 }
 
 ReadBuffer::ReadBuffer(const ENetPacket* packet)
@@ -38,12 +36,9 @@ const std::byte* ReadBuffer::data(void) const
     return m_vector.data();
 }
 
-void ReadBuffer::reset(const void* data, std::size_t size)
+void ReadBuffer::reset(std::span<const std::byte> data)
 {
-    assert(data);
-
-    auto bytes = reinterpret_cast<const std::byte*>(data);
-    m_vector.assign(bytes, bytes + size);
+    m_vector.assign(data.begin(), data.end());
     m_position = 0;
 }
 
@@ -211,6 +206,54 @@ std::string ReadBuffer::read<std::string>(void)
     return result;
 }
 
+template<typename T, std::size_t N>
+Eigen::Vector<T, N> ReadBuffer::read_vector(void)
+{
+    Eigen::Vector<T, N> result;
+
+    for(std::size_t i = 0; i < N; ++i) {
+        result[i] = read<T>();
+    }
+
+    return result;
+}
+
+template Eigen::Vector<std::uint8_t, 2> ReadBuffer::read_vector<std::uint8_t, 2>(void);
+template Eigen::Vector<std::uint8_t, 3> ReadBuffer::read_vector<std::uint8_t, 3>(void);
+template Eigen::Vector<std::uint8_t, 4> ReadBuffer::read_vector<std::uint8_t, 4>(void);
+
+template Eigen::Vector<std::uint16_t, 2> ReadBuffer::read_vector<std::uint16_t, 2>(void);
+template Eigen::Vector<std::uint16_t, 3> ReadBuffer::read_vector<std::uint16_t, 3>(void);
+template Eigen::Vector<std::uint16_t, 4> ReadBuffer::read_vector<std::uint16_t, 4>(void);
+
+template Eigen::Vector<std::uint32_t, 2> ReadBuffer::read_vector<std::uint32_t, 2>(void);
+template Eigen::Vector<std::uint32_t, 3> ReadBuffer::read_vector<std::uint32_t, 3>(void);
+template Eigen::Vector<std::uint32_t, 4> ReadBuffer::read_vector<std::uint32_t, 4>(void);
+
+template Eigen::Vector<std::uint64_t, 2> ReadBuffer::read_vector<std::uint64_t, 2>(void);
+template Eigen::Vector<std::uint64_t, 3> ReadBuffer::read_vector<std::uint64_t, 3>(void);
+template Eigen::Vector<std::uint64_t, 4> ReadBuffer::read_vector<std::uint64_t, 4>(void);
+
+template Eigen::Vector<std::int8_t, 2> ReadBuffer::read_vector<std::int8_t, 2>(void);
+template Eigen::Vector<std::int8_t, 3> ReadBuffer::read_vector<std::int8_t, 3>(void);
+template Eigen::Vector<std::int8_t, 4> ReadBuffer::read_vector<std::int8_t, 4>(void);
+
+template Eigen::Vector<std::int16_t, 2> ReadBuffer::read_vector<std::int16_t, 2>(void);
+template Eigen::Vector<std::int16_t, 3> ReadBuffer::read_vector<std::int16_t, 3>(void);
+template Eigen::Vector<std::int16_t, 4> ReadBuffer::read_vector<std::int16_t, 4>(void);
+
+template Eigen::Vector<std::int32_t, 2> ReadBuffer::read_vector<std::int32_t, 2>(void);
+template Eigen::Vector<std::int32_t, 3> ReadBuffer::read_vector<std::int32_t, 3>(void);
+template Eigen::Vector<std::int32_t, 4> ReadBuffer::read_vector<std::int32_t, 4>(void);
+
+template Eigen::Vector<std::int64_t, 2> ReadBuffer::read_vector<std::int64_t, 2>(void);
+template Eigen::Vector<std::int64_t, 3> ReadBuffer::read_vector<std::int64_t, 3>(void);
+template Eigen::Vector<std::int64_t, 4> ReadBuffer::read_vector<std::int64_t, 4>(void);
+
+template Eigen::Vector<float, 2> ReadBuffer::read_vector<float, 2>(void);
+template Eigen::Vector<float, 3> ReadBuffer::read_vector<float, 3>(void);
+template Eigen::Vector<float, 4> ReadBuffer::read_vector<float, 4>(void);
+
 void ReadBuffer::read(void* buffer, std::size_t size)
 {
     auto bytes = reinterpret_cast<std::byte*>(buffer);
@@ -248,12 +291,9 @@ void WriteBuffer::write(const WriteBuffer& other)
     m_vector.insert(m_vector.end(), other.m_vector.begin(), other.m_vector.end());
 }
 
-void WriteBuffer::write(const void* data, std::size_t size)
+void WriteBuffer::write(std::span<const std::byte> data)
 {
-    assert(data);
-
-    auto bytes = reinterpret_cast<const std::byte*>(data);
-    m_vector.insert(m_vector.end(), bytes, bytes + size);
+    m_vector.insert(m_vector.end(), data.begin(), data.end());
 }
 
 template<>
@@ -332,10 +372,54 @@ void WriteBuffer::write<std::string_view>(const std::string_view value)
 {
     write<std::uint16_t>(static_cast<std::uint16_t>(std::min<std::size_t>(value.size(), UINT16_MAX)));
 
-    for(const auto& character : value) {
+    for(auto& character : value) {
         m_vector.push_back(static_cast<std::byte>(character));
     }
 }
+
+template<typename T, std::size_t N>
+void WriteBuffer::write_vector(const Eigen::Vector<T, N>& value)
+{
+    for(std::size_t i = 0; i < N; ++i) {
+        write<T>(value[i]);
+    }
+}
+
+template void WriteBuffer::write_vector<std::uint8_t, 2>(const Eigen::Vector<std::uint8_t, 2>& value);
+template void WriteBuffer::write_vector<std::uint8_t, 3>(const Eigen::Vector<std::uint8_t, 3>& value);
+template void WriteBuffer::write_vector<std::uint8_t, 4>(const Eigen::Vector<std::uint8_t, 4>& value);
+
+template void WriteBuffer::write_vector<std::uint16_t, 2>(const Eigen::Vector<std::uint16_t, 2>& value);
+template void WriteBuffer::write_vector<std::uint16_t, 3>(const Eigen::Vector<std::uint16_t, 3>& value);
+template void WriteBuffer::write_vector<std::uint16_t, 4>(const Eigen::Vector<std::uint16_t, 4>& value);
+
+template void WriteBuffer::write_vector<std::uint32_t, 2>(const Eigen::Vector<std::uint32_t, 2>& value);
+template void WriteBuffer::write_vector<std::uint32_t, 3>(const Eigen::Vector<std::uint32_t, 3>& value);
+template void WriteBuffer::write_vector<std::uint32_t, 4>(const Eigen::Vector<std::uint32_t, 4>& value);
+
+template void WriteBuffer::write_vector<std::uint64_t, 2>(const Eigen::Vector<std::uint64_t, 2>& value);
+template void WriteBuffer::write_vector<std::uint64_t, 3>(const Eigen::Vector<std::uint64_t, 3>& value);
+template void WriteBuffer::write_vector<std::uint64_t, 4>(const Eigen::Vector<std::uint64_t, 4>& value);
+
+template void WriteBuffer::write_vector<std::int8_t, 2>(const Eigen::Vector<std::int8_t, 2>& value);
+template void WriteBuffer::write_vector<std::int8_t, 3>(const Eigen::Vector<std::int8_t, 3>& value);
+template void WriteBuffer::write_vector<std::int8_t, 4>(const Eigen::Vector<std::int8_t, 4>& value);
+
+template void WriteBuffer::write_vector<std::int16_t, 2>(const Eigen::Vector<std::int16_t, 2>& value);
+template void WriteBuffer::write_vector<std::int16_t, 3>(const Eigen::Vector<std::int16_t, 3>& value);
+template void WriteBuffer::write_vector<std::int16_t, 4>(const Eigen::Vector<std::int16_t, 4>& value);
+
+template void WriteBuffer::write_vector<std::int32_t, 2>(const Eigen::Vector<std::int32_t, 2>& value);
+template void WriteBuffer::write_vector<std::int32_t, 3>(const Eigen::Vector<std::int32_t, 3>& value);
+template void WriteBuffer::write_vector<std::int32_t, 4>(const Eigen::Vector<std::int32_t, 4>& value);
+
+template void WriteBuffer::write_vector<std::int64_t, 2>(const Eigen::Vector<std::int64_t, 2>& value);
+template void WriteBuffer::write_vector<std::int64_t, 3>(const Eigen::Vector<std::int64_t, 3>& value);
+template void WriteBuffer::write_vector<std::int64_t, 4>(const Eigen::Vector<std::int64_t, 4>& value);
+
+template void WriteBuffer::write_vector<float, 2>(const Eigen::Vector<float, 2>& value);
+template void WriteBuffer::write_vector<float, 3>(const Eigen::Vector<float, 3>& value);
+template void WriteBuffer::write_vector<float, 4>(const Eigen::Vector<float, 4>& value);
 
 PHYSFS_File* WriteBuffer::to_file(std::string_view path, bool append) const
 {

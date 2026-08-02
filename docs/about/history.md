@@ -1,12 +1,12 @@
 # About: history
 
-Voxelius as a concept dates back to 2021, when grass was greener and skies were less polluted with fiber optic.
+Voxelius as a concept dates back to 2021.
 
-## 2021: it wasn't always a voxel-ius
+## 2021: it was not always a voxel-ius
 
-I had nothing else to do during lockdown and lecture times at university, so I started experimenting with OpenGL 4.6 and C++17. The idea was to draw objects with a single draw-call and figure out their contents in a fragment shader.
+I had nothing else to do during lockdown and lecture times at university. I started experimenting with OpenGL 4.6 and C++17. The idea was to draw objects with a single draw call and figure out their contents in a fragment shader.
 
-What came out was a simple 2D engine. It used Box2D for physics, could play .xm modules (without streaming), and rendered the world in literally four draw-calls.
+What came out was a simple 2D engine. It used Box2D for physics, could play .xm modules (without streaming), and rendered the world in four draw calls.
 
 ![type:video](https://youtube.com/embed/8dSXFb5Ddl8)
 
@@ -18,13 +18,13 @@ What came out was a simple 2D engine. It used Box2D for physics, could play .xm 
 
 Then the voxel itch came back. I stripped the 2D rendering and started from scratch.
 
-I first defined some structures and made a basic renderer that only drew colored voxels, with a color per side:
+I first defined some structures and made a basic renderer. It only drew colored voxels, with a color per side:
 
 ![history.img-00.png](history.img-00.png)
 
-> As a matter of fact, this is _the first_ ever image captured of Voxelius rendering anything. It was made in RenderDoc and was originally placed in the repository root as `rd0.png`. Funnily enough, that first image still finds its way into web and installer media. It is something of a tradition at this point :D
+> This is the first image captured of Voxelius rendering anything. I made it in RenderDoc and originally placed it in the repository root as `rd0.png`. That first image still appears in web and installer media. It is something of a tradition at this point.
 
-Then came textures. The choice was quite unorthodox, but that is what I had lying around on my drive:
+Then came textures. The choice was unorthodox, but that is what I had on my drive:
 
 ![history.img-01.png](history.img-01.png)
 ![history.img-02.jpg](history.img-02.jpg)
@@ -38,7 +38,7 @@ Eventually greedy meshing, shadows, and rudimentary networking landed. By then t
 
 ## 2022-2023: voxelius modern
 
-Nothing particular. Some performance work, better threading, and a whole lot of doing nothing because 2022 was hard on the IRL side of things. Some experimental world generation showed up later.
+Nothing particular. Some performance work, better threading, and a lot of doing nothing because 2022 was hard on the IRL side of things. Some experimental world generation showed up later.
 
 ![history.img-05.jpg](history.img-05.jpg)
 ![history.img-06.jpg](history.img-06.jpg)
@@ -46,9 +46,9 @@ Nothing particular. Some performance work, better threading, and a whole lot of 
 
 ## 2024-2025: large progress
 
-> Funnily enough, in 2024 Voxelius landed me my current software job because it impressed the lead programmer. Hobby projects sometimes pay off.
+> In 2024 Voxelius landed me my current software job because it impressed the lead programmer. Hobby projects sometimes pay off.
 
-This period brought major strides: voxel interactions (break/place), decent world generation, feature placement, multiplayer, and a GUI that was actually usable.
+This period brought voxel interactions (break/place), decent world generation, feature placement, multiplayer, and a GUI that was usable.
 
 ![history.img-08.jpg](history.img-08.jpg)
 ![history.img-09.jpg](history.img-09.jpg)
@@ -70,14 +70,14 @@ I got interested in SDL3's GPU API. It abstracts Vulkan, Metal, and D3D12 and ac
 ![history.img-16.jpg](history.img-16.jpg)
 ![history.img-17.jpg](history.img-17.jpg)
 
-While doing that I figured out practices that made the source tree much better organized. Bringing those into Voxelius was an obvious next step. However...
+While doing that I figured out practices that made the source tree much better organised. Bringing those into Voxelius was an obvious next step. However...
 
 ## 2026: the third rewrite
 
-The current _public_ version of Voxelius leans hard on libraries and tools I no longer use. Examples: GLM (I use Eigen now), spdlog (I use my own simpler logging library from a work project), GLFW (I use SDL3 now). The list goes on. A straight port of the old code onto the new stack is not feasible.
+The current public version of Voxelius leans hard on libraries and tools I no longer use. Examples: GLM (I use Eigen now), spdlog (I use my own simpler logging library from a work project), GLFW (I use SDL3 now). The list goes on. A straight port of the old code onto the new stack is not feasible.
 
 I also wanted password-less player authentication. I already had a sort-of test project for Ed25519 auth called Prospero, and I want to reuse that approach in Voxelius.
 
-Finally, I want the rewrite to follow ideas from the core inspiration, [OpenBuilder](https://github.com/Hopson97/open-builder) and Minetest/Luanti (or whatever they rename it to in two years. I'm not kink-shaming). Game content should be defined through Lua, while core gameplay and world generation stay in C++.
+Finally, I want the rewrite to follow ideas from the core inspiration, [OpenBuilder](https://github.com/Hopson97/open-builder) and Minetest/Luanti (or whatever they rename it to in two years). Game content should be defined through Lua, while core gameplay and world generation stay in C++.
 
 ![history.img-18](history.img-18.png)

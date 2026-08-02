@@ -1,6 +1,6 @@
 # Blocks API
 
-Mods register new block types and access existing ones through the `blocks` library.
+Mods register new block types and read existing ones through the `blocks` library.
 
 ## Constants: render mode
 
@@ -22,8 +22,8 @@ Defines a block face used for culling and other grid-aligned operations.
 |`blocks.FACE_SOUTH`|South face|
 |`blocks.FACE_EAST`|East face|
 |`blocks.FACE_WEST`|West face|
-|`blocks.FACE_TOP`|Top/upper face|
-|`blocks.FACE_BOTTOM`|Bottom/lower face|
+|`blocks.FACE_TOP`|Top or upper face|
+|`blocks.FACE_BOTTOM`|Bottom or lower face|
 |`blocks.FACE_UP`|Same as `blocks.FACE_TOP`|
 |`blocks.FACE_DOWN`|Same as `blocks.FACE_BOTTOM`|
 
@@ -60,11 +60,11 @@ Freeform grouping tags checked at runtime with `blocks.has_tag`. Any block can c
 |Name|Description|
 |----|----|
 |`blocks.TAG_GAS`|Non-solid, passable block (eg. air)|
-|`blocks.TAG_ROCK`|Stone-family block. Used by tools/worldgen that care about "is this rock"|
-|`blocks.TAG_SOIL`|Soil-type block. Dirt, mud, and similar go here|
-|`blocks.TAG_TURF`|Turf-type block. Grass and similar go here|
-|`blocks.TAG_XFOIL`|Non-solid foliage: grass, bushes, etc|
-|`blocks.TAG_SFOIL`|Solid foliage: leaves, etc|
+|`blocks.TAG_ROCK`|Stone-family block. Used by tools and worldgen that check for rock|
+|`blocks.TAG_SOIL`|Soil-type block. Dirt, mud, and similar blocks go here|
+|`blocks.TAG_TURF`|Turf-type block. Grass and similar blocks go here|
+|`blocks.TAG_XFOIL`|Non-solid foliage: grass, bushes, and similar|
+|`blocks.TAG_SFOIL`|Solid foliage: leaves and similar|
 |`blocks.TAG_WOOD`|Wooden blocks|
 
 ## Constants: schedule source
@@ -163,7 +163,7 @@ Returns the numeric block ID.
 |`health`|`integer`|no|`0`|Base hit points needed to break the block. Tool effects can change this|
 |`sound`|`string`|no|N/D|Sound set for this block|
 |`emission`|`integer`|no|`0`|Emission light value|
-|`dissipation`|`integer`|no|`0`|How much light the block eats as light passes through|
+|`dissipation`|`integer`|no|`0`|How much light the block absorbs as light passes through|
 |`touch`|`integer`|no|`blocks.TOUCH_SOLID`|Block touch response|
 |`touch_coeffs`|`number[3]`|no|`{1, 1, 1}`|Block touch response coefficients|
 |`tags`|`integer[]`|no|`{}`|Block tags|
@@ -179,11 +179,11 @@ Returns the numeric block ID.
 
 #### Albedo
 
-Each texture slot is a list of textures used by the engine as either randomized-by-position variations, or as an animation frames if `animated` field is assigned `true`  
+Each texture slot is a list of textures. The engine uses them as position-randomized variations, or as animation frames when `animated` is `true`.
 
 #### Masks
 
-Each texture slot can have a mask texture used by the engine for certain purposes. Each color channel of an RGBA mask texture can (and will in the future) be used for some per-face logic
+Each texture slot can have a mask texture used by the engine for certain purposes. Each color channel of an RGBA mask texture can (and will in the future) drive per-face logic.
 
 |Channel|Designation|Description|
 |----|----|----|
@@ -194,7 +194,7 @@ Each texture slot can have a mask texture used by the engine for certain purpose
 
 ### Facing rotation
 
-`model_facing` and `bcoll_facing` each define one uniquely determined 90-degree-step rotation of the whole model or collision shape. In simple terms: they set where the model's north face points. By default it points world north.
+`model_facing` and `bcoll_facing` each define one 90-degree-step rotation of the whole model or collision shape. They set where the north face of the model points. By default it points world north.
 
 |Value|Rotation|Image|
 |----|----|----|
@@ -225,7 +225,7 @@ drops = {
 }
 ```
 
-Entries are evaluated top to bottom. The first entry whose `when` clause matches (or that has no `when`) provides the drops. Later entries are ignored.
+Entries are evaluated top to bottom. The first entry whose `when` clause matches (or that has no `when`) supplies the drops. Later entries are ignored.
 
 ### States table
 
@@ -238,7 +238,7 @@ states = {
 }
 ```
 
-Blockstate values are hashed strings. Any value can be written via `world.sset`. `hint` does not restrict this at runtime. `hint` is only a registration-time cross-check: every `when` clause across this block's `variants` is checked against the union of `hint` lists for the states it references. A value missing from `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state skip validation for that state.
+Blockstate values are hashed strings. Any value can be written via `world.sset`. `hint` does not restrict this at runtime. `hint` is only a registration-time cross-check. Every `when` clause across the `variants` of this block is checked against the union of `hint` lists for the states it references. A value missing from `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state skip validation for that state.
 
 ### State object
 
@@ -264,7 +264,7 @@ variants = {
 }
 ```
 
-`overrides` is a table of registration fields (same shape as the top-level definition). It merges on top of the block's base definition when `when` matches the current blockstate values.
+`overrides` is a table of registration fields (same shape as the top-level definition). It merges on top of the base definition of the block when `when` matches the current blockstate values.
 
 ### Target table
 

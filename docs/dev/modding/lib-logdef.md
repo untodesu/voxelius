@@ -1,6 +1,6 @@
 # Logs library
 
-The `builtin:logdef` library provides helpers for registering log-like blocks.
+The `builtin:logdef` library gives helpers for registering log-like blocks.
 
 ## Importing
 
@@ -10,11 +10,11 @@ local logdef = require("builtin:logdef")
 
 ### Function: `logdef.on_place(identifier) -> function`
 
-Produces an `on_place` callback for a given log identifier.
+Returns an `on_place` callback for a given log identifier.
 
 #### Arguments
 
-- `identifier` is the namespaced block ID. If the namespace is omitted, `core.NAMESPACE` is used.
+- `identifier` is the namespaced block ID. If you omit the namespace, the engine uses `core.NAMESPACE`.
 
 #### Return value
 
@@ -26,7 +26,7 @@ A wrapper around `blocks.add` that defines a log block family.
 
 #### Arguments
 
-- `identifier` is the namespaced block ID. If the namespace is omitted, `core.NAMESPACE` is used.
+- `identifier` is the namespaced block ID. If you omit the namespace, the engine uses `core.NAMESPACE`.
 - `prototype` is the base block definition the function builds on
 
 #### Return value

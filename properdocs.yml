@@ -65,10 +65,22 @@ nav:
         - Source Hierarchy: dev/engine/init-sources.md
         - Build Guide: dev/engine/init-building.md
       - Architecture Overview:
-        - Core: dev/engine/arch-core.md
-        - Rendering: dev/engine/arch-rendering.md
-        - Networking: dev/engine/arch-networking.md
-        - Sound: dev/engine/arch-sound.md
+        - Core:
+          - Overview: dev/engine/core-overview.md
+          - Configuration: dev/engine/core-config.md
+          - Resources: dev/engine/core-resources.md
+          - Threading: dev/engine/core-threading.md
+          - Buffers: dev/engine/core-buffers.md
+        - Rendering:
+          - Overview: dev/engine/draw-overview.md
+          - Outlines: dev/engine/draw-outlines.md
+          - Program API: dev/engine/draw-program.md
+        - Networking:
+          - Overview: dev/engine/net-overview.md
+          - Authentication: dev/engine/net-authentication.md
+          - Packet Reference: dev/engine/net-packets.md
+        - Sound:
+          - Overview: dev/engine/sound-overview.md
       - Development:
         - Code Style: dev/engine/dev-code-style.md
         - Contributing: dev/engine/dev-contributing.md

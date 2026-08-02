@@ -1,6 +1,6 @@
 # Features
 
-A feature is an atomic world-generation template: a palette of blocks and relative part offsets. Features are placed by the engine as scatter decorators (via `biome.scatter`) or as structure pieces (future). Placing features from scripts is planned.
+A feature is a single world-generation template. It contains a block palette and relative part offsets. The engine places features as scatter decorators through `biome.scatter`. Structure pieces are planned for the future. Script-based placement is planned.
 
 Stored features live under: `namespace:features`
 
@@ -10,7 +10,7 @@ Features are authored facing **north** (`blocks.FACE_NORTH`). Placement rules su
 
 |Field|Type|Required|Default|Description|
 |----|----|----|----|----|
-|`palette`|`object[]`|no|`[]`|Block palette to use|
+|`palette`|`object[]`|no|`[]`|Block palette for the feature|
 |`parts`|`object[]`|yes|N/D|Feature parts|
 
 ## Palette entries
@@ -50,7 +50,7 @@ Features are authored facing **north** (`blocks.FACE_NORTH`). Placement rules su
 |----|----|----|----|----|
 |`block`|`integer`|yes|N/D|Palette entry index|
 |`offset`|`integer[3]`|yes|N/D|Offset in blocks from the origin point|
-|`overwrite`|`string[]`|no|`{}`|Block tags the feature can overwrite when they occupy the needed space|
+|`overwrite`|`string[]`|no|`{}`|Block tags the feature can overwrite when they occupy the target space|
 
 ### Tag values
 

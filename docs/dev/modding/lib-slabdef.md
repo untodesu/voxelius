@@ -1,6 +1,6 @@
 # Slabs Library
 
-The `builtin:slabdef` library provides helpers for registering slab variants of regular blocks.
+The `builtin:slabdef` library gives helpers for registering slab variants of regular blocks.
 
 ## Importing
 
@@ -12,11 +12,11 @@ local slabdef = require("builtin:slabdef")
 
 ### Function: `slabdef.on_place(identifier) -> function`
 
-Produces an `on_place` callback for a given slab identifier.
+Returns an `on_place` callback for a given slab identifier.
 
 #### Arguments
 
-- `identifier` is the namespaced block ID. If the namespace is omitted, `core.NAMESPACE` is used.
+- `identifier` is the namespaced block ID. If you omit the namespace, the engine uses `core.NAMESPACE`.
 
 #### Return value
 
@@ -28,7 +28,7 @@ A wrapper around `blocks.add` that defines a slab block family.
 
 #### Arguments
 
-- `identifier` is the namespaced block ID. If the namespace is omitted, `core.NAMESPACE` is used.
+- `identifier` is the namespaced block ID. If you omit the namespace, the engine uses `core.NAMESPACE`.
 - `prototype` is the base block definition the function builds on
 - `options` is an optional table with extra parameters
 
@@ -39,4 +39,4 @@ A wrapper around `blocks.add` that defines a slab block family.
 #### Notes
 
 - The registered block family gets an `orientation` state and variants for `top`, `bottom`, and `double`.
-- The function does not modify touch response values from the prototype. It does define block collisions.
+- The function does not change touch response values from the prototype. It defines block collisions.

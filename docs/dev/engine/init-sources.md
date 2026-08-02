@@ -1,6 +1,6 @@
 # Source Hierarchy
 
-> **NOTE:** this file exists mainly so I do not shuffle sources _again_. I _HATE_ rewriting docs every time the tree moves.
+> **NOTE:** This file exists so I do not move sources again. I do not want to rewrite docs every time the tree changes.
 
 ## In-tree directories
 
@@ -11,7 +11,7 @@
 |`data`|Content packed with release executables. At least the `builtin` mod. More may appear later if people contribute|
 |`deps`|Third-party dependencies|
 |`docs`|Website sources, including documentation and a devlog|
-|`scripts`|Useful scripts to be used during build and elsewhere|
+|`scripts`|Scripts used during build and elsewhere|
 |`server`|Server executable sources|
 |`shared`|Shared game library. Most game logic, networking, and other client/server shared code|
 

@@ -1,6 +1,6 @@
 # Overview
 
-Voxelius _the game_ builds on Voxelius _the engine_. The engine exposes Lua hooks so mods can define blocks and other content that extends core gameplay.
+Voxelius _the game_ builds on Voxelius _the engine_. The engine exposes Lua hooks. Mods use these hooks to define blocks and other content that extends core gameplay.
 
 ## Namespaced identifiers
 
@@ -12,7 +12,7 @@ The engine uses _namespaced identifiers_, similar to Minecraft. A namespaced ide
 
 The namespace is optional.
 
-- In a mod script, a missing namespace defaults to that mod's namespace.
+- In a mod script, a missing namespace defaults to the namespace of that mod.
 - Elsewhere, a missing namespace defaults to `builtin` (the base game "mod" ID).
 
 Valid characters in both namespace and identifier:

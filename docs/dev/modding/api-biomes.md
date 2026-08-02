@@ -1,6 +1,6 @@
 # Biomes API
 
-Mods can register biome types for the world generator.
+Mods register biome types for the world generator.
 
 ## Constants: realms
 
@@ -41,9 +41,9 @@ Returns the numeric biome ID.
 |`humidity`|`integer`|no|50|Target humidity in climate space, 0 to 99|
 |`continentalness`|`integer`|no|50|Target continentalness, 0 to 99. Low values correspond to oceans|
 |`erosion`|`integer`|no|50|Target erosion, 0 to 99. High values are flat terrain, low values are mountainous|
-|`weirdness`|`integer`|no|50|Target weirdness / ridges, 0 to 99. Drives biome variants and peaks-vs-valleys terrain offset|
+|`weirdness`|`integer`|no|50|Target weirdness or ridges, 0 to 99. Drives biome variants and peaks-vs-valleys terrain offset|
 |`priority`|`integer`|no|0|If two biomes claim the same climate target during setup, higher priority keeps the point. The loser is nudged until the point is unique|
-|`offset`|`number`|no|0|Added to climate distance when picking a biome. Larger values make the biome harder to win / effectively smaller|
+|`offset`|`number`|no|0|Added to climate distance when picking a biome. Larger values make the biome harder to win and effectively smaller|
 |`palette`|`table`|no|`{}`|Biome block palette|
 |`scatter`|`table[]`|no|`{}`|List of features to scatter|
 |`tints`|`table`|no|`{}`|Tint group override colors|
@@ -76,7 +76,7 @@ Scatter entries are evaluated in list order. If several entries pass the roll on
 |`need_below`|`integer[]`|no|`{}`|List of `blocks.TAG_XXXX` constants. The origin block (surface) must have at least one listed tag|
 |`padding`|`integer`|no|0|Minimum block clearance between this feature's bounding box and another placement in the same padding family. Uses expanded-box separation: the current box is grown by `padding` blocks before intersection is tested|
 |`group`|`string`|no|`""`|Padding family name. Entries with the same non-empty `group` share padding. Empty group pads only against the same scatter entry|
-|`edge`|`integer`|no|0|Extra blocks beyond the feature's XZ bounds that must still belong to the same biome. The feature AABB footprint is always checked; `edge` grows that check so large decorations keep clear of biome borders|
+|`edge`|`integer`|no|0|Extra blocks beyond the feature's XZ bounds that must still belong to the same biome. The feature AABB footprint is always checked. `edge` grows that check so large decorations stay clear of biome borders|
 
 ## Example
 

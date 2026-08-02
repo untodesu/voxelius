@@ -4,7 +4,7 @@ The engine exposes limited access to subsystems and constants through the `core`
 
 ## Version constants
 
-These values match the game/engine version. See `core/version.hh` for the C++ equivalent.
+These values match the game and engine version. See `core/version.hh` for the C++ equivalent.
 
 |Value|Example|Description|
 |----|----|----|

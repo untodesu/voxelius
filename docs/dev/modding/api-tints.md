@@ -1,16 +1,16 @@
 # Tint API
 
-Each mod can register a named tint. Tints are used to paint specific block faces during rendering with a biome-specific color. This allows for there to be only a single block for stuff like grass, bushes and water
+Each mod can register a named tint. Tints paint specific block faces during rendering with a biome-specific color. One block type can serve grass, bushes, water, and similar surfaces.
 
 ## Constant: null tint
 
-`tints.NULL_TINT` is an empty, undefined or otherwise invalid tint ID. From the gamedev and gameplay point of view, this value is to be treated as a "no tint" marker for block models and fluids
+`tints.NULL_TINT` is an empty, undefined, or otherwise invalid tint ID. Treat it as a "no tint" marker for block models and fluids in gameplay and gamedev.
 
 ## Functions
 
 ### Function: `tints.add(name, def) -> integer`
 
-Registers a new named tint
+Registers a new named tint.
 
 #### Arguments
 
@@ -29,4 +29,4 @@ Returns the numeric tint ID.
 
 |Field|Type|Required|Default|Description|
 |----|----|----|----|----|
-|`default_color`|`number[3]`|yes|N/D|Default tint color when unspecified by a biome|  
+|`default_color`|`number[3]`|yes|N/D|Default tint color when unspecified by a biome|

@@ -2,7 +2,7 @@
 
 ## Clang-format
 
-All C++ code is formatted with `clang-format`. The config lives in the repository root. If your editor supports format-on-save, use it. Otherwise format before you commit.
+Format all C++ code with `clang-format`. The config file is in the repository root. If your editor supports format-on-save, enable it. Otherwise format before you commit.
 
 Dependencies are excluded from automatic formatting. They rarely match Voxelius style.
 
@@ -17,7 +17,7 @@ Notable settings:
 |Pointer alignment|Left|
 |Reference alignment|Left|
 
-> **NOTE:** if a formatting result looks wrong, do not edit `.clang-format` first. Split the code into smaller chunks so clang-format can handle it better. 👉👈
+> **NOTE:** If formatting looks wrong, do not edit `.clang-format` first. Split the code into smaller chunks so clang-format can handle it better.
 
 ## Naming
 
@@ -36,7 +36,7 @@ Notable settings:
 
 - Functions, methods, and namespaces put the opening brace on a new line.
 - Classes, structs, enums, unions, control statements, and lambdas keep the brace on the same line.
-- `else` and `catch` go on a new line after the closing brace. Two braces and a keyword on one line are hard to read.
+- Put `else` and `catch` on a new line after the closing brace. Two braces and a keyword on one line are hard to read.
 
 Example:
 
@@ -72,12 +72,12 @@ void vx::teardown(void)
 - Functions and methods with zero arguments use C-style `void` inside the parentheses.
 - Place `constexpr` function bodies in the header, just after the declarations.
 - C++ headers use `.hh`. C++ sources use `.cc`.
-- Profanity inside source code is allowed because I own the code and I can comment whatever the fuck I please inside of it.
+- Profanity in source code is allowed. I own the code and can comment as I choose.
 - Use standard `assert` for debug-time checks. Use `vx::throw_if_xxxx` when the game should crash on failure.
 
 ## Include guards
 
-- Every header uses an ifndef-block with a random GUID-style token. Dashes become underscores.
+- Every header uses an ifndef block with a random GUID-style token. Dashes become underscores.
 - Do not use `#pragma once`.
 - End the ifndef block with a block comment that repeats the same GUID.
 
@@ -92,7 +92,7 @@ Example:
 #endif /* B843EAA9_60C3_4C2B_8036_DF1026035AA8 */
 ```
 
-> **NOTE:** this matches the default behaviour of the [C/C++ Include Guard](https://marketplace.visualstudio.com/items?itemName=akiramiyakoda.cppincludeguard) VSCode extension.
+> **NOTE:** This matches the default behaviour of the [C/C++ Include Guard](https://marketplace.visualstudio.com/items?itemName=akiramiyakoda.cppincludeguard) VSCode extension.
 
 ## Namespaces
 

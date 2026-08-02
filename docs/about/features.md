@@ -1,3 +1,3 @@
 # About: features
 
-> **TODO:** list stuff here
+> **TODO:** List project features here.

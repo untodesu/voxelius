@@ -1,6 +1,6 @@
 # Mod Metadata
 
-Every mod root directory contains a `modinfo.conf` file. The file uses the engine's common configuration format.
+Every mod root directory contains a `modinfo.conf` file. The file uses the common configuration format of the engine.
 
 ## Fields
 
@@ -18,7 +18,7 @@ Every mod root directory contains a `modinfo.conf` file. The file uses the engin
 |`display_name`|no|Value of `name`|Metadata: display name|
 |`display_desc`|no|N/D|Metadata: short description|
 
-> **NOTE:** every mod implicitly depends on `builtin` at the version the game runtime provides (see `core/version.cc`).
+> **NOTE:** every mod implicitly depends on `builtin` at the version the game runtime ships (see `core/version.cc`).
 
 ## Example
 
