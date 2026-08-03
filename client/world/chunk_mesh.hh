@@ -6,7 +6,7 @@ struct ChunkMesh_Vertex final {
 
     static std::uint32_t pack_1(const Eigen::Vector3f& position_16ths);
     static std::uint32_t pack_2(const Eigen::Vector2f& uv, std::uint32_t mask_frame);
-    static std::uint32_t pack_3(std::uint32_t texture_index, std::uint32_t frame_offset);
+    static std::uint32_t pack_3(std::uint32_t albedo_strip, std::uint32_t frame_offset);
     static std::uint32_t pack_4(std::uint32_t ao, float shade, bool animated, const Eigen::Vector3f& tint_rgb);
 
     std::uint32_t data_1; // --ZZZZZZZZZZYYYYYYYYYYXXXXXXXXXX

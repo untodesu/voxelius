@@ -37,10 +37,11 @@ std::uint32_t ChunkMesh_Vertex::pack_2(const Eigen::Vector2f& uv, std::uint32_t 
     return result;
 }
 
-std::uint32_t ChunkMesh_Vertex::pack_3(std::uint32_t texture_index, std::uint32_t frame_offset)
+std::uint32_t ChunkMesh_Vertex::pack_3(std::uint32_t albedo_strip, std::uint32_t frame_offset)
 {
-    std::uint32_t result = texture_index & 0xFFFFU;
-    result |= (frame_offset & 0xFFU) << 16U;
+    std::uint32_t result = 0;
+    result |= (albedo_strip & 0xFFFFU);
+    result |= (frame_offset & 0xFFFFU) << 16U;
     return result;
 }
 

@@ -45,6 +45,7 @@ static std::size_t su_ViewProjection;
 static std::size_t su_AnimationTimer;
 static std::size_t su_ViewDistance;
 static std::size_t su_FogColor;
+static std::size_t su_CameraLocal;
 static std::size_t su_AtlasTexture;
 static std::size_t su_AtlasStrips;
 static std::size_t su_AtlasFrames;
@@ -303,7 +304,6 @@ static void on_chunk_mesh(entt::entity entity)
 
 static void bind_pipeline_state(unsigned fog_model)
 {
-    s_program.set_variant_vert(FOG_MODEL, fog_model);
     s_program.set_variant_frag(FOG_MODEL, fog_model);
     vx::throw_if_not(s_program.update());
 
@@ -315,6 +315,7 @@ static void bind_pipeline_state(unsigned fog_model)
     glUniform1ui(s_program.uniforms[su_AnimationTimer].location, animation_timer);
     glUniform1f(s_program.uniforms[su_ViewDistance].location, fog::distance);
     glUniform3fv(s_program.uniforms[su_FogColor].location, 1, fog::color.data());
+    glUniform3fv(s_program.uniforms[su_CameraLocal].location, 1, camera::local.data());
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, block_atlas::texture);
@@ -351,6 +352,7 @@ void chunk_renderer::init(void)
     su_AnimationTimer = s_program.add_uniform("u_AnimationTimer");
     su_ViewDistance = s_program.add_uniform("u_ViewDistance");
     su_FogColor = s_program.add_uniform("u_FogColor");
+    su_CameraLocal = s_program.add_uniform("u_CameraLocal");
     su_AtlasTexture = s_program.add_uniform("u_AtlasTexture");
     su_AtlasStrips = s_program.add_uniform("u_AtlasStrips");
     su_AtlasFrames = s_program.add_uniform("u_AtlasFrames");
@@ -494,7 +496,7 @@ void chunk_renderer::render_alpha(void)
         return;
     }
 
-    bind_pipeline_state(0);
+    bind_pipeline_state(s_fog_model.value());
 
     auto& frustum = camera::instance.frustum();
 
@@ -504,7 +506,7 @@ void chunk_renderer::render_alpha(void)
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     for(auto it = s_sorted_chunks.rbegin(); it != s_sorted_chunks.rend(); it = std::next(it)) {
         const auto& mesh = world::chunk_entities.get<ChunkMesh>(it->first);
@@ -530,7 +532,7 @@ void chunk_renderer::render_fluid(void)
         return;
     }
 
-    bind_pipeline_state(0);
+    bind_pipeline_state(s_fog_model.value());
 
     auto& frustum = camera::instance.frustum();
 
@@ -539,7 +541,7 @@ void chunk_renderer::render_fluid(void)
     glDepthMask(GL_TRUE);
     glDisable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     for(auto it = s_sorted_chunks.rbegin(); it != s_sorted_chunks.rend(); it = std::next(it)) {
         const auto& mesh = world::chunk_entities.get<ChunkMesh>(it->first);

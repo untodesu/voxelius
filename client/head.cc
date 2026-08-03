@@ -2,7 +2,6 @@
 
 #include "client/head.hh"
 
-#include "core/camera.hh"
 #include "core/cmdline.hh"
 #include "core/config/map.hh"
 #include "core/config/ref.hh"
@@ -11,7 +10,6 @@
 
 #include "shared/constant.hh"
 
-#include "client/camera.hh"
 #include "client/fog.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
@@ -20,10 +18,6 @@
 #include "client/world/chunk_renderer.hh"
 #include "client/world/chunk_vbo.hh"
 #include "client/world/outline.hh"
-
-// ONLY TOUCH THESE IF THE RESPECTIVE SHADER
-// VARIANT MACRO DECLARATIONS LAYOUT CHANGED AS WELL
-constexpr static unsigned FOG_MODEL = 0;
 
 struct LayerTarget final {
     GLuint fbo { 0 };
@@ -45,12 +39,8 @@ static std::size_t su_AlphaColor;
 static std::size_t su_AlphaDepth;
 static std::size_t su_FluidColor;
 static std::size_t su_FluidDepth;
-static std::size_t su_FogColor;
-static std::size_t su_ViewDistance;
-static std::size_t su_InverseProjection;
 
 static config::Ref<int> s_pixel_size { 1 };
-static config::Ref<unsigned> s_fog_model { 2 };
 
 static int s_scaled_width;
 static int s_scaled_height;
@@ -159,7 +149,6 @@ static void begin_translucent(LayerTarget& layer)
 
 static void composite_layers(void)
 {
-    s_transparency.set_variant_frag(FOG_MODEL, s_fog_model.value());
     vx::throw_if_not(s_transparency.update());
 
     glBindFramebuffer(GL_FRAMEBUFFER, s_compose_fbo);
@@ -196,12 +185,6 @@ static void composite_layers(void)
     glBindTexture(GL_TEXTURE_2D, s_fluid.depth);
     glUniform1i(s_transparency.uniforms[su_FluidDepth].location, 5);
 
-    glUniform3fv(s_transparency.uniforms[su_FogColor].location, 1, fog::color.data());
-    glUniform1f(s_transparency.uniforms[su_ViewDistance].location, fog::distance);
-
-    Eigen::Matrix4f inv_proj = camera::instance.projection().inverse();
-    glUniformMatrix4fv(s_transparency.uniforms[su_InverseProjection].location, 1, GL_FALSE, inv_proj.data());
-
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     glDepthMask(GL_TRUE);
@@ -218,7 +201,6 @@ static void on_sdl_window_event(const SDL_WindowEvent& event)
 void head::init(void)
 {
     s_pixel_size.bind(globals::client_config, "head.pixel_size");
-    s_fog_model.bind(globals::client_config, "head.fog_model");
 
     settings::slider<int>(2, settings_location::VIDEO, "head.pixel_size", 1, 4, true);
     settings::stepper<unsigned>(3, settings_location::VIDEO, "head.fog_model", 0, 2, 1, false);
@@ -256,9 +238,6 @@ void head::init(void)
     su_AlphaDepth = s_transparency.add_uniform("u_AlphaDepth");
     su_FluidColor = s_transparency.add_uniform("u_FluidColor");
     su_FluidDepth = s_transparency.add_uniform("u_FluidDepth");
-    su_FogColor = s_transparency.add_uniform("u_FogColor");
-    su_ViewDistance = s_transparency.add_uniform("u_ViewDistance");
-    su_InverseProjection = s_transparency.add_uniform("u_InverseProjection");
 
     chunk_vbo::init();
     chunk_renderer::init();

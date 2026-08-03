@@ -1,13 +1,12 @@
 #version 330 core
-#pragma variant 0 FOG_MODEL
 
 #define ANIMATED_BIT 0x00000004U
 
-layout(location = 0) in uint vert_Position;
-layout(location = 1) in uint vert_TexCoord;
-layout(location = 2) in uint vert_Texture;
-layout(location = 3) in uint vert_Extras;
-layout(location = 4) in uint vert_ChunkSlot;
+layout(location = 0) in uint vert_Data1;
+layout(location = 1) in uint vert_Data2;
+layout(location = 2) in uint vert_Data3;
+layout(location = 3) in uint vert_Data4;
+layout(location = 4) in uint vert_Data5;
 
 out vec2 vs_TexCoord;
 flat out uint vs_FrameIndex;
@@ -15,68 +14,99 @@ flat out uint vs_MaskFrame;
 flat out vec3 vs_TintColor;
 out float vs_Shade;
 out float vs_AO;
-
-#if FOG_MODEL
-out float vs_FogFactor;
-#endif
+out vec3 vs_ViewPos;
 
 uniform usamplerBuffer u_AtlasStrips;
 uniform samplerBuffer u_ChunkPositions;
 uniform mat4 u_ViewProjection;
 uniform uint u_AnimationTimer;
-uniform float u_ViewDistance;
+uniform vec3 u_CameraLocal;
 
-vec3 unpack_position(uint data)
+vec3 unpack_position(uint data_1)
 {
-    int xpos = int(data & 0x3FFU) - 16;
-    int ypos = int((data >> 10U) & 0x3FFU) - 16;
-    int zpos = int((data >> 20U) & 0x3FFU) - 16;
+    int xpos = int(data_1 & 0x3FFU) - 16;
+    int ypos = int((data_1 >> 10U) & 0x3FFU) - 16;
+    int zpos = int((data_1 >> 20U) & 0x3FFU) - 16;
     return vec3(xpos, ypos, zpos) / 16.0;
 }
 
-vec3 unpack_tint_rgb565(uint data)
+vec2 unpack_texcoord(uint data_2)
 {
-    uint bits = (data >> 16U) & 0xFFFFU;
-    float r = float(bits & 0x1FU) / 31.0;
-    float g = float((bits >> 5U) & 0x3FU) / 63.0;
-    float b = float((bits >> 11U) & 0x1FU) / 31.0;
+    float u = float(data_2 & 0xFFU) / 255.0;
+    float v = float((data_2 >> 8U) & 0xFFU) / 255.0;
+    return vec2(u, v);
+}
+
+uint unpack_mask_frame(uint data_2)
+{
+    return (data_2 >> 16U) & 0xFFFFU;
+}
+
+uint unpack_albedo_strip(uint data_3)
+{
+    return data_3 & 0xFFFFU;
+}
+
+uint unpack_frame_offset(uint data_3)
+{
+    return (data_3 >> 16U) & 0xFFFFU;
+}
+
+vec3 unpack_tint(uint data_4)
+{
+    uint tint_bits = (data_4 >> 16U) & 0xFFFFU;
+    float r = float(tint_bits & 0x1FU) / 31.0;
+    float g = float((tint_bits >> 5U) & 0x3FU) / 63.0;
+    float b = float((tint_bits >> 11U) & 0x1FU) / 31.0;
     return vec3(r, g, b);
+}
+
+float unpack_shade(uint data_4)
+{
+    return float((data_4 >> 8U) & 0xFFU) / 255.0;
+}
+
+float unpack_ao(uint data_4)
+{
+    return mix(0.25, 1.0, float(data_4 & 0x03U) / 3.0);
+}
+
+bool unpack_animated(uint data_4)
+{
+    return bool(data_4 & ANIMATED_BIT);
 }
 
 void main(void)
 {
-    vec3 local_position = unpack_position(vert_Position) + texelFetch(u_ChunkPositions, int(vert_ChunkSlot)).xyz;
+    vec3 local_position = unpack_position(vert_Data1);
+    local_position += texelFetch(u_ChunkPositions, int(vert_Data5)).xyz;
 
-    vs_TexCoord = vec2(float(vert_TexCoord & 0xFFU), float((vert_TexCoord >> 8U) & 0xFFU)) / 255.0;
-    vs_MaskFrame = (vert_TexCoord >> 16U) & 0xFFFFU;
+    vs_TexCoord = unpack_texcoord(vert_Data2);
+    vs_MaskFrame = unpack_mask_frame(vert_Data2);
 
-    uint texture_index = vert_Texture & 0xFFFFu;
-    uint frame_offset = (vert_Texture >> 16u) & 0xFFU;
-
-    uvec4 strip_data = texelFetch(u_AtlasStrips, int(texture_index));
+    uint albedo_strip = unpack_albedo_strip(vert_Data3);
+    uint frame_offset = unpack_frame_offset(vert_Data3);
+    
+    uvec4 strip_data = texelFetch(u_AtlasStrips, int(albedo_strip));
     uint strip_frame_base = strip_data.x;
     uint strip_frame_count = strip_data.y;
 
-    gl_Position = u_ViewProjection * vec4(local_position, 1.0);
+    gl_Position.w = 1.0;
+    gl_Position.xyz = unpack_position(vert_Data1);
+    gl_Position.xyz += texelFetch(u_ChunkPositions, int(vert_Data5)).xyz;
 
-    if(bool(vert_Extras & ANIMATED_BIT)) {
+    vs_ViewPos = gl_Position.xyz - u_CameraLocal;
+
+    gl_Position = u_ViewProjection * gl_Position;
+
+    if(unpack_animated(vert_Data4)) {
         vs_FrameIndex = strip_frame_base + u_AnimationTimer % max(strip_frame_count, 1U);
     }
-
     else {
         vs_FrameIndex = strip_frame_base + frame_offset;
     }
 
-    vs_TintColor = unpack_tint_rgb565(vert_Extras);
-    vs_Shade = float((vert_Extras >> 8U) & 0xFFU) / 255.0;
-
-    float ao_factor = float(vert_Extras & 0x03U) / 3.0;
-    vs_AO = mix(0.25, 1.0, ao_factor);
-
-#if FOG_MODEL == 1
-    vs_FogFactor = 1.0 - clamp((u_ViewDistance - length(gl_Position.xyz)) / (u_ViewDistance - 16.0), 0.0, 1.0);
-#elif FOG_MODEL == 2
-    float fogd = 2.0 / u_ViewDistance * length(gl_Position.xyz);
-    vs_FogFactor = 1.0 - clamp(exp2(fogd * fogd * -1.442695), 0.0, 1.0);
-#endif
+    vs_TintColor = unpack_tint(vert_Data4);
+    vs_Shade = unpack_shade(vert_Data4);
+    vs_AO = unpack_ao(vert_Data4);
 }

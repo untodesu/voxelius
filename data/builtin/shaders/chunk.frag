@@ -7,14 +7,12 @@ flat in uint vs_MaskFrame;
 flat in vec3 vs_TintColor;
 in float vs_Shade;
 in float vs_AO;
-
-#if FOG_MODEL
-in float vs_FogFactor;
-#endif
+in vec3 vs_ViewPos;
 
 out vec4 frag_Target;
 
 uniform vec3 u_FogColor;
+uniform float u_ViewDistance;
 uniform sampler2DArray u_AtlasTexture;
 uniform samplerBuffer u_AtlasFrames;
 
@@ -26,38 +24,43 @@ struct AtlasFrame {
 
 AtlasFrame get_frame(int index)
 {
-    vec4 part1 = texelFetch(u_AtlasFrames, index * 2);
-    vec4 part2 = texelFetch(u_AtlasFrames, index * 2 + 1);
+    vec4 part_1 = texelFetch(u_AtlasFrames, index * 2);
+    vec4 part_2 = texelFetch(u_AtlasFrames, index * 2 + 1);
 
     AtlasFrame frame;
-    frame.uv_min = part1.xy;
-    frame.uv_max = part1.zw;
-    frame.layer = floatBitsToUint(part2.x);
+    frame.uv_min = part_1.xy;
+    frame.uv_max = part_1.zw;
+    frame.layer = floatBitsToUint(part_2.x);
     
     return frame;
 }
 
 void main(void)
 {
-    AtlasFrame frame = get_frame(int(vs_FrameIndex));
-    vec2 final_uv = mix(frame.uv_min, frame.uv_max, vs_TexCoord);
-    vec4 albedo = texture(u_AtlasTexture, vec3(final_uv, float(frame.layer)));
+    AtlasFrame albedo_frame = get_frame(int(vs_FrameIndex));
+    vec2 albedo_uv = mix(albedo_frame.uv_min, albedo_frame.uv_max, vs_TexCoord);
+    vec4 albedo_color = texture(u_AtlasTexture, vec3(albedo_uv, float(albedo_frame.layer)));
 
     AtlasFrame mask_frame = get_frame(int(vs_MaskFrame));
     vec2 mask_uv = mix(mask_frame.uv_min, mask_frame.uv_max, vs_TexCoord);
-    float tint_mask = texture(u_AtlasTexture, vec3(mask_uv, float(mask_frame.layer))).r;
+    vec4 mask_color = texture(u_AtlasTexture, vec3(mask_uv, float(mask_frame.layer)));
 
-    vec3 tint = mix(vec3(1.0), vs_TintColor, tint_mask);
-    vec3 shaded = albedo.rgb * vs_Shade * vs_AO * tint;
-
-    if(albedo.a < 0.01) {
-        discard;
-    }
+    vec3 tint = mix(vec3(1.0), vs_TintColor, mask_color.r);
+    vec3 shaded = albedo_color.rgb * vs_Shade * vs_AO * tint;
 
     frag_Target.rgb = shaded;
-    frag_Target.a = albedo.a;
+    frag_Target.a = albedo_color.a;
 
-#if FOG_MODEL
-    frag_Target.rgb = mix(frag_Target.rgb, u_FogColor, vs_FogFactor);
+#if FOG_MODEL == 1
+    float dist = length(vs_ViewPos);
+    float fog_factor = 1.0 - clamp((u_ViewDistance - dist) / (u_ViewDistance - 16.0), 0.0, 1.0);
+    frag_Target.rgb = mix(frag_Target.rgb, u_FogColor, fog_factor);
+#elif FOG_MODEL == 2
+    float dist = length(vs_ViewPos);
+    float fogd = 2.0 / u_ViewDistance * dist;
+    float fog_factor = 1.0 - clamp(exp2(fogd * fogd * -1.442695), 0.0, 1.0);
+    frag_Target.rgb = mix(frag_Target.rgb, u_FogColor, fog_factor);
 #endif
+
+    frag_Target.rgb *= frag_Target.a;
 }
