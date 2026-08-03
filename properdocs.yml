@@ -67,7 +67,7 @@ nav:
       - Architecture Overview:
         - Core: dev/engine/arch-core.md
         - Rendering: dev/engine/arch-render.md
-        - Networking: dev/engine/arch-net.md
+        - Networking: dev/engine/arch-network.md
         - Sound: dev/engine/arch-sound.md
       - Development:
         - Code Style: dev/engine/dev-code-style.md
