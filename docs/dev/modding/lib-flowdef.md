@@ -2,7 +2,7 @@
 
 The `builtin:flowdef` library gives helpers for flowing blocks.
 
-> **NOTE:** the library implements Minecraft-like flowing logic. It includes infinite water sources and similar behaviour.
+> **NOTE:** The library implements Minecraft-like flowing logic. It supports infinite water sources and similar behaviour.
 
 ## Importing
 
@@ -23,7 +23,7 @@ local flowdef = require("builtin:flowdef")
 
 ### Function: `flowdef.states(config_src) -> table`
 
-Returns a states object for block registration.
+This function returns a states object for block registration.
 
 #### Arguments
 
@@ -35,7 +35,7 @@ A table to plug into `states` of a block definition.
 
 ### Function: `flowdef.variants(config_src) -> table`
 
-Returns a variants object for block registration.
+This function returns a variants object for block registration.
 
 #### Arguments
 
@@ -47,7 +47,7 @@ A table to plug into `variants` of a block definition.
 
 ### Function: `flowdef.on_place(config_src) -> function`
 
-Returns an `on_place` callback for the given flow config.
+This function returns an `on_place` callback for the given flow config.
 
 #### Arguments
 
@@ -59,7 +59,7 @@ A function that implements update logic for flowing blocks.
 
 ### Function: `flowdef.on_tick(config_src) -> function`
 
-Returns an `on_tick` callback for the given flow config.
+This function returns an `on_tick` callback for the given flow config.
 
 #### Arguments
 

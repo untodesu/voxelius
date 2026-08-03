@@ -26,4 +26,4 @@ On init, if the engine finds a duplicate registry entry (for example `mymod:mybl
 
 ## Error handling
 
-The mod root script `modname/scripts/init.lua` can catch its own errors. If an error leaves that script (into the init `lua_pcall`), the engine treats the mod as a load failure.
+The mod root script `modname/scripts/init.lua` can catch its own errors. If an error escapes that script and reaches the init `lua_pcall`, the engine marks the mod load as a failure.

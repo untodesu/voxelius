@@ -10,7 +10,7 @@ local logdef = require("builtin:logdef")
 
 ### Function: `logdef.on_place(identifier) -> function`
 
-Returns an `on_place` callback for a given log identifier.
+This function returns an `on_place` callback for a given log identifier.
 
 #### Arguments
 

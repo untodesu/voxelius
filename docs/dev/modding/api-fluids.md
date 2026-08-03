@@ -19,7 +19,7 @@ Defines the direction in which the fluid level decreases.
 
 ### Function: `fluids.add(name, def) -> integer`
 
-Register a new fluid in the registry.
+Registers a new fluid in the registry.
 
 #### Arguments
 
@@ -32,7 +32,7 @@ Returns the numeric fluid ID.
 
 #### Notes
 
-**Rename rule:** on conflict, the encroaching `name` gets a `~N` suffix. `N` is the smallest integer starting at `1` that yields a free id (e.g. `mymod:mywater~1`). Loading stays deterministic for the same mod list and order.
+**Rename rule:** on conflict, the engine adds a `~N` suffix to the encroaching `name`. `N` is the smallest integer, starting at `1`, that gives a free id (e.g. `mymod:mywater~1`). Loading stays deterministic for the same mod list and order.
 
 ## Fluid definition
 
@@ -44,11 +44,11 @@ Returns the numeric fluid ID.
 |`full_level`|`integer`|yes|N/D|Level that counts as a full cell, in 1/16ths of a block|
 |`opaque`|`boolean`|no|`false`|If `true`, fluid quads use the `blocks.RENDER_SOLID` step instead of the fluid step|
 |`tint`|`string`|no|`nil`|Namespaced tint id|
-|`fog_density`|`number`|no|1.0|When the client camera is inside this fluid, fog distance is divided by this value|
-|`fog_color`|`number[3]`|no|`{1,1,1}`|When the client camera is inside this fluid, fog color is replaced with this|
+|`fog_density`|`number`|no|1.0|When the client camera is inside this fluid, the engine divides fog distance by this value|
+|`fog_color`|`number[3]`|no|`{1,1,1}`|When the client camera is inside this fluid, the engine replaces fog color with this value|
 
 ## Fluid textures
 
-- Fluids are _assumed_ to be animated. Texture frames are not randomized by world position.
+- The engine assumes fluids are animated. It does not randomize texture frames by world position.
 - Fluids define only two hard-coded texture slots: `still` and `flowing`.
 - Texture syntax otherwise matches [block definitions](api-blocks.md), both for albedo and for mask textures.

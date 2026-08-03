@@ -12,7 +12,7 @@ local slabdef = require("builtin:slabdef")
 
 ### Function: `slabdef.on_place(identifier) -> function`
 
-Returns an `on_place` callback for a given slab identifier.
+This function returns an `on_place` callback for a given slab identifier.
 
 #### Arguments
 
@@ -39,4 +39,4 @@ A wrapper around `blocks.add` that defines a slab block family.
 #### Notes
 
 - The registered block family gets an `orientation` state and variants for `top`, `bottom`, and `double`.
-- The function does not change touch response values from the prototype. It defines block collisions.
+- The function keeps the touch response values from the prototype unchanged. It only defines block collisions.

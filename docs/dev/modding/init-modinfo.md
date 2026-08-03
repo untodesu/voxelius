@@ -41,6 +41,6 @@ display_desc = Adds explosive blocks to Voxelius
 
 ## Load order
 
-Mods are ordered by a topological sort of dependencies. Within one group in that list, mods load in alphabetical order. Mods with no dependencies beyond `builtin` load first.
+The engine orders mods by a topological sort of their dependencies. Within one group in that list, mods load in alphabetical order. Mods with no dependencies beyond `builtin` load first.
 
 > **NOTE:** a missing dependency causes the mod to fail.

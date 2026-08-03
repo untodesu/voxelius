@@ -29,4 +29,4 @@ The engine uses PhysFS for the VFS. It mounts these system paths:
 |`/`|`${PWD}/mods`|Read-only|User-provided mods|
 |`/`|`${APPDATA}/Voxelius` or similar|Read/Write|User directory. Settings and world saves live here. The user can also override vendored assets|
 
-All three mount at virtual root. The engine appends mods. It prepends the user directory. That sets priority: the user directory always overrides the game directory, and the game directory overrides mods.
+All three mounts share one virtual root. The engine appends the mods mount and prepends the user directory mount. This order sets priority: the user directory always overrides the game directory, and the game directory always overrides the mods directory.

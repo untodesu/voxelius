@@ -6,7 +6,7 @@ Mods read and write world blocks through the `world` library.
 
 ### Function: `world.get_block(bx, by, bz) -> integer`
 
-Retrieve a numeric block ID from the world.
+Retrieves a numeric block ID from the world.
 
 #### Arguments
 
@@ -21,7 +21,7 @@ Retrieve a numeric block ID from the world.
 
 ### Function: `world.set_block(bx, by, bz, id) -> boolean`
 
-Assign a block ID in the world.
+Assigns a block ID in the world.
 
 #### Arguments
 
@@ -37,7 +37,7 @@ Assign a block ID in the world.
 
 ### Function: `world.get_light(bx, by, bz) -> integer`
 
-Retrieve lighting information for a block position.
+Retrieves lighting information for a block position.
 
 #### Arguments
 
@@ -51,7 +51,7 @@ Retrieve lighting information for a block position.
 
 ### Function: `world.get_state(bx, by, bz, st) -> string`
 
-Retrieve a blockstate at a given position.
+Retrieves a blockstate at a given position.
 
 #### Arguments
 
@@ -66,7 +66,7 @@ Retrieve a blockstate at a given position.
 
 ### Function: `world.set_state(bx, by, bz, st, val) -> boolean`
 
-Assign a blockstate at a given position.
+Assigns a blockstate at a given position.
 
 #### Arguments
 
@@ -83,7 +83,7 @@ Assign a blockstate at a given position.
 
 ### Function: `world.get_temperature_base(bx, by, bz) -> integer`
 
-Retrieve a biome-defined temperature base for a block.
+Retrieves a biome-defined temperature base for a block.
 
 #### Arguments
 
@@ -102,7 +102,7 @@ Many biomes may not define this. In that case most use `298`, which is about 25 
 
 ### Function: `world.get_temperature(bx, by, bz) -> integer`
 
-Retrieve a biome-influenced seasonal temperature for a block.
+Retrieves a biome-influenced seasonal temperature for a block.
 
 #### Arguments
 
@@ -121,7 +121,7 @@ Season, weather, and other factors can change this. Relatively low values (below
 
 ### Function: `world.schedule(bx, by, bz, dt)`
 
-Schedule an `on_tick` call for a block in `dt` ticks. The tick source is `blocks.TICK_SCRIPTED`.
+Schedules an `on_tick` call for a block in `dt` ticks. The tick source is `blocks.TICK_SCRIPTED`.
 
 #### Arguments
 

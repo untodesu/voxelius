@@ -50,8 +50,8 @@ Defines a touch response for a block.
 |----|----|
 |`blocks.TOUCH_NONE`|Block is not collidable|
 |`blocks.TOUCH_SOLID`|Movement stops in the touch direction|
-|`blocks.TOUCH_BOUNCE`|Movement is reflected with some attenuation. Reserved for future use (e.g. slime-like blocks). No builtin block uses it yet|
-|`blocks.TOUCH_THROUGH`|Movement is attenuated but direction is unchanged. Reserved for future use (e.g. cobweb, liquids). No builtin block uses it yet|
+|`blocks.TOUCH_BOUNCE`|The block reflects movement with some attenuation. This is reserved for future use (e.g. slime-like blocks). No builtin block uses it yet|
+|`blocks.TOUCH_THROUGH`|The block attenuates movement but does not change its direction. This is reserved for future use (e.g. cobweb, liquids). No builtin block uses it yet|
 
 ## Constants: category bits
 
@@ -85,7 +85,7 @@ A scheduled tick is issued non-randomly with a specific timeout. Scheduled ticks
 
 ### Function: `blocks.get(name) -> integer`
 
-Retrieve a numeric block stem ID from a namespaced block ID.
+Retrieves a numeric block stem ID from a namespaced block ID.
 
 #### Arguments
 
@@ -98,11 +98,11 @@ Retrieve a numeric block stem ID from a namespaced block ID.
 
 #### Notes
 
-- If a block defines states and variants, the return value is a _stem_ ID. A stem placed in the world is not rendered, not collidable, and not raycastable.
+- If a block defines states and variants, the return value is a _stem_ ID. The engine does not render, collide with, or raycast a stem placed in the world.
 
 ### Function: `blocks.has_tag(id, tag) -> boolean`
 
-Check if a block has a specified tag.
+Checks if a block has a specified tag.
 
 #### Arguments
 
@@ -115,7 +115,7 @@ Check if a block has a specified tag.
 
 ### Function: `blocks.is_replaceable(id) -> boolean`
 
-Check if a block ID can be overwritten without breaking it first (empty cell or `replaceable = true` at registration).
+Checks if a block ID can be overwritten without breaking it first (empty cell, or `replaceable = true` at registration).
 
 #### Arguments
 
@@ -128,13 +128,13 @@ Check if a block ID can be overwritten without breaking it first (empty cell or 
 ### Function: `blocks.add(name, def) -> integer`
 ### Function: `blocks.add(name, prototype, def) -> integer`
 
-Register a new block in the registry.
+Registers a new block in the registry.
 
 #### Arguments
 
 - `name` is a namespaced block ID, eg `mymod:coolblockname`
 - `def` is a block definition table (see below)
-- `prototype` (3-argument form) is a base definition shared across a family of blocks (eg. all stone variants). `def` merges on top. Fields in `def` win on conflict.
+- `prototype` (3-argument form) is a base definition shared across a family of blocks (eg. all stone variants). `def` merges on top of `prototype`. On conflict, fields in `def` win.
 
 #### Return value
 
@@ -142,7 +142,7 @@ Returns the numeric block ID.
 
 #### Notes
 
-**Rename rule:** on conflict, the encroaching `name` gets a `~N` suffix. `N` is the smallest integer starting at `1` that yields a free id (e.g. `mymod:myblock~1`). Loading stays deterministic for the same mod list and order.
+**Rename rule:** on conflict, the engine adds a `~N` suffix to the encroaching `name`. `N` is the smallest integer, starting at `1`, that gives a free id (e.g. `mymod:myblock~1`). Loading stays deterministic for the same mod list and order.
 
 ## Block definition
 
@@ -151,19 +151,19 @@ Returns the numeric block ID.
 |`render`|`integer`|yes|N/D|One of `blocks.RENDER_XXXX` constants|
 |`albedo`|`table`|depends|`{}`|Albedo textures to attach to the block model|
 |`masks`|`table`|no|`{}`|Mask textures to attach to the block model|
-|`animated`|`boolean`|no|`false`|If true, textures in `textures` are animation frames instead of world-position random frames|
+|`animated`|`boolean`|no|`false`|If true, the engine treats textures in `textures` as animation frames instead of world-position random frames|
 |`model_name`|`string`|depends|N/D|[Block model](format-bmodel.md) name for this variant|
 |`model_offset`|`number[3]`|depends|`{0, 0, 0}`|Offset of the resolved block model|
-|`model_facing`|`integer`|no|`blocks.FACE_NORTH`|One of `blocks.FACE_XXXX`. Sets where the model's own north face points. Rotates the whole resolved block model|
+|`model_facing`|`integer`|no|`blocks.FACE_NORTH`|One of `blocks.FACE_XXXX`. Sets where the model's own north face points, and rotates the whole resolved block model|
 |`bcoll_name`|`string`|depends|N/D|[Block collision](format-bcoll.md) shape for this variant|
 |`bcoll_offset`|`number[3]`|depends|`{0, 0, 0}`|Block collision offset|
-|`bcoll_facing`|`integer`|no|`blocks.FACE_NORTH`|One of `blocks.FACE_XXXX`. Rotates the resolved collision shape the same way `model_facing` rotates the model. Set independently. Collision need not match the visual, though it usually should|
+|`bcoll_facing`|`integer`|no|`blocks.FACE_NORTH`|One of `blocks.FACE_XXXX`. Rotates the resolved collision shape the same way `model_facing` rotates the model. You can set it independently of `model_facing`. The collision shape does not need to match the visual, though it usually should|
 |`fluid_name`|`string`|no|N/D|[Fluid](api-fluids.md) name that shares the grid cell with the block|
 |`fluid_level`|`integer`|no|0|Fluid level if `fluid_name` is set, in 1/16ths of a block|
 |`health`|`integer`|no|`0`|Base hit points needed to break the block. Tool effects can change this|
 |`sound`|`string`|no|N/D|Sound set for this block|
 |`emission`|`integer`|no|`0`|Emission light value|
-|`dissipation`|`integer`|no|`0`|How much light the block absorbs as light passes through|
+|`dissipation`|`integer`|no|`0`|Amount of light the block absorbs as light passes through it|
 |`touch`|`integer`|no|`blocks.TOUCH_SOLID`|Block touch response|
 |`touch_coeffs`|`number[3]`|no|`{1, 1, 1}`|Block touch response coefficients|
 |`tags`|`integer[]`|no|`{}`|Block tags|
@@ -181,9 +181,10 @@ Returns the numeric block ID.
 
 Each texture slot is a list of textures. The engine uses them as position-randomized variations, or as animation frames when `animated` is `true`.
 
+
 #### Masks
 
-Each texture slot can have a mask texture used by the engine for certain purposes. Each color channel of an RGBA mask texture can (and will in the future) drive per-face logic.
+Each texture slot can have a mask texture that the engine uses for certain purposes. Each color channel of an RGBA mask texture can drive per-face logic, and more channels will gain this role in the future.
 
 |Channel|Designation|Description|
 |----|----|----|
@@ -194,7 +195,7 @@ Each texture slot can have a mask texture used by the engine for certain purpose
 
 ### Facing rotation
 
-`model_facing` and `bcoll_facing` each define one 90-degree-step rotation of the whole model or collision shape. They set where the north face of the model points. By default it points world north.
+`model_facing` and `bcoll_facing` each define one 90-degree-step rotation of the whole model or collision shape. They set where the north face of the model points. By default, the north face points world north.
 
 |Value|Rotation|Image|
 |----|----|----|
@@ -225,7 +226,7 @@ drops = {
 }
 ```
 
-Entries are evaluated top to bottom. The first entry whose `when` clause matches (or that has no `when`) supplies the drops. Later entries are ignored.
+The engine evaluates entries top to bottom. The first entry whose `when` clause matches (or that has no `when`) supplies the drops. The engine ignores later entries.
 
 ### States table
 
@@ -238,7 +239,7 @@ states = {
 }
 ```
 
-Blockstate values are hashed strings. Any value can be written via `world.sset`. `hint` does not restrict this at runtime. `hint` is only a registration-time cross-check. Every `when` clause across the `variants` of this block is checked against the union of `hint` lists for the states it references. A value missing from `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state skip validation for that state.
+Blockstate values are hashed strings. You can write any value via `world.sset`. `hint` does not restrict this at runtime; `hint` is only a registration-time cross-check. The engine checks every `when` clause across the `variants` of this block against the union of `hint` lists for the states it references. A value missing from `hint` produces a console warning at load time (typo protection, e.g. `orientation = "bottum"`). Blocks that omit `hint` for a state skip validation for that state.
 
 ### State object
 
@@ -311,7 +312,7 @@ end
 
 Returning `nil` blocks placement. Returning a table (empty or not) permits it. Table entries become initial blockstate values for states not covered by their `default`.
 
-When placement is permitted, the new block overwrites whatever was in the cell. Replaceable occupants are not broken and do not drop items.
+When placement is permitted, the new block overwrites whatever was in the cell. The engine does not break replaceable occupants, and they do not drop items.
 
 ### `on_break` handler
 

@@ -23,7 +23,7 @@ Returns the numeric tint ID.
 
 #### Notes
 
-**Rename rule:** on conflict, the encroaching `name` gets a `~N` suffix. `N` is the smallest integer starting at `1` that yields a free id (e.g. `mymod:mytint~1`). Loading stays deterministic for the same mod list and order.
+**Rename rule:** on conflict, the engine adds a `~N` suffix to the encroaching `name`. `N` is the smallest integer, starting at `1`, that gives a free id (e.g. `mymod:mytint~1`). Loading stays deterministic for the same mod list and order.
 
 ## Tint definition
 
