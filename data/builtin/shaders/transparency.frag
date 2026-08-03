@@ -71,16 +71,16 @@ void main(void)
     depths[2] = 0.0;
     order[2] = 2;
 
-    int active = 1;
+    int active_index = 1;
     vec4 alpha = texture(u_AlphaColor, vs_TexCoord);
 
     if(alpha.a > 0.0) {
         float alpha_depth = texture(u_AlphaDepth, vs_TexCoord).r;
-        colors[active] = fog_translucent(alpha, alpha_depth);
-        depths[active] = alpha_depth;
-        order[active] = active;
+        colors[active_index] = fog_translucent(alpha, alpha_depth);
+        depths[active_index] = alpha_depth;
+        order[active_index] = active_index;
 
-        int jj = active;
+        int jj = active_index;
         int ii = jj - 1;
 
         while(jj > 0 && depths[order[jj]] > depths[order[ii]]) {
@@ -93,18 +93,18 @@ void main(void)
             ii = jj - 1;
         }
 
-        active += 1;
+        active_index += 1;
     }
 
     vec4 fluid = texture(u_FluidColor, vs_TexCoord);
 
     if(fluid.a > 0.0) {
         float fluid_depth = texture(u_FluidDepth, vs_TexCoord).r;
-        colors[active] = fog_translucent(fluid, fluid_depth);
-        depths[active] = fluid_depth;
-        order[active] = active;
+        colors[active_index] = fog_translucent(fluid, fluid_depth);
+        depths[active_index] = fluid_depth;
+        order[active_index] = active_index;
 
-        int jj = active;
+        int jj = active_index;
         int ii = jj - 1;
 
         while(jj > 0 && depths[order[jj]] > depths[order[ii]]) {
@@ -117,12 +117,12 @@ void main(void)
             ii = jj - 1;
         }
 
-        active += 1;
+        active_index += 1;
     }
 
     vec3 accum = colors[order[0]].rgb;
 
-    for(int i = 1; i < active; i += 1) {
+    for(int i = 1; i < active_index; i += 1) {
         if(colors[order[i]].a > 0.0) {
             accum = blend(accum, colors[order[i]]);
         }
