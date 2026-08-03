@@ -1,8 +1,8 @@
 # Networking
 
-The client and the server talk over ENet, a thin reliability layer on top of UDP. Each side reads and writes [buffers](arch-core.md#buffers), and every packet starts with a 16-bit unsigned integer that names its ID.
+The client and the server talk over ENet, a thin reliability layer on top of UDP. Each side reads and writes [buffers](arch-core.md#buffers). Every packet starts with a 16-bit unsigned integer that names its ID.
 
-A client goes through one of two exchanges after it connects: a status ping, or a full login. Both start the same way and both end with the server closing or keeping the connection.
+A client goes through one of two exchanges after it connects: a status ping, or a full login. Both exchanges start the same way. Both end with the server closing the connection or keeping it open.
 
 ## Status pings
 
@@ -38,15 +38,38 @@ The client proves its identity with an Ed25519 keypair. The server challenges th
 
 ##### Server passwords
 
-A server-side password, if the server has one, is folded into the signed message. This way, the exchange also proves the client knows the password, without ever sending it.
+If the server has a password, the client folds it into the signed message. This way, the exchange also proves the client knows the password. The client never sends the password itself.
 
 ##### Invite codes
 
-The invite code is a one-time code. On a successful login, the server consumes the invite code and adds the client's public key to its whitelist. The same client can then reconnect later without a new invite.
+The invite code is a one-time code. On a successful login, the server consumes the invite code. The server then adds the client's public key to its whitelist. The same client can then reconnect later without a new invite.
 
 ##### Registry hashes
 
-The client sends its block, biome, fluid, and tint registry hashes, and the server checks them against its own. A mismatch means the two sides disagree on what a given ID means, so the server disconnects the client with a checksum mismatch reason before either side can act on the disagreement. This protects both directions: it stops a mismatched client from receiving chunk data it would render as corrupted or nonsensical, and it stops that same client from placing a block ID the server does not recognize.
+The client sends its block, biome, fluid, and tint registry hashes. The server checks each hash against its own. A mismatch means the two sides disagree on what a given ID means. When that happens, the server disconnects the client with a checksum mismatch reason, before either side can act on the disagreement.
+
+This check protects both sides:
+
+- It stops a mismatched client from receiving chunk data it would render as corrupted or nonsensical.
+- It stops that same client from placing a block ID the server does not recognize.
+
+## World
+
+Once the server admits a client, the client asks for chunks and reports block and entity actions. Only the server can make a world change final.
+
+##### Chunk transfer
+
+The client sends `RequestChunk` for any chunk position it needs. The server answers with `ChunkBlocks`, holding that chunk's full block data. The server also sends `ChunkBlocks` on its own initiative, as a full resync.
+
+##### Block and entity actions
+
+The client sends `PlayerAttack` or `PlayerInteract` to act on its current target. A `target` field names an entity. If the client is targeting a block instead, this field carries a null entity.
+
+For a block target, the packet also carries the block's position and the ID the client expects to find there. It also carries the hit face, normal, and point. These three fields match the `physics::BlockHit` fields the block callbacks expect.
+
+The server replies to every `PlayerAttack` or `PlayerInteract` with a `SetBlock` for the position involved. The server sends this reply whether or not the block changed. If the block changed, `SetBlock` also reaches every other client with that chunk loaded.
+
+> **TODO:** entity spawn/despawn/update packets. The plan is a Quake-style `classname`. Mods register entity types in Lua. C++ then attaches the matching components. The wire format should likely resolve `classname` the same way it already resolves block and biome IDs: through a registry checked at login, not a raw string per spawn. This is not needed until the entity-registration API itself exists.
 
 ## Packet reference
 
@@ -133,3 +156,50 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`0x00000008`|Outdated server|Client is too new for the server|
 |`0x00000009`|Server is full|No more free slots available|
 |`0x0000000A`|Server shutdown|Server is terminating|
+
+### `0x0008` `RequestChunk`
+
+|Type|Name|Description|
+|----|----|----|
+|`vector3<int32>`|`cpos`|Requested chunk position|
+
+### `0x0009` `ChunkBlocks`
+
+|Type|Name|Description|
+|----|----|----|
+|`vector3<int32>`|`cpos`|Chunk position|
+|`data`|`voxels`|Serialized and compressed block storage contents|
+
+### `0x000A` `ChunkBiomes`
+
+|Type|Name|Description|
+|----|----|----|
+|`uint32`|`realm`|Biome realm|
+|`vector2<int32>`|`cpos`|XZ-position|
+|`uint32<256>`|`biomes`|A list of biome IDs|
+
+### `0x000B` `SetBlock`
+
+|Type|Name|Description|
+|----|----|----|
+|`vector3<int64>`|`bpos`|World-scale block position|
+|`uint32`|`id`|Resulting numeric block ID|
+
+### `0x000C` `PlayerAttack`
+
+|Type|Name|Description|
+|----|----|----|
+|`entity`|`target`|Targeted entity, or null if the target is a block|
+|`vector3<int64>`|`bpos`|Targeted block position, used only when `target` is null|
+|`uint32`|`expected_id`|Block ID the client expects at `bpos`, used only when `target` is null|
+
+### `0x000D` `PlayerInteract`
+
+|Type|Name|Description|
+|----|----|----|
+|`entity`|`target`|Targeted entity, or null if the target is a block|
+|`vector3<int64>`|`bpos`|Targeted block position, used only when `target` is null|
+|`uint32`|`expected_id`|Block ID the client expects at `bpos`, used only when `target` is null|
+|`uint8`|`face`|Hit face (one of `blocks.FACE_XXXX`), used only when `target` is null|
+|`vector3<float>`|`normal`|Hit normal, used only when `target` is null|
+|`vector3<float>`|`point`|Hit point, local to the block, used only when `target` is null|
