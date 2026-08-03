@@ -30,7 +30,7 @@ If the client sends a login request instead of a status request, the server star
 |3|Server|Client|If the server accepts the request, it responds with a challenge packet holding a random nonce|
 |4|Client|Server|The client signs the nonce, the server's password, and the current UTC time, and sends the signature back in a challenge response packet|
 |5|Server|Client|If the signature matches, the server admits the client with a packet holding its assigned username|
-|6|N/A|N/A|Entity exchange and game packets begin here|
+|6|N/A|N/A|Entity exchange and game packets start here|
 
 ##### Identity
 
@@ -46,7 +46,7 @@ The invite code is a one-time code. On a successful login, the server consumes t
 
 ##### Registry hashes
 
-The client sends its block, biome, fluid, and tint registry hashes. The server checks each hash against its own. A mismatch means the two sides disagree on what a given ID means. When that happens, the server disconnects the client with a checksum mismatch reason, before either side can act on the disagreement.
+The client sends its block, biome, fluid, and tint registry hashes. The server checks each hash against its own. A mismatch means the two sides disagree on what a given ID means. When that happens, the server disconnects the client with a checksum mismatch reason. Neither side acts on the disagreement.
 
 This check protects both sides:
 
@@ -68,8 +68,6 @@ The client sends `PlayerAttack` or `PlayerInteract` to act on its current target
 For a block target, the packet also carries the block's position and the ID the client expects to find there. It also carries the hit face, normal, and point. These three fields match the `physics::BlockHit` fields the block callbacks expect.
 
 The server replies to every `PlayerAttack` or `PlayerInteract` with a `SetBlock` for the position involved. The server sends this reply whether or not the block changed. If the block changed, `SetBlock` also reaches every other client with that chunk loaded.
-
-> **TODO:** entity spawn/despawn/update packets. The plan is a Quake-style `classname`. Mods register entity types in Lua. C++ then attaches the matching components. The wire format should likely resolve `classname` the same way it already resolves block and biome IDs: through a registry checked at login, not a raw string per spawn. This is not needed until the entity-registration API itself exists.
 
 ## Packet reference
 
