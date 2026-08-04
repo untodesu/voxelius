@@ -26,7 +26,7 @@ struct Session final {
 
 namespace sessions
 {
-extern std::size_t num_players;
+extern std::uint16_t num_players;
 } // namespace sessions
 
 namespace sessions

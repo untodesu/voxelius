@@ -13,8 +13,8 @@ struct StatusRequest final : public BasePacket<packet_type::STATUS_REQUEST> {
 };
 
 struct StatusResponse final : public BasePacket<packet_type::STATUS_RESPONSE> {
-    constexpr static std::uint32_t PASSWORD_PROTECTED = 0x00000001;
-    constexpr static std::uint32_t WHITELIST_ENABLED = 0x00000002;
+    constexpr static std::uint32_t WHITELIST_ENABLED = 0x00000001;
+    constexpr static std::uint32_t STRICT_VERSION = 0x00000002;
 
     static void serialize(const StatusResponse& packet, WriteBuffer& buffer);
     static void deserialize(StatusResponse& packet, ReadBuffer& buffer);

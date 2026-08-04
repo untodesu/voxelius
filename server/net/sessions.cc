@@ -24,13 +24,13 @@ static std::vector<Session> s_sessions;
 static emhash8::HashMap<std::string, Session*> s_username_map;
 static emhash8::HashMap<std::uint64_t, Session*> s_identity_map;
 
-static config::Ref<bool> s_enable_whitelist { false };
+static config::Ref<bool> s_whitelist_enabled { false };
 static config::Ref<bool> s_strict_version { false }; // allow differences in minor and patch versions
 static config::Ref<unsigned> s_max_players { 8 };
 
 static std::mt19937_64 s_randomizer;
 
-std::size_t sessions::num_players = 0;
+std::uint16_t sessions::num_players = 0;
 
 static bool is_outdated_client(std::uint32_t major, std::uint32_t minor, std::uint32_t patch)
 {
@@ -86,7 +86,7 @@ static void on_auth_request(const AuthRequest& packet)
         return;
     }
 
-    if(packet.invite && s_enable_whitelist) {
+    if(packet.invite && s_whitelist_enabled) {
         if(!invites::consume(packet.invite, packet.pkey)) {
             Disconnect response {};
             response.reason = Disconnect::NOT_WHITELISTED;
@@ -95,7 +95,7 @@ static void on_auth_request(const AuthRequest& packet)
         }
     }
 
-    if(s_enable_whitelist) {
+    if(s_whitelist_enabled) {
         if(!whitelist::contains(packet.pkey)) {
             Disconnect response {};
             response.reason = Disconnect::NOT_WHITELISTED;
@@ -230,9 +230,9 @@ static std::string sanitize_username(std::string_view username)
 
 void sessions::init(void)
 {
-    s_enable_whitelist.bind(globals::server_config, "sessions.enable_whitelist");
-    s_strict_version.bind(globals::server_config, "sessions.strict_version");
-    s_max_players.bind(globals::server_config, "sessions.max_players");
+    s_whitelist_enabled.bind(globals::server_config, "whitelist.enabled");
+    s_strict_version.bind(globals::server_config, "auth.strict_version");
+    s_max_players.bind(globals::server_config, "host.max_players");
 
     std::random_device noise;
     s_randomizer.seed(noise());
