@@ -25,7 +25,7 @@ static emhash8::HashMap<std::string, Session*> s_username_map;
 static emhash8::HashMap<std::uint64_t, Session*> s_identity_map;
 
 static config::Ref<bool> s_whitelist_enabled { false };
-static config::Ref<bool> s_strict_version { false }; // allow differences in minor and patch versions
+static config::Ref<bool> s_strict_version { false };
 static config::Ref<unsigned> s_max_players { 8 };
 
 static std::mt19937_64 s_randomizer;
