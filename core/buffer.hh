@@ -21,7 +21,7 @@ public:
     constexpr void rewind(void);
     constexpr bool is_ended(void) const;
 
-    void read(std::span<std::byte> buffer);
+    void read_bytes(std::span<std::byte> buffer);
 
     template<typename T>
     T read(void);
@@ -45,8 +45,8 @@ public:
 
     void reset(void);
 
-    void write(const WriteBuffer& other);
-    void write(std::span<const std::byte> data);
+    void write_buffer(const WriteBuffer& other);
+    void write_bytes(std::span<const std::byte> data);
 
     template<typename T>
     void write(const T value);

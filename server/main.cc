@@ -15,6 +15,9 @@
 #include "server/constant.hh"
 #include "server/game.hh"
 #include "server/globals.hh"
+#include "server/net/invites.hh"
+#include "server/net/sessions.hh"
+#include "server/net/whitelist.hh"
 #include "server/world/climate.hh"
 #include "server/world/worldgen.hh"
 
@@ -57,6 +60,11 @@ static void wrapped_main(int argc, char** argv)
 
     shared_game::init();
     server_game::init();
+
+    whitelist::init();
+    invites::init();
+    sessions::init();
+
     worldgen::init();
 
     splash::init(SPLASH_SERVER);
@@ -65,6 +73,8 @@ static void wrapped_main(int argc, char** argv)
 
     shared_game::init_late();
     server_game::init_late();
+
+    sessions::init_late();
 
     climate::rebuild();
 
@@ -125,6 +135,11 @@ static void wrapped_main(int argc, char** argv)
     LOG_INFO("avg tickrate: {:.03f} TPS ({:.03f} MSPT)", 1.0f / globals::fixed_frametime_avg, 1000.0f * globals::fixed_frametime_avg);
 
     worldgen::shutdown();
+
+    sessions::shutdown();
+    invites::shutdown();
+    whitelist::shutdown();
+
     server_game::shutdown();
     shared_game::shutdown();
 

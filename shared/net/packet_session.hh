@@ -19,6 +19,9 @@ struct Disconnect final : public BasePacket<packet_type::DISCONNECT> {
     static void serialize(const Disconnect& packet, WriteBuffer& buffer);
     static void deserialize(Disconnect& packet, ReadBuffer& buffer);
 
+    static std::string_view reason_string_client(std::uint32_t reason);
+    static std::string_view reason_string_server(std::uint32_t reason);
+
     std::uint32_t reason;
 };
 

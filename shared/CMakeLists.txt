@@ -20,6 +20,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/entity/transform.hh"
     "${CMAKE_CURRENT_LIST_DIR}/entity/velocity.cc"
     "${CMAKE_CURRENT_LIST_DIR}/entity/velocity.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/net/ed25519.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/net/ed25519.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/packet_auth.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/packet_auth.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/packet_player.cc"
@@ -99,6 +101,7 @@ target_compile_features(shared PUBLIC cxx_std_20)
 target_include_directories(shared PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(shared PUBLIC core)
 target_link_libraries(shared PUBLIC
+    deps::ed25519
     deps::entt
     deps::lua)
 target_precompile_headers(shared PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")

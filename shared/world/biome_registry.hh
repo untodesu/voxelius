@@ -8,6 +8,7 @@ class ModContext;
 namespace biome_registry
 {
 std::span<const BiomeDefinition> all_definitions(void);
+std::uint64_t checksum(void);
 } // namespace biome_registry
 
 namespace biome_registry

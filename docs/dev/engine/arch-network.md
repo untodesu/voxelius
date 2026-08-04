@@ -131,6 +131,8 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 |Type|Name|Description|
 |----|----|----|
+|`uint16`|`client_id`|Client ID|
+|`uint64`|`identity`|Client identity|
 |`string`|`username`|Assigned username|
 
 ### `0x0007` `Disconnect`

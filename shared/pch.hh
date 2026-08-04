@@ -3,6 +3,8 @@
 
 #include <core/pch.hh>
 
+#include <ed25519.h>
+
 #include <entt/entt.hpp>
 
 extern "C" {

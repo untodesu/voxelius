@@ -9,10 +9,21 @@
 static std::vector<FluidDefinition> s_definitions;
 static emhash8::HashMap<Identifier, fluid_id_type> s_names;
 static emhash8::HashMap<fluid_id_type, Identifier> s_reverse_names;
+static std::uint64_t s_checksum;
+
+static void update_checksum(void)
+{
+    // TODO: go through each fluid definition and compute a checksum based on its contents
+}
 
 std::span<const FluidDefinition> fluid_registry::all_definitions(void)
 {
     return s_definitions;
+}
+
+std::uint64_t fluid_registry::checksum(void)
+{
+    return s_checksum;
 }
 
 void fluid_registry::resolve_tints(void)
@@ -64,6 +75,8 @@ void fluid_registry::commit(ModContext& ctx)
     if(fluids.size()) {
         s_definitions.insert(s_definitions.end(), std::make_move_iterator(fluids.begin() + 1), std::make_move_iterator(fluids.end()));
     }
+
+    update_checksum();
 }
 
 void fluid_registry::purge(void)
