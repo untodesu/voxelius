@@ -20,13 +20,16 @@ static std::any velocity_parse(lua_State* L, int config_idx)
     return std::monostate {};
 }
 
-static bool velocity_apply(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+static void velocity_spawn(entt::entity entity)
 {
     Velocity_Component velocity {};
     velocity.value = Eigen::Vector3f::Zero();
 
     world::basic_entities.emplace_or_replace<Velocity_Component>(entity, std::move(velocity));
+}
 
+static bool velocity_apply(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+{
     return true;
 }
 
@@ -48,6 +51,7 @@ void Velocity_Component::register_component(void)
 {
     ComponentDefinition def {};
     def.parse = &velocity_parse;
+    def.spawn = &velocity_spawn;
     def.apply = &velocity_apply;
     def.net_deserialize = &velocity_deserialize;
     def.sav_deserialize = &velocity_deserialize;

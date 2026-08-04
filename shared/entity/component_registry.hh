@@ -17,6 +17,11 @@ std::string_view name_of(component_id_type id);
 namespace component_registry
 {
 std::any parse(component_id_type id, lua_State* L, int config_idx);
+} // namespace component_registry
+
+namespace component_registry
+{
+bool spawn(component_id_type id, entt::entity entity);
 bool apply(component_id_type id, entt::entity entity, lua_State* L, int kv_idx, const std::any& config);
 bool net_deserialize(component_id_type id, entt::entity entity, ReadBuffer& buffer);
 bool sav_deserialize(component_id_type id, entt::entity entity, ReadBuffer& buffer);

@@ -8,7 +8,9 @@
 #include "shared/entity/class_registry.hh"
 #include "shared/entity/component_registry.hh"
 #include "shared/mod_context.hh"
+#include "shared/utils/entity.hh"
 #include "shared/utils/lua.hh"
+#include "shared/world/world.hh"
 
 static Identifier make_unique_id(const Identifier& id, const ModContext* ctx)
 {
@@ -163,6 +165,55 @@ static int api_add(lua_State* L)
     return 1;
 }
 
+static int api_spawn(lua_State* L)
+{
+    auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
+    auto raw_name = luaL_checkstring(L, 1);
+
+    auto id = Identifier::from_string(raw_name, ctx->name_space());
+
+    if(!id.is_valid()) {
+        lua_pushfstring(L, "entities.spawn: malformed name: %s", raw_name);
+        return lua_error(L);
+    }
+
+    int kv_idx;
+
+    if(lua_gettop(L) >= 2) {
+        luaL_checktype(L, 2, LUA_TTABLE);
+        kv_idx = 2;
+    }
+    else {
+        lua_newtable(L);
+        kv_idx = lua_gettop(L);
+    }
+
+    auto entity = utils::entity_spawn_lua(id, L, kv_idx);
+
+    if(entity == entt::null) {
+        return lua_error(L);
+    }
+
+    lua_pushinteger(L, static_cast<lua_Integer>(entity));
+    return 1;
+}
+
+static int api_despawn(lua_State* L)
+{
+    auto raw_entity = luaL_checkinteger(L, 1);
+    auto entity = static_cast<entt::entity>(raw_entity);
+
+    if(!world::basic_entities.valid(entity)) {
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    world::basic_entities.destroy(entity);
+
+    lua_pushboolean(L, true);
+    return 1;
+}
+
 void api::open_entities_library(std::shared_ptr<lua_State>& lua, ModContext* ctx)
 {
     assert(lua);
@@ -182,6 +233,13 @@ void api::open_entities_library(std::shared_ptr<lua_State>& lua, ModContext* ctx
     lua_pushlightuserdata(L, ctx);
     lua_pushcclosure(L, &api_add, 1);
     lua_setfield(L, -2, "add");
+
+    lua_pushlightuserdata(L, ctx);
+    lua_pushcclosure(L, &api_spawn, 1);
+    lua_setfield(L, -2, "spawn");
+
+    lua_pushcfunction(L, api_despawn);
+    lua_setfield(L, -2, "despawn");
 
     lua_setglobal(L, "entities");
 }

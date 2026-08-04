@@ -34,6 +34,7 @@ static void zoned_fixed_update(void)
 {
     ZoneScopedN("server::fixed_update");
 
+    shared_game::fixed_update();
     server_game::fixed_update();
 }
 
@@ -41,6 +42,7 @@ static void zoned_fixed_update_late(void)
 {
     ZoneScopedN("server::fixed_update_late");
 
+    shared_game::fixed_update_late();
     server_game::fixed_update_late();
 }
 

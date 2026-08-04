@@ -6,6 +6,7 @@
 
 #include "shared/constant.hh"
 #include "shared/coord.hh"
+#include "shared/entity/class.hh"
 #include "shared/entity/component_registry.hh"
 #include "shared/utils/coord.hh"
 #include "shared/utils/lua.hh"
@@ -31,6 +32,16 @@ static std::any transform_parse(lua_State* L, int config_idx)
     return std::monostate {};
 }
 
+static void transform_spawn(entt::entity entity)
+{
+    Transform transform {};
+    transform.chunk = ChunkPos::Zero();
+    transform.local = Eigen::Vector3f::Zero();
+    transform.angles = Eigen::Vector3f::Zero();
+
+    world::basic_entities.emplace_or_replace<Transform>(entity, std::move(transform));
+}
+
 static bool transform_apply(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
 {
     auto bpos = utils::opt_ivec<3>(L, kv_idx, "bpos", { 0, 0, 0 });
@@ -45,12 +56,10 @@ static bool transform_apply(entt::entity entity, lua_State* L, int kv_idx, const
         return false;
     }
 
-    Transform transform {};
+    auto& transform = world::basic_entities.get<Transform>(entity);
     transform.chunk = utils::to_chunk(bpos.value().cast<BlockPos::value_type>());
     transform.local = utils::to_local(bpos.value().cast<BlockPos::value_type>()).cast<float>();
     transform.angles = angles.value().cast<float>();
-
-    world::basic_entities.emplace_or_replace<Transform>(entity, std::move(transform));
 
     return true;
 }
@@ -77,6 +86,7 @@ void Transform::register_component(void)
 {
     ComponentDefinition def {};
     def.parse = &transform_parse;
+    def.spawn = &transform_spawn;
     def.apply = &transform_apply;
     def.net_deserialize = &transform_deserialize;
     def.sav_deserialize = &transform_deserialize;
@@ -94,5 +104,9 @@ void Transform::fixed_update(void)
         update_component(0U, transform);
         update_component(1U, transform);
         update_component(2U, transform);
+
+        if(auto class_component = world::basic_entities.try_get<EntityClass_Component>(entity)) {
+            LOG_INFO("entity {} ({}) transform update", static_cast<std::uint64_t>(entity), class_component->id.full_string());
+        }
     }
 }

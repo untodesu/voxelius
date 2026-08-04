@@ -14,12 +14,14 @@ struct ComponentTable final {
 };
 
 using component_parse_func = std::any (*)(lua_State* L, int config_idx);
+using component_spawn_func = void (*)(entt::entity entity);
 using component_apply_func = bool (*)(entt::entity entity, lua_State* L, int kv_idx, const std::any& config);
 using component_deserialize_func = void (*)(entt::entity entity, ReadBuffer& buffer);
 using component_serialize_func = void (*)(entt::entity entity, WriteBuffer& buffer);
 
 struct ComponentDefinition final {
     component_parse_func parse { nullptr };
+    component_spawn_func spawn { nullptr };
     component_apply_func apply { nullptr };
     component_deserialize_func net_deserialize { nullptr };
     component_deserialize_func sav_deserialize { nullptr };

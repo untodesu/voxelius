@@ -22,7 +22,7 @@ struct ClassDefinition final {
 };
 
 struct EntityClass_Component final {
-    std::string name;
+    Identifier id;
 };
 
 #endif /* D395275D_B45F_4578_81AA_E1229C4447BF */

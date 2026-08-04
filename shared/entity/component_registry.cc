@@ -34,8 +34,9 @@ component_id_type component_registry::add(std::string_view name, ComponentDefini
     auto it = s_id_map.find(key);
     vx::throw_if_not_fmt(it == s_id_map.cend(), "duplicate component_registry::add call for {}", name);
 
-    assert(def.apply);
     assert(def.parse);
+    assert(def.spawn);
+    assert(def.apply);
 
     auto id = static_cast<component_id_type>(s_names.size());
     s_id_map.insert_or_assign(key, component_id_type(id));
@@ -71,6 +72,18 @@ std::any component_registry::parse(component_id_type id, lua_State* L, int confi
     }
 
     return {};
+}
+
+bool component_registry::spawn(component_id_type id, entt::entity entity)
+{
+    if(auto hooks = find_hooks(id)) {
+        if(auto spawn_fn = hooks->spawn) {
+            spawn_fn(entity);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool component_registry::apply(component_id_type id, entt::entity entity, lua_State* L, int kv_idx, const std::any& config)

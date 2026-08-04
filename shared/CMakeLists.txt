@@ -62,6 +62,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/utils/biome.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/coord.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/coord.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/entity.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/entity.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/lua.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/lua.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/world.cc"

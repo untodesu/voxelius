@@ -6,6 +6,7 @@
 #include "core/exception.hh"
 
 #include "shared/constant.hh"
+#include "shared/entity/class_registry.hh"
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/fluid_registry.hh"
@@ -173,6 +174,7 @@ void mod_loader::init(void)
         fluid_registry::commit(ctx);
         block_registry::commit(ctx);
         biome_registry::commit(ctx);
+        class_registry::commit(ctx);
     }
 
     fluid_registry::resolve_tints();
@@ -186,6 +188,7 @@ void mod_loader::shutdown(void)
 {
     s_mods.clear();
 
+    class_registry::purge();
     biome_registry::purge();
     block_registry::purge();
     fluid_registry::purge();

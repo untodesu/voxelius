@@ -2,6 +2,10 @@
 
 #include "server/game.hh"
 
+#include "core/identifier.hh"
+
+#include "shared/utils/entity.hh"
+
 void server_game::init(void)
 {
     // empty
@@ -9,7 +13,7 @@ void server_game::init(void)
 
 void server_game::init_late(void)
 {
-    // empty
+    utils::entity_spawn_raw(Identifier::from_string("builtin:test_entity"));
 }
 
 void server_game::shutdown(void)
