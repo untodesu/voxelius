@@ -28,7 +28,7 @@ static void velocity_spawn(entt::entity entity)
     world::basic_entities.emplace_or_replace<Velocity_Component>(entity, std::move(velocity));
 }
 
-static bool velocity_apply(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+static bool velocity_configure(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
 {
     return true;
 }
@@ -50,9 +50,12 @@ static void velocity_serialize(entt::entity entity, WriteBuffer& buffer)
 void Velocity_Component::register_component(void)
 {
     ComponentDefinition def {};
+
     def.parse = &velocity_parse;
+
     def.spawn = &velocity_spawn;
-    def.apply = &velocity_apply;
+    def.configure = &velocity_configure;
+
     def.net_deserialize = &velocity_deserialize;
     def.sav_deserialize = &velocity_deserialize;
     def.net_serialize = &velocity_serialize;

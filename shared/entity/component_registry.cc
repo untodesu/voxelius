@@ -36,7 +36,7 @@ component_id_type component_registry::add(std::string_view name, ComponentDefini
 
     assert(def.parse);
     assert(def.spawn);
-    assert(def.apply);
+    assert(def.configure);
 
     auto id = static_cast<component_id_type>(s_names.size());
     s_id_map.insert_or_assign(key, component_id_type(id));
@@ -86,13 +86,28 @@ bool component_registry::spawn(component_id_type id, entt::entity entity)
     return false;
 }
 
-bool component_registry::apply(component_id_type id, entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+bool component_registry::configure(component_id_type id, entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
 {
     if(auto hooks = find_hooks(id)) {
-        if(auto apply_fn = hooks->apply) {
-            return apply_fn(entity, L, kv_idx, config);
+        if(auto configure_fn = hooks->configure) {
+            return configure_fn(entity, L, kv_idx, config);
         }
     }
+
+    lua_pushstring(L, "missing configure callback");
+
+    return false;
+}
+
+bool component_registry::patch(component_id_type id, entt::entity entity, lua_State* L, int kv_idx)
+{
+    if(auto hooks = find_hooks(id)) {
+        if(auto patch_fn = hooks->patch) {
+            return patch_fn(entity, L, kv_idx);
+        }
+    }
+
+    lua_pushstring(L, "missing patch callback");
 
     return false;
 }

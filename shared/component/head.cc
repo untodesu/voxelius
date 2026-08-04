@@ -40,7 +40,7 @@ static void head_spawn(entt::entity entity)
     world::basic_entities.emplace_or_replace<Head_Component>(entity, std::move(head));
 }
 
-static bool head_apply(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+static bool head_configure(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
 {
     auto& my_config = std::any_cast<const Head_Config&>(config);
 
@@ -52,6 +52,20 @@ static bool head_apply(entt::entity entity, lua_State* L, int kv_idx, const std:
 
     auto& head = world::basic_entities.get<Head_Component>(entity);
     head.offset = my_config.offset;
+    head.angles = angles.value().cast<float>();
+
+    return true;
+}
+
+static bool head_patch(entt::entity entity, lua_State* L, int kv_idx)
+{
+    auto& head = world::basic_entities.get<Head_Component>(entity);
+    auto angles = utils::opt_fvec<3>(L, kv_idx, "angles", head.angles.cast<lua_Number>());
+
+    if(!angles.has_value()) {
+        return false;
+    }
+
     head.angles = angles.value().cast<float>();
 
     return true;
@@ -74,9 +88,13 @@ static void head_serialize(entt::entity entity, WriteBuffer& buffer)
 void Head_Component::register_component(void)
 {
     ComponentDefinition def {};
+
     def.parse = &head_parse;
+
     def.spawn = &head_spawn;
-    def.apply = &head_apply;
+    def.configure = &head_configure;
+    def.patch = &head_patch;
+
     def.net_deserialize = &head_deserialize;
     def.sav_deserialize = &head_deserialize;
     def.net_serialize = &head_serialize;

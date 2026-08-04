@@ -79,7 +79,7 @@ entt::entity utils::entity_spawn_lua(const Identifier& class_id, lua_State* L, i
             return entt::null;
         }
 
-        if(!component_registry::apply(it.id, entity, L, kv_idx, it.config)) {
+        if(!component_registry::configure(it.id, entity, L, kv_idx, it.config)) {
             world::basic_entities.destroy(entity);
             return entt::null;
         }

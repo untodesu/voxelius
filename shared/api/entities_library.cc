@@ -198,6 +198,38 @@ static int api_spawn(lua_State* L)
     return 1;
 }
 
+static int api_patch(lua_State* L)
+{
+    auto raw_entity = luaL_checkinteger(L, 1);
+    auto entity = static_cast<entt::entity>(raw_entity);
+
+    if(!world::basic_entities.valid(entity)) {
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    auto component_name = luaL_checkstring(L, 2);
+    auto id = component_registry::find(component_name);
+
+    if(id == COMPONENT_ID_NULL) {
+        lua_pushfstring(L, "entities.patch: %s: unknown component", component_name);
+        return lua_error(L);
+    }
+
+    luaL_checktype(L, 3, LUA_TTABLE);
+
+    auto success = component_registry::patch(id, entity, L, 3);
+
+    if(!success) {
+        lua_pushboolean(L, false);
+        lua_insert(L, -2); // false before the error message already on the stack
+        return 2;
+    }
+
+    lua_pushboolean(L, true);
+    return 1;
+}
+
 static int api_despawn(lua_State* L)
 {
     auto raw_entity = luaL_checkinteger(L, 1);
@@ -237,6 +269,9 @@ void api::open_entities_library(std::shared_ptr<lua_State>& lua, ModContext* ctx
     lua_pushlightuserdata(L, ctx);
     lua_pushcclosure(L, &api_spawn, 1);
     lua_setfield(L, -2, "spawn");
+
+    lua_pushcfunction(L, api_patch);
+    lua_setfield(L, -2, "patch");
 
     lua_pushcfunction(L, api_despawn);
     lua_setfield(L, -2, "despawn");

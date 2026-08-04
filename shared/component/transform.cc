@@ -42,7 +42,7 @@ static void transform_spawn(entt::entity entity)
     world::basic_entities.emplace_or_replace<Transform>(entity, std::move(transform));
 }
 
-static bool transform_apply(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+static bool transform_configure(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
 {
     auto bpos = utils::opt_ivec<3>(L, kv_idx, "bpos", { 0, 0, 0 });
 
@@ -85,9 +85,12 @@ static void transform_serialize(entt::entity entity, WriteBuffer& buffer)
 void Transform::register_component(void)
 {
     ComponentDefinition def {};
+
     def.parse = &transform_parse;
+
     def.spawn = &transform_spawn;
-    def.apply = &transform_apply;
+    def.configure = &transform_configure;
+
     def.net_deserialize = &transform_deserialize;
     def.sav_deserialize = &transform_deserialize;
     def.net_serialize = &transform_serialize;
