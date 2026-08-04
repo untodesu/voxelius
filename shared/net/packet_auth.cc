@@ -4,7 +4,7 @@
 
 #include "core/buffer.hh"
 
-void AuthRequest::serialize(const AuthRequest& packet, WriteBuffer& buffer)
+void AuthRequest_Packet::serialize(const AuthRequest_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(packet.major);
     buffer.write<std::uint32_t>(packet.minor);
@@ -18,7 +18,7 @@ void AuthRequest::serialize(const AuthRequest& packet, WriteBuffer& buffer)
     buffer.write<std::string_view>(packet.username.substr(0, 64));
 }
 
-void AuthRequest::deserialize(AuthRequest& packet, ReadBuffer& buffer)
+void AuthRequest_Packet::deserialize(AuthRequest_Packet& packet, ReadBuffer& buffer)
 {
     packet.major = buffer.read<std::uint32_t>();
     packet.minor = buffer.read<std::uint32_t>();
@@ -32,34 +32,34 @@ void AuthRequest::deserialize(AuthRequest& packet, ReadBuffer& buffer)
     packet.username = buffer.read<std::string>();
 }
 
-void AuthChallenge::serialize(const AuthChallenge& packet, WriteBuffer& buffer)
+void AuthChallenge_Packet::serialize(const AuthChallenge_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write_bytes(packet.nonce);
 }
 
-void AuthChallenge::deserialize(AuthChallenge& packet, ReadBuffer& buffer)
+void AuthChallenge_Packet::deserialize(AuthChallenge_Packet& packet, ReadBuffer& buffer)
 {
     buffer.read_bytes(packet.nonce);
 }
 
-void AuthResponse::serialize(const AuthResponse& packet, WriteBuffer& buffer)
+void AuthResponse_Packet::serialize(const AuthResponse_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write_bytes(packet.signature);
 }
 
-void AuthResponse::deserialize(AuthResponse& packet, ReadBuffer& buffer)
+void AuthResponse_Packet::deserialize(AuthResponse_Packet& packet, ReadBuffer& buffer)
 {
     buffer.read_bytes(packet.signature);
 }
 
-void AuthAdmission::serialize(const AuthAdmission& packet, WriteBuffer& buffer)
+void AuthAdmission_Packet::serialize(const AuthAdmission_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint16_t>(packet.client_id);
     buffer.write<std::uint64_t>(packet.identity);
     buffer.write<std::string_view>(packet.username.substr(0, 64));
 }
 
-void AuthAdmission::deserialize(AuthAdmission& packet, ReadBuffer& buffer)
+void AuthAdmission_Packet::deserialize(AuthAdmission_Packet& packet, ReadBuffer& buffer)
 {
     packet.client_id = buffer.read<std::uint16_t>();
     packet.identity = buffer.read<std::uint64_t>();

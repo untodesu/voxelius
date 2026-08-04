@@ -14,16 +14,17 @@
 #include "shared/world/block_registry.hh"
 
 #include "client/camera.hh"
-#include "client/entity/interpolation.hh"
-#include "client/entity/player_look.hh"
-#include "client/entity/player_move.hh"
-#include "client/entity/player_target.hh"
 #include "client/globals.hh"
 #include "client/gui/gui.hh"
-#include "client/utils/entity.hh"
+#include "client/system/interpolation.hh"
+#include "client/system/player_look.hh"
+#include "client/system/player_move.hh"
+#include "client/system/player_target.hh"
 
 void client_game::init(void)
 {
+    interpolation::init();
+
     player_look::init();
     player_move::init();
     player_target::init();
@@ -31,7 +32,7 @@ void client_game::init(void)
 
 void client_game::init_late(void)
 {
-    globals::player = utils::spawn_player_client({ -8, 25, -8 });
+    // TODO: spawn the local player entity through the entities/class system
 }
 
 void client_game::shutdown(void)

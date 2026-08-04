@@ -3,6 +3,7 @@
 
 namespace interpolation
 {
+void init(void);
 void update(void);
 } // namespace interpolation
 

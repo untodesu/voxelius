@@ -4,6 +4,7 @@
 #include "shared/coord.hh"
 
 struct Transform {
+    static void register_component(void);
     static void fixed_update(void);
 
     ChunkPos chunk;

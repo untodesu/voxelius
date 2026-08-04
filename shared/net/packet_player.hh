@@ -5,31 +5,31 @@
 #include "shared/net/packet.hh"
 #include "shared/world/block.hh"
 
-struct PlayerAttackE final : public BasePacket<packet_type::PLAYER_ATTACK_E> {
-    static void serialize(const PlayerAttackE& packet, WriteBuffer& buffer);
-    static void deserialize(PlayerAttackE& packet, ReadBuffer& buffer);
+struct PlayerAttackE_Packet final : public BasePacket<packet_type::PLAYER_ATTACK_E> {
+    static void serialize(const PlayerAttackE_Packet& packet, WriteBuffer& buffer);
+    static void deserialize(PlayerAttackE_Packet& packet, ReadBuffer& buffer);
 
     entt::entity target;
 };
 
-struct PlayerAttackB final : public BasePacket<packet_type::PLAYER_ATTACK_B> {
-    static void serialize(const PlayerAttackB& packet, WriteBuffer& buffer);
-    static void deserialize(PlayerAttackB& packet, ReadBuffer& buffer);
+struct PlayerAttackB_Packet final : public BasePacket<packet_type::PLAYER_ATTACK_B> {
+    static void serialize(const PlayerAttackB_Packet& packet, WriteBuffer& buffer);
+    static void deserialize(PlayerAttackB_Packet& packet, ReadBuffer& buffer);
 
     BlockPos bpos;
     block_id_type expected;
 };
 
-struct PlayerInteractE final : public BasePacket<packet_type::PLAYER_INTERACT_E> {
-    static void serialize(const PlayerInteractE& packet, WriteBuffer& buffer);
-    static void deserialize(PlayerInteractE& packet, ReadBuffer& buffer);
+struct PlayerInteractE_Packet final : public BasePacket<packet_type::PLAYER_INTERACT_E> {
+    static void serialize(const PlayerInteractE_Packet& packet, WriteBuffer& buffer);
+    static void deserialize(PlayerInteractE_Packet& packet, ReadBuffer& buffer);
 
     entt::entity target;
 };
 
-struct PlayerInteractB final : public BasePacket<packet_type::PLAYER_INTERACT_B> {
-    static void serialize(const PlayerInteractB& packet, WriteBuffer& buffer);
-    static void deserialize(PlayerInteractB& packet, ReadBuffer& buffer);
+struct PlayerInteractB_Packet final : public BasePacket<packet_type::PLAYER_INTERACT_B> {
+    static void serialize(const PlayerInteractB_Packet& packet, WriteBuffer& buffer);
+    static void deserialize(PlayerInteractB_Packet& packet, ReadBuffer& buffer);
 
     BlockPos bpos;
     block_id_type expected;

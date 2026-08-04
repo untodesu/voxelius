@@ -1,13 +1,12 @@
 #include "client/pch.hh"
 
-#include "client/entity/player_move.hh"
+#include "client/system/player_move.hh"
 
 #include "core/camera.hh"
 #include "core/config/ref.hh"
 
-#include "shared/entity/head.hh"
-#include "shared/entity/transform.hh"
-#include "shared/entity/velocity.hh"
+#include "shared/component/transform.hh"
+#include "shared/component/velocity.hh"
 #include "shared/world/world.hh"
 
 #include "client/camera.hh"
@@ -48,10 +47,10 @@ void player_move::fixed_update(void)
     }
 
     const auto& transform = world::basic_entities.get<Transform>(globals::player);
-    auto& velocity = world::basic_entities.get<Velocity>(globals::player);
+    auto& velocity = world::basic_entities.get<Velocity_Component>(globals::player);
 
     world::basic_entities.emplace_or_replace<Transform_Prev>(globals::player, transform);
-    world::basic_entities.emplace_or_replace<Velocity_Prev>(globals::player, velocity);
+    world::basic_entities.emplace_or_replace<Velocity_Component_Prev>(globals::player, velocity);
 
     if(gui::screen) {
         velocity.value = Eigen::Vector3f::Zero();

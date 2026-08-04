@@ -1,6 +1,6 @@
 #include "client/pch.hh"
 
-#include "client/entity/player_target.hh"
+#include "client/system/player_target.hh"
 
 #include "core/camera.hh"
 

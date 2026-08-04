@@ -17,19 +17,19 @@ static config::Ref<bool> s_enable_whitelist;
 static config::Ref<bool> s_strict_version;
 static config::Ref<unsigned> s_max_players;
 
-static void on_status_request(const StatusRequest& packet)
+static void on_status_request(const StatusRequest_Packet& packet)
 {
     std::uint32_t server_tags = 0;
 
     if(s_enable_whitelist) {
-        server_tags |= StatusResponse::WHITELIST_ENABLED;
+        server_tags |= StatusResponse_Packet::WHITELIST_ENABLED;
     }
 
     if(s_strict_version) {
-        server_tags |= StatusResponse::STRICT_VERSION;
+        server_tags |= StatusResponse_Packet::STRICT_VERSION;
     }
 
-    StatusResponse response {};
+    StatusResponse_Packet response {};
     response.major = version::major;
     response.minor = version::minor;
     response.patch = version::patch;
@@ -47,5 +47,5 @@ void status::init(void)
     s_strict_version.bind(globals::server_config, "auth.strict_version");
     s_max_players.bind(globals::server_config, "host.max_players");
 
-    globals::dispatcher.sink<StatusRequest>().connect<&on_status_request>();
+    globals::dispatcher.sink<StatusRequest_Packet>().connect<&on_status_request>();
 }

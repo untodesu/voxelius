@@ -4,9 +4,9 @@
 #include "shared/net/ed25519.hh"
 #include "shared/net/packet.hh"
 
-struct AuthRequest final : public BasePacket<packet_type::AUTH_REQUEST> {
-    static void serialize(const AuthRequest& packet, WriteBuffer& buffer);
-    static void deserialize(AuthRequest& packet, ReadBuffer& buffer);
+struct AuthRequest_Packet final : public BasePacket<packet_type::AUTH_REQUEST> {
+    static void serialize(const AuthRequest_Packet& packet, WriteBuffer& buffer);
+    static void deserialize(AuthRequest_Packet& packet, ReadBuffer& buffer);
 
     std::uint32_t major;
     std::uint32_t minor;
@@ -20,23 +20,23 @@ struct AuthRequest final : public BasePacket<packet_type::AUTH_REQUEST> {
     std::string username;
 };
 
-struct AuthChallenge final : public BasePacket<packet_type::AUTH_CHALLENGE> {
-    static void serialize(const AuthChallenge& packet, WriteBuffer& buffer);
-    static void deserialize(AuthChallenge& packet, ReadBuffer& buffer);
+struct AuthChallenge_Packet final : public BasePacket<packet_type::AUTH_CHALLENGE> {
+    static void serialize(const AuthChallenge_Packet& packet, WriteBuffer& buffer);
+    static void deserialize(AuthChallenge_Packet& packet, ReadBuffer& buffer);
 
     std::array<std::byte, 64> nonce;
 };
 
-struct AuthResponse final : public BasePacket<packet_type::AUTH_RESPONSE> {
-    static void serialize(const AuthResponse& packet, WriteBuffer& buffer);
-    static void deserialize(AuthResponse& packet, ReadBuffer& buffer);
+struct AuthResponse_Packet final : public BasePacket<packet_type::AUTH_RESPONSE> {
+    static void serialize(const AuthResponse_Packet& packet, WriteBuffer& buffer);
+    static void deserialize(AuthResponse_Packet& packet, ReadBuffer& buffer);
 
     ed25519::sign_type signature;
 };
 
-struct AuthAdmission final : public BasePacket<packet_type::AUTH_ADMISSION> {
-    static void serialize(const AuthAdmission& packet, WriteBuffer& buffer);
-    static void deserialize(AuthAdmission& packet, ReadBuffer& buffer);
+struct AuthAdmission_Packet final : public BasePacket<packet_type::AUTH_ADMISSION> {
+    static void serialize(const AuthAdmission_Packet& packet, WriteBuffer& buffer);
+    static void deserialize(AuthAdmission_Packet& packet, ReadBuffer& buffer);
 
     std::uint16_t client_id;
     std::uint64_t identity;

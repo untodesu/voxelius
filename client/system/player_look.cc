@@ -1,12 +1,12 @@
 #include "client/pch.hh"
 
-#include "client/entity/player_look.hh"
+#include "client/system/player_look.hh"
 
 #include "core/config/map.hh"
 #include "core/config/ref.hh"
 #include "core/utils/angles.hh"
 
-#include "shared/entity/head.hh"
+#include "shared/component/head.hh"
 #include "shared/world/world.hh"
 
 #include "client/constant.hh"
@@ -22,7 +22,7 @@ static config::Ref<unsigned> s_sensitivity { 100 };
 static void add_angles(float pitch, float yaw)
 {
     if(world::basic_entities.valid(globals::player)) {
-        auto& head = world::basic_entities.get<Head>(globals::player);
+        auto& head = world::basic_entities.get<Head_Component>(globals::player);
 
         head.angles[0] += pitch;
         head.angles[1] += yaw;
@@ -32,7 +32,7 @@ static void add_angles(float pitch, float yaw)
         // Client-side head angles are not interpolated; re-assigning
         // the previous state after updating the current one is something
         // of a way to force the interpolation to behave like we need it to
-        world::basic_entities.emplace_or_replace<Head_Prev>(globals::player, head);
+        world::basic_entities.emplace_or_replace<Head_Component_Prev>(globals::player, head);
     }
 }
 

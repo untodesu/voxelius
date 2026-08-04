@@ -4,17 +4,17 @@
 
 #include "core/buffer.hh"
 
-void Disconnect::serialize(const Disconnect& packet, WriteBuffer& buffer)
+void Disconnect_Packet::serialize(const Disconnect_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(packet.reason);
 }
 
-void Disconnect::deserialize(Disconnect& packet, ReadBuffer& buffer)
+void Disconnect_Packet::deserialize(Disconnect_Packet& packet, ReadBuffer& buffer)
 {
     packet.reason = buffer.read<std::uint32_t>();
 }
 
-std::string_view Disconnect::reason_string_client(std::uint32_t reason)
+std::string_view Disconnect_Packet::reason_string_client(std::uint32_t reason)
 {
     switch(reason) {
         case CLIENT_DISCONNECT:
@@ -51,7 +51,7 @@ std::string_view Disconnect::reason_string_client(std::uint32_t reason)
     return std::string_view("protocol.disconnect.unspecified");
 }
 
-std::string_view Disconnect::reason_string_server(std::uint32_t reason)
+std::string_view Disconnect_Packet::reason_string_server(std::uint32_t reason)
 {
     switch(reason) {
         case CLIENT_DISCONNECT:

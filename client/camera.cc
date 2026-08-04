@@ -6,8 +6,8 @@
 #include "core/config/ref.hh"
 #include "core/utils/angles.hh"
 
-#include "shared/entity/head.hh"
-#include "shared/entity/transform.hh"
+#include "shared/component/head.hh"
+#include "shared/component/transform.hh"
 #include "shared/utils/coord.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/fluid_registry.hh"
@@ -71,7 +71,7 @@ void camera::update(void)
         return;
     }
 
-    const auto& head = world::basic_entities.get<Head_Intr>(globals::player);
+    const auto& head = world::basic_entities.get<Head_Component_Intr>(globals::player);
     const auto& transform = world::basic_entities.get<Transform_Intr>(globals::player);
 
     camera::angles = head.angles;

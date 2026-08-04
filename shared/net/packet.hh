@@ -29,20 +29,20 @@ struct BasePacket {
 class ReadBuffer;
 class WriteBuffer;
 
-struct StatusRequest;
-struct StatusResponse;
-struct AuthRequest;
-struct AuthChallenge;
-struct AuthResponse;
-struct AuthAdmission;
-struct Disconnect;
-struct RequestChunk;
-struct ChunkBlocks;
-struct ChunkBiomes;
-struct SetBlock;
-struct PlayerAttackE;
-struct PlayerAttackB;
-struct PlayerInteractE;
-struct PlayerInteractB;
+struct StatusRequest_Packet;
+struct StatusResponse_Packet;
+struct AuthRequest_Packet;
+struct AuthChallenge_Packet;
+struct AuthResponse_Packet;
+struct AuthAdmission_Packet;
+struct Disconnect_Packet;
+struct RequestChunk_Packet;
+struct ChunkBlocks_Packet;
+struct ChunkBiomes_Packet;
+struct SetBlock_Packet;
+struct PlayerAttackE_Packet;
+struct PlayerAttackB_Packet;
+struct PlayerInteractE_Packet;
+struct PlayerInteractB_Packet;
 
 #endif /* CD2A5EA0_1394_4165_9926_3411C2165A5B */

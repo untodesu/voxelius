@@ -73,7 +73,7 @@ The server replies to every `PlayerAttack` or `PlayerInteract` with a `SetBlock`
 
 Each packet starts with a 16-bit unsigned integer that names its ID. The packets are named and structured as follows:
 
-### `0x0001` `StatusRequest`
+### `0x0001` `StatusRequestPacket`
 
 |Type|Name|Description|
 |----|----|----|
@@ -81,7 +81,7 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`uint32`|`minor`|Minor game version|
 |`uint32`|`patch`|Patch game version|
 
-### `0x0002` `StatusResponse`
+### `0x0002` `StatusResponsePacket`
 
 |Type|Name|Description|
 |----|----|----|
@@ -100,7 +100,7 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`0x00000001`|Server is password-protected|
 |`0x00000002`|Server has whitelist enabled|
 
-### `0x0003` `AuthRequest`
+### `0x0003` `AuthRequestPacket`
 
 |Type|Name|Description|
 |----|----|----|
@@ -115,19 +115,19 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`uint64`|`tints_hash`|Tint registry hash|
 |`string`|`username`|Desired username|
 
-### `0x0004` `AuthChallenge`
+### `0x0004` `AuthChallengePacket`
 
 |Type|Name|Description|
 |----|----|----|
 |`uint8[64]`|`nonce`|Nonce for the client to sign|
 
-### `0x0005` `AuthResponse`
+### `0x0005` `AuthResponsePacket`
 
 |Type|Name|Description|
 |----|----|----|
 |`uint8[64]`|`signature`|Signed nonce + server password + UNIX minutes|
 
-### `0x0006` `AuthAdmission`
+### `0x0006` `AuthAdmissionPacket`
 
 |Type|Name|Description|
 |----|----|----|

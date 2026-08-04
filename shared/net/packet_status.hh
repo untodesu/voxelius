@@ -3,21 +3,21 @@
 
 #include "shared/net/packet.hh"
 
-struct StatusRequest final : public BasePacket<packet_type::STATUS_REQUEST> {
-    static void serialize(const StatusRequest& packet, WriteBuffer& buffer);
-    static void deserialize(StatusRequest& packet, ReadBuffer& buffer);
+struct StatusRequest_Packet final : public BasePacket<packet_type::STATUS_REQUEST> {
+    static void serialize(const StatusRequest_Packet& packet, WriteBuffer& buffer);
+    static void deserialize(StatusRequest_Packet& packet, ReadBuffer& buffer);
 
     std::uint32_t major;
     std::uint32_t minor;
     std::uint32_t patch;
 };
 
-struct StatusResponse final : public BasePacket<packet_type::STATUS_RESPONSE> {
+struct StatusResponse_Packet final : public BasePacket<packet_type::STATUS_RESPONSE> {
     constexpr static std::uint32_t WHITELIST_ENABLED = 0x00000001;
     constexpr static std::uint32_t STRICT_VERSION = 0x00000002;
 
-    static void serialize(const StatusResponse& packet, WriteBuffer& buffer);
-    static void deserialize(StatusResponse& packet, ReadBuffer& buffer);
+    static void serialize(const StatusResponse_Packet& packet, WriteBuffer& buffer);
+    static void deserialize(StatusResponse_Packet& packet, ReadBuffer& buffer);
 
     std::uint32_t major;
     std::uint32_t minor;
