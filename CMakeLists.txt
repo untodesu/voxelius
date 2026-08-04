@@ -62,7 +62,7 @@ set(CPACK_NSIS_MUI_HEADERIMAGE "${PROJECT_SOURCE_DIR}\\\\media\\\\nsis-header.bm
 set(CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_SOURCE_DIR}\\\\media\\\\nsis-splash.bmp")
 
 unset(CPACK_NSIS_MENU_LINKS)
-list(APPEND CPACK_NSIS_MENU_LINKS "bin/voxelius-client.exe" "Voxelius")
-list(APPEND CPACK_NSIS_MENU_LINKS "bin/voxelius-server.exe" "Voxelius server")
+list(APPEND CPACK_NSIS_MENU_LINKS "bin/vclient.exe" "Voxelius")
+list(APPEND CPACK_NSIS_MENU_LINKS "bin/vserver.exe" "Voxelius server")
 
 include(CPack)

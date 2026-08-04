@@ -1,4 +1,4 @@
-add_executable(voxelius-server
+add_executable(vserver
     "${CMAKE_CURRENT_LIST_DIR}/world/climate.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/climate.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/climate_noise.cc"
@@ -30,11 +30,11 @@ add_executable(voxelius-server
     "${CMAKE_CURRENT_LIST_DIR}/globals.hh"
     "${CMAKE_CURRENT_LIST_DIR}/main.cc"
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
-target_compile_features(voxelius-server PUBLIC cxx_std_20)
-target_include_directories(voxelius-server PUBLIC "${PROJECT_SOURCE_DIR}")
-target_link_libraries(voxelius-server PUBLIC core shared)
-target_link_libraries(voxelius-server PUBLIC
+target_compile_features(vserver PUBLIC cxx_std_20)
+target_include_directories(vserver PUBLIC "${PROJECT_SOURCE_DIR}")
+target_link_libraries(vserver PUBLIC core shared)
+target_link_libraries(vserver PUBLIC
     deps::FNL)
-target_precompile_headers(voxelius-server PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
+target_precompile_headers(vserver PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
 
-install(TARGETS voxelius-server RUNTIME DESTINATION ".")
+install(TARGETS vserver RUNTIME DESTINATION ".")

@@ -1,4 +1,4 @@
-add_executable(voxelius-client
+add_executable(vclient
     "${CMAKE_CURRENT_LIST_DIR}/entity/interpolation.cc"
     "${CMAKE_CURRENT_LIST_DIR}/entity/interpolation.hh"
     "${CMAKE_CURRENT_LIST_DIR}/entity/player_look.cc"
@@ -66,15 +66,15 @@ add_executable(voxelius-client
     "${CMAKE_CURRENT_LIST_DIR}/shader_program.hh"
     "${CMAKE_CURRENT_LIST_DIR}/video.cc"
     "${CMAKE_CURRENT_LIST_DIR}/video.hh")
-target_compile_features(voxelius-client PUBLIC cxx_std_20)
-target_include_directories(voxelius-client PUBLIC "${PROJECT_SOURCE_DIR}")
-target_link_libraries(voxelius-client PUBLIC core shared)
-target_link_libraries(voxelius-client PUBLIC
+target_compile_features(vclient PUBLIC cxx_std_20)
+target_include_directories(vclient PUBLIC "${PROJECT_SOURCE_DIR}")
+target_link_libraries(vclient PUBLIC core shared)
+target_link_libraries(vclient PUBLIC
     deps::imgui
     deps::imgui-backend-sdl3
     deps::imgui-backend-opengl3
     deps::SDL3
     deps::glad)
-target_precompile_headers(voxelius-client PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
+target_precompile_headers(vclient PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
 
-install(TARGETS voxelius-client RUNTIME DESTINATION ".")
+install(TARGETS vclient RUNTIME DESTINATION ".")
