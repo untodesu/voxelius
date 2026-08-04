@@ -18,6 +18,7 @@
                 "${workspaceFolder}/deps/glad/include",
                 "${workspaceFolder}/deps/imgui/include",
                 "${workspaceFolder}/deps/lua/include",
+                "${workspaceFolder}/deps/miniz/include",
                 "${workspaceFolder}/deps/parson/include",
                 "${workspaceFolder}/deps/physfs/include",
                 "${workspaceFolder}/deps/stb/include",

@@ -21,7 +21,7 @@ public:
     constexpr void rewind(void);
     constexpr bool is_ended(void) const;
 
-    void read(void* buffer, std::size_t size);
+    void read(std::span<std::byte> buffer);
 
     template<typename T>
     T read(void);

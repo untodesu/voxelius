@@ -43,12 +43,11 @@
 
 #include <BS_thread_pool.hpp>
 
-#include <Tracy.hpp>
-#include <TracyC.h>
-
 #include <emhash/hash_table8.hpp>
 
 #include <enet/enet.h>
+
+#include <miniz.h>
 
 #include <parson.h>
 
@@ -57,6 +56,9 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 #include <stb_rect_pack.h>
+
+#include <Tracy.hpp>
+#include <TracyC.h>
 
 #include <uulog.hh>
 

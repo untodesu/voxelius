@@ -13,19 +13,7 @@ blocks.add("grass", {
       "dirt/dirt_03.png",
       "dirt/dirt_04.png",
     },
-    north = {
-      "grass/grass_side_01.png",
-      "grass/grass_side_02.png",
-    },
-    south = {
-      "grass/grass_side_01.png",
-      "grass/grass_side_02.png",
-    },
-    east = {
-      "grass/grass_side_01.png",
-      "grass/grass_side_02.png",
-    },
-    west = {
+    default = {
       "grass/grass_side_01.png",
       "grass/grass_side_02.png",
     },

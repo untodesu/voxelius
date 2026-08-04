@@ -45,6 +45,7 @@ target_link_libraries(core PUBLIC
     deps::eigen
     deps::emhash
     deps::enet
+    deps::miniz
     deps::parson
     deps::physfs
     deps::stb
@@ -61,3 +62,5 @@ if(WIN32)
     target_compile_definitions(core PUBLIC _USE_MATH_DEFINES)
     target_compile_definitions(core PUBLIC NOMINMAX)
 endif()
+
+target_compile_definitions(core PUBLIC MINIZ_NO_STDIO)

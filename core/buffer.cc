@@ -254,16 +254,15 @@ template Eigen::Vector<float, 2> ReadBuffer::read_vector<float, 2>(void);
 template Eigen::Vector<float, 3> ReadBuffer::read_vector<float, 3>(void);
 template Eigen::Vector<float, 4> ReadBuffer::read_vector<float, 4>(void);
 
-void ReadBuffer::read(void* buffer, std::size_t size)
+void ReadBuffer::read(std::span<std::byte> buffer)
 {
-    auto bytes = reinterpret_cast<std::byte*>(buffer);
-    auto amount_to_read = std::min(size, m_vector.size() - m_position);
+    auto amount_to_read = std::min(buffer.size(), m_vector.size() - m_position);
 
     if(amount_to_read > 0) {
-        std::copy(m_vector.cbegin() + m_position, m_vector.cbegin() + m_position + amount_to_read, bytes);
+        std::copy(m_vector.cbegin() + m_position, m_vector.cbegin() + m_position + amount_to_read, buffer.begin());
     }
 
-    m_position += size;
+    m_position += buffer.size();
 }
 
 WriteBuffer::WriteBuffer(const WriteBuffer& other)

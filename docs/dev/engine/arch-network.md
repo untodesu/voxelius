@@ -166,7 +166,7 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |Type|Name|Description|
 |----|----|----|
 |`vector3<int32>`|`cpos`|Chunk position|
-|`data`|`voxels`|Serialized and compressed block storage contents|
+|`data`|`blocks`|Serialized and compressed block storage contents|
 
 ### `0x000A` `ChunkBiomes`
 
@@ -181,23 +181,33 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |Type|Name|Description|
 |----|----|----|
 |`vector3<int64>`|`bpos`|World-scale block position|
-|`uint32`|`id`|Resulting numeric block ID|
+|`uint32`|`block`|Resulting numeric block ID|
 
-### `0x000C` `PlayerAttack`
-
-|Type|Name|Description|
-|----|----|----|
-|`entity`|`target`|Targeted entity, or null if the target is a block|
-|`vector3<int64>`|`bpos`|Targeted block position, used only when `target` is null|
-|`uint32`|`expected_id`|Block ID the client expects at `bpos`, used only when `target` is null|
-
-### `0x000D` `PlayerInteract`
+### `0x000C` `PlayerAttackE`
 
 |Type|Name|Description|
 |----|----|----|
-|`entity`|`target`|Targeted entity, or null if the target is a block|
-|`vector3<int64>`|`bpos`|Targeted block position, used only when `target` is null|
-|`uint32`|`expected_id`|Block ID the client expects at `bpos`, used only when `target` is null|
-|`uint8`|`face`|Hit face (one of `blocks.FACE_XXXX`), used only when `target` is null|
-|`vector3<float>`|`normal`|Hit normal, used only when `target` is null|
-|`vector3<float>`|`point`|Hit point, local to the block, used only when `target` is null|
+|`uint64`|`target`|Targeted entity|
+
+### `0x000D` `PlayerAttackB`
+
+|Type|Name|Description|
+|----|----|----|
+|`vector3<int64>`|`bpos`|Targeted block position|
+|`uint32`|`expected`|Numeric block ID the client expects at `bpos`|
+
+### `0x000E` `PlayerInteractE`
+
+|Type|Name|Description|
+|----|----|----|
+|`uint64`|`target`|Targeted entity|
+
+### `0x000F` `PlayerInteractB`
+
+|Type|Name|Description|
+|----|----|----|
+|`vector3<int64>`|`bpos`|Targeted block position|
+|`uint32`|`expected`|Numeric block ID the client expects at `bpos`|
+|`uint8`|`face`|Hit face used for interactions|
+|`vector3<float>`|`normal`|Hit normal|
+|`vector3<float>`|`point`|Hit point local to the block|
