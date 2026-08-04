@@ -1,11 +1,11 @@
-#include "shared/pch.hh"
+#include "server/pch.hh"
 
-#include "shared/world/heightmap.hh"
+#include "server/world/heightmap.hh"
 
 #include "core/utils/modulo.hh"
 
-#include "shared/world/realm_sky.hh"
-#include "shared/world/realm_surface.hh"
+#include "server/world/realm_sky.hh"
+#include "server/world/realm_surface.hh"
 
 struct HeightmapEntry final {
     std::once_flag init_flag;

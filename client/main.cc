@@ -10,7 +10,6 @@
 
 #include "shared/game.hh"
 #include "shared/splash.hh"
-#include "shared/world/worldgen.hh"
 
 #include "client/camera.hh"
 #include "client/fog.hh"
@@ -197,8 +196,6 @@ static void wrapped_main(int argc, char** argv)
 
     client_game::init();
 
-    worldgen::init(); // TODO: pass in a world config?
-
     globals::client_config.load("client.conf");
     globals::client_config.load("client.user.conf");
 
@@ -301,8 +298,6 @@ static void wrapped_main(int argc, char** argv)
 
     client_game::shutdown();
 
-    worldgen::shutdown();
-
     // TODO: game_ui::shutdown();
 
     shared_game::shutdown();
@@ -331,9 +326,9 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
     catch(const vx::detail::Exception& ex) {
-        const auto& location = ex.location();
-        const auto file = std::filesystem::path(location.file_name()).filename().string();
-        const auto line = static_cast<unsigned long>(location.line());
+        auto& location = ex.location();
+        auto file = std::filesystem::path(location.file_name()).filename().string();
+        auto line = static_cast<unsigned long>(location.line());
 
         uulog::detail::error(file.c_str(), line, ex.what_standard(), ex.what().size());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Engine Error", ex.what_standard(), nullptr);

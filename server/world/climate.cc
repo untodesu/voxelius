@@ -1,6 +1,6 @@
-#include "shared/pch.hh"
+#include "server/pch.hh"
 
-#include "shared/world/climate.hh"
+#include "server/world/climate.hh"
 
 #include "shared/world/biome_registry.hh"
 

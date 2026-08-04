@@ -4,7 +4,8 @@
 #include "shared/coord.hh"
 #include "shared/world/biome_slice.hh"
 #include "shared/world/block_storage.hh"
-#include "shared/world/heightmap.hh"
+
+#include "server/world/heightmap.hh"
 
 namespace realm_sky
 {

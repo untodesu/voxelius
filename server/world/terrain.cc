@@ -1,11 +1,12 @@
-#include "shared/pch.hh"
+#include "server/pch.hh"
 
-#include "shared/world/terrain.hh"
+#include "server/world/terrain.hh"
 
-#include "shared/constant.hh"
 #include "shared/utils/biome.hh"
-#include "shared/world/realm_sky.hh"
-#include "shared/world/realm_surface.hh"
+
+#include "server/constant.hh"
+#include "server/world/realm_sky.hh"
+#include "server/world/realm_surface.hh"
 
 bool terrain::generate(const ChunkPos& pos, BlockStorage& blocks, BiomeSlice& biomes)
 {

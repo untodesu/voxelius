@@ -1,16 +1,17 @@
-#include "shared/pch.hh"
+#include "server/pch.hh"
 
-#include "shared/world/feature_scatter.hh"
+#include "server/world/feature_scatter.hh"
 
 #include "shared/constant.hh"
 #include "shared/res/feature.hh"
 #include "shared/utils/coord.hh"
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
-#include "shared/world/climate.hh"
-#include "shared/world/climate_noise.hh"
-#include "shared/world/entropy_cache.hh"
-#include "shared/world/heightmap.hh"
+
+#include "server/world/climate.hh"
+#include "server/world/climate_noise.hh"
+#include "server/world/entropy_cache.hh"
+#include "server/world/heightmap.hh"
 
 struct WouldPlaceKey final {
     constexpr bool operator==(const WouldPlaceKey& other) const

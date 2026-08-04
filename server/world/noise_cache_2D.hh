@@ -1,8 +1,9 @@
 #ifndef A159B98F_E5CD_4BCD_9BB1_817385D6A014
 #define A159B98F_E5CD_4BCD_9BB1_817385D6A014
 
-#include "shared/constant.hh"
 #include "shared/coord.hh"
+
+#include "server/constant.hh"
 
 template<unsigned CellW, unsigned CellH>
 class NoiseCache2D final {

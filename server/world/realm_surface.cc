@@ -1,6 +1,6 @@
-#include "shared/pch.hh"
+#include "server/pch.hh"
 
-#include "shared/world/realm_surface.hh"
+#include "server/world/realm_surface.hh"
 
 #include "core/identifier.hh"
 
@@ -8,12 +8,13 @@
 #include "shared/utils/coord.hh"
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
-#include "shared/world/climate.hh"
-#include "shared/world/climate_noise.hh"
-#include "shared/world/feature_placer.hh"
-#include "shared/world/heightmap.hh"
-#include "shared/world/noise_cache_3D.hh"
-#include "shared/world/terrain.hh"
+
+#include "server/world/climate.hh"
+#include "server/world/climate_noise.hh"
+#include "server/world/feature_placer.hh"
+#include "server/world/heightmap.hh"
+#include "server/world/noise_cache_3D.hh"
+#include "server/world/terrain.hh"
 
 constexpr static float VARIATION_MIN = 16.0f;
 constexpr static float VARIATION_MAX = 96.0f;

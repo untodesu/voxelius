@@ -2,6 +2,7 @@
 #define EA7EF9C5_B33B_4042_8C62_E039B82743C3
 
 #include "core/res/resource.hh"
+
 #include "shared/world/biome.hh"
 #include "shared/world/block_storage.hh"
 

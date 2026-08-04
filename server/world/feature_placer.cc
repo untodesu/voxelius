@@ -1,6 +1,6 @@
-#include "shared/pch.hh"
+#include "server/pch.hh"
 
-#include "shared/world/feature_placer.hh"
+#include "server/world/feature_placer.hh"
 
 #include "shared/constant.hh"
 #include "shared/res/feature.hh"

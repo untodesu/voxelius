@@ -8,7 +8,6 @@
 #include "shared/constant.hh"
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
-#include "shared/world/climate.hh"
 #include "shared/world/fluid_registry.hh"
 #include "shared/world/tint_registry.hh"
 
@@ -181,8 +180,6 @@ void mod_loader::init(void)
     biome_registry::resolve_palettes();
     biome_registry::resolve_features();
     biome_registry::resolve_tint_colors();
-
-    climate::rebuild();
 }
 
 void mod_loader::shutdown(void)

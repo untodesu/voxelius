@@ -1,6 +1,6 @@
-#include "shared/pch.hh"
+#include "server/pch.hh"
 
-#include "shared/world/worldgen.hh"
+#include "server/world/worldgen.hh"
 
 #include "core/threading.hh"
 
@@ -9,15 +9,16 @@
 #include "shared/world/biome_map.hh"
 #include "shared/world/biome_slice.hh"
 #include "shared/world/chunk.hh"
-#include "shared/world/climate_noise.hh"
-#include "shared/world/entropy_cache.hh"
-#include "shared/world/feature_placer.hh"
-#include "shared/world/feature_scatter.hh"
-#include "shared/world/heightmap.hh"
-#include "shared/world/realm_sky.hh"
-#include "shared/world/realm_surface.hh"
-#include "shared/world/terrain.hh"
 #include "shared/world/world.hh"
+
+#include "server/world/climate_noise.hh"
+#include "server/world/entropy_cache.hh"
+#include "server/world/feature_placer.hh"
+#include "server/world/feature_scatter.hh"
+#include "server/world/heightmap.hh"
+#include "server/world/realm_sky.hh"
+#include "server/world/realm_surface.hh"
+#include "server/world/terrain.hh"
 
 static emhash8::HashMap<ChunkPos, std::nullptr_t> s_pending;
 

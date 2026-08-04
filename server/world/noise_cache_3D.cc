@@ -1,6 +1,6 @@
-#include "shared/pch.hh"
+#include "server/pch.hh"
 
-#include "shared/world/noise_cache_3D.hh"
+#include "server/world/noise_cache_3D.hh"
 
 #include "core/utils/modulo.hh"
 

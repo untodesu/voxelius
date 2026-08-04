@@ -1,8 +1,8 @@
-#include "shared/pch.hh"
+#include "server/pch.hh"
 
-#include "shared/world/climate_noise.hh"
+#include "server/world/climate_noise.hh"
 
-#include "shared/world/noise_cache_2D.hh"
+#include "server/world/noise_cache_2D.hh"
 
 static std::unique_ptr<NoiseCache2D_8x8> s_temperature;
 static std::unique_ptr<NoiseCache2D_8x8> s_humidity;

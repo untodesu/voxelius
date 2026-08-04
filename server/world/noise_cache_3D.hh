@@ -1,8 +1,9 @@
 #ifndef DEF3C4C8_98BE_4D8B_8FB6_C5AD91C14873
 #define DEF3C4C8_98BE_4D8B_8FB6_C5AD91C14873
 
-#include "shared/constant.hh"
 #include "shared/coord.hh"
+
+#include "server/constant.hh"
 
 template<unsigned CellW, unsigned CellH, unsigned CellD>
 class NoiseCache3D final {

@@ -1,7 +1,7 @@
 #ifndef F63690CB_F2D8_41C3_88F8_CCA3EBDBDC80
 #define F63690CB_F2D8_41C3_88F8_CCA3EBDBDC80
 
-#include "shared/world/feature_placer.hh"
+#include "server/world/feature_placer.hh"
 
 class FeatureScatter final : public PlacementRule {
 public:
