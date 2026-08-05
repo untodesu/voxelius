@@ -6,6 +6,7 @@
 
 #include "shared/globals.hh"
 #include "shared/net/packet_auth.hh"
+#include "shared/net/packet_entity.hh"
 #include "shared/net/packet_player.hh"
 #include "shared/net/packet_session.hh"
 #include "shared/net/packet_status.hh"
@@ -61,6 +62,9 @@ void protocol::decode(const ENetPacket* packet, ENetPeer* peer)
     static PlayerAttackB_Packet player_attack_b;
     static PlayerInteractE_Packet player_interact_e;
     static PlayerInteractB_Packet player_interact_b;
+    static EntitySpawn_Packet entity_spawn;
+    static EntityPatch_Packet entity_patch;
+    static EntityRemove_Packet entity_remove;
 
     assert(packet);
     assert(peer);
@@ -160,6 +164,24 @@ void protocol::decode(const ENetPacket* packet, ENetPeer* peer)
             player_interact_b.peer = peer;
             globals::dispatcher.trigger(static_cast<const PlayerInteractB_Packet&>(player_interact_b));
             break;
+
+        case EntitySpawn_Packet::TYPE:
+            EntitySpawn_Packet::decode(entity_spawn, buffer);
+            entity_spawn.peer = peer;
+            globals::dispatcher.trigger(static_cast<const EntitySpawn_Packet&>(entity_spawn));
+            break;
+
+        case EntityPatch_Packet::TYPE:
+            EntityPatch_Packet::decode(entity_patch, buffer);
+            entity_patch.peer = peer;
+            globals::dispatcher.trigger(static_cast<const EntityPatch_Packet&>(entity_patch));
+            break;
+
+        case EntityRemove_Packet::TYPE:
+            EntityRemove_Packet::decode(entity_remove, buffer);
+            entity_remove.peer = peer;
+            globals::dispatcher.trigger(static_cast<const EntityRemove_Packet&>(entity_remove));
+            break;
     }
 }
 
@@ -193,6 +215,9 @@ template void protocol::broadcast<PlayerAttackE_Packet>(const PlayerAttackE_Pack
 template void protocol::broadcast<PlayerAttackB_Packet>(const PlayerAttackB_Packet& packet, ENetHost* host, ENetPeer* except);
 template void protocol::broadcast<PlayerInteractE_Packet>(const PlayerInteractE_Packet& packet, ENetHost* host, ENetPeer* except);
 template void protocol::broadcast<PlayerInteractB_Packet>(const PlayerInteractB_Packet& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<EntitySpawn_Packet>(const EntitySpawn_Packet& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<EntityPatch_Packet>(const EntityPatch_Packet& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<EntityRemove_Packet>(const EntityRemove_Packet& packet, ENetHost* host, ENetPeer* except);
 
 template<typename T>
 void protocol::send(const T& packet, ENetPeer* peer)
@@ -224,3 +249,6 @@ template void protocol::send<PlayerAttackE_Packet>(const PlayerAttackE_Packet& p
 template void protocol::send<PlayerAttackB_Packet>(const PlayerAttackB_Packet& packet, ENetPeer* peer);
 template void protocol::send<PlayerInteractE_Packet>(const PlayerInteractE_Packet& packet, ENetPeer* peer);
 template void protocol::send<PlayerInteractB_Packet>(const PlayerInteractB_Packet& packet, ENetPeer* peer);
+template void protocol::send<EntitySpawn_Packet>(const EntitySpawn_Packet& packet, ENetPeer* peer);
+template void protocol::send<EntityPatch_Packet>(const EntityPatch_Packet& packet, ENetPeer* peer);
+template void protocol::send<EntityRemove_Packet>(const EntityRemove_Packet& packet, ENetPeer* peer);

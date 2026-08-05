@@ -38,4 +38,5 @@ dofile("biome/surface_hills_grassy.lua")
 dofile("biome/surface_hills_rocky.lua")
 dofile("biome/surface_plains.lua")
 
+dofile("entity/player.lua")
 dofile("entity/test.lua")

@@ -75,6 +75,8 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x0001` `StatusRequestPacket`
 
+Request a status from server
+
 |Type|Name|Description|
 |----|----|----|
 |`uint32`|`major`|Major game version|
@@ -82,6 +84,8 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`uint32`|`patch`|Patch game version|
 
 ### `0x0002` `StatusResponsePacket`
+
+Server's response to a `StatusRequestPacket`
 
 |Type|Name|Description|
 |----|----|----|
@@ -102,6 +106,8 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x0003` `AuthRequestPacket`
 
+Request an authentication on a server
+
 |Type|Name|Description|
 |----|----|----|
 |`uint32`|`major`|Major game version|
@@ -118,11 +124,15 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x0004` `AuthChallengePacket`
 
+Server's response to `AuthRequestPacket`
+
 |Type|Name|Description|
 |----|----|----|
 |`uint8[64]`|`nonce`|Nonce for the client to sign|
 
 ### `0x0005` `AuthResponsePacket`
+
+Client's repsonse to `AuthChallengePacket`
 
 |Type|Name|Description|
 |----|----|----|
@@ -130,13 +140,18 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x0006` `AuthAdmissionPacket`
 
+On successful auth, server's response to `AuthResponsePacket`
+
 |Type|Name|Description|
 |----|----|----|
 |`uint16`|`client_id`|Client ID|
 |`uint64`|`identity`|Client identity|
 |`string`|`username`|Assigned username|
+|`uint64`|`entity`|Player entity|
 
 ### `0x0007` `Disconnect`
+
+Disconnection notification. Each network side should but may not terminate the connection immediately afterwards this packet is sent
 
 |Type|Name|Description|
 |----|----|----|
@@ -160,11 +175,15 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x0008` `RequestChunk`
 
+Sent by client to request a chunk to be generated or loaded and sent to the client over the network. Server performs view distance checks and may not respond at all
+
 |Type|Name|Description|
 |----|----|----|
 |`vector3<int32>`|`cpos`|Requested chunk position|
 
 ### `0x0009` `ChunkBlocks`
+
+Sent by server as a response to `RequestChunk` or at arbitrary moments to synchronize chunk contents with clients
 
 |Type|Name|Description|
 |----|----|----|
@@ -172,6 +191,8 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`data`|`blocks`|Serialized and compressed block storage contents|
 
 ### `0x000A` `ChunkBiomes`
+
+Sent by server as a response to `RequestChunk` once per realm to synchronize biome caches used for client rendering
 
 |Type|Name|Description|
 |----|----|----|
@@ -181,6 +202,8 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x000B` `SetBlock`
 
+Sent by server as a sub-chunk block update
+
 |Type|Name|Description|
 |----|----|----|
 |`vector3<int64>`|`bpos`|World-scale block position|
@@ -188,11 +211,15 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x000C` `PlayerAttackE`
 
+Sent by client to specify an attack action against an entity
+
 |Type|Name|Description|
 |----|----|----|
 |`uint64`|`target`|Targeted entity|
 
 ### `0x000D` `PlayerAttackB`
+
+Sent by client to specify an attach action against a block
 
 |Type|Name|Description|
 |----|----|----|
@@ -201,11 +228,17 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x000E` `PlayerInteractE`
 
+Sent by client to specify an interact action against an entity
+
+> **TODO:** send over specific part of an entity's hitbox as well
+
 |Type|Name|Description|
 |----|----|----|
 |`uint64`|`target`|Targeted entity|
 
 ### `0x000F` `PlayerInteractB`
+
+Sent by client to specify an interact action against a block
 
 |Type|Name|Description|
 |----|----|----|
@@ -217,14 +250,16 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x0010` `EntitySpawn`
 
+Sent by server when an entity is spawned
+
 |Type|Name|Description|
 |----|----|----|
 |`uint64`|`id`|Entity ID|
 |`class_id_type`|`class_id`|Numeric class ID|
-|`uint32`|`ncomp`|Component count|
-|`component[ncomp]`|`components`|Serialized components|
 
 ### `0x0011` `EntityPatch`
+
+Sent by server when an entity's component is updated
 
 |Type|Name|Description|
 |----|----|----|
@@ -233,6 +268,8 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`component[ncomp]`|`components`|Serialized components|
 
 ### `0x0012` `EntityRemove`
+
+Sent by server when an entity is removed
 
 |Type|Name|Description|
 |----|----|----|

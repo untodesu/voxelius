@@ -7,6 +7,7 @@
 
 #include "shared/constant.hh"
 #include "shared/entity/class_registry.hh"
+#include "shared/entity/required_class.hh"
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/fluid_registry.hh"
@@ -182,6 +183,8 @@ void mod_loader::init(void)
     biome_registry::resolve_palettes();
     biome_registry::resolve_features();
     biome_registry::resolve_tint_colors();
+
+    required_class::resolve();
 }
 
 void mod_loader::shutdown(void)

@@ -5,6 +5,7 @@
 #include "core/res/image.hh"
 
 #include "shared/component/head.hh"
+#include "shared/component/player.hh"
 #include "shared/component/stasis.hh"
 #include "shared/component/transform.hh"
 #include "shared/component/velocity.hh"
@@ -28,6 +29,7 @@ void shared_game::init(void)
     Transform::register_component();
     Head_Component::register_component();
     Velocity_Component::register_component();
+    Player_Component::register_component();
 
     biome_map::init();
     mod_loader::init();

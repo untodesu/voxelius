@@ -7,6 +7,7 @@
 #include "shared/entity/class.hh"
 #include "shared/entity/class_registry.hh"
 #include "shared/entity/component_registry.hh"
+#include "shared/entity/required_class.hh"
 #include "shared/mod_context.hh"
 #include "shared/utils/entity.hh"
 #include "shared/utils/lua.hh"
@@ -165,17 +166,24 @@ static int api_add(lua_State* L)
     return 1;
 }
 
-static int api_spawn(lua_State* L)
+static bool spawn_entity(lua_State* L, ModContext* ctx, const char* raw_name, int kv_idx, entt::entity& out_entity)
 {
-    auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
-    auto raw_name = luaL_checkstring(L, 1);
-
     auto id = Identifier::from_string(raw_name, ctx->name_space());
 
     if(!id.is_valid()) {
         lua_pushfstring(L, "entities.spawn: malformed name: %s", raw_name);
-        return lua_error(L);
+        return false;
     }
+
+    out_entity = utils::entity_spawn_lua(id, L, kv_idx);
+
+    return out_entity != entt::null;
+}
+
+static int api_spawn(lua_State* L)
+{
+    auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
+    auto raw_name = luaL_checkstring(L, 1);
 
     int kv_idx;
 
@@ -188,14 +196,40 @@ static int api_spawn(lua_State* L)
         kv_idx = lua_gettop(L);
     }
 
-    auto entity = utils::entity_spawn_lua(id, L, kv_idx);
+    entt::entity entity = entt::null;
 
-    if(entity == entt::null) {
+    if(!spawn_entity(L, ctx, raw_name, kv_idx, entity)) {
         return lua_error(L);
     }
 
     lua_pushinteger(L, static_cast<lua_Integer>(entity));
     return 1;
+}
+
+static bool do_set_player(lua_State* L, ModContext* ctx, const char* raw_name)
+{
+    auto id = Identifier::from_string(raw_name, ctx->name_space());
+
+    if(!id.is_valid()) {
+        lua_pushfstring(L, "entities.set_player: malformed name: %s", raw_name);
+        return false;
+    }
+
+    required_class::set_player(id, ctx);
+
+    return true;
+}
+
+static int api_set_player(lua_State* L)
+{
+    auto ctx = static_cast<ModContext*>(lua_touserdata(L, lua_upvalueindex(1)));
+    auto raw_name = luaL_checkstring(L, 1);
+
+    if(!do_set_player(L, ctx, raw_name)) {
+        return lua_error(L);
+    }
+
+    return 0;
 }
 
 static int api_patch(lua_State* L)
@@ -269,6 +303,10 @@ void api::open_entities_library(std::shared_ptr<lua_State>& lua, ModContext* ctx
     lua_pushlightuserdata(L, ctx);
     lua_pushcclosure(L, &api_spawn, 1);
     lua_setfield(L, -2, "spawn");
+
+    lua_pushlightuserdata(L, ctx);
+    lua_pushcclosure(L, &api_set_player, 1);
+    lua_setfield(L, -2, "set_player");
 
     lua_pushcfunction(L, api_patch);
     lua_setfield(L, -2, "patch");
