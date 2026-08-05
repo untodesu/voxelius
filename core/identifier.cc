@@ -60,20 +60,20 @@ Identifier Identifier::from_parts(std::string_view name_space, std::string_view 
 std::string Identifier::as_file_path(std::string_view extension) const
 {
     if(m_name_space.empty()) {
-        return std::format("{}{}", m_value, extension);
+        return std::format("data/{}{}", m_value, extension);
     }
     else {
-        return std::format("{}/{}{}", m_name_space, m_value, extension);
+        return std::format("data/{}/{}{}", m_name_space, m_value, extension);
     }
 }
 
 std::string Identifier::as_file_path(std::string_view subdirectory, std::string_view extension) const
 {
     if(m_name_space.empty()) {
-        return std::format("{}/{}{}", subdirectory, m_value, extension);
+        return std::format("data/{}/{}{}", subdirectory, m_value, extension);
     }
     else {
-        return std::format("{}/{}/{}{}", m_name_space, subdirectory, m_value, extension);
+        return std::format("data/{}/{}/{}{}", m_name_space, subdirectory, m_value, extension);
     }
 }
 

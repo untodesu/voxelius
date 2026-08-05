@@ -63,12 +63,6 @@ The client sends one of four packets depending on what it targets and what it do
 
 The entity variants carry only the targeted entity. The block variants carry the block's position and the ID the client expects to find there, plus the hit face, normal, and point. These three fields match the `physics::BlockHit` fields the block callbacks expect.
 
-##### Entity sync
-
-The server sends `EntitySpawn` to introduce an entity, `EntityPatch` when one or more of its components change, and `EntityRemove` when it's gone.
-
-Both `EntitySpawn` and `EntityPatch` carry a `component` list — a compound type, not a fixed struct. Its shape is assembled at runtime from whatever components the component registry currently has registered, rather than being baked into the protocol. Each entry is self-delimiting (a numeric component ID, a byte length, then that many payload bytes), so a reader can skip a component ID it doesn't recognize instead of desyncing the whole packet.
-
 ## Packet reference
 
 Each packet starts with a 16-bit unsigned integer that names its ID. The packets are named and structured as follows:

@@ -3,6 +3,7 @@
 #include "client/gui/fonts.hh"
 
 #include "core/exception.hh"
+#include "core/identifier.hh"
 #include "core/utils/physfs.hh"
 
 #include "client/constant.hh"
@@ -42,8 +43,8 @@ void fonts::load(void)
     s_font_config = {};
     s_font_config.FontDataOwnedByAtlas = false;
 
-    auto unscii16_path = std::format("{}/fonts/unscii-16.ttf", constant::BUILTIN_NAME_SPACE);
-    auto unscii8_path = std::format("{}/fonts/unscii-8.ttf", constant::BUILTIN_NAME_SPACE);
+    auto unscii16_path = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "unscii-16").as_file_path("fonts", ".ttf");
+    auto unscii8_path = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "unscii-8").as_file_path("fonts", ".ttf");
 
     fonts::unscii16 = load_font(unscii16_path, 16.0f, s_unscii16_data, io);
     fonts::unscii8 = load_font(unscii8_path, 8.0f, s_unscii8_data, io);

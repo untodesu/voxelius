@@ -5,6 +5,7 @@
 #include "core/config/map.hh"
 #include "core/config/ref.hh"
 #include "core/exception.hh"
+#include "core/identifier.hh"
 #include "core/utils/physfs.hh"
 
 #include "shared/mod_context.hh"
@@ -24,7 +25,7 @@ static config::Ref<std::string> s_config_language { std::string(DEFAULT_LANGUAGE
 
 static void read_mod_translations(std::string_view name_space)
 {
-    auto path = std::format("{}/lang/lang.{}.json", name_space, s_current_language->code());
+    auto path = Identifier::from_parts(name_space, std::format("lang.{}", s_current_language->code())).as_file_path("lang", ".json");
     std::string source;
 
     if(!utils::read_file(path, source)) {
@@ -68,7 +69,7 @@ LanguageUpdateEvent::LanguageUpdateEvent(language_iterator_type lang) : m_langua
 
 void language::init(void)
 {
-    auto manifest_path = std::format("{}/lang/manifest.json", constant::BUILTIN_NAME_SPACE);
+    auto manifest_path = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "manifest").as_file_path("lang", ".json");
 
     s_config_language.bind(globals::client_config, "language");
 

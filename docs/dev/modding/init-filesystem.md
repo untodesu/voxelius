@@ -2,7 +2,7 @@
 
 ## Mod root
 
-Each mod may use these directories:
+A mod's root directory is `data/<namespace>` in the virtual filesystem, where `<namespace>` is the mod's name. Each mod may use these directories:
 
 |Directory|Description|
 |----|----|
@@ -25,8 +25,6 @@ The engine uses PhysFS for the VFS. It mounts these system paths:
 
 |Mount|Path|Access|Description|
 |----|----|----|----|
-|`/`|`${PWD}/data`|Read-only|Vendored mods, including `builtin`|
-|`/`|`${PWD}/mods`|Read-only|User-provided mods|
-|`/`|`${APPDATA}/Voxelius` or similar|Read/Write|User directory. Settings and world saves live here. The user can also override vendored assets|
-
-All three mounts share one virtual root. The engine appends the mods mount and prepends the user directory mount. This order sets priority: the user directory always overrides the game directory, and the game directory always overrides the mods directory.
+|`/data`|`${PWD}/data`|Read-only|Vendored mods, including `builtin`|
+|`/data`|`${PWD}/mods`|Read-only|User-provided mods|
+|`/`|`${APPDATA}/Voxelius` or similar|Read/Write|User directory. Settings and world saves live here|

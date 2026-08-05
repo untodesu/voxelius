@@ -19,16 +19,18 @@ static std::vector<ModInfo> discover_mods(void)
 {
     std::vector<ModInfo> result;
 
-    if(auto entries = PHYSFS_enumerateFiles("/")) {
+    if(auto entries = PHYSFS_enumerateFiles("data")) {
         for(std::size_t i = 0; entries[i]; ++i) {
             PHYSFS_Stat stat {};
 
-            if(!PHYSFS_stat(entries[i], &stat)) {
+            auto entry_path = std::format("data/{}", entries[i]);
+
+            if(!PHYSFS_stat(entry_path.c_str(), &stat)) {
                 continue;
             }
 
             if(stat.filetype == PHYSFS_FILETYPE_DIRECTORY) {
-                auto modinfo_path = std::format("{}/modinfo.conf", entries[i]);
+                auto modinfo_path = std::format("data/{}/modinfo.conf", entries[i]);
 
                 if(!PHYSFS_exists(modinfo_path.c_str())) {
                     continue;
