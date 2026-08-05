@@ -13,20 +13,15 @@ struct ComponentTable final {
     int table_index;
 };
 
-using component_parse_func = std::any (*)(lua_State* L, int config_idx);
-using component_attach_func = void (*)(entt::entity entity);
-using component_update_func = bool (*)(entt::entity entity, lua_State* L, int kv_idx, const std::any& config);
-using component_encode_func = void (*)(entt::entity entity, WriteBuffer& buffer);
-using component_decode_func = void (*)(entt::entity entity, ReadBuffer& buffer);
-
-struct ComponentDefinition final {
-    component_parse_func parse;
-    component_attach_func attach;
-    component_update_func update;
-    component_encode_func net_encode;
-    component_decode_func net_decode;
-    component_encode_func save_encode;
-    component_decode_func save_decode;
+template<typename T>
+struct Component final {
+    static std::any prepare(lua_State* L, int config_idx);
+    static void attach(entt::entity entity);
+    static bool update(entt::entity entity, lua_State* L, int kv_idx, const std::any& config);
+    static void encode_dat(entt::entity entity, WriteBuffer& buffer);
+    static void decode_net(entt::entity entity, ReadBuffer& buffer);
+    static void encode_net(entt::entity entity, WriteBuffer& buffer);
+    static void decode_dat(entt::entity entity, ReadBuffer& buffer);
 };
 
 #endif /* A0C7CDBF_AEB2_4D28_AC4D_1B1D7550C5AA */

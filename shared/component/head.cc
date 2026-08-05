@@ -4,11 +4,12 @@
 
 #include "core/buffer.hh"
 
-#include "shared/entity/component_registry.hh"
+#include "shared/entity/component_map.hh"
+#include "shared/globals.hh"
 #include "shared/utils/lua.hh"
 #include "shared/world/world.hh"
 
-static std::any head_parse(lua_State* L, int config_idx)
+std::any Component<Head>::prepare(lua_State* L, int config_idx)
 {
     auto offset = utils::opt_fvec<3>(L, config_idx, { 0.0, 0.0, 0.0 });
 
@@ -19,18 +20,18 @@ static std::any head_parse(lua_State* L, int config_idx)
     return offset.value().cast<float>();
 }
 
-static void head_attach(entt::entity entity)
+void Component<Head>::attach(entt::entity entity)
 {
-    Head_Component head {};
+    Head head {};
     head.offset = Eigen::Vector3f::Zero();
     head.angles = Eigen::Vector3f::Zero();
 
-    world::basic_entities.emplace_or_replace<Head_Component>(entity, std::move(head));
+    globals::registry.emplace_or_replace<Head>(entity, std::move(head));
 }
 
-static bool head_update(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+bool Component<Head>::update(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
 {
-    auto& current = world::basic_entities.get<Head_Component>(entity);
+    auto& current = globals::registry.get<Head>(entity);
     auto angles = utils::opt_fvec<3>(L, kv_idx, current.angles.cast<lua_Number>());
 
     if(!angles.has_value()) {
@@ -46,7 +47,7 @@ static bool head_update(entt::entity entity, lua_State* L, int kv_idx, const std
         offset = current.offset;
     }
 
-    world::basic_entities.patch<Head_Component>(entity, [&](auto& head) {
+    globals::registry.patch<Head>(entity, [&](auto& head) {
         head.angles = angles.value().cast<float>();
         head.offset = offset;
     });
@@ -54,32 +55,37 @@ static bool head_update(entt::entity entity, lua_State* L, int kv_idx, const std
     return true;
 }
 
-static void head_encode(entt::entity entity, WriteBuffer& buffer)
+void Component<Head>::encode_net(entt::entity entity, WriteBuffer& buffer)
 {
-    const auto& head = world::basic_entities.get<Head_Component>(entity);
+    const auto& head = globals::registry.get<Head>(entity);
     buffer.write_vector<float, 3>(head.angles);
 }
 
-static void head_decode(entt::entity entity, ReadBuffer& buffer)
+void Component<Head>::decode_net(entt::entity entity, ReadBuffer& buffer)
 {
-    world::basic_entities.patch<Head_Component>(entity, [&](auto& head) {
+    globals::registry.patch<Head>(entity, [&](auto& head) {
         head.angles = buffer.read_vector<float, 3>();
     });
 }
 
-void Head_Component::register_component(void)
+void Component<Head>::encode_dat(entt::entity entity, WriteBuffer& buffer)
 {
-    ComponentDefinition def {};
+    const auto& head = globals::registry.get<Head>(entity);
+    buffer.write_vector<float, 3>(head.angles);
+    buffer.write_vector<float, 3>(head.offset);
+}
 
-    def.parse = &head_parse;
+void Component<Head>::decode_dat(entt::entity entity, ReadBuffer& buffer)
+{
+    globals::registry.patch<Head>(entity, [&](auto& head) {
+        head.angles = buffer.read_vector<float, 3>();
+        head.offset = buffer.read_vector<float, 3>();
+    });
+}
 
-    def.attach = &head_attach;
-    def.update = &head_update;
+void Head::register_component(void)
+{
+    component_map::add<Head>("head");
 
-    def.net_encode = &head_encode;
-    def.net_decode = &head_decode;
-    def.save_encode = &head_encode;
-    def.save_decode = &head_decode;
-
-    component_registry::add("head", def);
+    globals::registry.on_update<Head>().connect<&component_map::on_update<Head>>();
 }

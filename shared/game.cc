@@ -27,9 +27,9 @@ void shared_game::init(void)
     Feature::register_resource();
 
     Transform::register_component();
-    Head_Component::register_component();
-    Velocity_Component::register_component();
-    Player_Component::register_component();
+    Head::register_component();
+    Velocity::register_component();
+    Player::register_component();
 
     biome_map::init();
     mod_loader::init();
@@ -55,10 +55,10 @@ void shared_game::fixed_update(void)
 
     // NOTE: this freezes entities that are out
     // of a loaded chunk; uncomment this later!!!
-    // Stasis_Component::fixed_update();
+    // Stasis::fixed_update();
 
     Transform::fixed_update();
-    Velocity_Component::fixed_update();
+    Velocity::fixed_update();
 
     world::fixed_update();
 }

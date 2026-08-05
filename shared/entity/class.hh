@@ -21,7 +21,7 @@ struct ClassDefinition final {
     std::vector<ClassDefinition_Entry> entries;
 };
 
-struct EntityClass_Component final {
+struct EntityClass final {
     Identifier id;
 };
 

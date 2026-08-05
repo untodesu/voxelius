@@ -38,7 +38,7 @@ void background::layout(void)
             return; // chat draws its own bg
         }
 
-        if(world::basic_entities.valid(globals::player)) {
+        if(globals::registry.valid(globals::player)) {
             auto darken = ImGui::GetColorU32(ImVec4(0.00f, 0.00f, 0.00f, 0.75f));
             auto darker = ImGui::GetColorU32(ImVec4(0.00f, 0.00f, 0.00f, 0.95f));
             draw_list->AddRectFilledMultiColor({}, viewport->Size, darker, darken, darken, darker);

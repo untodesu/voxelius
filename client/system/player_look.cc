@@ -21,8 +21,8 @@ static config::Ref<unsigned> s_sensitivity { 100 };
 
 static void add_angles(float pitch, float yaw)
 {
-    if(world::basic_entities.valid(globals::player)) {
-        auto& head = world::basic_entities.get<Head_Component>(globals::player);
+    if(globals::registry.valid(globals::player)) {
+        auto& head = globals::registry.get<Head>(globals::player);
 
         head.angles[0] += pitch;
         head.angles[1] += yaw;
@@ -32,13 +32,13 @@ static void add_angles(float pitch, float yaw)
         // Client-side head angles are not interpolated; re-assigning
         // the previous state after updating the current one is something
         // of a way to force the interpolation to behave like we need it to
-        world::basic_entities.emplace_or_replace<Head_Component_Prev>(globals::player, head);
+        globals::registry.emplace_or_replace<Head_Prev>(globals::player, head);
     }
 }
 
 static void on_mouse_motion(const SDL_MouseMotionEvent& event)
 {
-    if(gui::screen || !world::basic_entities.valid(globals::player)) {
+    if(gui::screen || !globals::registry.valid(globals::player)) {
         return;
     }
 

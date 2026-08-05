@@ -42,15 +42,15 @@ void player_move::init(void)
 
 void player_move::fixed_update(void)
 {
-    if(!world::basic_entities.valid(globals::player)) {
+    if(!globals::registry.valid(globals::player)) {
         return;
     }
 
-    const auto& transform = world::basic_entities.get<Transform>(globals::player);
-    auto& velocity = world::basic_entities.get<Velocity_Component>(globals::player);
+    const auto& transform = globals::registry.get<Transform>(globals::player);
+    auto& velocity = globals::registry.get<Velocity>(globals::player);
 
-    world::basic_entities.emplace_or_replace<Transform_Prev>(globals::player, transform);
-    world::basic_entities.emplace_or_replace<Velocity_Component_Prev>(globals::player, velocity);
+    globals::registry.emplace_or_replace<Transform_Prev>(globals::player, transform);
+    globals::registry.emplace_or_replace<Velocity_Prev>(globals::player, velocity);
 
     if(gui::screen) {
         velocity.value = Eigen::Vector3f::Zero();

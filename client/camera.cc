@@ -66,13 +66,13 @@ void camera::init(void)
 
 void camera::update(void)
 {
-    if(!world::basic_entities.valid(globals::player)) {
+    if(!globals::registry.valid(globals::player)) {
         reset_camera();
         return;
     }
 
-    const auto& head = world::basic_entities.get<Head_Component_Intr>(globals::player);
-    const auto& transform = world::basic_entities.get<Transform_Intr>(globals::player);
+    const auto& head = globals::registry.get<Head_Intr>(globals::player);
+    const auto& transform = globals::registry.get<Transform_Intr>(globals::player);
 
     camera::angles = head.angles;
     camera::chunk = transform.chunk;

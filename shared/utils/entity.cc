@@ -3,8 +3,8 @@
 #include "shared/utils/entity.hh"
 
 #include "shared/entity/class_registry.hh"
-#include "shared/entity/component_registry.hh"
-#include "shared/world/world.hh"
+#include "shared/entity/component_map.hh"
+#include "shared/globals.hh"
 
 entt::entity utils::entity_spawn_raw(const Identifier& class_id, entt::entity hint)
 {
@@ -17,25 +17,25 @@ entt::entity utils::entity_spawn_raw(const Identifier& class_id, entt::entity hi
     entt::entity entity;
 
     if(hint == entt::null) {
-        entity = world::basic_entities.create();
+        entity = globals::registry.create();
     }
     else {
-        entity = world::basic_entities.create(hint);
+        entity = globals::registry.create(hint);
     }
 
-    if(!world::basic_entities.valid(entity)) {
+    if(!globals::registry.valid(entity)) {
         LOG_CRITICAL("if you're reading this, entt has fucked up");
         return entt::null;
     }
 
-    EntityClass_Component class_component {};
+    EntityClass class_component {};
     class_component.id = class_id;
-    world::basic_entities.emplace<EntityClass_Component>(entity, std::move(class_component));
+    globals::registry.emplace<EntityClass>(entity, std::move(class_component));
 
     for(const auto& it : def->entries) {
-        if(!component_registry::attach(it.id, entity)) {
+        if(!component_map::attach(it.id, entity)) {
             LOG_ERROR("failed to attach component {} for entity {}", it.id, static_cast<std::uint64_t>(entity));
-            world::basic_entities.destroy(entity);
+            globals::registry.destroy(entity);
             return entt::null;
         }
     }
@@ -57,30 +57,30 @@ entt::entity utils::entity_spawn_lua(const Identifier& class_id, lua_State* L, i
     entt::entity entity;
 
     if(hint == entt::null) {
-        entity = world::basic_entities.create();
+        entity = globals::registry.create();
     }
     else {
-        entity = world::basic_entities.create(hint);
+        entity = globals::registry.create(hint);
     }
 
-    if(!world::basic_entities.valid(entity)) {
+    if(!globals::registry.valid(entity)) {
         lua_pushstring(L, "if you're reading this, entt has fucked up");
         return entt::null;
     }
 
-    EntityClass_Component class_component {};
+    EntityClass class_component {};
     class_component.id = class_id;
-    world::basic_entities.emplace<EntityClass_Component>(entity, std::move(class_component));
+    globals::registry.emplace<EntityClass>(entity, std::move(class_component));
 
     for(const auto& it : def->entries) {
-        if(!component_registry::attach(it.id, entity)) {
+        if(!component_map::attach(it.id, entity)) {
             lua_pushfstring(L, "failed to attach component %s", it.name.c_str());
-            world::basic_entities.destroy(entity);
+            globals::registry.destroy(entity);
             return entt::null;
         }
 
-        if(!component_registry::update(it.id, entity, L, kv_idx, it.config)) {
-            world::basic_entities.destroy(entity);
+        if(!component_map::update(it.id, entity, L, kv_idx, it.config)) {
+            globals::registry.destroy(entity);
             return entt::null;
         }
     }

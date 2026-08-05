@@ -19,21 +19,21 @@ static void on_transform_construct(entt::registry& registry, entt::entity entity
 
 static void on_head_construct(entt::registry& registry, entt::entity entity)
 {
-    const auto& head = registry.get<Head_Component>(entity);
-    registry.emplace_or_replace<Head_Component_Intr>(entity, head);
-    registry.emplace_or_replace<Head_Component_Prev>(entity, head);
+    const auto& head = registry.get<Head>(entity);
+    registry.emplace_or_replace<Head_Intr>(entity, head);
+    registry.emplace_or_replace<Head_Prev>(entity, head);
 }
 
 static void on_velocity_construct(entt::registry& registry, entt::entity entity)
 {
-    const auto& velocity = registry.get<Velocity_Component>(entity);
-    registry.emplace_or_replace<Velocity_Component_Intr>(entity, velocity);
-    registry.emplace_or_replace<Velocity_Component_Prev>(entity, velocity);
+    const auto& velocity = registry.get<Velocity>(entity);
+    registry.emplace_or_replace<Velocity_Intr>(entity, velocity);
+    registry.emplace_or_replace<Velocity_Prev>(entity, velocity);
 }
 
 static void transform_interpolate(float alpha)
 {
-    auto view = world::basic_entities.view<Transform, Transform_Prev, Transform_Intr>();
+    auto view = globals::registry.view<Transform, Transform_Prev, Transform_Intr>();
 
     for(auto [entity, current, previous, interp] : view.each()) {
         interp.angles[0] = std::lerp(previous.angles[0], current.angles[0], alpha);
@@ -56,7 +56,7 @@ static void transform_interpolate(float alpha)
 
 static void head_interpolate(float alpha)
 {
-    auto view = world::basic_entities.view<Head_Component, Head_Component_Prev, Head_Component_Intr>();
+    auto view = globals::registry.view<Head, Head_Prev, Head_Intr>();
 
     for(auto [entity, current, previous, interp] : view.each()) {
         interp.angles[0] = std::lerp(previous.angles[0], current.angles[0], alpha);
@@ -71,7 +71,7 @@ static void head_interpolate(float alpha)
 
 static void velocity_interpolate(float alpha)
 {
-    auto view = world::basic_entities.view<Velocity_Component, Velocity_Component_Prev, Velocity_Component_Intr>();
+    auto view = globals::registry.view<Velocity, Velocity_Prev, Velocity_Intr>();
 
     for(auto [entity, current, previous, interp] : view.each()) {
         interp.value.x() = std::lerp(previous.value.x(), current.value.x(), alpha);
@@ -82,9 +82,9 @@ static void velocity_interpolate(float alpha)
 
 void interpolation::init(void)
 {
-    world::basic_entities.on_construct<Transform>().connect<&on_transform_construct>();
-    world::basic_entities.on_construct<Head_Component>().connect<&on_head_construct>();
-    world::basic_entities.on_construct<Velocity_Component>().connect<&on_velocity_construct>();
+    globals::registry.on_construct<Transform>().connect<&on_transform_construct>();
+    globals::registry.on_construct<Head>().connect<&on_head_construct>();
+    globals::registry.on_construct<Velocity>().connect<&on_velocity_construct>();
 }
 
 void interpolation::update(void)

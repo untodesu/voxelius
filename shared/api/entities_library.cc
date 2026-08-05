@@ -6,12 +6,12 @@
 
 #include "shared/entity/class.hh"
 #include "shared/entity/class_registry.hh"
-#include "shared/entity/component_registry.hh"
+#include "shared/entity/component_map.hh"
 #include "shared/entity/required_class.hh"
+#include "shared/globals.hh"
 #include "shared/mod_context.hh"
 #include "shared/utils/entity.hh"
 #include "shared/utils/lua.hh"
-#include "shared/world/world.hh"
 
 static Identifier make_unique_id(const Identifier& id, const ModContext* ctx)
 {
@@ -45,7 +45,7 @@ static bool parse_component(lua_State* L, int config_idx, ModContext* ctx, Class
     }
 
     auto name = std::string(component_name.value());
-    auto id = component_registry::find(name);
+    auto id = component_map::from_name(name);
 
     if(id == COMPONENT_ID_NULL) {
         lua_pushfstring(L, "entities.add: %s: unknown component", name.c_str());
@@ -55,7 +55,7 @@ static bool parse_component(lua_State* L, int config_idx, ModContext* ctx, Class
     lua_pushvalue(L, -1); // duplicate the config table; luaL_ref pops its argument
 
     auto config_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-    auto config = component_registry::parse(id, L, config_ref);
+    auto config = component_map::prepare(id, L, config_ref);
     luaL_unref(L, LUA_REGISTRYINDEX, config_ref);
 
     if(!config.has_value()) {
@@ -237,13 +237,13 @@ static int api_patch(lua_State* L)
     auto raw_entity = luaL_checkinteger(L, 1);
     auto entity = static_cast<entt::entity>(raw_entity);
 
-    if(!world::basic_entities.valid(entity)) {
+    if(!globals::registry.valid(entity)) {
         lua_pushboolean(L, false);
         return 1;
     }
 
     auto component_name = luaL_checkstring(L, 2);
-    auto id = component_registry::find(component_name);
+    auto id = component_map::from_name(component_name);
 
     if(id == COMPONENT_ID_NULL) {
         lua_pushfstring(L, "entities.patch: %s: unknown component", component_name);
@@ -252,7 +252,7 @@ static int api_patch(lua_State* L)
 
     luaL_checktype(L, 3, LUA_TTABLE);
 
-    auto success = component_registry::update(id, entity, L, 3, std::any {});
+    auto success = component_map::update(id, entity, L, 3, std::any {});
 
     if(!success) {
         lua_pushboolean(L, false);
@@ -269,12 +269,12 @@ static int api_despawn(lua_State* L)
     auto raw_entity = luaL_checkinteger(L, 1);
     auto entity = static_cast<entt::entity>(raw_entity);
 
-    if(!world::basic_entities.valid(entity)) {
+    if(!globals::registry.valid(entity)) {
         lua_pushboolean(L, false);
         return 1;
     }
 
-    world::basic_entities.destroy(entity);
+    globals::registry.destroy(entity);
 
     lua_pushboolean(L, true);
     return 1;

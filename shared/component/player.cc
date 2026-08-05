@@ -2,30 +2,48 @@
 
 #include "shared/component/player.hh"
 
-#include "shared/entity/component_registry.hh"
+#include "shared/entity/component_map.hh"
+#include "shared/globals.hh"
 #include "shared/world/world.hh"
 
-static std::any player_parse(lua_State* L, int config_idx)
+std::any Component<Player>::prepare(lua_State* L, int config_idx)
 {
     return std::monostate {};
 }
 
-static void player_attach(entt::entity entity)
+void Component<Player>::attach(entt::entity entity)
 {
-    world::basic_entities.emplace<Player_Component>(entity);
+    globals::registry.emplace<Player>(entity);
 }
 
-static bool player_update(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+bool Component<Player>::update(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
 {
     return true;
 }
 
-void Player_Component::register_component(void)
+void Component<Player>::encode_net(entt::entity entity, WriteBuffer& buffer)
 {
-    ComponentDefinition def {};
-    def.parse = player_parse;
-    def.attach = player_attach;
-    def.update = player_update;
+    // empty
+}
 
-    component_registry::add("player", def);
+void Component<Player>::decode_net(entt::entity entity, ReadBuffer& buffer)
+{
+    // empty
+}
+
+void Component<Player>::encode_dat(entt::entity entity, WriteBuffer& buffer)
+{
+    // empty
+}
+
+void Component<Player>::decode_dat(entt::entity entity, ReadBuffer& buffer)
+{
+    // empty
+}
+
+void Player::register_component(void)
+{
+    component_map::add<Player>("player");
+
+    globals::registry.on_construct<Player>().connect<&component_map::on_update<Player>>();
 }

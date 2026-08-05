@@ -3,7 +3,6 @@
 #include "shared/net/packet_entity.hh"
 
 #include "shared/entity/class_registry.hh"
-#include "shared/entity/component_registry.hh"
 
 void EntitySpawn_Packet::encode(const EntitySpawn_Packet& packet, WriteBuffer& buffer)
 {

@@ -89,7 +89,7 @@ void main_menu::layout(void)
     cursor_pos.y -= control.y * 1.5f;
     ImGui::SetCursorPos(cursor_pos);
 
-    if(world::basic_entities.valid(globals::player)) {
+    if(globals::registry.valid(globals::player)) {
         utils::button(str_button_disconnect.c_str(), control, [] {
             LOG_INFO("TODO: disconnect");
         });
@@ -110,7 +110,7 @@ void main_menu::layout(void)
     cursor_pos.y -= control.y * 1.5f;
     ImGui::SetCursorPos(cursor_pos);
 
-    if(world::basic_entities.valid(globals::player)) {
+    if(globals::registry.valid(globals::player)) {
         utils::button(str_button_resume.c_str(), control, [] {
             gui::screen = GUI_SCREEN_NONE;
         });

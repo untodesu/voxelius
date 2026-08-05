@@ -1,0 +1,94 @@
+#ifndef AFD5DBFC_92AA_4C82_85A9_F6FC3D3C4ADE
+#define AFD5DBFC_92AA_4C82_85A9_F6FC3D3C4ADE
+
+#include "shared/entity/component.hh"
+
+struct DirtyMarker final {
+    std::vector<bool> markers;
+};
+
+namespace component_map::detail
+{
+struct FunctionTable final {
+    std::any (*prepare)(lua_State* L, int config_idx);
+    void (*attach)(entt::entity entity);
+    bool (*update)(entt::entity entity, lua_State* L, int kv_idx, const std::any& config);
+    void (*encode_net)(entt::entity entity, WriteBuffer& buffer);
+    void (*decode_net)(entt::entity entity, ReadBuffer& buffer);
+    void (*encode_dat)(entt::entity entity, WriteBuffer& buffer);
+    void (*decode_dat)(entt::entity entity, ReadBuffer& buffer);
+};
+} // namespace component_map::detail
+
+namespace component_map::detail
+{
+component_id_type add(const std::type_info& type, std::string_view name, FunctionTable functions);
+component_id_type from_type(const std::type_info& type);
+} // namespace component_map::detail
+
+namespace component_map::detail
+{
+void mark_dirty(component_id_type id, entt::registry& registry, entt::entity entity);
+} // namespace component_map::detail
+
+namespace component_map
+{
+template<typename T>
+void on_update(entt::registry&, entt::entity entity);
+} // namespace component_map
+
+namespace component_map
+{
+template<typename T>
+component_id_type add(std::string_view name);
+template<typename T>
+component_id_type from_type(void);
+component_id_type from_name(std::string_view name);
+} // namespace component_map
+
+namespace component_map
+{
+std::any prepare(component_id_type id, lua_State* L, int config_idx);
+bool attach(component_id_type id, entt::entity entity);
+bool update(component_id_type id, entt::entity entity, lua_State* L, int kv_idx, const std::any& config);
+void encode_net(component_id_type id, entt::entity entity, WriteBuffer& buffer);
+void decode_net(component_id_type id, entt::entity entity, ReadBuffer& buffer);
+void encode_dat(component_id_type id, entt::entity entity, WriteBuffer& buffer);
+void decode_dat(component_id_type id, entt::entity entity, ReadBuffer& buffer);
+} // namespace component_map
+
+namespace component_map
+{
+void mark_dirty(component_id_type id, entt::entity entity);
+} // namespace component_map
+
+template<typename T>
+void component_map::on_update(entt::registry& registry, entt::entity entity)
+{
+    static auto id = from_type<T>();
+
+    detail::mark_dirty(id, registry, entity);
+}
+
+template<typename T>
+component_id_type component_map::add(std::string_view name)
+{
+    detail::FunctionTable functions {};
+    functions.prepare = &Component<T>::prepare;
+    functions.attach = &Component<T>::attach;
+    functions.update = &Component<T>::update;
+    functions.encode_net = &Component<T>::encode_net;
+    functions.decode_net = &Component<T>::decode_net;
+    functions.encode_dat = &Component<T>::encode_dat;
+    functions.decode_dat = &Component<T>::decode_dat;
+
+    return detail::add(typeid(T), std::move(name), std::move(functions));
+}
+
+template<typename T>
+component_id_type component_map::from_type(void)
+{
+    return detail::from_type(typeid(T));
+}
+
+#endif /* AFD5DBFC_92AA_4C82_85A9_F6FC3D3C4ADE */
