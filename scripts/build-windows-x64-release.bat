@@ -1,7 +1,7 @@
 @echo off
 cd /D "%~dp0\.."
-cmake -B build\windows-x64 -A x64
+cmake --preset windows-x64
 if %errorlevel% neq 0 exit /b %errorlevel%
-cmake --build build\windows-x64 --config Release --parallel
+cmake --build --preset windows-x64-release
 if %errorlevel% neq 0 exit /b %errorlevel%
 if /I %0 EQU "%~dpnx0" pause
