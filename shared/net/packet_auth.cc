@@ -15,6 +15,7 @@ void AuthRequest_Packet::encode(const AuthRequest_Packet& packet, WriteBuffer& b
     buffer.write<std::uint64_t>(packet.blocks_hash);
     buffer.write<std::uint64_t>(packet.fluids_hash);
     buffer.write<std::uint64_t>(packet.tints_hash);
+    buffer.write<std::uint64_t>(packet.ents_hash);
     buffer.write<std::string_view>(packet.username.substr(0, 64));
 }
 
@@ -29,6 +30,7 @@ void AuthRequest_Packet::decode(AuthRequest_Packet& packet, ReadBuffer& buffer)
     packet.blocks_hash = buffer.read<std::uint64_t>();
     packet.fluids_hash = buffer.read<std::uint64_t>();
     packet.tints_hash = buffer.read<std::uint64_t>();
+    packet.ents_hash = buffer.read<std::uint64_t>();
     packet.username = buffer.read<std::string>();
 }
 

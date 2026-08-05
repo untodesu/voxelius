@@ -17,6 +17,7 @@ struct AuthRequest_Packet final : public BasePacket<packet_type::AUTH_REQUEST> {
     std::uint64_t blocks_hash;
     std::uint64_t fluids_hash;
     std::uint64_t tints_hash;
+    std::uint64_t ents_hash;
     std::string username;
 };
 

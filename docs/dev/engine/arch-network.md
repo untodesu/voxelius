@@ -42,7 +42,7 @@ The invite code is a one-time code. On a successful login, the server consumes t
 
 ##### Registry hashes
 
-The client sends its block, biome, fluid, and tint registry hashes. The server checks each hash against its own. A mismatch means the two sides disagree on what a given ID means. When that happens, the server disconnects the client with a checksum mismatch reason. Neither side acts on the disagreement.
+The client sends its block, biome, fluid, tint, and entity class registry hashes. The server checks each hash against its own. A mismatch means the two sides disagree on what a given ID means. When that happens, the server disconnects the client with a checksum mismatch reason. Neither side acts on the disagreement.
 
 This check protects both sides:
 
@@ -113,6 +113,7 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`uint64`|`blocks_hash`|Block registry hash|
 |`uint64`|`fluids_hash`|Fluid registry hash|
 |`uint64`|`tints_hash`|Tint registry hash|
+|`uint64`|`ents_hash`|Entity registry hash|
 |`string`|`username`|Desired username|
 
 ### `0x0004` `AuthChallengePacket`

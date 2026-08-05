@@ -8,6 +8,7 @@
 #include "core/utils/epoch.hh"
 #include "core/version.hh"
 
+#include "shared/entity/class_registry.hh"
 #include "shared/net/packet_auth.hh"
 #include "shared/net/packet_session.hh"
 #include "shared/net/protocol.hh"
@@ -109,6 +110,7 @@ static void on_auth_request(const AuthRequest_Packet& packet)
     checksums_match = checksums_match && packet.blocks_hash == block_registry::checksum();
     checksums_match = checksums_match && packet.fluids_hash == fluid_registry::checksum();
     checksums_match = checksums_match && packet.tints_hash == tint_registry::checksum();
+    checksums_match = checksums_match && packet.ents_hash == class_registry::checksum();
 
     if(!checksums_match) {
         Disconnect_Packet response {};
