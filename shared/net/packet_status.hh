@@ -4,8 +4,8 @@
 #include "shared/net/packet.hh"
 
 struct StatusRequest_Packet final : public BasePacket<packet_type::STATUS_REQUEST> {
-    static void serialize(const StatusRequest_Packet& packet, WriteBuffer& buffer);
-    static void deserialize(StatusRequest_Packet& packet, ReadBuffer& buffer);
+    static void encode(const StatusRequest_Packet& packet, WriteBuffer& buffer);
+    static void decode(StatusRequest_Packet& packet, ReadBuffer& buffer);
 
     std::uint32_t major;
     std::uint32_t minor;
@@ -16,8 +16,8 @@ struct StatusResponse_Packet final : public BasePacket<packet_type::STATUS_RESPO
     constexpr static std::uint32_t WHITELIST_ENABLED = 0x00000001;
     constexpr static std::uint32_t STRICT_VERSION = 0x00000002;
 
-    static void serialize(const StatusResponse_Packet& packet, WriteBuffer& buffer);
-    static void deserialize(StatusResponse_Packet& packet, ReadBuffer& buffer);
+    static void encode(const StatusResponse_Packet& packet, WriteBuffer& buffer);
+    static void decode(StatusResponse_Packet& packet, ReadBuffer& buffer);
 
     std::uint32_t major;
     std::uint32_t minor;

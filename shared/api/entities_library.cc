@@ -218,7 +218,7 @@ static int api_patch(lua_State* L)
 
     luaL_checktype(L, 3, LUA_TTABLE);
 
-    auto success = component_registry::patch(id, entity, L, 3);
+    auto success = component_registry::update(id, entity, L, 3, std::any {});
 
     if(!success) {
         lua_pushboolean(L, false);

@@ -4,21 +4,21 @@
 
 #include "core/buffer.hh"
 
-void StatusRequest_Packet::serialize(const StatusRequest_Packet& packet, WriteBuffer& buffer)
+void StatusRequest_Packet::encode(const StatusRequest_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(packet.major);
     buffer.write<std::uint32_t>(packet.minor);
     buffer.write<std::uint32_t>(packet.patch);
 }
 
-void StatusRequest_Packet::deserialize(StatusRequest_Packet& packet, ReadBuffer& buffer)
+void StatusRequest_Packet::decode(StatusRequest_Packet& packet, ReadBuffer& buffer)
 {
     packet.major = buffer.read<std::uint32_t>();
     packet.minor = buffer.read<std::uint32_t>();
     packet.patch = buffer.read<std::uint32_t>();
 }
 
-void StatusResponse_Packet::serialize(const StatusResponse_Packet& packet, WriteBuffer& buffer)
+void StatusResponse_Packet::encode(const StatusResponse_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(packet.major);
     buffer.write<std::uint32_t>(packet.minor);
@@ -29,7 +29,7 @@ void StatusResponse_Packet::serialize(const StatusResponse_Packet& packet, Write
     buffer.write<std::uint16_t>(packet.slots);
 }
 
-void StatusResponse_Packet::deserialize(StatusResponse_Packet& packet, ReadBuffer& buffer)
+void StatusResponse_Packet::decode(StatusResponse_Packet& packet, ReadBuffer& buffer)
 {
     packet.major = buffer.read<std::uint32_t>();
     packet.minor = buffer.read<std::uint32_t>();

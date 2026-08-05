@@ -33,8 +33,8 @@ entt::entity utils::entity_spawn_raw(const Identifier& class_id, entt::entity hi
     world::basic_entities.emplace<EntityClass_Component>(entity, std::move(class_component));
 
     for(const auto& it : def->entries) {
-        if(!component_registry::spawn(it.id, entity)) {
-            LOG_ERROR("failed to spawn component {} for entity {}", it.id, static_cast<std::uint64_t>(entity));
+        if(!component_registry::attach(it.id, entity)) {
+            LOG_ERROR("failed to attach component {} for entity {}", it.id, static_cast<std::uint64_t>(entity));
             world::basic_entities.destroy(entity);
             return entt::null;
         }
@@ -73,13 +73,13 @@ entt::entity utils::entity_spawn_lua(const Identifier& class_id, lua_State* L, i
     world::basic_entities.emplace<EntityClass_Component>(entity, std::move(class_component));
 
     for(const auto& it : def->entries) {
-        if(!component_registry::spawn(it.id, entity)) {
-            lua_pushfstring(L, "failed to spawn component %s", it.name.c_str());
+        if(!component_registry::attach(it.id, entity)) {
+            lua_pushfstring(L, "failed to attach component %s", it.name.c_str());
             world::basic_entities.destroy(entity);
             return entt::null;
         }
 
-        if(!component_registry::configure(it.id, entity, L, kv_idx, it.config)) {
+        if(!component_registry::update(it.id, entity, L, kv_idx, it.config)) {
             world::basic_entities.destroy(entity);
             return entt::null;
         }

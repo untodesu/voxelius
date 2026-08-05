@@ -4,12 +4,12 @@
 
 #include "core/buffer.hh"
 
-void Disconnect_Packet::serialize(const Disconnect_Packet& packet, WriteBuffer& buffer)
+void Disconnect_Packet::encode(const Disconnect_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(packet.reason);
 }
 
-void Disconnect_Packet::deserialize(Disconnect_Packet& packet, ReadBuffer& buffer)
+void Disconnect_Packet::decode(Disconnect_Packet& packet, ReadBuffer& buffer)
 {
     packet.reason = buffer.read<std::uint32_t>();
 }

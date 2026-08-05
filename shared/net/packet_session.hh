@@ -16,8 +16,8 @@ struct Disconnect_Packet final : public BasePacket<packet_type::DISCONNECT> {
     constexpr static std::uint32_t SERVER_IS_FULL = 0x00000009;
     constexpr static std::uint32_t SERVER_SHUTDOWN = 0x0000000A;
 
-    static void serialize(const Disconnect_Packet& packet, WriteBuffer& buffer);
-    static void deserialize(Disconnect_Packet& packet, ReadBuffer& buffer);
+    static void encode(const Disconnect_Packet& packet, WriteBuffer& buffer);
+    static void decode(Disconnect_Packet& packet, ReadBuffer& buffer);
 
     static std::string_view reason_string_client(std::uint32_t reason);
     static std::string_view reason_string_server(std::uint32_t reason);

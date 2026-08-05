@@ -12,6 +12,64 @@
 #include "shared/utils/lua.hh"
 #include "shared/world/world.hh"
 
+static std::any transform_parse(lua_State* L, int config_idx)
+{
+    return std::monostate {};
+}
+
+static void transform_attach(entt::entity entity)
+{
+    Transform transform {};
+    transform.chunk = ChunkPos::Zero();
+    transform.local = Eigen::Vector3f::Zero();
+    transform.angles = Eigen::Vector3f::Zero();
+
+    world::basic_entities.emplace_or_replace<Transform>(entity, std::move(transform));
+}
+
+static bool transform_update(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+{
+    auto& current = world::basic_entities.get<Transform>(entity);
+    auto current_bpos = utils::to_block(current.chunk, current.local.cast<ChunkPos::value_type>());
+
+    auto bpos = utils::opt_ivec<3>(L, kv_idx, "bpos", current_bpos.cast<lua_Integer>());
+
+    if(!bpos.has_value()) {
+        return false;
+    }
+
+    auto angs = utils::opt_fvec<3>(L, kv_idx, "angs", current.angles.cast<lua_Number>());
+
+    if(!angs.has_value()) {
+        return false;
+    }
+
+    world::basic_entities.patch<Transform>(entity, [&](auto& transform) {
+        transform.chunk = utils::to_chunk(bpos.value().cast<BlockPos::value_type>());
+        transform.local = utils::to_local(bpos.value().cast<BlockPos::value_type>()).cast<float>();
+        transform.angles = angs.value().cast<float>();
+    });
+
+    return true;
+}
+
+static void transform_encode(entt::entity entity, WriteBuffer& buffer)
+{
+    const auto& transform = world::basic_entities.get<Transform>(entity);
+    buffer.write_vector<std::int64_t, 3>(transform.chunk.cast<std::int64_t>());
+    buffer.write_vector<float, 3>(transform.local);
+    buffer.write_vector<float, 3>(transform.angles);
+}
+
+static void transform_decode(entt::entity entity, ReadBuffer& buffer)
+{
+    world::basic_entities.patch<Transform>(entity, [&](auto& transform) {
+        transform.chunk = buffer.read_vector<std::int64_t, 3>().cast<ChunkPos::value_type>();
+        transform.local = buffer.read_vector<float, 3>();
+        transform.angles = buffer.read_vector<float, 3>();
+    });
+}
+
 constexpr inline static void update_component(unsigned dim, Transform& component)
 {
     if(component.local[dim] >= constant::CHUNK_SIZE) {
@@ -27,74 +85,18 @@ constexpr inline static void update_component(unsigned dim, Transform& component
     }
 }
 
-static std::any transform_parse(lua_State* L, int config_idx)
-{
-    return std::monostate {};
-}
-
-static void transform_spawn(entt::entity entity)
-{
-    Transform transform {};
-    transform.chunk = ChunkPos::Zero();
-    transform.local = Eigen::Vector3f::Zero();
-    transform.angles = Eigen::Vector3f::Zero();
-
-    world::basic_entities.emplace_or_replace<Transform>(entity, std::move(transform));
-}
-
-static bool transform_configure(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
-{
-    auto bpos = utils::opt_ivec<3>(L, kv_idx, "bpos", { 0, 0, 0 });
-
-    if(!bpos.has_value()) {
-        return false;
-    }
-
-    auto angles = utils::opt_fvec<3>(L, kv_idx, "angs", { 0.0, 0.0, 0.0 });
-
-    if(!angles.has_value()) {
-        return false;
-    }
-
-    auto& transform = world::basic_entities.get<Transform>(entity);
-    transform.chunk = utils::to_chunk(bpos.value().cast<BlockPos::value_type>());
-    transform.local = utils::to_local(bpos.value().cast<BlockPos::value_type>()).cast<float>();
-    transform.angles = angles.value().cast<float>();
-
-    return true;
-}
-
-static void transform_deserialize(entt::entity entity, ReadBuffer& buffer)
-{
-    auto& transform = world::basic_entities.get<Transform>(entity);
-    transform.chunk = buffer.read_vector<std::int64_t, 3>().cast<ChunkPos::value_type>();
-    transform.local = buffer.read_vector<float, 3>();
-    transform.angles = buffer.read_vector<float, 3>();
-
-    world::basic_entities.patch<Transform>(entity);
-}
-
-static void transform_serialize(entt::entity entity, WriteBuffer& buffer)
-{
-    const auto& transform = world::basic_entities.get<Transform>(entity);
-    buffer.write_vector<std::int64_t, 3>(transform.chunk.cast<std::int64_t>());
-    buffer.write_vector<float, 3>(transform.local);
-    buffer.write_vector<float, 3>(transform.angles);
-}
-
 void Transform::register_component(void)
 {
     ComponentDefinition def {};
 
     def.parse = &transform_parse;
+    def.attach = &transform_attach;
+    def.update = &transform_update;
 
-    def.spawn = &transform_spawn;
-    def.configure = &transform_configure;
-
-    def.net_deserialize = &transform_deserialize;
-    def.sav_deserialize = &transform_deserialize;
-    def.net_serialize = &transform_serialize;
-    def.sav_serialize = &transform_serialize;
+    def.net_encode = &transform_encode;
+    def.net_decode = &transform_decode;
+    def.save_encode = &transform_encode;
+    def.save_decode = &transform_decode;
 
     component_registry::add("transform", std::move(def));
 }

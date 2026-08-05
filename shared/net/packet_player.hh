@@ -6,30 +6,30 @@
 #include "shared/world/block.hh"
 
 struct PlayerAttackE_Packet final : public BasePacket<packet_type::PLAYER_ATTACK_E> {
-    static void serialize(const PlayerAttackE_Packet& packet, WriteBuffer& buffer);
-    static void deserialize(PlayerAttackE_Packet& packet, ReadBuffer& buffer);
+    static void encode(const PlayerAttackE_Packet& packet, WriteBuffer& buffer);
+    static void decode(PlayerAttackE_Packet& packet, ReadBuffer& buffer);
 
     entt::entity target;
 };
 
 struct PlayerAttackB_Packet final : public BasePacket<packet_type::PLAYER_ATTACK_B> {
-    static void serialize(const PlayerAttackB_Packet& packet, WriteBuffer& buffer);
-    static void deserialize(PlayerAttackB_Packet& packet, ReadBuffer& buffer);
+    static void encode(const PlayerAttackB_Packet& packet, WriteBuffer& buffer);
+    static void decode(PlayerAttackB_Packet& packet, ReadBuffer& buffer);
 
     BlockPos bpos;
     block_id_type expected;
 };
 
 struct PlayerInteractE_Packet final : public BasePacket<packet_type::PLAYER_INTERACT_E> {
-    static void serialize(const PlayerInteractE_Packet& packet, WriteBuffer& buffer);
-    static void deserialize(PlayerInteractE_Packet& packet, ReadBuffer& buffer);
+    static void encode(const PlayerInteractE_Packet& packet, WriteBuffer& buffer);
+    static void decode(PlayerInteractE_Packet& packet, ReadBuffer& buffer);
 
     entt::entity target;
 };
 
 struct PlayerInteractB_Packet final : public BasePacket<packet_type::PLAYER_INTERACT_B> {
-    static void serialize(const PlayerInteractB_Packet& packet, WriteBuffer& buffer);
-    static void deserialize(PlayerInteractB_Packet& packet, ReadBuffer& buffer);
+    static void encode(const PlayerInteractB_Packet& packet, WriteBuffer& buffer);
+    static void decode(PlayerInteractB_Packet& packet, ReadBuffer& buffer);
 
     BlockPos bpos;
     block_id_type expected;

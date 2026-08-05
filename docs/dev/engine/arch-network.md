@@ -28,17 +28,13 @@ If the client sends a login request instead of a status request, the server star
 |1|Client|Server|The client connects|
 |2|Client|Server|The client sends a login request packet: username, public Ed25519 key, invite code, protocol version, and registry hashes|
 |3|Server|Client|If the server accepts the request, it responds with a challenge packet holding a random nonce|
-|4|Client|Server|The client signs the nonce, the server's password, and the current UTC time, and sends the signature back in a challenge response packet|
+|4|Client|Server|The client signs the nonce plus the current UTC time (minute resolution), and sends the signature back in a challenge response packet|
 |5|Server|Client|If the signature matches, the server admits the client with a packet holding its assigned username|
 |6|N/A|N/A|Entity exchange and game packets start here|
 
 ##### Identity
 
 The client proves its identity with an Ed25519 keypair. The server challenges the client with a random nonce, and the client signs it.
-
-##### Server passwords
-
-If the server has a password, the client folds it into the signed message. This way, the exchange also proves the client knows the password. The client never sends the password itself.
 
 ##### Invite codes
 
@@ -63,11 +59,15 @@ The client sends `RequestChunk` for any chunk position it needs. The server answ
 
 ##### Block and entity actions
 
-The client sends `PlayerAttack` or `PlayerInteract` to act on its current target. A `target` field names an entity. If the client is targeting a block instead, this field carries a null entity.
+The client sends one of four packets depending on what it targets and what it does: `PlayerAttackE`/`PlayerInteractE` for an entity target, `PlayerAttackB`/`PlayerInteractB` for a block target. There is no single unified packet with a nullable target field.
 
-For a block target, the packet also carries the block's position and the ID the client expects to find there. It also carries the hit face, normal, and point. These three fields match the `physics::BlockHit` fields the block callbacks expect.
+The entity variants carry only the targeted entity. The block variants carry the block's position and the ID the client expects to find there, plus the hit face, normal, and point. These three fields match the `physics::BlockHit` fields the block callbacks expect.
 
-The server replies to every `PlayerAttack` or `PlayerInteract` with a `SetBlock` for the position involved. The server sends this reply whether or not the block changed. If the block changed, `SetBlock` also reaches every other client with that chunk loaded.
+##### Entity sync
+
+The server sends `EntitySpawn` to introduce an entity, `EntityPatch` when one or more of its components change, and `EntityRemove` when it's gone.
+
+Both `EntitySpawn` and `EntityPatch` carry a `component` list — a compound type, not a fixed struct. Its shape is assembled at runtime from whatever components the component registry currently has registered, rather than being baked into the protocol. Each entry is self-delimiting (a numeric component ID, a byte length, then that many payload bytes), so a reader can skip a component ID it doesn't recognize instead of desyncing the whole packet.
 
 ## Packet reference
 
@@ -97,8 +97,8 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 |Value|Description|
 |----|----|
-|`0x00000001`|Server is password-protected|
-|`0x00000002`|Server has whitelist enabled|
+|`0x00000001`|Server has whitelist enabled|
+|`0x00000002`|Server enforces strict version matching|
 
 ### `0x0003` `AuthRequestPacket`
 
@@ -125,7 +125,7 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 |Type|Name|Description|
 |----|----|----|
-|`uint8[64]`|`signature`|Signed nonce + server password + UNIX minutes|
+|`uint8[64]`|`signature`|Signed nonce + UNIX minutes|
 
 ### `0x0006` `AuthAdmissionPacket`
 
@@ -213,3 +213,26 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`uint8`|`face`|Hit face used for interactions|
 |`vector3<float>`|`normal`|Hit normal|
 |`vector3<float>`|`point`|Hit point local to the block|
+
+### `0x0010` `EntitySpawn`
+
+|Type|Name|Description|
+|----|----|----|
+|`uint64`|`id`|Entity ID|
+|`class_id_type`|`class_id`|Numeric class ID|
+|`uint32`|`ncomp`|Component count|
+|`component[ncomp]`|`components`|Serialized components|
+
+### `0x0011` `EntityPatch`
+
+|Type|Name|Description|
+|----|----|----|
+|`uint64`|`id`|Entity ID|
+|`uint32`|`ncomp`|Component count|
+|`component[ncomp]`|`components`|Serialized components|
+
+### `0x0012` `EntityRemove`
+
+|Type|Name|Description|
+|----|----|----|
+|`uint64`|`id`|Entity ID|

@@ -10,59 +10,59 @@ constexpr static std::uint32_t TAG_UNIFORM = 0x85787370;   // UNIF
 constexpr static std::uint32_t TAG_PALETTE8 = 0x80657666;  // PALB
 constexpr static std::uint32_t TAG_PALETTE16 = 0x80657687; // PALW
 
-void BlockStorage::serialize(const BlockStorage& storage, WriteBuffer& buffer)
+void BlockStorage::encode(const BlockStorage& storage, WriteBuffer& buffer)
 {
     if(const auto uniform = std::get_if<Uniform>(&storage.m_variant)) {
         buffer.write<std::uint32_t>(TAG_UNIFORM);
-        serialize(uniform, buffer);
+        encode(uniform, buffer);
         return;
     }
 
     if(const auto p8 = std::get_if<Palette8>(&storage.m_variant)) {
         buffer.write<std::uint32_t>(TAG_PALETTE8);
-        serialize(p8, buffer);
+        encode(p8, buffer);
         return;
     }
 
     if(const auto p16 = std::get_if<Palette16>(&storage.m_variant)) {
         buffer.write<std::uint32_t>(TAG_PALETTE16);
-        serialize(p16, buffer);
+        encode(p16, buffer);
         return;
     }
 }
 
-void BlockStorage::deserialize(BlockStorage& storage, ReadBuffer& buffer)
+void BlockStorage::decode(BlockStorage& storage, ReadBuffer& buffer)
 {
     const auto tag = buffer.read<std::uint32_t>();
 
     if(tag == TAG_PALETTE8) {
         Palette8 p8;
-        deserialize(p8, buffer);
+        decode(p8, buffer);
         storage.m_variant = std::move(p8);
         return;
     }
 
     if(tag == TAG_PALETTE16) {
         Palette16 p16;
-        deserialize(p16, buffer);
+        decode(p16, buffer);
         storage.m_variant = std::move(p16);
         return;
     }
 
     if(tag == TAG_UNIFORM) {
         Uniform uniform;
-        deserialize(uniform, buffer);
+        decode(uniform, buffer);
         storage.m_variant = std::move(uniform);
         return;
     }
 }
 
-void BlockStorage::serialize(const Uniform* uniform, WriteBuffer& buffer)
+void BlockStorage::encode(const Uniform* uniform, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(uniform->filler);
 }
 
-void BlockStorage::serialize(const Palette8* p8, WriteBuffer& buffer)
+void BlockStorage::encode(const Palette8* p8, WriteBuffer& buffer)
 {
     buffer.write<std::uint16_t>(static_cast<std::uint16_t>(p8->palette.size()));
 
@@ -76,7 +76,7 @@ void BlockStorage::serialize(const Palette8* p8, WriteBuffer& buffer)
     }
 }
 
-void BlockStorage::serialize(const Palette16* p16, WriteBuffer& buffer)
+void BlockStorage::encode(const Palette16* p16, WriteBuffer& buffer)
 {
     buffer.write<std::uint16_t>(static_cast<std::uint16_t>(p16->palette.size()));
 
@@ -90,12 +90,12 @@ void BlockStorage::serialize(const Palette16* p16, WriteBuffer& buffer)
     }
 }
 
-void BlockStorage::deserialize(Uniform& uniform, ReadBuffer& buffer)
+void BlockStorage::decode(Uniform& uniform, ReadBuffer& buffer)
 {
     uniform.filler = buffer.read<std::uint32_t>();
 }
 
-void BlockStorage::deserialize(Palette8& p8, ReadBuffer& buffer)
+void BlockStorage::decode(Palette8& p8, ReadBuffer& buffer)
 {
     p8.palette.resize(buffer.read<std::uint16_t>());
 
@@ -115,7 +115,7 @@ void BlockStorage::deserialize(Palette8& p8, ReadBuffer& buffer)
     }
 }
 
-void BlockStorage::deserialize(Palette16& p16, ReadBuffer& buffer)
+void BlockStorage::decode(Palette16& p16, ReadBuffer& buffer)
 {
     p16.palette.resize(buffer.read<std::uint16_t>());
 
