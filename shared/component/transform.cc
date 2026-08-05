@@ -12,19 +12,21 @@
 #include "shared/utils/coord.hh"
 #include "shared/utils/lua.hh"
 
-constexpr inline static void update_component(unsigned dim, Transform& component)
+constexpr inline static bool update_component(unsigned dim, Transform& component)
 {
     if(component.local[dim] >= constant::CHUNK_SIZE) {
         component.local[dim] -= constant::CHUNK_SIZE;
         component.chunk[dim] += 1;
-        return;
+        return true;
     }
 
     if(component.local[dim] < 0.0f) {
         component.local[dim] += constant::CHUNK_SIZE;
         component.chunk[dim] -= 1;
-        return;
+        return true;
     }
+
+    return false;
 }
 
 std::any Component<Transform>::prepare(lua_State* L, int config_idx)
@@ -99,7 +101,7 @@ void Transform::register_component(void)
 {
     component_map::add<Transform>("transform");
 
-    globals::registry.on_construct<Transform>().connect<&component_map::on_update<Transform>>();
+    globals::registry.on_update<Transform>().connect<&component_map::on_update<Transform>>();
 }
 
 void Transform::fixed_update(void)
@@ -107,12 +109,13 @@ void Transform::fixed_update(void)
     auto view = globals::registry.view<Transform>();
 
     for(auto [entity, transform] : view.each()) {
-        update_component(0U, transform);
-        update_component(1U, transform);
-        update_component(2U, transform);
+        auto changed = false;
+        changed = update_component(0, transform) || changed;
+        changed = update_component(1, transform) || changed;
+        changed = update_component(2, transform) || changed;
 
-        if(auto class_component = globals::registry.try_get<EntityClass>(entity)) {
-            LOG_INFO("entity {} ({}) transform update", static_cast<std::uint64_t>(entity), class_component->id.full_string());
+        if(changed) {
+            globals::registry.patch<Transform>(entity);
         }
     }
 }

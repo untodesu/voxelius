@@ -4,7 +4,6 @@
 
 #include "shared/entity/component_map.hh"
 #include "shared/globals.hh"
-#include "shared/world/world.hh"
 
 std::any Component<Player>::prepare(lua_State* L, int config_idx)
 {
@@ -45,5 +44,5 @@ void Player::register_component(void)
 {
     component_map::add<Player>("player");
 
-    globals::registry.on_construct<Player>().connect<&component_map::on_update<Player>>();
+    globals::registry.on_update<Player>().connect<&component_map::on_update<Player>>();
 }

@@ -450,3 +450,8 @@ void WriteBuffer::to_stream(std::ostream& stream) const
 
     stream.write(reinterpret_cast<const char*>(m_vector.data()), m_vector.size());
 }
+
+std::vector<std::byte> WriteBuffer::take(void)
+{
+    return std::move(m_vector);
+}

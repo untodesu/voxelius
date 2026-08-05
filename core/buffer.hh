@@ -58,6 +58,8 @@ public:
     ENetPacket* to_packet(enet_uint32 flags = ENET_PACKET_FLAG_RELIABLE) const;
     void to_stream(std::ostream& stream) const;
 
+    std::vector<std::byte> take(void);
+
 private:
     std::vector<std::byte> m_vector;
 };

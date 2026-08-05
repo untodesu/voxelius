@@ -6,6 +6,7 @@
 
 #include "shared/component/stasis.hh"
 #include "shared/component/transform.hh"
+#include "shared/constant.hh"
 #include "shared/entity/component_map.hh"
 #include "shared/globals.hh"
 #include "shared/utils/lua.hh"
@@ -66,7 +67,7 @@ void Velocity::register_component(void)
 {
     component_map::add<Velocity>("velocity");
 
-    globals::registry.on_construct<Velocity>().connect<&component_map::on_update<Velocity>>();
+    globals::registry.on_update<Velocity>().connect<&component_map::on_update<Velocity>>();
 }
 
 void Velocity::fixed_update(void)
@@ -74,6 +75,17 @@ void Velocity::fixed_update(void)
     auto view = globals::registry.view<Velocity, Transform>(entt::exclude<Stasis>);
 
     for(auto [entity, velocity, transform] : view.each()) {
-        transform.local += velocity.value * globals::fixed_frametime;
+        auto speed_sq = velocity.value.squaredNorm();
+
+        if(speed_sq >= constant::VELOCITY_EPS_SQ) {
+            transform.local += velocity.value * globals::fixed_frametime;
+
+            globals::registry.patch<Transform>(entity);
+        }
+        else if(speed_sq) {
+            velocity.value.setZero();
+
+            globals::registry.patch<Velocity>(entity);
+        }
     }
 }

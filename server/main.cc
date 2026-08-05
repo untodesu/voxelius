@@ -18,6 +18,7 @@
 #include "server/net/invites.hh"
 #include "server/net/sessions.hh"
 #include "server/net/whitelist.hh"
+#include "server/system/collector.hh"
 #include "server/world/climate.hh"
 #include "server/world/worldgen.hh"
 
@@ -44,6 +45,8 @@ static void zoned_fixed_update_late(void)
 
     shared_game::fixed_update_late();
     server_game::fixed_update_late();
+
+    collector::fixed_update_late();
 }
 
 static void wrapped_main(int argc, char** argv)

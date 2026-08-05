@@ -7,7 +7,6 @@
 #include "shared/entity/component_map.hh"
 #include "shared/globals.hh"
 #include "shared/utils/lua.hh"
-#include "shared/world/world.hh"
 
 std::any Component<Head>::prepare(lua_State* L, int config_idx)
 {

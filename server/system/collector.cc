@@ -1,0 +1,44 @@
+#include "server/pch.hh"
+
+#include "server/system/collector.hh"
+
+#include "shared/entity/component_map.hh"
+#include "shared/net/packet_entity.hh"
+#include "shared/net/protocol.hh"
+
+#include "server/globals.hh"
+
+static void process_entity(entt::entity entity, DirtyMarker& dirty)
+{
+    EntityPatch_Packet packet;
+    packet.entity = entity;
+    packet.components.reserve(dirty.markers.size());
+
+    for(component_id_type id = 0; id < dirty.markers.size(); id += 1) {
+        if(dirty.markers[id]) {
+            EntityPatch_Packet::Component component;
+            component.id = id;
+
+            WriteBuffer buffer;
+            component_map::encode_net(id, entity, buffer);
+            component.data = std::move(buffer.take());
+
+            packet.components.emplace_back(std::move(component));
+        }
+    }
+
+    WriteBuffer stub_buffer;
+    EntityPatch_Packet::encode(packet, stub_buffer);
+    LOG_INFO("[{}] Here i'd send a packet {} bytes in size", static_cast<std::uint64_t>(entity), stub_buffer.size());
+
+    std::ranges::fill(dirty.markers, false);
+}
+
+void collector::fixed_update_late(void)
+{
+    auto view = globals::registry.view<DirtyMarker>();
+
+    for(auto [entity, dirty] : view.each()) {
+        process_entity(entity, dirty);
+    }
+}
