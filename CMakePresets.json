@@ -4,19 +4,33 @@
   "configurePresets": [
     {
       "name": "generic-debug",
-      "displayName": "Generic-Debug",
+      "displayName": "Generic Debug",
       "binaryDir": "${sourceDir}/build/generic-debug",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     },
     {
+      "name": "generic-debug-profiling",
+      "displayName": "Generic Debug Profiling",
+      "inherits": "generic-debug",
+      "binaryDir": "${sourceDir}/build/generic-debug-profiling",
+      "cacheVariables": { "ENABLE_PROFILING": "ON" }
+    },
+    {
       "name": "generic-release",
-      "displayName": "Generic-Release",
+      "displayName": "Generic Release",
       "binaryDir": "${sourceDir}/build/generic-release",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
     {
+      "name": "generic-release-profiling",
+      "displayName": "Generic Release Profiling",
+      "inherits": "generic-release",
+      "binaryDir": "${sourceDir}/build/generic-release-profiling",
+      "cacheVariables": { "ENABLE_PROFILING": "ON" }
+    },
+    {
       "name": "windows-x32",
-      "displayName": "Windows-x32",
+      "displayName": "Windows x32",
       "binaryDir": "${sourceDir}/build/windows-x32",
       "architecture": "Win32",
       "condition": {
@@ -26,8 +40,15 @@
       }
     },
     {
+      "name": "windows-x32-profiling",
+      "displayName": "Windows x32 Profiling",
+      "inherits": "windows-x32",
+      "binaryDir": "${sourceDir}/build/windows-x32-profiling",
+      "cacheVariables": { "ENABLE_PROFILING": "ON" }
+    },
+    {
       "name": "windows-x64",
-      "displayName": "Windows-x64",
+      "displayName": "Windows x64",
       "binaryDir": "${sourceDir}/build/windows-x64",
       "architecture": "x64",
       "condition": {
@@ -35,6 +56,13 @@
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       }
+    },
+    {
+      "name": "windows-x64-profiling",
+      "displayName": "Windows x64 Profiling",
+      "inherits": "windows-x64",
+      "binaryDir": "${sourceDir}/build/windows-x64-profiling",
+      "cacheVariables": { "ENABLE_PROFILING": "ON" }
     }
   ],
   "buildPresets": [
@@ -66,6 +94,36 @@
     {
       "name": "windows-x64-release",
       "configurePreset": "windows-x64",
+      "configuration": "Release"
+    },
+    {
+      "name": "generic-debug-profiling",
+      "configurePreset": "generic-debug-profiling",
+      "configuration": "Debug"
+    },
+    {
+      "name": "generic-release-profiling",
+      "configurePreset": "generic-release-profiling",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x32-profiling-debug",
+      "configurePreset": "windows-x32-profiling",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x32-profiling-release",
+      "configurePreset": "windows-x32-profiling",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x64-profiling-debug",
+      "configurePreset": "windows-x64-profiling",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x64-profiling-release",
+      "configurePreset": "windows-x64-profiling",
       "configuration": "Release"
     }
   ],
