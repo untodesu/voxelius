@@ -22,6 +22,7 @@
 #include "client/gui/menu.hh"
 #include "client/gui/popup.hh"
 #include "client/gui/screen.hh"
+#include "client/gui/scroller.hh"
 #include "client/gui/stack.hh"
 #include "client/gui/title.hh"
 #include "client/language.hh"
@@ -44,9 +45,8 @@ static gui::Background s_settings_background {};
 static gui::Dimmer s_settings_dimmer {};
 static gui::HorizontalStack s_settings_hstack {};
 static gui::Button s_settings_back {};
-static gui::VerticalStack s_settings_vstack {};
-static gui::CheckBox s_settings_checkbox_a {};
-static gui::CheckBox s_settings_checkbox_b {};
+static gui::Scroller s_settings_scroll {};
+static std::array<gui::CheckBox, 32> s_settings_checkboxes {};
 
 static void on_bother_response(const BotherResponseEvent& event)
 {
@@ -125,16 +125,22 @@ void client_game::init(void)
         globals::gui_screen = &s_menu_screen;
     });
 
-    s_settings_checkbox_a.bind(globals::client_config, "test.checkbox_a");
-    s_settings_checkbox_a.enable_tooltip();
+    s_settings_scroll.set_margin(ImVec2(8.0f, 8.0f));
 
-    s_settings_checkbox_b.bind(globals::client_config, "test.checkbox_b");
+    for(std::size_t i = 0; i < s_settings_checkboxes.size(); ++i) {
+        auto& checkbox = s_settings_checkboxes[i];
 
-    s_settings_vstack.add_item(s_settings_checkbox_a, gui::FIXED, 32.0f);
-    s_settings_vstack.add_item(s_settings_checkbox_b, gui::FIXED, 32.0f);
+        checkbox.bind(globals::client_config, std::format("test.checkbox_{}", i));
+
+        if(i % 3 == 0) {
+            checkbox.enable_tooltip();
+        }
+
+        s_settings_scroll.add_child(checkbox);
+    }
 
     s_settings_hstack.add_item(s_settings_back, gui::FIXED, 220.0f);
-    s_settings_hstack.add_item(s_settings_vstack, gui::EXPANDING);
+    s_settings_hstack.add_item(s_settings_scroll, gui::EXPANDING);
 
     s_settings_screen.add_child(s_settings_background);
     s_settings_screen.add_child(s_settings_dimmer);

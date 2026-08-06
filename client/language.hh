@@ -7,6 +7,7 @@ public:
     constexpr std::string_view endonym(void) const;
     constexpr std::string_view display(void) const;
     constexpr std::string_view code(void) const;
+    constexpr const char* display_cstr(void) const;
 
 private:
     std::string m_endonym;
@@ -64,6 +65,11 @@ constexpr std::string_view LanguageInfo::display(void) const
 constexpr std::string_view LanguageInfo::code(void) const
 {
     return m_code;
+}
+
+constexpr const char* LanguageInfo::display_cstr(void) const
+{
+    return m_display.c_str();
 }
 
 constexpr language_iterator_type LanguageUpdateEvent::language(void) const

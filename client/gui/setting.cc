@@ -8,6 +8,9 @@ constexpr static float CONTROL_FRACTION = 0.4f;
 
 void gui::detail::SettingWidget::layout(void)
 {
+    auto row_start_x = ImGui::GetCursorPosX();
+    auto content_size = ImGui::GetContentRegionAvail();
+
     ImGui::TextUnformatted(m_label.c_str());
 
     if(m_tooltip_enabled) {
@@ -19,13 +22,10 @@ void gui::detail::SettingWidget::layout(void)
         }
     }
 
-    auto& style = ImGui::GetStyle();
-    auto window_width = ImGui::GetWindowWidth();
-    auto content_width = window_width - 2.0f * style.WindowPadding.x;
-    auto control_width = CONTROL_FRACTION * content_width;
+    auto control_width = CONTROL_FRACTION * content_size.x;
 
     ImGui::SetNextItemWidth(control_width);
-    ImGui::SameLine(window_width - style.WindowPadding.x - control_width);
+    ImGui::SameLine(row_start_x + content_size.x - control_width);
 
     layout_control();
 }
