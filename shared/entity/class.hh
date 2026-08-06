@@ -22,7 +22,8 @@ struct ClassDefinition final {
 };
 
 struct EntityClass final {
-    Identifier id;
+    class_id_type id;
+    Identifier name;
 };
 
 #endif /* D395275D_B45F_4578_81AA_E1229C4447BF */

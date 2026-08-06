@@ -16,8 +16,8 @@ struct ComponentTable final {
 template<typename T>
 struct Component final {
     static std::any prepare(lua_State* L, int config_idx);
-    static void attach(entt::entity entity);
-    static bool update(entt::entity entity, lua_State* L, int kv_idx, const std::any& config);
+    static void attach(entt::entity entity, const std::any& config);
+    static bool patch(entt::entity entity, lua_State* L, int kv_idx);
     static void encode_dat(entt::entity entity, WriteBuffer& buffer);
     static void decode_net(entt::entity entity, ReadBuffer& buffer);
     static void encode_net(entt::entity entity, WriteBuffer& buffer);

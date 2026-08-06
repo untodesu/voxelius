@@ -166,18 +166,22 @@ static int api_add(lua_State* L)
     return 1;
 }
 
-static bool spawn_entity(lua_State* L, ModContext* ctx, const char* raw_name, int kv_idx, entt::entity& out_entity)
+static std::optional<entt::entity> spawn_entity(lua_State* L, ModContext* ctx, const char* raw_name, int kv_idx)
 {
     auto id = Identifier::from_string(raw_name, ctx->name_space());
 
     if(!id.is_valid()) {
         lua_pushfstring(L, "entities.spawn: malformed name: %s", raw_name);
-        return false;
+        return std::nullopt;
     }
 
-    out_entity = utils::entity_spawn_lua(id, L, kv_idx);
+    auto entity = utils::spawn(id, L, kv_idx);
 
-    return out_entity != entt::null;
+    if(!globals::registry.valid(entity)) {
+        return std::nullopt;
+    }
+
+    return entity;
 }
 
 static int api_spawn(lua_State* L)
@@ -196,13 +200,13 @@ static int api_spawn(lua_State* L)
         kv_idx = lua_gettop(L);
     }
 
-    entt::entity entity = entt::null;
+    auto entity = spawn_entity(L, ctx, raw_name, kv_idx);
 
-    if(!spawn_entity(L, ctx, raw_name, kv_idx, entity)) {
+    if(!entity.has_value()) {
         return lua_error(L);
     }
 
-    lua_pushinteger(L, static_cast<lua_Integer>(entity));
+    lua_pushinteger(L, static_cast<lua_Integer>(entity.value()));
     return 1;
 }
 
@@ -252,7 +256,7 @@ static int api_patch(lua_State* L)
 
     luaL_checktype(L, 3, LUA_TTABLE);
 
-    auto success = component_map::update(id, entity, L, 3, std::any {});
+    auto success = component_map::patch(id, entity, L, 3);
 
     if(!success) {
         lua_pushboolean(L, false);

@@ -10,12 +10,12 @@ std::any Component<Player>::prepare(lua_State* L, int config_idx)
     return std::monostate {};
 }
 
-void Component<Player>::attach(entt::entity entity)
+void Component<Player>::attach(entt::entity entity, const std::any& config)
 {
     globals::registry.emplace<Player>(entity);
 }
 
-bool Component<Player>::update(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+bool Component<Player>::patch(entt::entity entity, lua_State* L, int kv_idx)
 {
     return true;
 }

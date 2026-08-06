@@ -20,6 +20,7 @@ enum class packet_type : std::uint16_t {
     ENTITY_SPAWN = 0x0010,
     ENTITY_PATCH = 0x0011,
     ENTITY_REMOVE = 0x0012,
+    ENTITY_CLIENT = 0x0013,
 };
 
 template<packet_type T>
@@ -50,5 +51,6 @@ struct PlayerInteractB_Packet;
 struct EntitySpawn_Packet;
 struct EntityPatch_Packet;
 struct EntityRemove_Packet;
+struct EntityClient_Packet;
 
 #endif /* CD2A5EA0_1394_4165_9926_3411C2165A5B */

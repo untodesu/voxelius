@@ -10,8 +10,10 @@
 
 #include "shared/entity/class_registry.hh"
 #include "shared/net/packet_auth.hh"
+#include "shared/net/packet_entity.hh"
 #include "shared/net/packet_session.hh"
 #include "shared/net/protocol.hh"
+#include "shared/utils/entity.hh"
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/fluid_registry.hh"
@@ -144,6 +146,8 @@ static void on_auth_request(const AuthRequest_Packet& packet)
     session->identity = utils::crc64(session->pkey);
     session->state = session_state::CHALLENGE;
 
+    LOG_INFO("{} ({}) connected", session->username, session->identity);
+
     AuthChallenge_Packet response {};
     response.nonce = session->nonce;
     protocol::send(response, packet.peer);
@@ -169,17 +173,21 @@ static void on_auth_response(const AuthResponse_Packet& packet)
 
     session->state = session_state::CONNECTED;
 
+    LOG_INFO("{} ({}) authenticated", session->username, session->identity);
+
     AuthAdmission_Packet response {};
     response.client_id = session->client_id;
     response.identity = session->identity;
     response.username = session->username;
     protocol::send(response, packet.peer);
 
-    // UNDONE: add player entity to AuthAdmission_Packet packet...
-    // AuthAdmission_Packet should be a marker for the client to start
-    // requesting chunks and the server to start sending chunks
-    // in response to the client, or just send a bunch of component
-    // update packets for the player entity idk
+    auto bpos = BlockPos::Zero();
+    auto player = utils::spawn_player(bpos);
+    session->player = player;
+
+    EntityClient_Packet response_2 {};
+    response_2.entity = player;
+    protocol::send(response_2, packet.peer);
 }
 
 static void on_disconnect(const Disconnect_Packet& packet)

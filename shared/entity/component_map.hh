@@ -11,8 +11,8 @@ namespace component_map::detail
 {
 struct FunctionTable final {
     std::any (*prepare)(lua_State* L, int config_idx);
-    void (*attach)(entt::entity entity);
-    bool (*update)(entt::entity entity, lua_State* L, int kv_idx, const std::any& config);
+    void (*attach)(entt::entity entity, const std::any& config);
+    bool (*patch)(entt::entity entity, lua_State* L, int kv_idx);
     void (*encode_net)(entt::entity entity, WriteBuffer& buffer);
     void (*decode_net)(entt::entity entity, ReadBuffer& buffer);
     void (*encode_dat)(entt::entity entity, WriteBuffer& buffer);
@@ -49,8 +49,8 @@ component_id_type from_name(std::string_view name);
 namespace component_map
 {
 std::any prepare(component_id_type id, lua_State* L, int config_idx);
-bool attach(component_id_type id, entt::entity entity);
-bool update(component_id_type id, entt::entity entity, lua_State* L, int kv_idx, const std::any& config);
+bool attach(component_id_type id, entt::entity entity, const std::any& config);
+bool patch(component_id_type id, entt::entity entity, lua_State* L, int kv_idx);
 void encode_net(component_id_type id, entt::entity entity, WriteBuffer& buffer);
 void decode_net(component_id_type id, entt::entity entity, ReadBuffer& buffer);
 void encode_dat(component_id_type id, entt::entity entity, WriteBuffer& buffer);
@@ -76,7 +76,7 @@ component_id_type component_map::add(std::string_view name)
     detail::FunctionTable functions {};
     functions.prepare = &Component<T>::prepare;
     functions.attach = &Component<T>::attach;
-    functions.update = &Component<T>::update;
+    functions.patch = &Component<T>::patch;
     functions.encode_net = &Component<T>::encode_net;
     functions.decode_net = &Component<T>::decode_net;
     functions.encode_dat = &Component<T>::encode_dat;

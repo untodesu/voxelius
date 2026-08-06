@@ -49,3 +49,13 @@ void EntityRemove_Packet::decode(EntityRemove_Packet& packet, ReadBuffer& buffer
 {
     packet.entity = static_cast<entt::entity>(buffer.read<std::uint64_t>());
 }
+
+void EntityClient_Packet::encode(const EntityClient_Packet& packet, WriteBuffer& buffer)
+{
+    buffer.write<std::uint64_t>(static_cast<std::uint64_t>(packet.entity));
+}
+
+void EntityClient_Packet::decode(EntityClient_Packet& packet, ReadBuffer& buffer)
+{
+    packet.entity = static_cast<entt::entity>(buffer.read<std::uint64_t>());
+}

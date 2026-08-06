@@ -35,4 +35,11 @@ struct EntityRemove_Packet final : public BasePacket<packet_type::ENTITY_REMOVE>
     entt::entity entity;
 };
 
+struct EntityClient_Packet final : public BasePacket<packet_type::ENTITY_CLIENT> {
+    static void encode(const EntityClient_Packet& packet, WriteBuffer& buffer);
+    static void decode(EntityClient_Packet& packet, ReadBuffer& buffer);
+
+    entt::entity entity;
+};
+
 #endif /* E6E02EB3_3045_4DA4_A4E9_D7E90FBA5A65 */

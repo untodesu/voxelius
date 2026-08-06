@@ -3,6 +3,7 @@
 
 namespace collector
 {
+void init(void);
 void fixed_update_late(void);
 } // namespace collector
 

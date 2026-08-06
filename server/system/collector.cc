@@ -2,11 +2,27 @@
 
 #include "server/system/collector.hh"
 
+#include "shared/entity/class.hh"
 #include "shared/entity/component_map.hh"
 #include "shared/net/packet_entity.hh"
 #include "shared/net/protocol.hh"
 
 #include "server/globals.hh"
+
+static void on_create_entity(entt::registry& registry, entt::entity entity)
+{
+    assert(&registry == &globals::registry); // sanyaty check
+
+    auto& component = registry.get<EntityClass>(entity);
+
+    EntitySpawn_Packet packet {};
+    packet.entity = entity;
+    packet.class_id = component.id;
+
+    WriteBuffer stub_buffer;
+    EntitySpawn_Packet::encode(packet, stub_buffer);
+    LOG_INFO("[{}] Here i'd send an EntitySpawn packet {} bytes in size", static_cast<std::uint64_t>(entity), stub_buffer.size());
+}
 
 static void process_entity(entt::entity entity, DirtyMarker& dirty)
 {
@@ -29,9 +45,14 @@ static void process_entity(entt::entity entity, DirtyMarker& dirty)
 
     WriteBuffer stub_buffer;
     EntityPatch_Packet::encode(packet, stub_buffer);
-    LOG_INFO("[{}] Here i'd send a packet {} bytes in size", static_cast<std::uint64_t>(entity), stub_buffer.size());
+    LOG_INFO("[{}] Here i'd send an EntityPatch packet {} bytes in size", static_cast<std::uint64_t>(entity), stub_buffer.size());
 
     std::ranges::fill(dirty.markers, false);
+}
+
+void collector::init(void)
+{
+    globals::registry.on_construct<EntityClass>().connect<&on_create_entity>();
 }
 
 void collector::fixed_update_late(void)

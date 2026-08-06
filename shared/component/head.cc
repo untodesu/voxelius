@@ -19,16 +19,18 @@ std::any Component<Head>::prepare(lua_State* L, int config_idx)
     return offset.value().cast<float>();
 }
 
-void Component<Head>::attach(entt::entity entity)
+void Component<Head>::attach(entt::entity entity, const std::any& config)
 {
+    assert(std::any_cast<const Eigen::Vector3f>(&config));
+
     Head head {};
-    head.offset = Eigen::Vector3f::Zero();
+    head.offset = std::any_cast<const Eigen::Vector3f>(config);
     head.angles = Eigen::Vector3f::Zero();
 
     globals::registry.emplace_or_replace<Head>(entity, std::move(head));
 }
 
-bool Component<Head>::update(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+bool Component<Head>::patch(entt::entity entity, lua_State* L, int kv_idx)
 {
     auto& current = globals::registry.get<Head>(entity);
     auto angles = utils::opt_fvec<3>(L, kv_idx, current.angles.cast<lua_Number>());
@@ -37,18 +39,8 @@ bool Component<Head>::update(entt::entity entity, lua_State* L, int kv_idx, cons
         return false;
     }
 
-    Eigen::Vector3f offset;
-
-    if(std::any_cast<const Eigen::Vector3f>(&config)) {
-        offset = std::any_cast<const Eigen::Vector3f>(config);
-    }
-    else {
-        offset = current.offset;
-    }
-
-    globals::registry.patch<Head>(entity, [&](auto& head) {
+    globals::registry.patch<Head>(entity, [&](Head& head) {
         head.angles = angles.value().cast<float>();
-        head.offset = offset;
     });
 
     return true;
@@ -62,7 +54,7 @@ void Component<Head>::encode_net(entt::entity entity, WriteBuffer& buffer)
 
 void Component<Head>::decode_net(entt::entity entity, ReadBuffer& buffer)
 {
-    globals::registry.patch<Head>(entity, [&](auto& head) {
+    globals::registry.patch<Head>(entity, [&](Head& head) {
         head.angles = buffer.read_vector<float, 3>();
     });
 }
@@ -76,7 +68,7 @@ void Component<Head>::encode_dat(entt::entity entity, WriteBuffer& buffer)
 
 void Component<Head>::decode_dat(entt::entity entity, ReadBuffer& buffer)
 {
-    globals::registry.patch<Head>(entity, [&](auto& head) {
+    globals::registry.patch<Head>(entity, [&](Head& head) {
         head.angles = buffer.read_vector<float, 3>();
         head.offset = buffer.read_vector<float, 3>();
     });

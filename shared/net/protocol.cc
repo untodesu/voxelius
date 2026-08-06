@@ -65,6 +65,7 @@ void protocol::decode(const ENetPacket* packet, ENetPeer* peer)
     static EntitySpawn_Packet entity_spawn;
     static EntityPatch_Packet entity_patch;
     static EntityRemove_Packet entity_remove;
+    static EntityClient_Packet entity_client;
 
     assert(packet);
     assert(peer);
@@ -182,6 +183,12 @@ void protocol::decode(const ENetPacket* packet, ENetPeer* peer)
             entity_remove.peer = peer;
             globals::dispatcher.trigger(static_cast<const EntityRemove_Packet&>(entity_remove));
             break;
+
+        case EntityClient_Packet::TYPE:
+            EntityClient_Packet::decode(entity_client, buffer);
+            entity_client.peer = peer;
+            globals::dispatcher.trigger(static_cast<const EntityClient_Packet&>(entity_client));
+            break;
     }
 }
 
@@ -218,6 +225,7 @@ template void protocol::broadcast<PlayerInteractB_Packet>(const PlayerInteractB_
 template void protocol::broadcast<EntitySpawn_Packet>(const EntitySpawn_Packet& packet, ENetHost* host, ENetPeer* except);
 template void protocol::broadcast<EntityPatch_Packet>(const EntityPatch_Packet& packet, ENetHost* host, ENetPeer* except);
 template void protocol::broadcast<EntityRemove_Packet>(const EntityRemove_Packet& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<EntityClient_Packet>(const EntityClient_Packet& packet, ENetHost* host, ENetPeer* except);
 
 template<typename T>
 void protocol::send(const T& packet, ENetPeer* peer)
@@ -252,3 +260,4 @@ template void protocol::send<PlayerInteractB_Packet>(const PlayerInteractB_Packe
 template void protocol::send<EntitySpawn_Packet>(const EntitySpawn_Packet& packet, ENetPeer* peer);
 template void protocol::send<EntityPatch_Packet>(const EntityPatch_Packet& packet, ENetPeer* peer);
 template void protocol::send<EntityRemove_Packet>(const EntityRemove_Packet& packet, ENetPeer* peer);
+template void protocol::send<EntityClient_Packet>(const EntityClient_Packet& packet, ENetPeer* peer);

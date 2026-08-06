@@ -16,7 +16,7 @@ std::any Component<Velocity>::prepare(lua_State* L, int config_idx)
     return std::monostate {};
 }
 
-void Component<Velocity>::attach(entt::entity entity)
+void Component<Velocity>::attach(entt::entity entity, const std::any& config)
 {
     Velocity velocity {};
     velocity.value = Eigen::Vector3f::Zero();
@@ -24,7 +24,7 @@ void Component<Velocity>::attach(entt::entity entity)
     globals::registry.emplace_or_replace<Velocity>(entity, std::move(velocity));
 }
 
-bool Component<Velocity>::update(entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+bool Component<Velocity>::patch(entt::entity entity, lua_State* L, int kv_idx)
 {
     auto& current = globals::registry.get<Velocity>(entity);
     auto value = utils::opt_fvec<3>(L, kv_idx, current.value.cast<lua_Number>());
@@ -33,7 +33,7 @@ bool Component<Velocity>::update(entt::entity entity, lua_State* L, int kv_idx, 
         return false;
     }
 
-    globals::registry.patch<Velocity>(entity, [&](auto& velocity) {
+    globals::registry.patch<Velocity>(entity, [&](Velocity& velocity) {
         velocity.value = value.value().cast<float>();
     });
 
@@ -48,7 +48,7 @@ void Component<Velocity>::encode_net(entt::entity entity, WriteBuffer& buffer)
 
 void Component<Velocity>::decode_net(entt::entity entity, ReadBuffer& buffer)
 {
-    globals::registry.patch<Velocity>(entity, [&](auto& velocity) {
+    globals::registry.patch<Velocity>(entity, [&](Velocity& velocity) {
         velocity.value = buffer.read_vector<float, 3>();
     });
 }

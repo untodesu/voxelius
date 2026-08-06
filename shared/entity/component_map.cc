@@ -34,7 +34,7 @@ component_id_type component_map::detail::add(const std::type_info& type, std::st
 
     vx::throw_if_not(functions.prepare, "missing FunctionTable::prepare");
     vx::throw_if_not(functions.attach, "missing FunctionTable::attach");
-    vx::throw_if_not(functions.update, "missing FunctionTable::update");
+    vx::throw_if_not(functions.patch, "missing FunctionTable::patch");
     vx::throw_if_not(functions.encode_net, "missing FunctionTable::encode_net");
     vx::throw_if_not(functions.decode_net, "missing FunctionTable::decode_net");
     vx::throw_if_not(functions.encode_dat, "missing FunctionTable::encode_dat");
@@ -96,10 +96,10 @@ std::any component_map::prepare(component_id_type id, lua_State* L, int config_i
     }
 }
 
-bool component_map::attach(component_id_type id, entt::entity entity)
+bool component_map::attach(component_id_type id, entt::entity entity, const std::any& config)
 {
     if(auto functions = find_functions(id)) {
-        functions->attach(entity);
+        functions->attach(entity, config);
         return true;
     }
     else {
@@ -108,10 +108,10 @@ bool component_map::attach(component_id_type id, entt::entity entity)
     }
 }
 
-bool component_map::update(component_id_type id, entt::entity entity, lua_State* L, int kv_idx, const std::any& config)
+bool component_map::patch(component_id_type id, entt::entity entity, lua_State* L, int kv_idx)
 {
     if(auto functions = find_functions(id)) {
-        return functions->update(entity, L, kv_idx, config);
+        return functions->patch(entity, L, kv_idx);
     }
     else {
         lua_pushfstring(L, "component not present: %I", static_cast<lua_Integer>(id));

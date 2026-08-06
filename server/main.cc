@@ -66,6 +66,8 @@ static void wrapped_main(int argc, char** argv)
     shared_game::init();
     server_game::init();
 
+    collector::init();
+
     whitelist::init();
     invites::init();
     sessions::init();

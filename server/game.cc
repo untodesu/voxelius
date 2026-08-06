@@ -13,7 +13,7 @@ void server_game::init(void)
 
 void server_game::init_late(void)
 {
-    utils::entity_spawn_raw(Identifier::from_string("builtin:test_entity"));
+    utils::spawn(Identifier::from_string("builtin:test_entity"));
 }
 
 void server_game::shutdown(void)
