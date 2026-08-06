@@ -25,7 +25,7 @@ void gui::VideoSelector::ensure_choices(void)
 
             auto& label = m_choice_labels[i + 1];
             label = std::format("{}x{} @ {}Hz", mode.w, mode.h, static_cast<int>(mode.refresh_rate));
-            label += std::format("{}[{}]", imgui_id(), i);
+            label += std::format("{}[{}]", imgui_id(), i + 1);
         }
     });
 }

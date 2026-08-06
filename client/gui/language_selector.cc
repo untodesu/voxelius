@@ -13,12 +13,11 @@ void gui::LanguageSelector::layout_control(void)
         auto it = language::const_begin();
 
         while(it < language::const_end()) {
-        }
-
-        for(auto it = language::const_begin(); it != language::const_end(); it = std::next(it)) {
             if(ImGui::Selectable(it->display_cstr(), it == current)) {
                 language::set(it);
             }
+
+            it = std::next(it);
         }
 
         ImGui::EndCombo();

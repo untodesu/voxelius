@@ -13,6 +13,15 @@ void gui::KeyBind::init(void)
     globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&gui::KeyBind::on_keyboard_event>();
 }
 
+gui::KeyBind& gui::KeyBind::bind(config::Map& config, std::string_view key)
+{
+    set_key(key);
+
+    m_value.bind(config, key);
+
+    return self();
+}
+
 void gui::KeyBind::layout_control(void)
 {
     auto label = m_bound_label.c_str();

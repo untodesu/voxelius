@@ -8,6 +8,7 @@ template<typename T>
 gui::Input<T>& gui::Input<T>::bind(config::Map& config, std::string_view key)
 {
     this->set_key(key);
+
     m_value.bind(config, key);
 
     return this->self();

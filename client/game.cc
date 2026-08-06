@@ -19,12 +19,18 @@
 #include "client/gui/button.hh"
 #include "client/gui/checkbox.hh"
 #include "client/gui/dimmer.hh"
+#include "client/gui/input.hh"
+#include "client/gui/keybind.hh"
+#include "client/gui/language_selector.hh"
 #include "client/gui/menu.hh"
 #include "client/gui/popup.hh"
 #include "client/gui/screen.hh"
 #include "client/gui/scroller.hh"
+#include "client/gui/slider.hh"
 #include "client/gui/stack.hh"
+#include "client/gui/stepper.hh"
 #include "client/gui/title.hh"
+#include "client/gui/video_selector.hh"
 #include "client/language.hh"
 #include "client/net/bother.hh"
 #include "client/system/interpolation.hh"
@@ -46,7 +52,19 @@ static gui::Dimmer s_settings_dimmer {};
 static gui::HorizontalStack s_settings_hstack {};
 static gui::Button s_settings_back {};
 static gui::Scroller s_settings_scroll {};
-static std::array<gui::CheckBox, 32> s_settings_checkboxes {};
+
+static gui::CheckBox s_test_checkbox {};
+static gui::SliderInt s_test_slider_int {};
+static gui::SliderFloat s_test_slider_float {};
+static gui::SliderUnsigned s_test_slider_unsigned {};
+static gui::StepperInt s_test_stepper_int {};
+static gui::StepperUnsigned s_test_stepper_unsigned {};
+static gui::InputInt s_test_input_int {};
+static gui::InputFloat s_test_input_float {};
+static gui::InputUnsigned s_test_input_unsigned {};
+static gui::KeyBind s_test_keybind {};
+static gui::LanguageSelector s_test_language {};
+static gui::VideoSelector s_test_video {};
 
 static void on_bother_response(const BotherResponseEvent& event)
 {
@@ -82,6 +100,8 @@ static void on_keyboard_event(const SDL_KeyboardEvent& event)
 void client_game::init(void)
 {
     interpolation::init();
+
+    gui::KeyBind::init();
 
     player_look::init();
     player_move::init();
@@ -127,17 +147,55 @@ void client_game::init(void)
 
     s_settings_scroll.set_margin(ImVec2(8.0f, 8.0f));
 
-    for(std::size_t i = 0; i < s_settings_checkboxes.size(); ++i) {
-        auto& checkbox = s_settings_checkboxes[i];
+    s_test_checkbox.bind(globals::client_config, "test.checkbox");
+    s_test_checkbox.enable_tooltip();
 
-        checkbox.bind(globals::client_config, std::format("test.checkbox_{}", i));
+    s_test_slider_int.bind(globals::client_config, "test.slider_int");
+    s_test_slider_int.set_range(0, 100);
 
-        if(i % 3 == 0) {
-            checkbox.enable_tooltip();
-        }
+    s_test_slider_float.bind(globals::client_config, "test.slider_float");
+    s_test_slider_float.set_range(0.0f, 1.0f);
 
-        s_settings_scroll.add_child(checkbox);
-    }
+    s_test_slider_unsigned.bind(globals::client_config, "test.slider_unsigned");
+    s_test_slider_unsigned.set_range(1u, 32u);
+
+    s_test_stepper_int.bind(globals::client_config, "test.stepper_int");
+    s_test_stepper_int.set_range(0, 4, 1);
+
+    s_test_stepper_unsigned.bind(globals::client_config, "test.stepper_unsigned");
+    s_test_stepper_unsigned.set_range(0u, 2u, 1u);
+
+    s_test_input_int.bind(globals::client_config, "test.input_int");
+    s_test_input_int.set_range(-100, 100);
+
+    s_test_input_float.bind(globals::client_config, "test.input_float");
+    s_test_input_float.set_range(0.0f, 10.0f);
+
+    s_test_input_unsigned.bind(globals::client_config, "test.input_unsigned");
+    s_test_input_unsigned.set_range(0u, 64u);
+
+    s_test_keybind.bind(globals::client_config, "test.keybind");
+
+    s_test_language.set_key("language");
+
+    s_test_video.set_key("video.current_mode");
+    s_test_video.on_change([](const gui::VideoSelector::mode_type&) -> gui::VideoSelector::decision_type {
+        // Тестово применяем сразу, без диалога подтверждения
+        return true;
+    });
+
+    s_settings_scroll.add_child(s_test_checkbox);
+    s_settings_scroll.add_child(s_test_slider_int);
+    s_settings_scroll.add_child(s_test_slider_float);
+    s_settings_scroll.add_child(s_test_slider_unsigned);
+    s_settings_scroll.add_child(s_test_stepper_int);
+    s_settings_scroll.add_child(s_test_stepper_unsigned);
+    s_settings_scroll.add_child(s_test_input_int);
+    s_settings_scroll.add_child(s_test_input_float);
+    s_settings_scroll.add_child(s_test_input_unsigned);
+    s_settings_scroll.add_child(s_test_keybind);
+    s_settings_scroll.add_child(s_test_language);
+    s_settings_scroll.add_child(s_test_video);
 
     s_settings_hstack.add_item(s_settings_back, gui::FIXED, 220.0f);
     s_settings_hstack.add_item(s_settings_scroll, gui::EXPANDING);
