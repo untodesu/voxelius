@@ -45,10 +45,10 @@ static void process_entity(entt::entity entity, DirtyMarker& dirty)
     }
 
     if(auto session = globals::registry.try_get<SessionRef>(entity)) {
-        // protocol::broadcast(packet, globals::host, session->ptr->peer);
+        protocol::broadcast(packet, globals::host, session->ptr->peer);
     }
     else {
-        // protocol::broadcast(packet, globals::host);
+        protocol::broadcast(packet, globals::host);
     }
 
     std::ranges::fill(dirty.markers, false);
