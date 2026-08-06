@@ -23,6 +23,16 @@ static void on_create_entity(entt::registry& registry, entt::entity entity)
     protocol::broadcast(packet, globals::host);
 }
 
+static void on_destroy_entity(entt::registry& registry, entt::entity entity)
+{
+    assert(&registry == &globals::registry); // sanyaty check
+
+    EntityRemove_Packet packet {};
+    packet.entity = entity;
+
+    protocol::broadcast(packet, globals::host);
+}
+
 static void process_entity(entt::entity entity, DirtyMarker& dirty)
 {
     EntityPatch_Packet packet;
@@ -55,6 +65,7 @@ static void process_entity(entt::entity entity, DirtyMarker& dirty)
 void collector::init(void)
 {
     globals::registry.on_construct<EntityClass>().connect<&on_create_entity>();
+    globals::registry.on_destroy<EntityClass>().connect<&on_destroy_entity>();
 }
 
 void collector::fixed_update_late(void)
