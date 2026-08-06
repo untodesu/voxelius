@@ -20,9 +20,7 @@ static void on_create_entity(entt::registry& registry, entt::entity entity)
     packet.entity = entity;
     packet.class_id = component.id;
 
-    WriteBuffer stub_buffer;
-    EntitySpawn_Packet::encode(packet, stub_buffer);
-    LOG_INFO("[{}] Here i'd send an EntitySpawn packet {} bytes in size", static_cast<std::uint64_t>(entity), stub_buffer.size());
+    protocol::broadcast(packet, globals::host);
 }
 
 static void process_entity(entt::entity entity, DirtyMarker& dirty)
