@@ -40,7 +40,6 @@ void core::setup(int argc, char** argv)
     vx::throw_if<vx::runtime_error>(enet_init_fail, "failed to initialize enet");
 
     s_gamepath = std::filesystem::absolute(cmdline::value_or("gamepath", "data"));
-    s_modspath = std::filesystem::absolute(cmdline::value_or("modspath", "mods"));
 
     if(auto value = cmdline::value_or_cstr("user", nullptr)) {
         // If there is a third-party launcher that supports
@@ -71,8 +70,11 @@ void core::setup(int argc, char** argv)
         s_userpath = std::filesystem::current_path();
     }
 
+    s_modspath = s_userpath / "mods";
+
     LOG_DEBUG("gamepath set to {}", s_gamepath.string());
     LOG_DEBUG("userpath set to {}", s_userpath.string());
+    LOG_DEBUG("modspath set to {}", s_modspath.string());
 
     std::filesystem::create_directories(s_userpath);
     std::filesystem::create_directories(s_modspath);

@@ -13,8 +13,6 @@
 /build/*
 /dist/
 /dist/*
-/mods/
-/mods/*
 /site/
 /site/*
 /*.old/

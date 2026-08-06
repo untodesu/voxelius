@@ -146,8 +146,6 @@ static void on_auth_request(const AuthRequest_Packet& packet)
     session->identity = utils::crc64(session->pkey);
     session->state = session_state::CHALLENGE;
 
-    LOG_INFO("{} ({}) connected", session->username, session->identity);
-
     AuthChallenge_Packet response {};
     response.nonce = session->nonce;
     protocol::send(response, packet.peer);
@@ -172,8 +170,6 @@ static void on_auth_response(const AuthResponse_Packet& packet)
     }
 
     session->state = session_state::CONNECTED;
-
-    LOG_INFO("{} ({}) authenticated", session->username, session->identity);
 
     AuthAdmission_Packet response {};
     response.client_id = session->client_id;

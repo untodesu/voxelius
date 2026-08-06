@@ -26,5 +26,5 @@ The engine uses PhysFS for the VFS. It mounts these system paths:
 |Mount|Path|Access|Description|
 |----|----|----|----|
 |`/data`|`${PWD}/data`|Read-only|Vendored mods, including `builtin`|
-|`/data`|`${PWD}/mods`|Read-only|User-provided mods|
+|`/data`|`${APPDATA}/Voxelius/mods` or similar|Read-only|User-provided mods|
 |`/`|`${APPDATA}/Voxelius` or similar|Read/Write|User directory. Settings and world saves live here|
