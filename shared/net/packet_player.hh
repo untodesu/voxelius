@@ -38,4 +38,15 @@ struct PlayerInteractB_Packet final : public BasePacket<packet_type::PLAYER_INTE
     Eigen::Vector3f point;
 };
 
+struct PlayerMoveData_Packet final : public BasePacket<packet_type::PLAYER_MOVE_DATA> {
+    static void encode(const PlayerMoveData_Packet& packet, WriteBuffer& buffer);
+    static void decode(PlayerMoveData_Packet& packet, ReadBuffer& buffer);
+
+    ChunkPos simulated_cpos;
+    Eigen::Vector3f simulated_lpos;
+    Eigen::Vector3f camera_angles;
+    Eigen::Vector3f velocity;
+    Eigen::Vector3f wishdir;
+};
+
 #endif /* EA34C57C_24D8_42CF_85E1_10F4CA706795 */
