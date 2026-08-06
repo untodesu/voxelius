@@ -11,8 +11,7 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-#include "client/gui/gui.hh"
-#include "client/gui/settings.hh"
+// #include "client/gui/settings.hh" // FIXME: settings system not ported yet
 
 constexpr static float PITCH_MIN = -1.0f * utils::radians(90.0f);
 constexpr static float PITCH_MAX = +1.0f * utils::radians(90.0f);
@@ -38,7 +37,7 @@ static void add_angles(float pitch, float yaw)
 
 static void on_mouse_motion(const SDL_MouseMotionEvent& event)
 {
-    if(gui::screen || !globals::registry.valid(globals::player)) {
+    if(globals::gui_screen || !globals::registry.valid(globals::player)) {
         return;
     }
 
@@ -51,7 +50,7 @@ void player_look::init(void)
 {
     s_sensitivity.bind(globals::client_config, "player_look.sensitivity");
 
-    settings::slider(0, settings_location::MOUSE, "player_look.sensitivity", 25, 100, true);
+    // settings::slider(0, settings_location::MOUSE, "player_look.sensitivity", 25, 100, true); // FIXME: settings system not ported yet
 
     globals::dispatcher.sink<SDL_MouseMotionEvent>().connect<&on_mouse_motion>();
 }
@@ -60,7 +59,7 @@ void player_look::update_late(void)
 {
     auto& io = ImGui::GetIO();
 
-    if(gui::screen) {
+    if(globals::gui_screen) {
         io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
         SDL_SetWindowRelativeMouseMode(globals::window, false);
     }

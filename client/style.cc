@@ -1,6 +1,6 @@
 #include "client/pch.hh"
 
-#include "client/gui/style.hh"
+#include "client/style.hh"
 
 void style::apply(void)
 {
@@ -10,8 +10,11 @@ void style::apply(void)
 
     // Black buttons on a dark background
     // may be harder to read than the text on them
+    style.ChildBorderSize = 0.0f;
     style.FrameBorderSize = 1.0;
+    style.PopupBorderSize = 0.0f;
     style.TabBorderSize = 1.0;
+    style.WindowBorderSize = 0.0f;
 
     // Rounding on elements looks cool but I am
     // aiming for a more or less blocky and

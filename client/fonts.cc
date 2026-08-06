@@ -1,6 +1,6 @@
 #include "client/pch.hh"
 
-#include "client/gui/fonts.hh"
+#include "client/fonts.hh"
 
 #include "core/exception.hh"
 #include "core/identifier.hh"

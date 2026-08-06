@@ -15,7 +15,7 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-#include "client/gui/settings.hh"
+// #include "client/gui/settings.hh" // FIXME: settings system not ported yet
 
 config::Ref<float> camera::vertical_fov { 70.0f };
 config::Ref<unsigned> camera::view_distance { 8 };
@@ -58,8 +58,8 @@ void camera::init(void)
     vertical_fov.bind(globals::client_config, "camera.vertical_fov");
     view_distance.bind(globals::client_config, "camera.view_distance");
 
-    settings::slider<float>(1, settings_location::GENERAL, "camera.vertical_fov", 45.0f, 110.0f, true, "%.0f");
-    settings::slider<unsigned>(0, settings_location::VIDEO, "camera.view_distance", 1, 32, false);
+    // settings::slider<float>(1, settings_location::GENERAL, "camera.vertical_fov", 45.0f, 110.0f, true, "%.0f"); // FIXME: settings system not ported yet
+    // settings::slider<unsigned>(0, settings_location::VIDEO, "camera.view_distance", 1, 32, false); // FIXME: settings system not ported yet
 
     reset_camera();
 }

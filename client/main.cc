@@ -12,13 +12,17 @@
 #include "shared/splash.hh"
 
 #include "client/camera.hh"
+#include "client/constant.hh"
 #include "client/fog.hh"
+#include "client/fonts.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
-#include "client/gui/gui.hh"
+#include "client/gui/screen.hh"
 #include "client/head.hh"
+#include "client/language.hh"
 #include "client/net/bother.hh"
 #include "client/res/texture2D.hh"
+#include "client/style.hh"
 #include "client/video.hh"
 #include "client/world/block_atlas.hh"
 #include "client/world/bmodel_cache.hh"
@@ -124,7 +128,15 @@ static void zoned_update(void)
 
     fog::update();
 
-    gui::update_scale();
+    int width, height;
+    SDL_GetWindowSize(globals::window, &width, &height);
+
+    auto scale_x = std::max(1.0f, std::floor(static_cast<float>(width) / static_cast<float>(constant::BASE_WIDTH)));
+    auto scale_y = std::max(1.0f, std::floor(static_cast<float>(height) / static_cast<float>(constant::BASE_HEIGHT)));
+    auto scale_min = std::min(scale_x, scale_y);
+
+    ImGui::GetIO().FontGlobalScale = scale_min;
+    globals::gui_scale = static_cast<unsigned>(scale_min);
 }
 
 static void zoned_render(void)
@@ -134,7 +146,9 @@ static void zoned_render(void)
     if(head::prepare()) {
         head::render();
 
-        gui::layout();
+        if(globals::gui_screen) {
+            globals::gui_screen->layout();
+        }
 
         client_game::layout();
 
@@ -195,7 +209,9 @@ static void wrapped_main(int argc, char** argv)
     head::init();
     camera::init();
 
-    gui::init();
+    style::apply();
+    fonts::load();
+    language::init();
 
     block_atlas::init();
 
@@ -207,7 +223,7 @@ static void wrapped_main(int argc, char** argv)
     video::init_late();
     head::init_late();
 
-    gui::init_late();
+    language::init_late();
 
     block_atlas::init_late();
     fluid_cache::init_late();
@@ -300,8 +316,6 @@ static void wrapped_main(int argc, char** argv)
     bmodel_cache::shutdown();
     fluid_cache::shutdown();
     block_atlas::shutdown();
-
-    gui::shutdown();
 
     client_game::shutdown();
 

@@ -1,6 +1,6 @@
 #include "client/pch.hh"
 
-#include "client/gui/language.hh"
+#include "client/language.hh"
 
 #include "core/config/map.hh"
 #include "core/config/ref.hh"
@@ -13,7 +13,7 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-#include "client/gui/settings.hh"
+// #include "client/gui/settings.hh" // FIXME: settings system not ported yet
 
 constexpr static std::string_view DEFAULT_LANGUAGE = "english";
 
@@ -73,7 +73,7 @@ void language::init(void)
 
     s_config_language.bind(globals::client_config, "language");
 
-    settings::language(0, settings_location::GENERAL, "language", false);
+    // settings::language(0, settings_location::GENERAL, "language", false); // FIXME: settings system not ported yet
 
     std::string source;
     auto read_ok = utils::read_file(manifest_path, source);

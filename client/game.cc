@@ -15,12 +15,38 @@
 
 #include "client/camera.hh"
 #include "client/globals.hh"
-#include "client/gui/gui.hh"
+#include "client/gui/background.hh"
+#include "client/gui/button.hh"
+#include "client/gui/checkbox.hh"
+#include "client/gui/dimmer.hh"
+#include "client/gui/menu.hh"
+#include "client/gui/popup.hh"
+#include "client/gui/screen.hh"
+#include "client/gui/stack.hh"
+#include "client/gui/title.hh"
+#include "client/language.hh"
 #include "client/net/bother.hh"
 #include "client/system/interpolation.hh"
 #include "client/system/player_look.hh"
 #include "client/system/player_move.hh"
 #include "client/system/player_target.hh"
+
+// Test screens for the new gui:: widget tree; will be
+// replaced by the real main menu/settings once they're ported over.
+static gui::Screen s_menu_screen {};
+static gui::Background s_menu_background {};
+static gui::Title s_menu_title {};
+static gui::Menu s_menu_menu {};
+static gui::Popup s_menu_popup {};
+
+static gui::Screen s_settings_screen {};
+static gui::Background s_settings_background {};
+static gui::Dimmer s_settings_dimmer {};
+static gui::HorizontalStack s_settings_hstack {};
+static gui::Button s_settings_back {};
+static gui::VerticalStack s_settings_vstack {};
+static gui::CheckBox s_settings_checkbox_a {};
+static gui::CheckBox s_settings_checkbox_b {};
 
 static void on_bother_response(const BotherResponseEvent& event)
 {
@@ -33,6 +59,26 @@ static void on_bother_response(const BotherResponseEvent& event)
         event.version_minor(), event.version_patch(), event.num_players(), event.max_players(), event.motd());
 }
 
+static void on_language_update_event(const LanguageUpdateEvent&)
+{
+    s_menu_screen.translate();
+    s_settings_screen.translate();
+}
+
+static void on_keyboard_event(const SDL_KeyboardEvent& event)
+{
+    if(event.type != SDL_EVENT_KEY_DOWN || event.key != SDLK_ESCAPE) {
+        return;
+    }
+
+    if(globals::gui_screen) {
+        globals::gui_screen = nullptr;
+    }
+    else {
+        globals::gui_screen = &s_menu_screen;
+    }
+}
+
 void client_game::init(void)
 {
     interpolation::init();
@@ -41,6 +87,62 @@ void client_game::init(void)
     player_move::init();
     player_target::init();
 
+    // --- main test menu ---
+    s_menu_screen.set_start(0.0f, 0.0f);
+    s_menu_screen.set_size(1.0f, 1.0f);
+
+    s_menu_title.set_text("test.title");
+
+    s_menu_menu.set_margin(ImVec2(16.0f, 16.0f));
+    s_menu_menu.set_control(ImVec2(256.0f, 32.0f));
+    s_menu_menu.add_button("test.menu.settings", [] {
+        globals::gui_screen = &s_settings_screen;
+    });
+    s_menu_menu.add_button("test.menu.popup", [] {
+        s_menu_popup.open();
+    });
+    s_menu_menu.add_button("test.menu.quit", [] {
+        LOG_INFO("quit clicked (test only, not wired up)");
+    });
+
+    s_menu_popup.set_title("test.popup.title");
+    s_menu_popup.set_question("test.popup.question");
+    s_menu_popup.add_choice("test.popup.ok");
+
+    s_menu_screen.add_child(s_menu_background);
+    s_menu_screen.add_child(s_menu_title);
+    s_menu_screen.add_child(s_menu_menu);
+    s_menu_screen.add_child(s_menu_popup);
+    s_menu_screen.translate();
+
+    // --- settings test screen ---
+    s_settings_screen.set_start(0.0f, 0.0f);
+    s_settings_screen.set_size(1.0f, 1.0f);
+
+    s_settings_back.set_text("test.settings.back");
+    s_settings_back.set_size(-1.0f, -1.0f);
+    s_settings_back.on_click([] {
+        globals::gui_screen = &s_menu_screen;
+    });
+
+    s_settings_checkbox_a.bind(globals::client_config, "test.checkbox_a");
+    s_settings_checkbox_a.enable_tooltip();
+
+    s_settings_checkbox_b.bind(globals::client_config, "test.checkbox_b");
+
+    s_settings_vstack.add_item(s_settings_checkbox_a, gui::FIXED, 32.0f);
+    s_settings_vstack.add_item(s_settings_checkbox_b, gui::FIXED, 32.0f);
+
+    s_settings_hstack.add_item(s_settings_back, gui::FIXED, 220.0f);
+    s_settings_hstack.add_item(s_settings_vstack, gui::EXPANDING);
+
+    s_settings_screen.add_child(s_settings_background);
+    s_settings_screen.add_child(s_settings_dimmer);
+    s_settings_screen.add_child(s_settings_hstack);
+    s_settings_screen.translate();
+
+    globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&on_keyboard_event>();
+    globals::dispatcher.sink<LanguageUpdateEvent>().connect<&on_language_update_event>();
     globals::dispatcher.sink<BotherResponseEvent>().connect<&on_bother_response>();
 
     bother::ping(1, "127.0.0.1", 16384);

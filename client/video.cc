@@ -12,7 +12,7 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-#include "client/gui/settings.hh"
+// #include "client/gui/settings.hh" // FIXME: settings system not ported yet
 
 static Eigen::Vector2i s_last_windowed_size;
 static config::Ref<bool> s_enable_vsync { true };
@@ -138,8 +138,8 @@ void video::init(void)
     pick_display();
     cache_fullscreen_modes();
 
-    settings::video_mode(0, settings_location::VIDEO, "video.current_mode", false);
-    settings::checkbox(1, settings_location::VIDEO, "video.enable_vsync", true);
+    // settings::video_mode(0, settings_location::VIDEO, "video.current_mode", false); // FIXME: settings system not ported yet
+    // settings::checkbox(1, settings_location::VIDEO, "video.enable_vsync", true); // FIXME: settings system not ported yet
 
     globals::window = SDL_CreateWindow("client", constant::BASE_WIDTH, constant::BASE_HEIGHT,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);

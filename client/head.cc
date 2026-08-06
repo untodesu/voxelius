@@ -13,7 +13,7 @@
 #include "client/fog.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
-#include "client/gui/settings.hh"
+// #include "client/gui/settings.hh" // FIXME: settings system not ported yet
 #include "client/shader_program.hh"
 #include "client/world/chunk_renderer.hh"
 #include "client/world/chunk_vbo.hh"
@@ -202,8 +202,8 @@ void head::init(void)
 {
     s_pixel_size.bind(globals::client_config, "head.pixel_size");
 
-    settings::slider<int>(2, settings_location::VIDEO, "head.pixel_size", 1, 4, true);
-    settings::stepper<unsigned>(3, settings_location::VIDEO, "head.fog_model", 0, 2, 1, false);
+    // settings::slider<int>(2, settings_location::VIDEO, "head.pixel_size", 1, 4, true); // FIXME: settings system not ported yet
+    // settings::stepper<unsigned>(3, settings_location::VIDEO, "head.fog_model", 0, 2, 1, false); // FIXME: settings system not ported yet
 
     globals::gl_context = SDL_GL_CreateContext(globals::window);
     vx::throw_if_not_fmt(globals::gl_context, "SDL_GL_CreateContext failed: {}", SDL_GetError());

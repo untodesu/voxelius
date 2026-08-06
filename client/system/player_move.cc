@@ -11,8 +11,7 @@
 
 #include "client/camera.hh"
 #include "client/globals.hh"
-#include "client/gui/gui.hh"
-#include "client/gui/settings.hh"
+// #include "client/gui/settings.hh" // FIXME: settings system not ported yet
 
 constexpr static float SPEED = 16.0f;
 
@@ -32,12 +31,12 @@ void player_move::init(void)
     s_key_jump.bind(globals::client_config, "player_move.key_jump");
     s_key_crouch.bind(globals::client_config, "player_move.key_crouch");
 
-    settings::keybind(0, settings_location::KEYBOARD_MOVEMENT, "player_move.key_forward", false);
-    settings::keybind(1, settings_location::KEYBOARD_MOVEMENT, "player_move.key_backward", false);
-    settings::keybind(2, settings_location::KEYBOARD_MOVEMENT, "player_move.key_left", false);
-    settings::keybind(3, settings_location::KEYBOARD_MOVEMENT, "player_move.key_right", false);
-    settings::keybind(4, settings_location::KEYBOARD_MOVEMENT, "player_move.key_jump", false);
-    settings::keybind(5, settings_location::KEYBOARD_MOVEMENT, "player_move.key_crouch", false);
+    // settings::keybind(0, settings_location::KEYBOARD_MOVEMENT, "player_move.key_forward", false); // FIXME: settings system not ported yet
+    // settings::keybind(1, settings_location::KEYBOARD_MOVEMENT, "player_move.key_backward", false); // FIXME: settings system not ported yet
+    // settings::keybind(2, settings_location::KEYBOARD_MOVEMENT, "player_move.key_left", false); // FIXME: settings system not ported yet
+    // settings::keybind(3, settings_location::KEYBOARD_MOVEMENT, "player_move.key_right", false); // FIXME: settings system not ported yet
+    // settings::keybind(4, settings_location::KEYBOARD_MOVEMENT, "player_move.key_jump", false); // FIXME: settings system not ported yet
+    // settings::keybind(5, settings_location::KEYBOARD_MOVEMENT, "player_move.key_crouch", false); // FIXME: settings system not ported yet
 }
 
 void player_move::fixed_update(void)
@@ -52,7 +51,7 @@ void player_move::fixed_update(void)
     globals::registry.emplace_or_replace<Transform_Prev>(globals::player, transform);
     globals::registry.emplace_or_replace<Velocity_Prev>(globals::player, velocity);
 
-    if(gui::screen) {
+    if(globals::gui_screen) {
         velocity.value = Eigen::Vector3f::Zero();
         return;
     }

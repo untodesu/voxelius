@@ -11,14 +11,13 @@
 
 #include "client/camera.hh"
 #include "client/globals.hh"
-#include "client/gui/gui.hh"
 #include "client/world/outline.hh"
 
 physics::Hit player_target::hit;
 
 static void on_mouse_button_event(const SDL_MouseButtonEvent& event)
 {
-    if(event.down && gui::screen == GUI_SCREEN_NONE && std::holds_alternative<physics::BlockHit>(player_target::hit)) {
+    if(event.down && !globals::gui_screen && std::holds_alternative<physics::BlockHit>(player_target::hit)) {
         const auto& hit = std::get<physics::BlockHit>(player_target::hit);
 
         if(event.button == SDL_BUTTON_RIGHT) {
