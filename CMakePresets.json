@@ -124,6 +124,16 @@
       "configurePreset": "windows-x32-prof"
     },
     {
+      "name": "windows-x32-release",
+      "displayName": "Windows x32 Release",
+      "configurePreset": "windows-x32"
+    },
+    {
+      "name": "windows-x32-release-prof",
+      "displayName": "Windows x32 Release (Profiling)",
+      "configurePreset": "windows-x32-prof"
+    },
+    {
       "name": "windows-x64-debug",
       "displayName": "Windows x64 Debug",
       "configurePreset": "windows-x64"
@@ -131,6 +141,16 @@
     {
       "name": "windows-x64-debug-prof",
       "displayName": "Windows x64 Debug (Profiling)",
+      "configurePreset": "windows-x64-prof"
+    },
+    {
+      "name": "windows-x64-release",
+      "displayName": "Windows x64 Release",
+      "configurePreset": "windows-x64"
+    },
+    {
+      "name": "windows-x64-release-prof",
+      "displayName": "Windows x64 Release (Profiling)",
       "configurePreset": "windows-x64-prof"
     }
   ],
