@@ -35,9 +35,10 @@ static void on_destroy_entity(entt::registry& registry, entt::entity entity)
 
 static void process_entity(entt::entity entity, DirtyMarker& dirty)
 {
-    EntityPatch_Packet packet;
+    static EntityPatch_Packet packet;
+
     packet.entity = entity;
-    packet.components.reserve(dirty.markers.size());
+    packet.components.clear();
 
     for(component_id_type id = 0; id < dirty.markers.size(); id += 1) {
         if(dirty.markers[id]) {
@@ -52,14 +53,16 @@ static void process_entity(entt::entity entity, DirtyMarker& dirty)
         }
     }
 
-    if(auto session = globals::registry.try_get<SessionRef>(entity)) {
-        protocol::broadcast(packet, globals::host, session->ptr->peer);
-    }
-    else {
-        protocol::broadcast(packet, globals::host);
-    }
+    if(packet.components.size()) {
+        if(auto session = globals::registry.try_get<SessionRef>(entity)) {
+            protocol::broadcast(packet, globals::host, session->ptr->peer);
+        }
+        else {
+            protocol::broadcast(packet, globals::host);
+        }
 
-    std::ranges::fill(dirty.markers, false);
+        std::ranges::fill(dirty.markers, false);
+    }
 }
 
 void collector::init(void)
