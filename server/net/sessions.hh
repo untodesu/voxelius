@@ -24,6 +24,10 @@ struct Session final {
     ENetPeer* peer;
 };
 
+struct SessionRef final {
+    Session* ptr;
+};
+
 namespace sessions
 {
 extern std::uint16_t num_players;

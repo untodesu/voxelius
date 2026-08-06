@@ -185,6 +185,10 @@ static void on_auth_response(const AuthResponse_Packet& packet)
     auto player = utils::spawn_player(bpos);
     session->player = player;
 
+    SessionRef ref {};
+    ref.ptr = session;
+    globals::registry.emplace<SessionRef>(player, std::move(ref));
+
     EntityClient_Packet response_2 {};
     response_2.entity = player;
     protocol::send(response_2, packet.peer);
@@ -254,19 +258,11 @@ void sessions::init(void)
 
 void sessions::init_late(void)
 {
-    auto max_players = s_max_players.value();
-    max_players = std::max(max_players, 1U);
-    max_players = std::min(max_players, 128U);
-
-    // Propagate the change to the rest of
-    // config::Ref instances bound to this slot
-    s_max_players.set_value(max_players);
-
     s_username_map.clear();
     s_identity_map.clear();
-    s_sessions.resize(max_players);
+    s_sessions.resize(s_max_players.value());
 
-    for(std::size_t i = 0; i < max_players; ++i) {
+    for(std::size_t i = 0; i < s_max_players.value(); ++i) {
         auto& session = s_sessions[i];
         session.state = session_state::UNCONNECTED;
         session.client_id = UINT16_MAX;

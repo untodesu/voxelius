@@ -8,6 +8,7 @@
 #include "shared/net/protocol.hh"
 
 #include "server/globals.hh"
+#include "server/net/sessions.hh"
 
 static void on_create_entity(entt::registry& registry, entt::entity entity)
 {
@@ -43,9 +44,12 @@ static void process_entity(entt::entity entity, DirtyMarker& dirty)
         }
     }
 
-    WriteBuffer stub_buffer;
-    EntityPatch_Packet::encode(packet, stub_buffer);
-    LOG_INFO("[{}] Here i'd send an EntityPatch packet {} bytes in size", static_cast<std::uint64_t>(entity), stub_buffer.size());
+    if(auto session = globals::registry.try_get<SessionRef>(entity)) {
+        // protocol::broadcast(packet, globals::host, session->ptr->peer);
+    }
+    else {
+        // protocol::broadcast(packet, globals::host);
+    }
 
     std::ranges::fill(dirty.markers, false);
 }

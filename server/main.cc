@@ -15,6 +15,7 @@
 #include "server/constant.hh"
 #include "server/game.hh"
 #include "server/globals.hh"
+#include "server/net/host.hh"
 #include "server/net/invites.hh"
 #include "server/net/sessions.hh"
 #include "server/net/whitelist.hh"
@@ -43,6 +44,8 @@ static void zoned_fixed_update_late(void)
 {
     ZoneScopedN("server::fixed_update_late");
 
+    host::fixed_update_late();
+
     shared_game::fixed_update_late();
     server_game::fixed_update_late();
 
@@ -63,6 +66,8 @@ static void wrapped_main(int argc, char** argv)
     std::signal(SIGINT, &signal_handler);
     std::signal(SIGTERM, &signal_handler);
 
+    host::init();
+
     shared_game::init();
     server_game::init();
 
@@ -77,6 +82,8 @@ static void wrapped_main(int argc, char** argv)
     splash::init(SPLASH_SERVER);
 
     globals::server_config.load("server.conf");
+
+    host::init_late();
 
     shared_game::init_late();
     server_game::init_late();
@@ -149,6 +156,8 @@ static void wrapped_main(int argc, char** argv)
 
     server_game::shutdown();
     shared_game::shutdown();
+
+    host::shutdown();
 
     res::hard_purge();
 

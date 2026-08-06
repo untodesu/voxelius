@@ -4,7 +4,6 @@
 
 #include "core/buffer.hh"
 
-#include "shared/globals.hh"
 #include "shared/net/packet_auth.hh"
 #include "shared/net/packet_entity.hh"
 #include "shared/net/packet_player.hh"
@@ -43,7 +42,7 @@ static void common_send(ENetPacket* packet, ENetPeer* peer)
     }
 }
 
-void protocol::decode(const ENetPacket* packet, ENetPeer* peer)
+void protocol::decode(entt::dispatcher& dispatcher, const ENetPacket* packet, ENetPeer* peer)
 {
     static ReadBuffer buffer;
 
@@ -79,115 +78,115 @@ void protocol::decode(const ENetPacket* packet, ENetPeer* peer)
         case StatusRequest_Packet::TYPE:
             StatusRequest_Packet::decode(status_request, buffer);
             status_request.peer = peer;
-            globals::dispatcher.trigger(static_cast<const StatusRequest_Packet&>(status_request));
+            dispatcher.trigger(static_cast<const StatusRequest_Packet&>(status_request));
             break;
 
         case StatusResponse_Packet::TYPE:
             StatusResponse_Packet::decode(status_response, buffer);
             status_response.peer = peer;
-            globals::dispatcher.trigger(static_cast<const StatusResponse_Packet&>(status_response));
+            dispatcher.trigger(static_cast<const StatusResponse_Packet&>(status_response));
             break;
 
         case AuthRequest_Packet::TYPE:
             AuthRequest_Packet::decode(auth_request, buffer);
             auth_request.peer = peer;
-            globals::dispatcher.trigger(static_cast<const AuthRequest_Packet&>(auth_request));
+            dispatcher.trigger(static_cast<const AuthRequest_Packet&>(auth_request));
             break;
 
         case AuthChallenge_Packet::TYPE:
             AuthChallenge_Packet::decode(auth_challenge, buffer);
             auth_challenge.peer = peer;
-            globals::dispatcher.trigger(static_cast<const AuthChallenge_Packet&>(auth_challenge));
+            dispatcher.trigger(static_cast<const AuthChallenge_Packet&>(auth_challenge));
             break;
 
         case AuthResponse_Packet::TYPE:
             AuthResponse_Packet::decode(auth_response, buffer);
             auth_response.peer = peer;
-            globals::dispatcher.trigger(static_cast<const AuthResponse_Packet&>(auth_response));
+            dispatcher.trigger(static_cast<const AuthResponse_Packet&>(auth_response));
             break;
 
         case AuthAdmission_Packet::TYPE:
             AuthAdmission_Packet::decode(auth_admission, buffer);
             auth_admission.peer = peer;
-            globals::dispatcher.trigger(static_cast<const AuthAdmission_Packet&>(auth_admission));
+            dispatcher.trigger(static_cast<const AuthAdmission_Packet&>(auth_admission));
             break;
 
         case Disconnect_Packet::TYPE:
             Disconnect_Packet::decode(disconnect, buffer);
             disconnect.peer = peer;
-            globals::dispatcher.trigger(static_cast<const Disconnect_Packet&>(disconnect));
+            dispatcher.trigger(static_cast<const Disconnect_Packet&>(disconnect));
             break;
 
         case RequestChunk_Packet::TYPE:
             RequestChunk_Packet::decode(request_chunk, buffer);
             request_chunk.peer = peer;
-            globals::dispatcher.trigger(static_cast<const RequestChunk_Packet&>(request_chunk));
+            dispatcher.trigger(static_cast<const RequestChunk_Packet&>(request_chunk));
             break;
 
         case ChunkBlocks_Packet::TYPE:
             ChunkBlocks_Packet::decode(chunk_blocks, buffer);
             chunk_blocks.peer = peer;
-            globals::dispatcher.trigger(static_cast<const ChunkBlocks_Packet&>(chunk_blocks));
+            dispatcher.trigger(static_cast<const ChunkBlocks_Packet&>(chunk_blocks));
             break;
 
         case ChunkBiomes_Packet::TYPE:
             ChunkBiomes_Packet::decode(chunk_biomes, buffer);
             chunk_biomes.peer = peer;
-            globals::dispatcher.trigger(static_cast<const ChunkBiomes_Packet&>(chunk_biomes));
+            dispatcher.trigger(static_cast<const ChunkBiomes_Packet&>(chunk_biomes));
             break;
 
         case SetBlock_Packet::TYPE:
             SetBlock_Packet::decode(set_block, buffer);
             set_block.peer = peer;
-            globals::dispatcher.trigger(static_cast<const SetBlock_Packet&>(set_block));
+            dispatcher.trigger(static_cast<const SetBlock_Packet&>(set_block));
             break;
 
         case PlayerAttackE_Packet::TYPE:
             PlayerAttackE_Packet::decode(player_attack_e, buffer);
             player_attack_e.peer = peer;
-            globals::dispatcher.trigger(static_cast<const PlayerAttackE_Packet&>(player_attack_e));
+            dispatcher.trigger(static_cast<const PlayerAttackE_Packet&>(player_attack_e));
             break;
 
         case PlayerAttackB_Packet::TYPE:
             PlayerAttackB_Packet::decode(player_attack_b, buffer);
             player_attack_b.peer = peer;
-            globals::dispatcher.trigger(static_cast<const PlayerAttackB_Packet&>(player_attack_b));
+            dispatcher.trigger(static_cast<const PlayerAttackB_Packet&>(player_attack_b));
             break;
 
         case PlayerInteractE_Packet::TYPE:
             PlayerInteractE_Packet::decode(player_interact_e, buffer);
             player_interact_e.peer = peer;
-            globals::dispatcher.trigger(static_cast<const PlayerInteractE_Packet&>(player_interact_e));
+            dispatcher.trigger(static_cast<const PlayerInteractE_Packet&>(player_interact_e));
             break;
 
         case PlayerInteractB_Packet::TYPE:
             PlayerInteractB_Packet::decode(player_interact_b, buffer);
             player_interact_b.peer = peer;
-            globals::dispatcher.trigger(static_cast<const PlayerInteractB_Packet&>(player_interact_b));
+            dispatcher.trigger(static_cast<const PlayerInteractB_Packet&>(player_interact_b));
             break;
 
         case EntitySpawn_Packet::TYPE:
             EntitySpawn_Packet::decode(entity_spawn, buffer);
             entity_spawn.peer = peer;
-            globals::dispatcher.trigger(static_cast<const EntitySpawn_Packet&>(entity_spawn));
+            dispatcher.trigger(static_cast<const EntitySpawn_Packet&>(entity_spawn));
             break;
 
         case EntityPatch_Packet::TYPE:
             EntityPatch_Packet::decode(entity_patch, buffer);
             entity_patch.peer = peer;
-            globals::dispatcher.trigger(static_cast<const EntityPatch_Packet&>(entity_patch));
+            dispatcher.trigger(static_cast<const EntityPatch_Packet&>(entity_patch));
             break;
 
         case EntityRemove_Packet::TYPE:
             EntityRemove_Packet::decode(entity_remove, buffer);
             entity_remove.peer = peer;
-            globals::dispatcher.trigger(static_cast<const EntityRemove_Packet&>(entity_remove));
+            dispatcher.trigger(static_cast<const EntityRemove_Packet&>(entity_remove));
             break;
 
         case EntityClient_Packet::TYPE:
             EntityClient_Packet::decode(entity_client, buffer);
             entity_client.peer = peer;
-            globals::dispatcher.trigger(static_cast<const EntityClient_Packet&>(entity_client));
+            dispatcher.trigger(static_cast<const EntityClient_Packet&>(entity_client));
             break;
     }
 }
