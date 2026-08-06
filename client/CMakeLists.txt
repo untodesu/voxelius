@@ -1,4 +1,6 @@
 add_executable(vclient
+    "${CMAKE_CURRENT_LIST_DIR}/net/bother.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/net/bother.hh"
     "${CMAKE_CURRENT_LIST_DIR}/system/interpolation.cc"
     "${CMAKE_CURRENT_LIST_DIR}/system/interpolation.hh"
     "${CMAKE_CURRENT_LIST_DIR}/system/player_look.cc"

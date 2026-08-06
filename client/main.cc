@@ -17,6 +17,7 @@
 #include "client/globals.hh"
 #include "client/gui/gui.hh"
 #include "client/head.hh"
+#include "client/net/bother.hh"
 #include "client/res/texture2D.hh"
 #include "client/video.hh"
 #include "client/world/block_atlas.hh"
@@ -161,6 +162,8 @@ static void zoned_update_late(void)
 
     client_game::update_late();
 
+    bother::update_late();
+
     threading::update();
 }
 
@@ -181,6 +184,8 @@ static void wrapped_main(int argc, char** argv)
     vx::throw_if_not_fmt(SDL_Init(SDL_INIT_EVENTS), "SDL_Init failed: {}", SDL_GetError());
 
     Texture2D::register_resource();
+
+    bother::init();
 
     shared_game::init();
 
@@ -289,6 +294,8 @@ static void wrapped_main(int argc, char** argv)
     LOG_INFO("shutdown after {} frames", globals::window_framecount);
     LOG_INFO("avg framerate: {:.03f} FPS ({:.03f} ms)", 1.0f / globals::window_frametime_avg, 1000.0f * globals::window_frametime_avg);
     LOG_INFO("last frame I drew {} vertices ({} draw calls)", globals::num_draw_vertices, globals::num_draw_calls);
+
+    bother::shutdown();
 
     bmodel_cache::shutdown();
     fluid_cache::shutdown();

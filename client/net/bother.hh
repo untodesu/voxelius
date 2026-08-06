@@ -18,12 +18,12 @@ public:
 private:
     unsigned m_request_id;
     bool m_unreachable;
-    std::uint16_t m_num_players;
-    std::uint16_t m_max_players;
-    std::uint32_t m_version_major;
-    std::uint32_t m_version_minor;
-    std::uint32_t m_version_patch;
-    std::string m_motd;
+    std::uint16_t m_num_players {};
+    std::uint16_t m_max_players {};
+    std::uint32_t m_version_major {};
+    std::uint32_t m_version_minor {};
+    std::uint32_t m_version_patch {};
+    std::string m_motd {};
 };
 
 namespace bother

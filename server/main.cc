@@ -18,6 +18,7 @@
 #include "server/net/host.hh"
 #include "server/net/invites.hh"
 #include "server/net/sessions.hh"
+#include "server/net/status.hh"
 #include "server/net/whitelist.hh"
 #include "server/system/collector.hh"
 #include "server/world/climate.hh"
@@ -76,6 +77,7 @@ static void wrapped_main(int argc, char** argv)
     whitelist::init();
     invites::init();
     sessions::init();
+    status::init();
 
     worldgen::init();
 
