@@ -21,6 +21,8 @@ protected:
 
 private:
     config::Ref<bool> m_value {};
+    std::string m_label_false {};
+    std::string m_label_true {};
 };
 } // namespace gui
 
