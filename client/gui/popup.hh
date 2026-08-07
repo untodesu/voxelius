@@ -10,7 +10,7 @@ public:
     ChoicePopup& set_title(std::string_view title);
     ChoicePopup& set_message(std::string_view question);
     ChoicePopup& add_choice(std::string_view choice, std::function<void(void)> callback = {});
-    ChoicePopup& set_min_size(float wide, float tall);
+    ChoicePopup& set_size(float wide, float tall);
 
     virtual void layout(void) override;
     virtual void translate(void) override;
@@ -32,9 +32,7 @@ private:
 
     std::vector<Choice> m_choices {};
 
-    ImVec2 m_min_size {};
-    ImVec2 m_min_size_scaled {};
-    unsigned m_min_size_scale { 0 };
+    ImVec2 m_size {};
 
     bool m_queued_open { false };
 };
@@ -48,7 +46,7 @@ public:
     InputPopup& add_input(std::string_view label, ImGuiInputTextFlags flags = 0, std::function<bool(std::string_view)> validator = {});
     InputPopup& on_submit(std::function<void(std::span<const std::string>)> callback);
     InputPopup& on_cancel(std::function<void(void)> callback);
-    InputPopup& set_min_size(float wide, float tall);
+    InputPopup& set_size(float wide, float tall);
 
     virtual void layout(void) override;
     virtual void translate(void) override;
@@ -78,9 +76,7 @@ private:
     std::string m_submit_label {};
     std::string m_cancel_label {};
 
-    ImVec2 m_min_size {};
-    ImVec2 m_min_size_scaled {};
-    unsigned m_min_size_scale { 0 };
+    ImVec2 m_size {};
 
     bool m_queued_open { false };
     bool m_focus_first { false };
@@ -95,7 +91,7 @@ public:
     ProgressPopup& set_message(std::string_view message);
     ProgressPopup& set_progress(std::optional<float> progress);
     ProgressPopup& on_cancel(std::function<void(void)> callback);
-    ProgressPopup& set_min_size(float wide, float tall);
+    ProgressPopup& set_size(float wide, float tall);
 
     virtual void layout(void) override;
     virtual void translate(void) override;
@@ -116,9 +112,7 @@ private:
 
     std::function<void(void)> m_cancel {};
 
-    ImVec2 m_min_size {};
-    ImVec2 m_min_size_scaled {};
-    unsigned m_min_size_scale { 0 };
+    ImVec2 m_size {};
 
     bool m_queued_open { false };
     bool m_queued_close { false };

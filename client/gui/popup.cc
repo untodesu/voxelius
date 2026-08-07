@@ -6,21 +6,6 @@
 #include "client/globals.hh"
 #include "client/language.hh"
 
-static const ImVec2& scaled_min_size(const ImVec2& logical_size, unsigned& cache_scale, ImVec2& cache_value)
-{
-    if(cache_scale == globals::gui_scale) {
-        return cache_value;
-    }
-
-    cache_scale = globals::gui_scale;
-
-    auto scale = static_cast<float>(cache_scale);
-    cache_value.x = logical_size.x * scale;
-    cache_value.y = logical_size.y * scale;
-
-    return cache_value;
-}
-
 gui::ChoicePopup& gui::ChoicePopup::set_title(std::string_view title)
 {
     m_title_key = title;
@@ -46,10 +31,10 @@ gui::ChoicePopup& gui::ChoicePopup::add_choice(std::string_view choice, std::fun
     return self();
 }
 
-gui::ChoicePopup& gui::ChoicePopup::set_min_size(float wide, float tall)
+gui::ChoicePopup& gui::ChoicePopup::set_size(float wide, float tall)
 {
-    m_min_size.x = wide;
-    m_min_size.y = tall;
+    m_size.x = wide;
+    m_size.y = tall;
 
     return self();
 }
@@ -70,13 +55,32 @@ void gui::ChoicePopup::layout(void)
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
     ImGui::PushFont(fonts::unscii16, fonts::unscii16->LegacySize);
 
-    ImGui::SetNextWindowSizeConstraints(scaled_min_size(m_min_size, m_min_size_scale, m_min_size_scaled), ImVec2(FLT_MAX, FLT_MAX));
+    ImVec2 size {};
+    size.x = m_size.x * static_cast<float>(globals::gui_scale);
+    size.y = m_size.y * static_cast<float>(globals::gui_scale);
 
-    if(ImGui::BeginPopupModal(m_title.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
+    auto forced = size.x > 0.0f || size.y > 0.0f;
+
+    if(forced) {
+        ImGui::SetNextWindowSize(size, ImGuiCond_Always);
+    }
+
+    auto flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize;
+
+    if(forced) {
+        flags &= ~ImGuiWindowFlags_AlwaysAutoResize;
+    }
+
+    if(ImGui::BeginPopupModal(m_title.c_str(), nullptr, flags)) {
         auto& style = ImGui::GetStyle();
         auto& spacing = style.ItemSpacing;
 
         auto content_width = ImGui::CalcItemWidth();
+
+        if(size.x > 0.0f) {
+            content_width = size.x - 2.0f * style.WindowPadding.x;
+        }
+
         ImGui::PushTextWrapPos(content_width + ImGui::GetCursorPosX());
         ImGui::TextUnformatted(m_message.c_str());
         ImGui::PopTextWrapPos();
@@ -172,6 +176,14 @@ gui::InputPopup& gui::InputPopup::on_cancel(std::function<void(void)> callback)
     return self();
 }
 
+gui::InputPopup& gui::InputPopup::set_size(float wide, float tall)
+{
+    m_size.x = wide;
+    m_size.y = tall;
+
+    return self();
+}
+
 void gui::InputPopup::layout(void)
 {
     assert(m_fields.size());
@@ -189,14 +201,33 @@ void gui::InputPopup::layout(void)
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
     ImGui::PushFont(fonts::unscii16, fonts::unscii16->LegacySize);
 
-    ImGui::SetNextWindowSizeConstraints(scaled_min_size(m_min_size, m_min_size_scale, m_min_size_scaled), ImVec2(FLT_MAX, FLT_MAX));
+    ImVec2 size {};
+    size.x = m_size.x * static_cast<float>(globals::gui_scale);
+    size.y = m_size.y * static_cast<float>(globals::gui_scale);
 
-    if(ImGui::BeginPopupModal(m_title.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
+    auto forced = size.x > 0.0f || size.y > 0.0f;
+
+    if(forced) {
+        ImGui::SetNextWindowSize(size, ImGuiCond_Always);
+    }
+
+    auto flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize;
+
+    if(forced) {
+        flags &= ~ImGuiWindowFlags_AlwaysAutoResize;
+    }
+
+    if(ImGui::BeginPopupModal(m_title.c_str(), nullptr, flags)) {
         auto& style = ImGui::GetStyle();
         auto& spacing = style.ItemSpacing;
 
         auto content_width = ImGui::CalcItemWidth();
-        bool enter_pressed = ImGui::IsKeyPressed(ImGuiKey_Enter);
+
+        if(size.x > 0.0f) {
+            content_width = size.x - 2.0f * style.WindowPadding.x;
+        }
+
+        auto enter_pressed = ImGui::IsKeyPressed(ImGuiKey_Enter);
 
         for(std::size_t i = 0; i < m_fields.size(); ++i) {
             auto& field = m_fields[i];
@@ -302,14 +333,6 @@ std::string_view gui::InputPopup::value(std::size_t index) const
     return m_fields[index].buffer_1;
 }
 
-gui::InputPopup& gui::InputPopup::set_min_size(float wide, float tall)
-{
-    m_min_size.x = wide;
-    m_min_size.y = tall;
-
-    return self();
-}
-
 gui::ProgressPopup& gui::ProgressPopup::set_title(std::string_view title)
 {
     m_title_key = title;
@@ -339,10 +362,10 @@ gui::ProgressPopup& gui::ProgressPopup::on_cancel(std::function<void(void)> call
     return self();
 }
 
-gui::ProgressPopup& gui::ProgressPopup::set_min_size(float wide, float tall)
+gui::ProgressPopup& gui::ProgressPopup::set_size(float wide, float tall)
 {
-    m_min_size.x = wide;
-    m_min_size.y = tall;
+    m_size.x = wide;
+    m_size.y = tall;
 
     return self();
 }
@@ -361,9 +384,23 @@ void gui::ProgressPopup::layout(void)
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
     ImGui::PushFont(fonts::unscii16, fonts::unscii16->LegacySize);
 
-    ImGui::SetNextWindowSizeConstraints(scaled_min_size(m_min_size, m_min_size_scale, m_min_size_scaled), ImVec2(FLT_MAX, FLT_MAX));
+    ImVec2 size {};
+    size.x = m_size.x * static_cast<float>(globals::gui_scale);
+    size.y = m_size.y * static_cast<float>(globals::gui_scale);
 
-    if(ImGui::BeginPopupModal(m_title.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
+    auto forced = size.x > 0.0f || size.y > 0.0f;
+
+    if(forced) {
+        ImGui::SetNextWindowSize(size, ImGuiCond_Always);
+    }
+
+    auto flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize;
+
+    if(forced) {
+        flags &= ~ImGuiWindowFlags_AlwaysAutoResize;
+    }
+
+    if(ImGui::BeginPopupModal(m_title.c_str(), nullptr, flags)) {
         if(m_queued_close) {
             ImGui::CloseCurrentPopup();
 
@@ -381,6 +418,10 @@ void gui::ProgressPopup::layout(void)
         auto& spacing = style.ItemSpacing;
 
         auto content_width = ImGui::CalcItemWidth();
+
+        if(size.x > 0.0f) {
+            content_width = size.x - 2.0f * style.WindowPadding.x;
+        }
 
         ImGui::PushTextWrapPos(content_width + ImGui::GetCursorPosX());
         ImGui::TextUnformatted(m_message.c_str());

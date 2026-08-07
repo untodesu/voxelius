@@ -697,7 +697,7 @@ void play_menu::init(void)
     });
 
     s_connect_popup.set_title("play_menu.connect.title");
-    s_connect_popup.set_min_size(220.0f, 0.0f);
+    s_connect_popup.set_size(220.0f, 0.0f);
     screen.add_child(s_connect_popup, 3);
 
     s_error_popup.set_title("play_menu.connect.error.title");
