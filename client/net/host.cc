@@ -73,6 +73,12 @@ bool host::connect(std::string_view address, std::uint16_t port)
 void host::disconnect(void)
 {
     if(globals::peer) {
-        enet_peer_disconnect(globals::peer, 0);
+        if(globals::peer->state == ENET_PEER_STATE_CONNECTED) {
+            enet_peer_disconnect(globals::peer, 0);
+        }
+        else {
+            enet_peer_reset(globals::peer);
+            globals::peer = nullptr;
+        }
     }
 }
