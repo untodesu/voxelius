@@ -55,7 +55,11 @@ static bool parse_component(lua_State* L, int config_idx, ModContext* ctx, Class
     lua_pushvalue(L, -1); // duplicate the config table; luaL_ref pops its argument
 
     auto config_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-    auto config = component_map::prepare(id, L, config_ref);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, config_ref);
+
+    auto config = component_map::prepare(id, L, lua_gettop(L));
+
+    lua_pop(L, 1);
     luaL_unref(L, LUA_REGISTRYINDEX, config_ref);
 
     if(!config.has_value()) {

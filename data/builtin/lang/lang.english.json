@@ -1,6 +1,7 @@
 {
   "gui.input_popup.submit": "OK",
   "gui.input_popup.cancel": "Cancel",
+  "gui.progress_popup.cancel": "Cancel",
 
   "main_menu.button.play": "Play Game",
   "main_menu.button.resume": "Resume",
@@ -41,6 +42,13 @@
   "play_menu.servers.motd_init": "Unknown",
   "play_menu.servers.motd_ping": "Pinging...",
   "play_menu.servers.motd_fail": "Unreachable",
+
+  "play_menu.connect.title": "Connecting",
+  "play_menu.connect.stage.connecting": "Connecting...",
+  "play_menu.connect.stage.authenticating": "Authenticating...",
+  "play_menu.connect.stage.spawning": "Spawning...",
+  "play_menu.connect.error.title": "Connection Error",
+  "play_menu.connect.error.ok": "OK",
 
   "settings.location.general": "General",
   "settings.location.video": "Graphics",

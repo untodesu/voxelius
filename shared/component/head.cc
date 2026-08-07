@@ -16,7 +16,7 @@ std::any Component<Head>::prepare(lua_State* L, int config_idx)
         return std::any {};
     }
 
-    return offset.value().cast<float>();
+    return Eigen::Vector3f(offset.value().cast<float>());
 }
 
 void Component<Head>::attach(entt::entity entity, const std::any& config)

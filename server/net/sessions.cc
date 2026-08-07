@@ -130,6 +130,8 @@ static void on_auth_request(const AuthRequest_Packet& packet)
         return;
     }
 
+    session->pkey = packet.pkey;
+
     auto timestamp_sec = utils::epoch_seconds();
     auto timestamp_min = timestamp_sec / 60;
     auto timestamp_str = std::to_string(timestamp_min);

@@ -57,4 +57,10 @@ extern unsigned gui_scale;
 extern gui::Screen* gui_screen;
 } // namespace globals
 
+namespace globals
+{
+extern ENetHost* host;
+extern ENetPeer* peer;
+} // namespace globals
+
 #endif /* D618E26B_01F4_4D5C_A249_6D2B49637425 */

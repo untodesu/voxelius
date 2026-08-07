@@ -24,8 +24,8 @@ gui::Screen main_menu::screen;
 gui::Background main_menu::background;
 
 static res::handle<Texture2D> s_background;
-static gui::Popup s_popup_mods;
-static gui::Popup s_popup_quit;
+static gui::ChoicePopup s_popup_mods;
+static gui::ChoicePopup s_popup_quit;
 static gui::Menu s_menu;
 
 static void on_language_update(const LanguageUpdateEvent& event)

@@ -3,23 +3,40 @@
 #include "client/gui/popup.hh"
 
 #include "client/fonts.hh"
+#include "client/globals.hh"
 #include "client/language.hh"
 
-gui::Popup& gui::Popup::set_title(std::string_view title)
+static const ImVec2& scaled_min_size(const ImVec2& logical_size, unsigned& cache_scale, ImVec2& cache_value)
+{
+    if(cache_scale == globals::gui_scale) {
+        return cache_value;
+    }
+
+    cache_scale = globals::gui_scale;
+
+    auto scale = static_cast<float>(cache_scale);
+    cache_value.x = logical_size.x * scale;
+    cache_value.y = logical_size.y * scale;
+
+    return cache_value;
+}
+
+gui::ChoicePopup& gui::ChoicePopup::set_title(std::string_view title)
 {
     m_title_key = title;
 
     return self();
 }
 
-gui::Popup& gui::Popup::set_message(std::string_view question)
+gui::ChoicePopup& gui::ChoicePopup::set_message(std::string_view question)
 {
     m_message_key = question;
+    m_message = language::resolve(question);
 
     return self();
 }
 
-gui::Popup& gui::Popup::add_choice(std::string_view choice, std::function<void(void)> callback)
+gui::ChoicePopup& gui::ChoicePopup::add_choice(std::string_view choice, std::function<void(void)> callback)
 {
     Choice item {};
     item.label_key = choice;
@@ -29,7 +46,15 @@ gui::Popup& gui::Popup::add_choice(std::string_view choice, std::function<void(v
     return self();
 }
 
-void gui::Popup::layout(void)
+gui::ChoicePopup& gui::ChoicePopup::set_min_size(float wide, float tall)
+{
+    m_min_size.x = wide;
+    m_min_size.y = tall;
+
+    return self();
+}
+
+void gui::ChoicePopup::layout(void)
 {
     assert(m_choices.size());
 
@@ -44,6 +69,8 @@ void gui::Popup::layout(void)
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
     ImGui::PushFont(fonts::unscii16, fonts::unscii16->LegacySize);
+
+    ImGui::SetNextWindowSizeConstraints(scaled_min_size(m_min_size, m_min_size_scale, m_min_size_scaled), ImVec2(FLT_MAX, FLT_MAX));
 
     if(ImGui::BeginPopupModal(m_title.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
         auto& style = ImGui::GetStyle();
@@ -94,7 +121,7 @@ void gui::Popup::layout(void)
     ImGui::PopStyleVar();
 }
 
-void gui::Popup::translate(void)
+void gui::ChoicePopup::translate(void)
 {
     m_title = language::resolve(m_title_key);
     m_title += imgui_id();
@@ -107,7 +134,7 @@ void gui::Popup::translate(void)
     }
 }
 
-void gui::Popup::open(void)
+void gui::ChoicePopup::open(void)
 {
     m_queued_open = true;
 }
@@ -161,6 +188,8 @@ void gui::InputPopup::layout(void)
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
     ImGui::PushFont(fonts::unscii16, fonts::unscii16->LegacySize);
+
+    ImGui::SetNextWindowSizeConstraints(scaled_min_size(m_min_size, m_min_size_scale, m_min_size_scaled), ImVec2(FLT_MAX, FLT_MAX));
 
     if(ImGui::BeginPopupModal(m_title.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
         auto& style = ImGui::GetStyle();
@@ -271,4 +300,149 @@ void gui::InputPopup::set_value(std::size_t index, std::string_view value)
 std::string_view gui::InputPopup::value(std::size_t index) const
 {
     return m_fields[index].buffer_1;
+}
+
+gui::InputPopup& gui::InputPopup::set_min_size(float wide, float tall)
+{
+    m_min_size.x = wide;
+    m_min_size.y = tall;
+
+    return self();
+}
+
+gui::ProgressPopup& gui::ProgressPopup::set_title(std::string_view title)
+{
+    m_title_key = title;
+
+    return self();
+}
+
+gui::ProgressPopup& gui::ProgressPopup::set_message(std::string_view message)
+{
+    m_message_key = message;
+    m_message = language::resolve(message);
+
+    return self();
+}
+
+gui::ProgressPopup& gui::ProgressPopup::set_progress(std::optional<float> progress)
+{
+    m_progress = std::move(progress);
+
+    return self();
+}
+
+gui::ProgressPopup& gui::ProgressPopup::on_cancel(std::function<void(void)> callback)
+{
+    m_cancel = std::move(callback);
+
+    return self();
+}
+
+gui::ProgressPopup& gui::ProgressPopup::set_min_size(float wide, float tall)
+{
+    m_min_size.x = wide;
+    m_min_size.y = tall;
+
+    return self();
+}
+
+void gui::ProgressPopup::layout(void)
+{
+    if(m_queued_open) {
+        ImGui::OpenPopup(m_title.c_str());
+
+        m_queued_open = false;
+    }
+
+    auto window_pos = ImGui::GetWindowPos();
+    auto window_size = ImGui::GetWindowSize();
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
+    ImGui::PushFont(fonts::unscii16, fonts::unscii16->LegacySize);
+
+    ImGui::SetNextWindowSizeConstraints(scaled_min_size(m_min_size, m_min_size_scale, m_min_size_scaled), ImVec2(FLT_MAX, FLT_MAX));
+
+    if(ImGui::BeginPopupModal(m_title.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
+        if(m_queued_close) {
+            ImGui::CloseCurrentPopup();
+
+            m_queued_close = false;
+
+            ImGui::EndPopup();
+
+            ImGui::PopFont();
+            ImGui::PopStyleVar();
+
+            return;
+        }
+
+        auto& style = ImGui::GetStyle();
+        auto& spacing = style.ItemSpacing;
+
+        auto content_width = ImGui::CalcItemWidth();
+
+        ImGui::PushTextWrapPos(content_width + ImGui::GetCursorPosX());
+        ImGui::TextUnformatted(m_message.c_str());
+        ImGui::PopTextWrapPos();
+
+        auto progress_value = -1.0f * static_cast<float>(ImGui::GetTime());
+
+        if(m_progress.has_value()) {
+            progress_value = m_progress.value();
+        }
+
+        ImGui::NewLine();
+        ImGui::ProgressBar(progress_value, ImVec2(-1.0f, 0.0f));
+
+        if(m_cancel) {
+            ImGui::NewLine();
+
+            ImVec2 button_size {};
+            button_size.x = 0.5f * content_width - 0.5f * spacing.x;
+            button_size.y = 0.0f;
+
+            if(ImGui::Button(m_cancel_label.c_str(), button_size)) {
+                m_cancel();
+
+                ImGui::CloseCurrentPopup();
+            }
+        }
+
+        auto popup_size = ImGui::GetWindowSize();
+
+        ImVec2 popup_pos {};
+        popup_pos.x = 0.5f * window_size.x - 0.5f * popup_size.x + window_pos.x;
+        popup_pos.y = 0.5f * window_size.y - 0.5f * popup_size.y + window_pos.y;
+
+        ImGui::SetWindowPos(popup_pos, ImGuiCond_Always);
+
+        ImGui::EndPopup();
+    }
+
+    ImGui::PopFont();
+    ImGui::PopStyleVar();
+}
+
+void gui::ProgressPopup::open(void)
+{
+    m_queued_open = true;
+    m_queued_close = false;
+}
+
+void gui::ProgressPopup::close(void)
+{
+    m_queued_close = true;
+    m_queued_open = false;
+}
+
+void gui::ProgressPopup::translate(void)
+{
+    m_title = language::resolve(m_title_key);
+    m_title += imgui_id();
+
+    m_message = language::resolve(m_message_key);
+
+    m_cancel_label = language::resolve("gui.progress_popup.cancel");
+    m_cancel_label += std::format("{}[cancel]", imgui_id());
 }

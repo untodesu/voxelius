@@ -23,6 +23,8 @@
 #include "client/language.hh"
 #include "client/main_menu.hh"
 #include "client/net/bother.hh"
+#include "client/net/host.hh"
+#include "client/net/session.hh"
 #include "client/play_menu.hh"
 #include "client/res/texture2D.hh"
 #include "client/settings.hh"
@@ -112,8 +114,10 @@ static void zoned_fixed_update(void)
 
     for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
         FrameMarkStart("Fixed");
-        client_game::fixed_update();
+
         shared_game::fixed_update();
+        client_game::fixed_update();
+
         FrameMarkEnd("Fixed");
     }
 }
@@ -166,8 +170,12 @@ static void zoned_fixed_update_late(void)
 
     for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
         FrameMarkStart("Fixed");
-        client_game::fixed_update_late();
+
+        host::fixed_update_late();
+
         shared_game::fixed_update_late();
+        client_game::fixed_update_late();
+
         FrameMarkEnd("Fixed");
     }
 }
@@ -206,6 +214,9 @@ static void wrapped_main(int argc, char** argv)
     Texture2D::register_resource();
 
     bother::init();
+
+    host::init();
+    session::init();
 
     shared_game::init();
 
@@ -340,6 +351,9 @@ static void wrapped_main(int argc, char** argv)
     // TODO: game_ui::shutdown();
 
     shared_game::shutdown();
+
+    session::shutdown();
+    host::shutdown();
 
     res::hard_purge();
 

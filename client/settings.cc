@@ -51,7 +51,7 @@ static gui::Dimmer s_dimmer;
 static gui::Tabs s_tabs;
 static gui::Panel s_body;
 
-static gui::Popup s_video_mode_popup;
+static gui::ChoicePopup s_video_mode_popup;
 static std::optional<bool> s_video_mode_decision;
 static bool s_video_mode_prompted;
 

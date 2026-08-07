@@ -7,6 +7,8 @@
 #include "core/utils/string.hh"
 #include "core/version.hh"
 
+#include "shared/net/packet_session.hh"
+
 #include "client/fonts.hh"
 #include "client/globals.hh"
 #include "client/gui/background.hh"
@@ -23,6 +25,7 @@
 #include "client/language.hh"
 #include "client/main_menu.hh"
 #include "client/net/bother.hh"
+#include "client/net/session.hh"
 
 constexpr static float ROW_HEIGHT = 24.0f;
 constexpr static float BODY_MARGIN = 32.0f;
@@ -90,6 +93,8 @@ static gui::Container s_worlds_tab;
 static gui::VerticalStack s_servers_tab;
 static gui::InputPopup s_server_popup;
 static gui::InputPopup s_direct_popup;
+static gui::ProgressPopup s_connect_popup;
+static gui::ChoicePopup s_error_popup;
 
 gui::Screen play_menu::screen;
 
@@ -240,7 +245,9 @@ static void select_server(ServerListItem* item)
 
 static void join_server(ServerListItem* item)
 {
-    LOG_INFO("TODO: connect to {}:{}", item->host, item->port);
+    session::connect(item->host, item->port, item->invite);
+
+    item->invite = 0; // clear invite after joining; FIXME: should we do that after a successful join instead?
 }
 
 static ServerListItem* create_server(void)
@@ -451,6 +458,35 @@ static void on_keyboard_event(const SDL_KeyboardEvent& event)
     }
 }
 
+static void on_session_state(const SessionStateEvent& event)
+{
+    switch(event.state()) {
+        case SESSION_CONNECTING:
+            play_menu::open_connect_popup("play_menu.connect.stage.connecting", [] {
+                session::disconnect(Disconnect_Packet::CLIENT_DISCONNECT);
+            });
+            break;
+
+        case SESSION_AUTHENTICATING:
+            play_menu::set_connect_message("play_menu.connect.stage.authenticating");
+            break;
+
+        case SESSION_SPAWNING:
+            play_menu::set_connect_message("play_menu.connect.stage.spawning");
+            break;
+
+        case SESSION_INGAME:
+            play_menu::close_connect_popup();
+            globals::gui_screen = nullptr;
+            break;
+
+        case SESSION_DISCONNECTED:
+            play_menu::close_connect_popup();
+            play_menu::show_error(Disconnect_Packet::reason_string_client(event.reason()));
+            break;
+    }
+}
+
 static void load_servers_json(void)
 {
     std::string source;
@@ -647,12 +683,31 @@ void play_menu::init(void)
     screen.add_child(s_direct_popup, 3);
 
     s_direct_popup.on_submit([](std::span<const std::string> values) {
-        LOG_INFO("TODO: direct connect");
+        auto parts = parse_hostname(values[0]);
+
+        std::uint64_t invite = 0;
+        auto invite_str = values[1];
+        auto invite_size = invite_str.size();
+
+        if(invite_size) {
+            std::from_chars(invite_str.data(), invite_str.data() + invite_size, invite);
+        }
+
+        session::connect(parts.first, parts.second, invite);
     });
+
+    s_connect_popup.set_title("play_menu.connect.title");
+    s_connect_popup.set_min_size(220.0f, 0.0f);
+    screen.add_child(s_connect_popup, 3);
+
+    s_error_popup.set_title("play_menu.connect.error.title");
+    s_error_popup.add_choice("play_menu.connect.error.ok");
+    screen.add_child(s_error_popup, 3);
 
     globals::dispatcher.sink<LanguageUpdateEvent>().connect<&on_language_update>();
     globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&on_keyboard_event>();
     globals::dispatcher.sink<BotherResponseEvent>().connect<&on_bother_response>();
+    globals::dispatcher.sink<SessionStateEvent>().connect<&on_session_state>();
 
     load_servers_json();
 }
@@ -673,4 +728,33 @@ void play_menu::update_late(void)
             owned->invalidate();
         }
     }
+}
+
+void play_menu::open_connect_popup(std::string_view message, std::function<void(void)> on_cancel)
+{
+    s_connect_popup.set_message(message);
+    s_connect_popup.set_progress(std::nullopt);
+    s_connect_popup.on_cancel(std::move(on_cancel));
+    s_connect_popup.open();
+}
+
+void play_menu::set_connect_message(std::string_view message)
+{
+    s_connect_popup.set_message(message);
+}
+
+void play_menu::set_connect_progress(std::optional<float> progress)
+{
+    s_connect_popup.set_progress(progress);
+}
+
+void play_menu::close_connect_popup(void)
+{
+    s_connect_popup.close();
+}
+
+void play_menu::show_error(std::string_view message)
+{
+    s_error_popup.set_message(message);
+    s_error_popup.open();
 }
