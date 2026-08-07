@@ -1,4 +1,7 @@
 {
+  "gui.input_popup.submit": "OK",
+  "gui.input_popup.cancel": "Cancel",
+
   "main_menu.button.play": "Play Game",
   "main_menu.button.resume": "Resume",
   "main_menu.button.settings": "Settings",
@@ -13,6 +16,27 @@
   "main_menu.mods_popup.title": "Mod warning",
   "main_menu.mods_popup.message": "One or more mods failed to load",
   "main_menu.mods_popup.choice.ok": "OK",
+
+  "play_menu.worlds.todo": "TODO",
+  
+  "play_menu.servers.join": "Join",
+  "play_menu.servers.connect": "Connect",
+  "play_menu.servers.add": "Add",
+  "play_menu.servers.edit": "Edit",
+  "play_menu.servers.remove": "Remove",
+  "play_menu.servers.refresh": "Refresh",
+
+  "play_menu.tab.worlds": "Worlds",
+  "play_menu.tab.servers": "Servers",
+
+  "play_menu.servers.popup.title": "Add/Edit Server",
+  "play_menu.servers.popup.name": "Name",
+  "play_menu.servers.popup.hostname": "Address",
+  "play_menu.servers.popup.invite": "Invite",
+
+  "play_menu.servers.motd_init": "Unknown",
+  "play_menu.servers.motd_ping": "Pinging...",
+  "play_menu.servers.motd_fail": "Unreachable",
 
   "settings.location.general": "General",
   "settings.location.video": "Graphics",

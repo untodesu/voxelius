@@ -16,6 +16,7 @@
 #include "client/gui/popup.hh"
 #include "client/gui/screen.hh"
 #include "client/language.hh"
+#include "client/play_menu.hh"
 #include "client/res/texture2D.hh"
 #include "client/settings.hh"
 
@@ -69,7 +70,9 @@ void main_menu::init(void)
         // which handler latches an internal flag in the main loop
         std::raise(SIGINT);
     });
+
     s_popup_quit.add_choice("main_menu.quit_popup.choice.no");
+
     screen.add_child(s_popup_quit);
 
     s_menu.add_button_offline("main_menu.button.quit", [] {
@@ -93,7 +96,7 @@ void main_menu::init(void)
     });
 
     s_menu.add_button_offline("main_menu.button.play", [] {
-        // TODO: set globals::gui_screen to &play_menu::screen
+        globals::gui_screen = &play_menu::screen;
     });
 
     screen.add_child(s_menu);

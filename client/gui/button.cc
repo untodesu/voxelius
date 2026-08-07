@@ -25,13 +25,24 @@ gui::Button& gui::Button::on_click(std::function<void(void)> callback)
     return self();
 }
 
+gui::Button& gui::Button::set_enabled(bool enabled)
+{
+    m_enabled = enabled;
+
+    return self();
+}
+
 void gui::Button::layout(void)
 {
+    ImGui::BeginDisabled(!m_enabled);
+
     if(ImGui::Button(m_text.c_str(), m_size)) {
         if(m_callback) {
             m_callback();
         }
     }
+
+    ImGui::EndDisabled();
 }
 
 void gui::Button::translate(void)

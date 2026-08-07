@@ -23,6 +23,7 @@
 #include "client/language.hh"
 #include "client/main_menu.hh"
 #include "client/net/bother.hh"
+#include "client/play_menu.hh"
 #include "client/res/texture2D.hh"
 #include "client/settings.hh"
 #include "client/style.hh"
@@ -181,6 +182,8 @@ static void zoned_update_late(void)
 
     bother::update_late();
 
+    play_menu::update_late();
+
     threading::update();
 }
 
@@ -222,6 +225,7 @@ static void wrapped_main(int argc, char** argv)
 
     settings::init();
     main_menu::init();
+    play_menu::init();
 
     client_game::init();
 
@@ -328,7 +332,7 @@ static void wrapped_main(int argc, char** argv)
     block_atlas::shutdown();
 
     settings::shutdown();
-
+    play_menu::shutdown();
     main_menu::shutdown();
 
     client_game::shutdown();

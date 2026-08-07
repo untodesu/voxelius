@@ -9,6 +9,7 @@ template<typename Derived>
 class ContainerBuilder : public WidgetBuilder<Derived> {
 public:
     Derived& add_child(Widget& child, int priority = 0);
+    Derived& remove_child(Widget& child);
 
     virtual void layout(void) override;
     virtual void translate(void) override;
@@ -38,6 +39,16 @@ Derived& gui::ContainerBuilder<Derived>::add_child(Widget& child, int priority)
     item.priority = priority;
 
     m_children.insert(it, std::move(item));
+
+    return this->self();
+}
+
+template<typename Derived>
+Derived& gui::ContainerBuilder<Derived>::remove_child(Widget& child)
+{
+    std::erase_if(m_children, [&child](const Item& item) {
+        return item.widget == &child;
+    });
 
     return this->self();
 }
