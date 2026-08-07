@@ -27,6 +27,24 @@ gui::Stepper<T>& gui::Stepper<T>::set_range(T min, T max, T step)
 }
 
 template<typename T>
+T gui::Stepper<T>::value(void) const
+{
+    return m_value.value();
+}
+
+template<typename T>
+void gui::Stepper<T>::set_value(T value)
+{
+    m_value.set_value(value);
+}
+
+template<typename T>
+bool gui::Stepper<T>::dirty(void) const
+{
+    return m_value.dirty();
+}
+
+template<typename T>
 void gui::Stepper<T>::layout_control(void)
 {
     if(m_labels.empty()) {
@@ -36,16 +54,16 @@ void gui::Stepper<T>::layout_control(void)
     auto current = m_value.value();
     auto index = static_cast<std::size_t>((current - m_min) / m_step);
 
-    const auto& style = ImGui::GetStyle();
     auto frame_height = ImGui::GetFrameHeight();
-    auto spacing = style.ItemSpacing.x;
-    auto combo_width = ImGui::CalcItemWidth() - 2.0f * (frame_height + spacing);
+    auto combo_width = ImGui::CalcItemWidth() - 2.0f * frame_height;
 
     if(combo_width < 1.0f) {
         combo_width = 1.0f;
     }
 
-    ImGui::PushID(this->imgui_id().c_str());
+    auto& control_id = this->imgui_id();
+
+    ImGui::PushID(control_id.c_str());
 
     if(ImGui::Button("<", ImVec2(frame_height, frame_height))) {
         if(current <= m_min) {
@@ -58,7 +76,7 @@ void gui::Stepper<T>::layout_control(void)
         m_value.set_value(current);
     }
 
-    ImGui::SameLine(0.0f, spacing);
+    ImGui::SameLine(0.0f, 0.0f);
     ImGui::SetNextItemWidth(combo_width);
 
     if(ImGui::BeginCombo("###combo", m_labels[index].c_str())) {
@@ -71,7 +89,7 @@ void gui::Stepper<T>::layout_control(void)
         ImGui::EndCombo();
     }
 
-    ImGui::SameLine(0.0f, spacing);
+    ImGui::SameLine(0.0f, 0.0f);
 
     if(ImGui::Button(">", ImVec2(frame_height, frame_height))) {
         if(current >= m_max) {

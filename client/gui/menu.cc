@@ -6,13 +6,17 @@
 #include "client/globals.hh"
 #include "client/language.hh"
 
+constexpr static unsigned CONDITION_ANY = 0xFFFF;
+constexpr static unsigned CONDITION_INGAME = 0x0001;
+constexpr static unsigned CONDITION_OFFLINE = 0x0002;
+
 static bool condition_met(unsigned condition)
 {
     if(globals::registry.valid(globals::player)) {
-        return static_cast<bool>(condition & gui::Menu::ALLOW_INGAME);
+        return static_cast<bool>(condition & CONDITION_INGAME);
     }
     else {
-        return static_cast<bool>(condition & gui::Menu::ALLOW_OFFLINE);
+        return static_cast<bool>(condition & CONDITION_OFFLINE);
     }
 }
 
@@ -30,10 +34,10 @@ gui::Menu& gui::Menu::set_control(ImVec2 control)
     return self();
 }
 
-gui::Menu& gui::Menu::add_button(std::string_view label, std::function<void(void)> callback, unsigned condition)
+gui::Menu& gui::Menu::add_button_any(std::string_view label, std::function<void(void)> callback)
 {
     Button item {};
-    item.condition = condition;
+    item.condition = CONDITION_ANY;
     item.label_key = label;
     item.callback = std::move(callback);
 
@@ -42,10 +46,56 @@ gui::Menu& gui::Menu::add_button(std::string_view label, std::function<void(void
     return self();
 }
 
-gui::Menu& gui::Menu::add_spacer(float height, unsigned condition)
+gui::Menu& gui::Menu::add_button_ingame(std::string_view label, std::function<void(void)> callback)
+{
+    Button item {};
+    item.condition = CONDITION_INGAME;
+    item.label_key = label;
+    item.callback = std::move(callback);
+
+    m_items.emplace_back(std::move(item));
+
+    return self();
+}
+
+gui::Menu& gui::Menu::add_button_offline(std::string_view label, std::function<void(void)> callback)
+{
+    Button item {};
+    item.condition = CONDITION_OFFLINE;
+    item.label_key = label;
+    item.callback = std::move(callback);
+
+    m_items.emplace_back(std::move(item));
+
+    return self();
+}
+
+gui::Menu& gui::Menu::add_spacer_any(float height)
 {
     Spacer item {};
-    item.condition = condition;
+    item.condition = CONDITION_ANY;
+    item.height = height;
+
+    m_items.emplace_back(std::move(item));
+
+    return self();
+}
+
+gui::Menu& gui::Menu::add_spacer_ingame(float height)
+{
+    Spacer item {};
+    item.condition = CONDITION_INGAME;
+    item.height = height;
+
+    m_items.emplace_back(std::move(item));
+
+    return self();
+}
+
+gui::Menu& gui::Menu::add_spacer_offline(float height)
+{
+    Spacer item {};
+    item.condition = CONDITION_OFFLINE;
     item.height = height;
 
     m_items.emplace_back(std::move(item));

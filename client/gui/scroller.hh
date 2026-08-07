@@ -9,12 +9,14 @@ class Scroller final : public ContainerBuilder<Scroller> {
 public:
     Scroller& set_margin(ImVec2 margin);
     Scroller& set_scroll_speed(float speed);
+    Scroller& enable_background(void);
 
     virtual void layout(void) override;
 
 private:
     ImVec2 m_margin { 0.0f, 0.0f };
     float m_scroll_speed { 64.0f };
+    bool m_background { false };
 };
 } // namespace gui
 

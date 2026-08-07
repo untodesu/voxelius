@@ -8,7 +8,7 @@ namespace gui
 class Popup final : public WidgetBuilder<Popup> {
 public:
     Popup& set_title(std::string_view title);
-    Popup& set_question(std::string_view question);
+    Popup& set_message(std::string_view question);
     Popup& add_choice(std::string_view choice, std::function<void(void)> callback = {});
 
     virtual void layout(void) override;
@@ -26,10 +26,12 @@ private:
     std::string m_title_key {};
     std::string m_title {};
 
-    std::string m_question_key {};
-    std::string m_question {};
+    std::string m_message_key {};
+    std::string m_message {};
 
     std::vector<Choice> m_choices {};
+
+    bool m_queued_open { false };
 };
 } // namespace gui
 

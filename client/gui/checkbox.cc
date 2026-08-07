@@ -15,19 +15,27 @@ gui::CheckBox& gui::CheckBox::bind(config::Map& config, std::string_view key)
     return self();
 }
 
+bool gui::CheckBox::value(void) const
+{
+    return m_value.value();
+}
+
+void gui::CheckBox::set_value(bool value)
+{
+    m_value.set_value(value);
+}
+
+bool gui::CheckBox::dirty(void) const
+{
+    return m_value.dirty();
+}
+
 void gui::CheckBox::layout_control(void)
 {
     auto current = m_value.value();
+    auto& control_id = imgui_id();
 
-    auto control_width = ImGui::CalcItemWidth();
-    auto box_size = ImGui::GetFrameHeight();
-
-    auto cursor_x = ImGui::GetCursorPosX();
-    ImGui::SetCursorPosX(cursor_x + control_width - box_size);
-
-    auto& id = imgui_id();
-
-    if(ImGui::Checkbox(id.c_str(), &current)) {
+    if(ImGui::Checkbox(control_id.c_str(), &current)) {
         m_value.set_value(current);
     }
 }

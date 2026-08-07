@@ -19,6 +19,10 @@ public:
     Slider<T>& set_range(T min, T max);
     Slider<T>& set_format(std::string_view format);
 
+    T value(void) const;
+    void set_value(T value);
+    bool dirty(void) const;
+
 protected:
     virtual void layout_control(void) override;
     virtual void translate_control(void) override;

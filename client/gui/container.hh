@@ -8,12 +8,18 @@ namespace gui
 template<typename Derived>
 class ContainerBuilder : public WidgetBuilder<Derived> {
 public:
-    Derived& add_child(Widget& child);
+    Derived& add_child(Widget& child, int priority = 0);
+
     virtual void layout(void) override;
     virtual void translate(void) override;
 
 private:
-    std::vector<Widget*> m_children {};
+    struct Item final {
+        Widget* widget;
+        int priority;
+    };
+
+    std::vector<Item> m_children {};
 };
 } // namespace gui
 
@@ -23,9 +29,15 @@ class Container final : public ContainerBuilder<Container> {};
 } // namespace gui
 
 template<typename Derived>
-Derived& gui::ContainerBuilder<Derived>::add_child(Widget& child)
+Derived& gui::ContainerBuilder<Derived>::add_child(Widget& child, int priority)
 {
-    m_children.push_back(&child);
+    auto it = std::ranges::upper_bound(m_children, priority, std::less {}, &Item::priority);
+
+    Item item {};
+    item.widget = &child;
+    item.priority = priority;
+
+    m_children.insert(it, std::move(item));
 
     return this->self();
 }
@@ -33,9 +45,9 @@ Derived& gui::ContainerBuilder<Derived>::add_child(Widget& child)
 template<typename Derived>
 void gui::ContainerBuilder<Derived>::layout(void)
 {
-    for(auto child : m_children) {
-        if(child->visible()) {
-            child->layout();
+    for(auto& child : m_children) {
+        if(child.widget->visible()) {
+            child.widget->layout();
         }
     }
 }
@@ -43,8 +55,8 @@ void gui::ContainerBuilder<Derived>::layout(void)
 template<typename Derived>
 void gui::ContainerBuilder<Derived>::translate(void)
 {
-    for(auto child : m_children) {
-        child->translate();
+    for(auto& child : m_children) {
+        child.widget->translate();
     }
 }
 

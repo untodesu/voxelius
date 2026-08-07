@@ -1,0 +1,117 @@
+#include "client/pch.hh"
+
+#include "client/main_menu.hh"
+
+#include "core/exception.hh"
+#include "core/res/resource.hh"
+
+#include "shared/mod_context.hh"
+#include "shared/mod_loader.hh"
+
+#include "client/constant.hh"
+#include "client/globals.hh"
+#include "client/gui/background.hh"
+#include "client/gui/dimmer.hh"
+#include "client/gui/menu.hh"
+#include "client/gui/popup.hh"
+#include "client/gui/screen.hh"
+#include "client/language.hh"
+#include "client/res/texture2D.hh"
+#include "client/settings.hh"
+
+gui::Screen main_menu::screen;
+gui::Background main_menu::background;
+
+static res::handle<Texture2D> s_background;
+static gui::Popup s_popup_mods;
+static gui::Popup s_popup_quit;
+static gui::Menu s_menu;
+
+static void on_language_update(const LanguageUpdateEvent& event)
+{
+    main_menu::screen.translate();
+}
+
+static void on_keyboard_event(const SDL_KeyboardEvent& event)
+{
+    if(event.type == SDL_EVENT_KEY_DOWN && event.key == SDLK_ESCAPE && globals::registry.valid(globals::player)) {
+        if(globals::gui_screen) {
+            globals::gui_screen = nullptr;
+        }
+        else {
+            globals::gui_screen = &main_menu::screen;
+        }
+    }
+}
+
+void main_menu::init(void)
+{
+    auto id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "background.png");
+    s_background = res::load<Texture2D>(id, "textures/gui");
+    vx::throw_if_not(s_background.get());
+
+    background.set_left({ 0.000f, 0.000f, 0.000f, 0.950f });
+    background.set_right({ 0.000f, 0.000f, 0.000f, 0.750f });
+    background.set_texture(s_background->imgui);
+    screen.add_child(background);
+
+    s_popup_mods.set_title("main_menu.mods_popup.title");
+    s_popup_mods.set_message("main_menu.mods_popup.message");
+    s_popup_mods.add_choice("main_menu.mods_popup.choice.ok");
+    screen.add_child(s_popup_mods);
+
+    s_popup_quit.set_title("main_menu.quit_popup.title");
+    s_popup_quit.set_message("main_menu.quit_popup.question");
+    s_popup_quit.add_choice("main_menu.quit_popup.choice.yes", [] {
+        // We don't really have a good way to
+        // pass "i want to quit" boolean to the main loop,
+        // so instead we just raise an external interrupt signal
+        // which handler latches an internal flag in the main loop
+        std::raise(SIGINT);
+    });
+    s_popup_quit.add_choice("main_menu.quit_popup.choice.no");
+    screen.add_child(s_popup_quit);
+
+    s_menu.add_button_offline("main_menu.button.quit", [] {
+        s_popup_quit.open();
+    });
+
+    s_menu.add_button_ingame("main_menu.button.disconnect", [] {
+        LOG_INFO("TODO: disconnect");
+    });
+
+    s_menu.add_spacer_any();
+
+    s_menu.add_button_any("main_menu.button.settings", [] {
+        globals::gui_screen = &settings::screen;
+    });
+
+    s_menu.add_spacer_any(1.5f);
+
+    s_menu.add_button_ingame("main_menu.button.resume", [] {
+        globals::gui_screen = nullptr;
+    });
+
+    s_menu.add_button_offline("main_menu.button.play", [] {
+        // TODO: set globals::gui_screen to &play_menu::screen
+    });
+
+    screen.add_child(s_menu);
+
+    globals::dispatcher.sink<LanguageUpdateEvent>().connect<&on_language_update>();
+    globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&on_keyboard_event>();
+}
+
+void main_menu::init_late(void)
+{
+    if(std::ranges::any_of(mod_loader::all(), std::bind_front(std::equal_to {}, mod_status::FAILED), &ModContext::status)) {
+        s_popup_mods.open();
+    }
+
+    globals::gui_screen = &screen;
+}
+
+void main_menu::shutdown(void)
+{
+    s_background.reset();
+}

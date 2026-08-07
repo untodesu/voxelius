@@ -7,14 +7,16 @@ namespace gui
 {
 class Menu final : public WidgetBuilder<Menu> {
 public:
-    constexpr static unsigned ALLOW_ALL = 0xFFFF;
-    constexpr static unsigned ALLOW_INGAME = 0x0001;
-    constexpr static unsigned ALLOW_OFFLINE = 0x0002;
-
     Menu& set_margin(ImVec2 margin);
     Menu& set_control(ImVec2 control);
-    Menu& add_button(std::string_view label, std::function<void(void)> callback = {}, unsigned condition = ALLOW_ALL);
-    Menu& add_spacer(float height = 1.0f, unsigned condition = ALLOW_ALL);
+
+    Menu& add_button_any(std::string_view label, std::function<void(void)> callback = {});
+    Menu& add_button_ingame(std::string_view label, std::function<void(void)> callback = {});
+    Menu& add_button_offline(std::string_view label, std::function<void(void)> callback = {});
+
+    Menu& add_spacer_any(float height = 1.0f);
+    Menu& add_spacer_ingame(float height = 1.0f);
+    Menu& add_spacer_offline(float height = 1.0f);
 
     virtual void layout(void) override;
     virtual void translate(void) override;

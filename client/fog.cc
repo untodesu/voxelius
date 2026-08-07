@@ -8,6 +8,7 @@
 
 #include "client/camera.hh"
 #include "client/constant.hh"
+#include "client/gui/slider.hh"
 #include "client/world/skybox.hh"
 
 float fog::distance;

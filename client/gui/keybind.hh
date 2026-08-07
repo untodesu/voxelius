@@ -19,6 +19,10 @@ public:
 
     KeyBind& bind(config::Map& config, std::string_view key);
 
+    SDL_Keycode value(void) const;
+    void set_value(SDL_Keycode value);
+    bool dirty(void) const;
+
 protected:
     virtual void layout_control(void) override;
     virtual void translate_control(void) override;

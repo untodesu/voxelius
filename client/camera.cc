@@ -3,7 +3,6 @@
 #include "client/camera.hh"
 
 #include "core/camera.hh"
-#include "core/config/ref.hh"
 #include "core/utils/angles.hh"
 
 #include "shared/component/head.hh"
@@ -15,10 +14,12 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-// #include "client/gui/settings.hh" // FIXME: settings system not ported yet
+#include "client/gui/container.hh"
+#include "client/gui/slider.hh"
+#include "client/settings.hh"
 
-config::Ref<float> camera::vertical_fov { 70.0f };
-config::Ref<unsigned> camera::view_distance { 8 };
+gui::Slider<float> camera::vertical_fov;
+gui::Slider<unsigned> camera::view_distance;
 
 Camera camera::instance;
 
@@ -55,11 +56,15 @@ static void reset_camera(void)
 
 void camera::init(void)
 {
+    vertical_fov.set_value(70.0f);
+    vertical_fov.set_range(45.0f, 110.0f).set_format("%.0f").enable_tooltip();
     vertical_fov.bind(globals::client_config, "camera.vertical_fov");
-    view_distance.bind(globals::client_config, "camera.view_distance");
+    settings::general.add_child(vertical_fov, 1);
 
-    // settings::slider<float>(1, settings_location::GENERAL, "camera.vertical_fov", 45.0f, 110.0f, true, "%.0f"); // FIXME: settings system not ported yet
-    // settings::slider<unsigned>(0, settings_location::VIDEO, "camera.view_distance", 1, 32, false); // FIXME: settings system not ported yet
+    view_distance.set_value(8);
+    view_distance.set_range(1, 32);
+    view_distance.bind(globals::client_config, "camera.view_distance");
+    settings::video.add_child(view_distance, 0);
 
     reset_camera();
 }

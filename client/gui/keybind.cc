@@ -22,6 +22,21 @@ gui::KeyBind& gui::KeyBind::bind(config::Map& config, std::string_view key)
     return self();
 }
 
+SDL_Keycode gui::KeyBind::value(void) const
+{
+    return m_value.value();
+}
+
+void gui::KeyBind::set_value(SDL_Keycode value)
+{
+    m_value.set_value(value);
+}
+
+bool gui::KeyBind::dirty(void) const
+{
+    return m_value.dirty();
+}
+
 void gui::KeyBind::layout_control(void)
 {
     auto label = m_bound_label.c_str();

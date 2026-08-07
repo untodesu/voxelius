@@ -18,6 +18,13 @@ gui::Scroller& gui::Scroller::set_scroll_speed(float speed)
     return self();
 }
 
+gui::Scroller& gui::Scroller::enable_background(void)
+{
+    m_background = true;
+
+    return self();
+}
+
 void gui::Scroller::layout(void)
 {
     ImVec2 margin {};
@@ -36,7 +43,9 @@ void gui::Scroller::layout(void)
 
     ImGui::SetCursorPos(cursor_pos);
 
-    if(ImGui::BeginChild(imgui_id().c_str(), size)) {
+    auto window_flags = m_background ? ImGuiWindowFlags_None : ImGuiWindowFlags_NoBackground;
+
+    if(ImGui::BeginChild(imgui_id().c_str(), size, ImGuiChildFlags_None, window_flags)) {
         if(ImGui::IsWindowHovered() || ImGui::IsWindowFocused()) {
             auto speed = m_scroll_speed * static_cast<float>(globals::gui_scale);
 

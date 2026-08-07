@@ -10,15 +10,18 @@
 #include "core/threading.hh"
 
 #include "shared/constant.hh"
+#include "shared/globals.hh"
 #include "shared/utils/chunk.hh"
 #include "shared/utils/coord.hh"
 #include "shared/world/chunk.hh"
-#include "shared/globals.hh"
 #include "shared/world/world.hh"
 
 #include "client/camera.hh"
 #include "client/fog.hh"
 #include "client/globals.hh"
+#include "client/gui/container.hh"
+#include "client/gui/stepper.hh"
+#include "client/settings.hh"
 #include "client/shader_program.hh"
 #include "client/world/block_atlas.hh"
 #include "client/world/chunk_mesh.hh"
@@ -39,7 +42,7 @@ constexpr static unsigned FOG_MODEL = 0;
 //  4096                77.742
 constexpr static std::size_t BATCH_MAX_PARTS = 1024;
 
-static config::Ref<unsigned> s_fog_model;
+static gui::StepperUnsigned s_fog_model;
 
 static ShaderProgram s_program;
 static std::size_t su_ViewProjection;
@@ -343,7 +346,9 @@ void chunk_renderer::init(void)
 {
     constexpr static std::size_t INITIAL_CAPACITY = 256;
 
+    s_fog_model.set_range(0, 2, 1); // TODO: move this elsewhere and use a config::Ref here
     s_fog_model.bind(globals::client_config, "head.fog_model");
+    settings::video.add_child(s_fog_model, 3);
 
     auto program_id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "chunk");
     auto program_ok = s_program.setup(program_id);

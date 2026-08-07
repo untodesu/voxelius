@@ -31,6 +31,24 @@ gui::Slider<T>& gui::Slider<T>::set_format(std::string_view format)
     return this->self();
 }
 
+template<typename T>
+T gui::Slider<T>::value(void) const
+{
+    return m_value.value();
+}
+
+template<typename T>
+void gui::Slider<T>::set_value(T value)
+{
+    m_value.set_value(value);
+}
+
+template<typename T>
+bool gui::Slider<T>::dirty(void) const
+{
+    return m_value.dirty();
+}
+
 template<>
 void gui::Slider<int>::layout_control(void)
 {

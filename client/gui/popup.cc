@@ -12,9 +12,9 @@ gui::Popup& gui::Popup::set_title(std::string_view title)
     return self();
 }
 
-gui::Popup& gui::Popup::set_question(std::string_view question)
+gui::Popup& gui::Popup::set_message(std::string_view question)
 {
-    m_question_key = question;
+    m_message_key = question;
 
     return self();
 }
@@ -33,6 +33,12 @@ void gui::Popup::layout(void)
 {
     assert(m_choices.size());
 
+    if(m_queued_open) {
+        ImGui::OpenPopup(m_title.c_str());
+
+        m_queued_open = false;
+    }
+
     auto window_pos = ImGui::GetWindowPos();
     auto window_size = ImGui::GetWindowSize();
 
@@ -45,7 +51,7 @@ void gui::Popup::layout(void)
 
         auto content_width = ImGui::CalcItemWidth();
         ImGui::PushTextWrapPos(content_width + ImGui::GetCursorPosX());
-        ImGui::TextUnformatted(m_question.c_str());
+        ImGui::TextUnformatted(m_message.c_str());
         ImGui::PopTextWrapPos();
 
         ImGui::NewLine();
@@ -93,7 +99,7 @@ void gui::Popup::translate(void)
     m_title = language::resolve(m_title_key);
     m_title += imgui_id();
 
-    m_question = language::resolve(m_question_key);
+    m_message = language::resolve(m_message_key);
 
     for(std::size_t i = 0; i < m_choices.size(); ++i) {
         m_choices[i].label = language::resolve(m_choices[i].label_key);
@@ -103,5 +109,5 @@ void gui::Popup::translate(void)
 
 void gui::Popup::open(void)
 {
-    ImGui::OpenPopup(m_title.c_str());
+    m_queued_open = true;
 }

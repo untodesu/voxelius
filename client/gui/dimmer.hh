@@ -18,10 +18,10 @@ public:
     virtual void layout(void) override;
 
 private:
-    ImVec4 m_top_left { 0.0f, 0.0f, 0.0f, 0.95f };
-    ImVec4 m_top_right { 0.0f, 0.0f, 0.0f, 0.95f };
-    ImVec4 m_bottom_left { 0.0f, 0.0f, 0.0f, 0.95f };
-    ImVec4 m_bottom_right { 0.0f, 0.0f, 0.0f, 0.95f };
+    ImVec4 m_top_left { 0.000f, 0.000f, 0.000f, 0.750f };
+    ImVec4 m_top_right { 0.000f, 0.000f, 0.000f, 0.750f };
+    ImVec4 m_bottom_left { 0.000f, 0.000f, 0.000f, 0.750f };
+    ImVec4 m_bottom_right { 0.000f, 0.000f, 0.000f, 0.750f };
 };
 } // namespace gui
 

@@ -11,6 +11,10 @@ class CheckBox final : public SettingBuilder<CheckBox> {
 public:
     CheckBox& bind(config::Map& config, std::string_view key);
 
+    bool value(void) const;
+    void set_value(bool value);
+    bool dirty(void) const;
+
 protected:
     virtual void layout_control(void) override;
     virtual void translate_control(void) override;

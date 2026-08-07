@@ -17,6 +17,7 @@ protected:
     std::string m_key {};
     std::string m_label {};
     std::string m_tooltip {};
+    ImVec4 m_highlight { 1.000f, 1.000f, 1.000f, 0.120f };
     bool m_tooltip_enabled { false };
 };
 } // namespace gui::detail
@@ -27,6 +28,7 @@ template<typename Derived>
 class SettingBuilder : public detail::SettingWidget {
 public:
     Derived& set_key(std::string_view key);
+    Derived& set_highlight(const ImVec4& highlight);
     Derived& enable_tooltip(void);
 
 protected:
@@ -38,6 +40,14 @@ template<typename Derived>
 Derived& gui::SettingBuilder<Derived>::set_key(std::string_view key)
 {
     m_key = key;
+
+    return self();
+}
+
+template<typename Derived>
+Derived& gui::SettingBuilder<Derived>::set_highlight(const ImVec4& highlight)
+{
+    m_highlight = highlight;
 
     return self();
 }

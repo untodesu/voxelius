@@ -18,6 +18,10 @@ public:
     Input<T>& bind(config::Map& config, std::string_view key);
     Input<T>& set_range(T min, T max);
 
+    T value(void) const;
+    void set_value(T value);
+    bool dirty(void) const;
+
 protected:
     virtual void layout_control(void) override;
     virtual void translate_control(void) override;

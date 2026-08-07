@@ -13,7 +13,9 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-// #include "client/gui/settings.hh" // FIXME: settings system not ported yet
+#include "client/gui/container.hh"
+#include "client/gui/language_selector.hh"
+#include "client/settings.hh"
 
 constexpr static std::string_view DEFAULT_LANGUAGE = "english";
 
@@ -22,6 +24,7 @@ static language_iterator_type s_current_language;
 static emhash8::HashMap<std::string, std::string> s_translations;
 static emhash8::HashMap<std::string, language_iterator_type> s_code_map;
 static config::Ref<std::string> s_config_language { std::string(DEFAULT_LANGUAGE) };
+static gui::LanguageSelector s_language_selector;
 
 static void read_mod_translations(std::string_view name_space)
 {
@@ -73,7 +76,8 @@ void language::init(void)
 
     s_config_language.bind(globals::client_config, "language");
 
-    // settings::language(0, settings_location::GENERAL, "language", false); // FIXME: settings system not ported yet
+    s_language_selector.set_key("language");
+    settings::general.add_child(s_language_selector, 0);
 
     std::string source;
     auto read_ok = utils::read_file(manifest_path, source);

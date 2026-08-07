@@ -17,11 +17,14 @@
 #include "client/fonts.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
+#include "client/gui/keybind.hh"
 #include "client/gui/screen.hh"
 #include "client/head.hh"
 #include "client/language.hh"
+#include "client/main_menu.hh"
 #include "client/net/bother.hh"
 #include "client/res/texture2D.hh"
+#include "client/settings.hh"
 #include "client/style.hh"
 #include "client/video.hh"
 #include "client/world/block_atlas.hh"
@@ -215,6 +218,11 @@ static void wrapped_main(int argc, char** argv)
 
     block_atlas::init();
 
+    gui::KeyBind::init();
+
+    settings::init();
+    main_menu::init();
+
     client_game::init();
 
     globals::client_config.load("client.conf");
@@ -234,6 +242,8 @@ static void wrapped_main(int argc, char** argv)
     chunk_mesher::init();
 
     skybox::init();
+
+    main_menu::init_late();
 
     client_game::init_late();
 
@@ -316,6 +326,10 @@ static void wrapped_main(int argc, char** argv)
     bmodel_cache::shutdown();
     fluid_cache::shutdown();
     block_atlas::shutdown();
+
+    settings::shutdown();
+
+    main_menu::shutdown();
 
     client_game::shutdown();
 

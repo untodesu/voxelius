@@ -11,32 +11,44 @@
 
 #include "client/camera.hh"
 #include "client/globals.hh"
-// #include "client/gui/settings.hh" // FIXME: settings system not ported yet
+#include "client/gui/container.hh"
+#include "client/gui/keybind.hh"
+#include "client/settings.hh"
 
 constexpr static float SPEED = 16.0f;
 
-static config::Ref<SDL_Keycode> s_key_forward { SDLK_W };
-static config::Ref<SDL_Keycode> s_key_backward { SDLK_S };
-static config::Ref<SDL_Keycode> s_key_left { SDLK_A };
-static config::Ref<SDL_Keycode> s_key_right { SDLK_D };
-static config::Ref<SDL_Keycode> s_key_jump { SDLK_SPACE };
-static config::Ref<SDL_Keycode> s_key_crouch { SDLK_LSHIFT };
+static gui::KeyBind s_key_forward;
+static gui::KeyBind s_key_backward;
+static gui::KeyBind s_key_left;
+static gui::KeyBind s_key_right;
+static gui::KeyBind s_key_jump;
+static gui::KeyBind s_key_crouch;
 
 void player_move::init(void)
 {
+    s_key_forward.set_value(SDLK_W);
     s_key_forward.bind(globals::client_config, "player_move.key_forward");
-    s_key_backward.bind(globals::client_config, "player_move.key_backward");
-    s_key_left.bind(globals::client_config, "player_move.key_left");
-    s_key_right.bind(globals::client_config, "player_move.key_right");
-    s_key_jump.bind(globals::client_config, "player_move.key_jump");
-    s_key_crouch.bind(globals::client_config, "player_move.key_crouch");
+    settings::keyboard_movement.add_child(s_key_forward, 0);
 
-    // settings::keybind(0, settings_location::KEYBOARD_MOVEMENT, "player_move.key_forward", false); // FIXME: settings system not ported yet
-    // settings::keybind(1, settings_location::KEYBOARD_MOVEMENT, "player_move.key_backward", false); // FIXME: settings system not ported yet
-    // settings::keybind(2, settings_location::KEYBOARD_MOVEMENT, "player_move.key_left", false); // FIXME: settings system not ported yet
-    // settings::keybind(3, settings_location::KEYBOARD_MOVEMENT, "player_move.key_right", false); // FIXME: settings system not ported yet
-    // settings::keybind(4, settings_location::KEYBOARD_MOVEMENT, "player_move.key_jump", false); // FIXME: settings system not ported yet
-    // settings::keybind(5, settings_location::KEYBOARD_MOVEMENT, "player_move.key_crouch", false); // FIXME: settings system not ported yet
+    s_key_backward.set_value(SDLK_S);
+    s_key_backward.bind(globals::client_config, "player_move.key_backward");
+    settings::keyboard_movement.add_child(s_key_backward, 1);
+
+    s_key_left.set_value(SDLK_A);
+    s_key_left.bind(globals::client_config, "player_move.key_left");
+    settings::keyboard_movement.add_child(s_key_left, 2);
+
+    s_key_right.set_value(SDLK_D);
+    s_key_right.bind(globals::client_config, "player_move.key_right");
+    settings::keyboard_movement.add_child(s_key_right, 3);
+
+    s_key_jump.set_value(SDLK_SPACE);
+    s_key_jump.bind(globals::client_config, "player_move.key_jump");
+    settings::keyboard_movement.add_child(s_key_jump, 4);
+
+    s_key_crouch.set_value(SDLK_LSHIFT);
+    s_key_crouch.bind(globals::client_config, "player_move.key_crouch");
+    settings::keyboard_movement.add_child(s_key_crouch, 5);
 }
 
 void player_move::fixed_update(void)
