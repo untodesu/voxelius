@@ -2,6 +2,7 @@
 
 #include "client/play_menu.hh"
 
+#include "core/exception.hh"
 #include "core/utils/physfs.hh"
 #include "core/utils/string.hh"
 #include "core/version.hh"
@@ -27,6 +28,7 @@ constexpr static float ROW_HEIGHT = 24.0f;
 constexpr static float BODY_MARGIN = 32.0f;
 constexpr static std::uint16_t DEFAULT_PORT = 16384;
 constexpr static std::string_view DEFAULT_NAME = "Voxelius Server";
+constexpr static std::string_view JSON_PATH = "servers.json";
 
 class ServerListItem final : public gui::ListBoxItemBuilder<ServerListItem> {
 public:
@@ -87,6 +89,7 @@ static gui::Label s_worlds_todo;
 static gui::Container s_worlds_tab;
 static gui::VerticalStack s_servers_tab;
 static gui::InputPopup s_server_popup;
+static gui::InputPopup s_direct_popup;
 
 gui::Screen play_menu::screen;
 
@@ -448,6 +451,119 @@ static void on_keyboard_event(const SDL_KeyboardEvent& event)
     }
 }
 
+static void load_servers_json(void)
+{
+    std::string source;
+
+    if(utils::read_file(JSON_PATH, source)) {
+        auto jsonv = json_parse_string(source.c_str());
+        auto json = json_value_get_object(jsonv);
+
+        if(jsonv == nullptr) {
+            LOG_WARNING("{}: malformed JSON", JSON_PATH);
+            return;
+        }
+
+        if(json == nullptr) {
+            LOG_WARNING("{}: expected JSON object", JSON_PATH);
+            json_value_free(jsonv);
+            return;
+        }
+
+        auto direct_hostname = json_object_get_string(json, "direct_hostname");
+        auto direct_invite_str = json_object_get_string(json, "direct_invite");
+        auto servers = json_object_get_array(json, "servers");
+
+        if(direct_hostname == nullptr || direct_invite_str == nullptr || servers == nullptr) {
+            LOG_WARNING("{}: expected JSON object with direct_hostname, direct_invite, and servers keys", JSON_PATH);
+            json_value_free(jsonv);
+            return;
+        }
+
+        std::uint64_t direct_invite {};
+        auto direct_invite_size = std::strlen(direct_invite_str);
+        auto direct_invite_check = std::from_chars(direct_invite_str, direct_invite_str + direct_invite_size, direct_invite);
+
+        if(direct_invite_check.ec == std::errc {}) {
+            s_direct_popup.set_value(0, direct_hostname);
+            s_direct_popup.set_value(1, std::to_string(direct_invite));
+        }
+
+        auto count = json_array_get_count(servers);
+
+        for(std::size_t i = 0; i < count; ++i) {
+            auto item = json_array_get_object(servers, i);
+            auto name = json_object_get_string(item, "name");
+            auto hostname = json_object_get_string(item, "hostname");
+            auto invite_str = json_object_get_string(item, "invite");
+
+            if(item == nullptr || name == nullptr || hostname == nullptr || invite_str == nullptr) {
+                LOG_WARNING("{}: expected JSON object with name, hostname, and invite keys", JSON_PATH);
+                continue;
+            }
+
+            std::uint64_t invite {};
+            auto invite_size = std::strlen(invite_str);
+            auto invite_check = std::from_chars(invite_str, invite_str + invite_size, invite);
+
+            if(invite_check.ec == std::errc {}) {
+                auto parts = parse_hostname(hostname);
+                auto server = create_server();
+                server->name = name;
+                server->host = parts.first;
+                server->port = parts.second;
+                server->invite = invite;
+                server->status = ServerListItem::UNKNOWN;
+                server->configured = true;
+                server->invalidate();
+            }
+        }
+
+        json_value_free(jsonv);
+    }
+}
+
+static void save_servers_json(void)
+{
+    auto jsonv = json_value_init_object();
+    auto json = json_value_get_object(jsonv);
+    vx::throw_if(jsonv == nullptr || json == nullptr);
+
+    json_object_set_string(json, "direct_hostname", std::string(s_direct_popup.value(0)).c_str());
+    json_object_set_string(json, "direct_invite", std::string(s_direct_popup.value(1)).c_str());
+
+    auto serversv = json_value_init_array();
+    auto servers = json_value_get_array(serversv);
+    vx::throw_if(serversv == nullptr || servers == nullptr);
+
+    for(auto& owned : s_servers) {
+        if(owned->configured) {
+            auto itemv = json_value_init_object();
+            auto item = json_value_get_object(itemv);
+            vx::throw_if(itemv == nullptr || item == nullptr);
+
+            auto hostname = std::format("{}:{}", owned->host, owned->port);
+            auto invite_str = std::to_string(owned->invite);
+
+            json_object_set_string(item, "name", owned->name.c_str());
+            json_object_set_string(item, "hostname", hostname.c_str());
+            json_object_set_string(item, "invite", invite_str.c_str());
+
+            json_array_append_value(servers, itemv);
+        }
+    }
+
+    json_object_set_value(json, "servers", serversv);
+
+    std::string source;
+    source.resize(json_serialization_size(jsonv));
+    json_serialize_to_buffer(jsonv, source.data(), source.size());
+
+    utils::write_file(JSON_PATH, source);
+
+    json_value_free(jsonv);
+}
+
 void play_menu::init(void)
 {
     s_next_identity = 0;
@@ -473,7 +589,7 @@ void play_menu::init(void)
     s_btn_connect.set_text("play_menu.servers.connect");
     s_btn_connect.set_size(-1.0f, -1.0f);
     s_btn_connect.on_click([] {
-        LOG_INFO("TODO: direct connection screen");
+        s_direct_popup.open();
     });
 
     s_btn_add.set_text("play_menu.servers.add");
@@ -525,13 +641,26 @@ void play_menu::init(void)
     s_server_popup.add_input("play_menu.servers.popup.invite", ImGuiInputTextFlags_CharsDecimal);
     screen.add_child(s_server_popup, 3);
 
+    s_direct_popup.set_title("play_menu.servers.direct.title");
+    s_direct_popup.add_input("play_menu.servers.direct.hostname", ImGuiInputTextFlags_CharsNoBlank);
+    s_direct_popup.add_input("play_menu.servers.direct.invite", ImGuiInputTextFlags_CharsDecimal);
+    screen.add_child(s_direct_popup, 3);
+
+    s_direct_popup.on_submit([](std::span<const std::string> values) {
+        LOG_INFO("TODO: direct connect");
+    });
+
     globals::dispatcher.sink<LanguageUpdateEvent>().connect<&on_language_update>();
     globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&on_keyboard_event>();
     globals::dispatcher.sink<BotherResponseEvent>().connect<&on_bother_response>();
+
+    load_servers_json();
 }
 
 void play_menu::shutdown(void)
 {
+    save_servers_json();
+
     s_servers.clear();
 }
 

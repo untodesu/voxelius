@@ -34,6 +34,10 @@
   "play_menu.servers.popup.hostname": "Address",
   "play_menu.servers.popup.invite": "Invite",
 
+  "play_menu.servers.direct.title": "Direct Connect",
+  "play_menu.servers.direct.hostname": "Address",
+  "play_menu.servers.direct.invite": "Invite",
+
   "play_menu.servers.motd_init": "Unknown",
   "play_menu.servers.motd_ping": "Pinging...",
   "play_menu.servers.motd_fail": "Unreachable",
