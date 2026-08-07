@@ -35,6 +35,8 @@ static std::mutex s_incoming_mutex;
 static std::vector<Job> s_incoming;
 static std::mutex s_outgoing_mutex;
 static std::vector<BotherResponseEvent> s_outgoing;
+static std::deque<Job_Ping> s_pending;
+static std::uint32_t s_active_peers;
 
 BotherResponseEvent::BotherResponseEvent(unsigned request_id) : m_request_id(request_id), m_unreachable(true)
 {
@@ -96,6 +98,41 @@ static std::vector<BotherResponseEvent> take_outgoing(void)
     return events;
 }
 
+static void start_ping(ENetHost* host, const Job_Ping& ping)
+{
+    ENetAddress address {};
+    address.port = ping.port;
+
+    if(enet_address_set_host(&address, ping.host.c_str()) < 0) {
+        push_outgoing(BotherResponseEvent(ping.request_id));
+        return;
+    }
+
+    auto peer = enet_host_connect(host, &address, 1, 0);
+
+    if(peer == nullptr) {
+        push_outgoing(BotherResponseEvent(ping.request_id));
+        return;
+    }
+
+    auto data = new BotherData;
+    data->request_id = ping.request_id;
+    data->responded = false;
+    peer->data = data;
+
+    s_active_peers += 1;
+}
+
+static void service_pending(ENetHost* host)
+{
+    while(s_active_peers < MAX_PEERS && !s_pending.empty()) {
+        auto ping = std::move(s_pending.front());
+        s_pending.pop_front();
+
+        start_ping(host, ping);
+    }
+}
+
 static void thread_main(std::stop_token stop_token)
 {
     auto host = enet_host_create(nullptr, MAX_PEERS, 1, 0, 0);
@@ -113,27 +150,18 @@ static void thread_main(std::stop_token stop_token)
 
         for(const auto& job : jobs) {
             if(auto ping = std::get_if<Job_Ping>(&job)) {
-                ENetAddress address {};
-                address.port = ping->port;
-
-                if(enet_address_set_host(&address, ping->host.c_str()) < 0) {
-                    push_outgoing(BotherResponseEvent(ping->request_id));
-                    continue;
+                if(s_active_peers < MAX_PEERS) {
+                    start_ping(host, *ping);
                 }
-
-                auto peer = enet_host_connect(host, &address, 1, 0);
-
-                if(peer == nullptr) {
-                    push_outgoing(BotherResponseEvent(ping->request_id));
-                    continue;
+                else {
+                    s_pending.push_back(*ping);
                 }
-
-                auto data = new BotherData;
-                data->request_id = ping->request_id;
-                data->responded = false;
-                peer->data = data;
             }
             else if(auto cancel = std::get_if<Job_Cancel>(&job)) {
+                std::erase_if(s_pending, [cancel](const Job_Ping& ping) {
+                    return ping.request_id == cancel->request_id;
+                });
+
                 for(size_t i = 0; i < host->peerCount; ++i) {
                     auto peer = &host->peers[i];
                     auto data = reinterpret_cast<BotherData*>(peer->data);
@@ -142,6 +170,7 @@ static void thread_main(std::stop_token stop_token)
                         enet_peer_reset(peer);
                         delete data;
                         peer->data = nullptr;
+                        s_active_peers -= 1;
                         break;
                     }
                 }
@@ -169,9 +198,13 @@ static void thread_main(std::stop_token stop_token)
             if(event.type == ENET_EVENT_TYPE_DISCONNECT) {
                 auto data = reinterpret_cast<BotherData*>(event.peer->data);
 
-                if(data && !data->responded) {
-                    push_outgoing(BotherResponseEvent(data->request_id));
+                if(data) {
+                    if(!data->responded) {
+                        push_outgoing(BotherResponseEvent(data->request_id));
+                    }
+
                     delete data;
+                    s_active_peers -= 1;
                 }
 
                 event.peer->data = nullptr;
@@ -179,6 +212,8 @@ static void thread_main(std::stop_token stop_token)
                 continue;
             }
         }
+
+        service_pending(host);
     }
 
     for(size_t i = 0; i < host->peerCount; ++i) {
@@ -192,6 +227,13 @@ static void thread_main(std::stop_token stop_token)
 
         peer->data = nullptr;
     }
+
+    for(const auto& ping : s_pending) {
+        push_outgoing(BotherResponseEvent(ping.request_id));
+    }
+
+    s_pending.clear();
+    s_active_peers = 0;
 
     enet_host_destroy(host);
 }
