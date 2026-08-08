@@ -12,6 +12,7 @@
 #include "shared/api/biomes_library.hh"
 #include "shared/api/blocks_library.hh"
 #include "shared/api/core_library.hh"
+#include "shared/api/entities_library.hh"
 #include "shared/api/fluids_library.hh"
 #include "shared/api/lua_libraries.hh"
 #include "shared/api/tints_library.hh"
@@ -141,6 +142,7 @@ bool ModContext::initialize(void)
     api::open_fluids_library(m_lua_state, this);
     api::open_blocks_library(m_lua_state, this);
     api::open_biomes_library(m_lua_state, this);
+    api::open_entities_library(m_lua_state, this);
     api::open_world_library(m_lua_state, this);
 
     auto entry = Identifier::from_parts(name_space(), "init.lua");
@@ -333,4 +335,37 @@ std::vector<TintDefinition> ModContext::take_tints(void)
 emhash8::HashMap<Identifier, tint_id_type> ModContext::take_tint_names(void)
 {
     return std::move(m_tint_names);
+}
+
+class_id_type ModContext::find_class(const Identifier& name) const
+{
+    auto it = m_class_names.find(name);
+
+    if(it == m_class_names.cend())
+        return CLASS_ID_NULL;
+    return it->second;
+}
+
+class_id_type ModContext::register_class(const Identifier& name, ClassDefinition def)
+{
+    if(m_classes.empty()) {
+        m_classes.emplace_back();
+    }
+
+    auto id = static_cast<class_id_type>(m_classes.size());
+
+    m_classes.push_back(std::move(def));
+    m_class_names.try_emplace(name, id);
+
+    return id;
+}
+
+std::vector<ClassDefinition> ModContext::take_classes(void)
+{
+    return std::move(m_classes);
+}
+
+emhash8::HashMap<Identifier, class_id_type> ModContext::take_class_names(void)
+{
+    return std::move(m_class_names);
 }

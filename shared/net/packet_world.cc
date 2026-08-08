@@ -4,49 +4,49 @@
 
 #include "core/buffer.hh"
 
-void RequestChunk::serialize(const RequestChunk& packet, WriteBuffer& buffer)
+void RequestChunk_Packet::encode(const RequestChunk_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write_vector<std::int32_t, 3>(packet.cpos.cast<std::int32_t>());
 }
 
-void RequestChunk::deserialize(RequestChunk& packet, ReadBuffer& buffer)
+void RequestChunk_Packet::decode(RequestChunk_Packet& packet, ReadBuffer& buffer)
 {
     packet.cpos = buffer.read_vector<std::int32_t, 3>().cast<ChunkPos::value_type>();
 }
 
-void ChunkBlocks::serialize(const ChunkBlocks& packet, WriteBuffer& buffer)
+void ChunkBlocks_Packet::encode(const ChunkBlocks_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write_vector<std::int32_t, 3>(packet.cpos.cast<std::int32_t>());
-    BlockStorage::serialize(packet.blocks, buffer);
+    BlockStorage::encode(packet.blocks, buffer);
 }
 
-void ChunkBlocks::deserialize(ChunkBlocks& packet, ReadBuffer& buffer)
+void ChunkBlocks_Packet::decode(ChunkBlocks_Packet& packet, ReadBuffer& buffer)
 {
     packet.cpos = buffer.read_vector<std::int32_t, 3>().cast<ChunkPos::value_type>();
-    BlockStorage::deserialize(packet.blocks, buffer);
+    BlockStorage::decode(packet.blocks, buffer);
 }
 
-void ChunkBiomes::serialize(const ChunkBiomes& packet, WriteBuffer& buffer)
+void ChunkBiomes_Packet::encode(const ChunkBiomes_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(static_cast<std::uint32_t>(packet.realm));
     buffer.write_vector<std::int32_t, 2>(packet.cpos.cast<std::int32_t>());
-    BiomeSlice::serialize(packet.biomes, buffer);
+    BiomeSlice::encode(packet.biomes, buffer);
 }
 
-void ChunkBiomes::deserialize(ChunkBiomes& packet, ReadBuffer& buffer)
+void ChunkBiomes_Packet::decode(ChunkBiomes_Packet& packet, ReadBuffer& buffer)
 {
     packet.realm = static_cast<biome_realm>(buffer.read<std::uint32_t>());
     packet.cpos = buffer.read_vector<std::int32_t, 2>().cast<ChunkPosXZ::value_type>();
-    BiomeSlice::deserialize(packet.biomes, buffer);
+    BiomeSlice::decode(packet.biomes, buffer);
 }
 
-void SetBlock::serialize(const SetBlock& packet, WriteBuffer& buffer)
+void SetBlock_Packet::encode(const SetBlock_Packet& packet, WriteBuffer& buffer)
 {
     buffer.write_vector<std::int64_t, 3>(packet.bpos.cast<std::int64_t>());
     buffer.write<std::uint32_t>(packet.block);
 }
 
-void SetBlock::deserialize(SetBlock& packet, ReadBuffer& buffer)
+void SetBlock_Packet::decode(SetBlock_Packet& packet, ReadBuffer& buffer)
 {
     packet.bpos = buffer.read_vector<std::int64_t, 3>().cast<BlockPos::value_type>();
     packet.block = buffer.read<std::uint32_t>();

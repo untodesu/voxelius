@@ -8,10 +8,8 @@
 #include "shared/world/biome_map.hh"
 #include "shared/world/block_registry.hh"
 
-emhash8::HashMap<ChunkPos, std::shared_ptr<Chunk>> world::chunks;
-entt::registry world::basic_entities;
-entt::registry world::chunk_entities;
-std::uint64_t world::current_tick = 0;
+emhash8::HashMap<ChunkPos, std::shared_ptr<Chunk>> world::chunk_map;
+entt::registry world::chunk_registry;
 
 ChunkCreateEvent::ChunkCreateEvent(const ChunkPos& pos, const std::shared_ptr<Chunk>& chunk) : m_chunk(chunk), m_pos(pos)
 {
@@ -36,17 +34,17 @@ BlockUpdateEvent::BlockUpdateEvent(const BlockPos& pos, block_id_type id, const 
 
 std::shared_ptr<Chunk> world::create_chunk(const ChunkPos& pos)
 {
-    auto it = chunks.find(pos);
+    auto it = chunk_map.find(pos);
 
-    if(it == chunks.cend()) {
-        auto entity = chunk_entities.create();
+    if(it == chunk_map.cend()) {
+        auto entity = chunk_registry.create();
         auto chunk = std::make_shared<Chunk>(entity);
 
-        auto& component = chunk_entities.emplace<Chunk_Component>(entity);
+        auto& component = chunk_registry.emplace<Chunk_Component>(entity);
         component.position = pos;
         component.ptr = chunk;
 
-        chunks.insert_or_assign(ChunkPos(pos), std::shared_ptr(chunk));
+        chunk_map.insert_or_assign(ChunkPos(pos), std::shared_ptr(chunk));
 
         globals::dispatcher.trigger(ChunkCreateEvent(pos, chunk));
 
@@ -58,9 +56,9 @@ std::shared_ptr<Chunk> world::create_chunk(const ChunkPos& pos)
 
 std::shared_ptr<Chunk> world::find_chunk(const ChunkPos& pos)
 {
-    auto it = chunks.find(pos);
+    auto it = chunk_map.find(pos);
 
-    if(it == chunks.cend()) {
+    if(it == chunk_map.cend()) {
         return nullptr;
     }
 
@@ -69,8 +67,8 @@ std::shared_ptr<Chunk> world::find_chunk(const ChunkPos& pos)
 
 std::shared_ptr<Chunk> world::find_chunk(entt::entity entity)
 {
-    if(chunk_entities.valid(entity)) {
-        auto& component = chunk_entities.get<Chunk_Component>(entity);
+    if(chunk_registry.valid(entity)) {
+        auto& component = chunk_registry.get<Chunk_Component>(entity);
         return component.ptr;
     }
 
@@ -86,27 +84,27 @@ void world::remove_chunk(const std::shared_ptr<const Chunk>& chunk)
 
 void world::remove_chunk(const ChunkPos& pos)
 {
-    auto it = chunks.find(pos);
+    auto it = chunk_map.find(pos);
 
-    if(it == chunks.cend()) {
+    if(it == chunk_map.cend()) {
         return;
     }
 
     globals::dispatcher.trigger(ChunkRemoveEvent(pos, it->second));
 
-    chunk_entities.destroy(it->second->entity());
-    chunks.erase(it);
+    chunk_registry.destroy(it->second->entity());
+    chunk_map.erase(it);
 }
 
 void world::remove_chunk(entt::entity entity)
 {
-    if(chunk_entities.valid(entity)) {
-        const auto& component = chunk_entities.get<Chunk_Component>(entity);
+    if(chunk_registry.valid(entity)) {
+        const auto& component = chunk_registry.get<Chunk_Component>(entity);
 
         globals::dispatcher.trigger(ChunkRemoveEvent(component.position, component.ptr));
 
-        chunks.erase(component.position);
-        chunk_entities.destroy(entity);
+        chunk_map.erase(component.position);
+        chunk_registry.destroy(entity);
     }
 }
 
@@ -150,13 +148,13 @@ bool world::set_block(const ChunkPos& cpos, const LocalPos& lpos, block_id_type 
 
         // Schedule for the next tick so neighbour updates never fire mid-pass
         // in an order that depends on chunk iteration order.
-        auto neighbour_deadline = world::current_tick + 1;
+        auto neighbour_deadline = globals::current_tick + 1;
 
         for(const auto& npos : neighbours) {
             auto nbpos = bpos + npos;
             auto ncpos = utils::to_chunk(nbpos);
 
-            if(chunks.contains(ncpos)) {
+            if(chunk_map.contains(ncpos)) {
                 schedule(nbpos, neighbour_deadline, BLOCK_TICK_NEIGHBOUR);
             }
         }
@@ -249,23 +247,23 @@ bool world::set_state(const ChunkPos& cpos, const LocalPos& lpos, std::string_vi
         return false;
     }
 
-    emhash8::HashMap<blockstate_key_type, blockstate_val_type> map;
+    emhash8::HashMap<blockstate_key_type, blockstate_val_type> chunk_map;
 
     for(const auto& [decl_key, decl] : family->states) {
-        map.try_emplace(decl_key, decl.default_value);
+        chunk_map.try_emplace(decl_key, decl.default_value);
     }
 
     auto id_it = family->id_states.find(id);
 
     if(id_it != family->id_states.cend()) {
         for(const auto& it : id_it->second) {
-            map.insert_or_assign(blockstate_key_type(it.first), blockstate_val_type(it.second));
+            chunk_map.insert_or_assign(blockstate_key_type(it.first), blockstate_val_type(it.second));
         }
     }
 
-    map.insert_or_assign(key, family->state_hash(value));
+    chunk_map.insert_or_assign(key, family->state_hash(value));
 
-    auto new_id = block_registry::resolve_variant(family->stem_id, map);
+    auto new_id = block_registry::resolve_variant(family->stem_id, chunk_map);
 
     return set_block(cpos, lpos, new_id);
 }
@@ -329,10 +327,8 @@ void world::schedule(const BlockPos& pos, std::uint64_t deadline, block_tick_sou
 
 void world::purge(void)
 {
-    chunks.clear();
-    chunk_entities.clear();
-    basic_entities.clear();
-    current_tick = 0;
+    chunk_map.clear();
+    chunk_registry.clear();
 
     biome_map::purge();
 }
@@ -341,15 +337,13 @@ void world::fixed_update(void)
 {
     std::vector<std::pair<std::size_t, block_tick_source>> due;
 
-    chunk_entities.view<Chunk_Component>().each([&](Chunk_Component& component) {
+    chunk_registry.view<Chunk_Component>().each([&](Chunk_Component& component) {
         due.clear();
 
-        component.ptr->pop_due(current_tick, due);
+        component.ptr->pop_due(globals::current_tick, due);
 
         for(auto it : due) {
             utils::block_sched_tick(component.position, component.ptr, it.first, it.second);
         }
     });
-
-    current_tick += 1;
 }

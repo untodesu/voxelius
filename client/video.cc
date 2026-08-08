@@ -12,11 +12,16 @@
 
 #include "client/constant.hh"
 #include "client/globals.hh"
-#include "client/gui/settings.hh"
+#include "client/gui/checkbox.hh"
+#include "client/gui/container.hh"
+#include "client/gui/video_selector.hh"
+#include "client/settings.hh"
 
 static Eigen::Vector2i s_last_windowed_size;
-static config::Ref<bool> s_enable_vsync { true };
+static gui::CheckBox s_enable_vsync;
 static config::Ref<std::string> s_current_mode { "windowed" };
+
+static gui::VideoSelector s_video_mode_control;
 
 static SDL_DisplayID s_display;
 static SDL_GPUPresentMode s_unlocked_present_mode;
@@ -123,8 +128,16 @@ void video::init(void)
 {
     s_last_windowed_size = Eigen::Vector2i(constant::BASE_WIDTH, constant::BASE_HEIGHT);
 
+    s_enable_vsync.set_value(true);
+    s_enable_vsync.enable_tooltip();
     s_enable_vsync.bind(globals::client_config, "video.enable_vsync");
+    settings::video.add_child(s_enable_vsync, 1);
+
     s_current_mode.bind(globals::client_config, "video.current_mode");
+
+    s_video_mode_control.on_change(&settings::detail::video_mode_popup);
+    s_video_mode_control.set_key("video.current_mode");
+    settings::video.add_child(s_video_mode_control, 0);
 
     vx::throw_if_not_fmt(SDL_InitSubSystem(SDL_INIT_VIDEO), "SDL_InitSubSystem for video failed: {}", SDL_GetError());
 
@@ -137,9 +150,6 @@ void video::init(void)
 
     pick_display();
     cache_fullscreen_modes();
-
-    settings::video_mode(0, settings_location::VIDEO, "video.current_mode", false);
-    settings::checkbox(1, settings_location::VIDEO, "video.enable_vsync", true);
 
     globals::window = SDL_CreateWindow("client", constant::BASE_WIDTH, constant::BASE_HEIGHT,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);

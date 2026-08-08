@@ -17,6 +17,11 @@ enum class packet_type : std::uint16_t {
     PLAYER_ATTACK_B = 0x000D,
     PLAYER_INTERACT_E = 0x000E,
     PLAYER_INTERACT_B = 0x000F,
+    PLAYER_MOVE_DATA = 0x0010,
+    ENTITY_SPAWN = 0x0011,
+    ENTITY_PATCH = 0x0012,
+    ENTITY_REMOVE = 0x0013,
+    ENTITY_CLIENT = 0x0014,
 };
 
 template<packet_type T>
@@ -29,20 +34,25 @@ struct BasePacket {
 class ReadBuffer;
 class WriteBuffer;
 
-struct StatusRequest;
-struct StatusResponse;
-struct AuthRequest;
-struct AuthChallenge;
-struct AuthResponse;
-struct AuthAdmission;
-struct Disconnect;
-struct RequestChunk;
-struct ChunkBlocks;
-struct ChunkBiomes;
-struct SetBlock;
-struct PlayerAttackE;
-struct PlayerAttackB;
-struct PlayerInteractE;
-struct PlayerInteractB;
+struct StatusRequest_Packet;
+struct StatusResponse_Packet;
+struct AuthRequest_Packet;
+struct AuthChallenge_Packet;
+struct AuthResponse_Packet;
+struct AuthAdmission_Packet;
+struct Disconnect_Packet;
+struct RequestChunk_Packet;
+struct ChunkBlocks_Packet;
+struct ChunkBiomes_Packet;
+struct SetBlock_Packet;
+struct PlayerAttackE_Packet;
+struct PlayerAttackB_Packet;
+struct PlayerInteractE_Packet;
+struct PlayerInteractB_Packet;
+struct PlayerMoveData_Packet;
+struct EntitySpawn_Packet;
+struct EntityPatch_Packet;
+struct EntityRemove_Packet;
+struct EntityClient_Packet;
 
 #endif /* CD2A5EA0_1394_4165_9926_3411C2165A5B */

@@ -32,15 +32,15 @@ static void deserialize_schedule(std::multimap<std::uint64_t, std::pair<std::siz
     }
 }
 
-void Chunk::serialize(const Chunk& chunk, WriteBuffer& buffer)
+void Chunk::encode(const Chunk& chunk, WriteBuffer& buffer)
 {
-    BlockStorage::serialize(chunk.m_blocks, buffer);
+    BlockStorage::encode(chunk.m_blocks, buffer);
     serialize_schedule(chunk.m_scheduled, buffer);
 }
 
-void Chunk::deserialize(Chunk& chunk, ReadBuffer& buffer)
+void Chunk::decode(Chunk& chunk, ReadBuffer& buffer)
 {
-    BlockStorage::deserialize(chunk.m_blocks, buffer);
+    BlockStorage::decode(chunk.m_blocks, buffer);
     deserialize_schedule(chunk.m_scheduled, buffer);
 }
 

@@ -8,6 +8,7 @@ class ModContext;
 namespace fluid_registry
 {
 std::span<const FluidDefinition> all_definitions(void);
+std::uint64_t checksum(void);
 } // namespace fluid_registry
 
 namespace fluid_registry

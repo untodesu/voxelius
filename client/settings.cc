@@ -1,0 +1,172 @@
+#include "client/pch.hh"
+
+#include "client/settings.hh"
+
+#include "client/globals.hh"
+#include "client/gui/background.hh"
+#include "client/gui/container.hh"
+#include "client/gui/dimmer.hh"
+#include "client/gui/keybind.hh"
+#include "client/gui/panel.hh"
+#include "client/gui/popup.hh"
+#include "client/gui/screen.hh"
+#include "client/gui/scroller.hh"
+#include "client/gui/separator.hh"
+#include "client/gui/tabs.hh"
+#include "client/language.hh"
+#include "client/main_menu.hh"
+
+gui::Screen settings::screen;
+
+gui::Container settings::general;
+gui::Container settings::keyboard_movement;
+gui::Container settings::keyboard_gameplay;
+gui::Container settings::keyboard_miscellaneous;
+gui::Container settings::gamepad;
+gui::Container settings::gamepad_movement;
+gui::Container settings::gamepad_gameplay;
+gui::Container settings::gamepad_miscellaneous;
+gui::Container settings::mouse;
+gui::Container settings::video;
+gui::Container settings::video_gui;
+gui::Container settings::sound;
+gui::Container settings::sound_levels;
+
+static gui::Scroller s_scroller_general;
+static gui::Scroller s_scroller_mouse;
+static gui::Scroller s_scroller_video;
+static gui::Scroller s_scroller_audio;
+static gui::Scroller s_scroller_keyboard;
+static gui::Scroller s_scroller_gamepad;
+
+static gui::Separator s_header_video_gui;
+static gui::Separator s_header_sound_levels;
+static gui::Separator s_header_keyboard_gameplay;
+static gui::Separator s_header_keyboard_miscellaneous;
+static gui::Separator s_header_gamepad_movement;
+static gui::Separator s_header_gamepad_gameplay;
+static gui::Separator s_header_gamepad_miscellaneous;
+
+static gui::Dimmer s_dimmer;
+static gui::Tabs s_tabs;
+static gui::Panel s_body;
+
+static gui::ChoicePopup s_video_mode_popup;
+static std::optional<bool> s_video_mode_decision;
+static bool s_video_mode_prompted;
+
+constexpr static float ROW_HEIGHT = 24.0f;
+constexpr static float BODY_MARGIN = 32.0f;
+
+static void on_language_update(const LanguageUpdateEvent& event)
+{
+    settings::screen.translate();
+}
+
+static void on_keyboard_event(const SDL_KeyboardEvent& event)
+{
+    auto change_screen = true;
+    change_screen = change_screen && event.type == SDL_EVENT_KEY_DOWN && event.key == SDLK_ESCAPE;
+    change_screen = change_screen && globals::gui_screen == &settings::screen;
+    change_screen = change_screen && gui::KeyBind::current == nullptr;
+
+    if(change_screen) {
+        globals::gui_screen = &main_menu::screen;
+    }
+}
+
+std::optional<bool> settings::detail::video_mode_popup(const std::optional<SDL_DisplayMode>& mode)
+{
+    if(!s_video_mode_prompted) {
+        s_video_mode_prompted = true;
+        s_video_mode_decision.reset();
+        s_video_mode_popup.open();
+    }
+
+    if(s_video_mode_decision.has_value()) {
+        auto decision = s_video_mode_decision;
+        s_video_mode_prompted = false;
+        s_video_mode_decision.reset();
+        return decision;
+    }
+
+    return std::nullopt;
+}
+
+void settings::init(void)
+{
+    screen.add_child(main_menu::background);
+    screen.add_child(s_dimmer);
+    screen.add_child(s_body);
+
+    s_body.set_margin(ImVec2(BODY_MARGIN, BODY_MARGIN));
+
+    s_header_video_gui.set_text("settings.label.gui");
+    s_header_sound_levels.set_text("settings.label.levels");
+    s_header_keyboard_gameplay.set_text("settings.label.gameplay");
+    s_header_keyboard_miscellaneous.set_text("settings.label.miscellaneous");
+    s_header_gamepad_movement.set_text("settings.label.movement");
+    s_header_gamepad_gameplay.set_text("settings.label.gameplay");
+    s_header_gamepad_miscellaneous.set_text("settings.label.miscellaneous");
+
+    s_scroller_general.add_child(general, 0);
+
+    s_scroller_mouse.add_child(mouse, 0);
+
+    s_scroller_video.add_child(video, 0);
+    s_scroller_video.add_child(s_header_video_gui, 1);
+    s_scroller_video.add_child(video_gui, 2);
+
+    s_scroller_audio.add_child(sound, 0);
+    s_scroller_audio.add_child(s_header_sound_levels, 1);
+    s_scroller_audio.add_child(sound_levels, 2);
+
+    s_scroller_keyboard.add_child(keyboard_movement, 0);
+    s_scroller_keyboard.add_child(s_header_keyboard_gameplay, 1);
+    s_scroller_keyboard.add_child(keyboard_gameplay, 2);
+    s_scroller_keyboard.add_child(s_header_keyboard_miscellaneous, 3);
+    s_scroller_keyboard.add_child(keyboard_miscellaneous, 4);
+
+    s_scroller_gamepad.add_child(gamepad, 0);
+    s_scroller_gamepad.add_child(s_header_gamepad_movement, 1);
+    s_scroller_gamepad.add_child(gamepad_movement, 2);
+    s_scroller_gamepad.add_child(s_header_gamepad_gameplay, 3);
+    s_scroller_gamepad.add_child(gamepad_gameplay, 4);
+    s_scroller_gamepad.add_child(s_header_gamepad_miscellaneous, 5);
+    s_scroller_gamepad.add_child(gamepad_miscellaneous, 6);
+
+    s_tabs.add_tab("settings.location.general", s_scroller_general, 0);
+    s_tabs.add_tab("settings.location.video", s_scroller_video, 1);
+    s_tabs.add_tab("settings.location.audio", s_scroller_audio, 2);
+    s_tabs.add_tab("settings.location.keyboard", s_scroller_keyboard, 3);
+    s_tabs.add_tab("settings.location.mouse", s_scroller_mouse, 4);
+    s_tabs.add_tab("settings.location.gamepad", s_scroller_gamepad, 5);
+
+    s_tabs.set_bar_height(ROW_HEIGHT);
+    s_tabs.set_callback([] {
+        globals::gui_screen = &main_menu::screen;
+    });
+
+    s_body.add_child(s_tabs);
+
+    s_video_mode_popup.set_title("settings.popup.video_change.title");
+    s_video_mode_popup.set_message("settings.popup.video_change.text");
+
+    s_video_mode_popup.add_choice("settings.popup.video_change.answer.yes", [] {
+        s_video_mode_decision = true;
+    });
+
+    s_video_mode_popup.add_choice("settings.popup.video_change.answer.no", [] {
+        s_video_mode_decision = false;
+    });
+
+    screen.add_child(s_video_mode_popup);
+
+    globals::dispatcher.sink<LanguageUpdateEvent>().connect<&on_language_update>();
+    globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&on_keyboard_event>();
+}
+
+void settings::shutdown(void)
+{
+    // empty
+}

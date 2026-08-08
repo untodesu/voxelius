@@ -1,4 +1,20 @@
 {
+  "gui.input_popup.submit": "OK",
+  "gui.input_popup.cancel": "Cancel",
+  "gui.progress_popup.cancel": "Cancel",
+
+  "protocol.disconnect.unspecified": "Connection closed",
+  "protocol.disconnect.client_disconnect": "Client disconnect",
+  "protocol.disconnect.client_shutdown": "Client shutdown",
+  "protocol.disconnect.entity_id_desync": "Entity ID desync",
+  "protocol.disconnect.checksum_mismatch": "Checksum mismatch",
+  "protocol.disconnect.not_whitelisted": "Not whitelisted",
+  "protocol.disconnect.invalid_signature": "Invalid signature",
+  "protocol.disconnect.outdated_client": "Outdated client",
+  "protocol.disconnect.outdated_server": "Outdated server",
+  "protocol.disconnect.server_is_full": "Server is full",
+  "protocol.disconnect.server_shutdown": "Server shutdown",
+
   "main_menu.button.play": "Play Game",
   "main_menu.button.resume": "Resume",
   "main_menu.button.settings": "Settings",
@@ -13,6 +29,39 @@
   "main_menu.mods_popup.title": "Mod warning",
   "main_menu.mods_popup.message": "One or more mods failed to load",
   "main_menu.mods_popup.choice.ok": "OK",
+
+  "play_menu.worlds.todo": "TODO",
+  
+  "play_menu.servers.join": "Join",
+  "play_menu.servers.connect": "Connect Directly",
+  "play_menu.servers.add": "Add",
+  "play_menu.servers.edit": "Edit",
+  "play_menu.servers.remove": "Remove",
+  "play_menu.servers.refresh": "Refresh",
+
+  "play_menu.tab.worlds": "Worlds",
+  "play_menu.tab.servers": "Servers",
+
+  "play_menu.servers.popup.title": "Add/Edit Server",
+  "play_menu.servers.popup.name": "Name",
+  "play_menu.servers.popup.hostname": "Address",
+  "play_menu.servers.popup.invite": "Invite",
+
+  "play_menu.servers.direct.title": "Direct Connect",
+  "play_menu.servers.direct.hostname": "Address",
+  "play_menu.servers.direct.invite": "Invite",
+
+  "play_menu.servers.motd_init": "Unknown",
+  "play_menu.servers.motd_ping": "Pinging...",
+  "play_menu.servers.motd_fail": "Unreachable",
+
+  "play_menu.connect.title": "Connecting",
+  "play_menu.connect.stage.connecting": "Connecting...",
+  "play_menu.connect.stage.authenticating": "Authenticating...",
+  "play_menu.connect.stage.spawning": "Spawning...",
+
+  "play_menu.connect.error.title": "Connection Error",
+  "play_menu.connect.error.ok": "OK",
 
   "settings.location.general": "General",
   "settings.location.video": "Graphics",

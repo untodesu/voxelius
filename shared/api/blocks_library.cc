@@ -86,18 +86,17 @@ static bool parse_drop_effects(lua_State* L, int when_idx, BlockDrop& drop, ModC
     return true;
 }
 
-static void parse_drop_tools(lua_State* L, int when_idx, BlockDrop& drop)
+static bool parse_drop_tools(lua_State* L, int when_idx, BlockDrop& drop)
 {
-    lua_getfield(L, when_idx, "tools");
+    auto mask = utils::opt_bitmask<unsigned>(L, when_idx, "tools", static_cast<unsigned>(drop.cond_tool_bits));
 
-    if(lua_isnil(L, -1)) {
-        lua_pop(L, 1);
-        return;
+    if(!mask.has_value()) {
+        return false;
     }
 
-    drop.cond_tool_bits = static_cast<block_tool_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
+    drop.cond_tool_bits = static_cast<block_tool_bit>(mask.value());
 
-    lua_pop(L, 1);
+    return true;
 }
 
 static bool parse_drop_when(lua_State* L, int entry_idx, BlockDrop& drop, ModContext* ctx)
@@ -116,7 +115,9 @@ static bool parse_drop_when(lua_State* L, int entry_idx, BlockDrop& drop, ModCon
         return false;
     }
 
-    parse_drop_tools(L, when_idx, drop);
+    if(!parse_drop_tools(L, when_idx, drop)) {
+        return false;
+    }
 
     lua_pop(L, 1);
 
@@ -146,9 +147,7 @@ static bool parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModCo
 
         BlockDropItem item {};
 
-        lua_getfield(L, item_idx, "name");
-
-        auto name = utils::require_string(L, -1);
+        auto name = utils::require_string(L, item_idx, "name");
 
         if(!name.has_value()) {
             return false;
@@ -156,19 +155,13 @@ static bool parse_drop_items(lua_State* L, int entry_idx, BlockDrop& drop, ModCo
 
         item.name = Identifier::from_string(name.value(), ctx->name_space());
 
-        lua_pop(L, 1);
-
-        lua_getfield(L, item_idx, "count");
-
-        auto count = utils::opt_integer(L, -1, 1);
+        auto count = utils::opt_integer(L, item_idx, "count", 1);
 
         if(!count.has_value()) {
             return false;
         }
 
         item.count = static_cast<unsigned>(count.value());
-
-        lua_pop(L, 1);
 
         drop.items.push_back(std::move(item));
 
@@ -321,13 +314,13 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("model_offset")) {
-        auto offset = utils::read_vector<float, 3>(L, lua_gettop(L));
+        auto offset = utils::require_fvec<3>(L, lua_gettop(L));
 
         if(!offset.has_value()) {
             return false;
         }
 
-        patch.model_offset = 0.0625f * offset.value();
+        patch.model_offset = 0.0625f * offset->cast<float>();
         lua_pop(L, 1);
     }
 
@@ -354,13 +347,13 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("bcoll_offset")) {
-        auto offset = utils::read_vector<float, 3>(L, lua_gettop(L));
+        auto offset = utils::require_fvec<3>(L, lua_gettop(L));
 
         if(!offset.has_value()) {
             return false;
         }
 
-        patch.bcoll_offset = 0.0625f * offset.value();
+        patch.bcoll_offset = 0.0625f * offset->cast<float>();
         lua_pop(L, 1);
     }
 
@@ -460,18 +453,24 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("touch_coeffs")) {
-        auto coeffs = utils::read_vector<float, 3>(L, lua_gettop(L));
+        auto coeffs = utils::require_fvec<3>(L, lua_gettop(L));
 
         if(!coeffs.has_value()) {
             return false;
         }
 
-        patch.touch_coeffs = coeffs.value();
+        patch.touch_coeffs = coeffs->cast<float>();
         lua_pop(L, 1);
     }
 
     if(reader.try_push("tags")) {
-        patch.tags = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
+        auto mask = utils::require_bitmask<unsigned>(L, lua_gettop(L));
+
+        if(!mask.has_value()) {
+            return false;
+        }
+
+        patch.tags = static_cast<block_tag_bit>(mask.value());
         lua_pop(L, 1);
     }
 
@@ -521,13 +520,13 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("model_offset")) {
-        auto offset = utils::read_vector<float, 3>(L, lua_gettop(L));
+        auto offset = utils::require_fvec<3>(L, lua_gettop(L));
 
         if(!offset.has_value()) {
             return false;
         }
 
-        def.model_offset = 0.0625f * offset.value();
+        def.model_offset = 0.0625f * offset->cast<float>();
         lua_pop(L, 1);
     }
 
@@ -554,13 +553,13 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("bcoll_offset")) {
-        auto offset = utils::read_vector<float, 3>(L, lua_gettop(L));
+        auto offset = utils::require_fvec<3>(L, lua_gettop(L));
 
         if(!offset.has_value()) {
             return false;
         }
 
-        def.bcoll_offset = 0.0625f * offset.value();
+        def.bcoll_offset = 0.0625f * offset->cast<float>();
         lua_pop(L, 1);
     }
 
@@ -741,18 +740,24 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("touch_coeffs")) {
-        auto coeffs = utils::read_vector<float, 3>(L, lua_gettop(L));
+        auto coeffs = utils::require_fvec<3>(L, lua_gettop(L));
 
         if(!coeffs.has_value()) {
             return false;
         }
 
-        def.touch_coeffs = coeffs.value();
+        def.touch_coeffs = coeffs->cast<float>();
         lua_pop(L, 1);
     }
 
     if(reader.try_push("tags")) {
-        def.tags = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
+        auto mask = utils::require_bitmask<unsigned>(L, lua_gettop(L));
+
+        if(!mask.has_value()) {
+            return false;
+        }
+
+        def.tags = static_cast<block_tag_bit>(mask.value());
         lua_pop(L, 1);
     }
 
@@ -762,7 +767,13 @@ static bool parse_definition(const BlockDefReader& reader, ModContext* ctx, Bloc
     }
 
     if(reader.try_push("tools")) {
-        def.tools = static_cast<block_tool_bit>(utils::read_bitmask<unsigned>(L, lua_gettop(L)));
+        auto mask = utils::require_bitmask<unsigned>(L, lua_gettop(L));
+
+        if(!mask.has_value()) {
+            return false;
+        }
+
+        def.tools = static_cast<block_tool_bit>(mask.value());
         lua_pop(L, 1);
     }
 
@@ -828,17 +839,13 @@ static bool parse_states(lua_State* L, int idx, BlockFamily& family)
 
         BlockStateDecl decl {};
 
-        lua_getfield(L, entry_idx, "default");
-
-        auto default_value = utils::require_string(L, -1);
+        auto default_value = utils::require_string(L, entry_idx, "default");
 
         if(!default_value.has_value()) {
             return false;
         }
 
         decl.default_value = family.state_hash(default_value.value());
-
-        lua_pop(L, 1);
 
         if(!parse_state_hint(L, entry_idx, decl, family)) {
             return false;

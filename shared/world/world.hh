@@ -56,10 +56,8 @@ private:
 
 namespace world
 {
-extern emhash8::HashMap<ChunkPos, std::shared_ptr<Chunk>> chunks;
-extern entt::registry basic_entities;
-extern entt::registry chunk_entities;
-extern std::uint64_t current_tick;
+extern emhash8::HashMap<ChunkPos, std::shared_ptr<Chunk>> chunk_map;
+extern entt::registry chunk_registry;
 } // namespace world
 
 namespace world

@@ -1,6 +1,7 @@
 #ifndef EE38FCD4_F793_4446_9DCF_44B1285F9330
 #define EE38FCD4_F793_4446_9DCF_44B1285F9330
 
+#include "shared/entity/class_registry.hh"
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/fluid_registry.hh"
@@ -102,6 +103,12 @@ public:
     std::vector<TintDefinition> take_tints(void);
     emhash8::HashMap<Identifier, tint_id_type> take_tint_names(void);
 
+    class_id_type find_class(const Identifier& name) const;
+    class_id_type register_class(const Identifier& name, ClassDefinition def);
+
+    std::vector<ClassDefinition> take_classes(void);
+    emhash8::HashMap<Identifier, class_id_type> take_class_names(void);
+
 private:
     ModInfo m_modinfo;
     mod_status m_status;
@@ -119,6 +126,9 @@ private:
 
     std::vector<TintDefinition> m_tints;
     emhash8::HashMap<Identifier, tint_id_type> m_tint_names;
+
+    std::vector<ClassDefinition> m_classes;
+    emhash8::HashMap<Identifier, class_id_type> m_class_names;
 };
 
 constexpr const ModInfo& ModContext::modinfo(void) const

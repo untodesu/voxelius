@@ -5,33 +5,33 @@
 #include "shared/world/biome_slice.hh"
 #include "shared/world/block_storage.hh"
 
-struct RequestChunk final : public BasePacket<packet_type::REQUEST_CHUNK> {
-    static void serialize(const RequestChunk& packet, WriteBuffer& buffer);
-    static void deserialize(RequestChunk& packet, ReadBuffer& buffer);
+struct RequestChunk_Packet final : public BasePacket<packet_type::REQUEST_CHUNK> {
+    static void encode(const RequestChunk_Packet& packet, WriteBuffer& buffer);
+    static void decode(RequestChunk_Packet& packet, ReadBuffer& buffer);
 
     ChunkPos cpos;
 };
 
-struct ChunkBlocks final : public BasePacket<packet_type::CHUNK_BLOCKS> {
-    static void serialize(const ChunkBlocks& packet, WriteBuffer& buffer);
-    static void deserialize(ChunkBlocks& packet, ReadBuffer& buffer);
+struct ChunkBlocks_Packet final : public BasePacket<packet_type::CHUNK_BLOCKS> {
+    static void encode(const ChunkBlocks_Packet& packet, WriteBuffer& buffer);
+    static void decode(ChunkBlocks_Packet& packet, ReadBuffer& buffer);
 
     ChunkPos cpos;
     BlockStorage blocks;
 };
 
-struct ChunkBiomes final : public BasePacket<packet_type::CHUNK_BIOMES> {
-    static void serialize(const ChunkBiomes& packet, WriteBuffer& buffer);
-    static void deserialize(ChunkBiomes& packet, ReadBuffer& buffer);
+struct ChunkBiomes_Packet final : public BasePacket<packet_type::CHUNK_BIOMES> {
+    static void encode(const ChunkBiomes_Packet& packet, WriteBuffer& buffer);
+    static void decode(ChunkBiomes_Packet& packet, ReadBuffer& buffer);
 
     biome_realm realm;
     ChunkPosXZ cpos;
     BiomeSlice biomes;
 };
 
-struct SetBlock final : public BasePacket<packet_type::SET_BLOCK> {
-    static void serialize(const SetBlock& packet, WriteBuffer& buffer);
-    static void deserialize(SetBlock& packet, ReadBuffer& buffer);
+struct SetBlock_Packet final : public BasePacket<packet_type::SET_BLOCK> {
+    static void encode(const SetBlock_Packet& packet, WriteBuffer& buffer);
+    static void decode(SetBlock_Packet& packet, ReadBuffer& buffer);
 
     BlockPos bpos;
     block_id_type block;

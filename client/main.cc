@@ -10,15 +10,26 @@
 
 #include "shared/game.hh"
 #include "shared/splash.hh"
-#include "shared/world/worldgen.hh"
 
 #include "client/camera.hh"
+#include "client/constant.hh"
 #include "client/fog.hh"
+#include "client/fonts.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
-#include "client/gui/gui.hh"
+#include "client/gui/keybind.hh"
+#include "client/gui/screen.hh"
 #include "client/head.hh"
+#include "client/language.hh"
+#include "client/main_menu.hh"
+#include "client/net/bother.hh"
+#include "client/net/host.hh"
+#include "client/net/receive.hh"
+#include "client/net/session.hh"
+#include "client/play_menu.hh"
 #include "client/res/texture2D.hh"
+#include "client/settings.hh"
+#include "client/style.hh"
 #include "client/video.hh"
 #include "client/world/block_atlas.hh"
 #include "client/world/bmodel_cache.hh"
@@ -104,8 +115,10 @@ static void zoned_fixed_update(void)
 
     for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
         FrameMarkStart("Fixed");
-        client_game::fixed_update();
+
         shared_game::fixed_update();
+        client_game::fixed_update();
+
         FrameMarkEnd("Fixed");
     }
 }
@@ -124,7 +137,15 @@ static void zoned_update(void)
 
     fog::update();
 
-    gui::update_scale();
+    int width, height;
+    SDL_GetWindowSize(globals::window, &width, &height);
+
+    auto scale_x = std::max(1.0f, std::floor(static_cast<float>(width) / static_cast<float>(constant::BASE_WIDTH)));
+    auto scale_y = std::max(1.0f, std::floor(static_cast<float>(height) / static_cast<float>(constant::BASE_HEIGHT)));
+    auto scale_min = std::min(scale_x, scale_y);
+
+    ImGui::GetIO().FontGlobalScale = scale_min;
+    globals::gui_scale = static_cast<unsigned>(scale_min);
 }
 
 static void zoned_render(void)
@@ -134,7 +155,9 @@ static void zoned_render(void)
     if(head::prepare()) {
         head::render();
 
-        gui::layout();
+        if(globals::gui_screen) {
+            globals::gui_screen->layout();
+        }
 
         client_game::layout();
 
@@ -148,8 +171,12 @@ static void zoned_fixed_update_late(void)
 
     for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
         FrameMarkStart("Fixed");
-        client_game::fixed_update_late();
+
+        host::fixed_update_late();
+
         shared_game::fixed_update_late();
+        client_game::fixed_update_late();
+
         FrameMarkEnd("Fixed");
     }
 }
@@ -161,6 +188,10 @@ static void zoned_update_late(void)
     video::update_late();
 
     client_game::update_late();
+
+    bother::update_late();
+
+    play_menu::update_late();
 
     threading::update();
 }
@@ -183,6 +214,12 @@ static void wrapped_main(int argc, char** argv)
 
     Texture2D::register_resource();
 
+    bother::init();
+
+    host::init();
+    session::init();
+    receive::init();
+
     shared_game::init();
 
     splash::init(SPLASH_CLIENT);
@@ -191,13 +228,19 @@ static void wrapped_main(int argc, char** argv)
     head::init();
     camera::init();
 
-    gui::init();
+    style::apply();
+    fonts::load();
+    language::init();
 
     block_atlas::init();
 
-    client_game::init();
+    gui::KeyBind::init();
 
-    worldgen::init(); // TODO: pass in a world config?
+    settings::init();
+    main_menu::init();
+    play_menu::init();
+
+    client_game::init();
 
     globals::client_config.load("client.conf");
     globals::client_config.load("client.user.conf");
@@ -205,7 +248,7 @@ static void wrapped_main(int argc, char** argv)
     video::init_late();
     head::init_late();
 
-    gui::init_late();
+    language::init_late();
 
     block_atlas::init_late();
     fluid_cache::init_late();
@@ -216,6 +259,8 @@ static void wrapped_main(int argc, char** argv)
     chunk_mesher::init();
 
     skybox::init();
+
+    main_menu::init_late();
 
     client_game::init_late();
 
@@ -293,19 +338,24 @@ static void wrapped_main(int argc, char** argv)
     LOG_INFO("avg framerate: {:.03f} FPS ({:.03f} ms)", 1.0f / globals::window_frametime_avg, 1000.0f * globals::window_frametime_avg);
     LOG_INFO("last frame I drew {} vertices ({} draw calls)", globals::num_draw_vertices, globals::num_draw_calls);
 
+    bother::shutdown();
+
     bmodel_cache::shutdown();
     fluid_cache::shutdown();
     block_atlas::shutdown();
 
-    gui::shutdown();
+    settings::shutdown();
+    play_menu::shutdown();
+    main_menu::shutdown();
 
     client_game::shutdown();
-
-    worldgen::shutdown();
 
     // TODO: game_ui::shutdown();
 
     shared_game::shutdown();
+
+    session::shutdown();
+    host::shutdown();
 
     res::hard_purge();
 
@@ -331,9 +381,9 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
     catch(const vx::detail::Exception& ex) {
-        const auto& location = ex.location();
-        const auto file = std::filesystem::path(location.file_name()).filename().string();
-        const auto line = static_cast<unsigned long>(location.line());
+        auto& location = ex.location();
+        auto file = std::filesystem::path(location.file_name()).filename().string();
+        auto line = static_cast<unsigned long>(location.line());
 
         uulog::detail::error(file.c_str(), line, ex.what_standard(), ex.what().size());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Engine Error", ex.what_standard(), nullptr);

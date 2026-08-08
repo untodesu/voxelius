@@ -10,7 +10,7 @@ constexpr static enet_uint32 CHANNEL = 0;
 
 namespace protocol
 {
-void decode(const ENetPacket* packet, ENetPeer* peer);
+void decode(entt::dispatcher& dispatcher, const ENetPacket* packet, ENetPeer* peer);
 } // namespace protocol
 
 namespace protocol

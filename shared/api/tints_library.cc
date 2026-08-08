@@ -33,16 +33,14 @@ static Identifier make_unique_id(const Identifier& id, const ModContext* ctx)
 
 static bool parse_definition(lua_State* L, int def_idx, TintDefinition& def, ModContext* ctx)
 {
-    lua_getfield(L, def_idx, "default_color");
-    auto default_color = utils::read_vector<float, 3>(L, -1);
+    auto default_color = utils::require_fvec<3>(L, def_idx, "default_color");
 
     if(!default_color.has_value()) {
         return false;
     }
 
-    def.default_color = default_color.value();
+    def.default_color = default_color->cast<float>();
     def.default_color = def.default_color.cwiseMin(1.0f).cwiseMax(0.0f);
-    lua_pop(L, 1);
 
     return true;
 }

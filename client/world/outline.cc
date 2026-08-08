@@ -13,6 +13,7 @@
 #include "client/camera.hh"
 #include "client/constant.hh"
 #include "client/globals.hh"
+#include "client/gui/slider.hh"
 #include "client/shader_program.hh"
 
 static ShaderProgram s_program;

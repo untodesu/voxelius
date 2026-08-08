@@ -10,8 +10,8 @@ class WriteBuffer;
 
 class BlockStorage final {
 public:
-    static void serialize(const BlockStorage& storage, WriteBuffer& buffer);
-    static void deserialize(BlockStorage& storage, ReadBuffer& buffer);
+    static void encode(const BlockStorage& storage, WriteBuffer& buffer);
+    static void decode(BlockStorage& storage, ReadBuffer& buffer);
 
     block_id_type get(std::size_t index) const;
     block_id_type get(const LocalPos& pos) const;
@@ -47,13 +47,13 @@ private:
 
     using variant_type = std::variant<Uniform, Palette8, Palette16>;
 
-    static void serialize(const Uniform* uniform, WriteBuffer& buffer);
-    static void serialize(const Palette8* p8, WriteBuffer& buffer);
-    static void serialize(const Palette16* p16, WriteBuffer& buffer);
+    static void encode(const Uniform* uniform, WriteBuffer& buffer);
+    static void encode(const Palette8* p8, WriteBuffer& buffer);
+    static void encode(const Palette16* p16, WriteBuffer& buffer);
 
-    static void deserialize(Uniform& uniform, ReadBuffer& buffer);
-    static void deserialize(Palette8& p8, ReadBuffer& buffer);
-    static void deserialize(Palette16& p16, ReadBuffer& buffer);
+    static void decode(Uniform& uniform, ReadBuffer& buffer);
+    static void decode(Palette8& p8, ReadBuffer& buffer);
+    static void decode(Palette16& p16, ReadBuffer& buffer);
 
     static std::optional<std::size_t> find_slot(const palette_type& palette, block_id_type id);
     static std::size_t add_slot(palette_type& palette, block_id_type id);

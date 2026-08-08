@@ -7,6 +7,9 @@
 #include "core/threading.hh"
 #include "core/utils/physfs.hh"
 
+constexpr static const char* MOUNT_DATA = "data";
+constexpr static const char* MOUNT_USER = nullptr;
+
 static std::filesystem::path s_gamepath;
 static std::filesystem::path s_userpath;
 static std::filesystem::path s_modspath;
@@ -37,7 +40,6 @@ void core::setup(int argc, char** argv)
     vx::throw_if<vx::runtime_error>(enet_init_fail, "failed to initialize enet");
 
     s_gamepath = std::filesystem::absolute(cmdline::value_or("gamepath", "data"));
-    s_modspath = std::filesystem::absolute(cmdline::value_or("modspath", "mods"));
 
     if(auto value = cmdline::value_or_cstr("user", nullptr)) {
         // If there is a third-party launcher that supports
@@ -68,19 +70,22 @@ void core::setup(int argc, char** argv)
         s_userpath = std::filesystem::current_path();
     }
 
+    s_modspath = s_userpath / "mods";
+
     LOG_DEBUG("gamepath set to {}", s_gamepath.string());
     LOG_DEBUG("userpath set to {}", s_userpath.string());
+    LOG_DEBUG("modspath set to {}", s_modspath.string());
 
     std::filesystem::create_directories(s_userpath);
     std::filesystem::create_directories(s_modspath);
 
-    auto mount_gamepath_ok = PHYSFS_mount(s_gamepath.string().c_str(), nullptr, false);
+    auto mount_gamepath_ok = PHYSFS_mount(s_gamepath.string().c_str(), MOUNT_DATA, false);
     vx::throw_if_not_fmt(mount_gamepath_ok, "failed to mount {}: {}", s_gamepath.string(), utils::physfs_error());
 
-    auto mount_userpath_ok = PHYSFS_mount(s_userpath.string().c_str(), nullptr, false);
+    auto mount_userpath_ok = PHYSFS_mount(s_userpath.string().c_str(), MOUNT_USER, false);
     vx::throw_if_not_fmt(mount_userpath_ok, "failed to mount {}: {}", s_userpath.string(), utils::physfs_error());
 
-    auto mount_modspath_ok = PHYSFS_mount(s_modspath.string().c_str(), nullptr, true);
+    auto mount_modspath_ok = PHYSFS_mount(s_modspath.string().c_str(), MOUNT_DATA, true);
     vx::throw_if_not_fmt(mount_modspath_ok, "failed to mount {}: {}", s_modspath.string(), utils::physfs_error());
 
     auto set_write_dir_ok = PHYSFS_setWriteDir(s_userpath.string().c_str());

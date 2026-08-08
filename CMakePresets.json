@@ -1,0 +1,248 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 15,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "hidden": true,
+      "name": "generic-base",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "hidden": true,
+      "name": "generic-base-prof",
+      "inherits": "generic-base",
+      "cacheVariables": { "ENABLE_PROFILING": "ON" }
+    },
+    {
+      "name": "generic-debug",
+      "displayName": "Generic Debug",
+      "inherits": "generic-base",
+      "binaryDir": "${sourceDir}/build/generic-debug",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "generic-debug-prof",
+      "displayName": "Generic Debug (Profiling)",
+      "inherits": "generic-base-prof",
+      "binaryDir": "${sourceDir}/build/generic-debug-prof",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "generic-release",
+      "displayName": "Generic Release",
+      "inherits": "generic-base",
+      "binaryDir": "${sourceDir}/build/generic-release",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "generic-release-prof",
+      "displayName": "Generic Release (Profiling)",
+      "inherits": "generic-base-prof",
+      "binaryDir": "${sourceDir}/build/generic-release-prof",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "hidden": true,
+      "name": "windows-x32-base",
+      "architecture": {
+        "value": "Win32",
+        "strategy": "external"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "hidden": true,
+      "name": "windows-x32-base-prof",
+      "inherits": "windows-x32-base",
+      "cacheVariables": { "ENABLE_PROFILING": "ON" }
+    },
+    {
+      "name": "windows-x32-debug",
+      "displayName": "Windows x32 Debug",
+      "inherits": "windows-x32-base",
+      "binaryDir": "${sourceDir}/build/windows-x32-debug",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "windows-x32-debug-prof",
+      "displayName": "Windows x32 Debug (Profiling)",
+      "inherits": "windows-x32-base-prof",
+      "binaryDir": "${sourceDir}/build/windows-x32-debug-prof",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "windows-x32-release",
+      "displayName": "Windows x32 Release",
+      "inherits": "windows-x32-base",
+      "binaryDir": "${sourceDir}/build/windows-x32-release",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "windows-x32-release-prof",
+      "displayName": "Windows x32 Release (Profiling)",
+      "inherits": "windows-x32-base-prof",
+      "binaryDir": "${sourceDir}/build/windows-x32-release-prof",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "hidden": true,
+      "name": "windows-x64-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "hidden": true,
+      "name": "windows-x64-base-prof",
+      "inherits": "windows-x64-base",
+      "cacheVariables": { "ENABLE_PROFILING": "ON" }
+    },
+    {
+      "name": "windows-x64-debug",
+      "displayName": "Windows x64 Debug",
+      "inherits": "windows-x64-base",
+      "binaryDir": "${sourceDir}/build/windows-x64-debug",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "windows-x64-debug-prof",
+      "displayName": "Windows x64 Debug (Profiling)",
+      "inherits": "windows-x64-base-prof",
+      "binaryDir": "${sourceDir}/build/windows-x64-debug-prof",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "windows-x64-release",
+      "displayName": "Windows x64 Release",
+      "inherits": "windows-x64-base",
+      "binaryDir": "${sourceDir}/build/windows-x64-release",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "windows-x64-release-prof",
+      "displayName": "Windows x64 Release (Profiling)",
+      "inherits": "windows-x64-base-prof",
+      "binaryDir": "${sourceDir}/build/windows-x64-release-prof",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "generic-debug",
+      "displayName": "Generic Debug",
+      "configurePreset": "generic-debug",
+      "configuration": "Debug"
+    },
+    {
+      "name": "generic-debug-prof",
+      "displayName": "Generic Debug (Profiling)",
+      "configurePreset": "generic-debug-prof",
+      "configuration": "Debug"
+    },
+    {
+      "name": "generic-release",
+      "displayName": "Generic Release",
+      "configurePreset": "generic-release",
+      "configuration": "Release"
+    },
+    {
+      "name": "generic-release-prof",
+      "displayName": "Generic Release (Profiling)",
+      "configurePreset": "generic-release-prof",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x32-debug",
+      "displayName": "Windows x32 Debug",
+      "configurePreset": "windows-x32-debug",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x32-debug-prof",
+      "displayName": "Windows x32 Debug (Profiling)",
+      "configurePreset": "windows-x32-debug-prof",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x32-release",
+      "displayName": "Windows x32 Release",
+      "configurePreset": "windows-x32-release",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x32-release-prof",
+      "displayName": "Windows x32 Release (Profiling)",
+      "configurePreset": "windows-x32-release-prof",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x64-debug",
+      "displayName": "Windows x64 Debug",
+      "configurePreset": "windows-x64-debug",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x64-debug-prof",
+      "displayName": "Windows x64 Debug (Profiling)",
+      "configurePreset": "windows-x64-debug-prof",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x64-release",
+      "displayName": "Windows x64 Release",
+      "configurePreset": "windows-x64-release",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x64-release-prof",
+      "displayName": "Windows x64 Release (Profiling)",
+      "configurePreset": "windows-x64-release-prof",
+      "configuration": "Release"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "generic-release",
+      "configurePreset": "generic-release",
+      "generators": [ "ZIP" ]
+    },
+    {
+      "name": "windows-x32-release-zip",
+      "configurePreset": "windows-x32-release",
+      "generators": [ "ZIP" ]
+    },
+    {
+      "name": "windows-x32-release-nsis",
+      "configurePreset": "windows-x32-release",
+      "generators": [ "NSIS" ]
+    },
+    {
+      "name": "windows-x64-release-zip",
+      "configurePreset": "windows-x64-release",
+      "generators": [ "ZIP" ]
+    },
+    {
+      "name": "windows-x64-release-nsis",
+      "configurePreset": "windows-x64-release",
+      "generators": [ "NSIS" ]
+    }
+  ]
+}

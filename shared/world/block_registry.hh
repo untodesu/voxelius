@@ -88,6 +88,7 @@ namespace block_registry
 {
 std::span<const BlockDefinition> all_definitions(void);
 std::span<const BlockFamily> all_families(void);
+std::uint64_t checksum(void);
 } // namespace block_registry
 
 namespace block_registry

@@ -7,10 +7,21 @@
 static std::vector<TintDefinition> s_definitions;
 static emhash8::HashMap<Identifier, tint_id_type> s_names;
 static emhash8::HashMap<tint_id_type, Identifier> s_reverse_names;
+static std::uint64_t s_checksum;
+
+static void update_checksum(void)
+{
+    // TODO: go through each tint definition and compute a checksum based on its contents
+}
 
 std::span<const TintDefinition> tint_registry::all_definitions(void)
 {
     return s_definitions;
+}
+
+std::uint64_t tint_registry::checksum(void)
+{
+    return s_checksum;
 }
 
 void tint_registry::commit(ModContext& ctx)
@@ -46,6 +57,8 @@ void tint_registry::commit(ModContext& ctx)
     if(tints.size()) {
         s_definitions.insert(s_definitions.end(), std::make_move_iterator(tints.begin() + 1), std::make_move_iterator(tints.end()));
     }
+
+    update_checksum();
 }
 
 void tint_registry::purge(void)

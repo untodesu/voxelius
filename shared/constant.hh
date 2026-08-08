@@ -40,4 +40,16 @@ constexpr static std::int32_t THE_DEPTHS_MIN_CHUNK_Y = THE_DEPTHS_MIN_Y >> const
 constexpr static std::int32_t THE_DEPTHS_MAX_CHUNK_Y = THE_DEPTHS_MAX_Y >> constant::CHUNK_SIZE_LOG2;
 } // namespace constant
 
+namespace constant
+{
+constexpr static std::uint64_t FIXED_TICKRATE = 20;
+constexpr static std::uint64_t FIXED_FRAMETIME_US = 1000000 / FIXED_TICKRATE;
+} // namespace constant
+
+namespace constant
+{
+constexpr static float VELOCITY_EPS = 0.0001f;
+constexpr static float VELOCITY_EPS_SQ = VELOCITY_EPS * VELOCITY_EPS;
+} // namespace constant
+
 #endif /* CA457813_A93D_4AE7_8644_4B9FECFCD782 */

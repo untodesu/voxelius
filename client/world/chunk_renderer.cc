@@ -10,6 +10,7 @@
 #include "core/threading.hh"
 
 #include "shared/constant.hh"
+#include "shared/globals.hh"
 #include "shared/utils/chunk.hh"
 #include "shared/utils/coord.hh"
 #include "shared/world/chunk.hh"
@@ -18,6 +19,9 @@
 #include "client/camera.hh"
 #include "client/fog.hh"
 #include "client/globals.hh"
+#include "client/gui/container.hh"
+#include "client/gui/stepper.hh"
+#include "client/settings.hh"
 #include "client/shader_program.hh"
 #include "client/world/block_atlas.hh"
 #include "client/world/chunk_mesh.hh"
@@ -38,7 +42,7 @@ constexpr static unsigned FOG_MODEL = 0;
 //  4096                77.742
 constexpr static std::size_t BATCH_MAX_PARTS = 1024;
 
-static config::Ref<unsigned> s_fog_model;
+static gui::StepperUnsigned s_fog_model;
 
 static ShaderProgram s_program;
 static std::size_t su_ViewProjection;
@@ -179,7 +183,7 @@ static void update_chunk_positions_tbo(void)
 {
     std::uint32_t max_slot = 0;
 
-    auto view = world::chunk_entities.view<Chunk_Component, ChunkMesh>();
+    auto view = world::chunk_registry.view<Chunk_Component, ChunkMesh>();
 
     for(const auto [entity, chunk, mesh] : view.each()) {
         if(mesh.slot == std::numeric_limits<std::uint32_t>::max()) {
@@ -251,7 +255,7 @@ static void batch_append(const ChunkMesh_Part& part)
 
 static float chunk_distance_sq(entt::entity entity)
 {
-    const auto& chunk = world::chunk_entities.get<Chunk_Component>(entity);
+    const auto& chunk = world::chunk_registry.get<Chunk_Component>(entity);
     Eigen::Vector3f position = utils::to_fvec(chunk.position - camera::chunk) * static_cast<float>(constant::CHUNK_SIZE);
     Eigen::Vector3f delta = position - camera::local;
     return delta.squaredNorm();
@@ -259,7 +263,7 @@ static float chunk_distance_sq(entt::entity entity)
 
 static void update_sorted_chunks(void)
 {
-    auto view = world::chunk_entities.view<Chunk_Component, ChunkMesh>();
+    auto view = world::chunk_registry.view<Chunk_Component, ChunkMesh>();
 
     s_sorted_chunks.clear();
     s_sorted_chunks.reserve(view.size_hint());
@@ -308,7 +312,7 @@ static void bind_pipeline_state(unsigned fog_model)
     vx::throw_if_not(s_program.update());
 
     auto& vproj = camera::instance.view_projection();
-    auto animation_timer = static_cast<std::uint32_t>(world::current_tick >> 1);
+    auto animation_timer = static_cast<std::uint32_t>(globals::current_tick >> 1);
 
     glUseProgram(s_program.handle);
     glUniformMatrix4fv(s_program.uniforms[su_ViewProjection].location, 1, GL_FALSE, vproj.data());
@@ -342,7 +346,9 @@ void chunk_renderer::init(void)
 {
     constexpr static std::size_t INITIAL_CAPACITY = 256;
 
+    s_fog_model.set_range(0, 2, 1); // TODO: move this elsewhere and use a config::Ref here
     s_fog_model.bind(globals::client_config, "head.fog_model");
+    settings::video.add_child(s_fog_model, 3);
 
     auto program_id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "chunk");
     auto program_ok = s_program.setup(program_id);
@@ -412,7 +418,7 @@ void chunk_renderer::init(void)
     globals::dispatcher.sink<ChunkCreateEvent>().connect<&on_chunk_create>();
     globals::dispatcher.sink<ChunkRemoveEvent>().connect<&on_chunk_remove>();
     globals::dispatcher.sink<ChunkUpdateEvent>().connect<&on_chunk_update>();
-    world::chunk_entities.on_update<ChunkMesh>().connect<&on_chunk_mesh>();
+    world::chunk_registry.on_update<ChunkMesh>().connect<&on_chunk_mesh>();
 }
 
 void chunk_renderer::shutdown(void)
@@ -477,8 +483,8 @@ void chunk_renderer::render_opaque(void)
     glDisable(GL_BLEND);
 
     for(const auto& it : s_sorted_chunks) {
-        const auto& mesh = world::chunk_entities.get<ChunkMesh>(it.first);
-        const auto& chunk = world::chunk_entities.get<Chunk_Component>(it.first);
+        const auto& mesh = world::chunk_registry.get<ChunkMesh>(it.first);
+        const auto& chunk = world::chunk_registry.get<Chunk_Component>(it.first);
 
         if(mesh.opaque.count && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
             batch_append(mesh.opaque);
@@ -509,8 +515,8 @@ void chunk_renderer::render_alpha(void)
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     for(auto it = s_sorted_chunks.rbegin(); it != s_sorted_chunks.rend(); it = std::next(it)) {
-        const auto& mesh = world::chunk_entities.get<ChunkMesh>(it->first);
-        const auto& chunk = world::chunk_entities.get<Chunk_Component>(it->first);
+        const auto& mesh = world::chunk_registry.get<ChunkMesh>(it->first);
+        const auto& chunk = world::chunk_registry.get<Chunk_Component>(it->first);
 
         if(mesh.alpha.count && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
             batch_append(mesh.alpha);
@@ -544,8 +550,8 @@ void chunk_renderer::render_fluid(void)
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     for(auto it = s_sorted_chunks.rbegin(); it != s_sorted_chunks.rend(); it = std::next(it)) {
-        const auto& mesh = world::chunk_entities.get<ChunkMesh>(it->first);
-        const auto& chunk = world::chunk_entities.get<Chunk_Component>(it->first);
+        const auto& mesh = world::chunk_registry.get<ChunkMesh>(it->first);
+        const auto& chunk = world::chunk_registry.get<Chunk_Component>(it->first);
 
         if(mesh.fluid.count && frustum.intersects(utils::bounds(chunk.position - camera::chunk))) {
             batch_append(mesh.fluid);

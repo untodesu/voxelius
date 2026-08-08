@@ -12,49 +12,43 @@
 #include "shared/utils/coord.hh"
 #include "shared/utils/world.hh"
 #include "shared/world/block_registry.hh"
-#include "shared/world/climate.hh"
-#include "shared/world/worldgen.hh"
 
 #include "client/camera.hh"
-#include "client/entity/interpolation.hh"
-#include "client/entity/player_look.hh"
-#include "client/entity/player_move.hh"
-#include "client/entity/player_target.hh"
 #include "client/globals.hh"
-#include "client/gui/gui.hh"
-#include "client/utils/entity.hh"
+#include "client/language.hh"
+#include "client/net/bother.hh"
+#include "client/system/interpolation.hh"
+#include "client/system/player_look.hh"
+#include "client/system/player_move.hh"
+#include "client/system/player_target.hh"
 
-static void generate_debug_terrain(void)
+static void on_bother_response(const BotherResponseEvent& event)
 {
-    constexpr static ChunkPos::value_type CHUNK_RADIUS = 32;
-    constexpr static ChunkPos::value_type VERT_RADIUS_SURFACE = 18;
-    constexpr static ChunkPos::value_type VERT_RADIUS_SKY = 6;
-
-    for(ChunkPos::value_type cx = -CHUNK_RADIUS; cx <= CHUNK_RADIUS; cx += 1) {
-        for(ChunkPos::value_type cz = -CHUNK_RADIUS; cz <= CHUNK_RADIUS; cz += 1) {
-            for(ChunkPos::value_type cy = -VERT_RADIUS_SURFACE; cy <= VERT_RADIUS_SURFACE; cy += 1) {
-                worldgen::request({ cx, cy, cz });
-            }
-
-            for(ChunkPos::value_type cy = -VERT_RADIUS_SKY; cy <= VERT_RADIUS_SKY; cy += 1) {
-                worldgen::request({ cx, 24 + cy, cz });
-            }
-        }
+    if(event.unreachable()) {
+        LOG_WARNING("bother test: request {} unreachable", event.request_id());
+        return;
     }
+
+    LOG_INFO("bother test: request {} -> {}.{}.{}, {}/{} players, motd: \"{}\"", event.request_id(), event.version_major(),
+        event.version_minor(), event.version_patch(), event.num_players(), event.max_players(), event.motd());
 }
 
 void client_game::init(void)
 {
+    interpolation::init();
+
     player_look::init();
     player_move::init();
     player_target::init();
+
+    globals::dispatcher.sink<BotherResponseEvent>().connect<&on_bother_response>();
+
+    bother::ping(1, "127.0.0.1", 16384);
 }
 
 void client_game::init_late(void)
 {
-    globals::player = utils::spawn_player_client({ -8, 25, -8 });
-
-    generate_debug_terrain();
+    // empty
 }
 
 void client_game::shutdown(void)

@@ -23,7 +23,6 @@ These appear when you run or build the game with the scripts. They are listed in
 |----|----|
 |`build`|Root build directory|
 |`dist`|CPack output directory|
-|`mods`|Created when you run the game inside the source tree. Often empty. Useful for local debug mods|
 
 ## Directory tree
 

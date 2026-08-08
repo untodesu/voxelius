@@ -13,6 +13,7 @@ static std::vector<BlockDefinition> s_definitions;
 static std::vector<BlockFamily> s_families;
 static emhash8::HashMap<Identifier, block_id_type> s_names;
 static emhash8::HashMap<block_id_type, Identifier> s_reverse_names;
+static std::uint64_t s_checksum;
 
 static std::uint64_t hash_state_map(const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map)
 {
@@ -77,6 +78,11 @@ static BlockDefinition apply_matching_variant(const BlockDefinition& base_def, c
     }
 
     return resolved;
+}
+
+static void update_checksum(void)
+{
+    // TODO: go through each block definition and compute a checksum based on its contents
 }
 
 BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverridePatch& patch)
@@ -201,6 +207,11 @@ std::span<const BlockFamily> block_registry::all_families(void)
     return s_families;
 }
 
+std::uint64_t block_registry::checksum(void)
+{
+    return s_checksum;
+}
+
 void block_registry::commit(ModContext& ctx)
 {
     if(s_definitions.empty()) {
@@ -319,6 +330,8 @@ void block_registry::commit(ModContext& ctx)
             }
         }
     }
+
+    update_checksum();
 }
 
 void block_registry::purge(void)

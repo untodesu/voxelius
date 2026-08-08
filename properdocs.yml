@@ -84,6 +84,7 @@ nav:
         - Fluids: dev/modding/api-fluids.md
         - Blocks: dev/modding/api-blocks.md
         - Biomes: dev/modding/api-biomes.md
+        - Entities: dev/modding/api-entities.md
         - World: dev/modding/api-world.md
       - File Formats:
         - Block Models: dev/modding/format-bmodel.md

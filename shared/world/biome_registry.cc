@@ -8,10 +8,21 @@
 static std::vector<BiomeDefinition> s_definitions;
 static emhash8::HashMap<Identifier, biome_id_type> s_names;
 static emhash8::HashMap<biome_id_type, Identifier> s_reverse_names;
+static std::uint64_t s_checksum;
+
+static void update_checksum(void)
+{
+    // TODO: go through each biome definition and compute a checksum based on its contents
+}
 
 std::span<const BiomeDefinition> biome_registry::all_definitions(void)
 {
     return s_definitions;
+}
+
+std::uint64_t biome_registry::checksum(void)
+{
+    return s_checksum;
 }
 
 void biome_registry::commit(ModContext& ctx)
@@ -47,6 +58,8 @@ void biome_registry::commit(ModContext& ctx)
     if(biomes.size()) {
         s_definitions.insert(s_definitions.end(), std::make_move_iterator(biomes.begin() + 1), std::make_move_iterator(biomes.end()));
     }
+
+    update_checksum();
 }
 
 void biome_registry::purge(void)

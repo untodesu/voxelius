@@ -3,9 +3,9 @@
 
 #include <core/pch.hh>
 
-#include <entt/entt.hpp>
+#include <ed25519.h>
 
-#include <fastnoiselite.h>
+#include <entt/entt.hpp>
 
 extern "C" {
 #include <lauxlib.h>

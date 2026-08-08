@@ -28,7 +28,7 @@ If the client sends a login request instead of a status request, the server star
 |1|Client|Server|The client connects|
 |2|Client|Server|The client sends a login request packet: username, public Ed25519 key, invite code, protocol version, and registry hashes|
 |3|Server|Client|If the server accepts the request, it responds with a challenge packet holding a random nonce|
-|4|Client|Server|The client signs the nonce, the server's password, and the current UTC time, and sends the signature back in a challenge response packet|
+|4|Client|Server|The client signs the nonce plus the current UTC time (minute resolution), and sends the signature back in a challenge response packet|
 |5|Server|Client|If the signature matches, the server admits the client with a packet holding its assigned username|
 |6|N/A|N/A|Entity exchange and game packets start here|
 
@@ -36,17 +36,13 @@ If the client sends a login request instead of a status request, the server star
 
 The client proves its identity with an Ed25519 keypair. The server challenges the client with a random nonce, and the client signs it.
 
-##### Server passwords
-
-If the server has a password, the client folds it into the signed message. This way, the exchange also proves the client knows the password. The client never sends the password itself.
-
 ##### Invite codes
 
 The invite code is a one-time code. On a successful login, the server consumes the invite code. The server then adds the client's public key to its whitelist. The same client can then reconnect later without a new invite.
 
 ##### Registry hashes
 
-The client sends its block, biome, fluid, and tint registry hashes. The server checks each hash against its own. A mismatch means the two sides disagree on what a given ID means. When that happens, the server disconnects the client with a checksum mismatch reason. Neither side acts on the disagreement.
+The client sends its block, biome, fluid, tint, and entity class registry hashes. The server checks each hash against its own. A mismatch means the two sides disagree on what a given ID means. When that happens, the server disconnects the client with a checksum mismatch reason. Neither side acts on the disagreement.
 
 This check protects both sides:
 
@@ -63,17 +59,17 @@ The client sends `RequestChunk` for any chunk position it needs. The server answ
 
 ##### Block and entity actions
 
-The client sends `PlayerAttack` or `PlayerInteract` to act on its current target. A `target` field names an entity. If the client is targeting a block instead, this field carries a null entity.
+The client sends one of four packets depending on what it targets and what it does: `PlayerAttackE`/`PlayerInteractE` for an entity target, `PlayerAttackB`/`PlayerInteractB` for a block target. There is no single unified packet with a nullable target field.
 
-For a block target, the packet also carries the block's position and the ID the client expects to find there. It also carries the hit face, normal, and point. These three fields match the `physics::BlockHit` fields the block callbacks expect.
-
-The server replies to every `PlayerAttack` or `PlayerInteract` with a `SetBlock` for the position involved. The server sends this reply whether or not the block changed. If the block changed, `SetBlock` also reaches every other client with that chunk loaded.
+The entity variants carry only the targeted entity. The block variants carry the block's position and the ID the client expects to find there, plus the hit face, normal, and point. These three fields match the `physics::BlockHit` fields the block callbacks expect.
 
 ## Packet reference
 
 Each packet starts with a 16-bit unsigned integer that names its ID. The packets are named and structured as follows:
 
-### `0x0001` `StatusRequest`
+### `0x0001` `StatusRequestPacket`
+
+Request a status from server
 
 |Type|Name|Description|
 |----|----|----|
@@ -81,7 +77,9 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`uint32`|`minor`|Minor game version|
 |`uint32`|`patch`|Patch game version|
 
-### `0x0002` `StatusResponse`
+### `0x0002` `StatusResponsePacket`
+
+Server's response to a `StatusRequestPacket`
 
 |Type|Name|Description|
 |----|----|----|
@@ -97,10 +95,12 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 |Value|Description|
 |----|----|
-|`0x00000001`|Server is password-protected|
-|`0x00000002`|Server has whitelist enabled|
+|`0x00000001`|Server has whitelist enabled|
+|`0x00000002`|Server enforces strict version matching|
 
-### `0x0003` `AuthRequest`
+### `0x0003` `AuthRequestPacket`
+
+Request an authentication on a server
 
 |Type|Name|Description|
 |----|----|----|
@@ -113,27 +113,39 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`uint64`|`blocks_hash`|Block registry hash|
 |`uint64`|`fluids_hash`|Fluid registry hash|
 |`uint64`|`tints_hash`|Tint registry hash|
+|`uint64`|`ents_hash`|Entity registry hash|
 |`string`|`username`|Desired username|
 
-### `0x0004` `AuthChallenge`
+### `0x0004` `AuthChallengePacket`
+
+Server's response to `AuthRequestPacket`
 
 |Type|Name|Description|
 |----|----|----|
 |`uint8[64]`|`nonce`|Nonce for the client to sign|
 
-### `0x0005` `AuthResponse`
+### `0x0005` `AuthResponsePacket`
+
+Client's repsonse to `AuthChallengePacket`
 
 |Type|Name|Description|
 |----|----|----|
-|`uint8[64]`|`signature`|Signed nonce + server password + UNIX minutes|
+|`uint8[64]`|`signature`|Signed nonce + UNIX minutes|
 
-### `0x0006` `AuthAdmission`
+### `0x0006` `AuthAdmissionPacket`
+
+On successful auth, server's response to `AuthResponsePacket`
 
 |Type|Name|Description|
 |----|----|----|
+|`uint16`|`client_id`|Client ID|
+|`uint64`|`identity`|Client identity|
 |`string`|`username`|Assigned username|
+|`uint64`|`entity`|Player entity|
 
 ### `0x0007` `Disconnect`
+
+Disconnection notification. Each network side should but may not terminate the connection immediately afterwards this packet is sent
 
 |Type|Name|Description|
 |----|----|----|
@@ -157,11 +169,15 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x0008` `RequestChunk`
 
+Sent by client to request a chunk to be generated or loaded and sent to the client over the network. Server performs view distance checks and may not respond at all
+
 |Type|Name|Description|
 |----|----|----|
 |`vector3<int32>`|`cpos`|Requested chunk position|
 
 ### `0x0009` `ChunkBlocks`
+
+Sent by server as a response to `RequestChunk` or at arbitrary moments to synchronize chunk contents with clients
 
 |Type|Name|Description|
 |----|----|----|
@@ -169,6 +185,8 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`data`|`blocks`|Serialized and compressed block storage contents|
 
 ### `0x000A` `ChunkBiomes`
+
+Sent by server as a response to `RequestChunk` once per realm to synchronize biome caches used for client rendering
 
 |Type|Name|Description|
 |----|----|----|
@@ -178,6 +196,8 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x000B` `SetBlock`
 
+Sent by server as a sub-chunk block update
+
 |Type|Name|Description|
 |----|----|----|
 |`vector3<int64>`|`bpos`|World-scale block position|
@@ -185,11 +205,15 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x000C` `PlayerAttackE`
 
+Sent by client to specify an attack action against an entity
+
 |Type|Name|Description|
 |----|----|----|
 |`uint64`|`target`|Targeted entity|
 
 ### `0x000D` `PlayerAttackB`
+
+Sent by client to specify an attach action against a block
 
 |Type|Name|Description|
 |----|----|----|
@@ -198,11 +222,17 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 
 ### `0x000E` `PlayerInteractE`
 
+Sent by client to specify an interact action against an entity
+
+> **TODO:** send over specific part of an entity's hitbox as well
+
 |Type|Name|Description|
 |----|----|----|
 |`uint64`|`target`|Targeted entity|
 
 ### `0x000F` `PlayerInteractB`
+
+Sent by client to specify an interact action against a block
 
 |Type|Name|Description|
 |----|----|----|
@@ -211,3 +241,30 @@ Each packet starts with a 16-bit unsigned integer that names its ID. The packets
 |`uint8`|`face`|Hit face used for interactions|
 |`vector3<float>`|`normal`|Hit normal|
 |`vector3<float>`|`point`|Hit point local to the block|
+
+### `0x0010` `EntitySpawn`
+
+Sent by server when an entity is spawned
+
+|Type|Name|Description|
+|----|----|----|
+|`uint64`|`id`|Entity ID|
+|`class_id_type`|`class_id`|Numeric class ID|
+
+### `0x0011` `EntityPatch`
+
+Sent by server when an entity's component is updated
+
+|Type|Name|Description|
+|----|----|----|
+|`uint64`|`id`|Entity ID|
+|`uint32`|`ncomp`|Component count|
+|`component[ncomp]`|`components`|Serialized components|
+
+### `0x0012` `EntityRemove`
+
+Sent by server when an entity is removed
+
+|Type|Name|Description|
+|----|----|----|
+|`uint64`|`id`|Entity ID|

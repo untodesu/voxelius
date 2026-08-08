@@ -2,6 +2,6 @@
 cd /D "%~dp0\.."
 call scripts\build-windows-x32-release.bat
 if %errorlevel% neq 0 exit /b %errorlevel%
-cpack -G ZIP --config build\windows-x32\CPackConfig.cmake
+cpack --preset windows-x32-release-zip
 if %errorlevel% neq 0 exit /b %errorlevel%
 if /I %0 EQU "%~dpnx0" pause

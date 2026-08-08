@@ -3,8 +3,10 @@
 #include "shared/globals.hh"
 
 entt::dispatcher globals::dispatcher;
+entt::registry globals::registry;
 
 std::uint64_t globals::curtime_us;
+std::uint64_t globals::current_tick;
 
 std::size_t globals::fixed_framecount;
 std::uint64_t globals::fixed_frametime_us;

@@ -6,9 +6,10 @@
 #include "core/exception.hh"
 
 #include "shared/constant.hh"
+#include "shared/entity/class_registry.hh"
+#include "shared/entity/required_class.hh"
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
-#include "shared/world/climate.hh"
 #include "shared/world/fluid_registry.hh"
 #include "shared/world/tint_registry.hh"
 
@@ -18,16 +19,18 @@ static std::vector<ModInfo> discover_mods(void)
 {
     std::vector<ModInfo> result;
 
-    if(auto entries = PHYSFS_enumerateFiles("/")) {
+    if(auto entries = PHYSFS_enumerateFiles("data")) {
         for(std::size_t i = 0; entries[i]; ++i) {
             PHYSFS_Stat stat {};
 
-            if(!PHYSFS_stat(entries[i], &stat)) {
+            auto entry_path = std::format("data/{}", entries[i]);
+
+            if(!PHYSFS_stat(entry_path.c_str(), &stat)) {
                 continue;
             }
 
             if(stat.filetype == PHYSFS_FILETYPE_DIRECTORY) {
-                auto modinfo_path = std::format("{}/modinfo.conf", entries[i]);
+                auto modinfo_path = std::format("data/{}/modinfo.conf", entries[i]);
 
                 if(!PHYSFS_exists(modinfo_path.c_str())) {
                     continue;
@@ -174,6 +177,7 @@ void mod_loader::init(void)
         fluid_registry::commit(ctx);
         block_registry::commit(ctx);
         biome_registry::commit(ctx);
+        class_registry::commit(ctx);
     }
 
     fluid_registry::resolve_tints();
@@ -182,13 +186,14 @@ void mod_loader::init(void)
     biome_registry::resolve_features();
     biome_registry::resolve_tint_colors();
 
-    climate::rebuild();
+    required_class::resolve();
 }
 
 void mod_loader::shutdown(void)
 {
     s_mods.clear();
 
+    class_registry::purge();
     biome_registry::purge();
     block_registry::purge();
     fluid_registry::purge();
