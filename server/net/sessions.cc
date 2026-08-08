@@ -79,6 +79,7 @@ static void on_auth_request(const AuthRequest_Packet& packet)
         Disconnect_Packet response {};
         response.reason = Disconnect_Packet::OUTDATED_CLIENT;
         protocol::send(response, packet.peer);
+        enet_peer_disconnect_later(packet.peer, 0);
         return;
     }
 
@@ -86,6 +87,7 @@ static void on_auth_request(const AuthRequest_Packet& packet)
         Disconnect_Packet response {};
         response.reason = Disconnect_Packet::OUTDATED_SERVER;
         protocol::send(response, packet.peer);
+        enet_peer_disconnect_later(packet.peer, 0);
         return;
     }
 
@@ -107,6 +109,7 @@ static void on_auth_request(const AuthRequest_Packet& packet)
         Disconnect_Packet response {};
         response.reason = Disconnect_Packet::NOT_WHITELISTED;
         protocol::send(response, packet.peer);
+        enet_peer_disconnect_later(packet.peer, 0);
         return;
     }
 
@@ -121,6 +124,7 @@ static void on_auth_request(const AuthRequest_Packet& packet)
         Disconnect_Packet response {};
         response.reason = Disconnect_Packet::CHECKSUM_MISMATCH;
         protocol::send(response, packet.peer);
+        enet_peer_disconnect_later(packet.peer, 0);
         return;
     }
 
@@ -130,6 +134,7 @@ static void on_auth_request(const AuthRequest_Packet& packet)
         Disconnect_Packet response {};
         response.reason = Disconnect_Packet::SERVER_IS_FULL;
         protocol::send(response, packet.peer);
+        enet_peer_disconnect_later(packet.peer, 0);
         return;
     }
 
@@ -166,6 +171,7 @@ static void on_auth_response(const AuthResponse_Packet& packet)
         Disconnect_Packet response {};
         response.reason = Disconnect_Packet::UNSPECIFIED;
         protocol::send(response, packet.peer);
+        enet_peer_disconnect_later(packet.peer, 0);
         return;
     }
 
@@ -173,6 +179,8 @@ static void on_auth_response(const AuthResponse_Packet& packet)
         Disconnect_Packet response {};
         response.reason = Disconnect_Packet::INVALID_SIGNATURE;
         protocol::send(response, packet.peer);
+        enet_peer_disconnect_later(packet.peer, 0);
+        sessions::destroy(session, Disconnect_Packet::INVALID_SIGNATURE);
         return;
     }
 
