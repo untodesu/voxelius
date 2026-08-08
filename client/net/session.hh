@@ -20,6 +20,15 @@ private:
     std::uint32_t m_reason;
 };
 
+class SessionErrorEvent final {
+public:
+    constexpr explicit SessionErrorEvent(std::uint32_t reason);
+    constexpr std::uint32_t reason(void) const;
+
+private:
+    std::uint32_t m_reason;
+};
+
 namespace session
 {
 extern session_state state;
@@ -56,6 +65,16 @@ constexpr session_state SessionStateEvent::state(void) const
 }
 
 constexpr std::uint32_t SessionStateEvent::reason(void) const
+{
+    return m_reason;
+}
+
+constexpr SessionErrorEvent::SessionErrorEvent(std::uint32_t reason) : m_reason(reason)
+{
+    // empty
+}
+
+constexpr std::uint32_t SessionErrorEvent::reason(void) const
 {
     return m_reason;
 }

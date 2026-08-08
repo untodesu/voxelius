@@ -246,8 +246,6 @@ static void select_server(ServerListItem* item)
 static void join_server(ServerListItem* item)
 {
     session::connect(item->host, item->port, item->invite);
-
-    item->invite = 0; // clear invite after joining; FIXME: should we do that after a successful join instead?
 }
 
 static ServerListItem* create_server(void)
@@ -482,9 +480,13 @@ static void on_session_state(const SessionStateEvent& event)
 
         case SESSION_DISCONNECTED:
             play_menu::close_connect_popup();
-            play_menu::show_error(Disconnect_Packet::reason_string_client(event.reason()));
             break;
     }
+}
+
+static void on_session_error(const SessionErrorEvent& event)
+{
+    play_menu::show_error(Disconnect_Packet::reason_string_client(event.reason()));
 }
 
 static void load_servers_json(void)
@@ -708,6 +710,7 @@ void play_menu::init(void)
     globals::dispatcher.sink<SDL_KeyboardEvent>().connect<&on_keyboard_event>();
     globals::dispatcher.sink<BotherResponseEvent>().connect<&on_bother_response>();
     globals::dispatcher.sink<SessionStateEvent>().connect<&on_session_state>();
+    globals::dispatcher.sink<SessionErrorEvent>().connect<&on_session_error>();
 
     load_servers_json();
 }

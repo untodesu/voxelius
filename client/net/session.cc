@@ -81,6 +81,8 @@ static void on_host_connect(const HostConnectEvent& event)
 static void on_host_disconnect(const HostDisconnectEvent& event)
 {
     if(session::state) {
+        globals::dispatcher.trigger(SessionErrorEvent(Disconnect_Packet::UNSPECIFIED));
+
         handle_disconnect(Disconnect_Packet::UNSPECIFIED);
     }
 }
@@ -112,6 +114,8 @@ static void on_auth_admission(const AuthAdmission_Packet& packet)
 
 static void on_disconnect(const Disconnect_Packet& packet)
 {
+    globals::dispatcher.trigger(SessionErrorEvent(packet.reason));
+
     handle_disconnect(packet.reason);
 }
 
@@ -160,6 +164,8 @@ void session::connect(std::string_view host, std::uint16_t port, std::uint64_t i
             set_state(SESSION_CONNECTING);
         }
         else {
+            globals::dispatcher.trigger(SessionErrorEvent(Disconnect_Packet::UNSPECIFIED));
+
             handle_disconnect(Disconnect_Packet::UNSPECIFIED);
         }
     }
@@ -167,17 +173,13 @@ void session::connect(std::string_view host, std::uint16_t port, std::uint64_t i
 
 void session::disconnect(std::uint32_t reason)
 {
-    if(state) {
-        if(globals::peer) {
-            Disconnect_Packet packet {};
-            packet.reason = reason;
-            protocol::send(packet, globals::peer);
-        }
-
-        reset_session();
-
-        host::disconnect();
+    if(state && globals::peer) {
+        Disconnect_Packet packet {};
+        packet.reason = reason;
+        protocol::send(packet, globals::peer);
     }
+
+    handle_disconnect(reason);
 }
 
 void session::notify_spawned(void)

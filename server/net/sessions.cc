@@ -89,22 +89,25 @@ static void on_auth_request(const AuthRequest_Packet& packet)
         return;
     }
 
-    if(packet.invite && s_whitelist_enabled) {
-        if(!invites::consume(packet.invite, packet.pkey)) {
-            Disconnect_Packet response {};
-            response.reason = Disconnect_Packet::NOT_WHITELISTED;
-            protocol::send(response, packet.peer);
-            return;
-        }
-    }
+    auto client_whitelisted = false;
 
     if(s_whitelist_enabled) {
-        if(!whitelist::contains(packet.pkey)) {
-            Disconnect_Packet response {};
-            response.reason = Disconnect_Packet::NOT_WHITELISTED;
-            protocol::send(response, packet.peer);
-            return;
+        if(whitelist::contains(packet.pkey)) {
+            client_whitelisted = true;
         }
+        else if(packet.invite) {
+            client_whitelisted = invites::consume(packet.invite, packet.pkey);
+        }
+    }
+    else {
+        client_whitelisted = true;
+    }
+
+    if(!client_whitelisted) {
+        Disconnect_Packet response {};
+        response.reason = Disconnect_Packet::NOT_WHITELISTED;
+        protocol::send(response, packet.peer);
+        return;
     }
 
     auto checksums_match = true;
@@ -148,6 +151,8 @@ static void on_auth_request(const AuthRequest_Packet& packet)
     session->identity = utils::crc64(session->pkey);
     session->state = session_state::CHALLENGE;
 
+    LOG_INFO("{} ({}) connected on version {}.{}.{}", session->username, session->identity, packet.major, packet.minor, packet.patch);
+
     AuthChallenge_Packet response {};
     response.nonce = session->nonce;
     protocol::send(response, packet.peer);
@@ -173,13 +178,15 @@ static void on_auth_response(const AuthResponse_Packet& packet)
 
     session->state = session_state::CONNECTED;
 
+    LOG_INFO("{} ({}) authenticated successfully", session->username, session->identity);
+
     AuthAdmission_Packet response {};
     response.client_id = session->client_id;
     response.identity = session->identity;
     response.username = session->username;
     protocol::send(response, packet.peer);
 
-    auto bpos = BlockPos::Zero();
+    auto bpos = BlockPos::Zero(); // TODO: spawn positions?
     auto player = utils::spawn_player(bpos);
     session->player = player;
 
@@ -194,11 +201,9 @@ static void on_auth_response(const AuthResponse_Packet& packet)
 
 static void on_disconnect(const Disconnect_Packet& packet)
 {
-    if(auto session = sessions::find(packet.peer)) {
-        LOG_INFO("{} ({}) disconnected: {}", session->username, session->identity, Disconnect_Packet::reason_string_server(packet.reason));
+    auto session = sessions::find(packet.peer);
 
-        sessions::destroy(session);
-    }
+    sessions::destroy(session, packet.reason);
 }
 
 static std::string sanitize_username(std::string_view username)
@@ -358,9 +363,20 @@ Session* sessions::find(const ENetPeer* peer)
     return session;
 }
 
-void sessions::destroy(Session* session)
+void sessions::destroy(Session* session, std::optional<std::uint32_t> reason)
 {
     if(session) {
+        std::string_view reason_string;
+
+        if(reason.has_value()) {
+            reason_string = Disconnect_Packet::reason_string_server(reason.value());
+        }
+        else {
+            reason_string = std::string_view("connection closed");
+        }
+
+        LOG_INFO("{} ({}) disconnected: {}", session->username, session->identity, reason_string);
+
         if(session->peer) {
             session->peer->data = nullptr;
         }

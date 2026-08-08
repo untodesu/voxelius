@@ -18,6 +18,7 @@ void host::init(void)
 void host::shutdown(void)
 {
     if(globals::peer) {
+        enet_host_flush(globals::host);
         enet_peer_reset(globals::peer);
     }
 
@@ -74,7 +75,7 @@ void host::disconnect(void)
 {
     if(globals::peer) {
         if(globals::peer->state == ENET_PEER_STATE_CONNECTED) {
-            enet_peer_disconnect(globals::peer, 0);
+            enet_peer_disconnect_later(globals::peer, 0);
         }
         else {
             enet_peer_reset(globals::peer);

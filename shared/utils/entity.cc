@@ -65,12 +65,11 @@ static bool patch_components(entt::entity entity, const ClassDefinition* def, lu
     return true;
 }
 
-entt::entity utils::spawn(const Identifier& name, entt::entity hint)
+entt::entity utils::spawn(class_id_type class_id, entt::entity hint)
 {
-    auto def = class_registry::find_definition(name);
-    auto id = class_registry::find(name);
+    auto def = class_registry::find_definition(class_id);
 
-    if(id == CLASS_ID_NULL || def == nullptr) {
+    if(def == nullptr) {
         return entt::null;
     }
 
@@ -81,7 +80,10 @@ entt::entity utils::spawn(const Identifier& name, entt::entity hint)
         return entt::null;
     }
 
-    attach_class(entity, id, name);
+    auto name = class_registry::name_of(class_id);
+    vx::throw_if_not(name.has_value(), "class_registry got corrupted");
+
+    attach_class(entity, class_id, std::move(name.value()));
 
     if(!attach_components(entity, def)) {
         globals::registry.destroy(entity);
@@ -91,16 +93,12 @@ entt::entity utils::spawn(const Identifier& name, entt::entity hint)
     return entity;
 }
 
-entt::entity utils::spawn(const Identifier& name, lua_State* L, int kv_idx, entt::entity hint)
+entt::entity utils::spawn(class_id_type class_id, lua_State* L, int kv_idx, entt::entity hint)
 {
-    auto def = class_registry::find_definition(name);
-    auto id = class_registry::find(name);
+    auto def = class_registry::find_definition(class_id);
 
-    if(id == CLASS_ID_NULL || def == nullptr) {
-        auto full_name = name.full_string();
-        lua_pushstring(L, "unknown class ");
-        lua_pushlstring(L, full_name.data(), full_name.size());
-        lua_concat(L, 2);
+    if(def == nullptr) {
+        lua_pushstring(L, "unknown class id");
         return entt::null;
     }
 
@@ -111,7 +109,10 @@ entt::entity utils::spawn(const Identifier& name, lua_State* L, int kv_idx, entt
         return entt::null;
     }
 
-    attach_class(entity, id, name);
+    auto name = class_registry::name_of(class_id);
+    vx::throw_if_not(name.has_value(), "class_registry got corrupted");
+
+    attach_class(entity, class_id, std::move(name.value()));
 
     if(!attach_components(entity, def)) {
         lua_pushstring(L, "failed to attach components");
@@ -126,6 +127,20 @@ entt::entity utils::spawn(const Identifier& name, lua_State* L, int kv_idx, entt
     }
 
     return entity;
+}
+
+entt::entity utils::spawn(const Identifier& name, entt::entity hint)
+{
+    auto id = class_registry::find(name);
+
+    return utils::spawn(id, hint);
+}
+
+entt::entity utils::spawn(const Identifier& name, lua_State* L, int kv_idx, entt::entity hint)
+{
+    auto id = class_registry::find(name);
+
+    return utils::spawn(id, L, kv_idx, hint);
 }
 
 entt::entity utils::spawn_player(const BlockPos& pos, entt::entity hint)

@@ -3,6 +3,8 @@ add_executable(vclient
     "${CMAKE_CURRENT_LIST_DIR}/net/bother.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/host.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/host.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/net/receive.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/net/receive.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/session.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/session.hh"
     "${CMAKE_CURRENT_LIST_DIR}/system/interpolation.cc"

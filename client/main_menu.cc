@@ -7,6 +7,7 @@
 
 #include "shared/mod_context.hh"
 #include "shared/mod_loader.hh"
+#include "shared/net/packet_session.hh"
 
 #include "client/constant.hh"
 #include "client/globals.hh"
@@ -16,6 +17,7 @@
 #include "client/gui/popup.hh"
 #include "client/gui/screen.hh"
 #include "client/language.hh"
+#include "client/net/session.hh"
 #include "client/play_menu.hh"
 #include "client/res/texture2D.hh"
 #include "client/settings.hh"
@@ -80,7 +82,9 @@ void main_menu::init(void)
     });
 
     s_menu.add_button_ingame("main_menu.button.disconnect", [] {
-        LOG_INFO("TODO: disconnect");
+        session::disconnect(Disconnect_Packet::CLIENT_DISCONNECT);
+
+        globals::gui_screen = &play_menu::screen;
     });
 
     s_menu.add_spacer_any();

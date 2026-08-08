@@ -2,8 +2,15 @@
 #define FEDE636E_EA8B_465F_8397_6BDB599AA241
 
 #include "shared/coord.hh"
+#include "shared/entity/class.hh"
 
 class Identifier;
+
+namespace utils
+{
+entt::entity spawn(class_id_type class_id, entt::entity hint = entt::null);
+entt::entity spawn(class_id_type class_id, lua_State* L, int kv_idx, entt::entity hint = entt::null);
+} // namespace utils
 
 namespace utils
 {
