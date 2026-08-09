@@ -9,6 +9,7 @@
 #include "shared/net/packet_player.hh"
 #include "shared/net/packet_world.hh"
 #include "shared/net/protocol.hh"
+#include "shared/system/pmove.hh"
 #include "shared/utils/biome.hh"
 #include "shared/world/biome_map.hh"
 #include "shared/world/chunk.hh"
@@ -16,6 +17,7 @@
 
 #include "server/globals.hh"
 #include "server/net/sessions.hh"
+#include "server/system/pmove_validator.hh"
 #include "server/world/chunk_loader.hh"
 
 static emhash8::HashMap<ChunkPos, std::vector<ENetPeer*>> s_waiting_peers;
@@ -107,9 +109,20 @@ static void on_player_interact_b(const PlayerInteractB_Packet& packet)
 
 static void on_player_move_data(const PlayerMoveData_Packet& packet)
 {
-    // TODO: simulate movement, compare results with what client
-    //  has simulated. If server disagrees with the client too
-    //  much, send a correction EntityPatch_Packet to the client
+    auto session = sessions::find(packet.peer);
+
+    if(session == nullptr) {
+        return;
+    }
+
+    globals::registry.emplace_or_replace<MoveData>(session->player, MoveData { packet.wishdir });
+
+    SimulatedMoveData sim_data;
+    sim_data.chunk = packet.simulated_cpos;
+    sim_data.local = packet.simulated_lpos;
+    sim_data.velocity = packet.velocity;
+
+    globals::registry.emplace_or_replace<SimulatedMoveData>(session->player, std::move(sim_data));
 }
 
 void receive::init(void)

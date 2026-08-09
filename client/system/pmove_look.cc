@@ -1,6 +1,6 @@
 #include "client/pch.hh"
 
-#include "client/system/player_look.hh"
+#include "client/system/pmove_look.hh"
 
 #include "core/config/map.hh"
 #include "core/config/ref.hh"

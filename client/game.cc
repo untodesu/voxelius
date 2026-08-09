@@ -9,6 +9,7 @@
 #include "shared/constant.hh"
 #include "shared/coord.hh"
 #include "shared/physics/physics.hh"
+#include "shared/system/pmove.hh"
 #include "shared/utils/coord.hh"
 #include "shared/utils/world.hh"
 #include "shared/world/block_registry.hh"
@@ -17,9 +18,10 @@
 #include "client/globals.hh"
 #include "client/language.hh"
 #include "client/net/bother.hh"
+#include "client/net/transmit.hh"
 #include "client/system/interpolation.hh"
-#include "client/system/player_look.hh"
-#include "client/system/player_move.hh"
+#include "client/system/pmove_client.hh"
+#include "client/system/pmove_look.hh"
 #include "client/system/player_target.hh"
 
 static void on_bother_response(const BotherResponseEvent& event)
@@ -63,6 +65,9 @@ void client_game::update(void)
     interpolation::update();
 
     player_target::update();
+
+    player_move::update();
+    pmove::update(globals::window_frametime);
 }
 
 void client_game::update_late(void)
@@ -70,7 +75,6 @@ void client_game::update_late(void)
     ZoneScoped;
 
     player_look::update_late();
-    player_move::update_late();
 }
 
 void client_game::fixed_update(void)
@@ -84,7 +88,7 @@ void client_game::fixed_update_late(void)
 {
     ZoneScoped;
 
-    // empty
+    transmit::fixed_update_late();
 }
 
 void client_game::layout(void)

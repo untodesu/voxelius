@@ -61,6 +61,7 @@ void protocol::decode(entt::dispatcher& dispatcher, const ENetPacket* packet, EN
     static PlayerAttackB_Packet player_attack_b;
     static PlayerInteractE_Packet player_interact_e;
     static PlayerInteractB_Packet player_interact_b;
+    static PlayerMoveData_Packet player_move_data;
     static EntitySpawn_Packet entity_spawn;
     static EntityPatch_Packet entity_patch;
     static EntityRemove_Packet entity_remove;
@@ -165,6 +166,12 @@ void protocol::decode(entt::dispatcher& dispatcher, const ENetPacket* packet, EN
             dispatcher.trigger(static_cast<const PlayerInteractB_Packet&>(player_interact_b));
             break;
 
+        case PlayerMoveData_Packet::TYPE:
+            PlayerMoveData_Packet::decode(player_move_data, buffer);
+            player_move_data.peer = peer;
+            dispatcher.trigger(static_cast<const PlayerMoveData_Packet&>(player_move_data));
+            break;
+
         case EntitySpawn_Packet::TYPE:
             EntitySpawn_Packet::decode(entity_spawn, buffer);
             entity_spawn.peer = peer;
@@ -256,6 +263,7 @@ template void protocol::send<PlayerAttackE_Packet>(const PlayerAttackE_Packet& p
 template void protocol::send<PlayerAttackB_Packet>(const PlayerAttackB_Packet& packet, ENetPeer* peer);
 template void protocol::send<PlayerInteractE_Packet>(const PlayerInteractE_Packet& packet, ENetPeer* peer);
 template void protocol::send<PlayerInteractB_Packet>(const PlayerInteractB_Packet& packet, ENetPeer* peer);
+template void protocol::send<PlayerMoveData_Packet>(const PlayerMoveData_Packet& packet, ENetPeer* peer);
 template void protocol::send<EntitySpawn_Packet>(const EntitySpawn_Packet& packet, ENetPeer* peer);
 template void protocol::send<EntityPatch_Packet>(const EntityPatch_Packet& packet, ENetPeer* peer);
 template void protocol::send<EntityRemove_Packet>(const EntityRemove_Packet& packet, ENetPeer* peer);

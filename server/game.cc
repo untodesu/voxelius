@@ -4,11 +4,15 @@
 
 #include "core/identifier.hh"
 
+#include "shared/globals.hh"
+#include "shared/system/pmove.hh"
 #include "shared/utils/entity.hh"
+
+#include "server/system/pmove_validator.hh"
 
 void server_game::init(void)
 {
-    // empty
+    pmove_validator::init();
 }
 
 void server_game::init_late(void)
@@ -24,9 +28,13 @@ void server_game::shutdown(void)
 void server_game::fixed_update(void)
 {
     ZoneScoped;
+
+    pmove::update(globals::fixed_frametime);
 }
 
 void server_game::fixed_update_late(void)
 {
     ZoneScoped;
+
+    pmove_validator::fixed_update_late();
 }

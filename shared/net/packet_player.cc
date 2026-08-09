@@ -58,7 +58,6 @@ void PlayerMoveData_Packet::encode(const PlayerMoveData_Packet& packet, WriteBuf
 {
     buffer.write_vector<std::int32_t, 3>(packet.simulated_cpos.cast<std::int32_t>());
     buffer.write_vector<float, 3>(packet.simulated_lpos);
-    buffer.write_vector<float, 3>(packet.camera_angles);
     buffer.write_vector<float, 3>(packet.velocity);
     buffer.write_vector<float, 3>(packet.wishdir);
 }
@@ -67,7 +66,6 @@ void PlayerMoveData_Packet::decode(PlayerMoveData_Packet& packet, ReadBuffer& bu
 {
     packet.simulated_cpos = buffer.read_vector<std::int32_t, 3>().cast<ChunkPos::value_type>();
     packet.simulated_lpos = buffer.read_vector<float, 3>();
-    packet.camera_angles = buffer.read_vector<float, 3>();
     packet.velocity = buffer.read_vector<float, 3>();
     packet.wishdir = buffer.read_vector<float, 3>();
 }

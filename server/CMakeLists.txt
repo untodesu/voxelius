@@ -13,6 +13,8 @@ add_executable(vserver
     "${CMAKE_CURRENT_LIST_DIR}/net/whitelist.hh"
     "${CMAKE_CURRENT_LIST_DIR}/system/collector.cc"
     "${CMAKE_CURRENT_LIST_DIR}/system/collector.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/system/pmove_validator.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/system/pmove_validator.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/climate_noise.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/climate_noise.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/climate.cc"
