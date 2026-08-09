@@ -17,10 +17,14 @@
 #include "server/globals.hh"
 #include "server/net/host.hh"
 #include "server/net/invites.hh"
+#include "server/net/receive.hh"
 #include "server/net/sessions.hh"
 #include "server/net/status.hh"
 #include "server/net/whitelist.hh"
 #include "server/system/collector.hh"
+#include "server/universe.hh"
+#include "server/world/chunk_loader.hh"
+#include "server/world/chunk_unloader.hh"
 #include "server/world/climate.hh"
 #include "server/world/worldgen.hh"
 
@@ -51,6 +55,11 @@ static void zoned_fixed_update_late(void)
     server_game::fixed_update_late();
 
     collector::fixed_update_late();
+
+    chunk_loader::fixed_update();
+    chunk_unloader::fixed_update_late();
+
+    threading::update();
 }
 
 static void wrapped_main(int argc, char** argv)
@@ -78,14 +87,21 @@ static void wrapped_main(int argc, char** argv)
     invites::init();
     sessions::init();
     status::init();
+    receive::init();
 
     worldgen::init();
+
+    universe::init();
+    chunk_loader::init();
+    chunk_unloader::init();
 
     splash::init(SPLASH_SERVER);
 
     globals::server_config.load("server.conf");
 
     host::init_late();
+
+    universe::init_late();
 
     shared_game::init_late();
     server_game::init_late();
@@ -151,6 +167,9 @@ static void wrapped_main(int argc, char** argv)
     LOG_INFO("avg tickrate: {:.03f} TPS ({:.03f} MSPT)", 1.0f / globals::fixed_frametime_avg, 1000.0f * globals::fixed_frametime_avg);
 
     worldgen::shutdown();
+
+    chunk_loader::shutdown();
+    universe::shutdown();
 
     sessions::shutdown();
     invites::shutdown();

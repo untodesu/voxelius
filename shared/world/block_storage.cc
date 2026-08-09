@@ -10,50 +10,98 @@ constexpr static std::uint32_t TAG_UNIFORM = 0x85787370;   // UNIF
 constexpr static std::uint32_t TAG_PALETTE8 = 0x80657666;  // PALB
 constexpr static std::uint32_t TAG_PALETTE16 = 0x80657687; // PALW
 
+constexpr static std::uint8_t COMPRESSION_NONE = 0;
+constexpr static std::uint8_t COMPRESSION_ZLIB = 1;
+
 void BlockStorage::encode(const BlockStorage& storage, WriteBuffer& buffer)
 {
-    if(const auto uniform = std::get_if<Uniform>(&storage.m_variant)) {
-        buffer.write<std::uint32_t>(TAG_UNIFORM);
-        encode(uniform, buffer);
-        return;
+    WriteBuffer raw;
+
+    if(auto uniform = std::get_if<Uniform>(&storage.m_variant)) {
+        raw.write<std::uint32_t>(TAG_UNIFORM);
+        encode(uniform, raw);
+    }
+    else if(auto p8 = std::get_if<Palette8>(&storage.m_variant)) {
+        raw.write<std::uint32_t>(TAG_PALETTE8);
+        encode(p8, raw);
+    }
+    else if(auto p16 = std::get_if<Palette16>(&storage.m_variant)) {
+        raw.write<std::uint32_t>(TAG_PALETTE16);
+        encode(p16, raw);
     }
 
-    if(const auto p8 = std::get_if<Palette8>(&storage.m_variant)) {
-        buffer.write<std::uint32_t>(TAG_PALETTE8);
-        encode(p8, buffer);
-        return;
-    }
+    auto raw_size = static_cast<mz_ulong>(raw.size());
+    auto raw_bound = mz_compressBound(raw_size);
 
-    if(const auto p16 = std::get_if<Palette16>(&storage.m_variant)) {
-        buffer.write<std::uint32_t>(TAG_PALETTE16);
-        encode(p16, buffer);
-        return;
+    auto compressed_size = raw_bound;
+    std::vector<std::byte> compressed;
+    compressed.resize(raw_bound);
+
+    auto raw_data = reinterpret_cast<const unsigned char*>(raw.data());
+    auto compressed_data = reinterpret_cast<unsigned char*>(compressed.data());
+    auto status = mz_compress2(compressed_data, &compressed_size, raw_data, raw_size, MZ_DEFAULT_LEVEL);
+    assert(status == MZ_OK);
+
+    if(compressed_size < raw_size) {
+        buffer.write<std::uint8_t>(COMPRESSION_ZLIB);
+        buffer.write<std::uint32_t>(static_cast<std::uint32_t>(raw_size));
+        buffer.write<std::uint32_t>(static_cast<std::uint32_t>(compressed_size));
+        buffer.write_bytes(std::span<const std::byte>(compressed.data(), compressed_size));
+    }
+    else {
+        buffer.write<std::uint8_t>(COMPRESSION_NONE);
+        buffer.write<std::uint32_t>(static_cast<std::uint32_t>(raw_size));
+        buffer.write_bytes(std::span(raw.data(), raw.size()));
     }
 }
 
 void BlockStorage::decode(BlockStorage& storage, ReadBuffer& buffer)
 {
-    const auto tag = buffer.read<std::uint32_t>();
+    auto mode = buffer.read<std::uint8_t>();
+    auto raw_size = buffer.read<std::uint32_t>();
 
-    if(tag == TAG_PALETTE8) {
-        Palette8 p8;
-        decode(p8, buffer);
-        storage.m_variant = std::move(p8);
-        return;
+    std::vector<std::byte> raw_bytes;
+    raw_bytes.resize(raw_size);
+
+    if(mode == COMPRESSION_ZLIB) {
+        auto compressed_size = static_cast<mz_ulong>(buffer.read<std::uint32_t>());
+
+        mz_ulong raw_size_mz = raw_size;
+        std::vector<std::byte> compressed;
+        compressed.resize(compressed_size);
+        buffer.read_bytes(compressed);
+
+        auto raw_data = reinterpret_cast<unsigned char*>(raw_bytes.data());
+        auto compressed_data = reinterpret_cast<unsigned char*>(compressed.data());
+        auto status = mz_uncompress(raw_data, &raw_size_mz, compressed_data, compressed_size);
+        assert(status == MZ_OK);
+    }
+    else {
+        buffer.read_bytes(raw_bytes);
     }
 
-    if(tag == TAG_PALETTE16) {
-        Palette16 p16;
-        decode(p16, buffer);
-        storage.m_variant = std::move(p16);
-        return;
-    }
+    ReadBuffer raw;
+    raw.reset(raw_bytes);
 
-    if(tag == TAG_UNIFORM) {
-        Uniform uniform;
-        decode(uniform, buffer);
-        storage.m_variant = std::move(uniform);
-        return;
+    Palette8 p8;
+    Palette16 p16;
+    Uniform uniform;
+
+    switch(raw.read<std::uint32_t>()) {
+        case TAG_UNIFORM:
+            decode(uniform, raw);
+            storage.m_variant = std::move(uniform);
+            return;
+
+        case TAG_PALETTE8:
+            decode(p8, raw);
+            storage.m_variant = std::move(p8);
+            return;
+
+        case TAG_PALETTE16:
+            decode(p16, raw);
+            storage.m_variant = std::move(p16);
+            return;
     }
 }
 

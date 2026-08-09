@@ -253,6 +253,11 @@ static std::string sanitize_username(std::string_view username)
     return sanitized;
 }
 
+std::span<const Session> sessions::all(void)
+{
+    return s_sessions;
+}
+
 void sessions::init(void)
 {
     s_whitelist_enabled.bind(globals::server_config, "whitelist.enabled");

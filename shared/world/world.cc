@@ -26,6 +26,11 @@ ChunkUpdateEvent::ChunkUpdateEvent(const ChunkPos& pos, const std::shared_ptr<Ch
     // empty
 }
 
+ChunkReadyEvent::ChunkReadyEvent(const ChunkPos& pos, const std::shared_ptr<Chunk>& chunk) : m_chunk(chunk), m_pos(pos)
+{
+    // empty
+}
+
 BlockUpdateEvent::BlockUpdateEvent(const BlockPos& pos, block_id_type id, const std::shared_ptr<Chunk>& chunk)
     : m_chunk(chunk), m_id(id), m_bpos(pos), m_cpos(utils::to_chunk(pos)), m_lpos(utils::to_local(pos))
 {

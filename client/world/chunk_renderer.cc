@@ -389,7 +389,7 @@ void chunk_renderer::init(void)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_pattern_ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(s_pattern_ibo_capacity), nullptr, GL_STATIC_DRAW);
 
-    s_chunk_positions.clear();
+    s_chunk_positions.assign(INITIAL_CAPACITY, Eigen::Vector3f::Zero());
     s_chunk_positions_capacity = INITIAL_CAPACITY;
 
     glGenBuffers(1, &s_chunk_positions_buffer);
@@ -419,6 +419,7 @@ void chunk_renderer::init(void)
     globals::dispatcher.sink<ChunkRemoveEvent>().connect<&on_chunk_remove>();
     globals::dispatcher.sink<ChunkUpdateEvent>().connect<&on_chunk_update>();
     world::chunk_registry.on_update<ChunkMesh>().connect<&on_chunk_mesh>();
+    world::chunk_registry.on_destroy<ChunkMesh>().connect<&on_chunk_mesh>();
 }
 
 void chunk_renderer::shutdown(void)

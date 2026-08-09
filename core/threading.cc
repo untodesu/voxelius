@@ -92,11 +92,14 @@ void threading::update(void)
 {
     ZoneScoped;
 
-    auto it = s_deque.cbegin();
+    std::vector<std::unique_ptr<Task>> finished;
+    finished.reserve(s_deque.size());
 
-    while(it != s_deque.cend()) {
-        auto task_ptr = it->get();
-        auto status = task_ptr->status.load(std::memory_order_relaxed);
+    auto it = s_deque.begin();
+
+    while(it < s_deque.end()) {
+        auto& task = *it;
+        auto status = task->status.load(std::memory_order_relaxed);
 
         if(status == task_status::CANCELLED) {
             it = s_deque.erase(it);
@@ -104,11 +107,15 @@ void threading::update(void)
         }
 
         if(status == task_status::COMPLETED) {
-            task_ptr->finalize();
+            finished.push_back(std::move(task));
             it = s_deque.erase(it);
             continue;
         }
 
         it = std::next(it);
+    }
+
+    for(auto& task : finished) {
+        task->finalize();
     }
 }

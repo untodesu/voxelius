@@ -35,15 +35,23 @@ add_executable(vserver
     "${CMAKE_CURRENT_LIST_DIR}/world/realm_surface.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/terrain.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/terrain.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/world/chunk_loader.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/world/chunk_loader.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/world/chunk_unloader.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/world/chunk_unloader.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/worldgen.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/worldgen.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/world/zvox_file.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/world/zvox_file.hh"
     "${CMAKE_CURRENT_LIST_DIR}/constant.hh"
     "${CMAKE_CURRENT_LIST_DIR}/game.cc"
     "${CMAKE_CURRENT_LIST_DIR}/game.hh"
     "${CMAKE_CURRENT_LIST_DIR}/globals.cc"
     "${CMAKE_CURRENT_LIST_DIR}/globals.hh"
     "${CMAKE_CURRENT_LIST_DIR}/main.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
+    "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/universe.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/universe.hh")
 target_compile_features(vserver PUBLIC cxx_std_20)
 target_include_directories(vserver PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(vserver PUBLIC core shared)

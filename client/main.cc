@@ -34,6 +34,7 @@
 #include "client/world/block_atlas.hh"
 #include "client/world/bmodel_cache.hh"
 #include "client/world/chunk_mesher.hh"
+#include "client/world/chunk_visibility.hh"
 #include "client/world/fluid_cache.hh"
 #include "client/world/skybox.hh"
 
@@ -116,8 +117,8 @@ static void zoned_fixed_update(void)
     for(std::uint64_t i = 0; i < globals::fixed_framecount; ++i) {
         FrameMarkStart("Fixed");
 
-        shared_game::fixed_update();
         client_game::fixed_update();
+        shared_game::fixed_update();
 
         FrameMarkEnd("Fixed");
     }
@@ -174,8 +175,10 @@ static void zoned_fixed_update_late(void)
 
         host::fixed_update_late();
 
-        shared_game::fixed_update_late();
         client_game::fixed_update_late();
+        shared_game::fixed_update_late();
+
+        chunk_visibility::fixed_update_late();
 
         FrameMarkEnd("Fixed");
     }

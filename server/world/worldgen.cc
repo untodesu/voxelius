@@ -88,6 +88,7 @@ void WorldgenTask::finalize(void)
     }
 
     globals::dispatcher.trigger(ChunkUpdateEvent(m_pos, chunk));
+    globals::dispatcher.trigger(ChunkReadyEvent(m_pos, chunk));
 }
 
 void worldgen::init(void)

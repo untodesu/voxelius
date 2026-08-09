@@ -35,6 +35,11 @@ extern std::uint16_t num_players;
 
 namespace sessions
 {
+std::span<const Session> all(void);
+} // namespace sessions
+
+namespace sessions
+{
 void init(void);
 void init_late(void);
 void shutdown(void);
