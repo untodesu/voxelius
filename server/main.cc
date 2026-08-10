@@ -147,6 +147,8 @@ static void wrapped_main(int argc, char** argv)
 
         last_curtime_us = globals::curtime_us;
 
+        globals::current_tick += 1;
+
         zoned_fixed_update();
 
         zoned_fixed_update_late();

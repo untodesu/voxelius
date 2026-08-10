@@ -4,6 +4,8 @@
 
 #include "core/camera.hh"
 
+#include "shared/net/packet_player.hh"
+#include "shared/net/protocol.hh"
 #include "shared/utils/coord.hh"
 #include "shared/utils/world.hh"
 #include "shared/world/block_collisions.hh"
@@ -21,12 +23,30 @@ static void on_mouse_button_event(const SDL_MouseButtonEvent& event)
         const auto& hit = std::get<physics::BlockHit>(player_target::hit);
 
         if(event.button == SDL_BUTTON_RIGHT) {
+            // TODO: hardcoded placed block until an inventory/hotbar system exists
             auto family = block_registry::find_family(Identifier::from_string("builtin:water"));
             auto block = family ? family->default_variant : block_registry::find(Identifier::from_string("builtin:water"));
             utils::block_place(hit, globals::player, block);
+
+            if(globals::peer) {
+                PlayerInteractB_Packet packet {};
+                packet.bpos = hit.block_pos;
+                packet.expected = hit.id;
+                packet.face = hit.face;
+                packet.normal = hit.normal;
+                packet.point = hit.point;
+                protocol::send(packet, globals::peer);
+            }
         }
         else if(event.button == SDL_BUTTON_LEFT) {
             utils::block_break(hit, globals::player);
+
+            if(globals::peer) {
+                PlayerAttackB_Packet packet {};
+                packet.bpos = hit.block_pos;
+                packet.expected = hit.id;
+                protocol::send(packet, globals::peer);
+            }
         }
     }
 }
