@@ -54,13 +54,8 @@ static void on_world_request(const packet::World_Request& packet)
         return;
     }
 
-    auto transform = globals::registry.try_get<Transform>(session->player);
-
-    if(transform == nullptr) {
-        return;
-    }
-
-    auto delta = ChunkPos(transform->chunk - packet.cpos);
+    auto& transform = globals::registry.get<Transform>(session->player);
+    auto delta = ChunkPos(transform.chunk - packet.cpos);
     auto distance = static_cast<unsigned>(delta.cwiseAbs().maxCoeff());
 
     if(distance > s_view_distance.value()) {
@@ -99,15 +94,9 @@ static void on_player_attack_e(const packet::Player_AttackE& packet)
 
 static bool in_reach(entt::entity player, const BlockPos& bpos)
 {
-    auto transform = globals::registry.try_get<Transform>(player);
-
-    if(transform == nullptr) {
-        return false;
-    }
-
-    auto player_bpos = utils::to_block(transform->chunk, transform->local.cast<LocalPos::value_type>());
+    auto& transform = globals::registry.get<Transform>(player);
+    auto player_bpos = utils::to_block(transform.chunk, transform.local.cast<LocalPos::value_type>());
     auto distance = (bpos - player_bpos).cast<float>().norm();
-
     return distance <= s_reach_distance.value();
 }
 

@@ -34,12 +34,11 @@ void chunk_unloader::fixed_update_late(void)
 
     for(auto& session : all_sessions) {
         if(globals::registry.valid(session.player)) {
-            if(auto transform = globals::registry.try_get<Transform>(session.player)) {
-                auto radius = static_cast<ChunkPos::value_type>(s_view_distance.value());
-                auto min = transform->chunk - ChunkPos::Constant(radius);
-                auto max = transform->chunk + ChunkPos::Constant(radius);
-                boxes.emplace_back(min, max);
-            }
+            auto& transform = globals::registry.get<Transform>(session.player);
+            auto radius = static_cast<ChunkPos::value_type>(s_view_distance.value());
+            auto min = transform.chunk - ChunkPos::Constant(radius);
+            auto max = transform.chunk + ChunkPos::Constant(radius);
+            boxes.emplace_back(min, max);
         }
     }
 

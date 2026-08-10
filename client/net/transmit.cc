@@ -14,34 +14,19 @@
 void transmit::fixed_update_late(void)
 {
     if(globals::peer && globals::registry.valid(globals::player)) {
-        const auto head = globals::registry.try_get<Head>(globals::player);
-        const auto transform = globals::registry.try_get<Transform>(globals::player);
-        const auto velocity = globals::registry.try_get<Velocity>(globals::player);
-        const auto move_data = globals::registry.try_get<MoveData>(globals::player);
+        const auto& head = globals::registry.get<Head>(globals::player);
+        const auto& transform = globals::registry.get<Transform>(globals::player);
+        const auto& velocity = globals::registry.get<Velocity>(globals::player);
 
         packet::Player_MoveData packet {};
-        packet.simulated_cpos = ChunkPos::Zero();
-        packet.camera_angles = Eigen::Vector3f::Zero();
-        packet.simulated_lpos = Eigen::Vector3f::Zero();
-        packet.velocity = Eigen::Vector3f::Zero();
-        packet.wishdir = Eigen::Vector3f::Zero();
+        packet.simulated_lpos = transform.local;
+        packet.simulated_cpos = transform.chunk;
+        packet.camera_angles.x() = head.angles.x();
+        packet.camera_angles.y() = transform.angles.y();
+        packet.camera_angles.z() = head.angles.z();
+        packet.velocity = velocity.value;
 
-        if(head) {
-            packet.camera_angles.x() = head->angles.x();
-            packet.camera_angles.z() = head->angles.z();
-        }
-
-        if(transform) {
-            packet.simulated_cpos = transform->chunk;
-            packet.simulated_lpos = transform->local;
-            packet.camera_angles.y() = transform->angles.y();
-        }
-
-        if(velocity) {
-            packet.velocity = velocity->value;
-        }
-
-        if(move_data) {
+        if(const auto move_data = globals::registry.try_get<MoveData>(globals::player)) {
             packet.wishdir = move_data->wishdir;
         }
 
