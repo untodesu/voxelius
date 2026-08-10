@@ -20,6 +20,7 @@
 
 #include "client/globals.hh"
 #include "client/net/host.hh"
+#include "client/video.hh"
 
 constexpr static std::string_view KEYPAIR_PATH = "keypair.dat";
 
@@ -62,6 +63,8 @@ static void handle_disconnect(std::uint32_t reason)
     globals::player = entt::null;
     biome_map::purge();
     world::purge();
+
+    video::update_window_title();
 }
 
 static void on_host_connect(const HostConnectEvent& event)
@@ -194,4 +197,6 @@ void session::notify_spawned(void)
     if(state == SESSION_SPAWNING) {
         set_state(SESSION_INGAME);
     }
+
+    video::update_window_title();
 }
