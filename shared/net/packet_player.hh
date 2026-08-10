@@ -43,6 +43,7 @@ struct PlayerMoveData_Packet final : public BasePacket<packet_type::PLAYER_MOVE_
     static void decode(PlayerMoveData_Packet& packet, ReadBuffer& buffer);
 
     ChunkPos simulated_cpos;
+    Eigen::Vector3f camera_angles;
     Eigen::Vector3f simulated_lpos;
     Eigen::Vector3f velocity;
     Eigen::Vector3f wishdir;
