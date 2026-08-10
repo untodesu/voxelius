@@ -16,6 +16,7 @@
 #include "server/game.hh"
 #include "server/globals.hh"
 #include "server/net/host.hh"
+#include "server/net/interest.hh"
 #include "server/net/invites.hh"
 #include "server/net/receive.hh"
 #include "server/net/sessions.hh"
@@ -55,6 +56,8 @@ static void zoned_fixed_update_late(void)
     shared_game::fixed_update_late();
     server_game::fixed_update_late();
 
+    interest::fixed_update_late();
+
     collector::fixed_update_late();
 
     chunk_loader::fixed_update();
@@ -85,6 +88,8 @@ static void wrapped_main(int argc, char** argv)
     server_game::init();
 
     collector::init();
+
+    interest::init();
 
     whitelist::init();
     invites::init();

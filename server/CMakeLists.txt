@@ -1,6 +1,8 @@
 add_executable(vserver
     "${CMAKE_CURRENT_LIST_DIR}/net/host.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/host.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/net/interest.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/net/interest.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/invites.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/invites.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/receive.cc"

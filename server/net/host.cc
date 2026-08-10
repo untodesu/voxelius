@@ -12,14 +12,15 @@
 #include "server/globals.hh"
 #include "server/net/sessions.hh"
 
-static config::Ref<unsigned> s_max_players { 8 };
+config::Ref<unsigned> host::max_players { 8 };
+
 static config::Ref<unsigned> s_status_peers { 4 };
 static config::Ref<std::uint16_t> s_port { protocol::PORT };
 static config::Ref<std::string> s_bind { "0.0.0.0" };
 
 void host::init(void)
 {
-    s_max_players.bind(globals::server_config, "host.max_players");
+    max_players.bind(globals::server_config, "host.max_players");
     s_status_peers.bind(globals::server_config, "host.status_peers");
     s_port.bind(globals::server_config, "host.listen_port");
     s_bind.bind(globals::server_config, "host.bind_address");
@@ -27,9 +28,9 @@ void host::init(void)
 
 void host::init_late(void)
 {
-    auto max_players = s_max_players.value();
-    max_players = std::max(max_players, 1U);
-    max_players = std::min(max_players, 128U);
+    auto max_players_v = max_players.value();
+    max_players_v = std::max(max_players_v, 1U);
+    max_players_v = std::min(max_players_v, 128U);
 
     auto status_peers = s_status_peers.value();
     status_peers = std::max(status_peers, 1U);
@@ -38,7 +39,7 @@ void host::init_late(void)
     auto listen_port = s_port.value();
     listen_port = std::max<std::uint16_t>(listen_port, 1024);
 
-    s_max_players.set_value(max_players);
+    max_players.set_value(max_players_v);
     s_status_peers.set_value(status_peers);
     s_port.set_value(listen_port);
 
@@ -47,11 +48,11 @@ void host::init_late(void)
     address.port = s_port.value();
     enet_address_set_host(&address, s_bind.value().c_str());
 
-    globals::host = enet_host_create(&address, s_max_players + s_status_peers, 1, 0, 0);
+    globals::host = enet_host_create(&address, max_players + s_status_peers, 1, 0, 0);
     vx::throw_if_not(globals::host, "enet_host_create failed");
 
     LOG_INFO("listening on {}:{}", s_bind.value(), s_port.value());
-    LOG_INFO("max players: {}", s_max_players.value());
+    LOG_INFO("max players: {}", max_players.value());
     LOG_INFO("status peers: {}", s_status_peers.value());
 }
 

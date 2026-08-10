@@ -5,6 +5,7 @@
 #include "shared/coord.hh"
 #include "shared/net/packet_world.hh"
 #include "shared/net/protocol.hh"
+#include "shared/utils/view.hh"
 #include "shared/world/chunk.hh"
 #include "shared/world/world.hh"
 
@@ -63,8 +64,7 @@ void chunk_visibility::fixed_update_late(void)
 
     if(session::state == SESSION_INGAME) {
         auto radius = static_cast<ChunkPos::value_type>(camera::view_distance.value());
-        s_bounds_curr.min() = camera::chunk - ChunkPos::Constant(radius);
-        s_bounds_curr.max() = camera::chunk + ChunkPos::Constant(radius);
+        s_bounds_curr = utils::view_box(camera::chunk, radius);
 
         if(!s_bounds_curr.isApprox(s_bounds_prev)) {
             build_requests();

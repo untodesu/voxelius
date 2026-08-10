@@ -3,6 +3,17 @@
 
 #include "shared/net/ed25519.hh"
 
+namespace config
+{
+template<typename T>
+class Ref;
+} // namespace config
+
+namespace whitelist
+{
+extern config::Ref<bool> enabled;
+} // namespace whitelist
+
 namespace whitelist
 {
 void init(void);

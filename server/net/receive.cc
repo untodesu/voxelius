@@ -20,12 +20,12 @@
 #include "shared/world/world.hh"
 
 #include "server/globals.hh"
+#include "server/net/interest.hh"
 #include "server/net/sessions.hh"
 #include "server/system/pmove_validator.hh"
 #include "server/world/chunk_loader.hh"
 
 static emhash8::HashMap<ChunkPos, std::vector<ENetPeer*>> s_waiting_peers;
-static config::Ref<unsigned> s_view_distance { 8 };
 static config::Ref<float> s_reach_distance { 8.0f };
 
 static void send_chunk(ENetPeer* peer, const ChunkPos& cpos, const std::shared_ptr<Chunk>& chunk)
@@ -58,7 +58,7 @@ static void on_world_request(const packet::World_Request& packet)
     auto delta = ChunkPos(transform.chunk - packet.cpos);
     auto distance = static_cast<unsigned>(delta.cwiseAbs().maxCoeff());
 
-    if(distance > s_view_distance.value()) {
+    if(distance > interest::view_distance.value()) {
         return;
     }
 
@@ -186,7 +186,6 @@ static void on_player_move_data(const packet::Player_MoveData& packet)
 
 void receive::init(void)
 {
-    s_view_distance.bind(globals::server_config, "game.view_distance");
     s_reach_distance.bind(globals::server_config, "game.reach_distance");
 
     globals::dispatcher.sink<packet::World_Request>().connect<&on_world_request>();

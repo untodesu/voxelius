@@ -6,21 +6,21 @@
 
 #include "shared/component/transform.hh"
 #include "shared/globals.hh"
+#include "shared/utils/view.hh"
 #include "shared/world/chunk.hh"
 #include "shared/world/world.hh"
 
 #include "server/constant.hh"
 #include "server/globals.hh"
+#include "server/net/interest.hh"
 #include "server/net/sessions.hh"
 #include "server/world/chunk_loader.hh"
 
 constexpr static std::size_t UNLOAD_BUDGET = constant::REGION_VOLUME;
 
-static config::Ref<unsigned> s_view_distance { 8 };
-
 void chunk_unloader::init(void)
 {
-    s_view_distance.bind(globals::server_config, "game.view_distance");
+    // empty
 }
 
 void chunk_unloader::fixed_update_late(void)
@@ -35,10 +35,8 @@ void chunk_unloader::fixed_update_late(void)
     for(auto& session : all_sessions) {
         if(globals::registry.valid(session.player)) {
             auto& transform = globals::registry.get<Transform>(session.player);
-            auto radius = static_cast<ChunkPos::value_type>(s_view_distance.value());
-            auto min = transform.chunk - ChunkPos::Constant(radius);
-            auto max = transform.chunk + ChunkPos::Constant(radius);
-            boxes.emplace_back(min, max);
+            auto radius = static_cast<ChunkPos::value_type>(interest::view_distance.value());
+            boxes.push_back(utils::view_box(transform.chunk, radius));
         }
     }
 

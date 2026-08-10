@@ -3,6 +3,17 @@
 
 #include "shared/net/ed25519.hh"
 
+namespace config
+{
+template<typename T>
+class Ref;
+} // namespace config
+
+namespace sessions
+{
+extern config::Ref<bool> strict_version;
+} // namespace sessions
+
 enum class session_state : std::uint8_t {
     UNCONNECTED,
     CHALLENGE,

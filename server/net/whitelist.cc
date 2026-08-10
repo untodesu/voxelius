@@ -2,15 +2,22 @@
 
 #include "server/net/whitelist.hh"
 
+#include "core/config/ref.hh"
 #include "core/utils/crc64.hh"
 #include "core/utils/physfs.hh"
+
+#include "server/globals.hh"
 
 constexpr static std::string_view WHITELIST_FILE = "whitelist.txt";
 
 static emhash8::HashMap<std::uint64_t, ed25519::pkey_type> s_whitelist;
 
+config::Ref<bool> whitelist::enabled { false };
+
 void whitelist::init(void)
 {
+    enabled.bind(globals::server_config, "whitelist.enabled");
+
     std::string line;
     std::istringstream stream;
 

@@ -2,7 +2,6 @@
 
 #include "server/net/status.hh"
 
-#include "core/config/map.hh"
 #include "core/config/ref.hh"
 #include "core/version.hh"
 
@@ -11,27 +10,25 @@
 #include "shared/splash.hh"
 
 #include "server/globals.hh"
+#include "server/net/host.hh"
 #include "server/net/sessions.hh"
-
-static config::Ref<bool> s_enable_whitelist;
-static config::Ref<bool> s_strict_version;
-static config::Ref<unsigned> s_max_players;
+#include "server/net/whitelist.hh"
 
 static void on_status_request(const packet::Status_Request& packet)
 {
     std::uint32_t server_tags = 0;
 
-    if(s_enable_whitelist) {
+    if(whitelist::enabled) {
         server_tags |= packet::Status_Response::WHITELIST_ENABLED;
     }
 
-    if(s_strict_version) {
+    if(sessions::strict_version) {
         server_tags |= packet::Status_Response::STRICT_VERSION;
     }
 
     packet::Status_Response response {};
     response.version_major = version::major;
-    response.max_players = s_max_players;
+    response.max_players = host::max_players.value();
     response.num_players = sessions::num_players;
     response.motd = splash::get();
     response.version_minor = version::minor;
@@ -43,9 +40,5 @@ static void on_status_request(const packet::Status_Request& packet)
 
 void status::init(void)
 {
-    s_enable_whitelist.bind(globals::server_config, "whitelist.enabled");
-    s_strict_version.bind(globals::server_config, "auth.strict_version");
-    s_max_players.bind(globals::server_config, "host.max_players");
-
     globals::dispatcher.sink<packet::Status_Request>().connect<&on_status_request>();
 }

@@ -7,13 +7,14 @@
 #include "shared/world/world.hh"
 
 #include "server/globals.hh"
+#include "server/net/interest.hh"
 
 static void on_block_update(const BlockUpdateEvent& event)
 {
     packet::World_SetBlock packet {};
     packet.bpos = event.bpos();
     packet.block = event.id();
-    protocol::broadcast(packet, globals::host, nullptr);
+    interest::broadcast(packet, event.cpos());
 }
 
 void transmit::init(void)

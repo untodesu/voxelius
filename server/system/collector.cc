@@ -2,12 +2,14 @@
 
 #include "server/system/collector.hh"
 
+#include "shared/component/transform.hh"
 #include "shared/entity/class.hh"
 #include "shared/entity/component_map.hh"
 #include "shared/net/packet_entity.hh"
 #include "shared/net/protocol.hh"
 
 #include "server/globals.hh"
+#include "server/net/interest.hh"
 #include "server/net/sessions.hh"
 
 static void on_create_entity(entt::registry& registry, entt::entity entity)
@@ -20,7 +22,12 @@ static void on_create_entity(entt::registry& registry, entt::entity entity)
     packet.entity = entity;
     packet.class_id = component.id;
 
-    protocol::broadcast(packet, globals::host);
+    if(auto transform = registry.try_get<Transform>(entity)) {
+        interest::broadcast(packet, transform->chunk);
+    }
+    else {
+        protocol::broadcast(packet, globals::host);
+    }
 }
 
 static void on_destroy_entity(entt::registry& registry, entt::entity entity)
@@ -30,7 +37,12 @@ static void on_destroy_entity(entt::registry& registry, entt::entity entity)
     packet::Entity_Remove packet {};
     packet.entity = entity;
 
-    protocol::broadcast(packet, globals::host);
+    if(auto transform = registry.try_get<Transform>(entity)) {
+        interest::broadcast(packet, transform->chunk);
+    }
+    else {
+        protocol::broadcast(packet, globals::host);
+    }
 }
 
 static void process_entity(entt::entity entity, DirtyMarker& dirty)
@@ -54,8 +66,13 @@ static void process_entity(entt::entity entity, DirtyMarker& dirty)
     }
 
     if(packet.components.size()) {
-        if(auto session = globals::registry.try_get<SessionRef>(entity)) {
-            protocol::broadcast(packet, globals::host, session->ptr->peer);
+        auto except = globals::registry.all_of<SessionRef>(entity) ? globals::registry.get<SessionRef>(entity).ptr->peer : nullptr;
+
+        if(auto transform = globals::registry.try_get<Transform>(entity)) {
+            interest::broadcast(packet, transform->chunk, except);
+        }
+        else if(except != nullptr) {
+            protocol::broadcast(packet, globals::host, except);
         }
         else {
             protocol::broadcast(packet, globals::host);

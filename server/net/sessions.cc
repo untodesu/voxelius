@@ -20,6 +20,7 @@
 #include "shared/world/tint_registry.hh"
 
 #include "server/globals.hh"
+#include "server/net/host.hh"
 #include "server/net/invites.hh"
 #include "server/net/whitelist.hh"
 
@@ -27,9 +28,7 @@ static std::vector<Session> s_sessions;
 static emhash8::HashMap<std::string, Session*> s_username_map;
 static emhash8::HashMap<std::uint64_t, Session*> s_identity_map;
 
-static config::Ref<bool> s_whitelist_enabled { false };
-static config::Ref<bool> s_strict_version { false };
-static config::Ref<unsigned> s_max_players { 8 };
+config::Ref<bool> sessions::strict_version { false };
 
 static std::mt19937_64 s_randomizer;
 
@@ -41,7 +40,7 @@ static bool is_outdated_client(std::uint32_t major, std::uint32_t minor, std::ui
         return true;
     }
 
-    if(s_strict_version) {
+    if(sessions::strict_version) {
         if(version::minor > minor) {
             return true;
         }
@@ -60,7 +59,7 @@ static bool is_outdated_server(std::uint32_t major, std::uint32_t minor, std::ui
         return true;
     }
 
-    if(s_strict_version) {
+    if(sessions::strict_version) {
         if(minor > version::minor) {
             return true;
         }
@@ -93,7 +92,7 @@ static void on_auth_request(const packet::Auth_Request& packet)
 
     auto client_whitelisted = false;
 
-    if(s_whitelist_enabled) {
+    if(whitelist::enabled) {
         if(whitelist::contains(packet.pkey)) {
             client_whitelisted = true;
         }
@@ -260,9 +259,7 @@ std::span<const Session> sessions::all(void)
 
 void sessions::init(void)
 {
-    s_whitelist_enabled.bind(globals::server_config, "whitelist.enabled");
-    s_strict_version.bind(globals::server_config, "auth.strict_version");
-    s_max_players.bind(globals::server_config, "host.max_players");
+    strict_version.bind(globals::server_config, "sessions.strict_version");
 
     std::random_device noise;
     s_randomizer.seed(noise());
@@ -276,9 +273,9 @@ void sessions::init_late(void)
 {
     s_username_map.clear();
     s_identity_map.clear();
-    s_sessions.resize(s_max_players.value());
+    s_sessions.resize(host::max_players.value());
 
-    for(std::size_t i = 0; i < s_max_players.value(); ++i) {
+    for(std::size_t i = 0; i < host::max_players.value(); ++i) {
         auto& session = s_sessions[i];
         session.state = session_state::UNCONNECTED;
         session.client_id = UINT16_MAX;
