@@ -18,6 +18,8 @@ struct ChunkRequest final {
     unsigned distance;
 };
 
+constexpr static std::size_t REQUESTS_PER_TICK = 48;
+
 static ChunkAlignedBox s_bounds_curr;
 static ChunkAlignedBox s_bounds_prev;
 static std::vector<ChunkRequest> s_requests;
@@ -68,7 +70,7 @@ void chunk_visibility::fixed_update_late(void)
             build_requests();
         }
 
-        while(s_requests.size()) {
+        for(std::size_t i = 0; s_requests.size() && i < REQUESTS_PER_TICK; ++i) {
             const auto& request = s_requests.back();
 
             RequestChunk_Packet packet;

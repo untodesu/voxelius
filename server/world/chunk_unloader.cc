@@ -20,7 +20,7 @@ static config::Ref<unsigned> s_view_distance { 8 };
 
 void chunk_unloader::init(void)
 {
-    s_view_distance.bind(globals::server_config, "view_distance");
+    s_view_distance.bind(globals::server_config, "game.view_distance");
 }
 
 void chunk_unloader::fixed_update_late(void)

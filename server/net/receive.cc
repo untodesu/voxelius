@@ -127,6 +127,8 @@ static void on_player_move_data(const PlayerMoveData_Packet& packet)
 
 void receive::init(void)
 {
+    s_view_distance.bind(globals::server_config, "game.view_distance");
+
     globals::dispatcher.sink<RequestChunk_Packet>().connect<&on_request_chunk>();
     globals::dispatcher.sink<ChunkReadyEvent>().connect<&on_chunk_ready>();
     globals::dispatcher.sink<PlayerAttackE_Packet>().connect<&on_player_attack_e>();
