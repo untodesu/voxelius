@@ -4,21 +4,21 @@
 
 #include "core/buffer.hh"
 
-void StatusRequest_Packet::encode(const StatusRequest_Packet& packet, WriteBuffer& buffer)
+void packet::Status_Request::encode(const Status_Request& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(packet.version_major);
     buffer.write<std::uint32_t>(packet.version_minor);
     buffer.write<std::uint32_t>(packet.version_patch);
 }
 
-void StatusRequest_Packet::decode(StatusRequest_Packet& packet, ReadBuffer& buffer)
+void packet::Status_Request::decode(Status_Request& packet, ReadBuffer& buffer)
 {
     packet.version_major = buffer.read<std::uint32_t>();
     packet.version_minor = buffer.read<std::uint32_t>();
     packet.version_patch = buffer.read<std::uint32_t>();
 }
 
-void StatusResponse_Packet::encode(const StatusResponse_Packet& packet, WriteBuffer& buffer)
+void packet::Status_Response::encode(const Status_Response& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint32_t>(packet.version_major);
     buffer.write<std::uint16_t>(packet.max_players);
@@ -29,7 +29,7 @@ void StatusResponse_Packet::encode(const StatusResponse_Packet& packet, WriteBuf
     buffer.write<std::uint32_t>(packet.server_tags);
 }
 
-void StatusResponse_Packet::decode(StatusResponse_Packet& packet, ReadBuffer& buffer)
+void packet::Status_Response::decode(Status_Response& packet, ReadBuffer& buffer)
 {
     packet.version_major = buffer.read<std::uint32_t>();
     packet.max_players = buffer.read<std::uint16_t>();

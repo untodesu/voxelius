@@ -20,6 +20,7 @@
 #include "server/net/receive.hh"
 #include "server/net/sessions.hh"
 #include "server/net/status.hh"
+#include "server/net/transmit.hh"
 #include "server/net/whitelist.hh"
 #include "server/system/collector.hh"
 #include "server/universe.hh"
@@ -59,6 +60,8 @@ static void zoned_fixed_update_late(void)
     chunk_loader::fixed_update();
     chunk_unloader::fixed_update_late();
 
+    transmit::fixed_update_late();
+
     threading::update();
 }
 
@@ -88,6 +91,7 @@ static void wrapped_main(int argc, char** argv)
     sessions::init();
     status::init();
     receive::init();
+    transmit::init();
 
     worldgen::init();
 

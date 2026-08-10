@@ -9,6 +9,8 @@ add_executable(vserver
     "${CMAKE_CURRENT_LIST_DIR}/net/sessions.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/status.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/status.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/net/transmit.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/net/transmit.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/whitelist.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/whitelist.hh"
     "${CMAKE_CURRENT_LIST_DIR}/system/collector.cc"

@@ -23,7 +23,7 @@ static config::Ref<float> s_vel_threshold { 10.0f };
 
 static void send_full_update(entt::entity entity)
 {
-    static EntityPatch_Packet packet;
+    static packet::Entity_Patch packet;
 
     auto head_id = component_map::from_type<Head>();
     auto transform_id = component_map::from_type<Transform>();
@@ -37,7 +37,7 @@ static void send_full_update(entt::entity entity)
         WriteBuffer buffer;
         component_map::encode_net(id, entity, buffer);
 
-        EntityPatch_Packet::Component component;
+        packet::Entity_Patch::Component component;
         component.id = id;
         component.data = std::move(buffer.take());
 

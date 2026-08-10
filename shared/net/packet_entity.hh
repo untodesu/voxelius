@@ -7,37 +7,37 @@
 #include "shared/entity/component.hh"
 #include "shared/net/packet.hh"
 
-struct EntitySpawn_Packet final : public BasePacket<packet_type::ENTITY_SPAWN> {
-    static void encode(const EntitySpawn_Packet& packet, WriteBuffer& buffer);
-    static void decode(EntitySpawn_Packet& packet, ReadBuffer& buffer);
+struct packet::Entity_Spawn final : public packet::Base<packet::ENTITY_SPAWN> {
+    static void encode(const Entity_Spawn& packet, WriteBuffer& buffer);
+    static void decode(Entity_Spawn& packet, ReadBuffer& buffer);
 
     entt::entity entity;
     class_id_type class_id;
 };
 
-struct EntityPatch_Packet final : public BasePacket<packet_type::ENTITY_PATCH> {
+struct packet::Entity_Patch final : public packet::Base<packet::ENTITY_PATCH> {
     struct Component final {
         component_id_type id;
         std::vector<std::byte> data;
     };
 
-    static void encode(const EntityPatch_Packet& packet, WriteBuffer& buffer);
-    static void decode(EntityPatch_Packet& packet, ReadBuffer& buffer);
+    static void encode(const Entity_Patch& packet, WriteBuffer& buffer);
+    static void decode(Entity_Patch& packet, ReadBuffer& buffer);
 
     entt::entity entity;
     std::vector<Component> components;
 };
 
-struct EntityRemove_Packet final : public BasePacket<packet_type::ENTITY_REMOVE> {
-    static void encode(const EntityRemove_Packet& packet, WriteBuffer& buffer);
-    static void decode(EntityRemove_Packet& packet, ReadBuffer& buffer);
+struct packet::Entity_Remove final : public packet::Base<packet::ENTITY_REMOVE> {
+    static void encode(const Entity_Remove& packet, WriteBuffer& buffer);
+    static void decode(Entity_Remove& packet, ReadBuffer& buffer);
 
     entt::entity entity;
 };
 
-struct EntityClient_Packet final : public BasePacket<packet_type::ENTITY_CLIENT> {
-    static void encode(const EntityClient_Packet& packet, WriteBuffer& buffer);
-    static void decode(EntityClient_Packet& packet, ReadBuffer& buffer);
+struct packet::Entity_Client final : public packet::Base<packet::ENTITY_CLIENT> {
+    static void encode(const Entity_Client& packet, WriteBuffer& buffer);
+    static void decode(Entity_Client& packet, ReadBuffer& buffer);
 
     entt::entity entity;
 };

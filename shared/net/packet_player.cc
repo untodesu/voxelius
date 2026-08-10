@@ -4,39 +4,39 @@
 
 #include "core/buffer.hh"
 
-void PlayerAttackE_Packet::encode(const PlayerAttackE_Packet& packet, WriteBuffer& buffer)
+void packet::Player_AttackE::encode(const Player_AttackE& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint64_t>(static_cast<std::uint64_t>(packet.target));
 }
 
-void PlayerAttackE_Packet::decode(PlayerAttackE_Packet& packet, ReadBuffer& buffer)
+void packet::Player_AttackE::decode(Player_AttackE& packet, ReadBuffer& buffer)
 {
     packet.target = static_cast<entt::entity>(buffer.read<std::uint64_t>());
 }
 
-void PlayerAttackB_Packet::encode(const PlayerAttackB_Packet& packet, WriteBuffer& buffer)
+void packet::Player_AttackB::encode(const Player_AttackB& packet, WriteBuffer& buffer)
 {
     buffer.write_vector<std::int64_t, 3>(packet.bpos.cast<std::int64_t>());
     buffer.write<std::uint32_t>(packet.expected);
 }
 
-void PlayerAttackB_Packet::decode(PlayerAttackB_Packet& packet, ReadBuffer& buffer)
+void packet::Player_AttackB::decode(Player_AttackB& packet, ReadBuffer& buffer)
 {
     packet.bpos = buffer.read_vector<std::int64_t, 3>().cast<BlockPos::value_type>();
     packet.expected = buffer.read<std::uint32_t>();
 }
 
-void PlayerInteractE_Packet::encode(const PlayerInteractE_Packet& packet, WriteBuffer& buffer)
+void packet::Player_InteractE::encode(const Player_InteractE& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint64_t>(static_cast<std::uint64_t>(packet.target));
 }
 
-void PlayerInteractE_Packet::decode(PlayerInteractE_Packet& packet, ReadBuffer& buffer)
+void packet::Player_InteractE::decode(Player_InteractE& packet, ReadBuffer& buffer)
 {
     packet.target = static_cast<entt::entity>(buffer.read<std::uint64_t>());
 }
 
-void PlayerInteractB_Packet::encode(const PlayerInteractB_Packet& packet, WriteBuffer& buffer)
+void packet::Player_InteractB::encode(const Player_InteractB& packet, WriteBuffer& buffer)
 {
     buffer.write_vector<std::int64_t, 3>(packet.bpos.cast<std::int64_t>());
     buffer.write<std::uint32_t>(packet.expected);
@@ -45,7 +45,7 @@ void PlayerInteractB_Packet::encode(const PlayerInteractB_Packet& packet, WriteB
     buffer.write_vector<float, 3>(packet.point);
 }
 
-void PlayerInteractB_Packet::decode(PlayerInteractB_Packet& packet, ReadBuffer& buffer)
+void packet::Player_InteractB::decode(Player_InteractB& packet, ReadBuffer& buffer)
 {
     packet.bpos = buffer.read_vector<std::int64_t, 3>().cast<BlockPos::value_type>();
     packet.expected = buffer.read<std::uint32_t>();
@@ -54,7 +54,7 @@ void PlayerInteractB_Packet::decode(PlayerInteractB_Packet& packet, ReadBuffer& 
     packet.point = buffer.read_vector<float, 3>();
 }
 
-void PlayerMoveData_Packet::encode(const PlayerMoveData_Packet& packet, WriteBuffer& buffer)
+void packet::Player_MoveData::encode(const Player_MoveData& packet, WriteBuffer& buffer)
 {
     buffer.write_vector<std::int32_t, 3>(packet.simulated_cpos.cast<std::int32_t>());
     buffer.write_vector<float, 3>(packet.camera_angles);
@@ -63,7 +63,7 @@ void PlayerMoveData_Packet::encode(const PlayerMoveData_Packet& packet, WriteBuf
     buffer.write_vector<float, 3>(packet.wishdir);
 }
 
-void PlayerMoveData_Packet::decode(PlayerMoveData_Packet& packet, ReadBuffer& buffer)
+void packet::Player_MoveData::decode(Player_MoveData& packet, ReadBuffer& buffer)
 {
     packet.simulated_cpos = buffer.read_vector<std::int32_t, 3>().cast<ChunkPos::value_type>();
     packet.camera_angles = buffer.read_vector<float, 3>();

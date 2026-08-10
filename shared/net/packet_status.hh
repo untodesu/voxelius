@@ -3,21 +3,21 @@
 
 #include "shared/net/packet.hh"
 
-struct StatusRequest_Packet final : public BasePacket<packet_type::STATUS_REQUEST> {
-    static void encode(const StatusRequest_Packet& packet, WriteBuffer& buffer);
-    static void decode(StatusRequest_Packet& packet, ReadBuffer& buffer);
+struct packet::Status_Request final : public packet::Base<packet::STATUS_REQUEST> {
+    static void encode(const Status_Request& packet, WriteBuffer& buffer);
+    static void decode(Status_Request& packet, ReadBuffer& buffer);
 
     std::uint32_t version_major;
     std::uint32_t version_minor;
     std::uint32_t version_patch;
 };
 
-struct StatusResponse_Packet final : public BasePacket<packet_type::STATUS_RESPONSE> {
+struct packet::Status_Response final : public packet::Base<packet::STATUS_RESPONSE> {
     constexpr static std::uint32_t WHITELIST_ENABLED = 0x00000001;
     constexpr static std::uint32_t STRICT_VERSION = 0x00000002;
 
-    static void encode(const StatusResponse_Packet& packet, WriteBuffer& buffer);
-    static void decode(StatusResponse_Packet& packet, ReadBuffer& buffer);
+    static void encode(const Status_Response& packet, WriteBuffer& buffer);
+    static void decode(Status_Response& packet, ReadBuffer& buffer);
 
     std::uint32_t version_major;
     std::uint16_t max_players;

@@ -5,31 +5,31 @@
 #include "shared/net/packet.hh"
 #include "shared/world/block.hh"
 
-struct PlayerAttackE_Packet final : public BasePacket<packet_type::PLAYER_ATTACK_E> {
-    static void encode(const PlayerAttackE_Packet& packet, WriteBuffer& buffer);
-    static void decode(PlayerAttackE_Packet& packet, ReadBuffer& buffer);
+struct packet::Player_AttackE final : public packet::Base<packet::PLAYER_ATTACK_E> {
+    static void encode(const Player_AttackE& packet, WriteBuffer& buffer);
+    static void decode(Player_AttackE& packet, ReadBuffer& buffer);
 
     entt::entity target;
 };
 
-struct PlayerAttackB_Packet final : public BasePacket<packet_type::PLAYER_ATTACK_B> {
-    static void encode(const PlayerAttackB_Packet& packet, WriteBuffer& buffer);
-    static void decode(PlayerAttackB_Packet& packet, ReadBuffer& buffer);
+struct packet::Player_AttackB final : public packet::Base<packet::PLAYER_ATTACK_B> {
+    static void encode(const Player_AttackB& packet, WriteBuffer& buffer);
+    static void decode(Player_AttackB& packet, ReadBuffer& buffer);
 
     BlockPos bpos;
     block_id_type expected;
 };
 
-struct PlayerInteractE_Packet final : public BasePacket<packet_type::PLAYER_INTERACT_E> {
-    static void encode(const PlayerInteractE_Packet& packet, WriteBuffer& buffer);
-    static void decode(PlayerInteractE_Packet& packet, ReadBuffer& buffer);
+struct packet::Player_InteractE final : public packet::Base<packet::PLAYER_INTERACT_E> {
+    static void encode(const Player_InteractE& packet, WriteBuffer& buffer);
+    static void decode(Player_InteractE& packet, ReadBuffer& buffer);
 
     entt::entity target;
 };
 
-struct PlayerInteractB_Packet final : public BasePacket<packet_type::PLAYER_INTERACT_B> {
-    static void encode(const PlayerInteractB_Packet& packet, WriteBuffer& buffer);
-    static void decode(PlayerInteractB_Packet& packet, ReadBuffer& buffer);
+struct packet::Player_InteractB final : public packet::Base<packet::PLAYER_INTERACT_B> {
+    static void encode(const Player_InteractB& packet, WriteBuffer& buffer);
+    static void decode(Player_InteractB& packet, ReadBuffer& buffer);
 
     BlockPos bpos;
     block_id_type expected;
@@ -38,9 +38,9 @@ struct PlayerInteractB_Packet final : public BasePacket<packet_type::PLAYER_INTE
     Eigen::Vector3f point;
 };
 
-struct PlayerMoveData_Packet final : public BasePacket<packet_type::PLAYER_MOVE_DATA> {
-    static void encode(const PlayerMoveData_Packet& packet, WriteBuffer& buffer);
-    static void decode(PlayerMoveData_Packet& packet, ReadBuffer& buffer);
+struct packet::Player_MoveData final : public packet::Base<packet::PLAYER_MOVE_DATA> {
+    static void encode(const Player_MoveData& packet, WriteBuffer& buffer);
+    static void decode(Player_MoveData& packet, ReadBuffer& buffer);
 
     ChunkPos simulated_cpos;
     Eigen::Vector3f camera_angles;

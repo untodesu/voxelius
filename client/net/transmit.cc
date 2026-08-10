@@ -19,7 +19,7 @@ void transmit::fixed_update_late(void)
         const auto velocity = globals::registry.try_get<Velocity>(globals::player);
         const auto move_data = globals::registry.try_get<MoveData>(globals::player);
 
-        PlayerMoveData_Packet packet {};
+        packet::Player_MoveData packet {};
         packet.simulated_cpos = ChunkPos::Zero();
         packet.camera_angles = Eigen::Vector3f::Zero();
         packet.simulated_lpos = Eigen::Vector3f::Zero();

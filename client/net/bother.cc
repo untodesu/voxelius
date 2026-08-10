@@ -62,7 +62,7 @@ static void push_outgoing(BotherResponseEvent event)
     s_outgoing.emplace_back(std::move(event));
 }
 
-static void on_status_response(const StatusResponse_Packet& packet)
+static void on_status_response(const packet::Status_Response& packet)
 {
     auto data = reinterpret_cast<BotherData*>(packet.peer->data);
 
@@ -143,7 +143,7 @@ static void thread_main(std::stop_token stop_token)
     }
 
     entt::dispatcher dispatcher;
-    dispatcher.sink<StatusResponse_Packet>().connect<&on_status_response>();
+    dispatcher.sink<packet::Status_Response>().connect<&on_status_response>();
 
     while(!stop_token.stop_requested()) {
         auto jobs = take_incoming();
@@ -181,7 +181,7 @@ static void thread_main(std::stop_token stop_token)
 
         while(0 < enet_host_service(host, &event, SERVICE_TIMEOUT_MS)) {
             if(event.type == ENET_EVENT_TYPE_CONNECT) {
-                StatusRequest_Packet request {};
+                packet::Status_Request request {};
                 request.version_major = version::major;
                 request.version_minor = version::minor;
                 request.version_patch = version::patch;

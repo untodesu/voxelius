@@ -46,26 +46,28 @@ void protocol::decode(entt::dispatcher& dispatcher, const ENetPacket* packet, EN
 {
     static ReadBuffer buffer;
 
-    static StatusRequest_Packet status_request;
-    static StatusResponse_Packet status_response;
-    static AuthRequest_Packet auth_request;
-    static AuthChallenge_Packet auth_challenge;
-    static AuthResponse_Packet auth_response;
-    static AuthAdmission_Packet auth_admission;
-    static Disconnect_Packet disconnect;
-    static RequestChunk_Packet request_chunk;
-    static ChunkBlocks_Packet chunk_blocks;
-    static ChunkBiomes_Packet chunk_biomes;
-    static SetBlock_Packet set_block;
-    static PlayerAttackE_Packet player_attack_e;
-    static PlayerAttackB_Packet player_attack_b;
-    static PlayerInteractE_Packet player_interact_e;
-    static PlayerInteractB_Packet player_interact_b;
-    static PlayerMoveData_Packet player_move_data;
-    static EntitySpawn_Packet entity_spawn;
-    static EntityPatch_Packet entity_patch;
-    static EntityRemove_Packet entity_remove;
-    static EntityClient_Packet entity_client;
+    static packet::Status_Request status_request;
+    static packet::Status_Response status_response;
+    static packet::Auth_Request auth_request;
+    static packet::Auth_Challenge auth_challenge;
+    static packet::Auth_Response auth_response;
+    static packet::Auth_Admission auth_admission;
+    static packet::Session_Disconnect session_disconnect;
+    static packet::World_Request world_request_chunk;
+    static packet::World_Blocks world_chunk_blocks;
+    static packet::World_Biomes world_chunk_biomes;
+    static packet::World_SetBlock world_set_block;
+    static packet::World_Timings world_timings;
+    static packet::World_Rules world_rules;
+    static packet::Player_AttackE player_attack_e;
+    static packet::Player_AttackB player_attack_b;
+    static packet::Player_InteractE player_interact_e;
+    static packet::Player_InteractB player_interact_b;
+    static packet::Player_MoveData player_move_data;
+    static packet::Entity_Spawn entity_spawn;
+    static packet::Entity_Patch entity_patch;
+    static packet::Entity_Remove entity_remove;
+    static packet::Entity_Client entity_client;
 
     assert(packet);
     assert(peer);
@@ -73,127 +75,139 @@ void protocol::decode(entt::dispatcher& dispatcher, const ENetPacket* packet, EN
     buffer.reset(packet);
 
     auto id = buffer.read<std::uint16_t>();
-    auto type = static_cast<packet_type>(id);
+    auto type = static_cast<packet::packet_type>(id);
 
     switch(type) {
-        case StatusRequest_Packet::TYPE:
-            StatusRequest_Packet::decode(status_request, buffer);
+        case packet::Status_Request::TYPE:
+            packet::Status_Request::decode(status_request, buffer);
             status_request.peer = peer;
-            dispatcher.trigger(static_cast<const StatusRequest_Packet&>(status_request));
+            dispatcher.trigger(static_cast<const packet::Status_Request&>(status_request));
             break;
 
-        case StatusResponse_Packet::TYPE:
-            StatusResponse_Packet::decode(status_response, buffer);
+        case packet::Status_Response::TYPE:
+            packet::Status_Response::decode(status_response, buffer);
             status_response.peer = peer;
-            dispatcher.trigger(static_cast<const StatusResponse_Packet&>(status_response));
+            dispatcher.trigger(static_cast<const packet::Status_Response&>(status_response));
             break;
 
-        case AuthRequest_Packet::TYPE:
-            AuthRequest_Packet::decode(auth_request, buffer);
+        case packet::Auth_Request::TYPE:
+            packet::Auth_Request::decode(auth_request, buffer);
             auth_request.peer = peer;
-            dispatcher.trigger(static_cast<const AuthRequest_Packet&>(auth_request));
+            dispatcher.trigger(static_cast<const packet::Auth_Request&>(auth_request));
             break;
 
-        case AuthChallenge_Packet::TYPE:
-            AuthChallenge_Packet::decode(auth_challenge, buffer);
+        case packet::Auth_Challenge::TYPE:
+            packet::Auth_Challenge::decode(auth_challenge, buffer);
             auth_challenge.peer = peer;
-            dispatcher.trigger(static_cast<const AuthChallenge_Packet&>(auth_challenge));
+            dispatcher.trigger(static_cast<const packet::Auth_Challenge&>(auth_challenge));
             break;
 
-        case AuthResponse_Packet::TYPE:
-            AuthResponse_Packet::decode(auth_response, buffer);
+        case packet::Auth_Response::TYPE:
+            packet::Auth_Response::decode(auth_response, buffer);
             auth_response.peer = peer;
-            dispatcher.trigger(static_cast<const AuthResponse_Packet&>(auth_response));
+            dispatcher.trigger(static_cast<const packet::Auth_Response&>(auth_response));
             break;
 
-        case AuthAdmission_Packet::TYPE:
-            AuthAdmission_Packet::decode(auth_admission, buffer);
+        case packet::Auth_Admission::TYPE:
+            packet::Auth_Admission::decode(auth_admission, buffer);
             auth_admission.peer = peer;
-            dispatcher.trigger(static_cast<const AuthAdmission_Packet&>(auth_admission));
+            dispatcher.trigger(static_cast<const packet::Auth_Admission&>(auth_admission));
             break;
 
-        case Disconnect_Packet::TYPE:
-            Disconnect_Packet::decode(disconnect, buffer);
-            disconnect.peer = peer;
-            dispatcher.trigger(static_cast<const Disconnect_Packet&>(disconnect));
+        case packet::Session_Disconnect::TYPE:
+            packet::Session_Disconnect::decode(session_disconnect, buffer);
+            session_disconnect.peer = peer;
+            dispatcher.trigger(static_cast<const packet::Session_Disconnect&>(session_disconnect));
             break;
 
-        case RequestChunk_Packet::TYPE:
-            RequestChunk_Packet::decode(request_chunk, buffer);
-            request_chunk.peer = peer;
-            dispatcher.trigger(static_cast<const RequestChunk_Packet&>(request_chunk));
+        case packet::World_Request::TYPE:
+            packet::World_Request::decode(world_request_chunk, buffer);
+            world_request_chunk.peer = peer;
+            dispatcher.trigger(static_cast<const packet::World_Request&>(world_request_chunk));
             break;
 
-        case ChunkBlocks_Packet::TYPE:
-            ChunkBlocks_Packet::decode(chunk_blocks, buffer);
-            chunk_blocks.peer = peer;
-            dispatcher.trigger(static_cast<const ChunkBlocks_Packet&>(chunk_blocks));
+        case packet::World_Blocks::TYPE:
+            packet::World_Blocks::decode(world_chunk_blocks, buffer);
+            world_chunk_blocks.peer = peer;
+            dispatcher.trigger(static_cast<const packet::World_Blocks&>(world_chunk_blocks));
             break;
 
-        case ChunkBiomes_Packet::TYPE:
-            ChunkBiomes_Packet::decode(chunk_biomes, buffer);
-            chunk_biomes.peer = peer;
-            dispatcher.trigger(static_cast<const ChunkBiomes_Packet&>(chunk_biomes));
+        case packet::World_Biomes::TYPE:
+            packet::World_Biomes::decode(world_chunk_biomes, buffer);
+            world_chunk_biomes.peer = peer;
+            dispatcher.trigger(static_cast<const packet::World_Biomes&>(world_chunk_biomes));
             break;
 
-        case SetBlock_Packet::TYPE:
-            SetBlock_Packet::decode(set_block, buffer);
-            set_block.peer = peer;
-            dispatcher.trigger(static_cast<const SetBlock_Packet&>(set_block));
+        case packet::World_SetBlock::TYPE:
+            packet::World_SetBlock::decode(world_set_block, buffer);
+            world_set_block.peer = peer;
+            dispatcher.trigger(static_cast<const packet::World_SetBlock&>(world_set_block));
             break;
 
-        case PlayerAttackE_Packet::TYPE:
-            PlayerAttackE_Packet::decode(player_attack_e, buffer);
+        case packet::World_Timings::TYPE:
+            packet::World_Timings::decode(world_timings, buffer);
+            world_timings.peer = peer;
+            dispatcher.trigger(static_cast<const packet::World_Timings&>(world_timings));
+            break;
+
+        case packet::World_Rules::TYPE:
+            packet::World_Rules::decode(world_rules, buffer);
+            world_rules.peer = peer;
+            dispatcher.trigger(static_cast<const packet::World_Rules&>(world_rules));
+            break;
+
+        case packet::Player_AttackE::TYPE:
+            packet::Player_AttackE::decode(player_attack_e, buffer);
             player_attack_e.peer = peer;
-            dispatcher.trigger(static_cast<const PlayerAttackE_Packet&>(player_attack_e));
+            dispatcher.trigger(static_cast<const packet::Player_AttackE&>(player_attack_e));
             break;
 
-        case PlayerAttackB_Packet::TYPE:
-            PlayerAttackB_Packet::decode(player_attack_b, buffer);
+        case packet::Player_AttackB::TYPE:
+            packet::Player_AttackB::decode(player_attack_b, buffer);
             player_attack_b.peer = peer;
-            dispatcher.trigger(static_cast<const PlayerAttackB_Packet&>(player_attack_b));
+            dispatcher.trigger(static_cast<const packet::Player_AttackB&>(player_attack_b));
             break;
 
-        case PlayerInteractE_Packet::TYPE:
-            PlayerInteractE_Packet::decode(player_interact_e, buffer);
+        case packet::Player_InteractE::TYPE:
+            packet::Player_InteractE::decode(player_interact_e, buffer);
             player_interact_e.peer = peer;
-            dispatcher.trigger(static_cast<const PlayerInteractE_Packet&>(player_interact_e));
+            dispatcher.trigger(static_cast<const packet::Player_InteractE&>(player_interact_e));
             break;
 
-        case PlayerInteractB_Packet::TYPE:
-            PlayerInteractB_Packet::decode(player_interact_b, buffer);
+        case packet::Player_InteractB::TYPE:
+            packet::Player_InteractB::decode(player_interact_b, buffer);
             player_interact_b.peer = peer;
-            dispatcher.trigger(static_cast<const PlayerInteractB_Packet&>(player_interact_b));
+            dispatcher.trigger(static_cast<const packet::Player_InteractB&>(player_interact_b));
             break;
 
-        case PlayerMoveData_Packet::TYPE:
-            PlayerMoveData_Packet::decode(player_move_data, buffer);
+        case packet::Player_MoveData::TYPE:
+            packet::Player_MoveData::decode(player_move_data, buffer);
             player_move_data.peer = peer;
-            dispatcher.trigger(static_cast<const PlayerMoveData_Packet&>(player_move_data));
+            dispatcher.trigger(static_cast<const packet::Player_MoveData&>(player_move_data));
             break;
 
-        case EntitySpawn_Packet::TYPE:
-            EntitySpawn_Packet::decode(entity_spawn, buffer);
+        case packet::Entity_Spawn::TYPE:
+            packet::Entity_Spawn::decode(entity_spawn, buffer);
             entity_spawn.peer = peer;
-            dispatcher.trigger(static_cast<const EntitySpawn_Packet&>(entity_spawn));
+            dispatcher.trigger(static_cast<const packet::Entity_Spawn&>(entity_spawn));
             break;
 
-        case EntityPatch_Packet::TYPE:
-            EntityPatch_Packet::decode(entity_patch, buffer);
+        case packet::Entity_Patch::TYPE:
+            packet::Entity_Patch::decode(entity_patch, buffer);
             entity_patch.peer = peer;
-            dispatcher.trigger(static_cast<const EntityPatch_Packet&>(entity_patch));
+            dispatcher.trigger(static_cast<const packet::Entity_Patch&>(entity_patch));
             break;
 
-        case EntityRemove_Packet::TYPE:
-            EntityRemove_Packet::decode(entity_remove, buffer);
+        case packet::Entity_Remove::TYPE:
+            packet::Entity_Remove::decode(entity_remove, buffer);
             entity_remove.peer = peer;
-            dispatcher.trigger(static_cast<const EntityRemove_Packet&>(entity_remove));
+            dispatcher.trigger(static_cast<const packet::Entity_Remove&>(entity_remove));
             break;
 
-        case EntityClient_Packet::TYPE:
-            EntityClient_Packet::decode(entity_client, buffer);
+        case packet::Entity_Client::TYPE:
+            packet::Entity_Client::decode(entity_client, buffer);
             entity_client.peer = peer;
-            dispatcher.trigger(static_cast<const EntityClient_Packet&>(entity_client));
+            dispatcher.trigger(static_cast<const packet::Entity_Client&>(entity_client));
             break;
     }
 }
@@ -213,25 +227,27 @@ void protocol::broadcast(const T& packet, ENetHost* host, ENetPeer* except)
     common_broadcast(enet_packet, host, except);
 }
 
-template void protocol::broadcast<StatusRequest_Packet>(const StatusRequest_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<StatusResponse_Packet>(const StatusResponse_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<AuthRequest_Packet>(const AuthRequest_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<AuthChallenge_Packet>(const AuthChallenge_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<AuthResponse_Packet>(const AuthResponse_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<AuthAdmission_Packet>(const AuthAdmission_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<Disconnect_Packet>(const Disconnect_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<RequestChunk_Packet>(const RequestChunk_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<ChunkBlocks_Packet>(const ChunkBlocks_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<ChunkBiomes_Packet>(const ChunkBiomes_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<SetBlock_Packet>(const SetBlock_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<PlayerAttackE_Packet>(const PlayerAttackE_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<PlayerAttackB_Packet>(const PlayerAttackB_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<PlayerInteractE_Packet>(const PlayerInteractE_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<PlayerInteractB_Packet>(const PlayerInteractB_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<EntitySpawn_Packet>(const EntitySpawn_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<EntityPatch_Packet>(const EntityPatch_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<EntityRemove_Packet>(const EntityRemove_Packet& packet, ENetHost* host, ENetPeer* except);
-template void protocol::broadcast<EntityClient_Packet>(const EntityClient_Packet& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Status_Request>(const packet::Status_Request& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Status_Response>(const packet::Status_Response& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Auth_Request>(const packet::Auth_Request& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Auth_Challenge>(const packet::Auth_Challenge& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Auth_Response>(const packet::Auth_Response& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Auth_Admission>(const packet::Auth_Admission& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Session_Disconnect>(const packet::Session_Disconnect& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::World_Request>(const packet::World_Request& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::World_Blocks>(const packet::World_Blocks& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::World_Biomes>(const packet::World_Biomes& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::World_SetBlock>(const packet::World_SetBlock& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::World_Timings>(const packet::World_Timings& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::World_Rules>(const packet::World_Rules& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Player_AttackE>(const packet::Player_AttackE& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Player_AttackB>(const packet::Player_AttackB& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Player_InteractE>(const packet::Player_InteractE& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Player_InteractB>(const packet::Player_InteractB& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Entity_Spawn>(const packet::Entity_Spawn& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Entity_Patch>(const packet::Entity_Patch& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Entity_Remove>(const packet::Entity_Remove& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Entity_Client>(const packet::Entity_Client& packet, ENetHost* host, ENetPeer* except);
 
 template<typename T>
 void protocol::send(const T& packet, ENetPeer* peer)
@@ -248,23 +264,25 @@ void protocol::send(const T& packet, ENetPeer* peer)
     common_send(enet_packet, peer);
 }
 
-template void protocol::send<StatusRequest_Packet>(const StatusRequest_Packet& packet, ENetPeer* peer);
-template void protocol::send<StatusResponse_Packet>(const StatusResponse_Packet& packet, ENetPeer* peer);
-template void protocol::send<AuthRequest_Packet>(const AuthRequest_Packet& packet, ENetPeer* peer);
-template void protocol::send<AuthChallenge_Packet>(const AuthChallenge_Packet& packet, ENetPeer* peer);
-template void protocol::send<AuthResponse_Packet>(const AuthResponse_Packet& packet, ENetPeer* peer);
-template void protocol::send<AuthAdmission_Packet>(const AuthAdmission_Packet& packet, ENetPeer* peer);
-template void protocol::send<Disconnect_Packet>(const Disconnect_Packet& packet, ENetPeer* peer);
-template void protocol::send<RequestChunk_Packet>(const RequestChunk_Packet& packet, ENetPeer* peer);
-template void protocol::send<ChunkBlocks_Packet>(const ChunkBlocks_Packet& packet, ENetPeer* peer);
-template void protocol::send<ChunkBiomes_Packet>(const ChunkBiomes_Packet& packet, ENetPeer* peer);
-template void protocol::send<SetBlock_Packet>(const SetBlock_Packet& packet, ENetPeer* peer);
-template void protocol::send<PlayerAttackE_Packet>(const PlayerAttackE_Packet& packet, ENetPeer* peer);
-template void protocol::send<PlayerAttackB_Packet>(const PlayerAttackB_Packet& packet, ENetPeer* peer);
-template void protocol::send<PlayerInteractE_Packet>(const PlayerInteractE_Packet& packet, ENetPeer* peer);
-template void protocol::send<PlayerInteractB_Packet>(const PlayerInteractB_Packet& packet, ENetPeer* peer);
-template void protocol::send<PlayerMoveData_Packet>(const PlayerMoveData_Packet& packet, ENetPeer* peer);
-template void protocol::send<EntitySpawn_Packet>(const EntitySpawn_Packet& packet, ENetPeer* peer);
-template void protocol::send<EntityPatch_Packet>(const EntityPatch_Packet& packet, ENetPeer* peer);
-template void protocol::send<EntityRemove_Packet>(const EntityRemove_Packet& packet, ENetPeer* peer);
-template void protocol::send<EntityClient_Packet>(const EntityClient_Packet& packet, ENetPeer* peer);
+template void protocol::send<packet::Status_Request>(const packet::Status_Request& packet, ENetPeer* peer);
+template void protocol::send<packet::Status_Response>(const packet::Status_Response& packet, ENetPeer* peer);
+template void protocol::send<packet::Auth_Request>(const packet::Auth_Request& packet, ENetPeer* peer);
+template void protocol::send<packet::Auth_Challenge>(const packet::Auth_Challenge& packet, ENetPeer* peer);
+template void protocol::send<packet::Auth_Response>(const packet::Auth_Response& packet, ENetPeer* peer);
+template void protocol::send<packet::Auth_Admission>(const packet::Auth_Admission& packet, ENetPeer* peer);
+template void protocol::send<packet::Session_Disconnect>(const packet::Session_Disconnect& packet, ENetPeer* peer);
+template void protocol::send<packet::World_Request>(const packet::World_Request& packet, ENetPeer* peer);
+template void protocol::send<packet::World_Blocks>(const packet::World_Blocks& packet, ENetPeer* peer);
+template void protocol::send<packet::World_Biomes>(const packet::World_Biomes& packet, ENetPeer* peer);
+template void protocol::send<packet::World_SetBlock>(const packet::World_SetBlock& packet, ENetPeer* peer);
+template void protocol::send<packet::World_Timings>(const packet::World_Timings& packet, ENetPeer* peer);
+template void protocol::send<packet::World_Rules>(const packet::World_Rules& packet, ENetPeer* peer);
+template void protocol::send<packet::Player_AttackE>(const packet::Player_AttackE& packet, ENetPeer* peer);
+template void protocol::send<packet::Player_AttackB>(const packet::Player_AttackB& packet, ENetPeer* peer);
+template void protocol::send<packet::Player_InteractE>(const packet::Player_InteractE& packet, ENetPeer* peer);
+template void protocol::send<packet::Player_InteractB>(const packet::Player_InteractB& packet, ENetPeer* peer);
+template void protocol::send<packet::Player_MoveData>(const packet::Player_MoveData& packet, ENetPeer* peer);
+template void protocol::send<packet::Entity_Spawn>(const packet::Entity_Spawn& packet, ENetPeer* peer);
+template void protocol::send<packet::Entity_Patch>(const packet::Entity_Patch& packet, ENetPeer* peer);
+template void protocol::send<packet::Entity_Remove>(const packet::Entity_Remove& packet, ENetPeer* peer);
+template void protocol::send<packet::Entity_Client>(const packet::Entity_Client& packet, ENetPeer* peer);

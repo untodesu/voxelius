@@ -73,7 +73,7 @@ void chunk_visibility::fixed_update_late(void)
         for(std::size_t i = 0; s_requests.size() && i < REQUESTS_PER_TICK; ++i) {
             const auto& request = s_requests.back();
 
-            RequestChunk_Packet packet;
+            packet::World_Request packet;
             packet.cpos = request.position;
             protocol::send(packet, globals::peer);
 

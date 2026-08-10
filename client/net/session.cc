@@ -68,7 +68,7 @@ static void on_host_connect(const HostConnectEvent& event)
 {
     set_state(SESSION_AUTHENTICATING);
 
-    AuthRequest_Packet request {};
+    packet::Auth_Request request {};
     request.version_major = version::major;
     request.version_minor = version::minor;
     request.version_patch = version::patch;
@@ -88,13 +88,13 @@ static void on_host_connect(const HostConnectEvent& event)
 static void on_host_disconnect(const HostDisconnectEvent& event)
 {
     if(session::state) {
-        globals::dispatcher.trigger(SessionErrorEvent(Disconnect_Packet::UNSPECIFIED));
+        globals::dispatcher.trigger(SessionErrorEvent(packet::Session_Disconnect::UNSPECIFIED));
 
-        handle_disconnect(Disconnect_Packet::UNSPECIFIED);
+        handle_disconnect(packet::Session_Disconnect::UNSPECIFIED);
     }
 }
 
-static void on_auth_challenge(const AuthChallenge_Packet& packet)
+static void on_auth_challenge(const packet::Auth_Challenge& packet)
 {
     auto timestamp_sec = utils::epoch_seconds();
     auto timestamp_min = timestamp_sec / 60;
@@ -105,12 +105,12 @@ static void on_auth_challenge(const AuthChallenge_Packet& packet)
     std::memcpy(nonce.data(), packet.nonce.data(), packet.nonce.size());
     std::memcpy(nonce.data() + packet.nonce.size(), timestamp_str.data(), timestamp_str.size());
 
-    AuthResponse_Packet response {};
+    packet::Auth_Response response {};
     response.signature = ed25519::sign(s_auth_pair, nonce);
     protocol::send(response, packet.peer);
 }
 
-static void on_auth_admission(const AuthAdmission_Packet& packet)
+static void on_auth_admission(const packet::Auth_Admission& packet)
 {
     session::identity = packet.identity;
     session::client_id = packet.client_id;
@@ -119,7 +119,7 @@ static void on_auth_admission(const AuthAdmission_Packet& packet)
     set_state(SESSION_SPAWNING);
 }
 
-static void on_disconnect(const Disconnect_Packet& packet)
+static void on_session_disconnect(const packet::Session_Disconnect& packet)
 {
     globals::dispatcher.trigger(SessionErrorEvent(packet.reason));
 
@@ -150,15 +150,15 @@ void session::init(void)
 
     globals::dispatcher.sink<HostConnectEvent>().connect<&on_host_connect>();
     globals::dispatcher.sink<HostDisconnectEvent>().connect<&on_host_disconnect>();
-    globals::dispatcher.sink<AuthChallenge_Packet>().connect<&on_auth_challenge>();
-    globals::dispatcher.sink<AuthAdmission_Packet>().connect<&on_auth_admission>();
-    globals::dispatcher.sink<Disconnect_Packet>().connect<&on_disconnect>();
+    globals::dispatcher.sink<packet::Auth_Challenge>().connect<&on_auth_challenge>();
+    globals::dispatcher.sink<packet::Auth_Admission>().connect<&on_auth_admission>();
+    globals::dispatcher.sink<packet::Session_Disconnect>().connect<&on_session_disconnect>();
 }
 
 void session::shutdown(void)
 {
     if(state) {
-        disconnect(Disconnect_Packet::CLIENT_SHUTDOWN);
+        disconnect(packet::Session_Disconnect::CLIENT_SHUTDOWN);
     }
 }
 
@@ -171,9 +171,9 @@ void session::connect(std::string_view host, std::uint16_t port, std::uint64_t i
             set_state(SESSION_CONNECTING);
         }
         else {
-            globals::dispatcher.trigger(SessionErrorEvent(Disconnect_Packet::UNSPECIFIED));
+            globals::dispatcher.trigger(SessionErrorEvent(packet::Session_Disconnect::UNSPECIFIED));
 
-            handle_disconnect(Disconnect_Packet::UNSPECIFIED);
+            handle_disconnect(packet::Session_Disconnect::UNSPECIFIED);
         }
     }
 }
@@ -181,7 +181,7 @@ void session::connect(std::string_view host, std::uint16_t port, std::uint64_t i
 void session::disconnect(std::uint32_t reason)
 {
     if(state && globals::peer) {
-        Disconnect_Packet packet {};
+        packet::Session_Disconnect packet {};
         packet.reason = reason;
         protocol::send(packet, globals::peer);
     }

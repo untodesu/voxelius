@@ -33,20 +33,20 @@ static void send_chunk(ENetPeer* peer, const ChunkPos& cpos, const std::shared_p
     auto realm = utils::realm(cpos.y());
 
     if(realm != BIOME_REALM_VOID) {
-        ChunkBiomes_Packet biomes_packet;
+        packet::World_Biomes biomes_packet;
         biomes_packet.realm = realm;
         biomes_packet.cpos = ChunkPosXZ(cpos.x(), cpos.z());
         biomes_packet.biomes = biome_map::get(realm, biomes_packet.cpos);
         protocol::send(biomes_packet, peer);
     }
 
-    ChunkBlocks_Packet blocks_packet;
+    packet::World_Blocks blocks_packet;
     blocks_packet.cpos = cpos;
     blocks_packet.blocks = chunk->blocks();
     protocol::send(blocks_packet, peer);
 }
 
-static void on_request_chunk(const RequestChunk_Packet& packet)
+static void on_world_request(const packet::World_Request& packet)
 {
     auto session = sessions::find(packet.peer);
 
@@ -92,7 +92,7 @@ static void on_chunk_ready(const ChunkReadyEvent& event)
     s_waiting_peers.erase(it);
 }
 
-static void on_player_attack_e(const PlayerAttackE_Packet& packet)
+static void on_player_attack_e(const packet::Player_AttackE& packet)
 {
     // empty
 }
@@ -111,7 +111,7 @@ static bool in_reach(entt::entity player, const BlockPos& bpos)
     return distance <= s_reach_distance.value();
 }
 
-static void on_player_attack_b(const PlayerAttackB_Packet& packet)
+static void on_player_attack_b(const packet::Player_AttackB& packet)
 {
     auto session = sessions::find(packet.peer);
 
@@ -124,7 +124,7 @@ static void on_player_attack_b(const PlayerAttackB_Packet& packet)
     }
 
     if(world::get_block(packet.bpos) != packet.expected) {
-        SetBlock_Packet correction {};
+        packet::World_SetBlock correction {};
         correction.bpos = packet.bpos;
         correction.block = world::get_block(packet.bpos);
         protocol::send(correction, packet.peer);
@@ -138,12 +138,12 @@ static void on_player_attack_b(const PlayerAttackB_Packet& packet)
     utils::block_break(hit, session->player);
 }
 
-static void on_player_interact_e(const PlayerInteractE_Packet& packet)
+static void on_player_interact_e(const packet::Player_InteractE& packet)
 {
     // empty
 }
 
-static void on_player_interact_b(const PlayerInteractB_Packet& packet)
+static void on_player_interact_b(const packet::Player_InteractB& packet)
 {
     auto session = sessions::find(packet.peer);
 
@@ -156,7 +156,7 @@ static void on_player_interact_b(const PlayerInteractB_Packet& packet)
     }
 
     if(world::get_block(packet.bpos) != packet.expected) {
-        SetBlock_Packet correction {};
+        packet::World_SetBlock correction {};
         correction.bpos = packet.bpos;
         correction.block = world::get_block(packet.bpos);
         protocol::send(correction, packet.peer);
@@ -177,15 +177,7 @@ static void on_player_interact_b(const PlayerInteractB_Packet& packet)
     utils::block_place(hit, session->player, block);
 }
 
-static void on_block_update(const BlockUpdateEvent& event)
-{
-    SetBlock_Packet packet {};
-    packet.bpos = event.bpos();
-    packet.block = event.id();
-    protocol::broadcast(packet, globals::host, nullptr);
-}
-
-static void on_player_move_data(const PlayerMoveData_Packet& packet)
+static void on_player_move_data(const packet::Player_MoveData& packet)
 {
     auto session = sessions::find(packet.peer);
 
@@ -208,12 +200,13 @@ void receive::init(void)
     s_view_distance.bind(globals::server_config, "game.view_distance");
     s_reach_distance.bind(globals::server_config, "game.reach_distance");
 
-    globals::dispatcher.sink<RequestChunk_Packet>().connect<&on_request_chunk>();
+    globals::dispatcher.sink<packet::World_Request>().connect<&on_world_request>();
+
+    globals::dispatcher.sink<packet::Player_AttackE>().connect<&on_player_attack_e>();
+    globals::dispatcher.sink<packet::Player_AttackB>().connect<&on_player_attack_b>();
+    globals::dispatcher.sink<packet::Player_InteractE>().connect<&on_player_interact_e>();
+    globals::dispatcher.sink<packet::Player_InteractB>().connect<&on_player_interact_b>();
+    globals::dispatcher.sink<packet::Player_MoveData>().connect<&on_player_move_data>();
+
     globals::dispatcher.sink<ChunkReadyEvent>().connect<&on_chunk_ready>();
-    globals::dispatcher.sink<PlayerAttackE_Packet>().connect<&on_player_attack_e>();
-    globals::dispatcher.sink<PlayerAttackB_Packet>().connect<&on_player_attack_b>();
-    globals::dispatcher.sink<PlayerInteractE_Packet>().connect<&on_player_interact_e>();
-    globals::dispatcher.sink<PlayerInteractB_Packet>().connect<&on_player_interact_b>();
-    globals::dispatcher.sink<PlayerMoveData_Packet>().connect<&on_player_move_data>();
-    globals::dispatcher.sink<BlockUpdateEvent>().connect<&on_block_update>();
 }

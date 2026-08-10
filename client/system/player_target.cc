@@ -29,7 +29,7 @@ static void on_mouse_button_event(const SDL_MouseButtonEvent& event)
             utils::block_place(hit, globals::player, block);
 
             if(globals::peer) {
-                PlayerInteractB_Packet packet {};
+                packet::Player_InteractB packet {};
                 packet.bpos = hit.block_pos;
                 packet.expected = hit.id;
                 packet.face = hit.face;
@@ -42,7 +42,7 @@ static void on_mouse_button_event(const SDL_MouseButtonEvent& event)
             utils::block_break(hit, globals::player);
 
             if(globals::peer) {
-                PlayerAttackB_Packet packet {};
+                packet::Player_AttackB packet {};
                 packet.bpos = hit.block_pos;
                 packet.expected = hit.id;
                 protocol::send(packet, globals::peer);

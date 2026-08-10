@@ -4,9 +4,9 @@
 #include "shared/net/ed25519.hh"
 #include "shared/net/packet.hh"
 
-struct AuthRequest_Packet final : public BasePacket<packet_type::AUTH_REQUEST> {
-    static void encode(const AuthRequest_Packet& packet, WriteBuffer& buffer);
-    static void decode(AuthRequest_Packet& packet, ReadBuffer& buffer);
+struct packet::Auth_Request final : public packet::Base<packet::AUTH_REQUEST> {
+    static void encode(const Auth_Request& packet, WriteBuffer& buffer);
+    static void decode(Auth_Request& packet, ReadBuffer& buffer);
 
     std::uint32_t version_major;
     std::uint32_t version_minor;
@@ -21,23 +21,23 @@ struct AuthRequest_Packet final : public BasePacket<packet_type::AUTH_REQUEST> {
     std::string username;
 };
 
-struct AuthChallenge_Packet final : public BasePacket<packet_type::AUTH_CHALLENGE> {
-    static void encode(const AuthChallenge_Packet& packet, WriteBuffer& buffer);
-    static void decode(AuthChallenge_Packet& packet, ReadBuffer& buffer);
+struct packet::Auth_Challenge final : public packet::Base<packet::AUTH_CHALLENGE> {
+    static void encode(const Auth_Challenge& packet, WriteBuffer& buffer);
+    static void decode(Auth_Challenge& packet, ReadBuffer& buffer);
 
     std::array<std::byte, 64> nonce;
 };
 
-struct AuthResponse_Packet final : public BasePacket<packet_type::AUTH_RESPONSE> {
-    static void encode(const AuthResponse_Packet& packet, WriteBuffer& buffer);
-    static void decode(AuthResponse_Packet& packet, ReadBuffer& buffer);
+struct packet::Auth_Response final : public packet::Base<packet::AUTH_RESPONSE> {
+    static void encode(const Auth_Response& packet, WriteBuffer& buffer);
+    static void decode(Auth_Response& packet, ReadBuffer& buffer);
 
     ed25519::sign_type signature;
 };
 
-struct AuthAdmission_Packet final : public BasePacket<packet_type::AUTH_ADMISSION> {
-    static void encode(const AuthAdmission_Packet& packet, WriteBuffer& buffer);
-    static void decode(AuthAdmission_Packet& packet, ReadBuffer& buffer);
+struct packet::Auth_Admission final : public packet::Base<packet::AUTH_ADMISSION> {
+    static void encode(const Auth_Admission& packet, WriteBuffer& buffer);
+    static void decode(Auth_Admission& packet, ReadBuffer& buffer);
 
     std::uint16_t client_id;
     std::uint64_t identity;

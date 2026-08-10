@@ -4,19 +4,19 @@
 
 #include "shared/entity/class_registry.hh"
 
-void EntitySpawn_Packet::encode(const EntitySpawn_Packet& packet, WriteBuffer& buffer)
+void packet::Entity_Spawn::encode(const Entity_Spawn& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint64_t>(static_cast<std::uint64_t>(packet.entity));
     buffer.write<std::uint16_t>(packet.class_id);
 }
 
-void EntitySpawn_Packet::decode(EntitySpawn_Packet& packet, ReadBuffer& buffer)
+void packet::Entity_Spawn::decode(Entity_Spawn& packet, ReadBuffer& buffer)
 {
     packet.entity = static_cast<entt::entity>(buffer.read<std::uint64_t>());
     packet.class_id = buffer.read<std::uint16_t>();
 }
 
-void EntityPatch_Packet::encode(const EntityPatch_Packet& packet, WriteBuffer& buffer)
+void packet::Entity_Patch::encode(const Entity_Patch& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint64_t>(static_cast<std::uint64_t>(packet.entity));
     buffer.write<std::uint32_t>(static_cast<std::uint32_t>(packet.components.size()));
@@ -28,7 +28,7 @@ void EntityPatch_Packet::encode(const EntityPatch_Packet& packet, WriteBuffer& b
     }
 }
 
-void EntityPatch_Packet::decode(EntityPatch_Packet& packet, ReadBuffer& buffer)
+void packet::Entity_Patch::decode(Entity_Patch& packet, ReadBuffer& buffer)
 {
     packet.entity = static_cast<entt::entity>(buffer.read<std::uint64_t>());
     packet.components.resize(buffer.read<std::uint32_t>());
@@ -40,22 +40,22 @@ void EntityPatch_Packet::decode(EntityPatch_Packet& packet, ReadBuffer& buffer)
     }
 }
 
-void EntityRemove_Packet::encode(const EntityRemove_Packet& packet, WriteBuffer& buffer)
+void packet::Entity_Remove::encode(const Entity_Remove& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint64_t>(static_cast<std::uint64_t>(packet.entity));
 }
 
-void EntityRemove_Packet::decode(EntityRemove_Packet& packet, ReadBuffer& buffer)
+void packet::Entity_Remove::decode(Entity_Remove& packet, ReadBuffer& buffer)
 {
     packet.entity = static_cast<entt::entity>(buffer.read<std::uint64_t>());
 }
 
-void EntityClient_Packet::encode(const EntityClient_Packet& packet, WriteBuffer& buffer)
+void packet::Entity_Client::encode(const Entity_Client& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint64_t>(static_cast<std::uint64_t>(packet.entity));
 }
 
-void EntityClient_Packet::decode(EntityClient_Packet& packet, ReadBuffer& buffer)
+void packet::Entity_Client::decode(Entity_Client& packet, ReadBuffer& buffer)
 {
     packet.entity = static_cast<entt::entity>(buffer.read<std::uint64_t>());
 }

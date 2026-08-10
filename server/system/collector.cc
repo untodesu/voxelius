@@ -16,7 +16,7 @@ static void on_create_entity(entt::registry& registry, entt::entity entity)
 
     auto& component = registry.get<EntityClass>(entity);
 
-    EntitySpawn_Packet packet {};
+    packet::Entity_Spawn packet {};
     packet.entity = entity;
     packet.class_id = component.id;
 
@@ -27,7 +27,7 @@ static void on_destroy_entity(entt::registry& registry, entt::entity entity)
 {
     assert(&registry == &globals::registry); // sanyaty check
 
-    EntityRemove_Packet packet {};
+    packet::Entity_Remove packet {};
     packet.entity = entity;
 
     protocol::broadcast(packet, globals::host);
@@ -35,14 +35,14 @@ static void on_destroy_entity(entt::registry& registry, entt::entity entity)
 
 static void process_entity(entt::entity entity, DirtyMarker& dirty)
 {
-    static EntityPatch_Packet packet;
+    static packet::Entity_Patch packet;
 
     packet.entity = entity;
     packet.components.clear();
 
     for(component_id_type id = 0; id < dirty.markers.size(); id += 1) {
         if(dirty.markers[id]) {
-            EntityPatch_Packet::Component component;
+            packet::Entity_Patch::Component component;
             component.id = id;
 
             WriteBuffer buffer;

@@ -461,7 +461,7 @@ static void on_session_state(const SessionStateEvent& event)
     switch(event.state()) {
         case SESSION_CONNECTING:
             play_menu::open_connect_popup("play_menu.connect.stage.connecting", [] {
-                session::disconnect(Disconnect_Packet::CLIENT_DISCONNECT);
+                session::disconnect(packet::Session_Disconnect::CLIENT_DISCONNECT);
             });
             break;
 
@@ -486,7 +486,7 @@ static void on_session_state(const SessionStateEvent& event)
 
 static void on_session_error(const SessionErrorEvent& event)
 {
-    play_menu::show_error(Disconnect_Packet::reason_string_client(event.reason()));
+    play_menu::show_error(packet::Session_Disconnect::reason_string_client(event.reason()));
 }
 
 static void load_servers_json(void)

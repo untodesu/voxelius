@@ -73,19 +73,19 @@ static bool is_outdated_server(std::uint32_t major, std::uint32_t minor, std::ui
     return false;
 }
 
-static void on_auth_request(const AuthRequest_Packet& packet)
+static void on_auth_request(const packet::Auth_Request& packet)
 {
     if(is_outdated_client(packet.version_major, packet.version_minor, packet.version_patch)) {
-        Disconnect_Packet response {};
-        response.reason = Disconnect_Packet::OUTDATED_CLIENT;
+        packet::Session_Disconnect response {};
+        response.reason = packet::Session_Disconnect::OUTDATED_CLIENT;
         protocol::send(response, packet.peer);
         enet_peer_disconnect_later(packet.peer, 0);
         return;
     }
 
     if(is_outdated_server(packet.version_major, packet.version_minor, packet.version_patch)) {
-        Disconnect_Packet response {};
-        response.reason = Disconnect_Packet::OUTDATED_SERVER;
+        packet::Session_Disconnect response {};
+        response.reason = packet::Session_Disconnect::OUTDATED_SERVER;
         protocol::send(response, packet.peer);
         enet_peer_disconnect_later(packet.peer, 0);
         return;
@@ -106,8 +106,8 @@ static void on_auth_request(const AuthRequest_Packet& packet)
     }
 
     if(!client_whitelisted) {
-        Disconnect_Packet response {};
-        response.reason = Disconnect_Packet::NOT_WHITELISTED;
+        packet::Session_Disconnect response {};
+        response.reason = packet::Session_Disconnect::NOT_WHITELISTED;
         protocol::send(response, packet.peer);
         enet_peer_disconnect_later(packet.peer, 0);
         return;
@@ -121,8 +121,8 @@ static void on_auth_request(const AuthRequest_Packet& packet)
     checksums_match = checksums_match && packet.ents_hash == class_registry::checksum();
 
     if(!checksums_match) {
-        Disconnect_Packet response {};
-        response.reason = Disconnect_Packet::CHECKSUM_MISMATCH;
+        packet::Session_Disconnect response {};
+        response.reason = packet::Session_Disconnect::CHECKSUM_MISMATCH;
         protocol::send(response, packet.peer);
         enet_peer_disconnect_later(packet.peer, 0);
         return;
@@ -131,8 +131,8 @@ static void on_auth_request(const AuthRequest_Packet& packet)
     auto session = sessions::create(packet.peer, packet.username);
 
     if(session == nullptr) {
-        Disconnect_Packet response {};
-        response.reason = Disconnect_Packet::SERVER_IS_FULL;
+        packet::Session_Disconnect response {};
+        response.reason = packet::Session_Disconnect::SERVER_IS_FULL;
         protocol::send(response, packet.peer);
         enet_peer_disconnect_later(packet.peer, 0);
         return;
@@ -158,29 +158,29 @@ static void on_auth_request(const AuthRequest_Packet& packet)
 
     LOG_INFO("{} ({}) connected", session->username, session->identity);
 
-    AuthChallenge_Packet response {};
+    packet::Auth_Challenge response {};
     response.nonce = session->nonce;
     protocol::send(response, packet.peer);
 }
 
-static void on_auth_response(const AuthResponse_Packet& packet)
+static void on_auth_response(const packet::Auth_Response& packet)
 {
     auto session = sessions::find(packet.peer);
 
     if(session == nullptr) {
-        Disconnect_Packet response {};
-        response.reason = Disconnect_Packet::UNSPECIFIED;
+        packet::Session_Disconnect response {};
+        response.reason = packet::Session_Disconnect::UNSPECIFIED;
         protocol::send(response, packet.peer);
         enet_peer_disconnect_later(packet.peer, 0);
         return;
     }
 
     if(!ed25519::verify(session->pkey, session->salted_nonce, packet.signature)) {
-        Disconnect_Packet response {};
-        response.reason = Disconnect_Packet::INVALID_SIGNATURE;
+        packet::Session_Disconnect response {};
+        response.reason = packet::Session_Disconnect::INVALID_SIGNATURE;
         protocol::send(response, packet.peer);
         enet_peer_disconnect_later(packet.peer, 0);
-        sessions::destroy(session, Disconnect_Packet::INVALID_SIGNATURE);
+        sessions::destroy(session, packet::Session_Disconnect::INVALID_SIGNATURE);
         return;
     }
 
@@ -188,7 +188,7 @@ static void on_auth_response(const AuthResponse_Packet& packet)
 
     LOG_INFO("{} ({}) authenticated successfully", session->username, session->identity);
 
-    AuthAdmission_Packet response {};
+    packet::Auth_Admission response {};
     response.client_id = session->client_id;
     response.identity = session->identity;
     response.username = session->username;
@@ -202,12 +202,12 @@ static void on_auth_response(const AuthResponse_Packet& packet)
     ref.ptr = session;
     globals::registry.emplace<SessionRef>(player, std::move(ref));
 
-    EntityClient_Packet response_2 {};
+    packet::Entity_Client response_2 {};
     response_2.entity = player;
     protocol::send(response_2, packet.peer);
 }
 
-static void on_disconnect(const Disconnect_Packet& packet)
+static void on_disconnect(const packet::Session_Disconnect& packet)
 {
     auto session = sessions::find(packet.peer);
 
@@ -267,9 +267,9 @@ void sessions::init(void)
     std::random_device noise;
     s_randomizer.seed(noise());
 
-    globals::dispatcher.sink<AuthRequest_Packet>().connect<&on_auth_request>();
-    globals::dispatcher.sink<AuthResponse_Packet>().connect<&on_auth_response>();
-    globals::dispatcher.sink<Disconnect_Packet>().connect<&on_disconnect>();
+    globals::dispatcher.sink<packet::Auth_Request>().connect<&on_auth_request>();
+    globals::dispatcher.sink<packet::Auth_Response>().connect<&on_auth_response>();
+    globals::dispatcher.sink<packet::Session_Disconnect>().connect<&on_disconnect>();
 }
 
 void sessions::init_late(void)
@@ -293,8 +293,8 @@ void sessions::shutdown(void)
 {
     for(auto& session : s_sessions) {
         if(session.peer) {
-            Disconnect_Packet packet {};
-            packet.reason = Disconnect_Packet::SERVER_SHUTDOWN;
+            packet::Session_Disconnect packet {};
+            packet.reason = packet::Session_Disconnect::SERVER_SHUTDOWN;
             protocol::send(packet, session.peer);
             enet_peer_disconnect_later(session.peer, 0);
         }
@@ -391,7 +391,7 @@ void sessions::destroy(Session* session, std::optional<std::uint32_t> reason)
         std::string_view reason_string;
 
         if(reason.has_value()) {
-            reason_string = Disconnect_Packet::reason_string_server(reason.value());
+            reason_string = packet::Session_Disconnect::reason_string_server(reason.value());
         }
         else {
             reason_string = std::string_view("connection closed");

@@ -15,22 +15,22 @@
 #include "client/globals.hh"
 #include "client/net/session.hh"
 
-static void on_entity_spawn(const EntitySpawn_Packet& packet)
+static void on_entity_spawn(const packet::Entity_Spawn& packet)
 {
     auto entity = utils::spawn(packet.class_id, packet.entity);
 
     if(!globals::registry.valid(entity)) {
-        session::disconnect(Disconnect_Packet::ENTITY_ID_DESYNC);
+        session::disconnect(packet::Session_Disconnect::ENTITY_ID_DESYNC);
         return;
     }
 
     if(entity != packet.entity) {
-        session::disconnect(Disconnect_Packet::ENTITY_ID_DESYNC);
+        session::disconnect(packet::Session_Disconnect::ENTITY_ID_DESYNC);
         return;
     }
 }
 
-static void on_entity_patch(const EntityPatch_Packet& packet)
+static void on_entity_patch(const packet::Entity_Patch& packet)
 {
     static ReadBuffer buffer;
 
@@ -41,25 +41,25 @@ static void on_entity_patch(const EntityPatch_Packet& packet)
     }
 }
 
-static void on_entity_remove(const EntityRemove_Packet& packet)
+static void on_entity_remove(const packet::Entity_Remove& packet)
 {
     globals::registry.destroy(packet.entity);
 
     if(globals::player == packet.entity) {
         globals::player = entt::null;
 
-        session::disconnect(Disconnect_Packet::ENTITY_ID_DESYNC); // We can't really recover from this
+        session::disconnect(packet::Session_Disconnect::ENTITY_ID_DESYNC); // We can't really recover from this
     }
 }
 
-static void on_entity_client(const EntityClient_Packet& packet)
+static void on_entity_client(const packet::Entity_Client& packet)
 {
     globals::player = packet.entity;
 
     session::notify_spawned();
 }
 
-static void on_chunk_blocks(const ChunkBlocks_Packet& packet)
+static void on_world_blocks(const packet::World_Blocks& packet)
 {
     auto chunk = world::create_chunk(packet.cpos);
 
@@ -68,14 +68,19 @@ static void on_chunk_blocks(const ChunkBlocks_Packet& packet)
     globals::dispatcher.trigger(ChunkUpdateEvent(packet.cpos, chunk));
 }
 
-static void on_chunk_biomes(const ChunkBiomes_Packet& packet)
+static void on_world_biomes(const packet::World_Biomes& packet)
 {
     biome_map::insert(packet.realm, packet.cpos, packet.biomes);
 }
 
-static void on_set_block(const SetBlock_Packet& packet)
+static void on_world_set_block(const packet::World_SetBlock& packet)
 {
     world::set_block(packet.bpos, packet.block);
+}
+
+static void on_world_timings(const packet::World_Timings& packet)
+{
+    globals::current_tick = packet.current_tick;
 }
 
 static void on_session_state(const SessionStateEvent& event)
@@ -87,14 +92,15 @@ static void on_session_state(const SessionStateEvent& event)
 
 void receive::init(void)
 {
-    globals::dispatcher.sink<EntitySpawn_Packet>().connect<&on_entity_spawn>();
-    globals::dispatcher.sink<EntityPatch_Packet>().connect<&on_entity_patch>();
-    globals::dispatcher.sink<EntityRemove_Packet>().connect<&on_entity_remove>();
-    globals::dispatcher.sink<EntityClient_Packet>().connect<&on_entity_client>();
+    globals::dispatcher.sink<packet::Entity_Spawn>().connect<&on_entity_spawn>();
+    globals::dispatcher.sink<packet::Entity_Patch>().connect<&on_entity_patch>();
+    globals::dispatcher.sink<packet::Entity_Remove>().connect<&on_entity_remove>();
+    globals::dispatcher.sink<packet::Entity_Client>().connect<&on_entity_client>();
 
-    globals::dispatcher.sink<ChunkBlocks_Packet>().connect<&on_chunk_blocks>();
-    globals::dispatcher.sink<ChunkBiomes_Packet>().connect<&on_chunk_biomes>();
-    globals::dispatcher.sink<SetBlock_Packet>().connect<&on_set_block>();
+    globals::dispatcher.sink<packet::World_Blocks>().connect<&on_world_blocks>();
+    globals::dispatcher.sink<packet::World_Biomes>().connect<&on_world_biomes>();
+    globals::dispatcher.sink<packet::World_SetBlock>().connect<&on_world_set_block>();
+    globals::dispatcher.sink<packet::World_Timings>().connect<&on_world_timings>();
 
     globals::dispatcher.sink<SessionStateEvent>().connect<&on_session_state>();
 }

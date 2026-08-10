@@ -82,7 +82,7 @@ void main_menu::init(void)
     });
 
     s_menu.add_button_ingame("main_menu.button.disconnect", [] {
-        session::disconnect(Disconnect_Packet::CLIENT_DISCONNECT);
+        session::disconnect(packet::Session_Disconnect::CLIENT_DISCONNECT);
 
         globals::gui_screen = &play_menu::screen;
     });
