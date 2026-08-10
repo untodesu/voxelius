@@ -34,36 +34,32 @@ static void grow(std::size_t required)
     chunk_vbo::capacity = new_capacity;
 }
 
-static void coalesce(void)
+static void insert_free_region(chunk_vbo::FreeRegion region)
 {
-    if(1 == chunk_vbo::free_list.size()) {
-        return; // nothing to coalesce
-    }
+    auto& list = chunk_vbo::free_list;
 
-    std::sort(chunk_vbo::free_list.begin(), chunk_vbo::free_list.end(), [](const auto& a, const auto& b) {
+    auto it = std::lower_bound(list.begin(), list.end(), region, [](const auto& a, const auto& b) {
         return a.base < b.base;
     });
 
-    std::vector<chunk_vbo::FreeRegion> merged;
-    merged.reserve(chunk_vbo::free_list.size());
+    auto prev = std::prev(it);
+    auto prev_end = prev->base + prev->size;
 
-    auto current = chunk_vbo::free_list.front();
-
-    for(std::size_t i = 1; i < chunk_vbo::free_list.size(); ++i) {
-        const auto& next = chunk_vbo::free_list[i];
-
-        if(current.base + current.size == next.base) {
-            current.size += next.size;
-        }
-        else {
-            merged.push_back(current);
-            current = next;
-        }
+    if(it > list.begin() && prev_end == region.base) {
+        it = prev;
+        it->size += region.size;
+    }
+    else {
+        it = list.insert(it, region);
     }
 
-    merged.push_back(current);
+    auto next = std::next(it);
+    auto next_end = next->base + next->size;
 
-    chunk_vbo::free_list = std::move(merged);
+    if(next < list.end() && it->base + it->size == next->base) {
+        it->size += next->size;
+        list.erase(next);
+    }
 }
 
 void chunk_vbo::init(void)
@@ -128,9 +124,7 @@ void chunk_vbo::free(std::uint32_t base, std::size_t vertex_count)
         region.base = base;
         region.size = static_cast<std::uint32_t>(vertex_count);
 
-        free_list.emplace_back(std::move(region));
-
-        coalesce();
+        insert_free_region(region);
     }
 }
 

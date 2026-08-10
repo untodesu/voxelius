@@ -26,6 +26,8 @@
 
 #include "client/camera.hh"
 
+constexpr static std::size_t MAX_SUBMIT_PER_FRAME = 32;
+
 constexpr static std::array ALL_FACES = {
     BLOCK_FACE_NORTH,
     BLOCK_FACE_SOUTH,
@@ -119,8 +121,14 @@ private:
     void mesh_fluid(const LocalPos& lpos, const BlockDefinition& def);
     void mesh_block(const LocalPos& lpos, block_id_type id);
 
+    void reset_tint_cache(void);
+
     BlockCache m_cache;
     BiomeCache m_biomes;
+
+    mutable std::array<std::pair<tint_id_type, Eigen::Vector3f>, 8> m_tint_cache;
+    mutable std::size_t m_tint_cache_size { 0 };
+
     std::vector<ChunkMesh_Vertex> m_opaque;
     std::vector<ChunkMesh_Vertex> m_alpha;
     std::vector<ChunkMesh_Vertex> m_fluid;
@@ -458,6 +466,12 @@ Eigen::Vector3f MeshingTask::resolve_tint(const LocalPos& lpos, tint_id_type tin
         return Eigen::Vector3f::Ones();
     }
 
+    for(std::size_t i = 0; i < m_tint_cache_size; ++i) {
+        if(m_tint_cache[i].first == tint) {
+            return m_tint_cache[i].second;
+        }
+    }
+
     Eigen::Vector3f sum = Eigen::Vector3f::Zero();
 
     for(int dz = -1; dz <= 1; dz += 1) {
@@ -479,7 +493,13 @@ Eigen::Vector3f MeshingTask::resolve_tint(const LocalPos& lpos, tint_id_type tin
         }
     }
 
-    return sum / 9.0f;
+    auto result = sum / 9.0f;
+
+    if(m_tint_cache_size < m_tint_cache.size()) {
+        m_tint_cache[m_tint_cache_size++] = std::make_pair(tint, result);
+    }
+
+    return result;
 }
 
 static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos, const BlockDefinition* def, fluid_gravity gravity,
@@ -932,6 +952,8 @@ void MeshingTask::mesh_block(const LocalPos& lpos, block_id_type id)
         return;
     }
 
+    reset_tint_cache();
+
     auto def = block_registry::find_definition(id);
 
     if(def == nullptr) {
@@ -992,6 +1014,11 @@ void MeshingTask::mesh_block(const LocalPos& lpos, block_id_type id)
     if(def->fluid) {
         mesh_fluid(lpos, *def);
     }
+}
+
+void MeshingTask::reset_tint_cache(void)
+{
+    m_tint_cache_size = 0;
 }
 
 static void mark_dirty(entt::entity entity)
@@ -1129,13 +1156,16 @@ void chunk_mesher::update(void)
         }
     }
 
-    std::sort(batch.begin(), batch.end(), [](const auto& a, const auto& b) {
+    auto submit_count = std::min(batch.size(), MAX_SUBMIT_PER_FRAME);
+
+    std::partial_sort(batch.begin(), batch.begin() + submit_count, batch.end(), [](const auto& a, const auto& b) {
         const auto& [a_entity, a_position, a_dist_sq] = a;
         const auto& [b_entity, b_position, b_dist_sq] = b;
         return a_dist_sq < b_dist_sq;
     });
 
-    for(const auto& [entity, position, dist_sq] : batch) {
+    for(std::size_t i = 0; i < submit_count; ++i) {
+        const auto& [entity, position, dist_sq] = batch[i];
         s_pending.emplace(position, nullptr);
         world::chunk_registry.remove<ChunkMesh_DirtyMarker>(entity);
         threading::submit<MeshingTask>(entity, position);
