@@ -11,10 +11,12 @@
 #include "shared/net/packet_auth.hh"
 #include "shared/net/packet_session.hh"
 #include "shared/net/protocol.hh"
+#include "shared/world/biome_map.hh"
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/fluid_registry.hh"
 #include "shared/world/tint_registry.hh"
+#include "shared/world/world.hh"
 
 #include "client/globals.hh"
 #include "client/net/host.hh"
@@ -55,6 +57,11 @@ static void handle_disconnect(std::uint32_t reason)
 
         globals::dispatcher.trigger(SessionStateEvent(SESSION_DISCONNECTED, reason));
     }
+
+    globals::registry.clear();
+    globals::player = entt::null;
+    biome_map::purge();
+    world::purge();
 }
 
 static void on_host_connect(const HostConnectEvent& event)
@@ -62,11 +69,11 @@ static void on_host_connect(const HostConnectEvent& event)
     set_state(SESSION_AUTHENTICATING);
 
     AuthRequest_Packet request {};
-    request.major = version::major;
-    request.minor = version::minor;
-    request.patch = version::patch;
+    request.version_major = version::major;
+    request.version_minor = version::minor;
+    request.version_patch = version::patch;
     request.pkey = s_auth_pair.first;
-    request.invite = s_pending_invite;
+    request.invite_code = s_pending_invite;
     request.biomes_hash = biome_registry::checksum();
     request.blocks_hash = block_registry::checksum();
     request.fluids_hash = fluid_registry::checksum();

@@ -52,70 +52,64 @@ void player_move::init(void)
 
 void player_move::fixed_update(void)
 {
-    if(!globals::registry.valid(globals::player)) {
-        return;
+    if(globals::registry.valid(globals::player)) {
+        const auto& transform = globals::registry.get<Transform>(globals::player);
+        const auto& velocity = globals::registry.get<Velocity>(globals::player);
+        globals::registry.emplace_or_replace<Transform_Prev>(globals::player, transform);
+        globals::registry.emplace_or_replace<Velocity_Prev>(globals::player, velocity);
     }
-
-    const auto& transform = globals::registry.get<Transform>(globals::player);
-    const auto& velocity = globals::registry.get<Velocity>(globals::player);
-
-    globals::registry.emplace_or_replace<Transform_Prev>(globals::player, transform);
-    globals::registry.emplace_or_replace<Velocity_Prev>(globals::player, velocity);
 }
 
 void player_move::update(void)
 {
-    if(!globals::registry.valid(globals::player)) {
-        return;
+    if(globals::registry.valid(globals::player)) {
+        Eigen::Vector3f wishdir = Eigen::Vector3f::Zero();
+
+        if(globals::gui_screen == nullptr) {
+            auto keyboard = SDL_GetKeyboardState(nullptr);
+
+            auto forward_scancode = SDL_GetScancodeFromKey(s_key_forward.value(), nullptr);
+            auto backward_scancode = SDL_GetScancodeFromKey(s_key_backward.value(), nullptr);
+            auto left_scancode = SDL_GetScancodeFromKey(s_key_left.value(), nullptr);
+            auto right_scancode = SDL_GetScancodeFromKey(s_key_right.value(), nullptr);
+            auto jump_scancode = SDL_GetScancodeFromKey(s_key_jump.value(), nullptr);
+            auto crouch_scancode = SDL_GetScancodeFromKey(s_key_crouch.value(), nullptr);
+
+            if(keyboard[forward_scancode]) {
+                wishdir.z() -= 1.0f;
+            }
+
+            if(keyboard[backward_scancode]) {
+                wishdir.z() += 1.0f;
+            }
+
+            if(keyboard[left_scancode]) {
+                wishdir.x() -= 1.0f;
+            }
+
+            if(keyboard[right_scancode]) {
+                wishdir.x() += 1.0f;
+            }
+
+            if(keyboard[jump_scancode]) {
+                wishdir.y() += 1.0f;
+            }
+
+            if(keyboard[crouch_scancode]) {
+                wishdir.y() -= 1.0f;
+            }
+
+            if(!wishdir.isZero()) {
+                const auto& head = globals::registry.get<Head>(globals::player);
+                auto yaw = Eigen::AngleAxisf(head.angles.y(), Eigen::Vector3f::UnitY());
+                wishdir = yaw * wishdir;
+                wishdir.normalize();
+            }
+        }
+
+        MoveData move_data {};
+        move_data.wishdir = wishdir;
+
+        globals::registry.emplace_or_replace<MoveData>(globals::player, std::move(move_data));
     }
-
-    Eigen::Vector3f wishdir = Eigen::Vector3f::Zero();
-
-    if(!globals::gui_screen) {
-        auto keyboard = SDL_GetKeyboardState(nullptr);
-
-        auto forward_scancode = SDL_GetScancodeFromKey(s_key_forward.value(), nullptr);
-        auto backward_scancode = SDL_GetScancodeFromKey(s_key_backward.value(), nullptr);
-        auto left_scancode = SDL_GetScancodeFromKey(s_key_left.value(), nullptr);
-        auto right_scancode = SDL_GetScancodeFromKey(s_key_right.value(), nullptr);
-        auto jump_scancode = SDL_GetScancodeFromKey(s_key_jump.value(), nullptr);
-        auto crouch_scancode = SDL_GetScancodeFromKey(s_key_crouch.value(), nullptr);
-
-        if(keyboard[forward_scancode]) {
-            wishdir.z() -= 1.0f;
-        }
-
-        if(keyboard[backward_scancode]) {
-            wishdir.z() += 1.0f;
-        }
-
-        if(keyboard[left_scancode]) {
-            wishdir.x() -= 1.0f;
-        }
-
-        if(keyboard[right_scancode]) {
-            wishdir.x() += 1.0f;
-        }
-
-        if(keyboard[jump_scancode]) {
-            wishdir.y() += 1.0f;
-        }
-
-        if(keyboard[crouch_scancode]) {
-            wishdir.y() -= 1.0f;
-        }
-
-        if(!wishdir.isZero()) {
-            const auto& head = globals::registry.get<Head>(globals::player);
-
-            // Only yaw affects fly direction; pitch is deliberately
-            // ignored so that looking up/down doesn't tilt movement
-            Eigen::AngleAxisf yaw(head.angles.y(), Eigen::Vector3f::UnitY());
-
-            wishdir = yaw * wishdir;
-            wishdir.normalize();
-        }
-    }
-
-    globals::registry.emplace_or_replace<MoveData>(globals::player, MoveData { wishdir });
 }

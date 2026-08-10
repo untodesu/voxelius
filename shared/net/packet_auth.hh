@@ -8,11 +8,11 @@ struct AuthRequest_Packet final : public BasePacket<packet_type::AUTH_REQUEST> {
     static void encode(const AuthRequest_Packet& packet, WriteBuffer& buffer);
     static void decode(AuthRequest_Packet& packet, ReadBuffer& buffer);
 
-    std::uint32_t major;
-    std::uint32_t minor;
-    std::uint32_t patch;
+    std::uint32_t version_major;
+    std::uint32_t version_minor;
+    std::uint32_t version_patch;
     ed25519::pkey_type pkey;
-    std::uint64_t invite;
+    std::uint64_t invite_code;
     std::uint64_t biomes_hash;
     std::uint64_t blocks_hash;
     std::uint64_t fluids_hash;

@@ -14,7 +14,7 @@
 
 static config::Ref<unsigned> s_max_players { 8 };
 static config::Ref<unsigned> s_status_peers { 4 };
-static config::Ref<std::uint16_t> s_port { 16384 };
+static config::Ref<std::uint16_t> s_port { protocol::PORT };
 static config::Ref<std::string> s_bind { "0.0.0.0" };
 
 void host::init(void)
@@ -57,6 +57,8 @@ void host::init_late(void)
 
 void host::shutdown(void)
 {
+    enet_host_flush(globals::host);
+    enet_host_service(globals::host, nullptr, 500);
     enet_host_destroy(globals::host);
 }
 

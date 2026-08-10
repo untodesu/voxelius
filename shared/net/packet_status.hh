@@ -7,9 +7,9 @@ struct StatusRequest_Packet final : public BasePacket<packet_type::STATUS_REQUES
     static void encode(const StatusRequest_Packet& packet, WriteBuffer& buffer);
     static void decode(StatusRequest_Packet& packet, ReadBuffer& buffer);
 
-    std::uint32_t major;
-    std::uint32_t minor;
-    std::uint32_t patch;
+    std::uint32_t version_major;
+    std::uint32_t version_minor;
+    std::uint32_t version_patch;
 };
 
 struct StatusResponse_Packet final : public BasePacket<packet_type::STATUS_RESPONSE> {
@@ -19,13 +19,13 @@ struct StatusResponse_Packet final : public BasePacket<packet_type::STATUS_RESPO
     static void encode(const StatusResponse_Packet& packet, WriteBuffer& buffer);
     static void decode(StatusResponse_Packet& packet, ReadBuffer& buffer);
 
-    std::uint32_t major;
-    std::uint32_t minor;
-    std::uint32_t patch;
-    std::uint32_t tags;
+    std::uint32_t version_major;
+    std::uint16_t max_players;
+    std::uint16_t num_players;
     std::string motd;
-    std::uint16_t players;
-    std::uint16_t slots;
+    std::uint32_t version_minor;
+    std::uint32_t version_patch;
+    std::uint32_t server_tags;
 };
 
 #endif /* A77BB035_0E49_4D48_89BF_2DE0B21B203F */

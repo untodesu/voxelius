@@ -72,8 +72,8 @@ static void on_status_response(const StatusResponse_Packet& packet)
 
     data->responded = true;
 
-    push_outgoing(BotherResponseEvent(data->request_id, packet.players, packet.slots, packet.major, packet.minor, packet.patch,
-        packet.motd));
+    push_outgoing(BotherResponseEvent(data->request_id, packet.num_players, packet.max_players, packet.version_major, packet.version_minor,
+        packet.version_patch, packet.motd));
 
     enet_peer_disconnect(packet.peer, 0);
 }
@@ -182,9 +182,9 @@ static void thread_main(std::stop_token stop_token)
         while(0 < enet_host_service(host, &event, SERVICE_TIMEOUT_MS)) {
             if(event.type == ENET_EVENT_TYPE_CONNECT) {
                 StatusRequest_Packet request {};
-                request.major = version::major;
-                request.minor = version::minor;
-                request.patch = version::patch;
+                request.version_major = version::major;
+                request.version_minor = version::minor;
+                request.version_patch = version::patch;
                 protocol::send(request, event.peer);
                 continue;
             }

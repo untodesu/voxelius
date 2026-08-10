@@ -6,6 +6,7 @@
 namespace protocol
 {
 constexpr static enet_uint32 CHANNEL = 0;
+constexpr static enet_uint16 PORT = 43103;
 } // namespace protocol
 
 namespace protocol

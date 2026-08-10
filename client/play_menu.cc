@@ -8,6 +8,7 @@
 #include "core/version.hh"
 
 #include "shared/net/packet_session.hh"
+#include "shared/net/protocol.hh"
 
 #include "client/fonts.hh"
 #include "client/globals.hh"
@@ -29,7 +30,6 @@
 
 constexpr static float ROW_HEIGHT = 24.0f;
 constexpr static float BODY_MARGIN = 32.0f;
-constexpr static std::uint16_t DEFAULT_PORT = 16384;
 constexpr static std::string_view DEFAULT_NAME = "Voxelius Server";
 constexpr static std::string_view JSON_PATH = "servers.json";
 
@@ -293,10 +293,10 @@ static std::pair<std::string_view, std::uint16_t> parse_hostname(std::string_vie
 
     if(colon == std::string_view::npos) {
         if(hostname.empty()) {
-            return std::make_pair(std::string_view("localhost"), DEFAULT_PORT);
+            return std::make_pair(std::string_view("localhost"), protocol::PORT);
         }
         else {
-            return std::make_pair(hostname, DEFAULT_PORT);
+            return std::make_pair(hostname, protocol::PORT);
         }
     }
     else {
@@ -310,7 +310,7 @@ static std::pair<std::string_view, std::uint16_t> parse_hostname(std::string_vie
             return std::make_pair(host_part, std::max<std::uint16_t>(1024, port));
         }
         else {
-            return std::make_pair(host_part, DEFAULT_PORT);
+            return std::make_pair(host_part, protocol::PORT);
         }
     }
 }
@@ -348,7 +348,7 @@ static void apply_popup_values(ServerListItem* item, std::span<const std::string
 static void open_add_popup(void)
 {
     auto item = create_server();
-    item->port = DEFAULT_PORT;
+    item->port = protocol::PORT;
 
     s_server_popup.set_value(0, DEFAULT_NAME);
     s_server_popup.set_value(1, {});
@@ -373,7 +373,7 @@ static void open_edit_popup(void)
         auto item = s_selected_server;
         std::string hostname;
 
-        if(item->port == DEFAULT_PORT) {
+        if(item->port == protocol::PORT) {
             hostname = item->host;
         }
         else {
@@ -758,6 +758,8 @@ void play_menu::close_connect_popup(void)
 
 void play_menu::show_error(std::string_view message)
 {
+    globals::gui_screen = &screen;
+
     s_error_popup.set_message(message);
     s_error_popup.open();
 }

@@ -30,13 +30,13 @@ static void on_status_request(const StatusRequest_Packet& packet)
     }
 
     StatusResponse_Packet response {};
-    response.major = version::major;
-    response.minor = version::minor;
-    response.patch = version::patch;
-    response.tags = server_tags;
+    response.version_major = version::major;
+    response.max_players = s_max_players;
+    response.num_players = sessions::num_players;
     response.motd = splash::get();
-    response.players = sessions::num_players;
-    response.slots = s_max_players;
+    response.version_minor = version::minor;
+    response.version_patch = version::patch;
+    response.server_tags = server_tags;
 
     protocol::send(response, packet.peer);
 }

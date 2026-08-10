@@ -6,11 +6,11 @@
 
 void AuthRequest_Packet::encode(const AuthRequest_Packet& packet, WriteBuffer& buffer)
 {
-    buffer.write<std::uint32_t>(packet.major);
-    buffer.write<std::uint32_t>(packet.minor);
-    buffer.write<std::uint32_t>(packet.patch);
+    buffer.write<std::uint32_t>(packet.version_major);
+    buffer.write<std::uint32_t>(packet.version_minor);
+    buffer.write<std::uint32_t>(packet.version_patch);
     buffer.write_bytes(packet.pkey);
-    buffer.write<std::uint64_t>(packet.invite);
+    buffer.write<std::uint64_t>(packet.invite_code);
     buffer.write<std::uint64_t>(packet.biomes_hash);
     buffer.write<std::uint64_t>(packet.blocks_hash);
     buffer.write<std::uint64_t>(packet.fluids_hash);
@@ -21,11 +21,11 @@ void AuthRequest_Packet::encode(const AuthRequest_Packet& packet, WriteBuffer& b
 
 void AuthRequest_Packet::decode(AuthRequest_Packet& packet, ReadBuffer& buffer)
 {
-    packet.major = buffer.read<std::uint32_t>();
-    packet.minor = buffer.read<std::uint32_t>();
-    packet.patch = buffer.read<std::uint32_t>();
+    packet.version_major = buffer.read<std::uint32_t>();
+    packet.version_minor = buffer.read<std::uint32_t>();
+    packet.version_patch = buffer.read<std::uint32_t>();
     buffer.read_bytes(packet.pkey);
-    packet.invite = buffer.read<std::uint64_t>();
+    packet.invite_code = buffer.read<std::uint64_t>();
     packet.biomes_hash = buffer.read<std::uint64_t>();
     packet.blocks_hash = buffer.read<std::uint64_t>();
     packet.fluids_hash = buffer.read<std::uint64_t>();

@@ -75,7 +75,7 @@ static bool is_outdated_server(std::uint32_t major, std::uint32_t minor, std::ui
 
 static void on_auth_request(const AuthRequest_Packet& packet)
 {
-    if(is_outdated_client(packet.major, packet.minor, packet.patch)) {
+    if(is_outdated_client(packet.version_major, packet.version_minor, packet.version_patch)) {
         Disconnect_Packet response {};
         response.reason = Disconnect_Packet::OUTDATED_CLIENT;
         protocol::send(response, packet.peer);
@@ -83,7 +83,7 @@ static void on_auth_request(const AuthRequest_Packet& packet)
         return;
     }
 
-    if(is_outdated_server(packet.major, packet.minor, packet.patch)) {
+    if(is_outdated_server(packet.version_major, packet.version_minor, packet.version_patch)) {
         Disconnect_Packet response {};
         response.reason = Disconnect_Packet::OUTDATED_SERVER;
         protocol::send(response, packet.peer);
@@ -97,8 +97,8 @@ static void on_auth_request(const AuthRequest_Packet& packet)
         if(whitelist::contains(packet.pkey)) {
             client_whitelisted = true;
         }
-        else if(packet.invite) {
-            client_whitelisted = invites::consume(packet.invite, packet.pkey);
+        else if(packet.invite_code) {
+            client_whitelisted = invites::consume(packet.invite_code, packet.pkey);
         }
     }
     else {
@@ -156,7 +156,7 @@ static void on_auth_request(const AuthRequest_Packet& packet)
     session->identity = utils::crc64(session->pkey);
     session->state = session_state::CHALLENGE;
 
-    LOG_INFO("{} ({}) connected on version {}.{}.{}", session->username, session->identity, packet.major, packet.minor, packet.patch);
+    LOG_INFO("{} ({}) connected", session->username, session->identity);
 
     AuthChallenge_Packet response {};
     response.nonce = session->nonce;
@@ -291,6 +291,15 @@ void sessions::init_late(void)
 
 void sessions::shutdown(void)
 {
+    for(auto& session : s_sessions) {
+        if(session.peer) {
+            Disconnect_Packet packet {};
+            packet.reason = Disconnect_Packet::SERVER_SHUTDOWN;
+            protocol::send(packet, session.peer);
+            enet_peer_disconnect_later(session.peer, 0);
+        }
+    }
+
     s_username_map.clear();
     s_identity_map.clear();
     s_sessions.clear();

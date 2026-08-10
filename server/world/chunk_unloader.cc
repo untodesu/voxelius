@@ -9,12 +9,12 @@
 #include "shared/world/chunk.hh"
 #include "shared/world/world.hh"
 
+#include "server/constant.hh"
 #include "server/globals.hh"
 #include "server/net/sessions.hh"
 #include "server/world/chunk_loader.hh"
 
-constexpr static std::size_t UNLOAD_BUDGET = 4;
-constexpr static std::size_t AUTOSAVE_BUDGET = 4;
+constexpr static std::size_t UNLOAD_BUDGET = constant::REGION_VOLUME;
 
 static config::Ref<unsigned> s_view_distance { 8 };
 
@@ -64,12 +64,6 @@ void chunk_unloader::fixed_update_late(void)
             }
 
             continue;
-        }
-
-        if(autosaved < AUTOSAVE_BUDGET) {
-            if(chunk_loader::save(component.position)) {
-                autosaved += 1;
-            }
         }
     }
 

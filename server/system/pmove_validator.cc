@@ -77,18 +77,16 @@ void pmove_validator::fixed_update_late(void)
             LOG_WARNING("rubberbanding entity {}: dist_vel={} dist_bpos={}", static_cast<std::uint64_t>(entity), dist_vel, dist_bpos);
 
             send_full_update(entity);
-            continue;
         }
+        else {
+            globals::registry.patch<Transform>(entity, [&](Transform& ptransform) {
+                ptransform.chunk = sim_data.chunk;
+                ptransform.local = sim_data.local;
+            });
 
-        // The server agrees with what the client simulated; adopt the
-        // client's viewpoint instead of trusting our own lagged simulation
-        globals::registry.patch<Transform>(entity, [&](Transform& t) {
-            t.chunk = sim_data.chunk;
-            t.local = sim_data.local;
-        });
-
-        globals::registry.patch<Velocity>(entity, [&](Velocity& v) {
-            v.value = sim_data.velocity;
-        });
+            globals::registry.patch<Velocity>(entity, [&](Velocity& pvelocity) {
+                pvelocity.value = sim_data.velocity;
+            });
+        }
     }
 }
