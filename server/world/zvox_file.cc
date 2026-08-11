@@ -11,6 +11,11 @@ constexpr static std::uint8_t ZVOX_MAGIC_3 = 0x4F;
 constexpr static std::uint8_t ZVOX_MAGIC_4 = 0x58;
 constexpr static std::uint32_t ZVOX_VERSION = 0x00000001;
 
+struct Payload final {
+    std::size_t slot;
+    std::vector<std::byte> data;
+};
+
 ZvoxFile::ZvoxFile(std::filesystem::path path) : m_path(std::move(path))
 {
     m_offsets.fill(0);
@@ -24,6 +29,10 @@ ZvoxFile::ZvoxFile(std::filesystem::path path) : m_path(std::move(path))
         m_stream.open(m_path, std::ios::in | std::ios::out | std::ios::binary);
         m_valid = m_stream.is_open();
         m_valid = m_valid && load_header();
+
+        if(m_valid) {
+            build_free_ranges();
+        }
     }
     else {
         m_stream.open(m_path, std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
@@ -97,10 +106,24 @@ void ZvoxFile::write_slot(std::size_t slot, const WriteBuffer& buffer)
 
     auto data = buffer.data();
     auto size = buffer.size();
-
-    auto offset = static_cast<std::uint64_t>(m_stream.seekp(0, std::ios::end).tellp());
     auto length = static_cast<std::uint64_t>(size);
     auto checksum = utils::crc64(std::span<const std::byte>(data, size));
+
+    if(m_lengths[slot]) {
+        insert_free_range(m_offsets[slot], m_lengths[slot]);
+        m_offsets[slot] = 0;
+        m_lengths[slot] = 0;
+    }
+
+    std::uint64_t offset;
+
+    if(auto reused = take_free_range(length)) {
+        offset = reused.value();
+        m_stream.seekp(static_cast<std::streamoff>(offset), std::ios::beg);
+    }
+    else {
+        offset = static_cast<std::uint64_t>(m_stream.seekp(0, std::ios::end).tellp());
+    }
 
     m_stream.write(reinterpret_cast<const char*>(data), static_cast<std::streamsize>(size));
 
@@ -115,20 +138,80 @@ void ZvoxFile::write_slot(std::size_t slot, const WriteBuffer& buffer)
     save_header();
 }
 
+bool ZvoxFile::compact(void)
+{
+    if(!m_valid) {
+        return false;
+    }
+
+    std::vector<Payload> payloads;
+
+    for(std::size_t i = 0; i < constant::REGION_VOLUME; ++i) {
+        if(m_lengths[i] == 0) {
+            continue;
+        }
+
+        std::vector<std::byte> data;
+        data.resize(m_lengths[i]);
+
+        m_stream.seekg(static_cast<std::streamoff>(m_offsets[i]), std::ios::beg);
+        m_stream.read(reinterpret_cast<char*>(data.data()), static_cast<std::streamsize>(data.size()));
+
+        if(!m_stream.good()) {
+            return false;
+        }
+
+        Payload payload {};
+        payload.slot = i;
+        payload.data = std::move(data);
+
+        payloads.emplace_back(std::move(payload));
+    }
+
+    m_offsets.fill(0);
+    m_free_ranges.clear();
+
+    m_stream.close();
+    m_stream.open(m_path, std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+
+    if(!m_stream.is_open()) {
+        m_valid = false;
+        return false;
+    }
+
+    save_header();
+
+    for(const auto& payload : payloads) {
+        auto offset = static_cast<std::uint64_t>(m_stream.seekp(0, std::ios::end).tellp());
+        m_stream.write(reinterpret_cast<const char*>(payload.data.data()), static_cast<std::streamsize>(payload.data.size()));
+        m_offsets[payload.slot] = offset;
+    }
+
+    save_header();
+
+    return m_stream.good();
+}
+
+std::size_t ZvoxFile::header_size(void)
+{
+    std::size_t result = 0;
+    result += sizeof(ZVOX_MAGIC_1);
+    result += sizeof(ZVOX_MAGIC_2);
+    result += sizeof(ZVOX_MAGIC_3);
+    result += sizeof(ZVOX_MAGIC_4);
+    result += sizeof(ZVOX_VERSION);
+    result += constant::REGION_VOLUME * sizeof(std::uint64_t);
+    result += constant::REGION_VOLUME * sizeof(std::uint64_t);
+    result += constant::REGION_VOLUME * sizeof(std::uint64_t);
+    return result;
+}
+
 bool ZvoxFile::load_header(void)
 {
-    std::size_t header_size = 0;
-    header_size += sizeof(ZVOX_MAGIC_1);
-    header_size += sizeof(ZVOX_MAGIC_2);
-    header_size += sizeof(ZVOX_MAGIC_3);
-    header_size += sizeof(ZVOX_MAGIC_4);
-    header_size += sizeof(ZVOX_VERSION);
-    header_size += constant::REGION_VOLUME * sizeof(std::uint64_t);
-    header_size += constant::REGION_VOLUME * sizeof(std::uint64_t);
-    header_size += constant::REGION_VOLUME * sizeof(std::uint64_t);
+    auto size = header_size();
 
     char gambit_character;
-    m_stream.seekg(static_cast<std::streamoff>(header_size - 1), std::ios::beg);
+    m_stream.seekg(static_cast<std::streamoff>(size - 1), std::ios::beg);
     m_stream.read(&gambit_character, sizeof(gambit_character));
 
     if(!m_stream.good()) {
@@ -136,7 +219,7 @@ bool ZvoxFile::load_header(void)
     }
 
     std::vector<std::byte> header;
-    header.resize(header_size);
+    header.resize(size);
 
     m_stream.seekg(0, std::ios::beg);
     m_stream.read(reinterpret_cast<char*>(header.data()), static_cast<std::streamsize>(header.size()));
@@ -192,4 +275,90 @@ void ZvoxFile::save_header(void)
 
     m_stream.seekp(0, std::ios::beg);
     buffer.to_stream(m_stream);
+}
+
+void ZvoxFile::build_free_ranges(void)
+{
+    m_free_ranges.clear();
+
+    std::vector<std::pair<std::uint64_t, std::uint64_t>> used;
+
+    for(std::size_t i = 0; i < constant::REGION_VOLUME; ++i) {
+        if(m_lengths[i] != 0) {
+            used.emplace_back(m_offsets[i], m_lengths[i]);
+        }
+    }
+
+    std::sort(used.begin(), used.end());
+
+    std::uint64_t cursor = static_cast<std::uint64_t>(header_size());
+
+    for(const auto& [offset, length] : used) {
+        if(offset > cursor) {
+            m_free_ranges.emplace_back(cursor, offset - cursor);
+        }
+
+        cursor = std::max(cursor, offset + length);
+    }
+}
+
+std::optional<std::uint64_t> ZvoxFile::take_free_range(std::uint64_t size)
+{
+    std::optional<std::size_t> best;
+
+    for(std::size_t i = 0; i < m_free_ranges.size(); ++i) {
+        if(m_free_ranges[i].second < size) {
+            continue;
+        }
+
+        if(!best.has_value() || m_free_ranges[i].second < m_free_ranges[best.value()].second) {
+            best = i;
+        }
+    }
+
+    if(!best.has_value()) {
+        return std::nullopt;
+    }
+
+    auto& range = m_free_ranges[best.value()];
+    auto offset = range.first;
+
+    if(range.second == size) {
+        m_free_ranges.erase(m_free_ranges.begin() + static_cast<std::ptrdiff_t>(best.value()));
+    }
+    else {
+        range.first += size;
+        range.second -= size;
+    }
+
+    return offset;
+}
+
+void ZvoxFile::insert_free_range(std::uint64_t offset, std::uint64_t length)
+{
+    if(length == 0) {
+        return;
+    }
+
+    auto end = offset + length;
+    auto it = std::lower_bound(m_free_ranges.begin(), m_free_ranges.end(), offset, [](const auto& range, auto value) {
+        return range.first < value;
+    });
+
+    if(it != m_free_ranges.end() && end == it->first) {
+        length += it->second;
+        it = m_free_ranges.erase(it);
+    }
+
+    if(it != m_free_ranges.begin()) {
+        auto prev = std::prev(it);
+
+        if(prev->first + prev->second == offset) {
+            offset = prev->first;
+            length += prev->second;
+            it = m_free_ranges.erase(prev);
+        }
+    }
+
+    m_free_ranges.insert(it, std::make_pair(offset, length));
 }
