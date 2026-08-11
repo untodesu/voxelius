@@ -210,7 +210,10 @@ static void wrapped_main(int argc, char** argv)
 
     LOG_INFO("engine version: {}", version::full);
 
+    std::signal(SIGABRT, &signal_handler);
+    std::signal(SIGILL, &signal_handler);
     std::signal(SIGINT, &signal_handler);
+    std::signal(SIGSEGV, &signal_handler);
     std::signal(SIGTERM, &signal_handler);
 
     vx::throw_if_not_fmt(SDL_Init(SDL_INIT_EVENTS), "SDL_Init failed: {}", SDL_GetError());
