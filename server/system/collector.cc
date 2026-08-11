@@ -24,9 +24,11 @@ static void on_create_entity(entt::registry& registry, entt::entity entity)
 
     if(auto transform = registry.try_get<Transform>(entity)) {
         interest::broadcast(packet, transform->chunk);
+        interest::mark_known(entity, transform->chunk);
     }
     else {
         protocol::broadcast(packet, globals::host);
+        interest::mark_known(entity);
     }
 }
 
@@ -43,6 +45,8 @@ static void on_destroy_entity(entt::registry& registry, entt::entity entity)
     else {
         protocol::broadcast(packet, globals::host);
     }
+
+    interest::forget(entity);
 }
 
 static void process_entity(entt::entity entity, DirtyMarker& dirty)

@@ -1,7 +1,9 @@
 #ifndef CB1D9924_5E4E_4165_AAD7_7B58D385FFA7
 #define CB1D9924_5E4E_4165_AAD7_7B58D385FFA7
 
+#include "shared/coord.hh"
 #include "shared/net/ed25519.hh"
+#include "shared/utils/view.hh"
 
 namespace config
 {
@@ -33,6 +35,9 @@ struct Session final {
     entt::entity player;
 
     ENetPeer* peer;
+
+    ChunkAlignedBox view_box;
+    vx::hash_set<entt::entity> known_entities;
 };
 
 struct SessionRef final {
@@ -46,7 +51,7 @@ extern std::uint16_t num_players;
 
 namespace sessions
 {
-std::span<const Session> all(void);
+std::span<Session> all(void);
 } // namespace sessions
 
 namespace sessions

@@ -85,6 +85,15 @@ component_id_type component_map::from_name(std::string_view name)
     return it->second;
 }
 
+std::string_view component_map::name_of(component_id_type id)
+{
+    auto index = static_cast<std::size_t>(id);
+
+    if(index == 0 || index >= s_names.size())
+        return {};
+    return s_names[index];
+}
+
 std::any component_map::prepare(component_id_type id, lua_State* L, int config_idx)
 {
     if(auto functions = find_functions(id)) {

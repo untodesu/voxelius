@@ -34,13 +34,13 @@ static void deserialize_schedule(std::multimap<std::uint64_t, std::pair<std::siz
 
 void Chunk::encode(const Chunk& chunk, WriteBuffer& buffer)
 {
-    BlockStorage::encode(chunk.m_blocks, buffer);
+    BlockStorage::encode_net(chunk.m_blocks, buffer);
     serialize_schedule(chunk.m_scheduled, buffer);
 }
 
 void Chunk::decode(Chunk& chunk, ReadBuffer& buffer)
 {
-    BlockStorage::decode(chunk.m_blocks, buffer);
+    BlockStorage::decode_net(chunk.m_blocks, buffer);
     deserialize_schedule(chunk.m_scheduled, buffer);
 }
 

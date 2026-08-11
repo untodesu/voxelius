@@ -28,6 +28,15 @@ static void on_entity_spawn(const packet::Entity_Spawn& packet)
         session::disconnect(packet::Session_Disconnect::ENTITY_ID_DESYNC);
         return;
     }
+
+    auto class_name = class_registry::name_of(packet.class_id);
+
+    if(class_name.has_value()) {
+        LOG_INFO("entity spawn: id={} class={}", static_cast<std::uint64_t>(entity), class_name->full_string());
+    }
+    else {
+        LOG_INFO("entity spawn: id={} class=<null>", static_cast<std::uint64_t>(entity));
+    }
 }
 
 static void on_entity_patch(const packet::Entity_Patch& packet)
@@ -39,10 +48,14 @@ static void on_entity_patch(const packet::Entity_Patch& packet)
 
         component_map::decode_net(it.id, packet.entity, buffer);
     }
+
+    LOG_INFO("entity patch: id={} components={}", static_cast<std::uint64_t>(packet.entity), packet.components.size());
 }
 
 static void on_entity_remove(const packet::Entity_Remove& packet)
 {
+    LOG_INFO("entity remove: id={}", static_cast<std::uint64_t>(packet.entity));
+
     globals::registry.destroy(packet.entity);
 
     if(globals::player == packet.entity) {
@@ -54,6 +67,8 @@ static void on_entity_remove(const packet::Entity_Remove& packet)
 
 static void on_entity_client(const packet::Entity_Client& packet)
 {
+    LOG_INFO("assign entity {} as a local player", static_cast<std::uint64_t>(packet.entity));
+
     globals::player = packet.entity;
 
     session::notify_spawned();

@@ -11,33 +11,13 @@
 #include "shared/world/world.hh"
 
 #include "server/constant.hh"
+#include "server/entity/entity_loader.hh"
 #include "server/universe.hh"
+#include "server/utils/region.hh"
 #include "server/world/worldgen.hh"
 #include "server/world/zvox_file.hh"
 
 constexpr static std::size_t MAX_REGIONS = 32;
-
-using RegionPos = Eigen::Vector<ChunkPos::value_type, 3>;
-
-struct RegionKey final {
-    bool operator==(const RegionKey& other) const;
-
-    biome_realm realm;
-    RegionPos pos;
-};
-
-template<>
-struct std::hash<RegionKey> final {
-    std::size_t operator()(const RegionKey& key) const
-    {
-        std::size_t value = 0;
-        value ^= key.pos.x() * 73856093;
-        value ^= key.pos.y() * 19349663;
-        value ^= key.pos.z() * 83492791;
-        value ^= static_cast<std::size_t>(key.realm) * 2654435761;
-        return value;
-    }
-};
 
 struct RegionEntry final {
     explicit RegionEntry(std::filesystem::path path);
@@ -55,28 +35,6 @@ RegionEntry::RegionEntry(std::filesystem::path path) : region_file(std::move(pat
 static std::shared_mutex s_cache_mutex;
 static vx::hash_map<RegionKey, std::shared_ptr<RegionEntry>> s_cache;
 static vx::hash_set<RegionPos> s_pending;
-
-bool RegionKey::operator==(const RegionKey& other) const
-{
-    return realm == other.realm && pos == other.pos;
-}
-
-static RegionPos region_of(const ChunkPos& pos)
-{
-    RegionPos region;
-    region.x() = pos.x() >> constant::REGION_SIZE_LOG2;
-    region.y() = pos.y() >> constant::REGION_SIZE_LOG2;
-    region.z() = pos.z() >> constant::REGION_SIZE_LOG2;
-    return region;
-}
-
-static std::size_t region_slot(const ChunkPos& pos, const RegionPos& region)
-{
-    auto lx = static_cast<std::size_t>(pos.x() - (region.x() << constant::REGION_SIZE_LOG2));
-    auto ly = static_cast<std::size_t>(pos.y() - (region.y() << constant::REGION_SIZE_LOG2));
-    auto lz = static_cast<std::size_t>(pos.z() - (region.z() << constant::REGION_SIZE_LOG2));
-    return (ly * constant::REGION_SIZE + lz) * constant::REGION_SIZE + lx;
-}
 
 static std::filesystem::path region_path(biome_realm realm, const RegionPos& region)
 {
@@ -159,13 +117,13 @@ static void evict_stale(void)
 static void write_chunk(const ChunkPos& pos, const BlockStorage& blocks)
 {
     auto realm = utils::realm(pos.y());
-    auto region = region_of(pos);
-    auto slot = region_slot(pos, region);
+    auto region = utils::region_of(pos);
+    auto slot = utils::region_slot(pos, region);
 
     auto entry = get_region(realm, region);
 
     WriteBuffer buffer;
-    BlockStorage::encode(blocks, buffer);
+    BlockStorage::encode_dat(blocks, buffer);
 
     std::scoped_lock io_lock(entry->io_mutex);
     entry->region_file.write_slot(slot, buffer);
@@ -211,8 +169,8 @@ void LoadTask::process(void)
     ZoneScopedN("chunk_loader::load");
 
     auto realm = utils::realm(m_pos.y());
-    auto region = region_of(m_pos);
-    auto slot = region_slot(m_pos, region);
+    auto region = utils::region_of(m_pos);
+    auto slot = utils::region_slot(m_pos, region);
 
     auto entry = get_region(realm, region);
 
@@ -221,7 +179,7 @@ void LoadTask::process(void)
     std::scoped_lock io_lock(entry->io_mutex);
 
     if(entry->region_file.read_slot(slot, buffer)) {
-        BlockStorage::decode(m_blocks, buffer);
+        BlockStorage::decode_dat(m_blocks, buffer);
         m_found = true;
     }
 }
@@ -237,6 +195,8 @@ void LoadTask::finalize(void)
         // Not ChunkUpdateEvent: loaded-from-disk chunks are identical
         // to what's saved and must NOT be marked ChunkDirtyMarker.
         globals::dispatcher.trigger(ChunkReadyEvent(m_pos, chunk));
+
+        entity_loader::load(m_pos);
     }
     else {
         worldgen::request(m_pos);

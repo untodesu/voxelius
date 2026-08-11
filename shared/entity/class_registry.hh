@@ -33,4 +33,11 @@ const ClassDefinition* find_definition(class_id_type id);
 const ClassDefinition* find_definition(const Identifier& id);
 } // namespace class_registry
 
+namespace class_registry
+{
+void for_each(const ClassDefinition* def, const std::function<void(component_id_type)>& callback);
+void for_each(class_id_type class_id, const std::function<void(component_id_type)>& callback);
+void for_each(const Identifier& id, const std::function<void(component_id_type)>& callback);
+} // namespace class_registry
+
 #endif /* CF0A7378_F458_4745_A82A_0723299A9B7F */

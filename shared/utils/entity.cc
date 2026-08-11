@@ -83,12 +83,12 @@ entt::entity utils::spawn(class_id_type class_id, entt::entity hint)
     auto name = class_registry::name_of(class_id);
     vx::throw_if_not(name.has_value(), "class_registry got corrupted");
 
-    attach_class(entity, class_id, std::move(name.value()));
-
     if(!attach_components(entity, def)) {
         globals::registry.destroy(entity);
         return entt::null;
     }
+
+    attach_class(entity, class_id, std::move(name.value()));
 
     return entity;
 }
@@ -112,13 +112,13 @@ entt::entity utils::spawn(class_id_type class_id, lua_State* L, int kv_idx, entt
     auto name = class_registry::name_of(class_id);
     vx::throw_if_not(name.has_value(), "class_registry got corrupted");
 
-    attach_class(entity, class_id, std::move(name.value()));
-
     if(!attach_components(entity, def)) {
         lua_pushstring(L, "failed to attach components");
         globals::registry.destroy(entity);
         return entt::null;
     }
+
+    attach_class(entity, class_id, std::move(name.value()));
 
     if(!patch_components(entity, def, L, kv_idx)) {
         lua_pushstring(L, "failed to patch components");
@@ -161,12 +161,12 @@ entt::entity utils::spawn_player(const BlockPos& pos, entt::entity hint)
     auto player_class = class_registry::name_of(required_class::player);
     vx::throw_if_not(player_class.has_value(), "class_registry got corrupted");
 
-    attach_class(entity, required_class::player, std::move(player_class.value()));
-
     if(!attach_components(entity, def)) {
         globals::registry.destroy(entity);
         return entt::null;
     }
+
+    attach_class(entity, required_class::player, std::move(player_class.value()));
 
     if(globals::registry.all_of<Transform>(entity)) {
         globals::registry.patch<Transform>(entity, [&](Transform& transform) {

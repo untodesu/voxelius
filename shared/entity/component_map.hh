@@ -48,6 +48,11 @@ component_id_type from_name(std::string_view name);
 
 namespace component_map
 {
+std::string_view name_of(component_id_type id);
+} // namespace component_map
+
+namespace component_map
+{
 std::any prepare(component_id_type id, lua_State* L, int config_idx);
 bool attach(component_id_type id, entt::entity entity, const std::any& config);
 bool patch(component_id_type id, entt::entity entity, lua_State* L, int kv_idx);

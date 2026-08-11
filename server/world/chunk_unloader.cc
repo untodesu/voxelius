@@ -5,12 +5,14 @@
 #include "core/config/ref.hh"
 
 #include "shared/component/transform.hh"
+#include "shared/entity/class.hh"
 #include "shared/globals.hh"
 #include "shared/utils/view.hh"
 #include "shared/world/chunk.hh"
 #include "shared/world/world.hh"
 
 #include "server/constant.hh"
+#include "server/entity/entity_loader.hh"
 #include "server/globals.hh"
 #include "server/net/interest.hh"
 #include "server/net/sessions.hh"
@@ -32,7 +34,7 @@ void chunk_unloader::fixed_update_late(void)
     std::vector<ChunkAlignedBox> boxes;
     boxes.reserve(all_sessions.size());
 
-    for(auto& session : all_sessions) {
+    for(const auto& session : all_sessions) {
         if(globals::registry.valid(session.player)) {
             auto& transform = globals::registry.get<Transform>(session.player);
             auto radius = static_cast<ChunkPos::value_type>(interest::view_distance.value());
@@ -64,7 +66,23 @@ void chunk_unloader::fixed_update_late(void)
         }
     }
 
+    auto entities = globals::registry.view<EntityClass, Transform>();
+
     for(const auto& pos : to_unload) {
+        std::vector<entt::entity> chunk_entities;
+
+        for(const auto [entity, cls, transform] : entities.each()) {
+            if(transform.chunk == pos) {
+                chunk_entities.push_back(entity);
+            }
+        }
+
+        entity_loader::save(pos, chunk_entities);
+
+        for(const auto entity : chunk_entities) {
+            globals::registry.destroy(entity);
+        }
+
         chunk_loader::save(pos);
         world::remove_chunk(pos);
     }

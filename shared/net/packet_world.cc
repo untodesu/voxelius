@@ -17,13 +17,13 @@ void packet::World_Request::decode(World_Request& packet, ReadBuffer& buffer)
 void packet::World_Blocks::encode(const World_Blocks& packet, WriteBuffer& buffer)
 {
     buffer.write_vector<std::int32_t, 3>(packet.cpos.cast<std::int32_t>());
-    BlockStorage::encode(packet.blocks, buffer);
+    BlockStorage::encode_net(packet.blocks, buffer);
 }
 
 void packet::World_Blocks::decode(World_Blocks& packet, ReadBuffer& buffer)
 {
     packet.cpos = buffer.read_vector<std::int32_t, 3>().cast<ChunkPos::value_type>();
-    BlockStorage::decode(packet.blocks, buffer);
+    BlockStorage::decode_net(packet.blocks, buffer);
 }
 
 void packet::World_Biomes::encode(const World_Biomes& packet, WriteBuffer& buffer)

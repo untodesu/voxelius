@@ -254,7 +254,7 @@ static std::string sanitize_username(std::string_view username)
     return sanitized;
 }
 
-std::span<const Session> sessions::all(void)
+std::span<Session> sessions::all(void)
 {
     return s_sessions;
 }
@@ -285,6 +285,7 @@ void sessions::init_late(void)
         session.username = std::string {};
         session.player = entt::null;
         session.peer = nullptr;
+        session.known_entities.clear();
     }
 }
 
@@ -316,6 +317,7 @@ Session* sessions::create(ENetPeer* peer, std::string_view username)
             session.username = sanitize_username(username);
             session.player = entt::null;
             session.peer = peer;
+            session.known_entities.clear();
 
             s_username_map.insert_or_assign(session.username, &session);
             s_identity_map.insert_or_assign(session.identity, &session);
@@ -404,12 +406,17 @@ void sessions::destroy(Session* session, std::optional<std::uint32_t> reason)
         s_username_map.erase(session->username);
         s_identity_map.erase(session->identity);
 
+        if(globals::registry.valid(session->player)) {
+            globals::registry.destroy(session->player);
+        }
+
         session->state = session_state::UNCONNECTED;
         session->client_id = UINT16_MAX;
         session->identity = UINT64_MAX;
         session->username = std::string {};
         session->player = entt::null;
         session->peer = nullptr;
+        session->known_entities.clear();
 
         num_players -= 1;
     }

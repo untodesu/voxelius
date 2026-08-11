@@ -1,4 +1,8 @@
 add_executable(vserver
+    "${CMAKE_CURRENT_LIST_DIR}/entity/entity_loader.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/entity/entity_loader.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/entity/zent_file.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/entity/zent_file.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/host.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/host.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/interest.cc"
@@ -19,6 +23,8 @@ add_executable(vserver
     "${CMAKE_CURRENT_LIST_DIR}/system/collector.hh"
     "${CMAKE_CURRENT_LIST_DIR}/system/pmove_validator.cc"
     "${CMAKE_CURRENT_LIST_DIR}/system/pmove_validator.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/region.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/region.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/climate_noise.cc"
     "${CMAKE_CURRENT_LIST_DIR}/world/climate_noise.hh"
     "${CMAKE_CURRENT_LIST_DIR}/world/climate.cc"

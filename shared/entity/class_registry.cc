@@ -99,3 +99,31 @@ const ClassDefinition* class_registry::find_definition(const Identifier& id)
 {
     return find_definition(find(id));
 }
+
+void class_registry::for_each(const ClassDefinition* def, const std::function<void(component_id_type)>& callback)
+{
+    assert(callback);
+    assert(def);
+
+    for(auto& entry : def->entries) {
+        callback(entry.id);
+    }
+}
+
+void class_registry::for_each(class_id_type class_id, const std::function<void(component_id_type)>& callback)
+{
+    assert(callback);
+
+    if(auto def = find_definition(class_id)) {
+        for_each(def, callback);
+    }
+}
+
+void class_registry::for_each(const Identifier& id, const std::function<void(component_id_type)>& callback)
+{
+    assert(callback);
+
+    if(auto def = find_definition(id)) {
+        for_each(def, callback);
+    }
+}
