@@ -38,7 +38,7 @@ static block_id_type parse_palette_entry(const JSON_Object* object)
         return block_registry::find(id);
     }
 
-    emhash8::HashMap<blockstate_key_type, blockstate_val_type> states;
+    vx::hash_map<blockstate_key_type, blockstate_val_type> states;
 
     auto json_states = json_object_get_object(object, "states");
     auto json_states_count = json_object_get_count(json_states);

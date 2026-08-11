@@ -6,8 +6,8 @@
 #include "shared/res/feature.hh"
 
 static std::vector<BiomeDefinition> s_definitions;
-static emhash8::HashMap<Identifier, biome_id_type> s_names;
-static emhash8::HashMap<biome_id_type, Identifier> s_reverse_names;
+static vx::hash_map<Identifier, biome_id_type> s_names;
+static vx::hash_map<biome_id_type, Identifier> s_reverse_names;
 static std::uint64_t s_checksum;
 
 static void update_checksum(void)
@@ -93,7 +93,7 @@ void biome_registry::resolve_palettes(void)
                 continue;
             }
 
-            emhash8::HashMap<blockstate_key_type, blockstate_val_type> map;
+            vx::hash_map<blockstate_key_type, blockstate_val_type> map;
 
             for(const auto& it : field->states) {
                 auto key_hash = family->state_hash(it.first);

@@ -256,7 +256,7 @@ std::vector<BlockFamily> ModContext::take_block_families(void)
     return std::move(m_block_families);
 }
 
-emhash8::HashMap<Identifier, block_id_type> ModContext::take_block_names(void)
+vx::hash_map<Identifier, block_id_type> ModContext::take_block_names(void)
 {
     return std::move(m_block_names);
 }
@@ -266,7 +266,7 @@ std::vector<BiomeDefinition> ModContext::take_biomes(void)
     return std::move(m_biomes);
 }
 
-emhash8::HashMap<Identifier, biome_id_type> ModContext::take_biome_names(void)
+vx::hash_map<Identifier, biome_id_type> ModContext::take_biome_names(void)
 {
     return std::move(m_biome_names);
 }
@@ -299,7 +299,7 @@ std::vector<FluidDefinition> ModContext::take_fluids(void)
     return std::move(m_fluids);
 }
 
-emhash8::HashMap<Identifier, fluid_id_type> ModContext::take_fluid_names(void)
+vx::hash_map<Identifier, fluid_id_type> ModContext::take_fluid_names(void)
 {
     return std::move(m_fluid_names);
 }
@@ -332,7 +332,7 @@ std::vector<TintDefinition> ModContext::take_tints(void)
     return std::move(m_tints);
 }
 
-emhash8::HashMap<Identifier, tint_id_type> ModContext::take_tint_names(void)
+vx::hash_map<Identifier, tint_id_type> ModContext::take_tint_names(void)
 {
     return std::move(m_tint_names);
 }
@@ -365,7 +365,7 @@ std::vector<ClassDefinition> ModContext::take_classes(void)
     return std::move(m_classes);
 }
 
-emhash8::HashMap<Identifier, class_id_type> ModContext::take_class_names(void)
+vx::hash_map<Identifier, class_id_type> ModContext::take_class_names(void)
 {
     return std::move(m_class_names);
 }

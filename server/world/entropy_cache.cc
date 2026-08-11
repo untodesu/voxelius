@@ -8,7 +8,7 @@ struct Entry final {
 };
 
 static std::shared_mutex s_mutex;
-static emhash8::HashMap<ChunkPosXZ, std::shared_ptr<Entry>> s_cache;
+static vx::hash_map<ChunkPosXZ, std::shared_ptr<Entry>> s_cache;
 static std::uint64_t s_seed;
 
 static void generate(const ChunkPosXZ& pos, cached_entropy_type& data)

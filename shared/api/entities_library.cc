@@ -75,7 +75,7 @@ static bool parse_component(lua_State* L, int config_idx, ModContext* ctx, Class
 
 static bool parse_components(lua_State* L, int def_idx, ModContext* ctx, ClassDefinition& def)
 {
-    emhash8::HashMap<std::string, ClassDefinition_Entry> components;
+    vx::hash_map<std::string, ClassDefinition_Entry> components;
 
     lua_pushnil(L);
 

@@ -13,7 +13,7 @@ struct MapEntry final {
 };
 
 static std::mutex s_mutex;
-static std::array<emhash8::HashMap<ChunkPosXZ, MapEntry>, NUM_BIOME_REALMS> s_biomes;
+static std::array<vx::hash_map<ChunkPosXZ, MapEntry>, NUM_BIOME_REALMS> s_biomes;
 static BiomeSlice s_empty_slice {};
 static std::shared_ptr<BiomeSlice> s_void_slice;
 

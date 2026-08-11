@@ -16,7 +16,7 @@ struct ScatterCacheEntry final {
 static std::size_t s_max_extent;
 static std::vector<std::unique_ptr<PlacementRule>> s_rules;
 static std::shared_mutex s_scatter_mutex;
-static std::array<emhash8::HashMap<ChunkPosXZ, std::shared_ptr<ScatterCacheEntry>>, NUM_BIOME_REALMS> s_scatter_cache;
+static std::array<vx::hash_map<ChunkPosXZ, std::shared_ptr<ScatterCacheEntry>>, NUM_BIOME_REALMS> s_scatter_cache;
 
 static std::shared_ptr<ScatterCacheEntry> find_scatter_entry(biome_realm realm, const ChunkPosXZ& pos)
 {

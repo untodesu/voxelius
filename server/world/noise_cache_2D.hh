@@ -51,7 +51,7 @@ private:
 
     fnl_state m_noise;
     mutable std::mutex m_mutex;
-    emhash8::HashMap<ChunkPosXZ, std::shared_ptr<Entry>> m_cache;
+    vx::hash_map<ChunkPosXZ, std::shared_ptr<Entry>> m_cache;
 };
 
 using NoiseCache2D_2x2 = NoiseCache2D<2, 2>;

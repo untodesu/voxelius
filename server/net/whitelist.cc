@@ -10,7 +10,7 @@
 
 constexpr static std::string_view WHITELIST_FILE = "whitelist.txt";
 
-static emhash8::HashMap<std::uint64_t, ed25519::pkey_type> s_whitelist;
+static vx::hash_map<std::uint64_t, ed25519::pkey_type> s_whitelist;
 
 config::Ref<bool> whitelist::enabled { false };
 

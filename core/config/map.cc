@@ -80,7 +80,7 @@ void config::Map::set_raw_string(map_slot_type slot, std::string_view value)
 
 config::map_slot_type config::Map::find_slot(std::string_view key) const /* E */
 {
-    auto it = m_index.find(std::string(key));
+    auto it = m_index.find(key);
 
     if(it == m_index.cend()) {
         return config::NULL_SLOT;
@@ -91,7 +91,7 @@ config::map_slot_type config::Map::find_slot(std::string_view key) const /* E */
 
 config::map_slot_type config::Map::find_or_create_slot(std::string_view key)
 {
-    auto it = m_index.find(std::string(key));
+    auto it = m_index.find(key);
 
     if(it == m_index.cend()) {
         auto slot = m_slots.size();
@@ -107,7 +107,7 @@ config::map_slot_type config::Map::find_or_create_slot(std::string_view key)
 
 bool config::Map::contains(std::string_view key) const
 {
-    return m_index.contains(std::string(key));
+    return m_index.contains(key);
 }
 
 void config::Map::purge(void)

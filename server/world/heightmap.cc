@@ -13,7 +13,7 @@ struct HeightmapEntry final {
 };
 
 static std::shared_mutex s_mutex;
-static std::array<emhash8::HashMap<ChunkPosXZ, std::shared_ptr<HeightmapEntry>>, NUM_BIOME_REALMS> s_cache;
+static std::array<vx::hash_map<ChunkPosXZ, std::shared_ptr<HeightmapEntry>>, NUM_BIOME_REALMS> s_cache;
 
 static ColumnSlice generate_slice(biome_realm realm, const ChunkPosXZ& pos)
 {

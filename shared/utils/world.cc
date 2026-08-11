@@ -109,7 +109,7 @@ bool utils::block_place(const physics::BlockHit& hit, entt::entity actor, block_
     }
 
     if(lua_istable(L, -1)) {
-        emhash8::HashMap<blockstate_key_type, blockstate_val_type> states;
+        vx::hash_map<blockstate_key_type, blockstate_val_type> states;
 
         for(const auto& it : family->states) {
             states.insert_or_assign(blockstate_key_type(it.first), blockstate_val_type(it.second.default_value));

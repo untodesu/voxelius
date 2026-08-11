@@ -94,7 +94,7 @@ static float mesh_queue_distance_sq(const ChunkPos& cpos)
     return delta.squaredNorm();
 }
 
-static emhash8::HashMap<ChunkPos, std::nullptr_t> s_pending;
+static vx::hash_set<ChunkPos> s_pending;
 
 class MeshingTask final : public Task {
 public:
@@ -1166,7 +1166,7 @@ void chunk_mesher::update(void)
 
     for(std::size_t i = 0; i < submit_count; ++i) {
         const auto& [entity, position, dist_sq] = batch[i];
-        s_pending.emplace(position, nullptr);
+        s_pending.emplace(position);
         world::chunk_registry.remove<ChunkMesh_DirtyMarker>(entity);
         threading::submit<MeshingTask>(entity, position);
     }

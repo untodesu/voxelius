@@ -25,7 +25,7 @@
 #include "server/system/pmove_validator.hh"
 #include "server/world/chunk_loader.hh"
 
-static emhash8::HashMap<ChunkPos, std::vector<ENetPeer*>> s_waiting_peers;
+static vx::hash_map<ChunkPos, std::vector<ENetPeer*>> s_waiting_peers;
 static config::Ref<float> s_reach_distance { 8.0f };
 
 static void send_chunk(ENetPeer* peer, const ChunkPos& cpos, const std::shared_ptr<Chunk>& chunk)

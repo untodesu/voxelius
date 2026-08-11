@@ -62,12 +62,12 @@ static std::vector<ModInfo> discover_mods(void)
 
 static std::vector<ModInfo> resolve_load_order(std::vector<ModInfo> mods)
 {
-    emhash8::HashMap<std::string, ModInfo*> map;
-    emhash8::HashMap<std::string, ModVersion> versions;
+    vx::hash_map<std::string, ModInfo*> map;
+    vx::hash_map<std::string, ModVersion> versions;
 
     for(auto& info : mods) {
         map.insert_or_assign(info.name, &info);
-        versions.insert_or_assign(std::string(info.name), ModVersion(info.version));
+        versions.insert_or_assign(info.name, ModVersion(info.version));
     }
 
     std::unordered_set<std::string> resolved;

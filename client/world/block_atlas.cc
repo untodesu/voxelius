@@ -31,7 +31,7 @@ const AtlasStrip* block_atlas::stub_check = nullptr;
 
 static bool s_compiled = false;
 static std::deque<AtlasStrip> s_strips;
-static emhash8::HashMap<std::uint64_t, AtlasStrip*> s_lookup;
+static vx::hash_map<std::uint64_t, AtlasStrip*> s_lookup;
 static std::vector<res::handle<Image>> s_pending;
 
 static std::uint64_t span_hash(std::span<const Identifier> textures)

@@ -21,8 +21,8 @@ constexpr static std::string_view DEFAULT_LANGUAGE = "english";
 
 static language_manifest_type s_manifest;
 static language_iterator_type s_current_language;
-static emhash8::HashMap<std::string, std::string> s_translations;
-static emhash8::HashMap<std::string, language_iterator_type> s_code_map;
+static vx::hash_map<std::string, std::string> s_translations;
+static vx::hash_map<std::string, language_iterator_type> s_code_map;
 static config::Ref<std::string> s_config_language { std::string(DEFAULT_LANGUAGE) };
 static gui::LanguageSelector s_language_selector;
 
@@ -119,7 +119,7 @@ void language::init_late(void)
     auto lang = s_code_map.find(s_config_language.value());
 
     if(lang == s_code_map.cend()) {
-        lang = s_code_map.find(std::string(DEFAULT_LANGUAGE));
+        lang = s_code_map.find(DEFAULT_LANGUAGE);
 
         vx::throw_if_fmt(lang == s_code_map.cend(), "we are doomed: {} doesn't exist!!!", DEFAULT_LANGUAGE);
     }
@@ -152,7 +152,7 @@ language_iterator_type language::current(void)
 
 language_iterator_type language::find(std::string_view code)
 {
-    const auto it = s_code_map.find(std::string(code));
+    const auto it = s_code_map.find(code);
 
     if(it == s_code_map.cend()) {
         return s_manifest.cend();
@@ -174,7 +174,7 @@ language_iterator_type language::const_end(void)
 
 std::string_view language::resolve(std::string_view key)
 {
-    const auto it = s_translations.find(std::string(key));
+    const auto it = s_translations.find(key);
 
     if(it == s_translations.cend()) {
         return key;

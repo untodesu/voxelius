@@ -4,7 +4,7 @@
 
 std::optional<std::span<const Identifier>> BlockDefinition::resolve_albedo_slot(std::string_view slot) const
 {
-    auto it = albedo.find(std::string(slot));
+    auto it = albedo.find(slot);
 
     if(it == albedo.cend() || it->second.empty()) {
         it = albedo.find("default");
@@ -19,7 +19,7 @@ std::optional<std::span<const Identifier>> BlockDefinition::resolve_albedo_slot(
 
 std::optional<Identifier> BlockDefinition::resolve_mask_slot(std::string_view slot) const
 {
-    auto it = masks.find(std::string(slot));
+    auto it = masks.find(slot);
 
     if(it == masks.cend()) {
         return std::nullopt;

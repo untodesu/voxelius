@@ -6,8 +6,8 @@
 
 #include "shared/globals.hh"
 
-static emhash8::HashMap<std::string, component_id_type> s_name_map;
-static emhash8::HashMap<std::type_index, component_id_type> s_type_map;
+static vx::hash_map<std::string, component_id_type> s_name_map;
+static vx::hash_map<std::type_index, component_id_type> s_type_map;
 static std::vector<component_map::detail::FunctionTable> s_functions;
 static std::vector<std::string> s_names;
 
@@ -78,7 +78,7 @@ void component_map::detail::mark_dirty(component_id_type id, entt::registry& reg
 
 component_id_type component_map::from_name(std::string_view name)
 {
-    auto it = s_name_map.find(std::string(name));
+    auto it = s_name_map.find(name);
 
     if(it == s_name_map.cend())
         return COMPONENT_ID_NULL;

@@ -100,7 +100,7 @@ static std::array<float, CLIMATE_DIMS> sample_to_unit(const ClimateSample& sampl
     };
 }
 
-static bool nudge(emhash8::HashMap<std::uint64_t, biome_id_type>& occupied, ClimatePos& pos, biome_id_type id, std::mt19937& random)
+static bool nudge(vx::hash_map<std::uint64_t, biome_id_type>& occupied, ClimatePos& pos, biome_id_type id, std::mt19937& random)
 {
     std::call_once(s_neighbour_dirs_once, &build_neighbour_dirs);
 
@@ -188,7 +188,7 @@ static void rebuild_realm(biome_realm realm)
         return a.priority > b.priority;
     });
 
-    emhash8::HashMap<std::uint64_t, biome_id_type> occupied;
+    vx::hash_map<std::uint64_t, biome_id_type> occupied;
 
     for(auto& seed : out) {
         if(!nudge(occupied, seed.target, seed.id, random)) {

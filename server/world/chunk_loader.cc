@@ -53,8 +53,8 @@ RegionEntry::RegionEntry(std::filesystem::path path) : region_file(std::move(pat
 }
 
 static std::shared_mutex s_cache_mutex;
-static emhash8::HashMap<RegionKey, std::shared_ptr<RegionEntry>> s_cache;
-static emhash8::HashMap<RegionPos, std::monostate> s_pending;
+static vx::hash_map<RegionKey, std::shared_ptr<RegionEntry>> s_cache;
+static vx::hash_set<RegionPos> s_pending;
 
 bool RegionKey::operator==(const RegionKey& other) const
 {
@@ -299,7 +299,7 @@ void chunk_loader::request(const ChunkPos& pos)
         return;
     }
 
-    s_pending.emplace(pos, std::monostate {});
+    s_pending.emplace(pos);
 
     threading::submit<LoadTask>(pos);
 }

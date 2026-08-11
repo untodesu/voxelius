@@ -7,8 +7,8 @@
 #include "shared/mod_context.hh"
 
 static std::vector<FluidDefinition> s_definitions;
-static emhash8::HashMap<Identifier, fluid_id_type> s_names;
-static emhash8::HashMap<fluid_id_type, Identifier> s_reverse_names;
+static vx::hash_map<Identifier, fluid_id_type> s_names;
+static vx::hash_map<fluid_id_type, Identifier> s_reverse_names;
 static std::uint64_t s_checksum;
 
 static void update_checksum(void)

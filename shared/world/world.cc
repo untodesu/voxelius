@@ -8,7 +8,7 @@
 #include "shared/world/biome_map.hh"
 #include "shared/world/block_registry.hh"
 
-emhash8::HashMap<ChunkPos, std::shared_ptr<Chunk>> world::chunk_map;
+vx::hash_map<ChunkPos, std::shared_ptr<Chunk>> world::chunk_map;
 entt::registry world::chunk_registry;
 
 ChunkCreateEvent::ChunkCreateEvent(const ChunkPos& pos, const std::shared_ptr<Chunk>& chunk) : m_chunk(chunk), m_pos(pos)
@@ -252,7 +252,7 @@ bool world::set_state(const ChunkPos& cpos, const LocalPos& lpos, std::string_vi
         return false;
     }
 
-    emhash8::HashMap<blockstate_key_type, blockstate_val_type> chunk_map;
+    vx::hash_map<blockstate_key_type, blockstate_val_type> chunk_map;
 
     for(const auto& [decl_key, decl] : family->states) {
         chunk_map.try_emplace(decl_key, decl.default_value);

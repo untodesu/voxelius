@@ -69,7 +69,7 @@ static std::string s_motd_ping {};
 static std::string s_motd_fail {};
 
 static std::deque<std::unique_ptr<ServerListItem>> s_servers;
-static emhash8::HashMap<unsigned, ServerListItem*> s_server_map;
+static vx::hash_map<unsigned, ServerListItem*> s_server_map;
 static unsigned s_next_identity;
 
 static gui::ListBox s_server_list;

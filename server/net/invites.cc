@@ -4,7 +4,7 @@
 
 #include "server/net/whitelist.hh"
 
-static emhash8::HashMap<std::uint64_t, std::monostate> s_invites;
+static vx::hash_set<std::uint64_t> s_invites;
 static std::mt19937_64 s_randomizer;
 
 void invites::init(void)
@@ -26,7 +26,7 @@ std::uint64_t invites::issue(void)
         token = s_randomizer();
     }
 
-    s_invites.insert_or_assign(token, std::monostate {});
+    s_invites.emplace(token);
     return token;
 }
 

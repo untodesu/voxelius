@@ -41,8 +41,8 @@ struct std::hash<WouldPlaceKey> final {
 };
 
 struct ScatterScanCache final {
-    emhash8::HashMap<BlockPosXZ, biome_id_type> biome;
-    emhash8::HashMap<WouldPlaceKey, bool> would_place;
+    vx::hash_map<BlockPosXZ, biome_id_type> biome;
+    vx::hash_map<WouldPlaceKey, bool> would_place;
 };
 
 static std::uint64_t entropy_at(BlockPos::value_type bx, BlockPos::value_type bz)

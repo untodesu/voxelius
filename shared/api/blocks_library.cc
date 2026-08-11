@@ -221,7 +221,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("albedo")) {
-        emhash8::HashMap<std::string, std::vector<Identifier>> albedo;
+        vx::hash_map<std::string, std::vector<Identifier>> albedo;
         auto albedo_idx = lua_gettop(L);
 
         lua_pushnil(L);
@@ -261,7 +261,7 @@ static bool parse_overrides(lua_State* L, int idx, ModContext* ctx, BlockOverrid
     }
 
     if(reader.try_push("masks")) {
-        emhash8::HashMap<std::string, Identifier> masks;
+        vx::hash_map<std::string, Identifier> masks;
 
         auto masks_idx = lua_gettop(L);
 

@@ -21,7 +21,7 @@
 #include "server/world/realm_surface.hh"
 #include "server/world/terrain.hh"
 
-static emhash8::HashMap<ChunkPos, std::nullptr_t> s_pending;
+static vx::hash_set<ChunkPos> s_pending;
 
 class WorldgenTask final : public Task {
 public:
@@ -126,7 +126,7 @@ void worldgen::request(const ChunkPos& pos)
         return;
     }
 
-    s_pending.emplace(pos, nullptr);
+    s_pending.emplace(pos);
 
     threading::submit<WorldgenTask>(pos);
 }

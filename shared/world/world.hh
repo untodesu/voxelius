@@ -67,7 +67,7 @@ private:
 
 namespace world
 {
-extern emhash8::HashMap<ChunkPos, std::shared_ptr<Chunk>> chunk_map;
+extern vx::hash_map<ChunkPos, std::shared_ptr<Chunk>> chunk_map;
 extern entt::registry chunk_registry;
 } // namespace world
 

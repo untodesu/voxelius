@@ -25,8 +25,8 @@
 #include "server/net/whitelist.hh"
 
 static std::vector<Session> s_sessions;
-static emhash8::HashMap<std::string, Session*> s_username_map;
-static emhash8::HashMap<std::uint64_t, Session*> s_identity_map;
+static vx::hash_map<std::string, Session*> s_username_map;
+static vx::hash_map<std::uint64_t, Session*> s_identity_map;
 
 config::Ref<bool> sessions::strict_version { false };
 
@@ -331,8 +331,7 @@ Session* sessions::create(ENetPeer* peer, std::string_view username)
 
 Session* sessions::find(std::string_view username)
 {
-    auto key = std::string(username);
-    auto it = s_username_map.find(key);
+    auto it = s_username_map.find(username);
 
     if(it == s_username_map.cend()) {
         return nullptr;
