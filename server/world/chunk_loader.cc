@@ -131,7 +131,11 @@ static void evict_stale(void)
 
     if(s_cache.size() > MAX_REGIONS) {
         std::vector<std::pair<RegionKey, std::shared_ptr<RegionEntry>>> entries;
-        entries.assign(s_cache.cbegin(), s_cache.cend());
+        entries.reserve(s_cache.size());
+
+        for(const auto& it : s_cache) {
+            entries.emplace_back(it.first, it.second);
+        }
 
         std::sort(entries.begin(), entries.end(), [](const auto& a, const auto& b) {
             return a.second->last_used < b.second->last_used;

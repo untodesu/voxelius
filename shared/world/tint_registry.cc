@@ -42,8 +42,9 @@ void tint_registry::commit(ModContext& ctx)
         tint_offset = static_cast<tint_id_type>(s_definitions.size()) - 1;
     }
 
-    for(const auto& [name, local_id] : names) {
-        auto global_id = local_id + tint_offset;
+    for(const auto& it : names) {
+        auto& name = it.first;
+        auto global_id = it.second + tint_offset;
         auto [it, inserted] = s_names.try_emplace(name, global_id);
 
         if(!inserted) {

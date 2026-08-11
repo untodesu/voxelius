@@ -254,8 +254,8 @@ bool world::set_state(const ChunkPos& cpos, const LocalPos& lpos, std::string_vi
 
     vx::hash_map<blockstate_key_type, blockstate_val_type> chunk_map;
 
-    for(const auto& [decl_key, decl] : family->states) {
-        chunk_map.try_emplace(decl_key, decl.default_value);
+    for(const auto& it : family->states) {
+        chunk_map.try_emplace(it.first, it.second.default_value);
     }
 
     auto id_it = family->id_states.find(id);

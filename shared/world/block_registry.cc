@@ -17,7 +17,12 @@ static std::uint64_t s_checksum;
 
 static std::uint64_t hash_state_map(const vx::hash_map<blockstate_key_type, blockstate_val_type>& map)
 {
-    std::vector<std::pair<blockstate_key_type, blockstate_val_type>> sorted(map.cbegin(), map.cend());
+    std::vector<std::pair<blockstate_key_type, blockstate_val_type>> sorted;
+    sorted.reserve(map.size());
+
+    for(const auto& it : map) {
+        sorted.emplace_back(it.first, it.second);
+    }
     std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
         return a.first < b.first;
     });
@@ -262,23 +267,24 @@ void block_registry::commit(ModContext& ctx)
             family.default_variant += block_offset;
         }
 
-        for(auto& [hash, id] : family.resolved_states) {
-            id += block_offset;
+        for(auto& it : family.resolved_states) {
+            it.second += block_offset;
         }
 
         if(block_offset) {
             vx::hash_map<block_id_type, vx::hash_map<blockstate_key_type, blockstate_val_type>> rebased;
 
-            for(auto& [id, map] : family.id_states) {
-                rebased.try_emplace(id + block_offset, std::move(map));
+            for(auto& it : family.id_states) {
+                rebased.try_emplace(it.first + block_offset, std::move(it.second));
             }
 
             family.id_states = std::move(rebased);
         }
     }
 
-    for(const auto& [name, local_id] : names) {
-        auto global_id = local_id + block_offset;
+    for(const auto& it : names) {
+        auto& name = it.first;
+        auto global_id = it.second + block_offset;
         auto [it, inserted] = s_names.try_emplace(name, global_id);
 
         if(!inserted) {
@@ -304,8 +310,8 @@ void block_registry::commit(ModContext& ctx)
             if(family.states.size()) {
                 vx::hash_map<blockstate_key_type, blockstate_val_type> default_map;
 
-                for(const auto& [key, decl] : family.states) {
-                    default_map.try_emplace(key, decl.default_value);
+                for(const auto& it : family.states) {
+                    default_map.try_emplace(it.first, it.second.default_value);
                 }
 
                 if(auto stem_def = find_definition(family.stem_id)) {
@@ -437,8 +443,8 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id, const vx::h
 
     vx::hash_map<blockstate_key_type, blockstate_val_type> full_map;
 
-    for(const auto& [key, decl] : family.states) {
-        full_map.try_emplace(key, decl.default_value);
+    for(const auto& it : family.states) {
+        full_map.try_emplace(it.first, it.second.default_value);
     }
 
     for(const auto& it : map) {

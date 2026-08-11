@@ -390,11 +390,11 @@ void block_atlas::init_late(void)
             }
         }
 
-        for(const auto& [slot, mask_id] : def.masks) {
-            auto mask_frames = std::array { mask_id };
+        for(const auto& it : def.masks) {
+            auto mask_frames = std::array { it.second };
 
             if(nullptr == block_atlas::load(mask_frames)) {
-                LOG_WARNING("{}: failed to load mask for slot '{}'", def.model_name.full_string(), slot);
+                LOG_WARNING("{}: failed to load mask for slot '{}'", def.model_name.full_string(), it.first);
             }
         }
     }
