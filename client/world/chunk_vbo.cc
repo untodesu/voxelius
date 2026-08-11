@@ -42,21 +42,24 @@ static void insert_free_region(chunk_vbo::FreeRegion region)
         return a.base < b.base;
     });
 
-    auto prev = std::prev(it);
-    auto prev_end = prev->base + prev->size;
+    if(it != list.begin()) {
+        auto prev = std::prev(it);
 
-    if(it > list.begin() && prev_end == region.base) {
-        it = prev;
-        it->size += region.size;
+        if(prev->base + prev->size == region.base) {
+            it = prev;
+            it->size += region.size;
+        }
+        else {
+            it = list.insert(it, region);
+        }
     }
     else {
         it = list.insert(it, region);
     }
 
     auto next = std::next(it);
-    auto next_end = next->base + next->size;
 
-    if(next < list.end() && it->base + it->size == next->base) {
+    if(next != list.end() && it->base + it->size == next->base) {
         it->size += next->size;
         list.erase(next);
     }

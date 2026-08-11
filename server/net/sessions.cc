@@ -222,7 +222,7 @@ static std::string sanitize_username(std::string_view username)
     sanitized.reserve(size);
 
     for(std::size_t i = 0; i < size; ++i) {
-        auto character = username[i];
+        auto character = static_cast<unsigned char>(username[i]);
         auto is_allowed = false;
 
         if(i > 0) {
@@ -232,6 +232,8 @@ static std::string sanitize_username(std::string_view username)
         else {
             is_allowed = is_allowed || std::isalpha(character);
         }
+
+        is_allowed = is_allowed && character < 128;
 
         if(is_allowed) {
             sanitized.push_back(character);

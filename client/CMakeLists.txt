@@ -58,6 +58,8 @@ add_executable(vclient
     "${CMAKE_CURRENT_LIST_DIR}/gui/stepper.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gui/tabs.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gui/tabs.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/text_box.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/gui/text_box.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gui/title.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gui/title.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gui/toggle_button.cc"

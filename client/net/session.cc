@@ -5,6 +5,7 @@
 #include "core/buffer.hh"
 #include "core/utils/epoch.hh"
 #include "core/utils/physfs.hh"
+#include "core/utils/string.hh"
 #include "core/version.hh"
 
 #include "shared/entity/class_registry.hh"
@@ -19,7 +20,10 @@
 #include "shared/world/world.hh"
 
 #include "client/globals.hh"
+#include "client/gui/container.hh"
+#include "client/gui/text_box.hh"
 #include "client/net/host.hh"
+#include "client/settings.hh"
 #include "client/video.hh"
 
 constexpr static std::string_view KEYPAIR_PATH = "keypair.dat";
@@ -29,6 +33,7 @@ std::uint64_t session::identity;
 std::uint16_t session::client_id;
 std::string session::assigned_username;
 
+static gui::TextBox s_desired_username;
 static ed25519::pair_type s_auth_pair;
 static std::uint64_t s_pending_invite;
 
@@ -82,7 +87,15 @@ static void on_host_connect(const HostConnectEvent& event)
     request.fluids_hash = fluid_registry::checksum();
     request.tints_hash = tint_registry::checksum();
     request.ents_hash = class_registry::checksum();
-    request.username = std::string("testplayer"); // TODO: username setting
+
+    auto desired_username = s_desired_username.value();
+
+    if(utils::is_whitespace<char>(desired_username)) {
+        request.username = std::string("player");
+    }
+    else {
+        request.username = desired_username;
+    }
 
     auto& enet_event = event.event();
     protocol::send(request, enet_event.peer);
@@ -131,6 +144,35 @@ static void on_session_disconnect(const packet::Session_Disconnect& packet)
 
 void session::init(void)
 {
+    s_desired_username.enable_tooltip();
+    s_desired_username.set_value("player");
+    s_desired_username.set_flags(ImGuiInputTextFlags_CharsNoBlank);
+    s_desired_username.bind(globals::client_config, "session.username");
+    s_desired_username.set_callback([](auto data) {
+        if(data->BufTextLen >= 64) {
+            return 1;
+        }
+
+        if(data->EventChar >= 128) {
+            return 1;
+        }
+
+        auto character = static_cast<unsigned char>(data->EventChar);
+        auto is_allowed = false;
+
+        if(data->CursorPos > 0) {
+            is_allowed = is_allowed || std::isalnum(character);
+            is_allowed = is_allowed || character == '_';
+        }
+        else {
+            is_allowed = is_allowed || std::isalpha(character);
+        }
+
+        return is_allowed ? 0 : 1;
+    });
+
+    settings::general.add_child(s_desired_username, 3);
+
     std::vector<std::byte> source;
 
     if(utils::read_file(KEYPAIR_PATH, source)) {

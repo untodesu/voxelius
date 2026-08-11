@@ -8,6 +8,7 @@
 #include <cstdarg>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 #include <algorithm>
 #include <any>
@@ -45,7 +46,7 @@
 #include <BS_thread_pool.hpp>
 
 #include <emhash/hash_set8.hpp>
-#include <emhash/hash_table7.hpp>
+#include <emhash/hash_table8.hpp>
 
 #include <enet/enet.h>
 
@@ -77,7 +78,7 @@ using cmp_for = std::conditional_t<hash_string_key<T>, std::equal_to<>, std::equ
 namespace vx
 {
 template<typename Key, typename Value>
-using hash_map = emhash7::HashMap<Key, Value, vx::detail::hash_for<Key>, vx::detail::cmp_for<Key>>;
+using hash_map = emhash8::HashMap<Key, Value, vx::detail::hash_for<Key>, vx::detail::cmp_for<Key>>;
 template<typename Key>
 using hash_set = emhash8::HashSet<Key, vx::detail::hash_for<Key>, vx::detail::cmp_for<Key>>;
 } // namespace vx
