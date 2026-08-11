@@ -23,3 +23,9 @@ std::size_t globals::num_draw_calls;
 std::size_t globals::num_draw_vertices;
 
 entt::entity globals::player;
+
+unsigned globals::gui_scale = 1U;
+gui::Screen* globals::gui_screen = nullptr;
+
+ENetHost* globals::host;
+ENetPeer* globals::peer;

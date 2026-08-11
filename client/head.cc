@@ -13,7 +13,9 @@
 #include "client/fog.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
-#include "client/gui/settings.hh"
+#include "client/gui/container.hh"
+#include "client/gui/slider.hh"
+#include "client/settings.hh"
 #include "client/shader_program.hh"
 #include "client/world/chunk_renderer.hh"
 #include "client/world/chunk_vbo.hh"
@@ -40,7 +42,7 @@ static std::size_t su_AlphaDepth;
 static std::size_t su_FluidColor;
 static std::size_t su_FluidDepth;
 
-static config::Ref<int> s_pixel_size { 1 };
+static gui::SliderInt s_pixel_size;
 
 static int s_scaled_width;
 static int s_scaled_height;
@@ -200,10 +202,10 @@ static void on_sdl_window_event(const SDL_WindowEvent& event)
 
 void head::init(void)
 {
+    s_pixel_size.set_value(1);
+    s_pixel_size.set_range(1, 4).enable_tooltip();
     s_pixel_size.bind(globals::client_config, "head.pixel_size");
-
-    settings::slider<int>(2, settings_location::VIDEO, "head.pixel_size", 1, 4, true);
-    settings::stepper<unsigned>(3, settings_location::VIDEO, "head.fog_model", 0, 2, 1, false);
+    settings::video.add_child(s_pixel_size, 2);
 
     globals::gl_context = SDL_GL_CreateContext(globals::window);
     vx::throw_if_not_fmt(globals::gl_context, "SDL_GL_CreateContext failed: {}", SDL_GetError());

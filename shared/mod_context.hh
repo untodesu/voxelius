@@ -1,6 +1,7 @@
 #ifndef EE38FCD4_F793_4446_9DCF_44B1285F9330
 #define EE38FCD4_F793_4446_9DCF_44B1285F9330
 
+#include "shared/entity/class_registry.hh"
 #include "shared/world/biome_registry.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/fluid_registry.hh"
@@ -82,25 +83,31 @@ public:
 
     std::vector<BlockDefinition> take_blocks(void);
     std::vector<BlockFamily> take_block_families(void);
-    emhash8::HashMap<Identifier, block_id_type> take_block_names(void);
+    vx::hash_map<Identifier, block_id_type> take_block_names(void);
 
     biome_id_type find_biome(const Identifier& name) const;
     biome_id_type register_biome(const Identifier& name, BiomeDefinition def);
 
     std::vector<BiomeDefinition> take_biomes(void);
-    emhash8::HashMap<Identifier, biome_id_type> take_biome_names(void);
+    vx::hash_map<Identifier, biome_id_type> take_biome_names(void);
 
     fluid_id_type find_fluid(const Identifier& name) const;
     fluid_id_type register_fluid(const Identifier& name, FluidDefinition def);
 
     std::vector<FluidDefinition> take_fluids(void);
-    emhash8::HashMap<Identifier, fluid_id_type> take_fluid_names(void);
+    vx::hash_map<Identifier, fluid_id_type> take_fluid_names(void);
 
     tint_id_type find_tint(const Identifier& name) const;
     tint_id_type register_tint(const Identifier& name, TintDefinition def);
 
     std::vector<TintDefinition> take_tints(void);
-    emhash8::HashMap<Identifier, tint_id_type> take_tint_names(void);
+    vx::hash_map<Identifier, tint_id_type> take_tint_names(void);
+
+    class_id_type find_class(const Identifier& name) const;
+    class_id_type register_class(const Identifier& name, ClassDefinition def);
+
+    std::vector<ClassDefinition> take_classes(void);
+    vx::hash_map<Identifier, class_id_type> take_class_names(void);
 
 private:
     ModInfo m_modinfo;
@@ -109,16 +116,19 @@ private:
 
     std::vector<BlockDefinition> m_blocks;
     std::vector<BlockFamily> m_block_families;
-    emhash8::HashMap<Identifier, block_id_type> m_block_names;
+    vx::hash_map<Identifier, block_id_type> m_block_names;
 
     std::vector<BiomeDefinition> m_biomes;
-    emhash8::HashMap<Identifier, biome_id_type> m_biome_names;
+    vx::hash_map<Identifier, biome_id_type> m_biome_names;
 
     std::vector<FluidDefinition> m_fluids;
-    emhash8::HashMap<Identifier, fluid_id_type> m_fluid_names;
+    vx::hash_map<Identifier, fluid_id_type> m_fluid_names;
 
     std::vector<TintDefinition> m_tints;
-    emhash8::HashMap<Identifier, tint_id_type> m_tint_names;
+    vx::hash_map<Identifier, tint_id_type> m_tint_names;
+
+    std::vector<ClassDefinition> m_classes;
+    vx::hash_map<Identifier, class_id_type> m_class_names;
 };
 
 constexpr const ModInfo& ModContext::modinfo(void) const

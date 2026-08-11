@@ -26,6 +26,8 @@
 
 #include "client/camera.hh"
 
+constexpr static std::size_t MAX_SUBMIT_PER_FRAME = 32;
+
 constexpr static std::array ALL_FACES = {
     BLOCK_FACE_NORTH,
     BLOCK_FACE_SOUTH,
@@ -92,7 +94,7 @@ static float mesh_queue_distance_sq(const ChunkPos& cpos)
     return delta.squaredNorm();
 }
 
-static emhash8::HashMap<ChunkPos, std::nullptr_t> s_pending;
+static vx::hash_set<ChunkPos> s_pending;
 
 class MeshingTask final : public Task {
 public:
@@ -119,8 +121,14 @@ private:
     void mesh_fluid(const LocalPos& lpos, const BlockDefinition& def);
     void mesh_block(const LocalPos& lpos, block_id_type id);
 
+    void reset_tint_cache(void);
+
     BlockCache m_cache;
     BiomeCache m_biomes;
+
+    mutable std::array<std::pair<tint_id_type, Eigen::Vector3f>, 8> m_tint_cache;
+    mutable std::size_t m_tint_cache_size { 0 };
+
     std::vector<ChunkMesh_Vertex> m_opaque;
     std::vector<ChunkMesh_Vertex> m_alpha;
     std::vector<ChunkMesh_Vertex> m_fluid;
@@ -235,12 +243,12 @@ void MeshingTask::finalize(void)
 {
     ZoneScopedN("chunk_mesher::finalize");
 
-    if(!world::chunk_entities.valid(m_entity) || !world::chunk_entities.all_of<Chunk_Component>(m_entity)) {
+    if(!world::chunk_registry.valid(m_entity) || !world::chunk_registry.all_of<Chunk_Component>(m_entity)) {
         s_pending.erase(m_cpos);
         return;
     }
 
-    const auto& chunk = world::chunk_entities.get<Chunk_Component>(m_entity);
+    const auto& chunk = world::chunk_registry.get<Chunk_Component>(m_entity);
 
     if(chunk.position != m_cpos) {
         s_pending.erase(m_cpos);
@@ -248,12 +256,12 @@ void MeshingTask::finalize(void)
     }
 
     if(m_opaque.empty() && m_alpha.empty() && m_fluid.empty()) {
-        world::chunk_entities.remove<ChunkMesh>(m_entity);
+        world::chunk_registry.remove<ChunkMesh>(m_entity);
         s_pending.erase(m_cpos);
         return;
     }
 
-    auto& component = world::chunk_entities.get_or_emplace<ChunkMesh>(m_entity);
+    auto& component = world::chunk_registry.get_or_emplace<ChunkMesh>(m_entity);
 
     component.opaque.vertices = std::move(m_opaque);
     sync_part(component.opaque, component.slot);
@@ -270,7 +278,7 @@ void MeshingTask::finalize(void)
     component.opaque.vertices.clear();
     component.opaque.vertices.shrink_to_fit();
 
-    world::chunk_entities.patch<ChunkMesh>(m_entity);
+    world::chunk_registry.patch<ChunkMesh>(m_entity);
 
     s_pending.erase(m_cpos);
 }
@@ -458,6 +466,12 @@ Eigen::Vector3f MeshingTask::resolve_tint(const LocalPos& lpos, tint_id_type tin
         return Eigen::Vector3f::Ones();
     }
 
+    for(std::size_t i = 0; i < m_tint_cache_size; ++i) {
+        if(m_tint_cache[i].first == tint) {
+            return m_tint_cache[i].second;
+        }
+    }
+
     Eigen::Vector3f sum = Eigen::Vector3f::Zero();
 
     for(int dz = -1; dz <= 1; dz += 1) {
@@ -479,7 +493,13 @@ Eigen::Vector3f MeshingTask::resolve_tint(const LocalPos& lpos, tint_id_type tin
         }
     }
 
-    return sum / 9.0f;
+    auto result = sum / 9.0f;
+
+    if(m_tint_cache_size < m_tint_cache.size()) {
+        m_tint_cache[m_tint_cache_size++] = std::make_pair(tint, result);
+    }
+
+    return result;
 }
 
 static float fluid_surface_height(const BlockCache& cache, const LocalPos& lpos, const BlockDefinition* def, fluid_gravity gravity,
@@ -932,6 +952,8 @@ void MeshingTask::mesh_block(const LocalPos& lpos, block_id_type id)
         return;
     }
 
+    reset_tint_cache();
+
     auto def = block_registry::find_definition(id);
 
     if(def == nullptr) {
@@ -994,9 +1016,14 @@ void MeshingTask::mesh_block(const LocalPos& lpos, block_id_type id)
     }
 }
 
+void MeshingTask::reset_tint_cache(void)
+{
+    m_tint_cache_size = 0;
+}
+
 static void mark_dirty(entt::entity entity)
 {
-    world::chunk_entities.emplace_or_replace<ChunkMesh_DirtyMarker>(entity);
+    world::chunk_registry.emplace_or_replace<ChunkMesh_DirtyMarker>(entity);
 }
 
 static void mark_dirty(const ChunkPos& cpos)
@@ -1090,9 +1117,9 @@ static void on_chunk_remove(const ChunkRemoveEvent& event)
     auto chunk = event.chunk();
     auto entity = chunk->entity();
 
-    if(world::chunk_entities.valid(entity)) {
-        world::chunk_entities.remove<ChunkMesh_DirtyMarker>(entity);
-        world::chunk_entities.remove<ChunkMesh>(entity);
+    if(world::chunk_registry.valid(entity)) {
+        world::chunk_registry.remove<ChunkMesh_DirtyMarker>(entity);
+        world::chunk_registry.remove<ChunkMesh>(entity);
     }
 }
 
@@ -1119,7 +1146,7 @@ void chunk_mesher::update(void)
 
     TracyPlot("Mesh queue", static_cast<int64_t>(s_pending.size()));
 
-    auto group = world::chunk_entities.group<ChunkMesh_DirtyMarker>(entt::get<Chunk_Component>);
+    auto group = world::chunk_registry.group<ChunkMesh_DirtyMarker>(entt::get<Chunk_Component>);
 
     batch.clear();
 
@@ -1129,15 +1156,18 @@ void chunk_mesher::update(void)
         }
     }
 
-    std::sort(batch.begin(), batch.end(), [](const auto& a, const auto& b) {
+    auto submit_count = std::min(batch.size(), MAX_SUBMIT_PER_FRAME);
+
+    std::partial_sort(batch.begin(), batch.begin() + submit_count, batch.end(), [](const auto& a, const auto& b) {
         const auto& [a_entity, a_position, a_dist_sq] = a;
         const auto& [b_entity, b_position, b_dist_sq] = b;
         return a_dist_sq < b_dist_sq;
     });
 
-    for(const auto& [entity, position, dist_sq] : batch) {
-        s_pending.emplace(position, nullptr);
-        world::chunk_entities.remove<ChunkMesh_DirtyMarker>(entity);
+    for(std::size_t i = 0; i < submit_count; ++i) {
+        const auto& [entity, position, dist_sq] = batch[i];
+        s_pending.emplace(position);
+        world::chunk_registry.remove<ChunkMesh_DirtyMarker>(entity);
         threading::submit<MeshingTask>(entity, position);
     }
 }

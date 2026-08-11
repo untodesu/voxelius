@@ -31,26 +31,9 @@ static Identifier make_unique_id(const Identifier& id, const ModContext* ctx)
     return id;
 }
 
-static bool parse_tag_bitmask(lua_State* L, int idx, block_tag_bit& out)
-{
-    if(lua_isnil(L, idx)) {
-        out = static_cast<block_tag_bit>(0);
-        return true;
-    }
-
-    if(!lua_istable(L, idx)) {
-        lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, idx)));
-        return false;
-    }
-
-    out = static_cast<block_tag_bit>(utils::read_bitmask<unsigned>(L, idx));
-    return true;
-}
-
 static bool parse_scatter_entry(lua_State* L, int entry_idx, BiomeScatterEntry& entry, ModContext* ctx)
 {
-    lua_getfield(L, entry_idx, "feature");
-    auto feature = utils::require_string(L, -1);
+    auto feature = utils::require_string(L, entry_idx, "feature");
 
     if(!feature.has_value()) {
         return false;
@@ -58,10 +41,7 @@ static bool parse_scatter_entry(lua_State* L, int entry_idx, BiomeScatterEntry& 
 
     entry.feature = Identifier::from_string(feature.value(), ctx->name_space());
 
-    lua_pop(L, 1);
-
-    lua_getfield(L, entry_idx, "chance");
-    auto chance = utils::opt_number(L, -1, 0.5);
+    auto chance = utils::opt_number(L, entry_idx, "chance", 0.5);
 
     if(!chance.has_value()) {
         return false;
@@ -69,26 +49,23 @@ static bool parse_scatter_entry(lua_State* L, int entry_idx, BiomeScatterEntry& 
 
     entry.chance = static_cast<float>(chance.value());
 
-    lua_pop(L, 1);
+    auto need_above = utils::opt_bitmask<unsigned>(L, entry_idx, "need_above", 0);
 
-    lua_getfield(L, entry_idx, "need_above");
-
-    if(!parse_tag_bitmask(L, lua_gettop(L), entry.need_above)) {
+    if(!need_above.has_value()) {
         return false;
     }
 
-    lua_pop(L, 1);
+    entry.need_above = static_cast<block_tag_bit>(need_above.value());
 
-    lua_getfield(L, entry_idx, "need_below");
+    auto need_below = utils::opt_bitmask<unsigned>(L, entry_idx, "need_below", 0);
 
-    if(!parse_tag_bitmask(L, lua_gettop(L), entry.need_below)) {
+    if(!need_below.has_value()) {
         return false;
     }
 
-    lua_pop(L, 1);
+    entry.need_below = static_cast<block_tag_bit>(need_below.value());
 
-    lua_getfield(L, entry_idx, "group");
-    auto group = utils::opt_string(L, -1, {});
+    auto group = utils::opt_string(L, entry_idx, "group", {});
 
     if(!group.has_value()) {
         return false;
@@ -101,44 +78,44 @@ static bool parse_scatter_entry(lua_State* L, int entry_idx, BiomeScatterEntry& 
         entry.group_hash = std::hash<std::string_view>()(*group);
     }
 
-    lua_pop(L, 1);
+    auto padding = utils::opt_integer(L, entry_idx, "padding", 0);
 
-    lua_getfield(L, entry_idx, "padding");
-    auto padding = utils::opt_integer(L, -1, 0);
+    if(!padding.has_value()) {
+        return false;
+    }
 
-    if(!padding.has_value() || padding.value() < 0) {
+    if(padding.value() < 0) {
+        lua_pushliteral(L, "padding must be non-negative");
         return false;
     }
 
     entry.padding = static_cast<unsigned>(padding.value());
 
-    lua_pop(L, 1);
+    auto edge = utils::opt_integer(L, entry_idx, "edge", 0);
 
-    lua_getfield(L, entry_idx, "edge");
-    auto edge = utils::opt_integer(L, -1, 0);
+    if(!edge.has_value()) {
+        return false;
+    }
 
-    if(!edge.has_value() || edge.value() < 0) {
+    if(edge.value() < 0) {
+        lua_pushliteral(L, "edge must be non-negative");
         return false;
     }
 
     entry.edge = static_cast<unsigned>(edge.value());
-
-    lua_pop(L, 1);
 
     return true;
 }
 
 static bool parse_palette_entry(lua_State* L, int entry_idx, BiomePaletteEntry& entry, ModContext* ctx)
 {
-    lua_getfield(L, entry_idx, "name");
-    auto name = utils::require_string(L, -1);
+    auto name = utils::require_string(L, entry_idx, "name");
 
     if(!name.has_value()) {
         return false;
     }
 
     entry.name = Identifier::from_string(name.value(), ctx->name_space());
-    lua_pop(L, 1);
 
     lua_getfield(L, entry_idx, "states");
 
@@ -207,15 +184,13 @@ static bool parse_palette(lua_State* L, int palette_idx, BiomeDefinition& def, M
 
 static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, ModContext* ctx)
 {
-    lua_getfield(L, def_idx, "realm");
-    auto realm = utils::require_integer(L, -1);
+    auto realm = utils::require_integer(L, def_idx, "realm");
 
     if(!realm.has_value()) {
         return false;
     }
 
     def.realm = static_cast<biome_realm>(realm.value());
-    lua_pop(L, 1);
 
     const std::array climate_fields = {
         std::make_pair("temperature", &def.temperature),
@@ -246,8 +221,7 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
         lua_pop(L, 1);
     }
 
-    lua_getfield(L, def_idx, "priority");
-    auto priority = utils::opt_integer(L, -1, 0);
+    auto priority = utils::opt_integer(L, def_idx, "priority", 0);
 
     if(!priority.has_value()) {
         return false;
@@ -259,17 +233,14 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
     }
 
     def.priority = static_cast<unsigned>(priority.value());
-    lua_pop(L, 1);
 
-    lua_getfield(L, def_idx, "offset");
-    auto offset = utils::opt_number(L, -1, 0.0);
+    auto offset = utils::opt_number(L, def_idx, "offset", 0.0);
 
     if(!offset.has_value()) {
         return false;
     }
 
     def.offset = static_cast<float>(offset.value());
-    lua_pop(L, 1);
 
     lua_getfield(L, def_idx, "palette");
 
@@ -341,14 +312,14 @@ static bool parse_definition(lua_State* L, int def_idx, BiomeDefinition& def, Mo
                 return false;
             }
 
-            auto value_vec = utils::read_vector<float, 3>(L, -1);
+            auto value_vec = utils::require_fvec<3>(L, -1);
 
             if(!value_vec.has_value()) {
                 return false;
             }
 
             auto key_id = Identifier::from_string(key_str.value(), ctx->name_space());
-            auto color = value_vec->cwiseMin(1.0f).cwiseMax(0.0f);
+            auto color = value_vec->cast<float>().cwiseMin(1.0f).cwiseMax(0.0f);
 
             def.tint_map.insert_or_assign(std::move(key_id), std::move(color));
 

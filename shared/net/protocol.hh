@@ -6,11 +6,12 @@
 namespace protocol
 {
 constexpr static enet_uint32 CHANNEL = 0;
+constexpr static enet_uint16 PORT = 43103;
 } // namespace protocol
 
 namespace protocol
 {
-void decode(const ENetPacket* packet, ENetPeer* peer);
+void decode(entt::dispatcher& dispatcher, const ENetPacket* packet, ENetPeer* peer);
 } // namespace protocol
 
 namespace protocol

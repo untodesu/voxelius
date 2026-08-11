@@ -6,12 +6,23 @@
 #include "shared/res/feature.hh"
 
 static std::vector<BiomeDefinition> s_definitions;
-static emhash8::HashMap<Identifier, biome_id_type> s_names;
-static emhash8::HashMap<biome_id_type, Identifier> s_reverse_names;
+static vx::hash_map<Identifier, biome_id_type> s_names;
+static vx::hash_map<biome_id_type, Identifier> s_reverse_names;
+static std::uint64_t s_checksum;
+
+static void update_checksum(void)
+{
+    // TODO: go through each biome definition and compute a checksum based on its contents
+}
 
 std::span<const BiomeDefinition> biome_registry::all_definitions(void)
 {
     return s_definitions;
+}
+
+std::uint64_t biome_registry::checksum(void)
+{
+    return s_checksum;
 }
 
 void biome_registry::commit(ModContext& ctx)
@@ -32,8 +43,9 @@ void biome_registry::commit(ModContext& ctx)
         biome_offset = static_cast<biome_id_type>(s_definitions.size()) - 1;
     }
 
-    for(const auto& [name, local_id] : names) {
-        auto global_id = local_id + biome_offset;
+    for(const auto& it : names) {
+        auto& name = it.first;
+        auto global_id = it.second + biome_offset;
         auto [it, inserted] = s_names.try_emplace(name, global_id);
 
         if(!inserted) {
@@ -47,6 +59,8 @@ void biome_registry::commit(ModContext& ctx)
     if(biomes.size()) {
         s_definitions.insert(s_definitions.end(), std::make_move_iterator(biomes.begin() + 1), std::make_move_iterator(biomes.end()));
     }
+
+    update_checksum();
 }
 
 void biome_registry::purge(void)
@@ -80,7 +94,7 @@ void biome_registry::resolve_palettes(void)
                 continue;
             }
 
-            emhash8::HashMap<blockstate_key_type, blockstate_val_type> map;
+            vx::hash_map<blockstate_key_type, blockstate_val_type> map;
 
             for(const auto& it : field->states) {
                 auto key_hash = family->state_hash(it.first);

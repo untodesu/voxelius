@@ -1,48 +1,91 @@
 #ifndef CD2A5EA0_1394_4165_9926_3411C2165A5B
 #define CD2A5EA0_1394_4165_9926_3411C2165A5B
 
-enum class packet_type : std::uint16_t {
-    STATUS_REQUEST = 0x0001,
-    STATUS_RESPONSE = 0x0002,
-    AUTH_REQUEST = 0x0003,
-    AUTH_CHALLENGE = 0x0004,
-    AUTH_RESPONSE = 0x0005,
-    AUTH_ADMISSION = 0x0006,
-    DISCONNECT = 0x0007,
-    REQUEST_CHUNK = 0x0008,
-    CHUNK_BLOCKS = 0x0009,
-    CHUNK_BIOMES = 0x000A,
-    SET_BLOCK = 0x000B,
-    PLAYER_ATTACK_E = 0x000C,
-    PLAYER_ATTACK_B = 0x000D,
-    PLAYER_INTERACT_E = 0x000E,
-    PLAYER_INTERACT_B = 0x000F,
-};
+class ReadBuffer;
+class WriteBuffer;
 
+namespace packet
+{
+enum packet_type : std::uint16_t {
+    STATUS_REQUEST = 0,
+    STATUS_RESPONSE = 1,
+    AUTH_REQUEST,
+    AUTH_CHALLENGE,
+    AUTH_RESPONSE,
+    AUTH_ADMISSION,
+    SESSION_DISCONNECT,
+    WORLD_REQUEST_CHUNK,
+    WORLD_CHUNK_BLOCKS,
+    WORLD_CHUNK_BIOMES,
+    WORLD_SET_BLOCK,
+    WORLD_TIMINGS,
+    WORLD_RULES,
+    PLAYER_ATTACK_E,
+    PLAYER_ATTACK_B,
+    PLAYER_INTERACT_E,
+    PLAYER_INTERACT_B,
+    PLAYER_MOVE_DATA,
+    ENTITY_SPAWN,
+    ENTITY_PATCH,
+    ENTITY_REMOVE,
+    ENTITY_CLIENT,
+};
+} // namespace packet
+
+namespace packet
+{
 template<packet_type T>
-struct BasePacket {
+struct Base {
     constexpr static packet_type TYPE = T;
 
     ENetPeer* peer { nullptr };
 };
+} // namespace packet
 
-class ReadBuffer;
-class WriteBuffer;
+namespace packet
+{
+struct Status_Request;
+struct Status_Response;
+} // namespace packet
 
-struct StatusRequest;
-struct StatusResponse;
-struct AuthRequest;
-struct AuthChallenge;
-struct AuthResponse;
-struct AuthAdmission;
-struct Disconnect;
-struct RequestChunk;
-struct ChunkBlocks;
-struct ChunkBiomes;
-struct SetBlock;
-struct PlayerAttackE;
-struct PlayerAttackB;
-struct PlayerInteractE;
-struct PlayerInteractB;
+namespace packet
+{
+struct Auth_Request;
+struct Auth_Challenge;
+struct Auth_Response;
+struct Auth_Admission;
+} // namespace packet
+
+namespace packet
+{
+struct Session_Disconnect;
+} // namespace packet
+
+namespace packet
+{
+struct World_Request;
+struct World_Blocks;
+struct World_Biomes;
+struct World_SetBlock;
+struct World_Timings;
+struct World_Rules;
+} // namespace packet
+
+namespace packet
+{
+struct Player_AttackE;
+struct Player_AttackB;
+struct Player_InteractE;
+struct Player_InteractB;
+struct Player_MoveData;
+} // namespace packet
+
+namespace packet
+{
+struct Entity_Spawn;
+struct Entity_Patch;
+struct Entity_Remove;
+struct Entity_Client;
+} // namespace packet
 
 #endif /* CD2A5EA0_1394_4165_9926_3411C2165A5B */

@@ -1,5 +1,6 @@
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
+add_subdirectory(ed25519)
 add_subdirectory(eigen)
 add_subdirectory(emhash)
 add_subdirectory(enet)

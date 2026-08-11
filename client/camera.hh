@@ -5,18 +5,18 @@
 #include "shared/world/block.hh"
 #include "shared/world/fluid.hh"
 
-namespace config
+namespace gui
 {
 template<typename T>
-class Ref;
-} // namespace config
+class Slider;
+} // namespace gui
 
 class Camera;
 
 namespace camera
 {
-extern config::Ref<float> vertical_fov;
-extern config::Ref<unsigned> view_distance;
+extern gui::Slider<float> vertical_fov;
+extern gui::Slider<unsigned> view_distance;
 } // namespace camera
 
 namespace camera

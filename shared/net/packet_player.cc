@@ -4,39 +4,39 @@
 
 #include "core/buffer.hh"
 
-void PlayerAttackE::serialize(const PlayerAttackE& packet, WriteBuffer& buffer)
+void packet::Player_AttackE::encode(const Player_AttackE& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint64_t>(static_cast<std::uint64_t>(packet.target));
 }
 
-void PlayerAttackE::deserialize(PlayerAttackE& packet, ReadBuffer& buffer)
+void packet::Player_AttackE::decode(Player_AttackE& packet, ReadBuffer& buffer)
 {
     packet.target = static_cast<entt::entity>(buffer.read<std::uint64_t>());
 }
 
-void PlayerAttackB::serialize(const PlayerAttackB& packet, WriteBuffer& buffer)
+void packet::Player_AttackB::encode(const Player_AttackB& packet, WriteBuffer& buffer)
 {
     buffer.write_vector<std::int64_t, 3>(packet.bpos.cast<std::int64_t>());
     buffer.write<std::uint32_t>(packet.expected);
 }
 
-void PlayerAttackB::deserialize(PlayerAttackB& packet, ReadBuffer& buffer)
+void packet::Player_AttackB::decode(Player_AttackB& packet, ReadBuffer& buffer)
 {
     packet.bpos = buffer.read_vector<std::int64_t, 3>().cast<BlockPos::value_type>();
     packet.expected = buffer.read<std::uint32_t>();
 }
 
-void PlayerInteractE::serialize(const PlayerInteractE& packet, WriteBuffer& buffer)
+void packet::Player_InteractE::encode(const Player_InteractE& packet, WriteBuffer& buffer)
 {
     buffer.write<std::uint64_t>(static_cast<std::uint64_t>(packet.target));
 }
 
-void PlayerInteractE::deserialize(PlayerInteractE& packet, ReadBuffer& buffer)
+void packet::Player_InteractE::decode(Player_InteractE& packet, ReadBuffer& buffer)
 {
     packet.target = static_cast<entt::entity>(buffer.read<std::uint64_t>());
 }
 
-void PlayerInteractB::serialize(const PlayerInteractB& packet, WriteBuffer& buffer)
+void packet::Player_InteractB::encode(const Player_InteractB& packet, WriteBuffer& buffer)
 {
     buffer.write_vector<std::int64_t, 3>(packet.bpos.cast<std::int64_t>());
     buffer.write<std::uint32_t>(packet.expected);
@@ -45,11 +45,29 @@ void PlayerInteractB::serialize(const PlayerInteractB& packet, WriteBuffer& buff
     buffer.write_vector<float, 3>(packet.point);
 }
 
-void PlayerInteractB::deserialize(PlayerInteractB& packet, ReadBuffer& buffer)
+void packet::Player_InteractB::decode(Player_InteractB& packet, ReadBuffer& buffer)
 {
     packet.bpos = buffer.read_vector<std::int64_t, 3>().cast<BlockPos::value_type>();
     packet.expected = buffer.read<std::uint32_t>();
     packet.face = static_cast<block_face>(buffer.read<std::uint8_t>());
     packet.normal = buffer.read_vector<float, 3>();
     packet.point = buffer.read_vector<float, 3>();
+}
+
+void packet::Player_MoveData::encode(const Player_MoveData& packet, WriteBuffer& buffer)
+{
+    buffer.write_vector<std::int32_t, 3>(packet.simulated_cpos.cast<std::int32_t>());
+    buffer.write_vector<float, 3>(packet.camera_angles);
+    buffer.write_vector<float, 3>(packet.simulated_lpos);
+    buffer.write_vector<float, 3>(packet.velocity);
+    buffer.write_vector<float, 3>(packet.wishdir);
+}
+
+void packet::Player_MoveData::decode(Player_MoveData& packet, ReadBuffer& buffer)
+{
+    packet.simulated_cpos = buffer.read_vector<std::int32_t, 3>().cast<ChunkPos::value_type>();
+    packet.camera_angles = buffer.read_vector<float, 3>();
+    packet.simulated_lpos = buffer.read_vector<float, 3>();
+    packet.velocity = buffer.read_vector<float, 3>();
+    packet.wishdir = buffer.read_vector<float, 3>();
 }

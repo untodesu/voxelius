@@ -1,0 +1,141 @@
+#include "server/pch.hh"
+
+#include "server/net/interest.hh"
+
+#include "core/config/ref.hh"
+
+#include "shared/component/transform.hh"
+#include "shared/entity/class.hh"
+#include "shared/entity/class_registry.hh"
+#include "shared/entity/component_map.hh"
+#include "shared/globals.hh"
+#include "shared/net/packet_entity.hh"
+#include "shared/net/packet_world.hh"
+#include "shared/utils/view.hh"
+
+#include "server/globals.hh"
+#include "server/net/sessions.hh"
+
+config::Ref<unsigned> interest::view_distance { 8 };
+
+static void send_full_snapshot(ENetPeer* peer, entt::entity entity)
+{
+    auto& entity_class = globals::registry.get<EntityClass>(entity);
+
+    packet::Entity_Spawn spawn_packet {};
+    spawn_packet.entity = entity;
+    spawn_packet.class_id = entity_class.id;
+    protocol::send(spawn_packet, peer);
+
+    packet::Entity_Patch patch_packet {};
+    patch_packet.entity = entity;
+
+    class_registry::for_each(entity_class.id, [&](component_id_type id) {
+        packet::Entity_Patch::Component component;
+        component.id = id;
+
+        WriteBuffer buffer;
+        component_map::encode_net(id, entity, buffer);
+        component.data = std::move(buffer.take());
+
+        patch_packet.components.emplace_back(std::move(component));
+    });
+
+    if(patch_packet.components.size()) {
+        protocol::send(patch_packet, peer);
+    }
+}
+
+static void update_visibility(void)
+{
+    ZoneScoped;
+
+    auto entities = globals::registry.view<EntityClass, Transform>();
+
+    for(auto& session : sessions::all()) {
+        if(session.peer == nullptr) {
+            continue;
+        }
+
+        for(const auto [entity, cls, transform] : entities.each()) {
+            auto in_box = session.view_box.contains(transform.chunk);
+            auto is_known = session.known_entities.contains(entity);
+
+            if(in_box && !is_known) {
+                send_full_snapshot(session.peer, entity);
+                session.known_entities.insert(entity);
+            }
+            else if(!in_box && is_known) {
+                packet::Entity_Remove packet {};
+                packet.entity = entity;
+                protocol::send(packet, session.peer);
+                session.known_entities.erase(entity);
+            }
+        }
+    }
+}
+
+void interest::init(void)
+{
+    view_distance.bind(globals::server_config, "interest.view_distance");
+}
+
+void interest::fixed_update_late(void)
+{
+    ZoneScoped;
+
+    auto radius = static_cast<ChunkPos::value_type>(view_distance.value());
+
+    for(auto& session : sessions::all()) {
+        if(globals::registry.valid(session.player)) {
+            auto& transform = globals::registry.get<Transform>(session.player);
+            session.view_box = utils::view_box(transform.chunk, radius);
+        }
+    }
+
+    update_visibility();
+}
+
+template<typename T>
+void interest::broadcast(const T& packet, const ChunkPos& origin, ENetPeer* except)
+{
+    for(const auto& session : sessions::all()) {
+        if(session.peer == nullptr || session.peer == except) {
+            continue;
+        }
+
+        if(session.view_box.contains(origin)) {
+            protocol::send(packet, session.peer);
+        }
+    }
+}
+
+template void interest::broadcast<packet::World_SetBlock>(const packet::World_SetBlock& packet, const ChunkPos& origin, ENetPeer* except);
+template void interest::broadcast<packet::Entity_Spawn>(const packet::Entity_Spawn& packet, const ChunkPos& origin, ENetPeer* except);
+template void interest::broadcast<packet::Entity_Patch>(const packet::Entity_Patch& packet, const ChunkPos& origin, ENetPeer* except);
+template void interest::broadcast<packet::Entity_Remove>(const packet::Entity_Remove& packet, const ChunkPos& origin, ENetPeer* except);
+
+void interest::mark_known(entt::entity entity, const ChunkPos& chunk)
+{
+    for(auto& session : sessions::all()) {
+        if(session.peer && session.view_box.contains(chunk)) {
+            session.known_entities.insert(entity);
+        }
+    }
+}
+
+void interest::mark_known(entt::entity entity)
+{
+    for(auto& session : sessions::all()) {
+        if(session.peer) {
+            session.known_entities.insert(entity);
+        }
+    }
+}
+
+void interest::forget(entt::entity entity)
+{
+    for(auto& session : sessions::all()) {
+        session.known_entities.erase(entity);
+    }
+}

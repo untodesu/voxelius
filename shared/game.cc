@@ -4,10 +4,14 @@
 
 #include "core/res/image.hh"
 
-#include "shared/entity/stasis.hh"
-#include "shared/entity/transform.hh"
-#include "shared/entity/velocity.hh"
+#include "shared/component/head.hh"
+#include "shared/component/move_mode.hh"
+#include "shared/component/player.hh"
+#include "shared/component/stasis.hh"
+#include "shared/component/transform.hh"
+#include "shared/component/velocity.hh"
 #include "shared/globals.hh"
+#include "shared/system/pmove.hh"
 #include "shared/mod_loader.hh"
 #include "shared/res/block_collision.hh"
 #include "shared/res/block_model.hh"
@@ -23,6 +27,12 @@ void shared_game::init(void)
     BlockCollision::register_resource();
     BlockModel::register_resource();
     Feature::register_resource();
+
+    Transform::register_component();
+    Head::register_component();
+    Velocity::register_component();
+    Player::register_component();
+    MoveMode::register_component();
 
     biome_map::init();
     mod_loader::init();

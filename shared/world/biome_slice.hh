@@ -9,8 +9,8 @@ class WriteBuffer;
 
 class BiomeSlice final : public std::array<biome_id_type, constant::CHUNK_AREA> {
 public:
-    static void serialize(const BiomeSlice& slice, WriteBuffer& buffer);
-    static void deserialize(BiomeSlice& slice, ReadBuffer& buffer);
+    static void encode(const BiomeSlice& slice, WriteBuffer& buffer);
+    static void decode(BiomeSlice& slice, ReadBuffer& buffer);
 
     using std::array<biome_id_type, constant::CHUNK_AREA>::array;
 };

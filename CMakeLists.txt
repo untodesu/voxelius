@@ -3,13 +3,6 @@ project(Voxelius LANGUAGES C CXX VERSION 17.0.0)
 
 option(ENABLE_PROFILING "Enable profiling" OFF)
 
-option(BUILD_CLIENT "Build game client" ON)
-option(BUILD_SERVER "Build game server" ON)
-
-if(NOT BUILD_CLIENT AND NOT BUILD_SERVER)
-    message(FATAL_ERROR "Neither BUILD_CLIENT nor BUILD_SERVER is enabled. I don't know what to do!!")
-endif()
-
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
@@ -37,14 +30,8 @@ execute_process(COMMAND git rev-parse --abbrev-ref HEAD WORKING_DIRECTORY ${PROJ
 add_subdirectory(core)
 add_subdirectory(deps)
 add_subdirectory(shared)
-
-if(BUILD_CLIENT)
-    add_subdirectory(client)
-endif()
-
-if(BUILD_SERVER)
-    add_subdirectory(server)
-endif()
+add_subdirectory(client)
+add_subdirectory(server)
 
 install(FILES "${PROJECT_SOURCE_DIR}/LICENSE" DESTINATION ".")
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/data" DESTINATION ".")
@@ -62,7 +49,7 @@ set(CPACK_NSIS_MUI_HEADERIMAGE "${PROJECT_SOURCE_DIR}\\\\media\\\\nsis-header.bm
 set(CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_SOURCE_DIR}\\\\media\\\\nsis-splash.bmp")
 
 unset(CPACK_NSIS_MENU_LINKS)
-list(APPEND CPACK_NSIS_MENU_LINKS "bin/voxelius-client.exe" "Voxelius")
-list(APPEND CPACK_NSIS_MENU_LINKS "bin/voxelius-server.exe" "Voxelius server")
+list(APPEND CPACK_NSIS_MENU_LINKS "bin/vclient.exe" "Voxelius")
+list(APPEND CPACK_NSIS_MENU_LINKS "bin/vserver.exe" "Voxelius server")
 
 include(CPack)

@@ -85,8 +85,8 @@ struct BlockDefinition final {
     std::optional<Identifier> resolve_mask_slot(std::string_view slot) const;
 
     block_render render;
-    emhash8::HashMap<std::string, std::vector<Identifier>> albedo;
-    emhash8::HashMap<std::string, Identifier> masks;
+    vx::hash_map<std::string, std::vector<Identifier>> albedo;
+    vx::hash_map<std::string, Identifier> masks;
     bool animated;
 
     Identifier model_name;

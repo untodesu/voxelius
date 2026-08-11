@@ -71,19 +71,15 @@ static bool parse_textures(lua_State* L, int idx, std::vector<Identifier>& out, 
 
 static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, ModContext* ctx)
 {
-    lua_getfield(L, def_idx, "gravity");
-    auto gravity = utils::require_integer(L, -1);
+    auto gravity = utils::require_integer(L, def_idx, "gravity");
 
     if(!gravity.has_value()) {
         return false;
     }
 
     def.gravity = static_cast<fluid_gravity>(gravity.value());
-    lua_pop(L, 1);
 
-    lua_getfield(L, def_idx, "full_level");
-
-    auto full_level = utils::require_integer(L, -1);
+    auto full_level = utils::require_integer(L, def_idx, "full_level");
 
     if(!full_level.has_value()) {
         return false;
@@ -91,7 +87,6 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
 
     def.full_level = static_cast<unsigned>(full_level.value());
     def.full_level = std::clamp(def.full_level, 1U, 15U);
-    lua_pop(L, 1);
 
     lua_getfield(L, def_idx, "opaque");
 
@@ -106,33 +101,24 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
 
     lua_pop(L, 1);
 
-    lua_getfield(L, def_idx, "fog_density");
-    auto fog_density = utils::opt_number(L, -1, 1.0);
+    auto fog_density = utils::opt_number(L, def_idx, "fog_density", 1.0);
 
     if(!fog_density.has_value()) {
         return false;
     }
 
     def.fog_density = std::max(static_cast<float>(fog_density.value()), 1.0f);
-    lua_pop(L, 1);
 
-    lua_getfield(L, def_idx, "fog_color");
+    auto fog_color = utils::opt_fvec<3>(L, def_idx, "fog_color", def.fog_color.cast<double>());
 
-    if(!lua_isnil(L, -1)) {
-        auto fog_color = utils::read_vector<float, 3>(L, -1);
-
-        if(!fog_color.has_value()) {
-            return false;
-        }
-
-        def.fog_color = fog_color.value();
-        def.fog_color = def.fog_color.cwiseMax(0.0f).cwiseMin(1.0f);
+    if(!fog_color.has_value()) {
+        return false;
     }
 
-    lua_pop(L, 1);
+    def.fog_color = fog_color->cast<float>();
+    def.fog_color = def.fog_color.cwiseMax(0.0f).cwiseMin(1.0f);
 
-    lua_getfield(L, def_idx, "tint");
-    auto tint_name = utils::opt_string(L, -1, {});
+    auto tint_name = utils::opt_string(L, def_idx, "tint", {});
 
     if(!tint_name.has_value()) {
         return false;
@@ -141,8 +127,6 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
     if(tint_name->size()) {
         def.tint_name = Identifier::from_string(tint_name.value(), ctx->name_space());
     }
-
-    lua_pop(L, 1);
 
     lua_getfield(L, def_idx, "albedo");
 
@@ -192,15 +176,15 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
             return false;
         }
 
-        lua_getfield(L, -1, "still");
+        auto masks_idx = lua_gettop(L);
 
-        if(!lua_isnil(L, -1)) {
-            auto still_mask = utils::require_string(L, -1);
+        auto still_mask = utils::opt_string(L, masks_idx, "still", {});
 
-            if(!still_mask.has_value()) {
-                return false;
-            }
+        if(!still_mask.has_value()) {
+            return false;
+        }
 
+        if(still_mask->size()) {
             def.mask_still = Identifier::from_string(still_mask.value(), ctx->name_space());
 
             if(!def.mask_still->is_valid()) {
@@ -209,17 +193,13 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
             }
         }
 
-        lua_pop(L, 1);
+        auto flowing_mask = utils::opt_string(L, masks_idx, "flowing", {});
 
-        lua_getfield(L, -1, "flowing");
+        if(!flowing_mask.has_value()) {
+            return false;
+        }
 
-        if(!lua_isnil(L, -1)) {
-            auto flowing_mask = utils::require_string(L, -1);
-
-            if(!flowing_mask.has_value()) {
-                return false;
-            }
-
+        if(flowing_mask->size()) {
             def.mask_flowing = Identifier::from_string(flowing_mask.value(), ctx->name_space());
 
             if(!def.mask_flowing->is_valid()) {
@@ -227,8 +207,6 @@ static bool parse_definition(lua_State* L, int def_idx, FluidDefinition& def, Mo
                 return false;
             }
         }
-
-        lua_pop(L, 1);
     }
 
     lua_pop(L, 1); // masks

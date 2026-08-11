@@ -5,8 +5,8 @@
 
 class Chunk final {
 public:
-    static void serialize(const Chunk& chunk, WriteBuffer& buffer);
-    static void deserialize(Chunk& chunk, ReadBuffer& buffer);
+    static void encode(const Chunk& chunk, WriteBuffer& buffer);
+    static void decode(Chunk& chunk, ReadBuffer& buffer);
 
     explicit Chunk(entt::entity entity);
 

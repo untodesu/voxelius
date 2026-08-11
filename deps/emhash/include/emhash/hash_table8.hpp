@@ -134,6 +134,10 @@ public:
 
     constexpr static size_type INACTIVE = size_type(-1);
     constexpr static size_type EAD = 2;
+    // Extra slots reserved beyond _num_filled to avoid immediate rehash on next insert
+    constexpr static size_type RESERVE_SLOTS = 2;
+    // Extra capacity buffer for pairs allocation (prevents frequent realloc on growth)
+    constexpr static size_type PAIRS_CAPACITY_BUFFER = 4;
 
     struct Index {
         size_type next;
@@ -239,12 +243,12 @@ public:
         : _pair_allocator(PairAllocTraits::select_on_container_copy_construction(rhs._pair_allocator)),
           _index_allocator(IndexAllocTraits::select_on_container_copy_construction(rhs._index_allocator)) {
         if (rhs.load_factor() > EMH_MIN_LOAD_FACTOR) {
-            _pairs_capacity = static_cast<size_type>(static_cast<float>(rhs._num_buckets) * rhs.max_load_factor()) + 4;
+            _pairs_capacity = rhs._pairs_capacity;
             _pairs = alloc_bucket(_pairs_capacity);
             _index = alloc_index(rhs._num_buckets);
             clone(rhs);
         } else {
-            init(rhs._num_filled + 2, rhs.max_load_factor());
+            init(rhs._num_filled + RESERVE_SLOTS, rhs.max_load_factor());
             for (auto it = rhs.begin(); it != rhs.end(); ++it)
                 (void)insert_unique(it->first, it->second);
         }
@@ -277,12 +281,12 @@ public:
 
     HashMap(const HashMap& rhs, const allocator_type& alloc) : _pair_allocator(alloc), _index_allocator(alloc) {
         if (rhs.load_factor() > EMH_MIN_LOAD_FACTOR) {
-            _pairs_capacity = static_cast<size_type>(static_cast<float>(rhs._num_buckets) * rhs.max_load_factor()) + 4;
+            _pairs_capacity = rhs._pairs_capacity;
             _pairs = alloc_bucket(_pairs_capacity);
             _index = alloc_index(rhs._num_buckets);
             clone(rhs);
         } else {
-            init(rhs._num_filled + 2, rhs.max_load_factor());
+            init(rhs._num_filled + RESERVE_SLOTS, rhs.max_load_factor());
             for (auto it = rhs.begin(); it != rhs.end(); ++it)
                 (void)insert_unique(it->first, it->second);
         }
@@ -307,7 +311,7 @@ public:
             dealloc_bucket(_pairs, _pairs_capacity);
             _pairs = nullptr;
             _pairs_capacity = 0;
-            rehash(rhs._num_filled + 2);
+            rehash(rhs._num_filled + RESERVE_SLOTS);
             for (auto it = rhs.begin(); it != rhs.end(); ++it)
                 (void)insert_unique(it->first, it->second);
             return *this;
@@ -319,7 +323,7 @@ public:
             dealloc_bucket(_pairs, _pairs_capacity);
             dealloc_index(_index, _num_buckets);
             _index = alloc_index(rhs._num_buckets);
-            _pairs_capacity = static_cast<size_type>(static_cast<float>(rhs._num_buckets) * rhs.max_load_factor()) + 4;
+            _pairs_capacity = rhs._pairs_capacity;
             _pairs = alloc_bucket(_pairs_capacity);
         }
 
@@ -364,7 +368,7 @@ public:
         //        _eq          = rhs._eq;
         _num_buckets = rhs._num_buckets;
         _num_filled = rhs._num_filled;
-        _pairs_capacity = rhs._pairs_capacity;
+        // _pairs_capacity is NOT overwritten - it was set by caller based on allocation size
         _mlf = rhs._mlf;
         _last = rhs._last;
         _mask = rhs._mask;
@@ -445,8 +449,8 @@ public:
     constexpr const_iterator cend() const { return {this, _num_filled}; }
     constexpr const_iterator end() const { return cend(); }
 
-    const value_type* values() const { return _pairs; }
-    const Index* index() const { return _index; }
+    const value_type* values() const noexcept { return _pairs; }
+    const Index* index() const noexcept { return _index; }
 
     [[nodiscard]] size_type size() const noexcept { return _num_filled; }
     [[nodiscard]] bool empty() const noexcept { return _num_filled == 0; }
@@ -455,9 +459,9 @@ public:
         return static_cast<float>(_num_filled) / (static_cast<float>(_mask) + 1.0f);
     }
 
-    [[nodiscard]] const HashT& hash_function() const { return _hasher; }
-    [[nodiscard]] const EqT& key_eq() const { return _eq; }
-    [[nodiscard]] allocator_type get_allocator() const { return allocator_type(_pair_allocator); }
+    [[nodiscard]] const HashT& hash_function() const noexcept { return _hasher; }
+    [[nodiscard]] const EqT& key_eq() const noexcept { return _eq; }
+    [[nodiscard]] allocator_type get_allocator() const noexcept { return allocator_type(_pair_allocator); }
 
     void max_load_factor(float mlf) {
         if (mlf <= 0.999f && mlf > EMH_MIN_LOAD_FACTOR) {
@@ -465,11 +469,11 @@ public:
         }
     }
 
-    [[nodiscard]] constexpr float max_load_factor() const {
+    [[nodiscard]] constexpr float max_load_factor() const noexcept {
         return static_cast<float>(1 << 28) / static_cast<float>(_mlf);
     }
-    [[nodiscard]] constexpr uint64_t max_size() const { return 1ull << (sizeof(_num_buckets) * 8 - 1); }
-    [[nodiscard]] constexpr uint64_t max_bucket_count() const { return max_size(); }
+    [[nodiscard]] constexpr uint64_t max_size() const noexcept { return 1ull << (sizeof(_num_buckets) * 8 - 1); }
+    [[nodiscard]] constexpr uint64_t max_bucket_count() const noexcept { return max_size(); }
 
 #if EMH_STATIS
     // Returns the bucket number where the element with key k is located.
@@ -1084,7 +1088,7 @@ public:
             dump_statics();
 #endif
 
-        rehash(required_buckets + 2);
+        rehash(required_buckets + RESERVE_SLOTS);
         return true;
     }
 
@@ -1130,9 +1134,10 @@ public:
     }
 
     void rebuild(size_type num_buckets, size_type required_buckets, size_type old_num_buckets) {
-        const auto need_size = std::max(
-            static_cast<size_type>(static_cast<double>(num_buckets) * static_cast<double>(max_load_factor())) + 4,
-            required_buckets + 2);
+        const auto need_size =
+            std::max(static_cast<size_type>(static_cast<double>(num_buckets) * static_cast<double>(max_load_factor())) +
+                         PAIRS_CAPACITY_BUFFER,
+                     required_buckets + RESERVE_SLOTS);
         auto new_pairs = alloc_bucket(need_size);
         if (is_trivially_copyable()) {
             if (_pairs)
@@ -1250,7 +1255,9 @@ private:
 #elif _WIN32
         _mm_prefetch(reinterpret_cast<const char*>(ctrl), _MM_HINT_T0);
 #endif
-#endif // EMH_NO_READ_PREFETCH
+#else
+        (void)ctrl;
+#endif
     }
 
     // Prefetch for write operations (insert/erase)
@@ -1263,7 +1270,9 @@ private:
 #elif _WIN32
         _mm_prefetch(reinterpret_cast<const char*>(ctrl), _MM_HINT_T0);
 #endif
-#endif // EMH_NO_WRITE_PREFETCH
+#else
+        (void)ctrl;
+#endif
     }
 
     // Legacy function for backward compatibility
@@ -1276,7 +1285,9 @@ private:
 #elif _WIN32
         _mm_prefetch(reinterpret_cast<const char*>(ctrl), _MM_HINT_T0);
 #endif
-#endif // EMH_NO_PREFETCH
+#else
+        (void)ctrl;
+#endif
     }
 
     // Safe inline replacement for EMH_EMPTY macro:
@@ -1791,11 +1802,12 @@ public:
         uint64_t a = 0, b = 0, seed = secret[0];
         const uint8_t* p = reinterpret_cast<const uint8_t*>(key);
         if (EMH_LIKELY(len <= 16)) {
-            if (EMH_LIKELY(len >= 4)) {
-                const auto half = (len >> 3) << 2;
-                a = (wyr4(p) << 32U) | wyr4(p + half);
-                p += len - 4;
-                b = (wyr4(p) << 32U) | wyr4(p - half);
+            if (len >= 8) {
+                a = wyr8(p);
+                b = wyr8(p + len - 8);
+            } else if (EMH_LIKELY(len >= 4)) {
+                a = wyr4(p);
+                b = wyr4(p + len - 4);
             } else if (len) {
                 a = wyr3(p, len);
             }
@@ -1803,16 +1815,37 @@ public:
             size_t i = len;
             if (EMH_UNLIKELY(i > 48)) {
                 uint64_t see1 = seed, see2 = seed;
-                do {
-                    seed = wymix(wyr8(p + 0) ^ secret[1], wyr8(p + 8) ^ seed);
+                if (i > 96) {
+                    uint64_t see3 = seed, see4 = seed, see5 = seed;
+                    do {
+                        seed = wymix(wyr8(p) ^ secret[1], wyr8(p + 8) ^ seed);
+                        see1 = wymix(wyr8(p + 16) ^ secret[2], wyr8(p + 24) ^ see1);
+                        see2 = wymix(wyr8(p + 32) ^ secret[3], wyr8(p + 40) ^ see2);
+                        see3 = wymix(wyr8(p + 48) ^ secret[0], wyr8(p + 56) ^ see3);
+                        see4 = wymix(wyr8(p + 64) ^ secret[1], wyr8(p + 72) ^ see4);
+                        see5 = wymix(wyr8(p + 80) ^ secret[2], wyr8(p + 88) ^ see5);
+                        p += 96;
+                        i -= 96;
+                    } while (EMH_LIKELY(i > 96));
+                    seed ^= see3 ^ see4 ^ see5;
+                }
+                while (i > 48) {
+                    seed = wymix(wyr8(p) ^ secret[1], wyr8(p + 8) ^ seed);
                     see1 = wymix(wyr8(p + 16) ^ secret[2], wyr8(p + 24) ^ see1);
                     see2 = wymix(wyr8(p + 32) ^ secret[3], wyr8(p + 40) ^ see2);
                     p += 48;
                     i -= 48;
-                } while (EMH_LIKELY(i > 48));
+                }
                 seed ^= see1 ^ see2;
+                while (i > 16) {
+                    seed = wymix(wyr8(p) ^ secret[1], wyr8(p + 8) ^ seed);
+                    i -= 16;
+                    p += 16;
+                }
+                auto tail = wymix(wyr8(p + i - 16) ^ secret[2], wyr8(p + i - 8) ^ secret[3]);
+                return wymix(secret[1] ^ len, seed ^ tail);
             }
-            while (i > 16) {
+            while (EMH_UNLIKELY(i > 16)) {
                 seed = wymix(wyr8(p) ^ secret[1], wyr8(p + 8) ^ seed);
                 i -= 16;
                 p += 16;
@@ -1826,40 +1859,30 @@ public:
 #endif
 
 private:
-    template <typename UType, typename std::enable_if<std::is_integral<UType>::value, uint32_t>::type = 0>
-    EMH_INLINE uint64_t hash_key(const UType key) const {
+    template <typename K> EMH_INLINE uint64_t hash_key(const K& key) const {
+        if constexpr (std::is_integral<K>::value) {
 #if EMH_INT_HASH
-        return hash64(key);
+            return hash64(key);
 #else
-        return _hasher(key);
+            return _hasher(key);
 #endif
-    }
-
-    template <typename UType, typename std::enable_if<std::is_same<UType, std::string>::value, uint32_t>::type = 0>
-    EMH_INLINE uint64_t hash_key(const UType& key) const {
-        EMH_MSAN_UNPOISON(&key, sizeof(key));
-        EMH_MSAN_UNPOISON(key.data(), key.size());
+        } else if constexpr (std::is_same<K, std::string>::value) {
+            EMH_MSAN_UNPOISON(&key, sizeof(key));
+            EMH_MSAN_UNPOISON(key.data(), key.size());
 #if EMH_WYHASH_HASH
-        return wyhashstr(key.data(), key.size());
+            return wyhashstr(key.data(), key.size());
 #else
-        return _hasher(key);
+            return _hasher(key);
 #endif
-    }
-
-    template <typename UType,
-              typename std::enable_if<!std::is_integral<UType>::value && !std::is_same<UType, std::string>::value,
-                                      uint32_t>::type = 0>
-    EMH_INLINE uint64_t hash_key(const UType& key) const {
-        return _hasher(key);
+        } else {
+            return _hasher(key);
+        }
     }
 
 private:
     Index* _index;
     value_type* _pairs;
 
-    HashT _hasher;
-    EqT _eq;
-    uint32_t _mlf;
     size_type _mask;
     size_type _num_buckets;
     size_type _num_filled;
@@ -1869,6 +1892,9 @@ private:
 #endif
     size_type _etail;
     size_type _pairs_capacity;
+    uint32_t _mlf;
+    HashT _hasher;
+    EqT _eq;
     PairAlloc _pair_allocator;
     IndexAlloc _index_allocator;
 };

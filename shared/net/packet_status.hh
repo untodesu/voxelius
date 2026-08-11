@@ -3,29 +3,29 @@
 
 #include "shared/net/packet.hh"
 
-struct StatusRequest final : public BasePacket<packet_type::STATUS_REQUEST> {
-    static void serialize(const StatusRequest& packet, WriteBuffer& buffer);
-    static void deserialize(StatusRequest& packet, ReadBuffer& buffer);
+struct packet::Status_Request final : public packet::Base<packet::STATUS_REQUEST> {
+    static void encode(const Status_Request& packet, WriteBuffer& buffer);
+    static void decode(Status_Request& packet, ReadBuffer& buffer);
 
-    std::uint32_t major;
-    std::uint32_t minor;
-    std::uint32_t patch;
+    std::uint32_t version_major;
+    std::uint32_t version_minor;
+    std::uint32_t version_patch;
 };
 
-struct StatusResponse final : public BasePacket<packet_type::STATUS_RESPONSE> {
-    constexpr static std::uint32_t PASSWORD_PROTECTED = 0x00000001;
-    constexpr static std::uint32_t WHITELIST_ENABLED = 0x00000002;
+struct packet::Status_Response final : public packet::Base<packet::STATUS_RESPONSE> {
+    constexpr static std::uint32_t WHITELIST_ENABLED = 0x00000001;
+    constexpr static std::uint32_t STRICT_VERSION = 0x00000002;
 
-    static void serialize(const StatusResponse& packet, WriteBuffer& buffer);
-    static void deserialize(StatusResponse& packet, ReadBuffer& buffer);
+    static void encode(const Status_Response& packet, WriteBuffer& buffer);
+    static void decode(Status_Response& packet, ReadBuffer& buffer);
 
-    std::uint32_t major;
-    std::uint32_t minor;
-    std::uint32_t patch;
-    std::uint32_t tags;
+    std::uint32_t version_major;
+    std::uint16_t max_players;
+    std::uint16_t num_players;
     std::string motd;
-    std::uint16_t players;
-    std::uint16_t slots;
+    std::uint32_t version_minor;
+    std::uint32_t version_patch;
+    std::uint32_t server_tags;
 };
 
 #endif /* A77BB035_0E49_4D48_89BF_2DE0B21B203F */

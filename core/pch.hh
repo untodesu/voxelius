@@ -8,8 +8,10 @@
 #include <cstdarg>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 #include <algorithm>
+#include <any>
 #include <array>
 #include <chrono>
 #include <compare>
@@ -43,6 +45,7 @@
 
 #include <BS_thread_pool.hpp>
 
+#include <emhash/hash_set8.hpp>
 #include <emhash/hash_table8.hpp>
 
 #include <enet/enet.h>
@@ -61,5 +64,23 @@
 #include <TracyC.h>
 
 #include <uulog.hh>
+
+namespace vx::detail
+{
+template<typename T>
+concept hash_string_key = std::same_as<T, std::string>;
+template<typename T>
+using hash_for = std::conditional_t<hash_string_key<T>, std::hash<std::string_view>, std::hash<T>>;
+template<typename T>
+using cmp_for = std::conditional_t<hash_string_key<T>, std::equal_to<>, std::equal_to<T>>;
+} // namespace vx::detail
+
+namespace vx
+{
+template<typename Key, typename Value>
+using hash_map = emhash8::HashMap<Key, Value, vx::detail::hash_for<Key>, vx::detail::cmp_for<Key>>;
+template<typename Key>
+using hash_set = emhash8::HashSet<Key, vx::detail::hash_for<Key>, vx::detail::cmp_for<Key>>;
+} // namespace vx
 
 #endif /* B5D57737_1608_4D9B_ABD2_70B8358CA53B */

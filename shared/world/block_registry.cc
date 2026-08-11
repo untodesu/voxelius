@@ -11,12 +11,18 @@
 
 static std::vector<BlockDefinition> s_definitions;
 static std::vector<BlockFamily> s_families;
-static emhash8::HashMap<Identifier, block_id_type> s_names;
-static emhash8::HashMap<block_id_type, Identifier> s_reverse_names;
+static vx::hash_map<Identifier, block_id_type> s_names;
+static vx::hash_map<block_id_type, Identifier> s_reverse_names;
+static std::uint64_t s_checksum;
 
-static std::uint64_t hash_state_map(const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map)
+static std::uint64_t hash_state_map(const vx::hash_map<blockstate_key_type, blockstate_val_type>& map)
 {
-    std::vector<std::pair<blockstate_key_type, blockstate_val_type>> sorted(map.cbegin(), map.cend());
+    std::vector<std::pair<blockstate_key_type, blockstate_val_type>> sorted;
+    sorted.reserve(map.size());
+
+    for(const auto& it : map) {
+        sorted.emplace_back(it.first, it.second);
+    }
     std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
         return a.first < b.first;
     });
@@ -47,7 +53,7 @@ static void resolve_fluid_binding(BlockDefinition& def)
 }
 
 static BlockDefinition apply_matching_variant(const BlockDefinition& base_def, const BlockFamily& family,
-    const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map)
+    const vx::hash_map<blockstate_key_type, blockstate_val_type>& map)
 {
     BlockDefinition resolved = base_def;
 
@@ -77,6 +83,11 @@ static BlockDefinition apply_matching_variant(const BlockDefinition& base_def, c
     }
 
     return resolved;
+}
+
+static void update_checksum(void)
+{
+    // TODO: go through each block definition and compute a checksum based on its contents
 }
 
 BlockDefinition BlockOverridePatch::apply(BlockDefinition base, const BlockOverridePatch& patch)
@@ -201,6 +212,11 @@ std::span<const BlockFamily> block_registry::all_families(void)
     return s_families;
 }
 
+std::uint64_t block_registry::checksum(void)
+{
+    return s_checksum;
+}
+
 void block_registry::commit(ModContext& ctx)
 {
     if(s_definitions.empty()) {
@@ -251,23 +267,24 @@ void block_registry::commit(ModContext& ctx)
             family.default_variant += block_offset;
         }
 
-        for(auto& [hash, id] : family.resolved_states) {
-            id += block_offset;
+        for(auto& it : family.resolved_states) {
+            it.second += block_offset;
         }
 
         if(block_offset) {
-            emhash8::HashMap<block_id_type, emhash8::HashMap<blockstate_key_type, blockstate_val_type>> rebased;
+            vx::hash_map<block_id_type, vx::hash_map<blockstate_key_type, blockstate_val_type>> rebased;
 
-            for(auto& [id, map] : family.id_states) {
-                rebased.try_emplace(id + block_offset, std::move(map));
+            for(auto& it : family.id_states) {
+                rebased.try_emplace(it.first + block_offset, std::move(it.second));
             }
 
             family.id_states = std::move(rebased);
         }
     }
 
-    for(const auto& [name, local_id] : names) {
-        auto global_id = local_id + block_offset;
+    for(const auto& it : names) {
+        auto& name = it.first;
+        auto global_id = it.second + block_offset;
         auto [it, inserted] = s_names.try_emplace(name, global_id);
 
         if(!inserted) {
@@ -291,10 +308,10 @@ void block_registry::commit(ModContext& ctx)
             family.default_variant = family.stem_id;
 
             if(family.states.size()) {
-                emhash8::HashMap<blockstate_key_type, blockstate_val_type> default_map;
+                vx::hash_map<blockstate_key_type, blockstate_val_type> default_map;
 
-                for(const auto& [key, decl] : family.states) {
-                    default_map.try_emplace(key, decl.default_value);
+                for(const auto& it : family.states) {
+                    default_map.try_emplace(it.first, it.second.default_value);
                 }
 
                 if(auto stem_def = find_definition(family.stem_id)) {
@@ -319,6 +336,8 @@ void block_registry::commit(ModContext& ctx)
             }
         }
     }
+
+    update_checksum();
 }
 
 void block_registry::purge(void)
@@ -412,7 +431,7 @@ bool block_registry::has_tag_any(block_id_type id, block_tag_bit tag_bits)
     return false;
 }
 
-block_id_type block_registry::resolve_variant(block_id_type curr_id, const emhash8::HashMap<blockstate_key_type, blockstate_val_type>& map)
+block_id_type block_registry::resolve_variant(block_id_type curr_id, const vx::hash_map<blockstate_key_type, blockstate_val_type>& map)
 {
     auto def = find_definition(curr_id);
 
@@ -422,10 +441,10 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id, const emhas
 
     auto& family = s_families[def->family];
 
-    emhash8::HashMap<blockstate_key_type, blockstate_val_type> full_map;
+    vx::hash_map<blockstate_key_type, blockstate_val_type> full_map;
 
-    for(const auto& [key, decl] : family.states) {
-        full_map.try_emplace(key, decl.default_value);
+    for(const auto& it : family.states) {
+        full_map.try_emplace(it.first, it.second.default_value);
     }
 
     for(const auto& it : map) {
@@ -452,7 +471,7 @@ block_id_type block_registry::resolve_variant(block_id_type curr_id, const emhas
 
     auto new_id = static_cast<block_id_type>(s_definitions.size());
     family.resolved_states.insert_or_assign(std::uint64_t(hash), block_id_type(new_id));
-    family.id_states.insert_or_assign(block_id_type(new_id), emhash8::HashMap(full_map));
+    family.id_states.insert_or_assign(block_id_type(new_id), std::move(full_map));
     s_definitions.push_back(std::move(resolved));
 
     return new_id;

@@ -6,14 +6,14 @@ struct Loader final {
     res::load_func load_fn;
     res::free_func free_fn;
 
-    emhash8::HashMap<std::string, res::handle<void>> resources;
+    vx::hash_map<std::string, res::handle<void>> resources;
 
     std::vector<res::handle<void>> cache;
 
     std::string classname;
 };
 
-static emhash8::HashMap<std::type_index, std::unique_ptr<Loader>> s_loaders;
+static vx::hash_map<std::type_index, std::unique_ptr<Loader>> s_loaders;
 
 void res::detail::register_loader(const std::type_info& type, load_func load_fn, free_func free_fn)
 {
@@ -93,7 +93,9 @@ res::handle<void> res::detail::find_resource(const std::type_info& type, std::st
 
 void res::soft_purge(bool include_cached)
 {
-    for(auto& [type_index, loader] : s_loaders) {
+    for(const auto& it : s_loaders) {
+        auto& loader = it.second;
+
         if(include_cached) {
             // Normally soft_purge is called after every
             // frame is rendered, but it also may be called
@@ -124,10 +126,15 @@ void res::soft_purge(bool include_cached)
 
 void res::hard_purge(void)
 {
-    for(auto& [type_index, loader] : s_loaders) {
+    for(auto& outer : s_loaders) {
+        auto& loader = outer.second;
+
         loader->cache.clear();
 
-        for(auto& [path, handle] : loader->resources) {
+        for(auto& inner : loader->resources) {
+            auto& path = inner.first;
+            auto& handle = inner.second;
+
             if(handle.use_count() > 1) {
                 LOG_WARNING("zombie resource: {}<{}> use_count={}", path, loader->classname, handle.use_count());
             }

@@ -4,10 +4,12 @@
 
 #include "core/cmdline.hh"
 
-constexpr static std::string_view DEFAULT_POOL_SIZE_ARG = "4";
+constexpr static std::string_view DEFAULT_POOL_SIZE_ARG { "4" };
+constexpr static std::chrono::milliseconds FINALIZE_BUDGET { 5 };
 
 static std::unique_ptr<BS::light_thread_pool> s_threads;
 static std::deque<std::unique_ptr<Task>> s_deque;
+static std::deque<std::unique_ptr<Task>> s_finalize_queue;
 
 static void task_process(Task* task)
 {
@@ -85,6 +87,7 @@ void threading::shutdown(void)
     s_threads->wait();
 
     s_deque.clear();
+    s_finalize_queue.clear();
     s_threads.reset();
 }
 
@@ -92,11 +95,11 @@ void threading::update(void)
 {
     ZoneScoped;
 
-    auto it = s_deque.cbegin();
+    auto it = s_deque.begin();
 
-    while(it != s_deque.cend()) {
-        auto task_ptr = it->get();
-        auto status = task_ptr->status.load(std::memory_order_relaxed);
+    while(it < s_deque.end()) {
+        auto& task = *it;
+        auto status = task->status.load(std::memory_order_relaxed);
 
         if(status == task_status::CANCELLED) {
             it = s_deque.erase(it);
@@ -104,11 +107,25 @@ void threading::update(void)
         }
 
         if(status == task_status::COMPLETED) {
-            task_ptr->finalize();
+            s_finalize_queue.push_back(std::move(task));
             it = s_deque.erase(it);
             continue;
         }
 
         it = std::next(it);
+    }
+
+    auto deadline = std::chrono::steady_clock::now() + FINALIZE_BUDGET;
+
+    while(s_finalize_queue.size()) {
+        auto task = std::move(s_finalize_queue.front());
+
+        s_finalize_queue.pop_front();
+
+        task->finalize();
+
+        if(std::chrono::steady_clock::now() >= deadline) {
+            break;
+        }
     }
 }

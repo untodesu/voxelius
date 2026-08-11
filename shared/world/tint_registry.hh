@@ -9,6 +9,7 @@ class ModContext;
 namespace tint_registry
 {
 std::span<const TintDefinition> all_definitions(void);
+std::uint64_t checksum(void);
 } // namespace tint_registry
 
 namespace tint_registry

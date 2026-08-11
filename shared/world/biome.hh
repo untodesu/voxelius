@@ -37,7 +37,7 @@ struct BiomeScatterEntry final {
 
 struct BiomePaletteEntry final {
     Identifier name;
-    emhash8::HashMap<std::string, std::string> states;
+    vx::hash_map<std::string, std::string> states;
     block_id_type cached;
 };
 
@@ -62,7 +62,7 @@ struct BiomeDefinition {
 
     std::vector<BiomeScatterEntry> scatter;
 
-    emhash8::HashMap<Identifier, Eigen::Vector3f> tint_map;
+    vx::hash_map<Identifier, Eigen::Vector3f> tint_map;
     std::vector<Eigen::Vector3f> tint_colors;
 };
 

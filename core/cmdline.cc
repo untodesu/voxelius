@@ -6,7 +6,7 @@
 // a bunch of OPTION_PREFIX'es inside and never end with one
 constexpr static char OPTION_PREFIX = '-';
 
-static emhash8::HashMap<std::string, std::string> s_options;
+static vx::hash_map<std::string, std::string> s_options;
 
 static bool is_option_argv(std::string_view argv_string)
 {
@@ -67,12 +67,12 @@ void cmdline::insert_option(std::string_view option, std::string_view value)
 
 bool cmdline::contains(std::string_view option)
 {
-    return s_options.contains(std::string(option));
+    return s_options.contains(option);
 }
 
 std::optional<std::string_view> cmdline::value(std::string_view option)
 {
-    auto iter = s_options.find(std::string(option));
+    auto iter = s_options.find(option);
 
     if(iter == s_options.cend()) {
         return std::nullopt;
@@ -83,7 +83,7 @@ std::optional<std::string_view> cmdline::value(std::string_view option)
 
 std::string_view cmdline::value_or(std::string_view option, std::string_view default_value)
 {
-    auto iter = s_options.find(std::string(option));
+    auto iter = s_options.find(option);
 
     if(iter == s_options.cend() || iter->second.empty()) {
         return default_value;
@@ -94,7 +94,7 @@ std::string_view cmdline::value_or(std::string_view option, std::string_view def
 
 const char* cmdline::value_cstr(std::string_view option)
 {
-    auto iter = s_options.find(std::string(option));
+    auto iter = s_options.find(option);
 
     if(iter == s_options.cend()) {
         return nullptr;
@@ -105,7 +105,7 @@ const char* cmdline::value_cstr(std::string_view option)
 
 const char* cmdline::value_or_cstr(std::string_view option, const char* default_value)
 {
-    auto iter = s_options.find(std::string(option));
+    auto iter = s_options.find(option);
 
     if(iter == s_options.cend() || iter->second.empty()) {
         return default_value;

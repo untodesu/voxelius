@@ -2,45 +2,291 @@
 
 #include "shared/utils/lua.hh"
 
-template<vx::arithmetic T, std::size_t N>
-std::optional<Eigen::Vector<T, N>> utils::read_vector(lua_State* L, int idx)
+template<std::size_t N>
+std::optional<Eigen::Vector<lua_Integer, N>> utils::require_ivec(lua_State* L, int idx)
 {
-    if(lua_istable(L, idx)) {
-        Eigen::Vector<T, N> result = Eigen::Vector<T, N>::Zero();
-
-        for(std::size_t i = 0; i < N; ++i) {
-            lua_rawgeti(L, idx, static_cast<lua_Integer>(i + 1));
-
-            if constexpr(std::is_integral_v<T>) {
-                result[i] = static_cast<T>(lua_tointeger(L, -1));
-            }
-            else {
-                result[i] = static_cast<T>(lua_tonumber(L, -1));
-            }
-
-            lua_pop(L, 1);
-        }
-
-        return result;
+    if(!lua_istable(L, idx)) {
+        lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, idx)));
+        return std::nullopt;
     }
 
-    return std::nullopt;
+    auto count = lua_rawlen(L, idx);
+
+    if(count != N) {
+        lua_pushfstring(L, "expected a table of length %d, got %d", static_cast<int>(N), static_cast<int>(count));
+        return std::nullopt;
+    }
+
+    Eigen::Vector<lua_Integer, N> result = Eigen::Vector<lua_Integer, N>::Zero();
+
+    for(std::size_t i = 0; i < N; ++i) {
+        lua_rawgeti(L, idx, static_cast<lua_Integer>(i + 1));
+
+        auto value = utils::require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return std::nullopt;
+        }
+
+        result[i] = value.value();
+
+        lua_pop(L, 1);
+    }
+
+    return result;
 }
 
-template<std::unsigned_integral T>
-T utils::read_bitmask(lua_State* L, int idx)
+template std::optional<Eigen::Vector<lua_Integer, 2>> utils::require_ivec(lua_State* L, int idx);
+template std::optional<Eigen::Vector<lua_Integer, 3>> utils::require_ivec(lua_State* L, int idx);
+template std::optional<Eigen::Vector<lua_Integer, 4>> utils::require_ivec(lua_State* L, int idx);
+
+template<std::size_t N>
+std::optional<Eigen::Vector<lua_Integer, N>> utils::require_ivec(lua_State* L, int idx, const char* key)
 {
+    lua_getfield(L, idx, key);
+
+    auto result = require_ivec<N>(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+template std::optional<Eigen::Vector<lua_Integer, 2>> utils::require_ivec(lua_State* L, int idx, const char* key);
+template std::optional<Eigen::Vector<lua_Integer, 3>> utils::require_ivec(lua_State* L, int idx, const char* key);
+template std::optional<Eigen::Vector<lua_Integer, 4>> utils::require_ivec(lua_State* L, int idx, const char* key);
+
+template<std::size_t N>
+std::optional<Eigen::Vector<lua_Integer, N>> utils::opt_ivec(lua_State* L, int idx, Eigen::Vector<lua_Integer, N> default_value)
+{
+    if(lua_isnoneornil(L, idx))
+        return default_value;
+    return require_ivec<N>(L, idx);
+}
+
+template std::optional<Eigen::Vector<lua_Integer, 2>> utils::opt_ivec(lua_State* L, int idx, Eigen::Vector<lua_Integer, 2> default_value);
+template std::optional<Eigen::Vector<lua_Integer, 3>> utils::opt_ivec(lua_State* L, int idx, Eigen::Vector<lua_Integer, 3> default_value);
+template std::optional<Eigen::Vector<lua_Integer, 4>> utils::opt_ivec(lua_State* L, int idx, Eigen::Vector<lua_Integer, 4> default_value);
+
+template<std::size_t N>
+std::optional<Eigen::Vector<lua_Integer, N>> utils::opt_ivec(lua_State* L, int idx, const char* key,
+    Eigen::Vector<lua_Integer, N> default_value)
+{
+    lua_getfield(L, idx, key);
+
+    if(lua_isnoneornil(L, -1)) {
+        lua_pop(L, 1);
+
+        return default_value;
+    }
+
+    auto result = require_ivec<N>(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+template std::optional<Eigen::Vector<lua_Integer, 2>> utils::opt_ivec(lua_State* L, int idx, const char* key,
+    Eigen::Vector<lua_Integer, 2> default_value);
+template std::optional<Eigen::Vector<lua_Integer, 3>> utils::opt_ivec(lua_State* L, int idx, const char* key,
+    Eigen::Vector<lua_Integer, 3> default_value);
+template std::optional<Eigen::Vector<lua_Integer, 4>> utils::opt_ivec(lua_State* L, int idx, const char* key,
+    Eigen::Vector<lua_Integer, 4> default_value);
+
+template<std::size_t N>
+std::optional<Eigen::Vector<lua_Number, N>> utils::require_fvec(lua_State* L, int idx)
+{
+    if(!lua_istable(L, idx)) {
+        lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, idx)));
+        return std::nullopt;
+    }
+
+    auto count = lua_rawlen(L, idx);
+
+    if(count != N) {
+        lua_pushfstring(L, "expected a table of length %d, got %d", static_cast<int>(N), static_cast<int>(count));
+        return std::nullopt;
+    }
+
+    Eigen::Vector<lua_Number, N> result = Eigen::Vector<lua_Number, N>::Zero();
+
+    for(std::size_t i = 0; i < N; ++i) {
+        lua_rawgeti(L, idx, static_cast<lua_Integer>(i + 1));
+
+        auto value = utils::require_number(L, -1);
+
+        if(!value.has_value()) {
+            return std::nullopt;
+        }
+
+        result[i] = value.value();
+
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+template std::optional<Eigen::Vector<lua_Number, 2>> utils::require_fvec(lua_State* L, int idx);
+template std::optional<Eigen::Vector<lua_Number, 3>> utils::require_fvec(lua_State* L, int idx);
+template std::optional<Eigen::Vector<lua_Number, 4>> utils::require_fvec(lua_State* L, int idx);
+
+template<std::size_t N>
+std::optional<Eigen::Vector<lua_Number, N>> utils::require_fvec(lua_State* L, int idx, const char* key)
+{
+    lua_getfield(L, idx, key);
+
+    auto result = require_fvec<N>(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+template std::optional<Eigen::Vector<lua_Number, 2>> utils::require_fvec(lua_State* L, int idx, const char* key);
+template std::optional<Eigen::Vector<lua_Number, 3>> utils::require_fvec(lua_State* L, int idx, const char* key);
+template std::optional<Eigen::Vector<lua_Number, 4>> utils::require_fvec(lua_State* L, int idx, const char* key);
+
+template<std::size_t N>
+std::optional<Eigen::Vector<lua_Number, N>> utils::opt_fvec(lua_State* L, int idx, Eigen::Vector<lua_Number, N> default_value)
+{
+    if(lua_isnoneornil(L, idx))
+        return default_value;
+    return require_fvec<N>(L, idx);
+}
+
+template std::optional<Eigen::Vector<lua_Number, 2>> utils::opt_fvec(lua_State* L, int idx, Eigen::Vector<lua_Number, 2> default_value);
+template std::optional<Eigen::Vector<lua_Number, 3>> utils::opt_fvec(lua_State* L, int idx, Eigen::Vector<lua_Number, 3> default_value);
+template std::optional<Eigen::Vector<lua_Number, 4>> utils::opt_fvec(lua_State* L, int idx, Eigen::Vector<lua_Number, 4> default_value);
+
+template<std::size_t N>
+std::optional<Eigen::Vector<lua_Number, N>> utils::opt_fvec(lua_State* L, int idx, const char* key,
+    Eigen::Vector<lua_Number, N> default_value)
+{
+    lua_getfield(L, idx, key);
+
+    if(lua_isnoneornil(L, -1)) {
+        lua_pop(L, 1);
+
+        return default_value;
+    }
+
+    auto result = require_fvec<N>(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+template std::optional<Eigen::Vector<lua_Number, 2>> utils::opt_fvec(lua_State* L, int idx, const char* key,
+    Eigen::Vector<lua_Number, 2> default_value);
+template std::optional<Eigen::Vector<lua_Number, 3>> utils::opt_fvec(lua_State* L, int idx, const char* key,
+    Eigen::Vector<lua_Number, 3> default_value);
+template std::optional<Eigen::Vector<lua_Number, 4>> utils::opt_fvec(lua_State* L, int idx, const char* key,
+    Eigen::Vector<lua_Number, 4> default_value);
+
+template<std::unsigned_integral T>
+std::optional<T> utils::require_bitmask(lua_State* L, int idx)
+{
+    if(!lua_istable(L, idx)) {
+        lua_pushfstring(L, "expected a table, got %s", lua_typename(L, lua_type(L, idx)));
+        return std::nullopt;
+    }
+
     T mask = static_cast<T>(0);
     auto count = lua_rawlen(L, idx);
 
     for(lua_Integer i = 1; i <= static_cast<lua_Integer>(count); ++i) {
         lua_rawgeti(L, idx, i);
-        mask |= static_cast<T>(lua_tointeger(L, -1));
+
+        auto value = utils::require_integer(L, -1);
+
+        if(!value.has_value()) {
+            return std::nullopt;
+        }
+
+        mask |= static_cast<T>(value.value());
+
         lua_pop(L, 1);
     }
 
     return mask;
 }
+
+template std::optional<unsigned char> utils::require_bitmask(lua_State* L, int idx);
+template std::optional<unsigned short> utils::require_bitmask(lua_State* L, int idx);
+template std::optional<unsigned> utils::require_bitmask(lua_State* L, int idx);
+template std::optional<unsigned long> utils::require_bitmask(lua_State* L, int idx);
+template std::optional<unsigned long long> utils::require_bitmask(lua_State* L, int idx);
+
+template<std::unsigned_integral T>
+std::optional<T> utils::require_bitmask(lua_State* L, int idx, const char* key)
+{
+    lua_getfield(L, idx, key);
+
+    auto result = require_bitmask<T>(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+template std::optional<unsigned char> utils::require_bitmask(lua_State* L, int idx, const char* key);
+template std::optional<unsigned short> utils::require_bitmask(lua_State* L, int idx, const char* key);
+template std::optional<unsigned> utils::require_bitmask(lua_State* L, int idx, const char* key);
+template std::optional<unsigned long> utils::require_bitmask(lua_State* L, int idx, const char* key);
+template std::optional<unsigned long long> utils::require_bitmask(lua_State* L, int idx, const char* key);
+
+template<std::unsigned_integral T>
+std::optional<T> utils::opt_bitmask(lua_State* L, int idx, T default_value)
+{
+    if(lua_isnoneornil(L, idx))
+        return default_value;
+    return require_bitmask<T>(L, idx);
+}
+
+template std::optional<unsigned char> utils::opt_bitmask(lua_State* L, int idx, unsigned char default_value);
+template std::optional<unsigned short> utils::opt_bitmask(lua_State* L, int idx, unsigned short default_value);
+template std::optional<unsigned> utils::opt_bitmask(lua_State* L, int idx, unsigned default_value);
+template std::optional<unsigned long> utils::opt_bitmask(lua_State* L, int idx, unsigned long default_value);
+template std::optional<unsigned long long> utils::opt_bitmask(lua_State* L, int idx, unsigned long long default_value);
+
+template<std::unsigned_integral T>
+std::optional<T> utils::opt_bitmask(lua_State* L, int idx, const char* key, T default_value)
+{
+    lua_getfield(L, idx, key);
+
+    if(lua_isnoneornil(L, -1)) {
+        lua_pop(L, 1);
+
+        return default_value;
+    }
+
+    auto result = require_bitmask<T>(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+template std::optional<unsigned char> utils::opt_bitmask(lua_State* L, int idx, const char* key, unsigned char default_value);
+template std::optional<unsigned short> utils::opt_bitmask(lua_State* L, int idx, const char* key, unsigned short default_value);
+template std::optional<unsigned> utils::opt_bitmask(lua_State* L, int idx, const char* key, unsigned default_value);
+template std::optional<unsigned long> utils::opt_bitmask(lua_State* L, int idx, const char* key, unsigned long default_value);
+template std::optional<unsigned long long> utils::opt_bitmask(lua_State* L, int idx, const char* key, unsigned long long default_value);
 
 std::optional<lua_Integer> utils::require_integer(lua_State* L, int idx)
 {
@@ -85,6 +331,45 @@ std::optional<std::string_view> utils::require_string(lua_State* L, int idx)
     return std::nullopt;
 }
 
+std::optional<lua_Integer> utils::require_integer(lua_State* L, int idx, const char* key)
+{
+    lua_getfield(L, idx, key);
+
+    auto result = require_integer(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+std::optional<lua_Number> utils::require_number(lua_State* L, int idx, const char* key)
+{
+    lua_getfield(L, idx, key);
+
+    auto result = require_number(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+std::optional<std::string_view> utils::require_string(lua_State* L, int idx, const char* key)
+{
+    lua_getfield(L, idx, key);
+
+    auto result = require_string(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
 std::optional<lua_Integer> utils::opt_integer(lua_State* L, int idx, lua_Integer default_value)
 {
     if(lua_isnoneornil(L, idx))
@@ -106,20 +391,59 @@ std::optional<std::string_view> utils::opt_string(lua_State* L, int idx, std::st
     return require_string(L, idx);
 }
 
-template std::optional<Eigen::Vector<float, 2>> utils::read_vector<float, 2>(lua_State* L, int idx);
-template std::optional<Eigen::Vector<float, 3>> utils::read_vector<float, 3>(lua_State* L, int idx);
-template std::optional<Eigen::Vector<float, 4>> utils::read_vector<float, 4>(lua_State* L, int idx);
+std::optional<lua_Integer> utils::opt_integer(lua_State* L, int idx, const char* key, lua_Integer default_value)
+{
+    lua_getfield(L, idx, key);
 
-template std::optional<Eigen::Vector<double, 2>> utils::read_vector<double, 2>(lua_State* L, int idx);
-template std::optional<Eigen::Vector<double, 3>> utils::read_vector<double, 3>(lua_State* L, int idx);
-template std::optional<Eigen::Vector<double, 4>> utils::read_vector<double, 4>(lua_State* L, int idx);
+    if(lua_isnoneornil(L, -1)) {
+        lua_pop(L, 1);
 
-template std::optional<Eigen::Vector<int, 2>> utils::read_vector<int, 2>(lua_State* L, int idx);
-template std::optional<Eigen::Vector<int, 3>> utils::read_vector<int, 3>(lua_State* L, int idx);
-template std::optional<Eigen::Vector<int, 4>> utils::read_vector<int, 4>(lua_State* L, int idx);
+        return default_value;
+    }
 
-template unsigned char utils::read_bitmask<unsigned char>(lua_State* L, int idx);
-template unsigned short utils::read_bitmask<unsigned short>(lua_State* L, int idx);
-template unsigned utils::read_bitmask<unsigned>(lua_State* L, int idx);
-template unsigned long utils::read_bitmask<unsigned long>(lua_State* L, int idx);
-template unsigned long long utils::read_bitmask<unsigned long long>(lua_State* L, int idx);
+    auto result = require_integer(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+std::optional<lua_Number> utils::opt_number(lua_State* L, int idx, const char* key, lua_Number default_value)
+{
+    lua_getfield(L, idx, key);
+
+    if(lua_isnoneornil(L, -1)) {
+        lua_pop(L, 1);
+
+        return default_value;
+    }
+
+    auto result = require_number(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}
+
+std::optional<std::string_view> utils::opt_string(lua_State* L, int idx, const char* key, std::string_view default_value)
+{
+    lua_getfield(L, idx, key);
+
+    if(lua_isnoneornil(L, -1)) {
+        lua_pop(L, 1);
+
+        return default_value;
+    }
+
+    auto result = require_string(L, -1);
+
+    if(result.has_value()) {
+        lua_pop(L, 1);
+    }
+
+    return result;
+}

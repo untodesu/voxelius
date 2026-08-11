@@ -1,11 +1,23 @@
-#ifndef A6C2EA26_599C_4969_9584_5DD3AE5B06DE
-#define A6C2EA26_599C_4969_9584_5DD3AE5B06DE
+#ifndef C009E778_A0FE_4967_BD62_FBF417A19895
+#define C009E778_A0FE_4967_BD62_FBF417A19895
 
-namespace background
+#include "client/gui/widget.hh"
+
+namespace gui
 {
-void init(void);
-void shutdown(void);
-void layout(void);
-} // namespace background
+class Background final : public WidgetBuilder<Background> {
+public:
+    Background& set_left(const ImVec4& color);
+    Background& set_right(const ImVec4& color);
+    Background& set_texture(ImTextureID texture);
 
-#endif /* A6C2EA26_599C_4969_9584_5DD3AE5B06DE */
+    virtual void layout(void) override;
+
+private:
+    ImVec4 m_left { 0.0f, 0.0f, 0.0f, 0.95f };
+    ImVec4 m_right { 0.0f, 0.0f, 0.0f, 0.95f };
+    ImTextureID m_texture { 0 };
+};
+} // namespace gui
+
+#endif /* C009E778_A0FE_4967_BD62_FBF417A19895 */

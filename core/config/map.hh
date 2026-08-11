@@ -49,7 +49,7 @@ public:
 private:
     std::vector<std::uint64_t> m_generations {};
     std::vector<std::optional<std::string>> m_slots {};
-    emhash8::HashMap<std::string, map_slot_type> m_index;
+    vx::hash_map<std::string, map_slot_type> m_index;
 };
 } // namespace config
 

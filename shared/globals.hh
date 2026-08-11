@@ -4,11 +4,13 @@
 namespace globals
 {
 extern entt::dispatcher dispatcher;
+extern entt::registry registry;
 } // namespace globals
 
 namespace globals
 {
 extern std::uint64_t curtime_us;
+extern std::uint64_t current_tick;
 } // namespace globals
 
 namespace globals

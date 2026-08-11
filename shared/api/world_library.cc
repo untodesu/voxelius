@@ -2,6 +2,7 @@
 
 #include "shared/api/world_library.hh"
 
+#include "shared/globals.hh"
 #include "shared/utils/lua.hh"
 #include "shared/world/block_registry.hh"
 #include "shared/world/world.hh"
@@ -123,7 +124,7 @@ static int api_schedule(lua_State* L)
     pos.z() = static_cast<BlockPos::value_type>(luaL_checkinteger(L, 3));
 
     auto dt = static_cast<std::uint64_t>(luaL_checkinteger(L, 4));
-    auto deadline = world::current_tick + dt;
+    auto deadline = globals::current_tick + dt;
 
     world::schedule(pos, deadline, BLOCK_TICK_SCRIPTED);
 

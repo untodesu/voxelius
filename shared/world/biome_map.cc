@@ -13,7 +13,7 @@ struct MapEntry final {
 };
 
 static std::mutex s_mutex;
-static std::array<emhash8::HashMap<ChunkPosXZ, MapEntry>, NUM_BIOME_REALMS> s_biomes;
+static std::array<vx::hash_map<ChunkPosXZ, MapEntry>, NUM_BIOME_REALMS> s_biomes;
 static BiomeSlice s_empty_slice {};
 static std::shared_ptr<BiomeSlice> s_void_slice;
 
@@ -33,7 +33,7 @@ static void on_chunk_create(const ChunkCreateEvent& event)
 
     if(realm == BIOME_REALM_VOID) {
         component.ptr = s_void_slice;
-        world::chunk_entities.emplace<BiomeSlice_Component>(entity, std::move(component));
+        world::chunk_registry.emplace<BiomeSlice_Component>(entity, std::move(component));
         return;
     }
 
@@ -60,7 +60,7 @@ static void on_chunk_create(const ChunkCreateEvent& event)
         component.ptr = it->second.ptr;
     }
 
-    world::chunk_entities.emplace<BiomeSlice_Component>(entity, std::move(component));
+    world::chunk_registry.emplace<BiomeSlice_Component>(entity, std::move(component));
 }
 
 void biome_map::init(void)
