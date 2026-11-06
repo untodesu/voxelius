@@ -9,6 +9,7 @@
 #include "shared/mod_loader.hh"
 #include "shared/net/packet_session.hh"
 
+#include "client/console.hh"
 #include "client/constant.hh"
 #include "client/globals.hh"
 #include "client/gui/background.hh"
@@ -37,6 +38,10 @@ static void on_language_update(const LanguageUpdateEvent& event)
 
 static void on_keyboard_event(const SDL_KeyboardEvent& event)
 {
+    if(globals::gui_screen == &console::screen) {
+        return;
+    }
+
     if(event.type == SDL_EVENT_KEY_DOWN && event.key == SDLK_ESCAPE && globals::registry.valid(globals::player)) {
         if(globals::gui_screen) {
             globals::gui_screen = nullptr;

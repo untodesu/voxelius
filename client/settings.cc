@@ -4,6 +4,7 @@
 
 #include "client/globals.hh"
 #include "client/gui/background.hh"
+#include "client/gui/button_bind.hh"
 #include "client/gui/container.hh"
 #include "client/gui/dimmer.hh"
 #include "client/gui/keybind.hh"
@@ -69,6 +70,7 @@ static void on_keyboard_event(const SDL_KeyboardEvent& event)
     change_screen = change_screen && event.type == SDL_EVENT_KEY_DOWN && event.key == SDLK_ESCAPE;
     change_screen = change_screen && globals::gui_screen == &settings::screen;
     change_screen = change_screen && gui::KeyBind::current == nullptr;
+    change_screen = change_screen && gui::ButtonBind::current == nullptr;
 
     if(change_screen) {
         globals::gui_screen = &main_menu::screen;

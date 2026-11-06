@@ -2,24 +2,30 @@
 
 #include "core/config/map.hh"
 #include "core/core.hh"
+#include "core/cvar/host.hh"
 #include "core/exception.hh"
 #include "core/res/resource.hh"
 #include "core/threading.hh"
 #include "core/utils/epoch.hh"
 #include "core/version.hh"
 
+#include "shared/cvar/commands.hh"
 #include "shared/game.hh"
 #include "shared/splash.hh"
 
 #include "client/camera.hh"
+#include "client/console.hh"
 #include "client/constant.hh"
 #include "client/fog.hh"
 #include "client/fonts.hh"
 #include "client/game.hh"
 #include "client/globals.hh"
+#include "client/gui/button_bind.hh"
 #include "client/gui/keybind.hh"
 #include "client/gui/screen.hh"
 #include "client/head.hh"
+#include "client/input/axes.hh"
+#include "client/input/buttons.hh"
 #include "client/language.hh"
 #include "client/main_menu.hh"
 #include "client/net/bother.hh"
@@ -203,6 +209,8 @@ static void wrapped_main(int argc, char** argv)
 {
     core::setup(argc, argv);
 
+    cvar::register_commands_core();
+
     tracy::SetThreadName("Main");
     TracySetProgramName("Voxelius");
     TracyAppInfo(version::full.data(), version::full.size());
@@ -242,8 +250,16 @@ static void wrapped_main(int argc, char** argv)
 
     gui::KeyBind::init();
 
+    buttons::init();
+    axes::init();
+    gui::ButtonBind::init();
+
     settings::init();
     main_menu::init();
+
+    console::init();
+    console::init_late();
+
     play_menu::init();
 
     client_game::init();
@@ -362,6 +378,9 @@ static void wrapped_main(int argc, char** argv)
 
     session::shutdown();
     host::shutdown();
+
+    gui::ButtonBind::shutdown();
+    console::shutdown();
 
     res::hard_purge();
 
