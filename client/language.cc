@@ -2,8 +2,8 @@
 
 #include "client/language.hh"
 
-#include "core/config/map.hh"
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
+#include "core/cvar/string.hh"
 #include "core/exception.hh"
 #include "core/identifier.hh"
 #include "core/utils/physfs.hh"
@@ -23,7 +23,7 @@ static language_manifest_type s_manifest;
 static language_iterator_type s_current_language;
 static vx::hash_map<std::string, std::string> s_translations;
 static vx::hash_map<std::string, language_iterator_type> s_code_map;
-static config::Ref<std::string> s_config_language { std::string(DEFAULT_LANGUAGE) };
+static cvar::String s_lang_current { std::string(DEFAULT_LANGUAGE) };
 static gui::LanguageSelector s_language_selector;
 
 static void read_mod_translations(std::string_view name_space)
@@ -70,11 +70,36 @@ LanguageUpdateEvent::LanguageUpdateEvent(language_iterator_type lang) : m_langua
     // empty
 }
 
+static void update_language(void)
+{
+    auto lang = s_code_map.find(s_lang_current.value());
+
+    if(lang == s_code_map.cend()) {
+        msg::log_warning("{}: unknown language, falling back to {}", s_lang_current.value(), DEFAULT_LANGUAGE);
+
+        lang = s_code_map.find(DEFAULT_LANGUAGE);
+
+        vx::throw_if_fmt(lang == s_code_map.cend(), "we are doomed: {} doesn't exist!!!", DEFAULT_LANGUAGE);
+
+        s_lang_current.set_value(std::string(lang->second->code()));
+        return;
+    }
+
+    if(lang->second == s_current_language) {
+        return;
+    }
+
+    language::set(lang->second);
+}
+
 void language::init(void)
 {
     auto manifest_path = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "manifest").as_file_path("lang", ".json");
 
-    s_config_language.bind(globals::client_config, "language");
+    auto& lang_current_binding = cvar::bind_var(s_lang_current, "language");
+    lang_current_binding.set_help("Current language");
+    lang_current_binding.set_flags(FCVAR_ARCHIVE);
+    lang_current_binding.changed().connect<&update_language>();
 
     s_language_selector.set_key("language");
     settings::general.add_child(s_language_selector, 0);
@@ -110,21 +135,13 @@ void language::init(void)
 
     // This is temporary! This value will
     // be overriden in init_late after the
-    // config system updates config_language
+    // cvar system updates the current language
     s_current_language = s_manifest.cend();
 }
 
 void language::init_late(void)
 {
-    auto lang = s_code_map.find(s_config_language.value());
-
-    if(lang == s_code_map.cend()) {
-        lang = s_code_map.find(DEFAULT_LANGUAGE);
-
-        vx::throw_if_fmt(lang == s_code_map.cend(), "we are doomed: {} doesn't exist!!!", DEFAULT_LANGUAGE);
-    }
-
-    set(lang->second);
+    update_language();
 }
 
 void language::set(language_iterator_type lang)
@@ -136,7 +153,10 @@ void language::set(language_iterator_type lang)
 
     s_translations.clear();
     s_current_language = lang;
-    s_config_language.set_value(std::string(lang->code()));
+
+    if(s_lang_current.value() != lang->code()) {
+        s_lang_current.set_value(std::string(lang->code()));
+    }
 
     for(auto& ctx : mod_loader::all()) {
         read_mod_translations(ctx.name_space());

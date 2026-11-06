@@ -15,13 +15,9 @@ extern gui::Screen screen;
 namespace settings
 {
 extern gui::Container general;
-extern gui::Container keyboard_movement;
-extern gui::Container keyboard_gameplay;
-extern gui::Container keyboard_miscellaneous;
-extern gui::Container gamepad;
-extern gui::Container gamepad_movement;
-extern gui::Container gamepad_gameplay;
-extern gui::Container gamepad_miscellaneous;
+extern gui::Container controls_movement;
+extern gui::Container controls_gameplay;
+extern gui::Container controls_miscellaneous;
 extern gui::Container mouse;
 extern gui::Container video;
 extern gui::Container video_gui;

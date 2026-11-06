@@ -3,20 +3,10 @@
 
 #include "shared/globals.hh"
 
-namespace config
-{
-class Map;
-} // namespace config
-
 namespace gui
 {
 class Screen;
 } // namespace gui
-
-namespace globals
-{
-extern config::Map client_config;
-} // namespace globals
 
 namespace globals
 {

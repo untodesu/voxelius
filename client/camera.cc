@@ -3,6 +3,7 @@
 #include "client/camera.hh"
 
 #include "core/camera.hh"
+#include "core/cvar/host.hh"
 #include "core/utils/angles.hh"
 
 #include "shared/component/head.hh"
@@ -18,8 +19,11 @@
 #include "client/gui/slider.hh"
 #include "client/settings.hh"
 
-gui::Slider<float> camera::vertical_fov;
-gui::Slider<unsigned> camera::view_distance;
+cvar::Number<float> camera::vertical_fov { 70.0f, 45.0f, 110.0f };
+cvar::Number<unsigned> camera::view_distance { 8, 1, 32 };
+
+static gui::SliderFloat s_vertical_fov_gui;
+static gui::SliderUnsigned s_view_distance_gui;
 
 Camera camera::instance;
 
@@ -56,15 +60,21 @@ static void reset_camera(void)
 
 void camera::init(void)
 {
-    vertical_fov.set_value(70.0f);
-    vertical_fov.set_range(45.0f, 110.0f).set_format("%.0f").enable_tooltip();
-    vertical_fov.bind(globals::client_config, "camera.vertical_fov");
-    settings::general.add_child(vertical_fov, 1);
+    auto& vertical_fov_binding = cvar::bind_var(vertical_fov, "camera.vertical_fov");
+    vertical_fov_binding.set_help("Vertical field of view");
+    vertical_fov_binding.set_flags(FCVAR_ARCHIVE);
 
-    view_distance.set_value(8);
-    view_distance.set_range(1, 32);
-    view_distance.bind(globals::client_config, "camera.view_distance");
-    settings::video.add_child(view_distance, 0);
+    s_vertical_fov_gui.set_range(45.0f, 110.0f).set_format("%.0f").enable_tooltip();
+    s_vertical_fov_gui.bind("camera.vertical_fov");
+    settings::general.add_child(s_vertical_fov_gui, 1);
+
+    auto& view_distance_binding = cvar::bind_var(view_distance, "camera.view_distance");
+    view_distance_binding.set_help("View distance, in chunks");
+    view_distance_binding.set_flags(FCVAR_ARCHIVE);
+
+    s_view_distance_gui.set_range(1, 32);
+    s_view_distance_gui.bind("camera.view_distance");
+    settings::video.add_child(s_view_distance_gui, 0);
 
     reset_camera();
 }

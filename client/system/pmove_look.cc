@@ -2,8 +2,8 @@
 
 #include "client/system/pmove_look.hh"
 
-#include "core/config/map.hh"
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
+#include "core/cvar/number.hh"
 #include "core/utils/angles.hh"
 
 #include "shared/component/head.hh"
@@ -13,12 +13,14 @@
 #include "client/globals.hh"
 #include "client/gui/container.hh"
 #include "client/gui/slider.hh"
+#include "client/input/axes.hh"
 #include "client/settings.hh"
 
 constexpr static float PITCH_MIN = -1.0f * utils::radians(90.0f);
 constexpr static float PITCH_MAX = +1.0f * utils::radians(90.0f);
 
-static gui::SliderUnsigned s_sensitivity;
+static cvar::Number<unsigned> s_sensitivity { 100, 25, 100 };
+static gui::SliderUnsigned s_sensitivity_gui;
 
 static void add_angles(float pitch, float yaw)
 {
@@ -37,25 +39,32 @@ static void add_angles(float pitch, float yaw)
     }
 }
 
-static void on_mouse_motion(const SDL_MouseMotionEvent& event)
+void player_look::init(void)
 {
-    if(globals::gui_screen || !globals::registry.valid(globals::player)) {
+    auto& sensitivity_binding = cvar::bind_var(s_sensitivity, "player_look.sensitivity");
+    sensitivity_binding.set_help("Mouse sensitivity");
+    sensitivity_binding.set_flags(FCVAR_ARCHIVE);
+
+    s_sensitivity_gui.set_range(25, 100).enable_tooltip();
+    s_sensitivity_gui.bind("player_look.sensitivity");
+    settings::mouse.add_child(s_sensitivity_gui, 0);
+
+    axes::bind(AxisSource(input_device::MOUSE, MAXIS_X), "pm_look_x");
+    axes::bind(AxisSource(input_device::MOUSE, MAXIS_Y), "pm_look_y");
+}
+
+void player_look::update(void)
+{
+    auto look_x = axes::consume("pm_look_x");
+    auto look_y = axes::consume("pm_look_y");
+
+    if(look_x.value == 0.0f && look_y.value == 0.0f) {
         return;
     }
 
-    auto dx = -0.01f * static_cast<float>(s_sensitivity.value()) * utils::radians(event.xrel);
-    auto dy = -0.01f * static_cast<float>(s_sensitivity.value()) * utils::radians(event.yrel);
+    auto dx = -0.01f * static_cast<float>(s_sensitivity.value()) * utils::radians(look_x.value);
+    auto dy = -0.01f * static_cast<float>(s_sensitivity.value()) * utils::radians(look_y.value);
     add_angles(dy, dx);
-}
-
-void player_look::init(void)
-{
-    s_sensitivity.set_value(100);
-    s_sensitivity.set_range(25, 100).enable_tooltip();
-    s_sensitivity.bind(globals::client_config, "player_look.sensitivity");
-    settings::mouse.add_child(s_sensitivity, 0);
-
-    globals::dispatcher.sink<SDL_MouseMotionEvent>().connect<&on_mouse_motion>();
 }
 
 void player_look::update_late(void)

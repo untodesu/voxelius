@@ -2,14 +2,14 @@
 
 #include "client/gui/input.hh"
 
-#include "core/config/map.hh"
+#include "core/cvar/host.hh"
 
 template<typename T>
-gui::Input<T>& gui::Input<T>::bind(config::Map& config, std::string_view key)
+gui::Input<T>& gui::Input<T>::bind(std::string_view name)
 {
-    this->set_key(key);
+    this->set_key(name);
 
-    m_value.bind(config, key);
+    cvar::bind_var(m_value, name);
 
     return this->self();
 }
@@ -33,12 +33,6 @@ template<typename T>
 void gui::Input<T>::set_value(T value)
 {
     m_value.set_value(value);
-}
-
-template<typename T>
-bool gui::Input<T>::dirty(void) const
-{
-    return m_value.dirty();
 }
 
 template<>

@@ -3,8 +3,8 @@
 #include "client/world/chunk_renderer.hh"
 
 #include "core/camera.hh"
-#include "core/config/map.hh"
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
+#include "core/cvar/number.hh"
 #include "core/exception.hh"
 #include "core/frustum.hh"
 #include "core/threading.hh"
@@ -42,7 +42,8 @@ constexpr static unsigned FOG_MODEL = 0;
 //  4096                77.742
 constexpr static std::size_t BATCH_MAX_PARTS = 1024;
 
-static gui::StepperUnsigned s_fog_model;
+static cvar::Number<unsigned> s_fog_model { 0, 0, 2 };
+static gui::StepperUnsigned s_fog_model_gui;
 
 static ShaderProgram s_program;
 static std::size_t su_ViewProjection;
@@ -346,9 +347,13 @@ void chunk_renderer::init(void)
 {
     constexpr static std::size_t INITIAL_CAPACITY = 256;
 
-    s_fog_model.set_range(0, 2, 1); // TODO: move this elsewhere and use a config::Ref here
-    s_fog_model.bind(globals::client_config, "head.fog_model");
-    settings::video.add_child(s_fog_model, 3);
+    auto& fog_model_binding = cvar::bind_var(s_fog_model, "head.fog_model");
+    fog_model_binding.set_help("Fog model: 0 = off, 1 = simple, 2 = fancy");
+    fog_model_binding.set_flags(FCVAR_ARCHIVE);
+
+    s_fog_model_gui.set_range(0, 2, 1);
+    s_fog_model_gui.bind("head.fog_model");
+    settings::video.add_child(s_fog_model_gui, 3);
 
     auto program_id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "chunk");
     auto program_ok = s_program.setup(program_id);

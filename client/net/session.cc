@@ -3,6 +3,8 @@
 #include "client/net/session.hh"
 
 #include "core/buffer.hh"
+#include "core/cvar/host.hh"
+#include "core/cvar/string.hh"
 #include "core/utils/epoch.hh"
 #include "core/utils/physfs.hh"
 #include "core/utils/string.hh"
@@ -33,7 +35,8 @@ std::uint64_t session::identity;
 std::uint16_t session::client_id;
 std::string session::assigned_username;
 
-static gui::TextBox s_desired_username;
+static cvar::String s_desired_username { "player" };
+static gui::TextBox s_desired_username_gui;
 static ed25519::pair_type s_auth_pair;
 static std::uint64_t s_pending_invite;
 
@@ -94,7 +97,7 @@ static void on_host_connect(const HostConnectEvent& event)
         request.username = std::string("player");
     }
     else {
-        request.username = desired_username;
+        request.username = std::string(desired_username);
     }
 
     auto& enet_event = event.event();
@@ -144,11 +147,14 @@ static void on_session_disconnect(const packet::Session_Disconnect& packet)
 
 void session::init(void)
 {
-    s_desired_username.enable_tooltip();
-    s_desired_username.set_value("player");
-    s_desired_username.set_flags(ImGuiInputTextFlags_CharsNoBlank);
-    s_desired_username.bind(globals::client_config, "session.username");
-    s_desired_username.set_callback([](auto data) {
+    auto& username_binding = cvar::bind_var(s_desired_username, "session.username");
+    username_binding.set_help("Name sent to the server");
+    username_binding.set_flags(FCVAR_ARCHIVE);
+
+    s_desired_username_gui.enable_tooltip();
+    s_desired_username_gui.set_flags(ImGuiInputTextFlags_CharsNoBlank);
+    s_desired_username_gui.bind("session.username");
+    s_desired_username_gui.set_callback([](auto data) {
         if(data->BufTextLen >= 64) {
             return 1;
         }
@@ -171,7 +177,7 @@ void session::init(void)
         return is_allowed ? 0 : 1;
     });
 
-    settings::general.add_child(s_desired_username, 3);
+    settings::general.add_child(s_desired_username_gui, 3);
 
     std::vector<std::byte> source;
 

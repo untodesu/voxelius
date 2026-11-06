@@ -1,12 +1,13 @@
 #include "client/pch.hh"
 
-#include "core/config/map.hh"
 #include "core/core.hh"
 #include "core/cvar/host.hh"
 #include "core/exception.hh"
 #include "core/res/resource.hh"
 #include "core/threading.hh"
 #include "core/utils/epoch.hh"
+#include "core/utils/physfs.hh"
+#include "core/utils/string.hh"
 #include "core/version.hh"
 
 #include "shared/cvar/commands.hh"
@@ -21,7 +22,6 @@
 #include "client/game.hh"
 #include "client/globals.hh"
 #include "client/gui/button_bind.hh"
-#include "client/gui/keybind.hh"
 #include "client/gui/screen.hh"
 #include "client/head.hh"
 #include "client/input/axes.hh"
@@ -205,6 +205,52 @@ static void zoned_update_late(void)
     threading::update();
 }
 
+static bool is_legacy_config(std::string_view path)
+{
+    std::string source;
+
+    if(!utils::read_file(path, source)) {
+        return false;
+    }
+
+    std::istringstream stream(source);
+    std::string line;
+
+    while(std::getline(stream, line)) {
+        auto trimmed = utils::trim_whitespace(utils::remove_comments(line));
+
+        if(trimmed.empty()) {
+            continue;
+        }
+
+        return trimmed.find('=') != std::string_view::npos;
+    }
+
+    return false;
+}
+
+static void load_cvar_config(std::string_view path)
+{
+    if(!is_legacy_config(path)) {
+        cvar::exec_from(path);
+        return;
+    }
+
+    std::string source;
+    std::string backup = std::format("{}.legacy", path);
+    std::string existing;
+
+    if(!utils::read_file(path, source)) {
+        return;
+    }
+
+    if(!utils::read_file(backup, existing) && !utils::write_file(backup, source)) {
+        msg::log_warning("{}: failed to write legacy backup", backup);
+    }
+
+    msg::log_warning("{}: legacy config skipped; backup at {}", path, backup);
+}
+
 static void wrapped_main(int argc, char** argv)
 {
     core::setup(argc, argv);
@@ -248,8 +294,6 @@ static void wrapped_main(int argc, char** argv)
 
     block_atlas::init();
 
-    gui::KeyBind::init();
-
     buttons::init();
     axes::init();
     gui::ButtonBind::init();
@@ -264,8 +308,8 @@ static void wrapped_main(int argc, char** argv)
 
     client_game::init();
 
-    globals::client_config.load("client.conf");
-    globals::client_config.load("client.user.conf");
+    load_cvar_config("client.conf");
+    load_cvar_config("client.user.conf");
 
     video::init_late();
     head::init_late();
@@ -387,7 +431,7 @@ static void wrapped_main(int argc, char** argv)
     head::shutdown();
     video::shutdown();
 
-    globals::client_config.save("client.conf");
+    cvar::save_values("client.conf");
 
     core::teardown();
 }

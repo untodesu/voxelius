@@ -50,6 +50,7 @@ void client_game::update(void)
 
     player_target::update();
 
+    player_look::update();
     player_move::update();
     pmove::update(globals::window_frametime);
 }

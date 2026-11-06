@@ -1,22 +1,18 @@
 #ifndef F8834F01_219B_4D3A_86E7_91FA52B4F625
 #define F8834F01_219B_4D3A_86E7_91FA52B4F625
 
+#include "core/cvar/number.hh"
+
 #include "shared/coord.hh"
 #include "shared/world/block.hh"
 #include "shared/world/fluid.hh"
-
-namespace gui
-{
-template<typename T>
-class Slider;
-} // namespace gui
 
 class Camera;
 
 namespace camera
 {
-extern gui::Slider<float> vertical_fov;
-extern gui::Slider<unsigned> view_distance;
+extern cvar::Number<float> vertical_fov;
+extern cvar::Number<unsigned> view_distance;
 } // namespace camera
 
 namespace camera

@@ -2,10 +2,6 @@
 
 #include "client/globals.hh"
 
-#include "core/config/map.hh"
-
-config::Map globals::client_config;
-
 SDL_Window* globals::window;
 SDL_GLContext globals::gl_context;
 

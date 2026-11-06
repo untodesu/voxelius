@@ -2,52 +2,109 @@
 
 #include "client/system/pmove_client.hh"
 
-#include "core/camera.hh"
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
 
 #include "shared/component/head.hh"
 #include "shared/component/transform.hh"
 #include "shared/component/velocity.hh"
 #include "shared/system/pmove.hh"
 
-#include "client/camera.hh"
 #include "client/globals.hh"
+#include "client/gui/button_bind.hh"
 #include "client/gui/container.hh"
-#include "client/gui/keybind.hh"
+#include "client/input/axes.hh"
+#include "client/input/buttons.hh"
 #include "client/settings.hh"
 
-static gui::KeyBind s_key_forward;
-static gui::KeyBind s_key_backward;
-static gui::KeyBind s_key_left;
-static gui::KeyBind s_key_right;
-static gui::KeyBind s_key_jump;
-static gui::KeyBind s_key_crouch;
+constexpr static std::uint32_t IN_FORWARD = 1 << 0;
+constexpr static std::uint32_t IN_BACK = 1 << 1;
+constexpr static std::uint32_t IN_LEFT = 1 << 2;
+constexpr static std::uint32_t IN_RIGHT = 1 << 3;
+constexpr static std::uint32_t IN_JUMP = 1 << 4;
+constexpr static std::uint32_t IN_SNEAK = 1 << 5;
+
+static std::uint32_t s_input_held;
+static bool s_gui_was_open;
+
+static gui::ButtonBind s_forward_bind;
+static gui::ButtonBind s_back_bind;
+static gui::ButtonBind s_left_bind;
+static gui::ButtonBind s_right_bind;
+static gui::ButtonBind s_jump_bind;
+static gui::ButtonBind s_sneak_bind;
+
+template<std::uint32_t Bit>
+static cvar::status cmd_press(const cvar::Context& ctx, std::span<const std::string_view> args)
+{
+    s_input_held |= Bit;
+
+    return cvar::status::OK;
+}
+
+template<std::uint32_t Bit>
+static cvar::status cmd_release(const cvar::Context& ctx, std::span<const std::string_view> args)
+{
+    s_input_held &= ~Bit;
+
+    return cvar::status::OK;
+}
+
+static void release_all(void)
+{
+    s_input_held = 0;
+    axes::reset_all();
+}
+
+static void on_window_event(const SDL_WindowEvent& event)
+{
+    if(event.type == SDL_EVENT_WINDOW_FOCUS_LOST) {
+        release_all();
+    }
+}
 
 void player_move::init(void)
 {
-    s_key_forward.set_value(SDLK_W);
-    s_key_forward.bind(globals::client_config, "player_move.key_forward");
-    settings::keyboard_movement.add_child(s_key_forward, 0);
+    cvar::bind_cmd("+forward").connect<&cmd_press<IN_FORWARD>>();
+    cvar::bind_cmd("-forward").connect<&cmd_release<IN_FORWARD>>();
+    cvar::bind_cmd("+back").connect<&cmd_press<IN_BACK>>();
+    cvar::bind_cmd("-back").connect<&cmd_release<IN_BACK>>();
+    cvar::bind_cmd("+moveleft").connect<&cmd_press<IN_LEFT>>();
+    cvar::bind_cmd("-moveleft").connect<&cmd_release<IN_LEFT>>();
+    cvar::bind_cmd("+moveright").connect<&cmd_press<IN_RIGHT>>();
+    cvar::bind_cmd("-moveright").connect<&cmd_release<IN_RIGHT>>();
+    cvar::bind_cmd("+jump").connect<&cmd_press<IN_JUMP>>();
+    cvar::bind_cmd("-jump").connect<&cmd_release<IN_JUMP>>();
+    cvar::bind_cmd("+sneak").connect<&cmd_press<IN_SNEAK>>();
+    cvar::bind_cmd("-sneak").connect<&cmd_release<IN_SNEAK>>();
 
-    s_key_backward.set_value(SDLK_S);
-    s_key_backward.bind(globals::client_config, "player_move.key_backward");
-    settings::keyboard_movement.add_child(s_key_backward, 1);
+    s_forward_bind.bind_action("forward");
+    s_back_bind.bind_action("back");
+    s_left_bind.bind_action("moveleft");
+    s_right_bind.bind_action("moveright");
+    s_jump_bind.bind_action("jump");
+    s_sneak_bind.bind_action("sneak");
 
-    s_key_left.set_value(SDLK_A);
-    s_key_left.bind(globals::client_config, "player_move.key_left");
-    settings::keyboard_movement.add_child(s_key_left, 2);
+    settings::controls_movement.add_child(s_forward_bind, 0);
+    settings::controls_movement.add_child(s_back_bind, 1);
+    settings::controls_movement.add_child(s_left_bind, 2);
+    settings::controls_movement.add_child(s_right_bind, 3);
+    settings::controls_movement.add_child(s_jump_bind, 4);
+    settings::controls_movement.add_child(s_sneak_bind, 5);
 
-    s_key_right.set_value(SDLK_D);
-    s_key_right.bind(globals::client_config, "player_move.key_right");
-    settings::keyboard_movement.add_child(s_key_right, 3);
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_W, input_edge::DOWN), "+forward");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_W, input_edge::UP), "-forward");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_S, input_edge::DOWN), "+back");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_S, input_edge::UP), "-back");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_A, input_edge::DOWN), "+moveleft");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_A, input_edge::UP), "-moveleft");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_D, input_edge::DOWN), "+moveright");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_D, input_edge::UP), "-moveright");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_SPACE, input_edge::DOWN), "+jump");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_SPACE, input_edge::UP), "-jump");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_LSHIFT, input_edge::DOWN), "+sneak");
+    buttons::bind(ButtonSource(input_device::KEYBOARD, SDL_SCANCODE_LSHIFT, input_edge::UP), "-sneak");
 
-    s_key_jump.set_value(SDLK_SPACE);
-    s_key_jump.bind(globals::client_config, "player_move.key_jump");
-    settings::keyboard_movement.add_child(s_key_jump, 4);
-
-    s_key_crouch.set_value(SDLK_LSHIFT);
-    s_key_crouch.bind(globals::client_config, "player_move.key_crouch");
-    settings::keyboard_movement.add_child(s_key_crouch, 5);
+    globals::dispatcher.sink<SDL_WindowEvent>().connect<&on_window_event>();
 }
 
 void player_move::fixed_update(void)
@@ -62,54 +119,53 @@ void player_move::fixed_update(void)
 
 void player_move::update(void)
 {
-    if(globals::registry.valid(globals::player)) {
-        Eigen::Vector3f wishdir = Eigen::Vector3f::Zero();
+    if(globals::gui_screen && !s_gui_was_open) {
+        release_all();
+    }
 
-        if(globals::gui_screen == nullptr) {
-            auto keyboard = SDL_GetKeyboardState(nullptr);
+    s_gui_was_open = globals::gui_screen != nullptr;
 
-            auto forward_scancode = SDL_GetScancodeFromKey(s_key_forward.value(), nullptr);
-            auto backward_scancode = SDL_GetScancodeFromKey(s_key_backward.value(), nullptr);
-            auto left_scancode = SDL_GetScancodeFromKey(s_key_left.value(), nullptr);
-            auto right_scancode = SDL_GetScancodeFromKey(s_key_right.value(), nullptr);
-            auto jump_scancode = SDL_GetScancodeFromKey(s_key_jump.value(), nullptr);
-            auto crouch_scancode = SDL_GetScancodeFromKey(s_key_crouch.value(), nullptr);
+    if(!globals::registry.valid(globals::player)) {
+        return;
+    }
 
-            if(keyboard[forward_scancode]) {
-                wishdir.z() -= 1.0f;
-            }
+    Eigen::Vector3f wishdir = Eigen::Vector3f::Zero();
 
-            if(keyboard[backward_scancode]) {
-                wishdir.z() += 1.0f;
-            }
-
-            if(keyboard[left_scancode]) {
-                wishdir.x() -= 1.0f;
-            }
-
-            if(keyboard[right_scancode]) {
-                wishdir.x() += 1.0f;
-            }
-
-            if(keyboard[jump_scancode]) {
-                wishdir.y() += 1.0f;
-            }
-
-            if(keyboard[crouch_scancode]) {
-                wishdir.y() -= 1.0f;
-            }
-
-            if(!wishdir.isZero()) {
-                const auto& head = globals::registry.get<Head>(globals::player);
-                auto yaw = Eigen::AngleAxisf(head.angles.y(), Eigen::Vector3f::UnitY());
-                wishdir = yaw * wishdir;
-                wishdir.normalize();
-            }
+    if(!globals::gui_screen) {
+        if(s_input_held & IN_FORWARD) {
+            wishdir.z() -= 1.0f;
         }
 
-        MoveData move_data {};
-        move_data.wishdir = wishdir;
+        if(s_input_held & IN_BACK) {
+            wishdir.z() += 1.0f;
+        }
 
-        globals::registry.emplace_or_replace<MoveData>(globals::player, std::move(move_data));
+        if(s_input_held & IN_LEFT) {
+            wishdir.x() -= 1.0f;
+        }
+
+        if(s_input_held & IN_RIGHT) {
+            wishdir.x() += 1.0f;
+        }
+
+        if(s_input_held & IN_JUMP) {
+            wishdir.y() += 1.0f;
+        }
+
+        if(s_input_held & IN_SNEAK) {
+            wishdir.y() -= 1.0f;
+        }
+
+        if(!wishdir.isZero()) {
+            const auto& head = globals::registry.get<Head>(globals::player);
+            auto yaw = Eigen::AngleAxisf(head.angles.y(), Eigen::Vector3f::UnitY());
+            wishdir = yaw * wishdir;
+            wishdir.normalize();
+        }
     }
+
+    MoveData move_data {};
+    move_data.wishdir = wishdir;
+
+    globals::registry.emplace_or_replace<MoveData>(globals::player, std::move(move_data));
 }

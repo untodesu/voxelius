@@ -3,8 +3,8 @@
 #include "client/head.hh"
 
 #include "core/cmdline.hh"
-#include "core/config/map.hh"
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
+#include "core/cvar/number.hh"
 #include "core/exception.hh"
 #include "core/identifier.hh"
 
@@ -42,7 +42,9 @@ static std::size_t su_AlphaDepth;
 static std::size_t su_FluidColor;
 static std::size_t su_FluidDepth;
 
-static gui::SliderInt s_pixel_size;
+static cvar::Number<int> s_head_pixel_size { 1, 1, 4 };
+static gui::SliderInt s_pixel_size_gui;
+static bool s_pixel_size_dirty { true };
 
 static int s_scaled_width;
 static int s_scaled_height;
@@ -92,7 +94,7 @@ static void create_or_resize_layer(LayerTarget& layer, int width, int height)
 
 static void update_framebuffer(int new_width, int new_height)
 {
-    auto pixel_size = std::clamp<int>(s_pixel_size.value(), 1, 4);
+    auto pixel_size = std::clamp<int>(s_head_pixel_size.value(), 1, 4);
     s_scaled_width = new_width / pixel_size;
     s_scaled_height = new_height / pixel_size;
 
@@ -200,12 +202,21 @@ static void on_sdl_window_event(const SDL_WindowEvent& event)
     }
 }
 
+static void on_pixel_size_changed(void)
+{
+    s_pixel_size_dirty = true;
+}
+
 void head::init(void)
 {
-    s_pixel_size.set_value(1);
-    s_pixel_size.set_range(1, 4).enable_tooltip();
-    s_pixel_size.bind(globals::client_config, "head.pixel_size");
-    settings::video.add_child(s_pixel_size, 2);
+    auto& pixel_size_binding = cvar::bind_var(s_head_pixel_size, "head.pixel_size");
+    pixel_size_binding.set_help("Internal render scale, in pixels");
+    pixel_size_binding.set_flags(FCVAR_ARCHIVE);
+    pixel_size_binding.changed().connect<&on_pixel_size_changed>();
+
+    s_pixel_size_gui.set_range(1, 4).enable_tooltip();
+    s_pixel_size_gui.bind("head.pixel_size");
+    settings::video.add_child(s_pixel_size_gui, 2);
 
     globals::gl_context = SDL_GL_CreateContext(globals::window);
     vx::throw_if_not_fmt(globals::gl_context, "SDL_GL_CreateContext failed: {}", SDL_GetError());
@@ -290,8 +301,9 @@ bool head::prepare(void)
     SDL_GetWindowSizeInPixels(globals::window, &width, &height);
     glViewport(0, 0, width, height);
 
-    if(s_pixel_size.dirty() || s_diffuse.fbo == 0) {
+    if(s_pixel_size_dirty || s_diffuse.fbo == 0) {
         update_framebuffer(width, height);
+        s_pixel_size_dirty = false;
     }
 
     glClearColor(0.0f, 0.0f, 0.5f, 1.0f);

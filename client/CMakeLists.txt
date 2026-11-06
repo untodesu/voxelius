@@ -34,8 +34,6 @@ add_executable(vclient
     "${CMAKE_CURRENT_LIST_DIR}/gui/font_scope.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gui/input.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gui/input.hh"
-    "${CMAKE_CURRENT_LIST_DIR}/gui/keybind.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/gui/keybind.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gui/label.cc"
     "${CMAKE_CURRENT_LIST_DIR}/gui/label.hh"
     "${CMAKE_CURRENT_LIST_DIR}/gui/language_selector.cc"

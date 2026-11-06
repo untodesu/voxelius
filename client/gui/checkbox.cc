@@ -2,15 +2,14 @@
 
 #include "client/gui/checkbox.hh"
 
-#include "core/config/map.hh"
-
 #include "client/language.hh"
+#include "core/cvar/host.hh"
 
-gui::CheckBox& gui::CheckBox::bind(config::Map& config, std::string_view key)
+gui::CheckBox& gui::CheckBox::bind(std::string_view name)
 {
-    set_key(key);
+    set_key(name);
 
-    m_value.bind(config, key);
+    cvar::bind_var(m_value, name);
 
     return self();
 }
@@ -23,11 +22,6 @@ bool gui::CheckBox::value(void) const
 void gui::CheckBox::set_value(bool value)
 {
     m_value.set_value(value);
-}
-
-bool gui::CheckBox::dirty(void) const
-{
-    return m_value.dirty();
 }
 
 void gui::CheckBox::layout_control(void)

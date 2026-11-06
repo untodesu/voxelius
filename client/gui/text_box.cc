@@ -2,13 +2,13 @@
 
 #include "client/gui/text_box.hh"
 
-#include "core/config/map.hh"
+#include "core/cvar/host.hh"
 
-gui::TextBox& gui::TextBox::bind(config::Map& config, std::string_view key)
+gui::TextBox& gui::TextBox::bind(std::string_view name)
 {
-    this->set_key(key);
+    this->set_key(name);
 
-    m_value.bind(config, key);
+    cvar::bind_var(m_value, name);
 
     return this->self();
 }
@@ -38,14 +38,9 @@ void gui::TextBox::set_value(std::string_view value)
     m_value.set_value(std::string(value));
 }
 
-bool gui::TextBox::dirty(void) const
-{
-    return m_value.dirty();
-}
-
 void gui::TextBox::layout_control(void)
 {
-    auto current = m_value.value();
+    auto current = std::string(m_value.value());
     auto flags = m_flags;
 
     if(m_callback) {

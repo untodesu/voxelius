@@ -3,8 +3,9 @@
 #include "client/video.hh"
 
 #include "core/cmdline.hh"
-#include "core/config/map.hh"
-#include "core/config/ref.hh"
+#include "core/cvar/boolean.hh"
+#include "core/cvar/host.hh"
+#include "core/cvar/string.hh"
 #include "core/exception.hh"
 #include "core/version.hh"
 
@@ -18,9 +19,10 @@
 #include "client/settings.hh"
 
 static Eigen::Vector2i s_last_windowed_size;
-static gui::CheckBox s_enable_vsync;
-static config::Ref<std::string> s_current_mode { "windowed" };
+static cvar::Boolean s_enable_vsync { true };
+static cvar::String s_current_mode { "windowed" };
 
+static gui::CheckBox s_enable_vsync_gui;
 static gui::VideoSelector s_video_mode_control;
 
 static SDL_DisplayID s_display;
@@ -114,11 +116,7 @@ static void update_present_mode(void)
 static void on_sdl_key(const SDL_KeyboardEvent& event)
 {
     if(event.type == SDL_EVENT_KEY_DOWN) {
-        if(event.key == SDLK_F1) {
-            globals::client_config.set_value<bool>("video.enable_vsync", !s_enable_vsync.value());
-        }
-
-        if(event.key == SDLK_F2) {
+        if(event.key == SDLK_F1 || event.key == SDLK_F2) {
             s_enable_vsync.set_value(!s_enable_vsync.value());
         }
     }
@@ -128,12 +126,18 @@ void video::init(void)
 {
     s_last_windowed_size = Eigen::Vector2i(constant::BASE_WIDTH, constant::BASE_HEIGHT);
 
-    s_enable_vsync.set_value(true);
-    s_enable_vsync.enable_tooltip();
-    s_enable_vsync.bind(globals::client_config, "video.enable_vsync");
-    settings::video.add_child(s_enable_vsync, 1);
+    auto& vsync_binding = cvar::bind_var(s_enable_vsync, "video.enable_vsync");
+    vsync_binding.set_help("Enable vertical synchronization");
+    vsync_binding.set_flags(FCVAR_ARCHIVE);
+    vsync_binding.changed().connect<&update_present_mode>();
 
-    s_current_mode.bind(globals::client_config, "video.current_mode");
+    s_enable_vsync_gui.enable_tooltip();
+    s_enable_vsync_gui.bind("video.enable_vsync");
+    settings::video.add_child(s_enable_vsync_gui, 1);
+
+    auto& current_mode_binding = cvar::bind_var(s_current_mode, "video.current_mode");
+    current_mode_binding.set_help("Current video mode");
+    current_mode_binding.set_flags(FCVAR_ARCHIVE);
 
     s_video_mode_control.on_change(&settings::detail::video_mode_popup);
     s_video_mode_control.set_key("video.current_mode");
@@ -167,7 +171,7 @@ void video::init_late(void)
 {
     update_present_mode();
 
-    const std::string& mode = s_current_mode.value();
+    const std::string& mode = s_current_mode.string();
 
     if(mode == "windowed") {
         video::request_windowed(s_last_windowed_size.x(), s_last_windowed_size.y());
@@ -203,9 +207,7 @@ void video::update(void)
 
 void video::update_late(void)
 {
-    if(s_enable_vsync.dirty()) {
-        update_present_mode();
-    }
+    // empty
 }
 
 void video::query_current_mode(int& width, int& height)

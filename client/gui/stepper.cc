@@ -2,16 +2,15 @@
 
 #include "client/gui/stepper.hh"
 
-#include "core/config/map.hh"
-
 #include "client/language.hh"
+#include "core/cvar/host.hh"
 
 template<typename T>
-gui::Stepper<T>& gui::Stepper<T>::bind(config::Map& config, std::string_view key)
+gui::Stepper<T>& gui::Stepper<T>::bind(std::string_view name)
 {
-    this->set_key(key);
+    this->set_key(name);
 
-    m_value.bind(config, key);
+    cvar::bind_var(m_value, name);
 
     return this->self();
 }
@@ -36,12 +35,6 @@ template<typename T>
 void gui::Stepper<T>::set_value(T value)
 {
     m_value.set_value(value);
-}
-
-template<typename T>
-bool gui::Stepper<T>::dirty(void) const
-{
-    return m_value.dirty();
 }
 
 template<typename T>
