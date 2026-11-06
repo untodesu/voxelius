@@ -60,20 +60,20 @@ static void reset_camera(void)
 
 void camera::init(void)
 {
-    auto& vertical_fov_binding = cvar::bind_var(vertical_fov, "camera.vertical_fov");
+    auto& vertical_fov_binding = cvar::bind_var(vertical_fov, "r_fov");
     vertical_fov_binding.set_help("Vertical field of view");
     vertical_fov_binding.set_flags(FCVAR_ARCHIVE);
 
     s_vertical_fov_gui.set_range(45.0f, 110.0f).set_format("%.0f").enable_tooltip();
-    s_vertical_fov_gui.bind("camera.vertical_fov");
+    s_vertical_fov_gui.bind("r_fov");
     settings::general.add_child(s_vertical_fov_gui, 1);
 
-    auto& view_distance_binding = cvar::bind_var(view_distance, "camera.view_distance");
+    auto& view_distance_binding = cvar::bind_var(view_distance, "r_viewdistance");
     view_distance_binding.set_help("View distance, in chunks");
     view_distance_binding.set_flags(FCVAR_ARCHIVE);
 
     s_view_distance_gui.set_range(1, 32);
-    s_view_distance_gui.bind("camera.view_distance");
+    s_view_distance_gui.bind("r_viewdistance");
     settings::video.add_child(s_view_distance_gui, 0);
 
     reset_camera();

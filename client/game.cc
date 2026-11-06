@@ -8,6 +8,7 @@
 
 #include "shared/constant.hh"
 #include "shared/coord.hh"
+#include "shared/cvar/gamerules.hh"
 #include "shared/physics/physics.hh"
 #include "shared/system/pmove.hh"
 #include "shared/utils/coord.hh"
@@ -25,6 +26,8 @@
 
 void client_game::init(void)
 {
+    gamerules::init(false);
+
     interpolation::init();
 
     player_look::init();

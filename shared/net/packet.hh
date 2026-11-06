@@ -19,7 +19,7 @@ enum packet_type : std::uint16_t {
     WORLD_CHUNK_BIOMES,
     WORLD_SET_BLOCK,
     WORLD_TIMINGS,
-    WORLD_RULES,
+    CVAR_SERVER_VARS,
     PLAYER_ATTACK_E,
     PLAYER_ATTACK_B,
     PLAYER_INTERACT_E,
@@ -68,7 +68,11 @@ struct World_Blocks;
 struct World_Biomes;
 struct World_SetBlock;
 struct World_Timings;
-struct World_Rules;
+} // namespace packet
+
+namespace packet
+{
+struct Cvar_ServerVars;
 } // namespace packet
 
 namespace packet

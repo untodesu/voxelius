@@ -14,7 +14,7 @@ cvar::Boolean whitelist::enabled { false };
 
 void whitelist::init(void)
 {
-    auto& enabled_binding = cvar::bind_var(enabled, "whitelist.enabled");
+    auto& enabled_binding = cvar::bind_var(enabled, "net_whitelist");
     enabled_binding.set_help("Only allow whitelisted players");
     enabled_binding.set_flags(FCVAR_ARCHIVE);
 

@@ -11,6 +11,8 @@ add_executable(vserver
     "${CMAKE_CURRENT_LIST_DIR}/net/invites.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/receive.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/receive.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/net/replication.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/net/replication.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/sessions.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/sessions.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/status.cc"

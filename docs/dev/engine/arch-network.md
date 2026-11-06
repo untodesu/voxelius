@@ -49,6 +49,16 @@ This check protects both sides:
 - It stops a mismatched client from receiving chunk data it would render as corrupted or nonsensical.
 - It stops that same client from placing a block ID the server does not recognize.
 
+## Cvar replication
+
+The server owns every variable flagged with `FCVAR_REPLICATED`. After admission it sends a full snapshot of them. On every fixed tick it sends the variables that changed since the previous tick.
+
+The client keeps the server value in a shadow. A local variable with the same name must also be flagged `FCVAR_REPLICATED`; otherwise the server value is ignored and a warning is logged. A full snapshot drops stale remote variables and clears the old shadows.
+
+The server does not accept cvar values from clients. Gamerules use the `gr_` prefix; match rules will use `mp_`. The full list is in [CVars](../../reference/cvars.md).
+
+The snapshot packet carries a `uint8 full` flag and a `uint32 count`, then for each variable a `string name` and a `string value`. A full snapshot adds a `uint16 flags` and a `string help` for each entry.
+
 ## World
 
 Once the server admits a client, the client asks for chunks and reports block and entity actions. Only the server can make a world change final.

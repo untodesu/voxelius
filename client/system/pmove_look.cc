@@ -41,12 +41,12 @@ static void add_angles(float pitch, float yaw)
 
 void player_look::init(void)
 {
-    auto& sensitivity_binding = cvar::bind_var(s_sensitivity, "player_look.sensitivity");
+    auto& sensitivity_binding = cvar::bind_var(s_sensitivity, "in_sensitivity");
     sensitivity_binding.set_help("Mouse sensitivity");
     sensitivity_binding.set_flags(FCVAR_ARCHIVE);
 
     s_sensitivity_gui.set_range(25, 100).enable_tooltip();
-    s_sensitivity_gui.bind("player_look.sensitivity");
+    s_sensitivity_gui.bind("in_sensitivity");
     settings::mouse.add_child(s_sensitivity_gui, 0);
 
     axes::bind(AxisSource(input_device::MOUSE, MAXIS_X), "pm_look_x");

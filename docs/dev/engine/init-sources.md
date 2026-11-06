@@ -34,6 +34,7 @@ C:\PATH\TO\REPOSITORY
 ├───build
 ├───client
 │   ├───input
+│   ├───net
 │   ├───res
 │   └───utils
 ├───core

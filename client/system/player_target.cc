@@ -6,6 +6,7 @@
 #include "core/cvar/host.hh"
 #include "core/identifier.hh"
 
+#include "shared/cvar/gamerules.hh"
 #include "shared/net/packet_player.hh"
 #include "shared/net/protocol.hh"
 #include "shared/utils/coord.hh"
@@ -28,6 +29,10 @@ static gui::ButtonBind s_place_bind;
 
 static void place_block(void)
 {
+    if(!gamerules::allow_building.value()) {
+        return;
+    }
+
     if(globals::gui_screen || !std::holds_alternative<physics::BlockHit>(player_target::hit)) {
         return;
     }
@@ -52,6 +57,10 @@ static void place_block(void)
 
 static void break_block(void)
 {
+    if(!gamerules::allow_building.value()) {
+        return;
+    }
+
     if(globals::gui_screen || !std::holds_alternative<physics::BlockHit>(player_target::hit)) {
         return;
     }

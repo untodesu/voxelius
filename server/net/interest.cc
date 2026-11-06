@@ -77,7 +77,7 @@ static void update_visibility(void)
 
 void interest::init(void)
 {
-    auto& view_distance_binding = cvar::bind_var(view_distance, "interest.view_distance");
+    auto& view_distance_binding = cvar::bind_var(view_distance, "net_viewdistance");
     view_distance_binding.set_help("View distance, in chunks");
     view_distance_binding.set_flags(FCVAR_ARCHIVE);
 }

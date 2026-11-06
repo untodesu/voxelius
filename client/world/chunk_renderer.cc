@@ -347,12 +347,12 @@ void chunk_renderer::init(void)
 {
     constexpr static std::size_t INITIAL_CAPACITY = 256;
 
-    auto& fog_model_binding = cvar::bind_var(s_fog_model, "head.fog_model");
+    auto& fog_model_binding = cvar::bind_var(s_fog_model, "r_fogmodel");
     fog_model_binding.set_help("Fog model: 0 = off, 1 = simple, 2 = fancy");
     fog_model_binding.set_flags(FCVAR_ARCHIVE);
 
     s_fog_model_gui.set_range(0, 2, 1);
-    s_fog_model_gui.bind("head.fog_model");
+    s_fog_model_gui.bind("r_fogmodel");
     settings::video.add_child(s_fog_model_gui, 3);
 
     auto program_id = Identifier::from_parts(constant::BUILTIN_NAME_SPACE, "chunk");

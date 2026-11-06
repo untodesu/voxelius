@@ -44,11 +44,4 @@ struct packet::World_Timings final : public packet::Base<packet::WORLD_TIMINGS> 
     std::uint64_t current_tick;
 };
 
-struct packet::World_Rules final : public packet::Base<packet::WORLD_RULES> {
-    static void encode(const World_Rules& packet, WriteBuffer& buffer);
-    static void decode(World_Rules& packet, ReadBuffer& buffer);
-
-    std::uint64_t stub_stub_stub;
-};
-
 #endif /* BD2D77E8_727E_4B4C_83D6_92E1569F5B4D */

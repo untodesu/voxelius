@@ -29,6 +29,7 @@
 #include "client/net/bother.hh"
 #include "client/net/host.hh"
 #include "client/net/receive.hh"
+#include "client/net/replication.hh"
 #include "client/net/session.hh"
 #include "client/play_menu.hh"
 #include "client/res/texture2D.hh"
@@ -231,6 +232,7 @@ static void wrapped_main(int argc, char** argv)
     host::init();
     session::init();
     receive::init();
+    replication::init();
 
     shared_game::init();
 

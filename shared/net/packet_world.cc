@@ -61,13 +61,3 @@ void packet::World_Timings::decode(World_Timings& packet, ReadBuffer& buffer)
 {
     packet.current_tick = buffer.read<std::uint64_t>();
 }
-
-void packet::World_Rules::encode(const World_Rules& packet, WriteBuffer& buffer)
-{
-    buffer.write<std::uint64_t>(packet.stub_stub_stub);
-}
-
-void packet::World_Rules::decode(World_Rules& packet, ReadBuffer& buffer)
-{
-    packet.stub_stub_stub = buffer.read<std::uint64_t>();
-}

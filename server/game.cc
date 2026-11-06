@@ -4,6 +4,7 @@
 
 #include "core/identifier.hh"
 
+#include "shared/cvar/gamerules.hh"
 #include "shared/globals.hh"
 #include "shared/system/pmove.hh"
 #include "shared/utils/entity.hh"
@@ -12,6 +13,8 @@
 
 void server_game::init(void)
 {
+    gamerules::init(true);
+
     pmove_validator::init();
 }
 

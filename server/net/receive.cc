@@ -6,6 +6,7 @@
 #include "core/cvar/number.hh"
 
 #include "shared/component/transform.hh"
+#include "shared/cvar/gamerules.hh"
 #include "shared/net/packet_player.hh"
 #include "shared/net/packet_world.hh"
 #include "shared/net/protocol.hh"
@@ -102,6 +103,10 @@ static bool in_reach(entt::entity player, const BlockPos& bpos)
 
 static void on_player_attack_b(const packet::Player_AttackB& packet)
 {
+    if(!gamerules::allow_building.value()) {
+        return;
+    }
+
     auto session = sessions::find(packet.peer);
 
     if(session == nullptr) {
@@ -134,6 +139,10 @@ static void on_player_interact_e(const packet::Player_InteractE& packet)
 
 static void on_player_interact_b(const packet::Player_InteractB& packet)
 {
+    if(!gamerules::allow_building.value()) {
+        return;
+    }
+
     auto session = sessions::find(packet.peer);
 
     if(session == nullptr) {
@@ -186,7 +195,7 @@ static void on_player_move_data(const packet::Player_MoveData& packet)
 
 void receive::init(void)
 {
-    auto& reach_distance_binding = cvar::bind_var(s_reach_distance, "game.reach_distance");
+    auto& reach_distance_binding = cvar::bind_var(s_reach_distance, "net_reachdistance");
     reach_distance_binding.set_help("Maximum block interaction distance");
     reach_distance_binding.set_flags(FCVAR_ARCHIVE);
 

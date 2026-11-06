@@ -22,6 +22,8 @@ The second store is the cvar host. It holds console variables and commands. A va
 
 The startup order is: defaults and flags are set first, then the config file is loaded, then `init_late` applies the values that other subsystems depend on. The client loads both config files after every `init` and before `init_late`.
 
+A server-owned variable can use `FCVAR_REPLICATED`. The server sends its value to clients as a shadow; clients cannot overwrite it while connected. The full list of variables is in [CVars](../../reference/cvars.md).
+
 ## Resources
 
 Resource management is the engine's one loading and caching path for assets that mods reference. A resource type registers one loader for itself. After that, any code can request a resource of that type by identifier. The engine turns the identifier into a file path and looks it up. If the resource is already loaded, the request returns the existing instance. Otherwise, the request triggers a new load, and the engine keeps the result for later requests. A request can also ask the engine to hold a permanent reference to the result. This lets the resource survive even when nothing else holds it.

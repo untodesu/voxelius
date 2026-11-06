@@ -25,6 +25,7 @@
 #include "client/gui/container.hh"
 #include "client/gui/text_box.hh"
 #include "client/net/host.hh"
+#include "client/net/replication.hh"
 #include "client/settings.hh"
 #include "client/video.hh"
 
@@ -59,6 +60,8 @@ static void reset_session(void)
 
 static void handle_disconnect(std::uint32_t reason)
 {
+    replication::clear();
+
     if(session::state) {
         reset_session();
 
@@ -147,13 +150,13 @@ static void on_session_disconnect(const packet::Session_Disconnect& packet)
 
 void session::init(void)
 {
-    auto& username_binding = cvar::bind_var(s_desired_username, "session.username");
+    auto& username_binding = cvar::bind_var(s_desired_username, "net_username");
     username_binding.set_help("Name sent to the server");
     username_binding.set_flags(FCVAR_ARCHIVE);
 
     s_desired_username_gui.enable_tooltip();
     s_desired_username_gui.set_flags(ImGuiInputTextFlags_CharsNoBlank);
-    s_desired_username_gui.bind("session.username");
+    s_desired_username_gui.bind("net_username");
     s_desired_username_gui.set_callback([](auto data) {
         if(data->BufTextLen >= 64) {
             return 1;

@@ -12,6 +12,7 @@
 /build/
 /build/*
 /compile_commands.json
+/docs/reference/cvars.md
 /dist/
 /dist/*
 /site/

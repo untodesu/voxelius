@@ -20,19 +20,19 @@ static cvar::String s_bind { "0.0.0.0" };
 
 void host::init(void)
 {
-    auto& max_players_binding = cvar::bind_var(max_players, "host.max_players");
+    auto& max_players_binding = cvar::bind_var(max_players, "net_maxplayers");
     max_players_binding.set_help("Maximum number of players");
     max_players_binding.set_flags(FCVAR_ARCHIVE);
 
-    auto& status_peers_binding = cvar::bind_var(s_status_peers, "host.status_peers");
+    auto& status_peers_binding = cvar::bind_var(s_status_peers, "net_statuspeers");
     status_peers_binding.set_help("Maximum number of status peers");
     status_peers_binding.set_flags(FCVAR_ARCHIVE);
 
-    auto& port_binding = cvar::bind_var(s_port, "host.listen_port");
+    auto& port_binding = cvar::bind_var(s_port, "net_listen_port");
     port_binding.set_help("Listen port");
     port_binding.set_flags(FCVAR_ARCHIVE);
 
-    auto& bind_binding = cvar::bind_var(s_bind, "host.bind_address");
+    auto& bind_binding = cvar::bind_var(s_bind, "net_listen_addr");
     bind_binding.set_help("Address to bind the listen socket to");
     bind_binding.set_flags(FCVAR_ARCHIVE);
 }

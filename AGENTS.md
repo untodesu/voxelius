@@ -155,7 +155,7 @@ differently.
 |Directory|Contents|
 |----|----|
 |`core/`|Foundation library. `config/` is the generic key-value store, `cvar/` the console variables and commands, `msg/` the logging layer, `res/` the resource loader, `utils/` the small helpers|
-|`shared/`|Game logic for both sides. `api/` the Lua API, `component/` and `entity/` the EnTT pieces, `net/` the packets, `physics/`, `system/`, `world/`|
+|`shared/`|Game logic for both sides. `api/` the Lua API, `component/` and `entity/` the EnTT pieces, `cvar/` the shared variables, `net/` the packets, `physics/`, `system/`, `world/`|
 |`client/`|`vclient`. `gui/` the menus, `net/` the connection, `res/` the render resources, `system/` the frame systems, `world/` the renderer|
 |`server/`|`vserver`. `entity/`, `net/`, `system/`, `utils/`, `world/`|
 |`data/`|Content that ships with the game: `builtin` mod, shaders, textures, language files|
@@ -195,9 +195,9 @@ The repository ships a setup script for both C/C++ engines in VS Code. Run it af
 If the Windows execution policy blocks a PowerShell script, use the `.bat` wrapper or run the Python file directly:
 `py -3 scripts/setup_environment.py clangd`.
 
-- `clangd` is the default. The script turns off the analysis of the Microsoft extension, keeps its debugger, and copies
-  `build/<preset>/compile_commands.json` to `build/compile_commands.json`, where clangd finds it.
-- Add `--preset <name>` to pick the preset whose database to copy. Without it the script takes the most recently configured one.
+- `clangd` is the default. The script turns off the analysis of the Microsoft extension, keeps its debugger, and checks for
+  `compile_commands.json` in the repository root. The CMake build copies it there from the preset binary dir.
+- Add `--preset <name>` to name the preset when the root database is missing.
 - The `intellisense` mode writes `.vscode/c_cpp_properties.json` from the presets and the dependency tree.
 - `.vscode/settings.json` and `build/` are ignored by git. `.vscode/c_cpp_properties.json` is tracked and holds only workspace-relative
   paths.

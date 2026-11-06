@@ -21,6 +21,7 @@
 #include "server/globals.hh"
 #include "server/net/host.hh"
 #include "server/net/invites.hh"
+#include "server/net/replication.hh"
 #include "server/net/whitelist.hh"
 
 static std::vector<Session> s_sessions;
@@ -192,6 +193,8 @@ static void on_auth_response(const packet::Auth_Response& packet)
     response.username = session->username;
     protocol::send(response, packet.peer);
 
+    replication::synchronize(session);
+
     auto bpos = BlockPos::Zero(); // TODO: spawn positions?
     auto player = utils::spawn_player(bpos);
     session->player = player;
@@ -260,7 +263,7 @@ std::span<Session> sessions::all(void)
 
 void sessions::init(void)
 {
-    auto& strict_version_binding = cvar::bind_var(strict_version, "sessions.strict_version");
+    auto& strict_version_binding = cvar::bind_var(strict_version, "net_strictversion");
     strict_version_binding.set_help("Reject clients with a different protocol version");
     strict_version_binding.set_flags(FCVAR_ARCHIVE);
 
