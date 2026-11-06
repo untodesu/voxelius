@@ -9,6 +9,12 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Emit compile_commands.json for clangd and other tooling. Only the Ninja and
+# Makefile generators support it.
+if(CMAKE_GENERATOR MATCHES "Ninja|Makefiles")
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
+
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
