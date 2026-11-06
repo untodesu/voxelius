@@ -1,5 +1,5 @@
-#ifndef A1276FBA_7D52_4B22_8EAE_DDDFFEC21DAD
-#define A1276FBA_7D52_4B22_8EAE_DDDFFEC21DAD
+#ifndef B7C4E2A1_5F3D_4B8A_9C6E_2D1F0A3B4C5D
+#define B7C4E2A1_5F3D_4B8A_9C6E_2D1F0A3B4C5D
 
 #include "client/gui/setting.hh"
 #include "client/input/source.hh"
@@ -38,4 +38,4 @@ private:
 };
 } // namespace gui
 
-#endif /* A1276FBA_7D52_4B22_8EAE_DDDFFEC21DAD */
+#endif /* B7C4E2A1_5F3D_4B8A_9C6E_2D1F0A3B4C5D */
