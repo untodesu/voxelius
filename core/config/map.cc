@@ -39,7 +39,7 @@ static std::optional<Eigen::Vector<T, N>> get_vector(const config::Map* map, con
         }
 
         std::string_view inner = sv.substr(bracket_op + 1, bracket_cl - bracket_op - 1);
-        inner = utils::trim_whitespace<char>(inner);
+        inner = utils::trim_whitespace(inner);
 
         auto tokens = utils::tokenize(inner);
 
@@ -132,10 +132,10 @@ void config::Map::load(std::istream& stream)
     std::string kv_string;
 
     while(std::getline(stream, line)) {
-        kv_string = utils::remove_comments<char>(line);
-        kv_string = utils::trim_whitespace<char>(kv_string);
+        kv_string = utils::remove_comments(line);
+        kv_string = utils::trim_whitespace(kv_string);
 
-        if(utils::is_whitespace<char>(kv_string)) {
+        if(utils::is_whitespace(kv_string)) {
             continue;
         }
 
@@ -149,8 +149,8 @@ void config::Map::load(std::istream& stream)
         auto kv_name = kv_string.substr(0, separator);
         auto kv_value = kv_string.substr(separator + 1);
 
-        kv_name = utils::trim_whitespace<char>(kv_name);
-        kv_value = utils::trim_whitespace<char>(kv_value);
+        kv_name = utils::trim_whitespace(kv_name);
+        kv_value = utils::trim_whitespace(kv_value);
 
         set_raw_string(find_or_create_slot(kv_name), kv_value);
     }

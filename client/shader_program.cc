@@ -110,8 +110,8 @@ bool ShaderProgram::update(void)
         frag_lines[macro.line] = std::format("#define {} {}", macro.identifier, macro.value);
     }
 
-    auto vert_source = utils::join<char>(vert_lines, "\r\n");
-    auto frag_source = utils::join<char>(frag_lines, "\r\n");
+    auto vert_source = utils::join(vert_lines, "\r\n");
+    auto frag_source = utils::join(frag_lines, "\r\n");
 
     auto vert = compile_shader(vert_path, vert_source.c_str(), GL_VERTEX_SHADER);
     auto frag = compile_shader(frag_path, frag_source.c_str(), GL_FRAGMENT_SHADER);

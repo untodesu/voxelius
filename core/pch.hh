@@ -29,6 +29,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <mutex>
 #include <numbers>
 #include <numeric>

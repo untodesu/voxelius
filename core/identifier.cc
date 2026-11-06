@@ -12,9 +12,9 @@ Identifier Identifier::from_string(std::string_view string)
 
 Identifier Identifier::from_string(std::string_view string, std::string_view implicit_name_space)
 {
-    auto trimmed = utils::trim_whitespace<char>(string);
+    auto trimmed = utils::trim_whitespace(string);
 
-    if(utils::is_whitespace<char>(trimmed)) {
+    if(utils::is_whitespace(trimmed)) {
         return {};
     }
 
@@ -23,7 +23,7 @@ Identifier Identifier::from_string(std::string_view string, std::string_view imp
     std::string value;
 
     if(separator == std::string_view::npos) {
-        if(utils::is_whitespace<char>(implicit_name_space)) {
+        if(utils::is_whitespace(implicit_name_space)) {
             return Identifier(std::string(trimmed), {}, std::string(trimmed));
         }
 
@@ -35,8 +35,8 @@ Identifier Identifier::from_string(std::string_view string, std::string_view imp
         value = trimmed.substr(separator + 1);
     }
 
-    name_space = utils::trim_whitespace<char>(name_space);
-    value = utils::trim_whitespace<char>(value);
+    name_space = utils::trim_whitespace(name_space);
+    value = utils::trim_whitespace(value);
 
     // C++ move semantics are a mess; just shoving std::format into
     // the arguments appears to be undefined behaviour because stuff

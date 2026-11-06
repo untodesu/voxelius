@@ -320,7 +320,7 @@ static void apply_popup_values(ServerListItem* item, std::span<const std::string
     auto parts = parse_hostname(values[1]);
     auto name = values[0].substr(0, 18);
 
-    if(utils::is_whitespace<char>(name)) {
+    if(utils::is_whitespace(name)) {
         item->name = DEFAULT_NAME;
     }
     else {

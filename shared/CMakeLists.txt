@@ -27,6 +27,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/component/transform.hh"
     "${CMAKE_CURRENT_LIST_DIR}/component/velocity.cc"
     "${CMAKE_CURRENT_LIST_DIR}/component/velocity.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/cvar/commands.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/cvar/commands.hh"
     "${CMAKE_CURRENT_LIST_DIR}/entity/class_registry.cc"
     "${CMAKE_CURRENT_LIST_DIR}/entity/class_registry.hh"
     "${CMAKE_CURRENT_LIST_DIR}/entity/class.hh"

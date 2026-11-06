@@ -90,7 +90,7 @@ static void on_host_connect(const HostConnectEvent& event)
 
     auto desired_username = s_desired_username.value();
 
-    if(utils::is_whitespace<char>(desired_username)) {
+    if(utils::is_whitespace(desired_username)) {
         request.username = std::string("player");
     }
     else {

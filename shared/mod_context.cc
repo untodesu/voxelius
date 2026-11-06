@@ -84,19 +84,19 @@ bool ModInfo::parse(const config::Map& map, ModInfo& modinfo)
 
     auto hard_depends = map.value<std::string>("hard_depends").value_or(std::string {});
 
-    for(auto token : utils::tokenize<char>(hard_depends)) {
+    for(auto token : utils::tokenize(hard_depends)) {
         modinfo.hard_depends.emplace_back(parse_mod_entry(token));
     }
 
     auto soft_depends = map.value<std::string>("soft_depends").value_or(std::string {});
 
-    for(auto token : utils::tokenize<char>(soft_depends)) {
+    for(auto token : utils::tokenize(soft_depends)) {
         modinfo.soft_depends.emplace_back(parse_mod_entry(token));
     }
 
     auto conflicts = map.value<std::string>("conflicts").value_or(std::string {});
 
-    for(auto token : utils::tokenize<char>(conflicts)) {
+    for(auto token : utils::tokenize(conflicts)) {
         modinfo.conflicts.emplace_back(parse_mod_entry(token));
     }
 

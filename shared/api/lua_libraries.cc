@@ -60,7 +60,7 @@ static bool do_require(lua_State* L, std::string_view path)
 {
     auto identifier = Identifier::from_string(path);
 
-    if(!identifier.is_valid() || utils::is_whitespace<char>(identifier.name_space())) {
+    if(!identifier.is_valid() || utils::is_whitespace(identifier.name_space())) {
         lua_pushstring(L, "malformed path: ");
         lua_pushlstring(L, path.data(), path.size());
         lua_concat(L, 2);

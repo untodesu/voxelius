@@ -2,83 +2,73 @@
 
 #include "core/utils/string.hh"
 
-template<vx::char_type T>
-constexpr static std::array<T, 7> WHITESPACE_CHARS = { ' ', '\t', '\n', '\v', '\f', '\r', 0 };
+constexpr static std::array<char, 7> WHITESPACE_CHARS = { ' ', '\t', '\n', '\v', '\f', '\r', 0 };
+constexpr static char SINGLE_QUOTE_CHAR = '\'';
+constexpr static char DOUBLE_QUOTE_CHAR = '\"';
+constexpr static char BACKSLASH_CHAR = '\\';
 
-template<vx::char_type T>
-constexpr static T SINGLE_QUOTE_CHAR = static_cast<T>('\'');
-template<vx::char_type T>
-constexpr static T DOUBLE_QUOTE_CHAR = static_cast<T>('\"');
-
-template<vx::char_type T>
-static bool is_whitespace_char(const T character)
+static bool is_whitespace_char(char character)
 {
-    return std::ranges::any_of(WHITESPACE_CHARS<T>, [character](const T whitespace_char) {
-        return character == whitespace_char;
+    return std::ranges::any_of(WHITESPACE_CHARS, [character](char test) {
+        return character == test;
     });
 }
 
-template<vx::char_type T>
-bool utils::is_whitespace(std::basic_string_view<T> string)
+bool utils::is_whitespace(std::string_view string)
 {
     auto result = false;
     result = result || string.empty();
     result = result || string.size() == 1 && string[0] == 0;
-    result = result || string.find_first_not_of(WHITESPACE_CHARS<T>.data()) == std::basic_string_view<T>::npos;
+    result = result || string.find_first_not_of(WHITESPACE_CHARS.data()) == std::string_view::npos;
     return result;
 }
 
-template<vx::char_type T>
-bool utils::has_whitespace(std::basic_string_view<T> string)
+bool utils::has_whitespace(std::string_view string)
 {
-    return string.find_first_of(WHITESPACE_CHARS<T>.data()) != std::basic_string_view<T>::npos;
+    return string.find_first_of(WHITESPACE_CHARS.data()) != std::string_view::npos;
 }
 
-template<vx::char_type T>
-std::basic_string_view<T> utils::skip_whitespace(std::basic_string_view<T> string)
+std::string_view utils::skip_whitespace(std::string_view string)
 {
     std::size_t position = 0;
 
-    while(position < string.size() && is_whitespace_char<T>(string[position])) {
+    while(position < string.size() && is_whitespace_char(string[position])) {
         position += 1;
     }
 
     return string.substr(position);
 }
 
-template<vx::char_type T>
-std::basic_string_view<T> utils::trim_whitespace(std::basic_string_view<T> string)
+std::string_view utils::trim_whitespace(std::string_view string)
 {
-    auto start = string.find_first_not_of(WHITESPACE_CHARS<T>.data());
-    auto end = string.find_last_not_of(WHITESPACE_CHARS<T>.data());
+    auto start = string.find_first_not_of(WHITESPACE_CHARS.data());
+    auto end = string.find_last_not_of(WHITESPACE_CHARS.data());
 
-    if(start == std::basic_string_view<T>::npos || end == std::basic_string_view<T>::npos) {
+    if(start == std::string_view::npos || end == std::string_view::npos) {
         return {};
     }
 
     return string.substr(start, end - start + 1);
 }
 
-template<vx::char_type T>
-std::basic_string_view<T> utils::remove_comments(std::basic_string_view<T> string)
+std::string_view utils::remove_comments(std::string_view string)
 {
-    auto comment_position = string.find_first_of(static_cast<T>('#'));
+    auto comment_position = string.find_first_of('#');
 
-    if(comment_position == std::basic_string_view<T>::npos) {
+    if(comment_position == std::string_view::npos) {
         return string;
     }
 
     return string.substr(0, comment_position);
 }
 
-template<vx::char_type T>
-std::vector<std::basic_string_view<T>> utils::tokenize(std::basic_string_view<T> string)
+std::vector<std::string_view> utils::tokenize(std::string_view string)
 {
-    std::vector<std::basic_string_view<T>> tokens;
+    std::vector<std::string_view> tokens;
     std::size_t position = 0;
 
     while(position < string.size()) {
-        while(position < string.size() && is_whitespace_char<T>(string[position])) {
+        while(position < string.size() && is_whitespace_char(string[position])) {
             position += 1;
         }
 
@@ -86,9 +76,9 @@ std::vector<std::basic_string_view<T>> utils::tokenize(std::basic_string_view<T>
             break;
         }
 
-        T quote_char = 0;
+        char quote_char = 0;
 
-        if(string[position] == SINGLE_QUOTE_CHAR<T> || string[position] == DOUBLE_QUOTE_CHAR<T>) {
+        if(string[position] == SINGLE_QUOTE_CHAR || string[position] == DOUBLE_QUOTE_CHAR) {
             quote_char = string[position];
 
             position += 1;
@@ -96,7 +86,7 @@ std::vector<std::basic_string_view<T>> utils::tokenize(std::basic_string_view<T>
 
         std::size_t token_start = position;
 
-        if(quote_char != 0) {
+        if(quote_char) {
             while(position < string.size() && string[position] != quote_char) {
                 position += 1;
             }
@@ -108,7 +98,7 @@ std::vector<std::basic_string_view<T>> utils::tokenize(std::basic_string_view<T>
             }
         }
         else {
-            while(position < string.size() && !is_whitespace_char<T>(string[position])) {
+            while(position < string.size() && !is_whitespace_char(string[position])) {
                 position += 1;
             }
 
@@ -119,8 +109,63 @@ std::vector<std::basic_string_view<T>> utils::tokenize(std::basic_string_view<T>
     return tokens;
 }
 
-template<vx::char_type T>
-std::basic_string<T> utils::join(const std::vector<std::basic_string<T>>& parts, std::basic_string_view<T> separator)
+std::vector<std::string> utils::tokenize_esc(std::string_view string)
+{
+    std::vector<std::string> tokens;
+    std::size_t position = 0;
+
+    while(position < string.size()) {
+        while(position < string.size() && is_whitespace_char(string[position])) {
+            position += 1;
+        }
+
+        if(position >= string.size()) {
+            break;
+        }
+
+        char quote_char = 0;
+
+        if(string[position] == SINGLE_QUOTE_CHAR || string[position] == DOUBLE_QUOTE_CHAR) {
+            quote_char = string[position];
+
+            position += 1;
+        }
+
+        std::string token;
+
+        if(quote_char) {
+            while(position < string.size() && string[position] != quote_char) {
+                if(string[position] == BACKSLASH_CHAR && position + 1 < string.size()) {
+                    token.push_back(string[position + 1]);
+                    position += 2;
+                }
+                else {
+                    token.push_back(string[position]);
+                    position += 1;
+                }
+            }
+
+            tokens.push_back(std::move(token));
+
+            if(position < string.size()) {
+                position += 1;
+            }
+        }
+        else {
+            std::size_t token_start = position;
+
+            while(position < string.size() && !is_whitespace_char(string[position])) {
+                position += 1;
+            }
+
+            tokens.push_back(std::string(string.substr(token_start, position - token_start)));
+        }
+    }
+
+    return tokens;
+}
+
+std::string utils::join(std::span<const std::string> parts, std::string_view separator)
 {
     if(parts.empty()) {
         return {};
@@ -132,15 +177,15 @@ std::basic_string<T> utils::join(const std::vector<std::basic_string<T>>& parts,
         total_length += part.size();
     }
 
-    std::basic_string<T> result;
+    std::string result;
     result.reserve(total_length);
 
-    auto it = parts.cbegin();
+    auto it = parts.begin();
     result.append(*it);
     it = std::next(it);
 
     while(true) {
-        if(it == parts.cend()) {
+        if(it == parts.end()) {
             break;
         }
 
@@ -153,49 +198,51 @@ std::basic_string<T> utils::join(const std::vector<std::basic_string<T>>& parts,
     return result;
 }
 
-template bool utils::is_whitespace<char>(std::basic_string_view<char> string);
-template bool utils::is_whitespace<wchar_t>(std::basic_string_view<wchar_t> string);
-template bool utils::is_whitespace<char8_t>(std::basic_string_view<char8_t> string);
-template bool utils::is_whitespace<char16_t>(std::basic_string_view<char16_t> string);
-template bool utils::is_whitespace<char32_t>(std::basic_string_view<char32_t> string);
+std::string utils::join(std::span<const std::string_view> parts, std::string_view separator)
+{
+    if(parts.empty()) {
+        return {};
+    }
 
-template bool utils::has_whitespace<char>(std::basic_string_view<char> string);
-template bool utils::has_whitespace<wchar_t>(std::basic_string_view<wchar_t> string);
-template bool utils::has_whitespace<char8_t>(std::basic_string_view<char8_t> string);
-template bool utils::has_whitespace<char16_t>(std::basic_string_view<char16_t> string);
-template bool utils::has_whitespace<char32_t>(std::basic_string_view<char32_t> string);
+    auto total_length = separator.size() * parts.size() - parts.size();
 
-template std::basic_string_view<char> utils::skip_whitespace<char>(std::basic_string_view<char> string);
-template std::basic_string_view<wchar_t> utils::skip_whitespace<wchar_t>(std::basic_string_view<wchar_t> string);
-template std::basic_string_view<char8_t> utils::skip_whitespace<char8_t>(std::basic_string_view<char8_t> string);
-template std::basic_string_view<char16_t> utils::skip_whitespace<char16_t>(std::basic_string_view<char16_t> string);
-template std::basic_string_view<char32_t> utils::skip_whitespace<char32_t>(std::basic_string_view<char32_t> string);
+    for(const auto& part : parts) {
+        total_length += part.size();
+    }
 
-template std::basic_string_view<char> utils::trim_whitespace<char>(std::basic_string_view<char> string);
-template std::basic_string_view<wchar_t> utils::trim_whitespace<wchar_t>(std::basic_string_view<wchar_t> string);
-template std::basic_string_view<char8_t> utils::trim_whitespace<char8_t>(std::basic_string_view<char8_t> string);
-template std::basic_string_view<char16_t> utils::trim_whitespace<char16_t>(std::basic_string_view<char16_t> string);
-template std::basic_string_view<char32_t> utils::trim_whitespace<char32_t>(std::basic_string_view<char32_t> string);
+    std::string result;
+    result.reserve(total_length);
 
-template std::basic_string_view<char> utils::remove_comments<char>(std::basic_string_view<char> string);
-template std::basic_string_view<wchar_t> utils::remove_comments<wchar_t>(std::basic_string_view<wchar_t> string);
-template std::basic_string_view<char8_t> utils::remove_comments<char8_t>(std::basic_string_view<char8_t> string);
-template std::basic_string_view<char16_t> utils::remove_comments<char16_t>(std::basic_string_view<char16_t> string);
-template std::basic_string_view<char32_t> utils::remove_comments<char32_t>(std::basic_string_view<char32_t> string);
+    auto it = parts.begin();
+    result.append(*it);
+    it = std::next(it);
 
-template std::vector<std::basic_string_view<char>> utils::tokenize<char>(std::basic_string_view<char> string);
-template std::vector<std::basic_string_view<wchar_t>> utils::tokenize<wchar_t>(std::basic_string_view<wchar_t> string);
-template std::vector<std::basic_string_view<char8_t>> utils::tokenize<char8_t>(std::basic_string_view<char8_t> string);
-template std::vector<std::basic_string_view<char16_t>> utils::tokenize<char16_t>(std::basic_string_view<char16_t> string);
-template std::vector<std::basic_string_view<char32_t>> utils::tokenize<char32_t>(std::basic_string_view<char32_t> string);
+    while(true) {
+        if(it == parts.end()) {
+            break;
+        }
 
-template std::basic_string<char> utils::join<char>(const std::vector<std::basic_string<char>>& parts,
-    std::basic_string_view<char> separator);
-template std::basic_string<wchar_t> utils::join<wchar_t>(const std::vector<std::basic_string<wchar_t>>& parts,
-    std::basic_string_view<wchar_t> separator);
-template std::basic_string<char8_t> utils::join<char8_t>(const std::vector<std::basic_string<char8_t>>& parts,
-    std::basic_string_view<char8_t> separator);
-template std::basic_string<char16_t> utils::join<char16_t>(const std::vector<std::basic_string<char16_t>>& parts,
-    std::basic_string_view<char16_t> separator);
-template std::basic_string<char32_t> utils::join<char32_t>(const std::vector<std::basic_string<char32_t>>& parts,
-    std::basic_string_view<char32_t> separator);
+        result.append(separator);
+        result.append(*it);
+
+        it = std::next(it);
+    }
+
+    return result;
+}
+
+std::string utils::escape_quotations(std::string_view string)
+{
+    std::string result;
+    result.reserve(string.size());
+
+    for(const auto& character : string) {
+        if(character == SINGLE_QUOTE_CHAR || character == DOUBLE_QUOTE_CHAR) {
+            result.push_back(BACKSLASH_CHAR);
+        }
+
+        result.push_back(character);
+    }
+
+    return result;
+}
