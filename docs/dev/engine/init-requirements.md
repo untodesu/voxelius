@@ -12,7 +12,7 @@ You also need network access to clone the repository.
 
 - A C++20 compiler. You may hit issues on platforms that lack fixed-width integers in the standard library (see cppreference for `cstdint`).
 - A C99 compiler. Many dependencies are C and must be compiled as C. Building them with a C++ compiler is not guaranteed to work.
-- CMake 3.15 or newer, plus a working generator backend (Visual Studio, GNU make, or any other backend CMake supports).
+- CMake 3.25 or newer, plus any generator that CMake supports (Visual Studio, Ninja, GNU make). The presets use schema version 6.
 - Python 3.x for internal scripts.
 - A text editor. Visual Studio Code works. Use whatever editor you prefer.
 
