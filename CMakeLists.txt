@@ -39,6 +39,18 @@ add_subdirectory(shared)
 add_subdirectory(client)
 add_subdirectory(server)
 
+# clangd looks for the compilation database in the repository root, while CMake writes it into the
+# binary dir; refresh the root copy on every build (copy_if_different compares content, so an
+# unchanged database is not rewritten). The Visual Studio generator cannot export one at all.
+if(CMAKE_EXPORT_COMPILE_COMMANDS AND CMAKE_GENERATOR MATCHES "Ninja|Makefiles")
+    add_custom_target(copy-compile-commands ALL
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                "${PROJECT_BINARY_DIR}/compile_commands.json"
+                "${PROJECT_SOURCE_DIR}/compile_commands.json"
+        COMMENT "Refreshing ${PROJECT_SOURCE_DIR}/compile_commands.json for clangd"
+        VERBATIM)
+endif()
+
 install(FILES "${PROJECT_SOURCE_DIR}/LICENSE" DESTINATION ".")
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/data" DESTINATION ".")
 

@@ -40,7 +40,7 @@ DEFAULT_SETTINGS = {
 }
 
 # Include-path and define defaults for the Microsoft C/C++ extension. The clangd environment
-# needs no c_cpp_properties.json: it reads build/compile_commands.json instead.
+# needs no c_cpp_properties.json: it reads compile_commands.json from the repository root instead.
 CPP_DEFINES = ["TRACY_ENABLE", "NOMINMAX", "_CRT_SECURE_NO_WARNINGS", "_USE_MATH_DEFINES"]
 
 CLANGD_EXTENSION = "llvm-vs-code-extensions.vscode-clangd"
@@ -54,8 +54,7 @@ ENGINE_SETTINGS = {
         "C_Cpp.codeAnalysis.runAutomatically": False,
         "clangd.enable": True,
         # No --compile-commands-dir: clangd then looks for a database upwards from each file,
-        # so build/compile_commands.json (copied there by setup_compilation_database) serves
-        # the whole project.
+        # so compile_commands.json in the repository root serves the whole project.
         "clangd.arguments": [
             "--background-index",
             "--background-index-priority=low",
@@ -88,6 +87,15 @@ def _keep_strings(match):
 
 def relative(path):
     return path.relative_to(ROOT).as_posix()
+
+
+def workspace_include(path):
+    path = path.resolve()
+
+    try:
+        return f"${{workspaceFolder}}/{path.relative_to(ROOT).as_posix()}"
+    except ValueError:
+        return path.as_posix()
 
 
 def backup(path):
@@ -188,28 +196,49 @@ def dependency_includes():
     directories = sorted(directory for directory in (ROOT / "deps").glob("*/include") if directory.is_dir())
     tracy = ROOT / "deps" / "tracy" / "public" / "tracy"
 
-    paths = [relative(directory) for directory in directories]
+    paths = list(directories)
 
     if tracy.is_dir():
-        paths.append(relative(tracy))
+        paths.append(tracy)
 
     return sorted(paths)
 
 
+def configure_presets():
+    path = ROOT / "CMakePresets.json"
+
+    if not path.is_file():
+        return []
+
+    data = json.loads(path.read_text(encoding="utf-8-sig"))
+    return data.get("configurePresets", [])
+
+
+def preset_binary_dir(preset):
+    value = preset.get("binaryDir", "")
+
+    if not value:
+        return None
+
+    value = value.replace("${sourceDir}", ROOT.as_posix())
+    value = value.replace("${presetName}", preset.get("name", ""))
+    return Path(value).resolve()
+
+
 def sdl3_includes():
-    """The Windows presets download SDL3 into build/<preset>/_deps at configure time."""
-    presets = json.loads((ROOT / "CMakePresets.json").read_text(encoding="utf-8-sig"))
+    """The Windows presets download SDL3 into their binary dir at configure time."""
     paths = []
 
-    for preset in presets.get("configurePresets", []):
-        binary_dir = preset.get("binaryDir", "")
-
-        if not preset.get("name", "").startswith("windows-") or "${sourceDir}/" not in binary_dir:
+    for preset in configure_presets():
+        if not preset.get("name", "").startswith("windows-"):
             continue
 
-        paths.append(binary_dir.split("${sourceDir}/", 1)[1] + "/_deps/download_sdl3-src/include")
+        binary_dir = preset_binary_dir(preset)
 
-    return paths
+        if binary_dir is not None:
+            paths.append(binary_dir / "_deps" / "download_sdl3-src" / "include")
+
+    return sorted(set(paths))
 
 
 def setup_cpp_properties():
@@ -218,7 +247,7 @@ def setup_cpp_properties():
     properties, lossy = load(path)
     original = copy.deepcopy(properties)
 
-    include_path = [f"${{workspaceFolder}}/{directory}" for directory in sdl3_includes() + dependency_includes()]
+    include_path = [workspace_include(directory) for directory in sdl3_includes() + dependency_includes()]
     configuration = {
         "name": "Voxelius",
         "cppStandard": "c++23",
@@ -243,37 +272,24 @@ def setup_cpp_properties():
 
 
 def setup_compilation_database(preset):
-    """CMake presets configure into build/<preset>/, but clangd only looks for a database in the
-    directories above a file and in their build/ subdirectory, so the database of one preset is
-    copied to build/compile_commands.json. The copy goes stale on reconfigure: re-run the script.
-    Only the Ninja and Makefile generators write a database; Visual Studio writes none."""
-    target = ROOT / "build" / "compile_commands.json"
+    """CMake's copy-compile-commands target refreshes compile_commands.json in the repository root
+    on every build. This only checks that the database is there; configure and build a Ninja or
+    Makefile preset if it is missing. Visual Studio cannot export one."""
+    path = ROOT / "compile_commands.json"
+
+    if path.is_file():
+        print(f"  ok       {relative(path)} exists")
+        return True
+
+    print("  warning  compile_commands.json is missing from the repository root")
+    print("           configure and build a preset with Ninja, then re-run this script:")
 
     if preset:
-        source = ROOT / "build" / preset / "compile_commands.json"
+        print(f"             cmake --build --preset {preset} --target copy-compile-commands")
     else:
-        candidates = sorted(ROOT.glob("build/*/compile_commands.json"), key=lambda path: path.stat().st_mtime)
-        source = candidates[-1] if candidates else None
+        print("             cmake --build --preset <preset> --target copy-compile-commands")
 
-    if source is None:
-        print("  warning  no compilation database under build/*/compile_commands.json")
-        print("           configure a preset with Ninja, which writes one, and re-run:")
-        print("             cmake -S . -B build/clangd -G Ninja -DCMAKE_BUILD_TYPE=Debug \\")
-        print("                   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON")
-        return False
-
-    if not source.is_file():
-        print(f"  warning  {relative(source)} does not exist; configure the preset first:")
-        print(f"             cmake --preset {preset}")
-        return False
-
-    data = source.read_bytes()
-    if target.is_file() and target.read_bytes() == data:
-        print(f"  ok       {relative(target)} is up to date ({relative(source.parent)})")
-    else:
-        target.write_bytes(data)
-        print(f"  write    {relative(target)} from {relative(source.parent)}")
-    return True
+    return False
 
 
 def main():
@@ -281,7 +297,7 @@ def main():
     parser.add_argument("environment", choices=sorted(ENGINE_SETTINGS))
     parser.add_argument(
         "--preset",
-        help="clangd: the CMake preset whose compilation database to use (default: the most recently configured one)",
+        help="clangd: the CMake preset to name when compile_commands.json is missing",
     )
     args = parser.parse_args()
     environment = args.environment
