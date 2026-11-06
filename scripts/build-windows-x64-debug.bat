@@ -1,6 +1,6 @@
 @echo off
 cd /D "%~dp0\.."
-cmake --preset windows-x64
+cmake --preset windows-x64-debug
 if %errorlevel% neq 0 exit /b %errorlevel%
 cmake --build --preset windows-x64-debug
 if %errorlevel% neq 0 exit /b %errorlevel%
