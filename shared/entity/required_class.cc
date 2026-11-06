@@ -14,9 +14,9 @@ static std::optional<Identifier> s_pending_player;
 static void set_pending(std::optional<Identifier>& pending, Identifier id, const ModContext* ctx, std::string_view name)
 {
     if(pending.has_value()) {
-        LOG_WARNING("{} overrides existing required {} class {} with {}", ctx->name_space(), name, pending->full_string(),
+        msg::log_warning("{} overrides existing required {} class {} with {}", ctx->name_space(), name, pending->full_string(),
             id.full_string());
-        LOG_WARNING("this is probably not a good idea!");
+        msg::log_warning("this is probably not a good idea!");
     }
 
     pending = id;

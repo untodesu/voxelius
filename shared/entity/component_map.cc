@@ -112,7 +112,7 @@ bool component_map::attach(component_id_type id, entt::entity entity, const std:
         return true;
     }
     else {
-        LOG_WARNING("component not present: {}", static_cast<std::size_t>(id));
+        msg::log_warning("component not present: {}", static_cast<std::size_t>(id));
         return false;
     }
 }
@@ -134,7 +134,7 @@ void component_map::encode_net(component_id_type id, entt::entity entity, WriteB
         functions->encode_net(entity, buffer);
     }
     else {
-        LOG_WARNING("component not present: {}", static_cast<std::size_t>(id));
+        msg::log_warning("component not present: {}", static_cast<std::size_t>(id));
     }
 }
 
@@ -144,7 +144,7 @@ void component_map::decode_net(component_id_type id, entt::entity entity, ReadBu
         functions->decode_net(entity, buffer);
     }
     else {
-        LOG_WARNING("component not present: {}", static_cast<std::size_t>(id));
+        msg::log_warning("component not present: {}", static_cast<std::size_t>(id));
     }
 }
 
@@ -154,7 +154,7 @@ void component_map::encode_dat(component_id_type id, entt::entity entity, WriteB
         functions->encode_dat(entity, buffer);
     }
     else {
-        LOG_WARNING("component not present: {}", static_cast<std::size_t>(id));
+        msg::log_warning("component not present: {}", static_cast<std::size_t>(id));
     }
 }
 
@@ -164,7 +164,7 @@ void component_map::decode_dat(component_id_type id, entt::entity entity, ReadBu
         functions->decode_dat(entity, buffer);
     }
     else {
-        LOG_WARNING("component not present: {}", static_cast<std::size_t>(id));
+        msg::log_warning("component not present: {}", static_cast<std::size_t>(id));
     }
 }
 

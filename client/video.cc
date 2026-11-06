@@ -269,7 +269,7 @@ void video::request_fullscreen(int width, int height, int rate)
 
     s_current_mode.set_value(std::format("{}:{}:{}", best_mode.w, best_mode.h, static_cast<int>(best_mode.refresh_rate)));
 
-    LOG_DEBUG("set mode to: {}x{} ({} Hz)", best_mode.w, best_mode.h, static_cast<int>(best_mode.refresh_rate));
+    msg::log_debug("set mode to: {}x{} ({} Hz)", best_mode.w, best_mode.h, static_cast<int>(best_mode.refresh_rate));
 }
 
 void video::request_windowed(int width, int height)
@@ -287,7 +287,7 @@ void video::request_windowed(int width, int height)
 
     s_current_mode.set_value("windowed");
 
-    LOG_DEBUG("set mode to: windowed {}x{}", width, height);
+    msg::log_debug("set mode to: windowed {}x{}", width, height);
 }
 
 void video::request_windowed(void)

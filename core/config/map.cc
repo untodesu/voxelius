@@ -142,7 +142,7 @@ void config::Map::load(std::istream& stream)
         auto separator = kv_string.find('=');
 
         if(separator == std::string::npos) {
-            LOG_WARNING("[stream]: invalid line: '{}'", line);
+            msg::log_warning("[stream]: invalid line: '{}'", line);
             continue;
         }
 

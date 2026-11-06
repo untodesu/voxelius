@@ -56,7 +56,7 @@ bool ModInfo::parse(const config::Map& map, ModInfo& modinfo)
     auto name = map.value<std::string>("name");
 
     if(!name.has_value() || name->empty()) {
-        LOG_ERROR("missing required field 'name'");
+        msg::log_error("missing required field 'name'");
         return false;
     }
 
@@ -130,7 +130,7 @@ bool ModContext::initialize(void)
     auto L = luaL_newstate();
 
     if(L == nullptr) {
-        LOG_ERROR("{}: unable to create a Lua state", m_modinfo.name);
+        msg::log_error("{}: unable to create a Lua state", m_modinfo.name);
         m_status = mod_status::FAILED;
         return false;
     }
@@ -152,7 +152,7 @@ bool ModContext::initialize(void)
     std::string source;
 
     if(!utils::read_file(entry_path, source)) {
-        LOG_ERROR("{}: {}: {}", m_modinfo.name, entry_path, utils::physfs_error());
+        msg::log_error("{}: {}: {}", m_modinfo.name, entry_path, utils::physfs_error());
         m_status = mod_status::FAILED;
         return false;
     }
@@ -160,7 +160,7 @@ bool ModContext::initialize(void)
     auto load_status = luaL_loadbuffer(L, source.data(), source.size(), chunk_name.c_str());
 
     if(load_status != LUA_OK) {
-        LOG_ERROR("{}: {}", m_modinfo.name, lua_tostring(L, -1));
+        msg::log_error("{}: {}", m_modinfo.name, lua_tostring(L, -1));
         m_status = mod_status::FAILED;
         return false;
     }
@@ -168,7 +168,7 @@ bool ModContext::initialize(void)
     auto pcall_status = lua_pcall(L, 0, 0, 0);
 
     if(pcall_status != LUA_OK) {
-        LOG_ERROR("{}: {}", m_modinfo.name, lua_tostring(L, -1));
+        msg::log_error("{}: {}", m_modinfo.name, lua_tostring(L, -1));
         m_status = mod_status::FAILED;
         return false;
     }

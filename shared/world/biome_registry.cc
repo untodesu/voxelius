@@ -49,7 +49,7 @@ void biome_registry::commit(ModContext& ctx)
         auto [it, inserted] = s_names.try_emplace(name, global_id);
 
         if(!inserted) {
-            LOG_WARNING("duplicate biome name: {}", name.full_string());
+            msg::log_warning("duplicate biome name: {}", name.full_string());
             continue;
         }
 

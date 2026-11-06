@@ -155,7 +155,7 @@ static void on_auth_request(const packet::Auth_Request& packet)
     session->identity = utils::crc64(session->pkey);
     session->state = session_state::CHALLENGE;
 
-    LOG_INFO("{} ({}) connected", session->username, session->identity);
+    msg::log_info("{} ({}) connected", session->username, session->identity);
 
     packet::Auth_Challenge response {};
     response.nonce = session->nonce;
@@ -185,7 +185,7 @@ static void on_auth_response(const packet::Auth_Response& packet)
 
     session->state = session_state::CONNECTED;
 
-    LOG_INFO("{} ({}) authenticated successfully", session->username, session->identity);
+    msg::log_info("{} ({}) authenticated successfully", session->username, session->identity);
 
     packet::Auth_Admission response {};
     response.client_id = session->client_id;
@@ -397,7 +397,7 @@ void sessions::destroy(Session* session, std::optional<std::uint32_t> reason)
             reason_string = std::string_view("connection closed");
         }
 
-        LOG_INFO("{} ({}) disconnected: {}", session->username, session->identity, reason_string);
+        msg::log_info("{} ({}) disconnected: {}", session->username, session->identity, reason_string);
 
         if(session->peer) {
             session->peer->data = nullptr;

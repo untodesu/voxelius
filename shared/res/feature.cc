@@ -155,7 +155,7 @@ static const void* feature_load_fn(const char* path, std::uint32_t flags)
     std::string source;
 
     if(!utils::read_file(path, source)) {
-        LOG_WARNING("{}: {}", path, utils::physfs_error());
+        msg::log_warning("{}: {}", path, utils::physfs_error());
         return nullptr;
     }
 
@@ -163,12 +163,12 @@ static const void* feature_load_fn(const char* path, std::uint32_t flags)
     auto json = json_value_get_object(jsonv);
 
     if(jsonv == nullptr) {
-        LOG_WARNING("{}: parse error", path);
+        msg::log_warning("{}: parse error", path);
         return nullptr;
     }
 
     if(json == nullptr) {
-        LOG_WARNING("{}: malformed JSON", path);
+        msg::log_warning("{}: malformed JSON", path);
         json_value_free(jsonv);
         return nullptr;
     }
@@ -177,7 +177,7 @@ static const void* feature_load_fn(const char* path, std::uint32_t flags)
     auto palette = parse_palette(palette_array);
 
     if(!palette.has_value()) {
-        LOG_WARNING("{}: invalid or missing palette", path);
+        msg::log_warning("{}: invalid or missing palette", path);
         json_value_free(jsonv);
         return nullptr;
     }
@@ -188,7 +188,7 @@ static const void* feature_load_fn(const char* path, std::uint32_t flags)
     auto parts = parse_parts(parts_array, palette.value(), bounds);
 
     if(!parts.has_value()) {
-        LOG_WARNING("{}: invalid or missing parts", path);
+        msg::log_warning("{}: invalid or missing parts", path);
         json_value_free(jsonv);
         return nullptr;
     }

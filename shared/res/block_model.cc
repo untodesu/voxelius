@@ -167,7 +167,7 @@ static const void* block_model_load_fn(const char* path, std::uint32_t flags)
     std::string source;
 
     if(!utils::read_file(path, source)) {
-        LOG_WARNING("{}: {}", path, utils::physfs_error());
+        msg::log_warning("{}: {}", path, utils::physfs_error());
         return nullptr;
     }
 
@@ -175,12 +175,12 @@ static const void* block_model_load_fn(const char* path, std::uint32_t flags)
     auto json = json_value_get_object(jsonv);
 
     if(jsonv == nullptr) {
-        LOG_WARNING("{}: parse error", path);
+        msg::log_warning("{}: parse error", path);
         return nullptr;
     }
 
     if(json == nullptr) {
-        LOG_WARNING("{}: malformed JSON", path);
+        msg::log_warning("{}: malformed JSON", path);
         json_value_free(jsonv);
         return nullptr;
     }
@@ -189,7 +189,7 @@ static const void* block_model_load_fn(const char* path, std::uint32_t flags)
     auto slots = parse_texture_slots(textures);
 
     if(!slots.has_value()) {
-        LOG_WARNING("{}: invalid or missing textures", path);
+        msg::log_warning("{}: invalid or missing textures", path);
         json_value_free(jsonv);
         return nullptr;
     }
@@ -198,7 +198,7 @@ static const void* block_model_load_fn(const char* path, std::uint32_t flags)
     auto num_elements = json_array_get_count(elements);
 
     if(elements == nullptr || num_elements == 0) {
-        LOG_WARNING("{}: invalid or missing elements", path);
+        msg::log_warning("{}: invalid or missing elements", path);
         json_value_free(jsonv);
         return nullptr;
     }
@@ -212,7 +212,7 @@ static const void* block_model_load_fn(const char* path, std::uint32_t flags)
         auto element = parse_element(element_object);
 
         if(!element.has_value()) {
-            LOG_WARNING("{}: invalid element at index {}", path, i);
+            msg::log_warning("{}: invalid element at index {}", path, i);
             json_value_free(jsonv);
             return nullptr;
         }

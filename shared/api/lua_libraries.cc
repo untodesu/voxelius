@@ -162,7 +162,7 @@ static int api_override_print(lua_State* L)
         debug_line = std::max(0, ar.currentline);
     }
 
-    LOG_INFO("{}:{}: {}", debug_file, debug_line, message);
+    msg::log_info("{}:{}: {}", debug_file, debug_line, message);
 
     return 0;
 }

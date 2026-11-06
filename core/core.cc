@@ -72,9 +72,9 @@ void core::setup(int argc, char** argv)
 
     s_modspath = s_userpath / "mods";
 
-    LOG_DEBUG("gamepath set to {}", s_gamepath.string());
-    LOG_DEBUG("userpath set to {}", s_userpath.string());
-    LOG_DEBUG("modspath set to {}", s_modspath.string());
+    msg::log_debug("gamepath set to {}", s_gamepath.string());
+    msg::log_debug("userpath set to {}", s_userpath.string());
+    msg::log_debug("modspath set to {}", s_modspath.string());
 
     std::filesystem::create_directories(s_userpath);
     std::filesystem::create_directories(s_modspath);

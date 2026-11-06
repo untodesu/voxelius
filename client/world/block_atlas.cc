@@ -276,7 +276,7 @@ static void build_atlas(void)
 
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
-    LOG_INFO("packed {} frames into {} layer(s) of a {}x{} atlas", rects.size(), num_layers, LAYER_SIZE, LAYER_SIZE);
+    msg::log_info("packed {} frames into {} layer(s) of a {}x{} atlas", rects.size(), num_layers, LAYER_SIZE, LAYER_SIZE);
 
     s_pending.clear();
     s_pending.shrink_to_fit();
@@ -301,7 +301,7 @@ const AtlasStrip* block_atlas::load(std::span<const Identifier> textures)
             auto image = res::load<Image>(id, "textures/block");
 
             if(image == nullptr) {
-                LOG_WARNING("{}: failed to load image", id.full_string());
+                msg::log_warning("{}: failed to load image", id.full_string());
                 continue;
             }
 
@@ -373,7 +373,7 @@ void block_atlas::init_late(void)
         auto model = res::load<BlockModel>(def.model_name, "models/block", ".json");
 
         if(model == nullptr) {
-            LOG_WARNING("{}: failed to load block model", def.model_name.full_string());
+            msg::log_warning("{}: failed to load block model", def.model_name.full_string());
             continue;
         }
 
@@ -381,12 +381,12 @@ void block_atlas::init_late(void)
             auto frames = def.resolve_albedo_slot(slot);
 
             if(!frames.has_value()) {
-                LOG_WARNING("{}: missing albedo texture for slot '{}'", def.model_name.full_string(), slot);
+                msg::log_warning("{}: missing albedo texture for slot '{}'", def.model_name.full_string(), slot);
                 continue;
             }
 
             if(nullptr == block_atlas::load(frames.value())) {
-                LOG_WARNING("{}: failed to load atlas strip for slot '{}'", def.model_name.full_string(), slot);
+                msg::log_warning("{}: failed to load atlas strip for slot '{}'", def.model_name.full_string(), slot);
             }
         }
 
@@ -394,7 +394,7 @@ void block_atlas::init_late(void)
             auto mask_frames = std::array { it.second };
 
             if(nullptr == block_atlas::load(mask_frames)) {
-                LOG_WARNING("{}: failed to load mask for slot '{}'", def.model_name.full_string(), it.first);
+                msg::log_warning("{}: failed to load mask for slot '{}'", def.model_name.full_string(), it.first);
             }
         }
     }
@@ -413,20 +413,20 @@ void block_atlas::init_late(void)
         auto albedo_still = block_atlas::load(def.albedo_still);
 
         if(albedo_still == nullptr) {
-            LOG_WARNING("fluid {}: failed to load still textures", fluid_label);
+            msg::log_warning("fluid {}: failed to load still textures", fluid_label);
         }
 
         auto albedo_flowing = block_atlas::load(def.albedo_flowing);
 
         if(albedo_flowing == nullptr) {
-            LOG_WARNING("fluid {}: failed to load flowing textures", fluid_label);
+            msg::log_warning("fluid {}: failed to load flowing textures", fluid_label);
         }
 
         if(def.mask_still.has_value()) {
             std::array mask_frames { def.mask_still.value() };
 
             if(nullptr == block_atlas::load(mask_frames)) {
-                LOG_WARNING("fluid {}: failed to load still mask", fluid_label);
+                msg::log_warning("fluid {}: failed to load still mask", fluid_label);
             }
         }
 
@@ -434,7 +434,7 @@ void block_atlas::init_late(void)
             std::array mask_frames { def.mask_flowing.value() };
 
             if(nullptr == block_atlas::load(mask_frames)) {
-                LOG_WARNING("fluid {}: failed to load flowing mask", fluid_label);
+                msg::log_warning("fluid {}: failed to load flowing mask", fluid_label);
             }
         }
     }

@@ -42,7 +42,7 @@ static std::atomic_bool s_is_running;
 
 static void signal_handler(int)
 {
-    LOG_INFO("received termination signal");
+    msg::log_info("received termination signal");
 
     s_is_running.store(false);
 }
@@ -208,7 +208,7 @@ static void wrapped_main(int argc, char** argv)
     TracyAppInfo(version::full.data(), version::full.size());
     TracyPlotConfig("Frametime ms", tracy::PlotFormatType::Number, false, true, 0);
 
-    LOG_INFO("engine version: {}", version::full);
+    msg::log_info("engine version: {}", version::full);
 
     std::signal(SIGABRT, &signal_handler);
     std::signal(SIGILL, &signal_handler);
@@ -271,7 +271,7 @@ static void wrapped_main(int argc, char** argv)
     client_game::init_late();
 
 #ifndef NDEBUG
-    LOG_WARNING("debug build");
+    msg::log_warning("debug build");
 #endif
 
     s_is_running.store(true);
@@ -340,9 +340,9 @@ static void wrapped_main(int argc, char** argv)
         TracyPlot("Vertices", static_cast<int64_t>(globals::num_draw_vertices));
     }
 
-    LOG_INFO("shutdown after {} frames", globals::window_framecount);
-    LOG_INFO("avg framerate: {:.03f} FPS ({:.03f} ms)", 1.0f / globals::window_frametime_avg, 1000.0f * globals::window_frametime_avg);
-    LOG_INFO("last frame I drew {} vertices ({} draw calls)", globals::num_draw_vertices, globals::num_draw_calls);
+    msg::log_info("shutdown after {} frames", globals::window_framecount);
+    msg::log_info("avg framerate: {:.03f} FPS ({:.03f} ms)", 1.0f / globals::window_frametime_avg, 1000.0f * globals::window_frametime_avg);
+    msg::log_info("last frame I drew {} vertices ({} draw calls)", globals::num_draw_vertices, globals::num_draw_calls);
 
     bother::shutdown();
 
@@ -375,28 +375,24 @@ static void wrapped_main(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    uulog::add_sink(&uulog::builtin::stderr_ansi);
+    msg::add_sink<&msg::detail::stderr_sink>();
 
     try {
         wrapped_main(argc, argv);
         return EXIT_SUCCESS;
     }
     catch(const std::exception& ex) {
-        uulog::detail::error("unknown", 0, ex.what(), std::strlen(ex.what()));
+        msg::log_error(std::string_view(ex.what()));
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Engine Error", ex.what(), nullptr);
         return EXIT_FAILURE;
     }
     catch(const vx::detail::Exception& ex) {
-        auto& location = ex.location();
-        auto file = std::filesystem::path(location.file_name()).filename().string();
-        auto line = static_cast<unsigned long>(location.line());
-
-        uulog::detail::error(file.c_str(), line, ex.what_standard(), ex.what().size());
+        msg::log_error(ex.what_standard(), ex.location());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Engine Error", ex.what_standard(), nullptr);
         return EXIT_FAILURE;
     }
     catch(...) {
-        uulog::detail::error("unknown", 0, "Unknown exception", std::strlen("Unknown exception"));
+        msg::log_error(std::string_view("Unknown exception"));
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Engine Error", "Unknown exception", nullptr);
         return EXIT_FAILURE;
     }

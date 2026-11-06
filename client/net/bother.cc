@@ -138,7 +138,7 @@ static void thread_main(std::stop_token stop_token)
     auto host = enet_host_create(nullptr, MAX_PEERS, 1, 0, 0);
 
     if(host == nullptr) {
-        LOG_WARNING("failed to create host");
+        msg::log_warning("failed to create host");
         return;
     }
 

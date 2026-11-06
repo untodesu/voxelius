@@ -50,8 +50,8 @@ void universe::init(void)
 
 void universe::init_late(void)
 {
-    LOG_INFO("set world root={}", s_root_dir.string());
-    LOG_INFO("set world seed={}", s_seed.value());
+    msg::log_info("set world root={}", s_root_dir.string());
+    msg::log_info("set world seed={}", s_seed.value());
 }
 
 void universe::shutdown(void)

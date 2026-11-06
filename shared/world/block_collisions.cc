@@ -56,7 +56,7 @@ static std::unique_ptr<BakedBlockCollision> bake_collision(const BlockDefinition
     auto collision = res::load<BlockCollision>(def.bcoll_name, "collisions/block", ".json");
 
     if(collision == nullptr) {
-        LOG_WARNING("{}: load failed", def.bcoll_name.full_string());
+        msg::log_warning("{}: load failed", def.bcoll_name.full_string());
         return nullptr;
     }
 

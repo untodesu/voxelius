@@ -498,12 +498,12 @@ static void load_servers_json(void)
         auto json = json_value_get_object(jsonv);
 
         if(jsonv == nullptr) {
-            LOG_WARNING("{}: malformed JSON", JSON_PATH);
+            msg::log_warning("{}: malformed JSON", JSON_PATH);
             return;
         }
 
         if(json == nullptr) {
-            LOG_WARNING("{}: expected JSON object", JSON_PATH);
+            msg::log_warning("{}: expected JSON object", JSON_PATH);
             json_value_free(jsonv);
             return;
         }
@@ -513,7 +513,7 @@ static void load_servers_json(void)
         auto servers = json_object_get_array(json, "servers");
 
         if(direct_hostname == nullptr || direct_invite_str == nullptr || servers == nullptr) {
-            LOG_WARNING("{}: expected JSON object with direct_hostname, direct_invite, and servers keys", JSON_PATH);
+            msg::log_warning("{}: expected JSON object with direct_hostname, direct_invite, and servers keys", JSON_PATH);
             json_value_free(jsonv);
             return;
         }
@@ -536,7 +536,7 @@ static void load_servers_json(void)
             auto invite_str = json_object_get_string(item, "invite");
 
             if(item == nullptr || name == nullptr || hostname == nullptr || invite_str == nullptr) {
-                LOG_WARNING("{}: expected JSON object with name, hostname, and invite keys", JSON_PATH);
+                msg::log_warning("{}: expected JSON object with name, hostname, and invite keys", JSON_PATH);
                 continue;
             }
 

@@ -50,8 +50,8 @@ static GLuint compile_shader(std::string_view path, const char* source, GLenum s
         std::basic_string<GLchar> info_log;
         info_log.resize(info_log_length);
         glGetShaderInfoLog(shader, info_log_length, nullptr, info_log.data());
-        LOG_INFO("shader information:", path);
-        LOG_INFO("{}", info_log);
+        msg::log_info("shader information:", path);
+        msg::log_info("{}", info_log);
     }
 
     GLint compile_status;
@@ -76,12 +76,12 @@ bool ShaderProgram::setup(const Identifier& id)
     std::istringstream frag_stream;
 
     if(!utils::read_file(vert_path, vert_stream)) {
-        LOG_WARNING("{}: read failed", vert_path);
+        msg::log_warning("{}: read failed", vert_path);
         return false;
     }
 
     if(!utils::read_file(frag_path, frag_stream)) {
-        LOG_WARNING("{}: read failed", frag_path);
+        msg::log_warning("{}: read failed", frag_path);
         return false;
     }
 
@@ -134,8 +134,8 @@ bool ShaderProgram::update(void)
         std::basic_string<GLchar> info_log;
         info_log.resize(info_log_length);
         glGetProgramInfoLog(handle, info_log_length, nullptr, info_log.data());
-        LOG_INFO("program information:");
-        LOG_INFO("{}", info_log);
+        msg::log_info("program information:");
+        msg::log_info("{}", info_log);
     }
 
     glDeleteShader(frag);

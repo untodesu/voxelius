@@ -29,7 +29,7 @@ void res::detail::register_loader(const std::type_info& type, load_func load_fn,
 
     assert(0 == s_loaders.count(type_index));
 
-    LOG_DEBUG("registering new loader for <{}>", loader->classname);
+    msg::log_debug("registering new loader for <{}>", loader->classname);
 
     s_loaders.insert_or_assign(type_index, std::move(loader));
 }
@@ -42,7 +42,7 @@ res::handle<void> res::detail::load_resource(const std::type_info& type, std::st
     auto loader = s_loaders.find(type_index);
 
     if(loader == s_loaders.cend()) {
-        LOG_WARNING("no loader present for <{}>", type.name());
+        msg::log_warning("no loader present for <{}>", type.name());
         return nullptr;
     }
 
@@ -52,7 +52,7 @@ res::handle<void> res::detail::load_resource(const std::type_info& type, std::st
         auto raw = loader->second->load_fn(full_path.c_str(), flags);
 
         if(raw == nullptr) {
-            LOG_WARNING("{}<{}>: load failed", full_path, type.name());
+            msg::log_warning("{}<{}>: load failed", full_path, type.name());
             return nullptr;
         }
 
@@ -78,7 +78,7 @@ res::handle<void> res::detail::find_resource(const std::type_info& type, std::st
     auto loader = s_loaders.find(type_index);
 
     if(loader == s_loaders.cend()) {
-        LOG_WARNING("no loader present for <{}>", type.name());
+        msg::log_warning("no loader present for <{}>", type.name());
         return nullptr;
     }
 
@@ -111,7 +111,7 @@ void res::soft_purge(bool include_cached)
 
         while(iter != loader->resources.end()) {
             if(iter->second.use_count() <= 1) {
-                LOG_DEBUG("releasing {}<{}>", iter->first, loader->classname);
+                msg::log_debug("releasing {}<{}>", iter->first, loader->classname);
 
                 loader->free_fn(iter->second.get());
 
@@ -136,10 +136,10 @@ void res::hard_purge(void)
             auto& handle = inner.second;
 
             if(handle.use_count() > 1) {
-                LOG_WARNING("zombie resource: {}<{}> use_count={}", path, loader->classname, handle.use_count());
+                msg::log_warning("zombie resource: {}<{}> use_count={}", path, loader->classname, handle.use_count());
             }
 
-            LOG_DEBUG("releasing {}<{}>", path, loader->classname);
+            msg::log_debug("releasing {}<{}>", path, loader->classname);
 
             loader->free_fn(handle.get());
         }

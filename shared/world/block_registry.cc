@@ -43,7 +43,7 @@ static void resolve_fluid_binding(BlockDefinition& def)
         def.fluid = fluid_registry::find(def.fluid_name.value());
 
         if(def.fluid == FLUID_ID_NULL) {
-            LOG_WARNING("unknown fluid: {}", def.fluid_name->full_string());
+            msg::log_warning("unknown fluid: {}", def.fluid_name->full_string());
             def.fluid_name.reset();
             return;
         }
@@ -288,7 +288,7 @@ void block_registry::commit(ModContext& ctx)
         auto [it, inserted] = s_names.try_emplace(name, global_id);
 
         if(!inserted) {
-            LOG_WARNING("duplicate block name: {}", name.full_string());
+            msg::log_warning("duplicate block name: {}", name.full_string());
             continue;
         }
 

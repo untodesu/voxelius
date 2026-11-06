@@ -57,7 +57,7 @@ static void update_fly(entt::entity entity, const Eigen::Vector3f& wishdir, floa
 
 static void update_walk(entt::entity entity, const Eigen::Vector3f& wishdir, float frametime)
 {
-    LOG_WARNING("no walk move implemented yet");
+    msg::log_warning("no walk move implemented yet");
 }
 
 void pmove::update(float frametime)

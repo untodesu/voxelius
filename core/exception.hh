@@ -1,20 +1,12 @@
 #ifndef B843EAA9_60C3_4C2B_8036_DF1026035AA8
 #define B843EAA9_60C3_4C2B_8036_DF1026035AA8
 
+#include "core/format.hh"
+
 namespace vx::detail
 {
 template<typename... Args>
-struct FormatWithLocation final {
-    std::format_string<Args...> value;
-    std::source_location location;
-
-    template<typename StringT>
-    consteval FormatWithLocation(const StringT& value, std::source_location location = std::source_location::current())
-        : value(value), location(std::move(location))
-    {
-        // empty
-    }
-};
+using FormatWithLocation = vx::FormatWithLocation<Args...>;
 } // namespace vx::detail
 
 namespace vx::detail

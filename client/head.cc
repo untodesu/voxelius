@@ -215,8 +215,8 @@ void head::init(void)
     auto glad_ok = gladLoadGL(reinterpret_cast<GLADloadfunc>(&SDL_GL_GetProcAddress));
     vx::throw_if_not(glad_ok, "failed to load OpenGL function pointers");
 
-    LOG_INFO("GL_VERSION: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-    LOG_INFO("GL_RENDERER: {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
+    msg::log_info("GL_VERSION: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+    msg::log_info("GL_RENDERER: {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

@@ -48,7 +48,7 @@ void tint_registry::commit(ModContext& ctx)
         auto [it, inserted] = s_names.try_emplace(name, global_id);
 
         if(!inserted) {
-            LOG_WARNING("duplicate tint name: {}", name.full_string());
+            msg::log_warning("duplicate tint name: {}", name.full_string());
             continue;
         }
 

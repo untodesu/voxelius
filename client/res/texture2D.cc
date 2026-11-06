@@ -22,7 +22,7 @@ static const void* texture2D_load_fn(const char* path, std::uint32_t flags)
     auto image = res::load_by_path<Image>(path, image_flags);
 
     if(image == nullptr) {
-        LOG_WARNING("{}: failed to load image", path);
+        msg::log_warning("{}: failed to load image", path);
         return nullptr;
     }
 

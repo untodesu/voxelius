@@ -51,9 +51,9 @@ void host::init_late(void)
     globals::host = enet_host_create(&address, max_players + s_status_peers, 1, 0, 0);
     vx::throw_if_not(globals::host, "enet_host_create failed");
 
-    LOG_INFO("listening on {}:{}", s_bind.value(), s_port.value());
-    LOG_INFO("max players: {}", max_players.value());
-    LOG_INFO("status peers: {}", s_status_peers.value());
+    msg::log_info("listening on {}:{}", s_bind.value(), s_port.value());
+    msg::log_info("max players: {}", max_players.value());
+    msg::log_info("status peers: {}", s_status_peers.value());
 }
 
 void host::shutdown(void)

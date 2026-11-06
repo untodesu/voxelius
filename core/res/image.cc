@@ -35,7 +35,7 @@ static const void* image_load_fn(const char* path, std::uint32_t flags)
     auto file = PHYSFS_openRead(path);
 
     if(file == nullptr) {
-        LOG_WARNING("{}: {}", path, utils::physfs_error());
+        msg::log_warning("{}: {}", path, utils::physfs_error());
         return nullptr;
     }
 
@@ -54,7 +54,7 @@ static const void* image_load_fn(const char* path, std::uint32_t flags)
     auto pixels = stbi_load_from_callbacks(&callbacks, file, &width, &height, &channels, desired_channels);
 
     if(pixels == nullptr) {
-        LOG_WARNING("{}: {}", path, stbi_failure_reason());
+        msg::log_warning("{}: {}", path, stbi_failure_reason());
         return nullptr;
     }
 

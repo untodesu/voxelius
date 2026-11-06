@@ -34,7 +34,7 @@ static std::atomic_bool s_is_running;
 
 static void signal_handler(int)
 {
-    LOG_INFO("received termination signal");
+    msg::log_info("received termination signal");
 
     s_is_running.store(false);
 }
@@ -77,7 +77,7 @@ static void wrapped_main(int argc, char** argv)
     TracyAppInfo(version::full.data(), version::full.size());
     TracyPlotConfig("Frametime ms", tracy::PlotFormatType::Number, false, true, 0);
 
-    LOG_INFO("engine version: {}", version::full);
+    msg::log_info("engine version: {}", version::full);
 
     std::signal(SIGINT, &signal_handler);
     std::signal(SIGTERM, &signal_handler);
@@ -120,7 +120,7 @@ static void wrapped_main(int argc, char** argv)
     climate::rebuild();
 
 #ifndef NDEBUG
-    LOG_WARNING("debug build");
+    msg::log_warning("debug build");
 #endif
 
     s_is_running.store(true);
@@ -174,8 +174,8 @@ static void wrapped_main(int argc, char** argv)
         TracyPlot("Fixed framerate", static_cast<int64_t>(1.0e6f / globals::fixed_frametime));
     }
 
-    LOG_INFO("shutdown after {} frames", globals::fixed_framecount);
-    LOG_INFO("avg tickrate: {:.03f} TPS ({:.03f} MSPT)", 1.0f / globals::fixed_frametime_avg, 1000.0f * globals::fixed_frametime_avg);
+    msg::log_info("shutdown after {} frames", globals::fixed_framecount);
+    msg::log_info("avg tickrate: {:.03f} TPS ({:.03f} MSPT)", 1.0f / globals::fixed_frametime_avg, 1000.0f * globals::fixed_frametime_avg);
 
     worldgen::shutdown();
 
@@ -200,26 +200,22 @@ static void wrapped_main(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    uulog::add_sink(&uulog::builtin::stderr_ansi);
+    msg::add_sink<&msg::detail::stderr_sink>();
 
     try {
         wrapped_main(argc, argv);
         return EXIT_SUCCESS;
     }
     catch(const std::exception& ex) {
-        uulog::detail::error("unknown", 0, ex.what(), std::strlen(ex.what()));
+        msg::log_error(std::string_view(ex.what()));
         return EXIT_FAILURE;
     }
     catch(const vx::detail::Exception& ex) {
-        auto& location = ex.location();
-        auto file = std::filesystem::path(location.file_name()).filename().string();
-        auto line = static_cast<unsigned long>(location.line());
-
-        uulog::detail::error(file.c_str(), line, ex.what_standard(), std::strlen(ex.what_standard()));
+        msg::log_error(ex.what_standard(), ex.location());
         return EXIT_FAILURE;
     }
     catch(...) {
-        uulog::detail::error("unknown", 0, "unknown exception", std::strlen("unknown exception"));
+        msg::log_error(std::string_view("unknown exception"));
         return EXIT_FAILURE;
     }
 }

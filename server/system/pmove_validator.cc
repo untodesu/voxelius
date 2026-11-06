@@ -73,7 +73,7 @@ void pmove_validator::fixed_update_late(void)
         rubberband = rubberband || dist_bpos > s_pos_threshold.value();
 
         if(rubberband) {
-            LOG_WARNING("rubberbanding entity {}: dist_vel={} dist_bpos={}", static_cast<std::uint64_t>(entity), dist_vel, dist_bpos);
+            msg::log_warning("rubberbanding entity {}: dist_vel={} dist_bpos={}", static_cast<std::uint64_t>(entity), dist_vel, dist_bpos);
 
             send_full_update(entity);
         }

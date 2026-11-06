@@ -50,7 +50,7 @@ void cmdline::create(int argc, char** argv)
             insert_option(option);
         }
         else {
-            LOG_WARNING("invalid option: {}", argv_string);
+            msg::log_warning("invalid option: {}", argv_string);
         }
     }
 }

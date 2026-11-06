@@ -31,10 +31,15 @@ add_library(core STATIC
     "${CMAKE_CURRENT_LIST_DIR}/core.hh"
     "${CMAKE_CURRENT_LIST_DIR}/exception.cc"
     "${CMAKE_CURRENT_LIST_DIR}/exception.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/format.hh"
     "${CMAKE_CURRENT_LIST_DIR}/frustum.cc"
     "${CMAKE_CURRENT_LIST_DIR}/frustum.hh"
     "${CMAKE_CURRENT_LIST_DIR}/identifier.cc"
     "${CMAKE_CURRENT_LIST_DIR}/identifier.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/msg/log.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/msg/log.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/msg/sink.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/msg/sink.hh"
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
     "${CMAKE_CURRENT_LIST_DIR}/threading.cc"
     "${CMAKE_CURRENT_LIST_DIR}/threading.hh"
@@ -45,13 +50,13 @@ target_link_libraries(core PUBLIC
     deps::eigen
     deps::emhash
     deps::enet
+    deps::entt
     deps::miniz
     deps::parson
     deps::physfs
     deps::stb
     deps::thread_pool
-    deps::tracy
-    deps::uulog)
+    deps::tracy)
 target_precompile_headers(core PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pch.hh")
 
 configure_file("${CMAKE_CURRENT_LIST_DIR}/version.cc.in" "${PROJECT_BINARY_DIR}/core.generated_version.cc")

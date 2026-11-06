@@ -76,7 +76,7 @@ entt::entity utils::spawn(class_id_type class_id, entt::entity hint)
     auto entity = create_entity(hint);
 
     if(!globals::registry.valid(entity)) {
-        LOG_CRITICAL("if you're reading this, entt has fucked up");
+        msg::log_critical("if you're reading this, entt has fucked up");
         return entt::null;
     }
 
@@ -154,7 +154,7 @@ entt::entity utils::spawn_player(const BlockPos& pos, entt::entity hint)
     auto entity = create_entity(hint);
 
     if(!globals::registry.valid(entity)) {
-        LOG_CRITICAL("if you're reading this, entt has fucked up");
+        msg::log_critical("if you're reading this, entt has fucked up");
         return entt::null;
     }
 

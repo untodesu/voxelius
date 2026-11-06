@@ -353,7 +353,7 @@ static std::unique_ptr<CachedBlockModel> bake_model(const BlockDefinition& def)
     auto model = res::load<BlockModel>(def.model_name, "models/block", ".json");
 
     if(model == nullptr) {
-        LOG_WARNING("{}: load failed", def.model_name.full_string());
+        msg::log_warning("{}: load failed", def.model_name.full_string());
         return nullptr;
     }
 
@@ -383,14 +383,14 @@ static std::unique_ptr<CachedBlockModel> bake_model(const BlockDefinition& def)
             auto albedo_frames = def.resolve_albedo_slot(texture_face->texture_slot);
 
             if(!albedo_frames.has_value()) {
-                LOG_WARNING("{}: {}: missing albedo textures", def.model_name.full_string(), texture_face->texture_slot);
+                msg::log_warning("{}: {}: missing albedo textures", def.model_name.full_string(), texture_face->texture_slot);
                 continue;
             }
 
             auto albedo_strip = block_atlas::find(albedo_frames.value());
 
             if(albedo_strip == nullptr) {
-                LOG_WARNING("{}: {}: albedo strip not found", def.model_name.full_string(), texture_face->texture_slot);
+                msg::log_warning("{}: {}: albedo strip not found", def.model_name.full_string(), texture_face->texture_slot);
                 continue;
             }
 

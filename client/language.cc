@@ -32,7 +32,7 @@ static void read_mod_translations(std::string_view name_space)
     std::string source;
 
     if(!utils::read_file(path, source)) {
-        LOG_DEBUG("{}: read failed", path);
+        msg::log_debug("{}: read failed", path);
         return;
     }
 
@@ -40,7 +40,7 @@ static void read_mod_translations(std::string_view name_space)
     auto json = json_value_get_object(jsonv);
 
     if(jsonv == nullptr || json == nullptr) {
-        LOG_WARNING("{}: parse error", path);
+        msg::log_warning("{}: parse error", path);
         return;
     }
 

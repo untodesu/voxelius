@@ -26,12 +26,12 @@ void fluid_cache::init_late(void)
         auto albedo_flowing = block_atlas::find(def.albedo_flowing);
 
         if(albedo_still == nullptr) {
-            LOG_WARNING("fluid {}: failed to load still textures", id);
+            msg::log_warning("fluid {}: failed to load still textures", id);
             continue;
         }
 
         if(albedo_flowing == nullptr) {
-            LOG_WARNING("fluid {}: failed to load flowing textures", id);
+            msg::log_warning("fluid {}: failed to load flowing textures", id);
             continue;
         }
 
@@ -47,7 +47,7 @@ void fluid_cache::init_late(void)
             cached.mask_still = block_atlas::find(mask_frames);
 
             if(cached.mask_still == nullptr) {
-                LOG_WARNING("fluid {}: failed to load still mask", id);
+                msg::log_warning("fluid {}: failed to load still mask", id);
             }
         }
 
@@ -57,7 +57,7 @@ void fluid_cache::init_late(void)
             cached.mask_flowing = block_atlas::find(mask_frames);
 
             if(cached.mask_flowing == nullptr) {
-                LOG_WARNING("fluid {}: failed to load flowing mask", id);
+                msg::log_warning("fluid {}: failed to load flowing mask", id);
             }
         }
 

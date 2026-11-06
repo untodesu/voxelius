@@ -192,7 +192,7 @@ static void rebuild_realm(biome_realm realm)
 
     for(auto& seed : out) {
         if(!nudge(occupied, seed.target, seed.id, random)) {
-            LOG_WARNING("failed to place biome {} uniquely in realm {}", seed.id, static_cast<unsigned>(realm));
+            msg::log_warning("failed to place biome {} uniquely in realm {}", seed.id, static_cast<unsigned>(realm));
         }
     }
 }

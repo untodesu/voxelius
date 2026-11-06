@@ -22,12 +22,12 @@ static Identifier make_unique_id(const Identifier& id, const ModContext* ctx)
         auto candidate = Identifier::from_parts(id.name_space(), std::format("{}~{}", id.value(), n));
 
         if(is_free(candidate)) {
-            LOG_WARNING("fluids.add: {} is already registered, using {} instead", id.full_string(), candidate.full_string());
+            msg::log_warning("fluids.add: {} is already registered, using {} instead", id.full_string(), candidate.full_string());
             return candidate;
         }
     }
 
-    LOG_CRITICAL("fluids.add: {}: out of resolvable names", id.full_string());
+    msg::log_critical("fluids.add: {}: out of resolvable names", id.full_string());
     return id;
 }
 

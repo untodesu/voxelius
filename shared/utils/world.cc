@@ -17,7 +17,7 @@ static bool call_routine(lua_State* L, int argc, int retc, std::string_view debu
         return true;
     }
 
-    LOG_ERROR("{}: {}", debug_name, lua_tostring(L, -1));
+    msg::log_error("{}: {}", debug_name, lua_tostring(L, -1));
     lua_pop(L, 1);
     return false;
 }
