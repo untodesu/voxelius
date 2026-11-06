@@ -1,18 +1,14 @@
 #ifndef D5554859_D83A_42F2_81FB_1BA81634255B
 #define D5554859_D83A_42F2_81FB_1BA81634255B
 
+#include "core/cvar/number.hh"
+
 #include "shared/coord.hh"
 #include "shared/net/protocol.hh"
 
-namespace config
-{
-template<typename T>
-class Ref;
-} // namespace config
-
 namespace interest
 {
-extern config::Ref<unsigned> view_distance;
+extern cvar::Number<unsigned> view_distance;
 } // namespace interest
 
 namespace interest

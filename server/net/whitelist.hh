@@ -1,17 +1,13 @@
 #ifndef B969E03D_5FD1_4185_AE9C_301DACEEA895
 #define B969E03D_5FD1_4185_AE9C_301DACEEA895
 
-#include "shared/net/ed25519.hh"
+#include "core/cvar/boolean.hh"
 
-namespace config
-{
-template<typename T>
-class Ref;
-} // namespace config
+#include "shared/net/ed25519.hh"
 
 namespace whitelist
 {
-extern config::Ref<bool> enabled;
+extern cvar::Boolean enabled;
 } // namespace whitelist
 
 namespace whitelist

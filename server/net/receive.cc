@@ -2,8 +2,8 @@
 
 #include "server/net/receive.hh"
 
-#include "core/config/map.hh"
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
+#include "core/cvar/number.hh"
 
 #include "shared/component/transform.hh"
 #include "shared/net/packet_player.hh"
@@ -26,7 +26,7 @@
 #include "server/world/chunk_loader.hh"
 
 static vx::hash_map<ChunkPos, std::vector<ENetPeer*>> s_waiting_peers;
-static config::Ref<float> s_reach_distance { 8.0f };
+static cvar::Number<float> s_reach_distance { 8.0f, 0.0f, 32.0f };
 
 static void send_chunk(ENetPeer* peer, const ChunkPos& cpos, const std::shared_ptr<Chunk>& chunk)
 {
@@ -186,7 +186,9 @@ static void on_player_move_data(const packet::Player_MoveData& packet)
 
 void receive::init(void)
 {
-    s_reach_distance.bind(globals::server_config, "game.reach_distance");
+    auto& reach_distance_binding = cvar::bind_var(s_reach_distance, "game.reach_distance");
+    reach_distance_binding.set_help("Maximum block interaction distance");
+    reach_distance_binding.set_flags(FCVAR_ARCHIVE);
 
     globals::dispatcher.sink<packet::World_Request>().connect<&on_world_request>();
 

@@ -3,16 +3,6 @@
 
 #include "shared/globals.hh"
 
-namespace config
-{
-class Map;
-} // namespace config
-
-namespace globals
-{
-extern config::Map server_config;
-} // namespace globals
-
 namespace globals
 {
 extern ENetHost* host;

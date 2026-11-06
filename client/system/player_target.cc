@@ -3,6 +3,8 @@
 #include "client/system/player_target.hh"
 
 #include "core/camera.hh"
+#include "core/cvar/host.hh"
+#include "core/identifier.hh"
 
 #include "shared/net/packet_player.hh"
 #include "shared/net/protocol.hh"
@@ -13,49 +15,97 @@
 
 #include "client/camera.hh"
 #include "client/globals.hh"
+#include "client/gui/button_bind.hh"
+#include "client/gui/container.hh"
+#include "client/input/buttons.hh"
+#include "client/settings.hh"
 #include "client/world/outline.hh"
 
 physics::Hit player_target::hit;
 
-static void on_mouse_button_event(const SDL_MouseButtonEvent& event)
+static gui::ButtonBind s_break_bind;
+static gui::ButtonBind s_place_bind;
+
+static void place_block(void)
 {
-    if(event.down && !globals::gui_screen && std::holds_alternative<physics::BlockHit>(player_target::hit)) {
-        const auto& hit = std::get<physics::BlockHit>(player_target::hit);
-
-        if(event.button == SDL_BUTTON_RIGHT) {
-            // TODO: hardcoded placed block until an inventory/hotbar system exists
-            auto family = block_registry::find_family(Identifier::from_string("builtin:water"));
-            auto block = family ? family->default_variant : block_registry::find(Identifier::from_string("builtin:water"));
-            utils::block_place(hit, globals::player, block);
-
-            if(globals::peer) {
-                packet::Player_InteractB packet {};
-                packet.bpos = hit.block_pos;
-                packet.expected = hit.id;
-                packet.face = hit.face;
-                packet.normal = hit.normal;
-                packet.point = hit.point;
-                protocol::send(packet, globals::peer);
-            }
-        }
-        else if(event.button == SDL_BUTTON_LEFT) {
-            utils::block_break(hit, globals::player);
-
-            if(globals::peer) {
-                packet::Player_AttackB packet {};
-                packet.bpos = hit.block_pos;
-                packet.expected = hit.id;
-                protocol::send(packet, globals::peer);
-            }
-        }
+    if(globals::gui_screen || !std::holds_alternative<physics::BlockHit>(player_target::hit)) {
+        return;
     }
+
+    const auto& hit = std::get<physics::BlockHit>(player_target::hit);
+
+    // TODO: hardcoded placed block until an inventory/hotbar system exists
+    auto family = block_registry::find_family(Identifier::from_string("builtin:water"));
+    auto block = family ? family->default_variant : block_registry::find(Identifier::from_string("builtin:water"));
+    utils::block_place(hit, globals::player, block);
+
+    if(globals::peer) {
+        packet::Player_InteractB packet {};
+        packet.bpos = hit.block_pos;
+        packet.expected = hit.id;
+        packet.face = hit.face;
+        packet.normal = hit.normal;
+        packet.point = hit.point;
+        protocol::send(packet, globals::peer);
+    }
+}
+
+static void break_block(void)
+{
+    if(globals::gui_screen || !std::holds_alternative<physics::BlockHit>(player_target::hit)) {
+        return;
+    }
+
+    const auto& hit = std::get<physics::BlockHit>(player_target::hit);
+
+    utils::block_break(hit, globals::player);
+
+    if(globals::peer) {
+        packet::Player_AttackB packet {};
+        packet.bpos = hit.block_pos;
+        packet.expected = hit.id;
+        protocol::send(packet, globals::peer);
+    }
+}
+
+static cvar::status cmd_place(const cvar::Context& ctx, std::span<const std::string_view> args)
+{
+    place_block();
+
+    return cvar::status::OK;
+}
+
+static cvar::status cmd_break(const cvar::Context& ctx, std::span<const std::string_view> args)
+{
+    break_block();
+
+    return cvar::status::OK;
+}
+
+static cvar::status cmd_release(const cvar::Context& ctx, std::span<const std::string_view> args)
+{
+    return cvar::status::OK;
 }
 
 void player_target::init(void)
 {
     hit = std::monostate();
 
-    globals::dispatcher.sink<SDL_MouseButtonEvent>().connect<&on_mouse_button_event>();
+    cvar::bind_cmd("+place").connect<&cmd_place>();
+    cvar::bind_cmd("-place").connect<&cmd_release>();
+    cvar::bind_cmd("+break").connect<&cmd_break>();
+    cvar::bind_cmd("-break").connect<&cmd_release>();
+
+    buttons::bind(ButtonSource(input_device::MOUSE, SDL_BUTTON_RIGHT, input_edge::DOWN), "+place");
+    buttons::bind(ButtonSource(input_device::MOUSE, SDL_BUTTON_RIGHT, input_edge::UP), "-place");
+    buttons::bind(ButtonSource(input_device::MOUSE, SDL_BUTTON_LEFT, input_edge::DOWN), "+break");
+    buttons::bind(ButtonSource(input_device::MOUSE, SDL_BUTTON_LEFT, input_edge::UP), "-break");
+
+    s_break_bind.bind_action("break");
+    s_place_bind.bind_action("place");
+
+    settings::controls_gameplay.add_child(s_break_bind, 0);
+    settings::controls_gameplay.add_child(s_place_bind, 1);
 }
 
 void player_target::update(void)

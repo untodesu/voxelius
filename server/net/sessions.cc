@@ -2,8 +2,7 @@
 
 #include "server/net/sessions.hh"
 
-#include "core/config/map.hh"
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
 #include "core/utils/crc64.hh"
 #include "core/utils/epoch.hh"
 #include "core/version.hh"
@@ -28,7 +27,7 @@ static std::vector<Session> s_sessions;
 static vx::hash_map<std::string, Session*> s_username_map;
 static vx::hash_map<std::uint64_t, Session*> s_identity_map;
 
-config::Ref<bool> sessions::strict_version { false };
+cvar::Boolean sessions::strict_version { false };
 
 static std::mt19937_64 s_randomizer;
 
@@ -40,7 +39,7 @@ static bool is_outdated_client(std::uint32_t major, std::uint32_t minor, std::ui
         return true;
     }
 
-    if(sessions::strict_version) {
+    if(sessions::strict_version.value()) {
         if(version::minor > minor) {
             return true;
         }
@@ -59,7 +58,7 @@ static bool is_outdated_server(std::uint32_t major, std::uint32_t minor, std::ui
         return true;
     }
 
-    if(sessions::strict_version) {
+    if(sessions::strict_version.value()) {
         if(minor > version::minor) {
             return true;
         }
@@ -92,7 +91,7 @@ static void on_auth_request(const packet::Auth_Request& packet)
 
     auto client_whitelisted = false;
 
-    if(whitelist::enabled) {
+    if(whitelist::enabled.value()) {
         if(whitelist::contains(packet.pkey)) {
             client_whitelisted = true;
         }
@@ -261,7 +260,9 @@ std::span<Session> sessions::all(void)
 
 void sessions::init(void)
 {
-    strict_version.bind(globals::server_config, "sessions.strict_version");
+    auto& strict_version_binding = cvar::bind_var(strict_version, "sessions.strict_version");
+    strict_version_binding.set_help("Reject clients with a different protocol version");
+    strict_version_binding.set_flags(FCVAR_ARCHIVE);
 
     std::random_device noise;
     s_randomizer.seed(noise());

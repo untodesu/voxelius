@@ -2,21 +2,21 @@
 
 #include "server/net/whitelist.hh"
 
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
 #include "core/utils/crc64.hh"
 #include "core/utils/physfs.hh"
-
-#include "server/globals.hh"
 
 constexpr static std::string_view WHITELIST_FILE = "whitelist.txt";
 
 static vx::hash_map<std::uint64_t, ed25519::pkey_type> s_whitelist;
 
-config::Ref<bool> whitelist::enabled { false };
+cvar::Boolean whitelist::enabled { false };
 
 void whitelist::init(void)
 {
-    enabled.bind(globals::server_config, "whitelist.enabled");
+    auto& enabled_binding = cvar::bind_var(enabled, "whitelist.enabled");
+    enabled_binding.set_help("Only allow whitelisted players");
+    enabled_binding.set_flags(FCVAR_ARCHIVE);
 
     std::string line;
     std::istringstream stream;

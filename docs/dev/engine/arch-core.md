@@ -12,7 +12,15 @@ Resources and mods use namespaced identifiers, for example `mymod:some/thing`, i
 
 ## Configuration
 
-Configuration is a generic key-value store, with string keys. Configuration does not belong to one feature. Any part of the engine that needs persistent settings, such as user preferences, server settings, or mod metadata, loads its settings into this same kind of map. Code can bind a typed reference to a key. This keeps reads cheap when the value does not change. The client and the server each keep one global config as the default place for their own settings. A subsystem can also load its own separate, temporary map. Mod metadata does this.
+The engine has two configuration stores.
+
+The first store is `config::Map`. It is a generic key-value map with string keys. Code can bind a typed reference to a key. A subsystem uses this store for its own separate data, such as mod metadata and per-world save files. The map format is `key=value`.
+
+The second store is the cvar host. It holds console variables and commands. A variable has a type, an optional default, a range or validator, flags and optional change hooks. A command has a help text and a callback. The host keeps every variable and command in one registry. The client and the server each fill their own registry during startup.
+
+`cvar::exec_from` reads a command script. Each line is either `name value`, a command, or a comment that starts with `#`. `cvar::save_values` writes every `FCVAR_ARCHIVE` value, then calls the registered write hooks. The client uses `client.conf` for its settings and bindings; the server uses `server.conf`. The client loads `client.user.conf` after `client.conf`, so a user file can override the main file.
+
+The startup order is: defaults and flags are set first, then the config file is loaded, then `init_late` applies the values that other subsystems depend on. The client loads both config files after every `init` and before `init_late`.
 
 ## Resources
 

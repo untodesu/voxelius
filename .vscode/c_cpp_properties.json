@@ -35,7 +35,6 @@
         "${workspaceFolder}/deps/stb/include",
         "${workspaceFolder}/deps/thread_pool/include",
         "${workspaceFolder}/deps/tracy/public/tracy",
-        "${workspaceFolder}/deps/uulog/include",
         "${workspaceFolder}",
         "${default}"
       ]

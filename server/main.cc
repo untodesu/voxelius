@@ -1,7 +1,7 @@
 #include "server/pch.hh"
 
-#include "core/config/map.hh"
 #include "core/core.hh"
+#include "core/cvar/host.hh"
 #include "core/exception.hh"
 #include "core/res/resource.hh"
 #include "core/threading.hh"
@@ -106,7 +106,7 @@ static void wrapped_main(int argc, char** argv)
 
     splash::init(SPLASH_SERVER);
 
-    globals::server_config.load("server.conf");
+    cvar::exec_from("server.conf");
 
     host::init_late();
 
@@ -193,7 +193,7 @@ static void wrapped_main(int argc, char** argv)
 
     res::hard_purge();
 
-    globals::server_config.save("server.conf");
+    cvar::save_values("server.conf");
 
     core::teardown();
 }

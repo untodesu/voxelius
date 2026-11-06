@@ -18,11 +18,11 @@ static void on_status_request(const packet::Status_Request& packet)
 {
     std::uint32_t server_tags = 0;
 
-    if(whitelist::enabled) {
+    if(whitelist::enabled.value()) {
         server_tags |= packet::Status_Response::WHITELIST_ENABLED;
     }
 
-    if(sessions::strict_version) {
+    if(sessions::strict_version.value()) {
         server_tags |= packet::Status_Response::STRICT_VERSION;
     }
 

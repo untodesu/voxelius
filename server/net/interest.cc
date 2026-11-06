@@ -2,7 +2,7 @@
 
 #include "server/net/interest.hh"
 
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
 
 #include "shared/component/transform.hh"
 #include "shared/entity/class.hh"
@@ -16,7 +16,7 @@
 #include "server/globals.hh"
 #include "server/net/sessions.hh"
 
-config::Ref<unsigned> interest::view_distance { 8 };
+cvar::Number<unsigned> interest::view_distance { 8, 1, 32 };
 
 static void send_full_snapshot(ENetPeer* peer, entt::entity entity)
 {
@@ -77,7 +77,9 @@ static void update_visibility(void)
 
 void interest::init(void)
 {
-    view_distance.bind(globals::server_config, "interest.view_distance");
+    auto& view_distance_binding = cvar::bind_var(view_distance, "interest.view_distance");
+    view_distance_binding.set_help("View distance, in chunks");
+    view_distance_binding.set_flags(FCVAR_ARCHIVE);
 }
 
 void interest::fixed_update_late(void)

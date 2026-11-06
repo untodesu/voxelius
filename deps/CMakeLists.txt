@@ -16,7 +16,6 @@ add_subdirectory(SDL3)
 add_subdirectory(stb)
 add_subdirectory(thread_pool)
 add_subdirectory(tracy)
-add_subdirectory(uulog)
 
 # Generate thirdparty.txt; I find it annoying to manually aggregate
 # all the third-party libraries licenses from all over the place so

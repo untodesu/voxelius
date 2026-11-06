@@ -154,7 +154,7 @@ differently.
 
 |Directory|Contents|
 |----|----|
-|`core/`|Foundation library. `config/` is the typed key-value store, `res/` the resource loader, `utils/` the small helpers|
+|`core/`|Foundation library. `config/` is the generic key-value store, `cvar/` the console variables and commands, `msg/` the logging layer, `res/` the resource loader, `utils/` the small helpers|
 |`shared/`|Game logic for both sides. `api/` the Lua API, `component/` and `entity/` the EnTT pieces, `net/` the packets, `physics/`, `system/`, `world/`|
 |`client/`|`vclient`. `gui/` the menus, `net/` the connection, `res/` the render resources, `system/` the frame systems, `world/` the renderer|
 |`server/`|`vserver`. `entity/`, `net/`, `system/`, `utils/`, `world/`|

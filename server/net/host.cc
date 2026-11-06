@@ -3,8 +3,8 @@
 #include "server/net/host.hh"
 
 #include "core/cmdline.hh"
-#include "core/config/map.hh"
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
+#include "core/cvar/string.hh"
 #include "core/exception.hh"
 
 #include "shared/net/protocol.hh"
@@ -12,18 +12,29 @@
 #include "server/globals.hh"
 #include "server/net/sessions.hh"
 
-config::Ref<unsigned> host::max_players { 8 };
+cvar::Number<unsigned> host::max_players { 8, 1, 128 };
 
-static config::Ref<unsigned> s_status_peers { 4 };
-static config::Ref<std::uint16_t> s_port { protocol::PORT };
-static config::Ref<std::string> s_bind { "0.0.0.0" };
+static cvar::Number<unsigned> s_status_peers { 4, 1, 16 };
+static cvar::Number<unsigned short> s_port { protocol::PORT, 1024, 65535 };
+static cvar::String s_bind { "0.0.0.0" };
 
 void host::init(void)
 {
-    max_players.bind(globals::server_config, "host.max_players");
-    s_status_peers.bind(globals::server_config, "host.status_peers");
-    s_port.bind(globals::server_config, "host.listen_port");
-    s_bind.bind(globals::server_config, "host.bind_address");
+    auto& max_players_binding = cvar::bind_var(max_players, "host.max_players");
+    max_players_binding.set_help("Maximum number of players");
+    max_players_binding.set_flags(FCVAR_ARCHIVE);
+
+    auto& status_peers_binding = cvar::bind_var(s_status_peers, "host.status_peers");
+    status_peers_binding.set_help("Maximum number of status peers");
+    status_peers_binding.set_flags(FCVAR_ARCHIVE);
+
+    auto& port_binding = cvar::bind_var(s_port, "host.listen_port");
+    port_binding.set_help("Listen port");
+    port_binding.set_flags(FCVAR_ARCHIVE);
+
+    auto& bind_binding = cvar::bind_var(s_bind, "host.bind_address");
+    bind_binding.set_help("Address to bind the listen socket to");
+    bind_binding.set_flags(FCVAR_ARCHIVE);
 }
 
 void host::init_late(void)
@@ -46,9 +57,9 @@ void host::init_late(void)
     ENetAddress address {};
     address.host = ENET_HOST_ANY;
     address.port = s_port.value();
-    enet_address_set_host(&address, s_bind.value().c_str());
+    enet_address_set_host(&address, s_bind.string().c_str());
 
-    globals::host = enet_host_create(&address, max_players + s_status_peers, 1, 0, 0);
+    globals::host = enet_host_create(&address, max_players.value() + s_status_peers.value(), 1, 0, 0);
     vx::throw_if_not(globals::host, "enet_host_create failed");
 
     msg::log_info("listening on {}:{}", s_bind.value(), s_port.value());

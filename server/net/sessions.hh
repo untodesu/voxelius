@@ -1,19 +1,15 @@
 #ifndef CB1D9924_5E4E_4165_AAD7_7B58D385FFA7
 #define CB1D9924_5E4E_4165_AAD7_7B58D385FFA7
 
+#include "core/cvar/boolean.hh"
+
 #include "shared/coord.hh"
 #include "shared/net/ed25519.hh"
 #include "shared/utils/view.hh"
 
-namespace config
-{
-template<typename T>
-class Ref;
-} // namespace config
-
 namespace sessions
 {
-extern config::Ref<bool> strict_version;
+extern cvar::Boolean strict_version;
 } // namespace sessions
 
 enum class session_state : std::uint8_t {

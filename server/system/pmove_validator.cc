@@ -3,8 +3,8 @@
 #include "server/system/pmove_validator.hh"
 
 #include "core/buffer.hh"
-#include "core/config/map.hh"
-#include "core/config/ref.hh"
+#include "core/cvar/host.hh"
+#include "core/cvar/number.hh"
 
 #include "shared/component/head.hh"
 #include "shared/component/move_mode.hh"
@@ -18,8 +18,8 @@
 #include "server/globals.hh"
 #include "server/net/sessions.hh"
 
-static config::Ref<float> s_pos_threshold { 10.0f };
-static config::Ref<float> s_vel_threshold { 10.0f };
+static cvar::Number<float> s_pos_threshold { 10.0f, 0.0f, 100.0f };
+static cvar::Number<float> s_vel_threshold { 10.0f, 0.0f, 100.0f };
 
 static void send_full_update(entt::entity entity)
 {
@@ -50,8 +50,13 @@ static void send_full_update(entt::entity entity)
 
 void pmove_validator::init(void)
 {
-    s_pos_threshold.bind(globals::server_config, "pmove.pos_threshold");
-    s_vel_threshold.bind(globals::server_config, "pmove.vel_threshold");
+    auto& pos_threshold_binding = cvar::bind_var(s_pos_threshold, "pmove.pos_threshold");
+    pos_threshold_binding.set_help("Maximum position desync before a full update");
+    pos_threshold_binding.set_flags(FCVAR_ARCHIVE);
+
+    auto& vel_threshold_binding = cvar::bind_var(s_vel_threshold, "pmove.vel_threshold");
+    vel_threshold_binding.set_help("Maximum velocity desync before a full update");
+    vel_threshold_binding.set_flags(FCVAR_ARCHIVE);
 }
 
 void pmove_validator::fixed_update_late(void)

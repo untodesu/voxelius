@@ -33,10 +33,13 @@ C:\PATH\TO\REPOSITORY
 ├───.vscode
 ├───build
 ├───client
+│   ├───input
 │   ├───res
 │   └───utils
 ├───core
 │   ├───config
+│   ├───cvar
+│   ├───msg
 │   ├───res
 │   └───utils
 ├───data
@@ -67,8 +70,7 @@ C:\PATH\TO\REPOSITORY
 │   ├───physfs
 │   ├───SDL3
 │   ├───stb
-│   ├───thread_pool
-│   └───uulog
+│   └───thread_pool
 ├───docs
 │   ├───about
 │   ├───dev
@@ -79,7 +81,7 @@ C:\PATH\TO\REPOSITORY
 ├───scripts
 ├───server
 └───shared
+    ├───cvar
     ├───res
-    ├───scripting
     └───utils
 ```

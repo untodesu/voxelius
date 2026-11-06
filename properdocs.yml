@@ -67,6 +67,7 @@ nav:
         - Editor Setup: dev/engine/init-editor.md
       - Architecture Overview:
         - Core: dev/engine/arch-core.md
+        - Input: dev/engine/arch-input.md
         - Rendering: dev/engine/arch-render.md
         - Networking: dev/engine/arch-network.md
         - Sound: dev/engine/arch-sound.md

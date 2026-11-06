@@ -6,8 +6,6 @@
 #include "core/res/resource.hh"
 #include "core/threading.hh"
 #include "core/utils/epoch.hh"
-#include "core/utils/physfs.hh"
-#include "core/utils/string.hh"
 #include "core/version.hh"
 
 #include "shared/cvar/commands.hh"
@@ -205,52 +203,6 @@ static void zoned_update_late(void)
     threading::update();
 }
 
-static bool is_legacy_config(std::string_view path)
-{
-    std::string source;
-
-    if(!utils::read_file(path, source)) {
-        return false;
-    }
-
-    std::istringstream stream(source);
-    std::string line;
-
-    while(std::getline(stream, line)) {
-        auto trimmed = utils::trim_whitespace(utils::remove_comments(line));
-
-        if(trimmed.empty()) {
-            continue;
-        }
-
-        return trimmed.find('=') != std::string_view::npos;
-    }
-
-    return false;
-}
-
-static void load_cvar_config(std::string_view path)
-{
-    if(!is_legacy_config(path)) {
-        cvar::exec_from(path);
-        return;
-    }
-
-    std::string source;
-    std::string backup = std::format("{}.legacy", path);
-    std::string existing;
-
-    if(!utils::read_file(path, source)) {
-        return;
-    }
-
-    if(!utils::read_file(backup, existing) && !utils::write_file(backup, source)) {
-        msg::log_warning("{}: failed to write legacy backup", backup);
-    }
-
-    msg::log_warning("{}: legacy config skipped; backup at {}", path, backup);
-}
-
 static void wrapped_main(int argc, char** argv)
 {
     core::setup(argc, argv);
@@ -308,8 +260,8 @@ static void wrapped_main(int argc, char** argv)
 
     client_game::init();
 
-    load_cvar_config("client.conf");
-    load_cvar_config("client.user.conf");
+    cvar::exec_from("client.conf");
+    cvar::exec_from("client.user.conf");
 
     video::init_late();
     head::init_late();
