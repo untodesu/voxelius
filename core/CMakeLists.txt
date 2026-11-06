@@ -39,7 +39,7 @@ add_library(core STATIC
     "${CMAKE_CURRENT_LIST_DIR}/threading.cc"
     "${CMAKE_CURRENT_LIST_DIR}/threading.hh"
     "${CMAKE_CURRENT_LIST_DIR}/version.hh")
-target_compile_features(core PUBLIC cxx_std_20)
+target_compile_features(core PUBLIC cxx_std_23)
 target_include_directories(core PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(core PUBLIC
     deps::eigen

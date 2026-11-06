@@ -49,7 +49,7 @@ cmake -S . -B build/clangd -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMP
 
 |File|Tracked|Contents|
 |----|----|----|
-|`.clangd`|Yes|Project-wide clangd switches: the module precompiled header is not reported as an unused include, headers are parsed as C++20|
+|`.clangd`|Yes|Project-wide clangd switches: the module precompiled header is not reported as an unused include, headers are parsed as C++23|
 |`.vscode/settings.json`|No|Engine choice and editor defaults for this machine|
 |`.vscode/c_cpp_properties.json`|Yes|Include paths for the Microsoft engine, all relative to the workspace|
 |`.vscode/launch.json`|Yes|Debug configurations for both platforms|

@@ -221,7 +221,7 @@ def setup_cpp_properties():
     include_path = [f"${{workspaceFolder}}/{directory}" for directory in sdl3_includes() + dependency_includes()]
     configuration = {
         "name": "Voxelius",
-        "cppStandard": "c++20",
+        "cppStandard": "c++23",
         "cStandard": "c99",
         "defines": list(CPP_DEFINES),
         "includePath": include_path + ["${workspaceFolder}", "${default}"],

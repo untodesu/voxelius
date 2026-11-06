@@ -64,7 +64,7 @@ add_executable(vserver
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
     "${CMAKE_CURRENT_LIST_DIR}/universe.cc"
     "${CMAKE_CURRENT_LIST_DIR}/universe.hh")
-target_compile_features(vserver PUBLIC cxx_std_20)
+target_compile_features(vserver PUBLIC cxx_std_23)
 target_include_directories(vserver PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(vserver PUBLIC core shared)
 target_link_libraries(vserver PUBLIC

@@ -17,7 +17,7 @@ no other file to follow the rules.
 
 ## About Voxelius
 
-Voxelius is a sandbox voxel game and engine written in C++20 and built with CMake. Engine code is C++20. The vendored dependencies are C99.
+Voxelius is a sandbox voxel game and engine written in C++23 and built with CMake. Engine code is C++23. The vendored dependencies are C99.
 The client draws with OpenGL 3.3 core profile through SDL3 and builds its interface with Dear ImGui. The server is headless. The two sides
 talk over ENet, a reliability layer on top of UDP. Game entities use EnTT. Mods are Lua scripts that call the engine API.
 
@@ -58,7 +58,7 @@ cmake --build --preset windows-x64-debug
   build must not define them.
 - On Windows with MSVC, `deps/SDL3` downloads the SDL3 3.4.12 development package into `build/<preset>/_deps/` at configure time. Every
   other dependency is in the tree, so a build after the first needs no network access.
-- A C++20 compiler, a C99 compiler, CMake 3.25 or newer and Python 3 are enough. The presets use schema version 6, so an older CMake
+- A C++23 compiler, a C99 compiler, CMake 3.25 or newer and Python 3 are enough. The presets use schema version 6, so an older CMake
   cannot read them. Python runs the third-party license collector and the asset generators.
 - The executables land in `build/<preset>/`. A multi-configuration generator such as Visual Studio adds the configuration directory:
   `build/<preset>/Debug/vclient.exe`.
@@ -99,7 +99,7 @@ differently.
 
 ### Language
 
-- Use C++20. Prefer the standard facility over a hand-written one: `std::bit_cast`, `std::span`, `std::format`, concepts,
+- Use C++23. Prefer the standard facility over a hand-written one: `std::bit_cast`, `std::span`, `std::format`, concepts,
   `std::source_location`.
 - Report a failure through `vx::throw_if` or `vx::throw_if_not` from `core/exception.hh`. Both throw a `vx::runtime_error` with the source
   location of the call. Use `assert` only for a condition that must hold in a debug build.
@@ -202,7 +202,7 @@ If the Windows execution policy blocks a PowerShell script, use the `.bat` wrapp
 - `.vscode/settings.json` and `build/` are ignored by git. `.vscode/c_cpp_properties.json` is tracked and holds only workspace-relative
   paths.
 - `.clangd` in the repository root holds the project-wide clangd switches. It stops the include cleaner from reporting the module
-  precompiled header as unused, and it parses headers as C++20.
+  precompiled header as unused, and it parses headers as C++23.
 - CMake writes a compilation database only for the Ninja and Makefile generators. The Visual Studio generator writes none, so clangd
   needs one Ninja configure:
 

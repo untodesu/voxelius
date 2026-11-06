@@ -10,7 +10,7 @@ You also need network access to clone the repository.
 
 ## Software
 
-- A C++20 compiler. You may hit issues on platforms that lack fixed-width integers in the standard library (see cppreference for `cstdint`).
+- A C++23 compiler. You may hit issues on platforms that lack fixed-width integers in the standard library (see cppreference for `cstdint`).
 - A C99 compiler. Many dependencies are C and must be compiled as C. Building them with a C++ compiler is not guaranteed to work.
 - CMake 3.25 or newer, plus any generator that CMake supports (Visual Studio, Ninja, GNU make). The presets use schema version 6.
 - Python 3.x for internal scripts.
@@ -18,6 +18,6 @@ You also need network access to clone the repository.
 
 ## Brains
 
-Know modern C++20 features and prefer them over older patterns when they fit. Many old undefined-behaviour tricks are now standard. For example, bit-casting `float` to `std::uint32_t` uses `std::bit_cast` instead of union hacks or `reinterpret_cast`.
+Know modern C++23 features and prefer them over older patterns when they fit. Many old undefined-behaviour tricks are now standard. For example, bit-casting `float` to `std::uint32_t` uses `std::bit_cast` instead of union hacks or `reinterpret_cast`.
 
 Test your code. Blind coding and hope are not a substitute for checks.

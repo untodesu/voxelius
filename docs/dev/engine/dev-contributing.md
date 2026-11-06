@@ -1,6 +1,6 @@
 # Contributing
 
-Voxelius is a sandbox voxel game and engine written in C++20. This page describes how to send a change.
+Voxelius is a sandbox voxel game and engine written in C++23. This page describes how to send a change.
 
 Read the [Code Style](dev-code-style.md) page before you start. Formatting and naming are part of the review. The [Build Guide](init-building.md) and the [Requirements](init-requirements.md) pages explain how to build the project. The [Editor Setup](init-editor.md) page configures the C/C++ engine in Visual Studio Code.
 

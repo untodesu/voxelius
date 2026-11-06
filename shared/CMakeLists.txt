@@ -118,7 +118,7 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/pch.hh"
     "${CMAKE_CURRENT_LIST_DIR}/splash.cc"
     "${CMAKE_CURRENT_LIST_DIR}/splash.hh")
-target_compile_features(shared PUBLIC cxx_std_20)
+target_compile_features(shared PUBLIC cxx_std_23)
 target_include_directories(shared PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(shared PUBLIC core)
 target_link_libraries(shared PUBLIC

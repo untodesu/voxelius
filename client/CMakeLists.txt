@@ -123,7 +123,7 @@ add_executable(vclient
     "${CMAKE_CURRENT_LIST_DIR}/style.hh"
     "${CMAKE_CURRENT_LIST_DIR}/video.cc"
     "${CMAKE_CURRENT_LIST_DIR}/video.hh")
-target_compile_features(vclient PUBLIC cxx_std_20)
+target_compile_features(vclient PUBLIC cxx_std_23)
 target_include_directories(vclient PUBLIC "${PROJECT_SOURCE_DIR}")
 target_link_libraries(vclient PUBLIC core shared)
 target_link_libraries(vclient PUBLIC

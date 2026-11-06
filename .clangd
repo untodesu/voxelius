@@ -7,9 +7,9 @@ Diagnostics:
       - pch\.hh
 ---
 # Commands for headers are interpolated from a neighbouring .cc and clangd drops
-# MSVC's /std:c++20 while doing so, leaving clang-cl at its C++14 default. -Xclang
+# MSVC's /std:c++23 while doing so, leaving clang-cl at its C++14 default. -Xclang
 # reaches the frontend under any driver mode.
 If:
   PathMatch: .*\.(hh|hxx)
 CompileFlags:
-  Add: [-Xclang, -std=c++20]
+  Add: [-Xclang, -std=c++23]

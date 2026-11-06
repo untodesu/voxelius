@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 project(Voxelius LANGUAGES C CXX VERSION 17.0.0)
 
 option(ENABLE_PROFILING "Enable profiling" OFF)
@@ -6,7 +6,7 @@ option(ENABLE_PROFILING "Enable profiling" OFF)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Emit compile_commands.json for clangd and other tooling. Only the Ninja and
