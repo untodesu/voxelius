@@ -43,9 +43,18 @@ static const void* texture2D_load_fn(const char* path, std::uint32_t flags)
     glBindTexture(GL_TEXTURE_2D, handle);
 
     glTexImage2D(GL_TEXTURE_2D, 0, format_internal, image->width, image->height, 0, format_source, GL_UNSIGNED_BYTE, image->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+
+    if(flags & RESFLAG_TEX_NEAREST) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    else {
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
 
     auto texture = new Texture2D;
+    texture->width = image->width;
+    texture->height = image->height;
     texture->handle = handle;
     texture->imgui = static_cast<ImTextureID>(texture->handle);
     return texture;
