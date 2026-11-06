@@ -4,12 +4,14 @@
     {
       "name": "Voxelius",
       "cppStandard": "c++20",
-      "defines": ["TRACY_ENABLE", "NOMINMAX", "_CRT_SECURE_NO_WARNINGS", "_USE_MATH_DEFINES"],
+      "cStandard": "c99",
+      "defines": [
+        "TRACY_ENABLE",
+        "NOMINMAX",
+        "_CRT_SECURE_NO_WARNINGS",
+        "_USE_MATH_DEFINES"
+      ],
       "includePath": [
-        "${workspaceFolder}/build/generic-debug/_deps/download_sdl3-src/include",
-        "${workspaceFolder}/build/generic-debug-prof/_deps/download_sdl3-src/include",
-        "${workspaceFolder}/build/generic-release/_deps/download_sdl3-src/include",
-        "${workspaceFolder}/build/generic-release-prof/_deps/download_sdl3-src/include",
         "${workspaceFolder}/build/windows-x32-debug/_deps/download_sdl3-src/include",
         "${workspaceFolder}/build/windows-x32-debug-prof/_deps/download_sdl3-src/include",
         "${workspaceFolder}/build/windows-x32-release/_deps/download_sdl3-src/include",
