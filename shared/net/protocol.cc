@@ -7,6 +7,7 @@
 #include "shared/net/packet_auth.hh"
 #include "shared/net/packet_cvar.hh"
 #include "shared/net/packet_entity.hh"
+#include "shared/net/packet_msg.hh"
 #include "shared/net/packet_player.hh"
 #include "shared/net/packet_session.hh"
 #include "shared/net/packet_status.hh"
@@ -60,6 +61,9 @@ void protocol::decode(entt::dispatcher& dispatcher, const ENetPacket* packet, EN
     static packet::World_SetBlock world_set_block;
     static packet::World_Timings world_timings;
     static packet::Cvar_ServerVars cvar_server_vars;
+    static packet::Cvar_ServerCmds cvar_server_cmds;
+    static packet::Cvar_Command cvar_command;
+    static packet::Msg_Log msg_log;
     static packet::Player_AttackE player_attack_e;
     static packet::Player_AttackB player_attack_b;
     static packet::Player_InteractE player_interact_e;
@@ -157,6 +161,24 @@ void protocol::decode(entt::dispatcher& dispatcher, const ENetPacket* packet, EN
             dispatcher.trigger(static_cast<const packet::Cvar_ServerVars&>(cvar_server_vars));
             break;
 
+        case packet::Cvar_ServerCmds::TYPE:
+            packet::Cvar_ServerCmds::decode(cvar_server_cmds, buffer);
+            cvar_server_cmds.peer = peer;
+            dispatcher.trigger(static_cast<const packet::Cvar_ServerCmds&>(cvar_server_cmds));
+            break;
+
+        case packet::Cvar_Command::TYPE:
+            packet::Cvar_Command::decode(cvar_command, buffer);
+            cvar_command.peer = peer;
+            dispatcher.trigger(static_cast<const packet::Cvar_Command&>(cvar_command));
+            break;
+
+        case packet::Msg_Log::TYPE:
+            packet::Msg_Log::decode(msg_log, buffer);
+            msg_log.peer = peer;
+            dispatcher.trigger(static_cast<const packet::Msg_Log&>(msg_log));
+            break;
+
         case packet::Player_AttackE::TYPE:
             packet::Player_AttackE::decode(player_attack_e, buffer);
             player_attack_e.peer = peer;
@@ -241,6 +263,9 @@ template void protocol::broadcast<packet::World_Biomes>(const packet::World_Biom
 template void protocol::broadcast<packet::World_SetBlock>(const packet::World_SetBlock& packet, ENetHost* host, ENetPeer* except);
 template void protocol::broadcast<packet::World_Timings>(const packet::World_Timings& packet, ENetHost* host, ENetPeer* except);
 template void protocol::broadcast<packet::Cvar_ServerVars>(const packet::Cvar_ServerVars& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Cvar_ServerCmds>(const packet::Cvar_ServerCmds& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Cvar_Command>(const packet::Cvar_Command& packet, ENetHost* host, ENetPeer* except);
+template void protocol::broadcast<packet::Msg_Log>(const packet::Msg_Log& packet, ENetHost* host, ENetPeer* except);
 template void protocol::broadcast<packet::Player_AttackE>(const packet::Player_AttackE& packet, ENetHost* host, ENetPeer* except);
 template void protocol::broadcast<packet::Player_AttackB>(const packet::Player_AttackB& packet, ENetHost* host, ENetPeer* except);
 template void protocol::broadcast<packet::Player_InteractE>(const packet::Player_InteractE& packet, ENetHost* host, ENetPeer* except);
@@ -278,6 +303,9 @@ template void protocol::send<packet::World_Biomes>(const packet::World_Biomes& p
 template void protocol::send<packet::World_SetBlock>(const packet::World_SetBlock& packet, ENetPeer* peer);
 template void protocol::send<packet::World_Timings>(const packet::World_Timings& packet, ENetPeer* peer);
 template void protocol::send<packet::Cvar_ServerVars>(const packet::Cvar_ServerVars& packet, ENetPeer* peer);
+template void protocol::send<packet::Cvar_ServerCmds>(const packet::Cvar_ServerCmds& packet, ENetPeer* peer);
+template void protocol::send<packet::Cvar_Command>(const packet::Cvar_Command& packet, ENetPeer* peer);
+template void protocol::send<packet::Msg_Log>(const packet::Msg_Log& packet, ENetPeer* peer);
 template void protocol::send<packet::Player_AttackE>(const packet::Player_AttackE& packet, ENetPeer* peer);
 template void protocol::send<packet::Player_AttackB>(const packet::Player_AttackB& packet, ENetPeer* peer);
 template void protocol::send<packet::Player_InteractE>(const packet::Player_InteractE& packet, ENetPeer* peer);

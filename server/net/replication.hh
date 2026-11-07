@@ -5,6 +5,7 @@ struct Session;
 
 namespace replication
 {
+void init(void);
 void init_late(void);
 void fixed_update_late(void);
 } // namespace replication

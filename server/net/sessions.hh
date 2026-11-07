@@ -34,6 +34,9 @@ struct Session final {
 
     ChunkAlignedBox view_box;
     vx::hash_set<entt::entity> known_entities;
+
+    std::uint64_t cvar_ratelimit_tick;
+    float cvar_ratelimit_tokens;
 };
 
 struct SessionRef final {

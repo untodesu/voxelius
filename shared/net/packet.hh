@@ -29,6 +29,9 @@ enum packet_type : std::uint16_t {
     ENTITY_PATCH,
     ENTITY_REMOVE,
     ENTITY_CLIENT,
+    CVAR_SERVER_CMDS,
+    CVAR_COMMAND,
+    MSG_LOG,
 };
 } // namespace packet
 
@@ -73,6 +76,13 @@ struct World_Timings;
 namespace packet
 {
 struct Cvar_ServerVars;
+struct Cvar_ServerCmds;
+struct Cvar_Command;
+} // namespace packet
+
+namespace packet
+{
+struct Msg_Log;
 } // namespace packet
 
 namespace packet

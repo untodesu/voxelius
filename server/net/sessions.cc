@@ -290,6 +290,8 @@ void sessions::init_late(void)
         session.player = entt::null;
         session.peer = nullptr;
         session.known_entities.clear();
+        session.cvar_ratelimit_tick = 0;
+        session.cvar_ratelimit_tokens = 0.0f;
     }
 }
 
@@ -322,6 +324,8 @@ Session* sessions::create(ENetPeer* peer, std::string_view username)
             session.player = entt::null;
             session.peer = peer;
             session.known_entities.clear();
+            session.cvar_ratelimit_tick = globals::current_tick;
+            session.cvar_ratelimit_tokens = 1.0f; // allow one command right after connecting
 
             s_username_map.insert_or_assign(session.username, &session);
             s_identity_map.insert_or_assign(session.identity, &session);
@@ -421,6 +425,8 @@ void sessions::destroy(Session* session, std::optional<std::uint32_t> reason)
         session->player = entt::null;
         session->peer = nullptr;
         session->known_entities.clear();
+        session->cvar_ratelimit_tick = 0;
+        session->cvar_ratelimit_tokens = 0.0f;
 
         num_players -= 1;
     }

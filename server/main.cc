@@ -9,6 +9,7 @@
 #include "core/version.hh"
 
 #include "shared/coord.hh"
+#include "shared/cvar/commands.hh"
 #include "shared/game.hh"
 #include "shared/splash.hh"
 
@@ -97,6 +98,7 @@ static void wrapped_main(int argc, char** argv)
     whitelist::init();
     invites::init();
     sessions::init();
+    replication::init();
     status::init();
     receive::init();
     transmit::init();
@@ -108,6 +110,8 @@ static void wrapped_main(int argc, char** argv)
     chunk_unloader::init();
 
     splash::init(SPLASH_SERVER);
+
+    cvar::register_commands_core();
 
     cvar::exec_from("server.conf");
 

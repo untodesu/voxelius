@@ -23,4 +23,29 @@ struct packet::Cvar_ServerVars final : public packet::Base<packet::CVAR_SERVER_V
     std::vector<Variable> variables;
 };
 
+struct packet::Cvar_ServerCmds final : public packet::Base<packet::CVAR_SERVER_CMDS> {
+    struct Command final {
+        std::string name;
+        cvar::flag_bits flags;
+        std::string help;
+    };
+
+    static void encode(const Cvar_ServerCmds& packet, WriteBuffer& buffer);
+    static void decode(Cvar_ServerCmds& packet, ReadBuffer& buffer);
+
+    static void build_full(Cvar_ServerCmds& packet);
+
+    std::vector<Command> commands;
+};
+
+struct packet::Cvar_Command final : public packet::Base<packet::CVAR_COMMAND> {
+    constexpr static std::size_t MAX_LINE = 512;
+
+    static void encode(const Cvar_Command& packet, WriteBuffer& buffer);
+    static void decode(Cvar_Command& packet, ReadBuffer& buffer);
+
+    std::uint32_t request_id;
+    std::string line;
+};
+
 #endif /* D1058B64_4176_4F3F_8A52_75E0BAEF0668 */

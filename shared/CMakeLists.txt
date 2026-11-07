@@ -47,6 +47,8 @@ add_library(shared STATIC
     "${CMAKE_CURRENT_LIST_DIR}/net/packet_cvar.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/packet_entity.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/packet_entity.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/net/packet_msg.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/net/packet_msg.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/packet_player.cc"
     "${CMAKE_CURRENT_LIST_DIR}/net/packet_player.hh"
     "${CMAKE_CURRENT_LIST_DIR}/net/packet_session.cc"

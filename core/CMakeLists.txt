@@ -54,6 +54,8 @@ add_library(core STATIC
     "${CMAKE_CURRENT_LIST_DIR}/frustum.hh"
     "${CMAKE_CURRENT_LIST_DIR}/identifier.cc"
     "${CMAKE_CURRENT_LIST_DIR}/identifier.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/msg/capture.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/msg/capture.hh"
     "${CMAKE_CURRENT_LIST_DIR}/msg/log.cc"
     "${CMAKE_CURRENT_LIST_DIR}/msg/log.hh"
     "${CMAKE_CURRENT_LIST_DIR}/msg/sink.cc"
