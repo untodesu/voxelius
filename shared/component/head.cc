@@ -74,6 +74,25 @@ void Component<Head>::decode_dat(entt::entity entity, ReadBuffer& buffer)
     });
 }
 
+void component_traits<Head>::interpolate(entt::entity entity, float alpha)
+{
+    auto* current = globals::registry.try_get<Head>(entity);
+    auto* previous = globals::registry.try_get<Head_Prev>(entity);
+    auto* interp = globals::registry.try_get<Head_Intr>(entity);
+
+    if(current == nullptr || previous == nullptr || interp == nullptr) {
+        return;
+    }
+
+    interp->angles[0] = std::lerp(previous->angles[0], current->angles[0], alpha);
+    interp->angles[1] = std::lerp(previous->angles[1], current->angles[1], alpha);
+    interp->angles[2] = std::lerp(previous->angles[2], current->angles[2], alpha);
+
+    interp->offset.x() = std::lerp(previous->offset.x(), current->offset.x(), alpha);
+    interp->offset.y() = std::lerp(previous->offset.y(), current->offset.y(), alpha);
+    interp->offset.z() = std::lerp(previous->offset.z(), current->offset.z(), alpha);
+}
+
 void Head::register_component(void)
 {
     component_map::add<Head>("head");

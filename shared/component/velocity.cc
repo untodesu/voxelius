@@ -63,6 +63,21 @@ void Component<Velocity>::decode_dat(entt::entity entity, ReadBuffer& buffer)
     decode_net(entity, buffer);
 }
 
+void component_traits<Velocity>::interpolate(entt::entity entity, float alpha)
+{
+    auto* current = globals::registry.try_get<Velocity>(entity);
+    auto* previous = globals::registry.try_get<Velocity_Prev>(entity);
+    auto* interp = globals::registry.try_get<Velocity_Intr>(entity);
+
+    if(current == nullptr || previous == nullptr || interp == nullptr) {
+        return;
+    }
+
+    interp->value.x() = std::lerp(previous->value.x(), current->value.x(), alpha);
+    interp->value.y() = std::lerp(previous->value.y(), current->value.y(), alpha);
+    interp->value.z() = std::lerp(previous->value.z(), current->value.z(), alpha);
+}
+
 void Velocity::register_component(void)
 {
     component_map::add<Velocity>("velocity");

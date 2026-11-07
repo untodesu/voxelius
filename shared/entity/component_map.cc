@@ -4,6 +4,7 @@
 
 #include "core/exception.hh"
 
+#include "shared/entity/class_registry.hh"
 #include "shared/globals.hh"
 
 static vx::hash_map<std::string, component_id_type> s_name_map;
@@ -171,4 +172,19 @@ void component_map::decode_dat(component_id_type id, entt::entity entity, ReadBu
 void component_map::mark_dirty(component_id_type id, entt::entity entity)
 {
     detail::mark_dirty(id, globals::registry, entity);
+}
+
+void component_map::interpolate(entt::registry& registry, entt::entity entity, float alpha)
+{
+    auto class_component = registry.try_get<EntityClass>(entity);
+
+    if(class_component == nullptr) {
+        return;
+    }
+
+    class_registry::for_each(class_component->id, [&](component_id_type id) {
+        if(auto functions = find_functions(id); functions && functions->interpolate) {
+            functions->interpolate(entity, alpha);
+        }
+    });
 }

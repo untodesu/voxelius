@@ -97,6 +97,33 @@ void Component<Transform>::decode_dat(entt::entity entity, ReadBuffer& buffer)
     decode_net(entity, buffer);
 }
 
+void component_traits<Transform>::interpolate(entt::entity entity, float alpha)
+{
+    auto* current = globals::registry.try_get<Transform>(entity);
+    auto* previous = globals::registry.try_get<Transform_Prev>(entity);
+    auto* interp = globals::registry.try_get<Transform_Intr>(entity);
+
+    if(current == nullptr || previous == nullptr || interp == nullptr) {
+        return;
+    }
+
+    interp->angles[0] = std::lerp(previous->angles[0], current->angles[0], alpha);
+    interp->angles[1] = std::lerp(previous->angles[1], current->angles[1], alpha);
+    interp->angles[2] = std::lerp(previous->angles[2], current->angles[2], alpha);
+
+    // Figure out previous chunk-local floating-point coordinates transformed
+    // to the current WorldCoord's chunk domain coordinates; we're interpolating
+    // against these instead of using previous.position.local to prevent jittering
+    auto previous_shift = utils::to_relative(current->chunk, current->local, previous->chunk, previous->local);
+    auto previous_local = current->local + previous_shift;
+
+    interp->chunk = current->chunk;
+
+    interp->local.x() = std::lerp(previous_local.x(), current->local.x(), alpha);
+    interp->local.y() = std::lerp(previous_local.y(), current->local.y(), alpha);
+    interp->local.z() = std::lerp(previous_local.z(), current->local.z(), alpha);
+}
+
 void Transform::register_component(void)
 {
     component_map::add<Transform>("transform");

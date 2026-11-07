@@ -17,6 +17,7 @@ struct FunctionTable final {
     void (*decode_net)(entt::entity entity, ReadBuffer& buffer);
     void (*encode_dat)(entt::entity entity, WriteBuffer& buffer);
     void (*decode_dat)(entt::entity entity, ReadBuffer& buffer);
+    void (*interpolate)(entt::entity entity, float alpha);
 };
 } // namespace component_map::detail
 
@@ -60,6 +61,7 @@ void encode_net(component_id_type id, entt::entity entity, WriteBuffer& buffer);
 void decode_net(component_id_type id, entt::entity entity, ReadBuffer& buffer);
 void encode_dat(component_id_type id, entt::entity entity, WriteBuffer& buffer);
 void decode_dat(component_id_type id, entt::entity entity, ReadBuffer& buffer);
+void interpolate(entt::registry& registry, entt::entity entity, float alpha);
 } // namespace component_map
 
 namespace component_map
@@ -86,6 +88,10 @@ component_id_type component_map::add(std::string_view name)
     functions.decode_net = &Component<T>::decode_net;
     functions.encode_dat = &Component<T>::encode_dat;
     functions.decode_dat = &Component<T>::decode_dat;
+
+    if constexpr(requires { &component_traits<T>::interpolate; }) {
+        functions.interpolate = &component_traits<T>::interpolate;
+    }
 
     return detail::add(typeid(T), std::move(name), std::move(functions));
 }

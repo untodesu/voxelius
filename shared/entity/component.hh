@@ -14,6 +14,11 @@ struct ComponentTable final {
 };
 
 template<typename T>
+struct component_traits final {
+    static void interpolate(entt::entity entity, float alpha) = delete;
+};
+
+template<typename T>
 struct Component final {
     static std::any prepare(lua_State* L, int config_idx);
     static void attach(entt::entity entity, const std::any& config);
