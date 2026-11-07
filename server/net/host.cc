@@ -6,6 +6,7 @@
 #include "core/cvar/host.hh"
 #include "core/cvar/string.hh"
 #include "core/exception.hh"
+#include "core/utils/enet.hh"
 
 #include "shared/net/protocol.hh"
 
@@ -61,6 +62,8 @@ void host::init_late(void)
 
     globals::host = enet_host_create(&address, max_players.value() + s_status_peers.value(), 1, 0, 0);
     vx::throw_if_not(globals::host, "enet_host_create failed");
+
+    utils::enable_compression(globals::host);
 
     msg::log_info("listening on {}:{}", s_bind.value(), s_port.value());
     msg::log_info("max players: {}", max_players.value());

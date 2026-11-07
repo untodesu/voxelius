@@ -26,6 +26,8 @@ add_library(core STATIC
     "${CMAKE_CURRENT_LIST_DIR}/utils/angles.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/crc64.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/crc64.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/enet.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/utils/enet.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/epoch.cc"
     "${CMAKE_CURRENT_LIST_DIR}/utils/epoch.hh"
     "${CMAKE_CURRENT_LIST_DIR}/utils/json.cc"
@@ -67,6 +69,7 @@ target_link_libraries(core PUBLIC
     deps::emhash
     deps::enet
     deps::entt
+    deps::lz4
     deps::miniz
     deps::parson
     deps::physfs

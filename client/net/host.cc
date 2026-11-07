@@ -3,6 +3,7 @@
 #include "client/net/host.hh"
 
 #include "core/exception.hh"
+#include "core/utils/enet.hh"
 
 #include "shared/net/protocol.hh"
 
@@ -13,6 +14,8 @@ void host::init(void)
     globals::peer = nullptr;
     globals::host = enet_host_create(nullptr, 1, 1, 0, 0);
     vx::throw_if_not(globals::host, "enet_host_create failed");
+
+    utils::enable_compression(globals::host);
 }
 
 void host::shutdown(void)
