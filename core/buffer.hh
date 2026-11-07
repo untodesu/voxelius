@@ -18,8 +18,13 @@ public:
     void reset(PHYSFS_File* file);
     void reset(std::istream& stream);
 
+    void seek(std::size_t position);
+
     constexpr void rewind(void);
     constexpr bool is_ended(void) const;
+    constexpr std::size_t tell(void) const;
+
+    bool has_records(std::uint32_t count, std::size_t record_size) const;
 
     void read_bytes(std::span<std::byte> buffer);
 
@@ -72,6 +77,11 @@ constexpr void ReadBuffer::rewind(void)
 constexpr bool ReadBuffer::is_ended(void) const
 {
     return m_position >= m_vector.size();
+}
+
+constexpr std::size_t ReadBuffer::tell(void) const
+{
+    return m_position;
 }
 
 #endif /* C7541CDE_1304_48E6_BC70_123F817E41E3 */

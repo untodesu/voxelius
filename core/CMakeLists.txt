@@ -41,6 +41,8 @@ add_library(core STATIC
     "${CMAKE_CURRENT_LIST_DIR}/buffer.hh"
     "${CMAKE_CURRENT_LIST_DIR}/camera.cc"
     "${CMAKE_CURRENT_LIST_DIR}/camera.hh"
+    "${CMAKE_CURRENT_LIST_DIR}/chunk.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/chunk.hh"
     "${CMAKE_CURRENT_LIST_DIR}/cmdline.cc"
     "${CMAKE_CURRENT_LIST_DIR}/cmdline.hh"
     "${CMAKE_CURRENT_LIST_DIR}/concepts.hh"

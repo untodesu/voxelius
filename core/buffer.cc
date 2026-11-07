@@ -80,6 +80,19 @@ void ReadBuffer::reset(std::istream& stream)
     stream.read(reinterpret_cast<char*>(m_vector.data()), m_vector.size());
 }
 
+bool ReadBuffer::has_records(std::uint32_t count, std::size_t record_size) const
+{
+    auto total_size = record_size * static_cast<std::uint64_t>(count);
+    return total_size + m_position <= m_vector.size();
+}
+
+void ReadBuffer::seek(std::size_t position)
+{
+    assert(position <= m_vector.size());
+
+    m_position = position;
+}
+
 template<>
 std::byte ReadBuffer::read<std::byte>(void)
 {
@@ -109,54 +122,52 @@ std::uint8_t ReadBuffer::read<std::uint8_t>(void)
 template<>
 std::uint16_t ReadBuffer::read<std::uint16_t>(void)
 {
-    if((m_position + 2) <= m_vector.size()) {
-        auto result = UINT16_C(0x0000);
-        result |= (UINT16_C(0x00FF) & static_cast<std::uint16_t>(m_vector[m_position + 0])) << 8;
-        result |= (UINT16_C(0x00FF) & static_cast<std::uint16_t>(m_vector[m_position + 1])) << 0;
-        m_position += 2;
-        return result;
+    std::uint16_t result = 0;
+
+    if((m_position + sizeof(result)) <= m_vector.size()) {
+        std::memcpy(&result, &m_vector[m_position], sizeof(result));
+
+        if constexpr(std::endian::native == std::endian::big) {
+            result = std::byteswap(result);
+        }
     }
 
-    m_position += 2;
-    return 0;
+    m_position += sizeof(result);
+    return result;
 }
 
 template<>
 std::uint32_t ReadBuffer::read<std::uint32_t>(void)
 {
-    if((m_position + 4) <= m_vector.size()) {
-        auto result = UINT32_C(0x00000000);
-        result |= (UINT32_C(0x000000FF) & static_cast<std::uint32_t>(m_vector[m_position + 0])) << 24;
-        result |= (UINT32_C(0x000000FF) & static_cast<std::uint32_t>(m_vector[m_position + 1])) << 16;
-        result |= (UINT32_C(0x000000FF) & static_cast<std::uint32_t>(m_vector[m_position + 2])) << 8;
-        result |= (UINT32_C(0x000000FF) & static_cast<std::uint32_t>(m_vector[m_position + 3])) << 0;
-        m_position += 4;
-        return result;
+    std::uint32_t result = 0;
+
+    if((m_position + sizeof(result)) <= m_vector.size()) {
+        std::memcpy(&result, &m_vector[m_position], sizeof(result));
+
+        if constexpr(std::endian::native == std::endian::big) {
+            result = std::byteswap(result);
+        }
     }
 
-    m_position += 4;
-    return 0;
+    m_position += sizeof(result);
+    return result;
 }
 
 template<>
 std::uint64_t ReadBuffer::read<std::uint64_t>(void)
 {
-    if((m_position + 8) <= m_vector.size()) {
-        auto result = UINT64_C(0x0000000000000000);
-        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 0])) << 56;
-        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 1])) << 48;
-        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 2])) << 40;
-        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 3])) << 32;
-        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 4])) << 24;
-        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 5])) << 16;
-        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 6])) << 8;
-        result |= (UINT64_C(0x00000000000000FF) & static_cast<std::uint64_t>(m_vector[m_position + 7])) << 0;
-        m_position += 8;
-        return result;
+    std::uint64_t result = 0;
+
+    if((m_position + sizeof(result)) <= m_vector.size()) {
+        std::memcpy(&result, &m_vector[m_position], sizeof(result));
+
+        if constexpr(std::endian::native == std::endian::big) {
+            result = std::byteswap(result);
+        }
     }
 
-    m_position += 8;
-    return 0;
+    m_position += sizeof(result);
+    return result;
 }
 
 template<>
@@ -310,30 +321,43 @@ void WriteBuffer::write<std::uint8_t>(const std::uint8_t value)
 template<>
 void WriteBuffer::write<std::uint16_t>(const std::uint16_t value)
 {
-    m_vector.push_back(static_cast<std::byte>(UINT16_C(0xFF) & ((value & UINT16_C(0xFF00)) >> 8)));
-    m_vector.push_back(static_cast<std::byte>(UINT16_C(0xFF) & ((value & UINT16_C(0x00FF)) >> 0)));
+    auto value_little = value;
+
+    if constexpr(std::endian::native == std::endian::big) {
+        value_little = std::byteswap(value_little);
+    }
+
+    std::array<std::byte, sizeof(value_little)> bytes;
+    std::memcpy(bytes.data(), &value_little, sizeof(value_little));
+    m_vector.insert(m_vector.end(), bytes.cbegin(), bytes.cend());
 }
 
 template<>
 void WriteBuffer::write<std::uint32_t>(const std::uint32_t value)
 {
-    m_vector.push_back(static_cast<std::byte>(UINT32_C(0xFF) & ((value & UINT32_C(0xFF000000)) >> 24)));
-    m_vector.push_back(static_cast<std::byte>(UINT32_C(0xFF) & ((value & UINT32_C(0x00FF0000)) >> 16)));
-    m_vector.push_back(static_cast<std::byte>(UINT32_C(0xFF) & ((value & UINT32_C(0x0000FF00)) >> 8)));
-    m_vector.push_back(static_cast<std::byte>(UINT32_C(0xFF) & ((value & UINT32_C(0x000000FF)) >> 0)));
+    auto value_little = value;
+
+    if constexpr(std::endian::native == std::endian::big) {
+        value_little = std::byteswap(value_little);
+    }
+
+    std::array<std::byte, sizeof(value_little)> bytes;
+    std::memcpy(bytes.data(), &value_little, sizeof(value_little));
+    m_vector.insert(m_vector.end(), bytes.cbegin(), bytes.cend());
 }
 
 template<>
 void WriteBuffer::write<std::uint64_t>(const std::uint64_t value)
 {
-    m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0xFF00000000000000)) >> 56)));
-    m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x00FF000000000000)) >> 48)));
-    m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x0000FF0000000000)) >> 40)));
-    m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x000000FF00000000)) >> 32)));
-    m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x00000000FF000000)) >> 24)));
-    m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x0000000000FF0000)) >> 16)));
-    m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x000000000000FF00)) >> 8)));
-    m_vector.push_back(static_cast<std::byte>(UINT64_C(0xFF) & ((value & UINT64_C(0x00000000000000FF)) >> 0)));
+    auto value_little = value;
+
+    if constexpr(std::endian::native == std::endian::big) {
+        value_little = std::byteswap(value_little);
+    }
+
+    std::array<std::byte, sizeof(value_little)> bytes;
+    std::memcpy(bytes.data(), &value_little, sizeof(value_little));
+    m_vector.insert(m_vector.end(), bytes.cbegin(), bytes.cend());
 }
 
 template<>
