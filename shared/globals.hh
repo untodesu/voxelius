@@ -4,7 +4,6 @@
 namespace globals
 {
 extern entt::dispatcher dispatcher;
-extern entt::registry registry;
 } // namespace globals
 
 namespace globals

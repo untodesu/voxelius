@@ -5,7 +5,6 @@
 #include "shared/constant.hh"
 
 entt::dispatcher globals::dispatcher;
-entt::registry globals::registry;
 
 std::uint64_t globals::curtime_us;
 std::uint64_t globals::current_tick;

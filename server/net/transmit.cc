@@ -12,6 +12,7 @@
 
 #include "server/globals.hh"
 #include "server/net/interest.hh"
+#include "server/net/sessions.hh"
 
 constexpr static std::uint64_t WEATHER_SYNC_TICKS = constant::FIXED_TICKRATE;
 
@@ -20,7 +21,7 @@ static void on_block_update(const BlockUpdateEvent& event)
     packet::World_SetBlock packet {};
     packet.bpos = event.bpos();
     packet.block = event.id();
-    interest::broadcast(packet, event.cpos());
+    interest::broadcast(event.world(), packet, event.cpos());
 }
 
 void transmit::init(void)
@@ -37,11 +38,18 @@ void transmit::fixed_update_late(void)
     protocol::broadcast(timings, globals::host);
 
     // One small packet per second keeps both sides on the same front;
-    // the seeds and scales travel once in World_Info, so only the
-    // drift and the wind have to be refreshed here
+    // the seeds and scales travel once in World_Info, so only the drift and the wind have to be refreshed here
     if(0 == (globals::current_tick % WEATHER_SYNC_TICKS)) {
-        packet::World_Weather weather_state {};
-        weather::fill_packet(weather_state);
-        protocol::broadcast(weather_state, globals::host);
+        for(auto& session : sessions::all()) {
+            if(session.state != session_state::CONNECTED || session.world == nullptr) {
+                continue;
+            }
+
+            auto& state = session.world->weather();
+
+            packet::World_Weather weather_state {};
+            state.fill_packet(weather_state);
+            protocol::send(weather_state, session.peer);
+        }
     }
 }

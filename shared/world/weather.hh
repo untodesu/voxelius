@@ -3,8 +3,6 @@
 
 #include "core/identifier.hh"
 
-#include "shared/world/biome.hh"
-
 namespace packet
 {
 struct World_Info;
@@ -54,7 +52,6 @@ struct WeatherCallback final {
 struct WeatherTypeDefinition final {
     Identifier name;
     weather_type_id id { WEATHER_ID_NULL };
-    std::uint32_t realms_bits { 0 }; // A type is only ever selected in the realms these bits name
 
     CloudBody cloud;
 
@@ -82,16 +79,6 @@ struct WeatherField final {
     std::uint32_t seed { 0 };
 };
 
-struct WeatherRealmState final {
-    // One field picks the type, the other one drives how strong it
-    // is right here. Both drift with the wind and are rebuilt from a
-    // seed on both sides, so no per-cell data travels over the network
-    WeatherField types;
-    WeatherField detail;
-
-    Eigen::Vector2f wind { Eigen::Vector2f::Zero() };
-};
-
 struct WeatherBlend final {
     float coverage;
     Eigen::Vector3f sky_tint;
@@ -99,60 +86,43 @@ struct WeatherBlend final {
     float light_scale;
 };
 
-namespace weather
-{
-std::span<WeatherRealmState, NUM_BIOME_REALMS> states(void);
-} // namespace weather
+class WeatherState final {
+public:
+    void reset(void);
+    void advance(float delta_time);
+    bool force_at(std::span<const weather_type_id> allowed, weather_type_id type, float x, float z);
 
-namespace weather
-{
-WeatherRealmState& state(biome_realm realm);
-} // namespace weather
+    weather_type_id type_at(std::span<const weather_type_id> allowed, float x, float z) const;
+    float type_weight(std::span<const weather_type_id> allowed, weather_type_id type, float x, float z) const;
+    float type_weight_in_field(std::span<const weather_type_id> allowed, weather_type_id type, float fx, float fz) const;
+    float coverage_of(std::span<const weather_type_id> allowed, weather_type_id type, float x, float z) const;
+    float coverage_in_field(std::span<const weather_type_id> allowed, weather_type_id type, float fx, float fz) const;
+    float coverage(std::span<const weather_type_id> allowed, float x, float z) const;
 
-namespace weather
-{
-void reset(void);
-void advance(float delta_time);
-void force_at(biome_realm realm, weather_type_id type, float x, float z);
-} // namespace weather
+    WeatherBlend blend(std::span<const weather_type_id> allowed, float x, float z) const;
+    WeatherBlend blend_overhead(std::span<const weather_type_id> allowed, float x, float y, float z) const;
+    WeatherBlend blend_region(std::span<const weather_type_id> allowed, float x, float y, float z, float radius) const;
 
-namespace weather
-{
-float noise_at(float x, float z, std::uint32_t seed);
-float cell_random(std::int32_t x, std::int32_t z, std::uint32_t seed);
-} // namespace weather
+    void fill_info(packet::World_Info& packet) const;
+    void apply_info(const packet::World_Info& packet);
+    void fill_packet(packet::World_Weather& packet) const;
+    void apply_packet(const packet::World_Weather& packet, bool baseline);
 
-namespace weather
-{
-weather_type_id type_at(biome_realm realm, float x, float z);
-float type_weight(biome_realm realm, weather_type_id type, float x, float z);
-float coverage_of(biome_realm realm, weather_type_id type, float x, float z);
-float coverage(biome_realm realm, float x, float z);
-} // namespace weather
+    // One field picks the type, the other one drives how strong it
+    // is right here. Both drift with the wind and are rebuilt from a
+    // seed on both sides, so no per-cell data travels over the network
+    WeatherField types;
+    WeatherField detail;
 
-namespace weather
-{
-float type_weight_in_field(const WeatherRealmState& state, biome_realm realm, weather_type_id type, float fx, float fz);
-float coverage_in_field(const WeatherRealmState& state, biome_realm realm, weather_type_id type, float fx, float fz);
-} // namespace weather
+    Eigen::Vector2f wind { Eigen::Vector2f::Zero() };
+    Eigen::Vector2f wind_direction { Eigen::Vector2f::Zero() };
+    float strike_budget { 0.0f };
 
-namespace weather
-{
-WeatherBlend blend(biome_realm realm, float x, float z);
-WeatherBlend blend_overhead(float x, float y, float z);
-WeatherBlend blend_region(float x, float y, float z, float radius);
-} // namespace weather
-
-namespace weather
-{
-void fill_info(packet::World_Info& packet);
-void apply_info(const packet::World_Info& packet);
-} // namespace weather
-
-namespace weather
-{
-void fill_packet(packet::World_Weather& packet);
-void apply_packet(const packet::World_Weather& packet, bool baseline);
-} // namespace weather
+private:
+    float type_noise(float x, float z) const;
+    float type_noise_in_field(float fx, float fz) const;
+    float detail_coverage(float intensity, float x, float z) const;
+    float detail_coverage_in_field(float intensity, float fx, float fz) const;
+};
 
 #endif /* A6B2C1D9_4E7F_4A3B_9C51_2F0D8E6B7A14 */

@@ -10,6 +10,7 @@
 #include "shared/cvar/server.hh"
 #include "shared/entity/class_registry.hh"
 #include "shared/entity/component_map.hh"
+#include "shared/globals.hh"
 #include "shared/net/packet_entity.hh"
 #include "shared/net/packet_session.hh"
 #include "shared/net/packet_world.hh"
@@ -22,6 +23,7 @@
 #include "shared/world/world_clock.hh"
 
 #include "client/camera.hh"
+#include "client/game.hh"
 #include "client/globals.hh"
 #include "client/net/session.hh"
 #include "client/world/cloud_renderer.hh"
@@ -33,9 +35,10 @@ static bool s_weather_synced;
 
 static void on_entity_spawn(const packet::Entity_Spawn& packet)
 {
-    auto entity = utils::spawn(packet.class_id, packet.entity);
+    auto& registry = globals::world->registry();
+    auto entity = utils::spawn(registry, packet.class_id, packet.entity);
 
-    if(!globals::registry.valid(entity)) {
+    if(!registry.valid(entity)) {
         session::disconnect(packet::Session_Disconnect::ENTITY_ID_DESYNC);
         return;
     }
@@ -59,10 +62,12 @@ static void on_entity_patch(const packet::Entity_Patch& packet)
 {
     static ReadBuffer buffer;
 
+    auto& registry = globals::world->registry();
+
     for(auto& it : packet.components) {
         buffer.reset(it.data);
 
-        component_map::decode_net(it.id, packet.entity, buffer);
+        component_map::decode_net(registry, it.id, packet.entity, buffer);
     }
 
     msg::log_info("entity patch: id={} components={}", static_cast<std::uint64_t>(packet.entity), packet.components.size());
@@ -70,9 +75,11 @@ static void on_entity_patch(const packet::Entity_Patch& packet)
 
 static void on_entity_remove(const packet::Entity_Remove& packet)
 {
+    auto& registry = globals::world->registry();
+
     msg::log_info("entity remove: id={}", static_cast<std::uint64_t>(packet.entity));
 
-    globals::registry.destroy(packet.entity);
+    registry.destroy(packet.entity);
 
     if(globals::player == packet.entity) {
         globals::player = entt::null;
@@ -96,10 +103,10 @@ static void on_world_blocks(const packet::World_Blocks& packet)
     // resync the server sends to roll a stale client world back. Block edits
     // made after the packet was queued arrive as SetBlock on the same reliable
     // channel, so applying the whole chunk here cannot win over a newer prediction
-    auto chunk = world::find_chunk(packet.cpos);
+    auto chunk = globals::world->find_chunk(packet.cpos);
 
     if(chunk == nullptr) {
-        chunk = world::create_chunk(packet.cpos);
+        chunk = globals::world->create_chunk(packet.cpos);
     }
 
     chunk->set_blocks(packet.blocks);
@@ -111,18 +118,18 @@ static void on_world_blocks(const packet::World_Blocks& packet)
         chunk->clear_light();
     }
 
-    globals::dispatcher.trigger(ChunkUpdateEvent(packet.cpos, chunk));
+    globals::dispatcher.trigger(ChunkUpdateEvent(globals::world, packet.cpos, chunk));
 }
 
 static void on_world_biomes(const packet::World_Biomes& packet)
 {
-    biome_map::insert(packet.realm, packet.cpos, packet.biomes);
+    globals::world->insert_biomes(packet.cpos, packet.biomes);
 }
 
 static void on_world_light(const packet::World_Light& packet)
 {
     for(const auto& entry : packet.entries) {
-        auto chunk = world::find_chunk(entry.cpos);
+        auto chunk = globals::world->find_chunk(entry.cpos);
 
         if(chunk == nullptr) {
             continue;
@@ -143,19 +150,23 @@ static void on_world_light(const packet::World_Light& packet)
             }
         }
 
-        globals::dispatcher.trigger(ChunkLightUpdateEvent(entry.cpos));
+        globals::dispatcher.trigger(ChunkLightUpdateEvent(globals::world, entry.cpos));
     }
 }
 
 static void on_world_set_block(const packet::World_SetBlock& packet)
 {
-    world::set_block(packet.bpos, packet.block);
+    globals::world->set_block(packet.bpos, packet.block);
 }
 
 static void on_world_timings(const packet::World_Timings& packet)
 {
     auto previous_tick = globals::daylight_tick;
-    auto jump = packet.daylight_tick > previous_tick ? packet.daylight_tick - previous_tick : previous_tick - packet.daylight_tick;
+    auto jump = packet.daylight_tick - previous_tick;
+
+    if(previous_tick > packet.daylight_tick) {
+        jump = previous_tick - packet.daylight_tick;
+    }
 
     globals::current_tick = packet.current_tick;
     globals::daylight_tick = packet.daylight_tick;
@@ -170,7 +181,14 @@ static void on_world_timings(const packet::World_Timings& packet)
 
 static void on_world_info(const packet::World_Info& packet)
 {
-    weather::apply_info(packet);
+    // A new world also starts a new weather baseline; the next packet must
+    // replace the drift whole instead of sliding the old deck towards it
+    s_weather_synced = false;
+
+    client_game::open_world(packet);
+
+    auto& state = globals::world->weather();
+    state.apply_info(packet);
 
     skybox::set_star_seed(packet.star_seed);
 }
@@ -182,14 +200,15 @@ static void on_world_weather(const packet::World_Weather& packet)
     auto baseline = !s_weather_synced;
     s_weather_synced = true;
 
-    weather::apply_packet(packet, baseline);
+    auto& state = globals::world->weather();
+    state.apply_packet(packet, baseline);
 
     if(baseline) {
         cloud_renderer::reset();
     }
 }
 
-static cvar::status cmd_time_query(const cvar::Context& ctx, std::span<const std::string_view> args)
+static cvar::status cmd_time_query(const cvar::Context&, std::span<const std::string_view>)
 {
     auto phase = world_clock::phase(globals::daylight_tick, server_vars::day_length_ticks());
     auto daylight = world_clock::daylight(phase);
@@ -200,30 +219,29 @@ static cvar::status cmd_time_query(const cvar::Context& ctx, std::span<const std
     return cvar::status::OK;
 }
 
-static cvar::status cmd_weather_status(const cvar::Context& ctx, std::span<const std::string_view> args)
+static cvar::status cmd_weather_status(const cvar::Context&, std::span<const std::string_view>)
 {
     auto world = utils::to_fvec(camera::chunk) + camera::local;
 
-    for(std::size_t i = 0; i < NUM_BIOME_REALMS; ++i) {
-        auto realm = static_cast<biome_realm>(i);
-        auto& state = weather::state(realm);
+    auto& definition = globals::world->definition();
+    auto& state = globals::world->weather();
+    auto& allowed = definition.weather;
 
-        auto type = weather::type_at(realm, world.x(), world.z());
-        auto coverage = weather::coverage(realm, world.x(), world.z());
+    auto type = state.type_at(allowed, world.x(), world.z());
+    auto coverage = state.coverage(allowed, world.x(), world.z());
 
-        std::string description = "none";
+    std::string description = "none";
 
-        if(auto name = weather_registry::name_of(type)) {
-            // The identifier is a temporary, so its view must be copied
-            // before the optional goes out of scope
-            description = name->full_string();
-        }
-
-        auto types = std::format("({:.0f}, {:.0f})/{}", state.types.drift.x(), state.types.drift.y(), state.types.scale);
-        auto detail = std::format("({:.0f}, {:.0f})/{}", state.detail.drift.x(), state.detail.drift.y(), state.detail.scale);
-
-        msg::log_info("weather[{}]: type={} coverage={:.2f} types={} detail={}", i, description, coverage, types, detail);
+    if(auto name = weather_registry::name_of(type)) {
+        // The identifier is a temporary, so its view must
+        // be copied before the optional goes out of scope
+        description = name->full_string();
     }
+
+    auto types = std::format("({:.0f}, {:.0f})/{}", state.types.drift.x(), state.types.drift.y(), state.types.scale);
+    auto detail = std::format("({:.0f}, {:.0f})/{}", state.detail.drift.x(), state.detail.drift.y(), state.detail.scale);
+
+    msg::log_info("weather: type={} coverage={:.2f} types={} detail={}", description, coverage, types, detail);
 
     return cvar::status::OK;
 }
